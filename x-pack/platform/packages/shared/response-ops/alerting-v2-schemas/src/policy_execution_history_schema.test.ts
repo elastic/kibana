@@ -82,8 +82,12 @@ describe('policy_execution_history_schema', () => {
 
     it('rejects arrays longer than the number of distinct outcomes', () => {
       expect(
-        policyExecutionOutcomeFilterSchema.safeParse(['dispatched', 'throttled', 'dispatched'])
-          .success
+        policyExecutionOutcomeFilterSchema.safeParse([
+          'dispatched',
+          'throttled',
+          'dispatch_failed',
+          'dispatched',
+        ]).success
       ).toBe(false);
     });
   });

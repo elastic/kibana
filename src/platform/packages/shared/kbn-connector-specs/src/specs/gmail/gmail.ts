@@ -249,27 +249,10 @@ export const GmailConnector: ConnectorSpec = {
     description: 'Verifies Gmail connection by fetching user profile',
     handler: async (ctx) => {
       ctx.log.debug('Gmail test handler');
-      try {
-        const response = await ctx.client.get(`${GMAIL_API_BASE}/profile`);
-        if (response.status !== 200) {
-          return {
-            ok: false,
-            message: 'Failed to connect to Gmail API',
-          };
-        }
-        const emailAddress = response.data?.emailAddress ?? 'user';
-        return {
-          ok: true,
-          message: `Successfully connected to Gmail as ${emailAddress}`,
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        return {
-          ok: false,
-          message: `Failed to connect to Gmail API: ${errorMessage}`,
-        };
-      }
+      await ctx.client.get(`${GMAIL_API_BASE}/profile`);
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

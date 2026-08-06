@@ -112,8 +112,6 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     );
   }
 
-  const nameNeedsAttention = metadataErrors.name != null;
-
   const tabs = (
     <EuiTabs
       css={css`
@@ -140,22 +138,11 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       >
         {i18n.FIELDS_TAB_LABEL}
       </EuiTab>
+      {/* No required-attention badge: the name it used to flag now lives in the page title, which
+          is always visible, so the tab has nothing mandatory left to warn about. */}
       <EuiTab
         isSelected={activeTab === 'configuration'}
         onClick={() => selectTab('configuration')}
-        append={
-          nameNeedsAttention ? (
-            <EuiToolTip content={i18n.CONFIGURATION_TAB_NAME_REQUIRED}>
-              <EuiNotificationBadge
-                color="accent"
-                aria-label={i18n.CONFIGURATION_TAB_NAME_REQUIRED}
-                data-test-subj="templateConfigTabRequiredIndicator"
-              >
-                {'!'}
-              </EuiNotificationBadge>
-            </EuiToolTip>
-          ) : undefined
-        }
         data-test-subj="templateTabConfiguration"
       >
         {i18n.CONFIGURATION_TAB_LABEL}

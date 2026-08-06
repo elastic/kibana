@@ -89,29 +89,9 @@ export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const OCCURRENCES_CHART_TITLE = i18n.translate(
-  'xpack.significantEventsApp.streamsView.occurrencesChartTitle',
-  {
-    defaultMessage: 'Detected event occurrences',
-  }
-);
-
 export const ONBOARDING_FAILURE_TITLE = i18n.translate(
   'xpack.significantEventsApp.streamsView.onboardingErrorTitle',
   {
     defaultMessage: 'Could not onboard stream',
-  }
-);
-
-export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.discoverInsightsButtonLabel',
-  {
-    defaultMessage: 'Discover Insights',
-  }
-);
-export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.discoverInsightsConfigAriaLabel',
-  {
-    defaultMessage: 'Configure discovery model',
   }
 );

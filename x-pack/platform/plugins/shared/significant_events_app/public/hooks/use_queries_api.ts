@@ -32,13 +32,7 @@ interface QueriesApi {
 }
 
 export function useQueriesApi(): QueriesApi {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const { signal, abort, refresh } = useAbortController();
 
   return useMemo(

@@ -42,6 +42,7 @@ describe('createConnectorTypeFromSpec', () => {
           handler: jest.fn(),
         },
       },
+      test: overrides.test ?? { handler: jest.fn(), enabled: false },
       ...overrides,
     } as ConnectorSpec);
 
@@ -383,7 +384,7 @@ describe('createConnectorTypeFromSpec', () => {
       const testHandler = jest.fn();
       const specWithOnlyDisabledTest = createMockSpec({
         actions: {},
-        test: { handler: testHandler },
+        test: { handler: testHandler, enabled: false },
       });
 
       expect(() =>
@@ -391,7 +392,7 @@ describe('createConnectorTypeFromSpec', () => {
       ).toThrow('No actions defined');
 
       const specWithActions = createMockSpec({
-        test: { handler: testHandler },
+        test: { handler: testHandler, enabled: false },
       });
       const connectorType = createConnectorTypeFromSpec(specWithActions, mockActionsPlugin);
 
