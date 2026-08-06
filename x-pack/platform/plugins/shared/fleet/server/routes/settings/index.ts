@@ -54,6 +54,7 @@ export const registerRoutes = (
             since: '9.1.0',
             stability: 'stable',
           },
+          tags: ['oas-tag:Fleet internals'],
         },
       })
       .addVersion(
@@ -86,6 +87,7 @@ export const registerRoutes = (
             since: '9.1.0',
             stability: 'stable',
           },
+          tags: ['oas-tag:Fleet internals'],
         },
       })
       .addVersion(
