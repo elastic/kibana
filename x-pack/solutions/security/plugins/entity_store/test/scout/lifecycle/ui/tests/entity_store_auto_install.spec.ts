@@ -19,6 +19,9 @@ const TEST_TIMEOUT = 240_000; // per-test cap
 const REQUEST_TIMEOUT = 180_000; // waiting for a request or a status change to settle
 const INSTALL_GRACE = 2_000; // short window to confirm no auto-install fired
 
+const LEGACY_V1_ENGINE_STATUS_TYPE = 'entity-engine-status';
+const LEGACY_V1_ENGINE_DESCRIPTOR_ID = 'entity-engine-descriptor-host-default';
+
 const isStatusResponse = (url: string) => url.includes(ENTITY_STORE_ROUTES.public.STATUS);
 const isInstallRequest = (url: string, method: string) =>
   url.includes(ENTITY_STORE_ROUTES.public.INSTALL) && method === 'POST';
@@ -40,12 +43,7 @@ const throwOnInstallRequest = (page: ScoutPage) =>
       }
     );
 
-/**
- * Resets to a clean, auto-install-enabled state so the chain starts the same on every run (the lane's
- * cluster is shared): uninstall clears the store and disables auto-install, then re-enable it via the
- * dedicated preferences route (the preferences saved object isn't writable directly).
- */
-const resetEntityStoreV2 = async (kbnClient: KbnClient) => {
+const uninstallEntityStoreV2 = async (kbnClient: KbnClient) => {
   await kbnClient.request({
     method: 'POST',
     path: ENTITY_STORE_ROUTES.public.UNINSTALL,
@@ -53,26 +51,52 @@ const resetEntityStoreV2 = async (kbnClient: KbnClient) => {
     body: {},
     ignoreErrors: [404],
   });
+};
+
+const seedLegacyV1EngineStatus = async (kbnClient: KbnClient) => {
   await kbnClient.request({
-    method: 'PUT',
-    path: ENTITY_STORE_ROUTES.internal.PREFERENCES,
-    headers: { 'elastic-api-version': API_VERSIONS.internal.v2 },
-    body: { autoInstall: true },
+    method: 'POST',
+    path: `/api/saved_objects/${LEGACY_V1_ENGINE_STATUS_TYPE}/${LEGACY_V1_ENGINE_DESCRIPTOR_ID}`,
+    body: {
+      attributes: {
+        type: 'host',
+        status: 'running',
+      },
+    },
+    ignoreErrors: [409],
+  });
+};
+
+const removeLegacyV1EngineStatus = async (kbnClient: KbnClient) => {
+  await kbnClient.request({
+    method: 'DELETE',
+    path: `/api/saved_objects/${LEGACY_V1_ENGINE_STATUS_TYPE}/${LEGACY_V1_ENGINE_DESCRIPTOR_ID}`,
+    ignoreErrors: [404],
   });
 };
 
 /**
- * Runs serially in the default space (the only space where auto-install runs). The store moves
- * running -> stopped -> uninstalled across the three tests; assertions are on the UI toggle.
+ * Resets to a clean v1-migration state so the chain starts the same on every run (the lane's
+ * cluster is shared): uninstall v2, clear any leftover legacy v1 descriptor, then seed a running
+ * v1 engine-status saved object so the hook treats this space as a migration candidate.
+ */
+const resetForV1MigrationAutoInstall = async (kbnClient: KbnClient) => {
+  await uninstallEntityStoreV2(kbnClient);
+  await removeLegacyV1EngineStatus(kbnClient);
+  await seedLegacyV1EngineStatus(kbnClient);
+};
+
+/**
+ * Runs serially in the default space. The store moves running -> stopped -> uninstalled across
+ * the three tests; assertions are on the UI toggle.
  */
 test.describe.serial(
-  'Entity Store auto-install',
+  'Entity Store v1 migration auto-install',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
-      // Start from a pristine v2 store so test 1 observes a real auto-install, not a pre-existing one.
-      await resetEntityStoreV2(kbnClient);
+      await resetForV1MigrationAutoInstall(kbnClient);
     });
 
     test.beforeEach(async ({ browserAuth }) => {
@@ -81,9 +105,8 @@ test.describe.serial(
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      // Leave the shared cluster pristine so other specs in this lane aren't affected,
-      // even if this chain failed partway with the store still installed.
-      await resetEntityStoreV2(kbnClient);
+      await uninstallEntityStoreV2(kbnClient);
+      await removeLegacyV1EngineStatus(kbnClient);
     });
 
     test('auto-installs the entity store when visiting a Security page', async ({

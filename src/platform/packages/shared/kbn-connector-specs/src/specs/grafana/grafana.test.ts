@@ -429,10 +429,8 @@ describe('Grafana', () => {
     it('should succeed when rules can be listed', async () => {
       mockClient.get.mockResolvedValue({ data: [{ uid: 'r1' }, { uid: 'r2' }] });
 
-      if (!Grafana.test) throw new Error('Test handler not defined');
       const result = await Grafana.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('2');
     });
 

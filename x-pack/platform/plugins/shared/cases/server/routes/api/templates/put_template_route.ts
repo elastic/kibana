@@ -6,17 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { parse as yamlParse } from 'yaml';
 import { isBoom } from '@hapi/boom';
-import {
-  UpdateTemplateInputSchema,
-  ParsedTemplateDefinitionSchema,
-} from '../../../../common/types/domain/template/v1';
+import { UpdateTemplateInputSchema } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { parseTemplate } from './parse_template';
+import { validateTemplateDefinition } from './validate_template_input';
 
 /**
  * PUT /internal/cases/templates/{template_id}
@@ -51,26 +48,9 @@ export const putTemplateRoute = createCasesRoute({
         });
       }
 
-      // Validate YAML definition
-      let parsedYaml: unknown;
-      try {
-        parsedYaml = yamlParse(input.definition);
-      } catch (yamlError) {
-        return response.badRequest({
-          body: { message: `Invalid YAML definition: ${yamlError}` },
-        });
-      }
-
-      // Validate parsed definition against the field schema
-      const definitionResult = ParsedTemplateDefinitionSchema.safeParse(parsedYaml);
-      if (!definitionResult.success) {
-        return response.badRequest({
-          body: {
-            message: `Invalid template definition: ${JSON.stringify(
-              definitionResult.error.issues
-            )}`,
-          },
-        });
+      const definitionValidation = validateTemplateDefinition(input.definition);
+      if (!definitionValidation.valid) {
+        return response.badRequest({ body: { message: definitionValidation.message } });
       }
 
       const updatedTemplate = await casesClient.templates.updateTemplate(templateId, input);

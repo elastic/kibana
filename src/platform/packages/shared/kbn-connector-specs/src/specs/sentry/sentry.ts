@@ -523,7 +523,6 @@ export const Sentry: ConnectorSpec = {
           `${buildBaseUrl(ctx)}/organizations/${orgSlug}/projects/`
         );
         return {
-          ok: true,
           message: `Successfully connected to Sentry organization "${orgSlug}" (${response.data.length} project(s) visible).`,
         };
       } catch (error) {
