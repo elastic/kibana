@@ -17,7 +17,8 @@ spaceTest.describe('Discover sidebar many fields', { tag: tags.deploymentAgnosti
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    // Security serverless editor/viewer cannot read `indices-stats`.
+    await browserAuth.loginAsAdmin();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
