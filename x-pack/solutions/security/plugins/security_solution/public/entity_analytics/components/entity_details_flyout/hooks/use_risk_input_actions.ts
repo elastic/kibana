@@ -16,7 +16,7 @@ import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 /**
  * The returned actions only support alerts risk inputs.
  */
-export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => void) => {
+export const useRiskInputActions = (inputs: InputAlert[]) => {
   const { cases: casesService } = useKibana().services;
   const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: noop });
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal();
@@ -38,14 +38,12 @@ export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => vo
   return useMemo(
     () => ({
       addToExistingCase: () => {
-        closePopover();
         selectCaseModal.open({ getAttachments: () => caseAttachments });
       },
       addToNewCaseClick: () => {
-        closePopover();
         createCaseFlyout.open({ attachments: caseAttachments });
       },
     }),
-    [caseAttachments, closePopover, createCaseFlyout, selectCaseModal]
+    [caseAttachments, createCaseFlyout, selectCaseModal]
   );
 };

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu } from '@elastic/eui';
 import {
   type AttackDiscoveryAlert,
   getAttackDiscoveryMarkdown,
@@ -30,8 +28,15 @@ import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attac
 import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry/events/attacks/types';
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import {
+  SECURITY_ACTION_IDS,
+  SECURITY_ACTION_MENU_PRESETS,
+  SecurityActionMenuContent,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
-interface AttacksGroupTakeActionItemsProps {
+export interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
   /** Optional callback to close the containing popover menu */
   closePopover?: () => void;
@@ -46,6 +51,11 @@ interface AttacksGroupTakeActionItemsProps {
    * Use this for remote/CCS attacks where mutations are not possible.
    */
   isRemoteDocument: boolean;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
+  preset?:
+    | typeof SECURITY_ACTION_MENU_PRESETS.attackGroup
+    | typeof SECURITY_ACTION_MENU_PRESETS.attackFlyout;
 }
 
 const ADD_TO_DATASET = i18n.translate(
@@ -60,6 +70,9 @@ export function AttacksGroupTakeActionItems({
   showAiAssistantAction = true,
   telemetrySource,
   isRemoteDocument,
+  customActions,
+  actionOrder,
+  preset = SECURITY_ACTION_MENU_PRESETS.attackGroup,
 }: AttacksGroupTakeActionItemsProps) {
   const {
     services: { evals },
@@ -213,43 +226,75 @@ export function AttacksGroupTakeActionItems({
     [addToDatasetAction]
   );
 
-  const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
-    () => ({
-      id: 0,
-      items: isRemoteDocument
-        ? [...navigationItems]
-        : [
-            ...casesItems,
-            ...workflowItems,
-            ...tagsItems,
-            ...assignItems,
-            ...runWorkflowItems,
-            ...(showAiAssistantAction ? viewInAiAssistantItems : []),
-            ...datasetItems,
-            ...navigationItems,
-          ],
-    }),
+  const contributions: SecurityActionMenuContribution[] = useMemo(
+    () => [
+      {
+        id: SECURITY_ACTION_IDS.addToCase,
+        items: !isRemoteDocument ? casesItems : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackWorkflow,
+        items: !isRemoteDocument ? workflowItems : [],
+        panels: !isRemoteDocument ? workflowPanels : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackTags,
+        items: !isRemoteDocument ? tagsItems : [],
+        panels: !isRemoteDocument ? tagsPanels : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackAssignees,
+        items: !isRemoteDocument ? assignItems : [],
+        panels: !isRemoteDocument ? assignPanels : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackRunWorkflow,
+        items: !isRemoteDocument ? runWorkflowItems : [],
+        panels: !isRemoteDocument ? runWorkflowPanels : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackAi,
+        items: !isRemoteDocument && showAiAssistantAction ? viewInAiAssistantItems : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackDataset,
+        items: !isRemoteDocument ? datasetItems : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.investigateInTimeline,
+        items: isInSecurityApp ? navigationItems : [],
+      },
+      {
+        id: SECURITY_ACTION_IDS.explore,
+        items: !isInSecurityApp ? navigationItems : [],
+      },
+    ],
     [
-      isRemoteDocument,
-      runWorkflowItems,
-      workflowItems,
       assignItems,
-      tagsItems,
-      navigationItems,
+      assignPanels,
       casesItems,
-      showAiAssistantAction,
-      viewInAiAssistantItems,
       datasetItems,
+      isInSecurityApp,
+      isRemoteDocument,
+      navigationItems,
+      runWorkflowItems,
+      runWorkflowPanels,
+      showAiAssistantAction,
+      tagsItems,
+      tagsPanels,
+      viewInAiAssistantItems,
+      workflowItems,
+      workflowPanels,
     ]
   );
 
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () =>
-      isRemoteDocument
-        ? [defaultPanel]
-        : [defaultPanel, ...runWorkflowPanels, ...workflowPanels, ...assignPanels, ...tagsPanels],
-    [isRemoteDocument, runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
+  return (
+    <SecurityActionMenuContent
+      preset={preset}
+      contributions={contributions}
+      customActions={customActions}
+      actionOrder={actionOrder}
+      closeMenu={closePopover}
+    />
   );
-
-  return <EuiContextMenu initialPanelId={defaultPanel.id} panels={panels} />;
 }

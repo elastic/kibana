@@ -13,13 +13,7 @@ import {
   type Replacements,
 } from '@kbn/elastic-assistant-common';
 import { i18n as i18nTranslate } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  type EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
@@ -39,11 +33,20 @@ import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use
 import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useAttackRunWorkflowContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
+import {
+  SECURITY_ACTION_IDS,
+  SECURITY_ACTION_MENU_PRESETS,
+  SecurityActionMenuContent,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
   buttonText?: string;
   buttonSize?: 's' | 'xs';
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
   refetchFindAttackDiscoveries?: () => void;
   replacements?: Replacements;
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
@@ -53,6 +56,8 @@ const TakeActionComponent: React.FC<Props> = ({
   attackDiscoveries,
   buttonSize = 's',
   buttonText,
+  customActions,
+  actionOrder,
   refetchFindAttackDiscoveries,
   replacements,
   setSelectedAttackDiscoveries,
@@ -308,7 +313,7 @@ const TakeActionComponent: React.FC<Props> = ({
     [buttonSize, buttonText, onButtonClick]
   );
 
-  const allItems = useMemo(() => {
+  const contributions: SecurityActionMenuContribution[] = useMemo(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
 
     const isOpen = attackDiscoveries.every(
@@ -418,13 +423,27 @@ const TakeActionComponent: React.FC<Props> = ({
         : [];
 
     return [
-      ...markAsOpenItem,
-      ...markAsAcknowledgedItem,
-      ...markAsClosedItem,
-      ...runWorkflowItems,
-      ...caseItems,
-      ...aiItems,
-      ...datasetItems,
+      {
+        id: SECURITY_ACTION_IDS.attackStatus,
+        items: [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem],
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackRunWorkflow,
+        items: runWorkflowItems,
+        panels: runWorkflowPanels,
+      },
+      {
+        id: SECURITY_ACTION_IDS.addToCase,
+        items: caseItems,
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackAi,
+        items: aiItems,
+      },
+      {
+        id: SECURITY_ACTION_IDS.attackDataset,
+        items: datasetItems,
+      },
     ];
   }, [
     attackDiscoveries,
@@ -441,13 +460,9 @@ const TakeActionComponent: React.FC<Props> = ({
     onViewInAiAssistant,
     onUpdateWorkflowStatus,
     runWorkflowItems,
+    runWorkflowPanels,
     addToDatasetAction,
   ]);
-
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [{ id: 0, items: allItems }, ...runWorkflowPanels],
-    [allItems, runWorkflowPanels]
-  );
 
   const onCloseOrCancel = useCallback(() => {
     setPendingAction(null);
@@ -465,7 +480,13 @@ const TakeActionComponent: React.FC<Props> = ({
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <SecurityActionMenuContent
+          preset={SECURITY_ACTION_MENU_PRESETS.attackDiscovery}
+          contributions={contributions}
+          customActions={customActions}
+          actionOrder={actionOrder}
+          closeMenu={closePopover}
+        />
       </EuiPopover>
 
       {pendingAction != null && !hasSearchAILakeConfigurations && (

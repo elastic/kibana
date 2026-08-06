@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -41,6 +41,13 @@ import { FLYOUT_ACTION } from '../../../../common/lib/telemetry';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+import {
+  SECURITY_ACTION_IDS,
+  SecurityActionMenuContent,
+  hasSecurityActionMenuItems,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 // Maps each footer "Take action" menu item's existing `data-test-subj` to the `FlyoutActionType`
 // reported when it's clicked. Kept as one flat map (rather than one per action family) since
@@ -102,6 +109,8 @@ export interface TakeActionButtonProps {
    * Callback to open the notes flyout. Shown in the dropdown only for raw events (not alerts).
    */
   onShowNotes: () => void;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
 /**
@@ -109,7 +118,15 @@ export interface TakeActionButtonProps {
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
 export const TakeActionButton = memo(
-  ({ hit, ecsData, refetchFlyoutData, onAlertUpdated, onShowNotes }: TakeActionButtonProps) => {
+  ({
+    hit,
+    ecsData,
+    refetchFlyoutData,
+    onAlertUpdated,
+    onShowNotes,
+    customActions,
+    actionOrder,
+  }: TakeActionButtonProps) => {
     const { reportActionClicked } = useFlyoutTelemetry();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -297,25 +314,72 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const rawItems = useMemo(
+    const contributions: SecurityActionMenuContribution[] = useMemo(
       () => [
-        ...(!isRemoteDocument ? addToCaseActionItems : []),
-        ...(!isRemoteDocument && isAlert ? statusActionItems : []),
-        ...(!isRemoteDocument && isAlert ? alertTagsItems : []),
-        ...(!isRemoteDocument && isAlert ? alertAssigneesItems : []),
-        ...(!isRemoteDocument && isAlert ? exceptionActionItems : []),
-        ...(!isRemoteDocument && isAlert ? hostIsolationActionItems : []),
-        ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
-        ...(!isRemoteDocument ? endpointResponseActionsConsoleItems : []),
-        ...(!isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : []),
-        ...(!isRemoteDocument && !isAlert ? noteItems : []),
-        ...(isInSecurityApp ? investigateInTimelineActionItems : []),
-        ...(!isInSecurityApp ? exploreActionItems : []),
+        {
+          id: SECURITY_ACTION_IDS.addToCase,
+          items: !isRemoteDocument ? addToCaseActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.status,
+          items: !isRemoteDocument && isAlert ? statusActionItems : [],
+          panels: !isRemoteDocument && isAlert ? statusActionPanels : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.tags,
+          items: !isRemoteDocument && isAlert ? alertTagsItems : [],
+          panels: !isRemoteDocument && isAlert ? alertTagsPanels : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.assignees,
+          items: !isRemoteDocument && isAlert ? alertAssigneesItems : [],
+          panels: !isRemoteDocument && isAlert ? alertAssigneesPanels : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.exceptions,
+          items: !isRemoteDocument && isAlert ? exceptionActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.hostIsolation,
+          items: !isRemoteDocument && isAlert ? hostIsolationActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.alertWorkflow,
+          items: !isRemoteDocument && isAlert ? runWorkflowMenuItem : [],
+          panels: !isRemoteDocument && isAlert ? runAlertWorkflowPanel : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.documentWorkflow,
+          items: !isRemoteDocument && !isAlert ? documentWorkflowMenuItem : [],
+          panels: !isRemoteDocument && !isAlert ? runDocumentWorkflowPanel : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.responder,
+          items: !isRemoteDocument ? endpointResponseActionsConsoleItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.osquery,
+          items: !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.addNote,
+          items: !isRemoteDocument && !isAlert ? noteItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.investigateInTimeline,
+          items: isInSecurityApp ? investigateInTimelineActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.explore,
+          items: !isInSecurityApp ? exploreActionItems : [],
+        },
       ],
       [
         addToCaseActionItems,
         alertAssigneesItems,
+        alertAssigneesPanels,
         alertTagsItems,
+        alertTagsPanels,
         documentWorkflowMenuItem,
         endpointResponseActionsConsoleItems,
         exceptionActionItems,
@@ -328,43 +392,33 @@ export const TakeActionButton = memo(
         noteItems,
         osqueryActionItem,
         osqueryAvailable,
-        runWorkflowMenuItem,
-        statusActionItems,
-      ]
-    );
-
-    const items = useMemo(
-      () => wrapActionTelemetry(rawItems, FOOTER_ACTION_TEST_SUBJ, reportActionClicked),
-      [rawItems, reportActionClicked]
-    );
-
-    const panels = useMemo(
-      () => [
-        { id: 0, items },
-        ...(!isRemoteDocument && isAlert ? statusActionPanels : []),
-        ...(!isRemoteDocument && isAlert ? alertAssigneesPanels : []),
-        ...(!isRemoteDocument && isAlert ? alertTagsPanels : []),
-        ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
-      ],
-      [
-        alertAssigneesPanels,
-        alertTagsPanels,
-        isAlert,
-        isRemoteDocument,
-        items,
         runAlertWorkflowPanel,
         runDocumentWorkflowPanel,
+        runWorkflowMenuItem,
+        statusActionItems,
         statusActionPanels,
       ]
     );
-
+    const telemetryContributions = useMemo(
+      () =>
+        [...contributions, ...(customActions ?? [])].map((contribution) => ({
+          ...contribution,
+          items: wrapActionTelemetry(
+            contribution.items,
+            FOOTER_ACTION_TEST_SUBJ,
+            reportActionClicked
+          ),
+        })),
+      [contributions, customActions, reportActionClicked]
+    );
+    const hasItems = hasSecurityActionMenuItems(telemetryContributions);
     const takeActionButton = (
       <EuiButton
         data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
         fill
         iconSide="right"
         iconType="arrowDown"
-        isDisabled={items.length === 0}
+        isDisabled={!hasItems}
         onClick={togglePopoverHandler}
       >
         {TAKE_ACTION}
@@ -399,7 +453,13 @@ export const TakeActionButton = memo(
           anchorPosition="downLeft"
           repositionOnScroll
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
+          <SecurityActionMenuContent
+            preset="documentFlyoutV2"
+            contributions={telemetryContributions}
+            actionOrder={actionOrder}
+            closeMenu={closePopoverHandler}
+            dataTestSubj="takeActionPanelMenu"
+          />
         </EuiPopover>
         {isExceptionFlyoutOpen && (
           <AddExceptionFlyoutWrapper

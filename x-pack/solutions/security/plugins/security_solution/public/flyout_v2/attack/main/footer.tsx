@@ -16,6 +16,11 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { AttacksGroupTakeActionItems } from '../../../detections/components/attacks/table/attacks_group_take_action_items';
 import { AttackAiAssistantButton } from '../../../detections/components/attacks/table/attack_details/attack_ai_assistant_button';
 import { FOOTER_TEST_ID, FOOTER_TAKE_ACTION_BUTTON_TEST_ID } from './constants/test_ids';
+import {
+  SECURITY_ACTION_MENU_PRESETS,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../common/components/security_action_menu';
 
 export interface FooterProps {
   /**
@@ -30,6 +35,8 @@ export interface FooterProps {
    * Callback invoked after attack mutations to refresh related views.
    */
   onAttackUpdated: () => void;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
 /**
@@ -38,73 +45,78 @@ export interface FooterProps {
  * on the active app, swapped automatically by the underlying menu items.
  * Prop-driven — no context dependencies.
  */
-export const Footer = memo(({ attack, hit, onAttackUpdated }: FooterProps) => {
-  const indexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string | undefined);
-  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName ?? ''), [indexName]);
+export const Footer = memo(
+  ({ attack, hit, onAttackUpdated, customActions, actionOrder }: FooterProps) => {
+    const indexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string | undefined);
+    const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName ?? ''), [indexName]);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const closePopover = useCallback(() => {
-    setIsPopoverOpen(false);
-  }, []);
+    const closePopover = useCallback(() => {
+      setIsPopoverOpen(false);
+    }, []);
 
-  const togglePopover = useCallback(() => {
-    setIsPopoverOpen((open) => !open);
-  }, []);
+    const togglePopover = useCallback(() => {
+      setIsPopoverOpen((open) => !open);
+    }, []);
 
-  const onActionSuccess = useCallback(() => {
-    onAttackUpdated();
-  }, [onAttackUpdated]);
+    const onActionSuccess = useCallback(() => {
+      onAttackUpdated();
+    }, [onAttackUpdated]);
 
-  const takeActionButton = useMemo(
-    () => (
-      <EuiButton
-        data-test-subj={FOOTER_TAKE_ACTION_BUTTON_TEST_ID}
-        fill
-        iconSide="right"
-        iconType="arrowDown"
-        onClick={togglePopover}
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.flyoutV2.attack.footer.takeActionButtonLabel"
-          defaultMessage="Take action"
-        />
-      </EuiButton>
-    ),
-    [togglePopover]
-  );
-
-  return (
-    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" data-test-subj={FOOTER_TEST_ID}>
-      <EuiFlexItem grow={false}>
-        <AttackAiAssistantButton attack={attack} pathway="attacks_page_flyout_take_action" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="AttackFlyoutV2TakeActionPanel"
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyoutV2.attack.footer.takeActionPopoverAriaLabel',
-            { defaultMessage: 'Take action' }
-          )}
-          button={takeActionButton}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          repositionOnScroll
+    const takeActionButton = useMemo(
+      () => (
+        <EuiButton
+          data-test-subj={FOOTER_TAKE_ACTION_BUTTON_TEST_ID}
+          fill
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={togglePopover}
         >
-          <AttacksGroupTakeActionItems
-            attack={attack}
-            onActionSuccess={onActionSuccess}
-            closePopover={closePopover}
-            telemetrySource="attacks_page_flyout_take_action"
-            showAiAssistantAction={false}
-            isRemoteDocument={isRemoteDocument}
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.attack.footer.takeActionButtonLabel"
+            defaultMessage="Take action"
           />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+        </EuiButton>
+      ),
+      [togglePopover]
+    );
+
+    return (
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" data-test-subj={FOOTER_TEST_ID}>
+        <EuiFlexItem grow={false}>
+          <AttackAiAssistantButton attack={attack} pathway="attacks_page_flyout_take_action" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            id="AttackFlyoutV2TakeActionPanel"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyoutV2.attack.footer.takeActionPopoverAriaLabel',
+              { defaultMessage: 'Take action' }
+            )}
+            button={takeActionButton}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <AttacksGroupTakeActionItems
+              attack={attack}
+              onActionSuccess={onActionSuccess}
+              closePopover={closePopover}
+              telemetrySource="attacks_page_flyout_take_action"
+              showAiAssistantAction={false}
+              isRemoteDocument={isRemoteDocument}
+              customActions={customActions}
+              actionOrder={actionOrder}
+              preset={SECURITY_ACTION_MENU_PRESETS.attackFlyout}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 Footer.displayName = 'Footer';

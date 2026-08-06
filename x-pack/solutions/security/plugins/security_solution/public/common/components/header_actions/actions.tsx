@@ -38,6 +38,10 @@ import { useNavigateToSessionView } from '../../../flyout/document_details/share
 import { useIsNewFlyoutEnabled } from '../../hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../lib/telemetry';
+import type {
+  SecurityActionMenuActionId,
+  SecurityActionMenuContribution,
+} from '../security_action_menu';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -63,7 +67,10 @@ export type ActionsComponentProps = Pick<
   | 'showNotes'
   | 'timelineId'
   | 'toggleShowNotes'
->;
+> & {
+  customContextMenuActions?: readonly SecurityActionMenuContribution[];
+  contextMenuActionOrder?: readonly SecurityActionMenuActionId[];
+};
 
 const ActionsComponent: React.FC<ActionsComponentProps> = ({
   ariaRowindex,
@@ -83,6 +90,8 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   showNotes,
   timelineId,
   toggleShowNotes,
+  customContextMenuActions,
+  contextMenuActionOrder,
 }) => {
   const { timelineType, savedObjectId } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
@@ -267,6 +276,8 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           disabled={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
+          customActions={customContextMenuActions}
+          actionOrder={contextMenuActionOrder}
         />
         {showAnalyzerIcon ? (
           <div>

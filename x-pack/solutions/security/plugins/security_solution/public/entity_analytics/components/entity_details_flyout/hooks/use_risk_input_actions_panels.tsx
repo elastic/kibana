@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiTextTruncate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,10 +22,25 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import {
+  SECURITY_ACTION_IDS,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
+import { composeSecurityActionMenu } from '../../../../common/components/security_action_menu/compose_security_action_menu';
 
-export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
+export interface UseRiskInputActionsPanelsOptions {
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
+}
+
+export const useRiskInputActionsPanels = (
+  inputs: InputAlert[],
+  closePopover: () => void,
+  { customActions, actionOrder }: UseRiskInputActionsPanelsOptions = {}
+): EuiContextMenuPanelDescriptor[] => {
   const { cases: casesService, telemetry } = useKibana().services;
-  const { addToExistingCase, addToNewCaseClick } = useRiskInputActions(inputs, closePopover);
+  const { addToExistingCase, addToNewCaseClick } = useRiskInputActions(inputs);
   const { from, to } = useGlobalTime();
   const {
     timelinePrivileges: { read: canReadTimelines },
@@ -57,7 +73,6 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
             quantity: inputs.length,
           });
 
-          closePopover();
           const items = inputs.map(({ input }: InputAlert) => {
             return {
               _id: input.id,
@@ -73,18 +88,57 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         },
       },
     ];
-  }, [
-    canReadTimelines,
-    isInSecurityApp,
-    inputs,
-    sendBulkEventsToTimelineHandler,
-    closePopover,
-    telemetry,
-  ]);
+  }, [canReadTimelines, isInSecurityApp, inputs, sendBulkEventsToTimelineHandler, telemetry]);
 
-  return useMemo(() => {
+  const casesActions = useMemo(
+    () =>
+      hasCasesPermissions
+        ? [
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
+                  defaultMessage="Add to new case"
+                />
+              ),
+              onClick: addToNewCaseClick,
+            },
+            {
+              name: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
+                  defaultMessage="Add to existing case"
+                />
+              ),
+              onClick: addToExistingCase,
+            },
+          ]
+        : [],
+    [addToExistingCase, addToNewCaseClick, hasCasesPermissions]
+  );
+  const contributions: SecurityActionMenuContribution[] = useMemo(
+    () => [
+      {
+        id: SECURITY_ACTION_IDS.riskInputTimeline,
+        items: timelineActions,
+      },
+      {
+        id: SECURITY_ACTION_IDS.addToCase,
+        items: casesActions,
+      },
+    ],
+    [casesActions, timelineActions]
+  );
+  const { panels } = composeSecurityActionMenu({
+    preset: 'entityRiskInput',
+    contributions,
+    customActions,
+    actionOrder,
+    closeMenu: closePopover,
+  });
+  const title = useMemo(() => {
     const ruleName = get(['alert', ALERT_RULE_NAME], inputs[0]) ?? '';
-    const title = i18n.translate(
+    const panelTitle = i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
       {
         defaultMessage: 'Risk input: {description}',
@@ -105,44 +159,16 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
       }
     );
 
-    return [
-      {
-        title: (
-          <EuiTextTruncate
-            width={230} // It prevents the title from taking too much space
-            text={title}
-          />
-        ),
-        id: 0,
-        items: [
-          ...timelineActions,
-          ...(hasCasesPermissions
-            ? [
-                {
-                  name: (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
-                      defaultMessage="Add to new case"
-                    />
-                  ),
+    return (
+      <EuiTextTruncate
+        width={230} // It prevents the title from taking too much space
+        text={panelTitle}
+      />
+    );
+  }, [inputs]);
 
-                  onClick: addToNewCaseClick,
-                },
-
-                {
-                  name: (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
-                      defaultMessage="Add to existing case"
-                    />
-                  ),
-
-                  onClick: addToExistingCase,
-                },
-              ]
-            : []),
-        ],
-      },
-    ];
-  }, [addToExistingCase, addToNewCaseClick, inputs, hasCasesPermissions, timelineActions]);
+  return useMemo(
+    () => panels.map((panel) => (panel.id === 0 ? { ...panel, title } : panel)),
+    [panels, title]
+  );
 };

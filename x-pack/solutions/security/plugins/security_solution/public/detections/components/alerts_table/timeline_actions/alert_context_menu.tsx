@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 import { useSelector } from 'react-redux-v7';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -50,11 +50,18 @@ import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/t
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
-import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAddToChatAction } from './use_add_to_chat_action';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
+import {
+  SECURITY_ACTION_IDS,
+  SecurityActionMenuContent,
+  hasSecurityActionMenuItems,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
+
 interface AlertContextMenuProps {
   ariaLabel?: string;
   ariaRowindex: number;
@@ -64,6 +71,8 @@ interface AlertContextMenuProps {
   onRuleChange?: () => void;
   scopeId: string;
   refetch: (() => void) | undefined;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
@@ -75,6 +84,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   onRuleChange,
   scopeId,
   refetch,
+  customActions,
+  actionOrder,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
@@ -262,85 +273,85 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     alertId: ecsRowData._id,
   });
 
-  const items: AlertTableContextMenuItem[] = useMemo(
-    () =>
-      !isEvent && ruleId
-        ? [
-            ...addToCaseActionItems,
-            ...statusActionItems,
-            ...runWorkflowMenuItem,
-            ...alertTagsItems,
-            ...alertAssigneesItems,
-            ...exceptionActionItems,
-            ...(agentId ? osqueryActionItems : []),
-            ...addToChatActionItems,
-          ]
-        : [
-            ...addToCaseActionItems,
-            ...runDocumentWorkflowMenuItem,
-            ...(canCreateEndpointEventFilters ? eventFilterActionItems : []),
-            ...(agentId ? osqueryActionItems : []),
-          ],
-    [
-      runWorkflowMenuItem,
-      runDocumentWorkflowMenuItem,
-      isEvent,
-      ruleId,
-      addToCaseActionItems,
-      statusActionItems,
-      exceptionActionItems,
-      agentId,
-      osqueryActionItems,
-      eventFilterActionItems,
-      canCreateEndpointEventFilters,
-      alertTagsItems,
-      alertAssigneesItems,
-      addToChatActionItems,
-    ]
-  );
+  const contributions: SecurityActionMenuContribution[] = useMemo(() => {
+    const addToCaseContribution = {
+      id: SECURITY_ACTION_IDS.addToCase,
+      items: addToCaseActionItems,
+    };
+    const osqueryContribution = {
+      id: SECURITY_ACTION_IDS.osquery,
+      items: agentId ? osqueryActionItems : [],
+    };
 
-  const panels = useMemo(
-    () => [
+    if (!isEvent && ruleId) {
+      return [
+        addToCaseContribution,
+        {
+          id: SECURITY_ACTION_IDS.status,
+          items: statusActionItems,
+          panels: statusActionPanels,
+        },
+        {
+          id: SECURITY_ACTION_IDS.alertWorkflow,
+          items: runWorkflowMenuItem,
+          panels: runAlertWorkflowPanel,
+        },
+        {
+          id: SECURITY_ACTION_IDS.tags,
+          items: alertTagsItems,
+          panels: alertTagsPanels,
+        },
+        {
+          id: SECURITY_ACTION_IDS.assignees,
+          items: alertAssigneesItems,
+          panels: alertAssigneesPanels,
+        },
+        {
+          id: SECURITY_ACTION_IDS.exceptions,
+          items: exceptionActionItems,
+        },
+        osqueryContribution,
+        {
+          id: SECURITY_ACTION_IDS.addToChat,
+          items: addToChatActionItems,
+        },
+      ];
+    }
+
+    return [
+      addToCaseContribution,
       {
-        id: 0,
-        items,
+        id: SECURITY_ACTION_IDS.documentWorkflow,
+        items: runDocumentWorkflowMenuItem,
+        panels: runDocumentWorkflowPanels,
       },
-      ...alertTagsPanels,
-      ...alertAssigneesPanels,
-      ...statusActionPanels,
-      ...runAlertWorkflowPanel,
-      ...runDocumentWorkflowPanels,
-    ],
-    [
-      items,
-      alertTagsPanels,
-      alertAssigneesPanels,
-      statusActionPanels,
-      runAlertWorkflowPanel,
-      runDocumentWorkflowPanels,
-    ]
-  );
-
-  const button = useMemo(() => {
-    const hasItems = !!items.length;
-    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
-
-    return (
-      <EuiToolTip position="top" content={tooltipContent}>
-        <EuiButtonIcon
-          aria-label={ariaLabel}
-          data-test-subj="timeline-context-menu-button"
-          size="s"
-          iconType="boxesVertical"
-          data-popover-open={isPopoverOpen}
-          onClick={onButtonClick}
-          isDisabled={disabled || !hasItems}
-          color={isPopoverOpen ? 'primary' : 'text'}
-        />
-      </EuiToolTip>
-    );
-  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
-
+      {
+        id: SECURITY_ACTION_IDS.eventFilter,
+        items: canCreateEndpointEventFilters ? eventFilterActionItems : [],
+      },
+      osqueryContribution,
+    ];
+  }, [
+    addToCaseActionItems,
+    addToChatActionItems,
+    agentId,
+    alertAssigneesItems,
+    alertAssigneesPanels,
+    alertTagsItems,
+    alertTagsPanels,
+    canCreateEndpointEventFilters,
+    eventFilterActionItems,
+    exceptionActionItems,
+    isEvent,
+    osqueryActionItems,
+    ruleId,
+    runAlertWorkflowPanel,
+    runDocumentWorkflowMenuItem,
+    runDocumentWorkflowPanels,
+    runWorkflowMenuItem,
+    statusActionItems,
+    statusActionPanels,
+  ]);
   const osqueryFlyout = useMemo(() => {
     return (
       <OsqueryFlyout
@@ -351,6 +362,24 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       />
     );
   }, [agentId, alertId, ecsRowData, handleOnOsqueryClick]);
+  const hasItems = hasSecurityActionMenuItems(contributions, customActions);
+  const button = (
+    <EuiToolTip
+      position="top"
+      content={hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES}
+    >
+      <EuiButtonIcon
+        aria-label={ariaLabel}
+        data-test-subj="timeline-context-menu-button"
+        size="s"
+        iconType="boxesVertical"
+        data-popover-open={isPopoverOpen}
+        onClick={onButtonClick}
+        isDisabled={disabled || !hasItems}
+        color={isPopoverOpen ? 'primary' : 'text'}
+      />
+    </EuiToolTip>
+  );
 
   return (
     <>
@@ -366,10 +395,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <EuiContextMenu
-              initialPanelId={0}
-              panels={panels}
-              data-test-subj="actions-context-menu"
+            <SecurityActionMenuContent
+              preset="alertRow"
+              contributions={contributions}
+              customActions={customActions}
+              actionOrder={actionOrder}
+              closeMenu={closePopover}
+              dataTestSubj="actions-context-menu"
             />
           </EuiPopover>
         </EventsTdContent>

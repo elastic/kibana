@@ -17,6 +17,7 @@ import { useSendBulkToTimeline } from '../../../../detections/components/alerts_
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { SECURITY_ACTION_IDS } from '../../../../common/components/security_action_menu';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 const mockCanUseCases = jest.fn();
@@ -140,6 +141,25 @@ describe('useRiskInputActionsPanels', () => {
     expect(container).not.toHaveTextContent('Add to new timeline');
   });
 
+  it('supports custom actions and action order overrides', () => {
+    const { result } = renderHook(
+      () =>
+        useRiskInputActionsPanels([alertInputDataMock], () => {}, {
+          customActions: [{ id: 'custom', items: [{ name: 'Custom action' }] }],
+          actionOrder: ['custom', SECURITY_ACTION_IDS.addToCase],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(result.current[0].items?.map(({ name }) => name)).toEqual([
+      'Custom action',
+      expect.anything(),
+      expect.anything(),
+    ]);
+  });
+
   it('calls sendBulkEventsToTimelineHandler when timeline action is clicked', () => {
     const mockSendBulkEvents = jest.fn();
     mockUseSendBulkToTimeline.mockReturnValue({
@@ -158,11 +178,12 @@ describe('useRiskInputActionsPanels', () => {
     );
 
     const timelineAction = result.current[0].items?.find(
-      (item: Partial<{ name: React.JSX.Element }>) =>
-        item.name?.props?.defaultMessage === 'Add to new timeline'
+      (item) =>
+        React.isValidElement<{ defaultMessage?: string }>(item.name) &&
+        item.name.props.defaultMessage === 'Add to new timeline'
     );
 
-    timelineAction?.onClick?.();
+    timelineAction?.onClick?.({} as React.MouseEvent<HTMLHRElement>);
 
     expect(mockSendBulkEvents).toHaveBeenCalledWith([
       {

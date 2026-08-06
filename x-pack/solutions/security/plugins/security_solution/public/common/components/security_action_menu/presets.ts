@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SecurityActionMenuActionId, SecurityActionMenuPreset } from './types';
+
+export const SECURITY_ACTION_IDS = {
+  addToCase: 'addToCase',
+  status: 'status',
+  alertWorkflow: 'alertWorkflow',
+  documentWorkflow: 'documentWorkflow',
+  tags: 'tags',
+  assignees: 'assignees',
+  exceptions: 'exceptions',
+  eventFilter: 'eventFilter',
+  hostIsolation: 'hostIsolation',
+  responder: 'responder',
+  osquery: 'osquery',
+  addToChat: 'addToChat',
+  addNote: 'addNote',
+  investigateInTimeline: 'investigateInTimeline',
+  explore: 'explore',
+  attackStatus: 'attackStatus',
+  attackWorkflow: 'attackWorkflow',
+  attackTags: 'attackTags',
+  attackAssignees: 'attackAssignees',
+  attackRunWorkflow: 'attackRunWorkflow',
+  attackAi: 'attackAi',
+  attackDataset: 'attackDataset',
+  entityTimeline: 'entityTimeline',
+  riskInputTimeline: 'riskInputTimeline',
+  anomalyNavigation: 'anomalyNavigation',
+} as const;
+
+export const SECURITY_ACTION_MENU_PRESET_ORDER: Record<
+  SecurityActionMenuPreset,
+  readonly SecurityActionMenuActionId[]
+> = {
+  alertRow: [
+    SECURITY_ACTION_IDS.addToCase,
+    SECURITY_ACTION_IDS.status,
+    SECURITY_ACTION_IDS.alertWorkflow,
+    SECURITY_ACTION_IDS.documentWorkflow,
+    SECURITY_ACTION_IDS.tags,
+    SECURITY_ACTION_IDS.assignees,
+    SECURITY_ACTION_IDS.exceptions,
+    SECURITY_ACTION_IDS.eventFilter,
+    SECURITY_ACTION_IDS.osquery,
+    SECURITY_ACTION_IDS.addToChat,
+  ],
+  documentFlyoutV2: [
+    SECURITY_ACTION_IDS.addToCase,
+    SECURITY_ACTION_IDS.status,
+    SECURITY_ACTION_IDS.tags,
+    SECURITY_ACTION_IDS.assignees,
+    SECURITY_ACTION_IDS.exceptions,
+    SECURITY_ACTION_IDS.hostIsolation,
+    SECURITY_ACTION_IDS.alertWorkflow,
+    SECURITY_ACTION_IDS.documentWorkflow,
+    SECURITY_ACTION_IDS.responder,
+    SECURITY_ACTION_IDS.osquery,
+    SECURITY_ACTION_IDS.addNote,
+    SECURITY_ACTION_IDS.investigateInTimeline,
+    SECURITY_ACTION_IDS.explore,
+  ],
+  documentFlyoutLegacy: [
+    SECURITY_ACTION_IDS.addToCase,
+    SECURITY_ACTION_IDS.status,
+    SECURITY_ACTION_IDS.tags,
+    SECURITY_ACTION_IDS.assignees,
+    SECURITY_ACTION_IDS.exceptions,
+    SECURITY_ACTION_IDS.eventFilter,
+    SECURITY_ACTION_IDS.alertWorkflow,
+    SECURITY_ACTION_IDS.documentWorkflow,
+    SECURITY_ACTION_IDS.hostIsolation,
+    SECURITY_ACTION_IDS.responder,
+    SECURITY_ACTION_IDS.osquery,
+    SECURITY_ACTION_IDS.investigateInTimeline,
+  ],
+  easeAlertRow: [SECURITY_ACTION_IDS.addToCase, SECURITY_ACTION_IDS.tags],
+  easeAlertFlyout: [SECURITY_ACTION_IDS.addToCase, SECURITY_ACTION_IDS.tags],
+  attackDiscovery: [
+    SECURITY_ACTION_IDS.attackStatus,
+    SECURITY_ACTION_IDS.attackRunWorkflow,
+    SECURITY_ACTION_IDS.addToCase,
+    SECURITY_ACTION_IDS.attackAi,
+    SECURITY_ACTION_IDS.attackDataset,
+  ],
+  attackGroup: [
+    SECURITY_ACTION_IDS.addToCase,
+    SECURITY_ACTION_IDS.attackWorkflow,
+    SECURITY_ACTION_IDS.attackTags,
+    SECURITY_ACTION_IDS.attackAssignees,
+    SECURITY_ACTION_IDS.attackRunWorkflow,
+    SECURITY_ACTION_IDS.attackAi,
+    SECURITY_ACTION_IDS.attackDataset,
+    SECURITY_ACTION_IDS.investigateInTimeline,
+    SECURITY_ACTION_IDS.explore,
+  ],
+  attackFlyout: [
+    SECURITY_ACTION_IDS.addToCase,
+    SECURITY_ACTION_IDS.attackWorkflow,
+    SECURITY_ACTION_IDS.attackTags,
+    SECURITY_ACTION_IDS.attackAssignees,
+    SECURITY_ACTION_IDS.attackRunWorkflow,
+    SECURITY_ACTION_IDS.attackAi,
+    SECURITY_ACTION_IDS.attackDataset,
+    SECURITY_ACTION_IDS.investigateInTimeline,
+    SECURITY_ACTION_IDS.explore,
+  ],
+  entityRiskInput: [SECURITY_ACTION_IDS.riskInputTimeline, SECURITY_ACTION_IDS.addToCase],
+  anomalyRow: [SECURITY_ACTION_IDS.anomalyNavigation],
+};

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
@@ -32,9 +32,15 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
-import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
+import {
+  SECURITY_ACTION_IDS,
+  SecurityActionMenuContent,
+  hasSecurityActionMenuItems,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyout.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -108,6 +114,8 @@ export interface TakeActionDropdownProps {
    * The raw ES search hit containing the full document source
    */
   searchHit: SearchHit;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
 /**
@@ -126,6 +134,8 @@ export const TakeActionDropdown = memo(
     onOsqueryClick,
     scopeId,
     searchHit,
+    customActions,
+    actionOrder,
   }: TakeActionDropdownProps) => {
     // popover interaction
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -294,32 +304,6 @@ export const TakeActionDropdown = memo(
       agentId: osqueryAgentId,
     });
 
-    // alert action items
-    const alertsActionItems = useMemo(
-      () =>
-        !isEvent && alertSummaryData.ruleId
-          ? [
-              ...statusActionItems,
-              ...alertTagsItems,
-              ...alertAssigneesItems,
-              ...exceptionActionItems,
-            ]
-          : isEndpointEvent && canCreateEndpointEventFilters
-          ? eventFilterActionItems
-          : [],
-      [
-        eventFilterActionItems,
-        isEndpointEvent,
-        canCreateEndpointEventFilters,
-        exceptionActionItems,
-        statusActionItems,
-        isEvent,
-        alertSummaryData.ruleId,
-        alertTagsItems,
-        alertAssigneesItems,
-      ]
-    );
-
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData: dataAsNestedObject,
       nonEcsData:
@@ -358,44 +342,95 @@ export const TakeActionDropdown = memo(
         documents,
       });
 
-    // items to render in the dropdown
-    const items: AlertTableContextMenuItem[] = useMemo(
-      () =>
-        isRemoteDocument
-          ? [...investigateInTimelineActionItems]
-          : [
-              ...addToCaseActionItems,
-              ...alertsActionItems,
-              ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
-              ...hostIsolationActionItems,
-              ...endpointResponseActionsConsoleItems,
-              ...(osqueryAvailable ? [osqueryActionItem] : []),
-              ...investigateInTimelineActionItems,
-            ],
+    const hasAlertActions = !isEvent && Boolean(alertSummaryData.ruleId);
+    const contributions: SecurityActionMenuContribution[] = useMemo(
+      () => [
+        {
+          id: SECURITY_ACTION_IDS.addToCase,
+          items: !isRemoteDocument ? addToCaseActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.status,
+          items: !isRemoteDocument && hasAlertActions ? statusActionItems : [],
+          panels: !isRemoteDocument && hasAlertActions ? statusActionPanels : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.tags,
+          items: !isRemoteDocument && hasAlertActions ? alertTagsItems : [],
+          panels: !isRemoteDocument && hasAlertActions ? alertTagsPanels : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.assignees,
+          items: !isRemoteDocument && hasAlertActions ? alertAssigneesItems : [],
+          panels: !isRemoteDocument && hasAlertActions ? alertAssigneesPanels : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.exceptions,
+          items: !isRemoteDocument && hasAlertActions ? exceptionActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.eventFilter,
+          items:
+            !isRemoteDocument &&
+            !hasAlertActions &&
+            isEndpointEvent &&
+            canCreateEndpointEventFilters
+              ? eventFilterActionItems
+              : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.alertWorkflow,
+          items: !isRemoteDocument && isAlert ? alertWorkflowMenuItem : [],
+          panels: !isRemoteDocument && isAlert ? runAlertWorkflowPanel : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.documentWorkflow,
+          items: !isRemoteDocument && !isAlert ? documentWorkflowMenuItem : [],
+          panels: !isRemoteDocument && !isAlert ? runDocumentWorkflowPanel : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.hostIsolation,
+          items: !isRemoteDocument ? hostIsolationActionItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.responder,
+          items: !isRemoteDocument ? endpointResponseActionsConsoleItems : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.osquery,
+          items: !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
+        },
+        {
+          id: SECURITY_ACTION_IDS.investigateInTimeline,
+          items: investigateInTimelineActionItems,
+        },
+      ],
       [
         addToCaseActionItems,
-        alertsActionItems,
-        isAlert,
-        isRemoteDocument,
+        alertAssigneesItems,
+        alertAssigneesPanels,
+        alertTagsItems,
+        alertTagsPanels,
         alertWorkflowMenuItem,
+        canCreateEndpointEventFilters,
         documentWorkflowMenuItem,
-        hostIsolationActionItems,
         endpointResponseActionsConsoleItems,
-        osqueryAvailable,
-        osqueryActionItem,
+        eventFilterActionItems,
+        exceptionActionItems,
+        hasAlertActions,
+        hostIsolationActionItems,
         investigateInTimelineActionItems,
+        isAlert,
+        isEndpointEvent,
+        isRemoteDocument,
+        osqueryActionItem,
+        osqueryAvailable,
+        runAlertWorkflowPanel,
+        runDocumentWorkflowPanel,
+        statusActionItems,
+        statusActionPanels,
       ]
     );
-
-    // panels rendered in the context menu
-    const panels = [
-      { id: 0, items },
-      ...(!isRemoteDocument ? alertTagsPanels : []),
-      ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
-      ...(!isRemoteDocument ? alertAssigneesPanels : []),
-      ...(!isRemoteDocument ? statusActionPanels : []),
-    ];
-
     const takeActionButton = useMemo(
       () => (
         <EuiButton
@@ -411,8 +446,9 @@ export const TakeActionDropdown = memo(
 
       [togglePopoverHandler]
     );
+    const hasItems = hasSecurityActionMenuItems(contributions, customActions);
 
-    return items.length && dataAsNestedObject ? (
+    return hasItems && dataAsNestedObject ? (
       <EuiPopover
         id="AlertTakeActionPanel"
         aria-label={TAKE_ACTION}
@@ -423,7 +459,14 @@ export const TakeActionDropdown = memo(
         anchorPosition="downLeft"
         repositionOnScroll
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
+        <SecurityActionMenuContent
+          preset="documentFlyoutLegacy"
+          contributions={contributions}
+          customActions={customActions}
+          actionOrder={actionOrder}
+          closeMenu={closePopoverHandler}
+          dataTestSubj="takeActionPanelMenu"
+        />
       </EuiPopover>
     ) : null;
   }
