@@ -59,6 +59,7 @@
 **Identity management**
 
 - [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
+- [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 
 **Email security**
 
