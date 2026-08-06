@@ -495,13 +495,9 @@ describe('discover session API transforms', () => {
     expect(roundTripped).toMatchObject(apiData);
     expect(roundTripped.tabs[0]).toMatchObject({
       column_order: [],
-      density: 'compact',
-      header_row_height: 3,
     });
     expect(roundTripped.tabs[1]).toMatchObject({
       column_order: [],
-      density: 'compact',
-      header_row_height: 3,
       control_panels: [
         {
           width: 'medium',
@@ -509,6 +505,15 @@ describe('discover session API transforms', () => {
         },
       ],
     });
+
+    expect(roundTripped.tabs[0].density).toBeUndefined();
+    expect(roundTripped.tabs[0].header_row_height).toBeUndefined();
+    expect(roundTripped.tabs[1].density).toBeUndefined();
+    expect(roundTripped.tabs[1].header_row_height).toBeUndefined();
+    expect(reverted.attributes.tabs[0].attributes.density).toBeUndefined();
+    expect(reverted.attributes.tabs[0].attributes.headerRowHeight).toBeUndefined();
+    expect(reverted.attributes.tabs[1].attributes.density).toBeUndefined();
+    expect(reverted.attributes.tabs[1].attributes.headerRowHeight).toBeUndefined();
     expect(reverted.attributes.tabs[0].attributes.visContext).toEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
       requestData: {
