@@ -20,7 +20,7 @@ export const CreateRuleExceptionStepId = 'security.createRuleException' as const
 
 export const createRuleExceptionInputSchema = z
   .object({
-    rule_id: z.string().min(1),
+    rule_id: z.string().min(1).max(36),
     item_id: ExceptionListItemHumanId.optional(),
     overwrite: z.boolean().optional().default(false),
     ...exceptionItemBaseSchema.shape,
