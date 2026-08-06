@@ -37,7 +37,9 @@ describe('AssigneesColumn', () => {
     expect(
       screen.queryByTestId('case-table-column-assignee-damaged_raccoon')
     ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-table-column-assignee-expand-button')
+    ).not.toBeInTheDocument();
     // u2014 is the unicode for a long dash
     expect(screen.getByText('\u2014')).toBeInTheDocument();
   });
@@ -74,7 +76,7 @@ describe('AssigneesColumn', () => {
 
     renderWithTestingProviders(<AssigneesColumn {...props} />);
 
-    expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-column-assignee-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
   });
 
@@ -86,7 +88,9 @@ describe('AssigneesColumn', () => {
 
     renderWithTestingProviders(<AssigneesColumn {...props} />);
 
-    expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-table-column-assignee-expand-button')
+    ).not.toBeInTheDocument();
   });
 
   it('does not show the show more button when the limit is the same number of the assignees', async () => {
@@ -97,7 +101,9 @@ describe('AssigneesColumn', () => {
 
     renderWithTestingProviders(<AssigneesColumn {...props} />);
 
-    expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-table-column-assignee-expand-button')
+    ).not.toBeInTheDocument();
   });
 
   it('displays the show less avatars button when the show more is clicked', async () => {
@@ -110,10 +116,10 @@ describe('AssigneesColumn', () => {
 
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-column-assignee-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-assignee-expand-button'));
     expect(await screen.findByText('show less')).toBeInTheDocument();
 
     expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
@@ -129,17 +135,17 @@ describe('AssigneesColumn', () => {
 
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-column-assignee-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-assignee-expand-button'));
 
     expect(await screen.findByText('show less')).toBeInTheDocument();
     expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
 
     await waitFor(() => {});
 
-    await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    await userEvent.click(screen.getByTestId('case-table-column-assignee-expand-button'));
 
     expect(await screen.findByText('+1 more')).toBeInTheDocument();
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
