@@ -94,9 +94,17 @@ export const getChildWorkflowExecutions = async ({
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  const { items: parentItems } = await workflowExecutionsDataClient.getByIds([parentExecutionId], {
-    sourceIncludes: [...PARENT_SOURCE_INCLUDES],
-  });
+  const { items: parentItems, missing: parentMissing } =
+    await workflowExecutionsDataClient.getByIds([parentExecutionId], {
+      sourceIncludes: [...PARENT_SOURCE_INCLUDES],
+    });
+
+  // Throw so callers can distinguish "parent doesn't exist" from "parent has no
+  // child executions" — both cases would otherwise silently return [].
+  if (parentMissing.includes(parentExecutionId)) {
+    throw new Error(`Workflow execution not found: ${parentExecutionId}`);
+  }
+
   const parentDoc = parentItems[0]?.document;
 
   if (!parentDoc || parentDoc.spaceId !== spaceId) {

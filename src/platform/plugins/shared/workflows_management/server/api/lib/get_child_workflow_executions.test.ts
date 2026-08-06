@@ -81,16 +81,20 @@ describe('getChildWorkflowExecutions', () => {
     jest.clearAllMocks();
   });
 
-  it('should return empty array when parent execution is not found', async () => {
-    mockWorkflowDataClient.getByIds.mockResolvedValue(mockWorkflowGetByIds([]));
+  it('should throw when parent execution is not found', async () => {
+    mockWorkflowDataClient.getByIds.mockResolvedValue(
+      createMockGetExecutionsByIdsResponse([] as unknown as EsWorkflowExecution[], {
+        missing: [baseParams.parentExecutionId],
+      })
+    );
 
-    const result = await getChildWorkflowExecutions({
-      ...baseParams,
-      workflowExecutionsDataClient: mockWorkflowDataClient,
-      stepExecutionsDataClient: mockStepDataClient,
-    });
-
-    expect(result).toEqual([]);
+    await expect(
+      getChildWorkflowExecutions({
+        ...baseParams,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
+        stepExecutionsDataClient: mockStepDataClient,
+      })
+    ).rejects.toThrow(`Workflow execution not found: ${baseParams.parentExecutionId}`);
   });
 
   it('should return empty array when spaceId does not match', async () => {
