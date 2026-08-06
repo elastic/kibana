@@ -19,6 +19,11 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',
+  /**
+   * Creation from a single representative document has no extra gate beyond identity presence:
+   * `service.name` is a single-field identity with low duplicate risk.
+   */
+  creatableFromDocument: {},
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [
     newestValue({ destination: 'entity.name', source: 'service.name' }),

@@ -60,7 +60,7 @@ const emptyResult = (): CreateMissingEntitiesResult => ({
 /**
  * Create-if-missing path for base scoring: for EUID-valid scores with no entity store record,
  * fetch a representative alert document per EUID and attempt a policy-gated create instead of
- * silently dropping the score (see `entity_creation_policy.ts` in the entity_store plugin).
+ * silently dropping the score (see `creatable_from_document.ts` in the entity_store plugin).
  *
  * The maintainer's own EUID can't be trusted for gating (the ES|QL base-scoring query applies
  * only `documentsFilter`, not `postAggFilter`), so this re-derives everything from a real source

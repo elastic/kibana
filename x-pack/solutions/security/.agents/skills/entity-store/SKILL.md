@@ -64,6 +64,7 @@ x-pack/solutions/security/plugins/entity_store/
 | Call any Entity Store API or write curl | [references/api-routes.md](references/api-routes.md) |
 | Work with resolution (link/unlink/group) | [references/resolution.md](references/resolution.md) |
 | Register or debug a maintainer | [references/maintainers.md](references/maintainers.md) |
+| Work with the risk score maintainer, its feature gates, or create-if-missing | [references/risk-score.md](references/risk-score.md) |
 | Construct or parse an entity.id (EUID) | [references/euid.md](references/euid.md) |
 | Handle errors or write error handling code | [references/errors.md](references/errors.md) |
 | Use plugin contracts or handler context | [references/contracts.md](references/contracts.md) |
@@ -114,8 +115,10 @@ x-pack/solutions/security/plugins/entity_store/
 
 2. **Experimental feature flag** `entityAnalyticsEntityStoreV2` — gates server-side plugin setup (risk score maintainer registration). Requires Kibana restart.
    - Enable in `kibana.dev.yml`: `xpack.securitySolution.enableExperimental: ['entityAnalyticsEntityStoreV2']`
-   - Defaults to `false` in `common/experimental_features.ts`
+   - Defaults to `true` in `common/experimental_features.ts`
    - The **risk score maintainer** only registers when this flag is `true` (checked in `plugin.ts` at setup)
+
+A third, narrower gate — `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` (Kibana config, defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
 
 ## Risk Score Architecture (v2)
 
@@ -124,3 +127,5 @@ The risk score maintainer (`id: 'risk-score'`) is registered by `security_soluti
 **When to use which source:**
 - **Entity Store** (`entity.risk.*`, `entity.relationships.resolution.risk.*`) — for displaying score badges, score values, risk levels. Primary source for scores.
 - **Risk score index** (`risk-score.risk-score-default`) — for detailed breakdowns (category scores, inputs, modifiers, Lens visualizations). Query with `useRiskScore()` hook + `score_type` filter.
+
+Optionally, the maintainer can create entities missing from the store instead of dropping their scores, gated by a conservative per-type creation policy and stamped with `entity.created_by`. See [references/risk-score.md](references/risk-score.md) for gates, the creation policy, and funnel semantics.

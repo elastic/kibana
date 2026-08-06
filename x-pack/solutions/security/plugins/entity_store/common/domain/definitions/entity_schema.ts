@@ -152,6 +152,40 @@ export const setFieldsByConditionSchema = z.object({
 });
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 
+// Closed set of rejection reasons a definition can attach to its own `creatableFromDocument.requires`
+// gate. Kept separate from the shared, non-definitional reasons (e.g. `no_identity`,
+// `event_outcome_failure`, `entity_type_not_creatable`) so each definition can only report a reason
+// it actually owns.
+export const creationRejectionReasonSchema = z.enum([
+  'user_not_local_namespace',
+  'host_missing_host_id',
+]);
+export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
+
+/**
+ * Opt-in gate for out-of-band creation from a single representative document (e.g.
+ * `createEntitiesFromSource`, seeded from a representative alert `_source`). A type with no
+ * `creatableFromDocument` is never created this way — this is the only place that decides it.
+ *
+ * Unlike every other condition in this schema, `requires` has no ESQL or Painless target: it is
+ * evaluated in memory only, against the document after `fieldEvaluations`,
+ * `whenConditionTrueSetFieldsPreAgg`, and `whenConditionTrueSetFieldsAfterStats` have been applied.
+ * It cannot reuse `postAggFilter` directly because that filter short-circuits on
+ * `entity.id already exists`, which trivially passes for a synthetic doc that already carries the
+ * candidate id.
+ */
+const creatableFromDocumentSchema = z
+  .object({
+    requires: z.optional(streamlangConditionSchema),
+    // Required when `requires` is set (see refine below); omitted otherwise, since a type with
+    // no extra requirement (e.g. `service`) has nothing for it to report.
+    rejectionReason: z.optional(creationRejectionReasonSchema),
+  })
+  .refine((value) => !value.requires || value.rejectionReason !== undefined, {
+    message: '`rejectionReason` is required when `requires` is set',
+  });
+export type CreatableFromDocument = z.infer<typeof creatableFromDocumentSchema>;
+
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -170,6 +204,8 @@ export const entitySchema = z.object({
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
+  // Opt-in gate for creation from a single representative document. See `creatableFromDocumentSchema`.
+  creatableFromDocument: z.optional(creatableFromDocumentSchema),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields

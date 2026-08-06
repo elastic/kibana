@@ -27,8 +27,8 @@ import {
   EntityStoreNotInstalledError,
 } from '../errors';
 import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
-import { getEntityCreationCandidate } from '../../../common/domain/definitions/entity_creation_policy';
-import type { EntityCreationRejectionReason } from '../../../common/domain/definitions/entity_creation_policy';
+import { getEntityCreationCandidate } from '../../../common/domain/definitions/creatable_from_document';
+import type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_document';
 import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
 import { validateAndTransformDoc } from './utils';
 import { buildEntityFromSource } from './entity_from_source';
@@ -123,7 +123,7 @@ export interface CreateEntitiesFromSourceResult {
 
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
 // except create/delete. createEntitiesFromSource is intentionally included — it is a scoped,
-// policy-gated create path (see entity_creation_policy.ts), not the unrestricted createEntity.
+// policy-gated create path (see creatable_from_document.ts), not the unrestricted createEntity.
 export type EntityUpdateClient = Omit<CRUDClient, 'createEntity' | 'deleteEntity'>;
 
 export class CRUDClient {

@@ -50,6 +50,7 @@ export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
 export const ENTITY_CREATED_BY_FIELD = 'entity.created_by';
+// Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 /**
  * Provenance stamp identifying which engine created an entity. Written once, on create, by
@@ -62,7 +63,6 @@ export const ENTITY_CREATED_BY = {
 } as const;
 
 export type EntityCreatedBy = (typeof ENTITY_CREATED_BY)[keyof typeof ENTITY_CREATED_BY];
-// Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'

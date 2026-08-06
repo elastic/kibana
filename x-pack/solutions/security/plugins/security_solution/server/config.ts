@@ -188,12 +188,7 @@ export const configSchema = schema.object({
       /**
        * Opt-in switch for the risk score maintainer's create-if-missing path: when an alert's
        * EUID passes the entity type's creation policy but has no entity store record, create
-       * the entity (with its risk score) instead of silently dropping the score. Independent
-       * of `idBasedRiskScoringEnabled` (both must be enabled for creation to occur), so this
-       * can be disabled without turning off dual-write.
-       *
-       * Defaults to `false` while this is validated on Cloud/Serverless; flip the default to
-       * `true` (or remove the flag) once confirmed safe.
+       * the entity (with its risk score) instead of silently dropping the score.
        */
       createMissingEntities: schema.boolean({ defaultValue: false }),
     }),

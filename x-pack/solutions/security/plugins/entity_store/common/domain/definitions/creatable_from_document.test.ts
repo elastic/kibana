@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getEntityCreationCandidate } from './entity_creation_policy';
+import { getEntityCreationCandidate } from './creatable_from_document';
+import { getEntityDefinitionWithoutId } from './registry';
 
 describe('getEntityCreationCandidate', () => {
   describe('shared event.outcome gate', () => {
@@ -48,11 +49,15 @@ describe('getEntityCreationCandidate', () => {
   });
 
   describe('generic', () => {
-    it('is never creatable', () => {
+    it('is never creatable (no creatableFromDocument on the definition)', () => {
       expect(getEntityCreationCandidate('generic', { entity: { id: 'e-123' } })).toEqual({
         accepted: false,
         reason: 'entity_type_not_creatable',
       });
+    });
+
+    it('has no creatableFromDocument declared on its definition', () => {
+      expect(getEntityDefinitionWithoutId('generic').creatableFromDocument).toBeUndefined();
     });
   });
 

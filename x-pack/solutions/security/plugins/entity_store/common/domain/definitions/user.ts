@@ -193,6 +193,20 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   },
 
   /**
+   * Creation from a single representative document (e.g. an alert) is restricted to
+   * medium-confidence local-namespace users: `postAggFilter` above can't be reused as-is because
+   * its `entityIdExistsAfterLookup` branch trivially passes for a synthetic doc that already
+   * carries the candidate id, and alerts can't legitimately pass the IdP gates (`event.kind` is
+   * rewritten to `signal` on alert documents). An accidental non-local create would mint a
+   * high-confidence entity with no authoritative IdP evidence, since `entity.confidence` is
+   * stamped from the namespace above.
+   */
+  creatableFromDocument: {
+    requires: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },
+    rejectionReason: 'user_not_local_namespace',
+  },
+
+  /**
    * Post-STATS: entity.name for local vs non-local; entity.confidence from namespace (local → medium,
    * else → high). Logs ESQL maps to `recent.*` after STATS.
    */
