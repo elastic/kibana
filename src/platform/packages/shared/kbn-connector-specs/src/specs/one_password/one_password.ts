@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const BASE_URL = 'https://api.1password.com/v1beta1';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v1beta1` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://api.1password.com';
+const ONE_PASSWORD_API_V1BETA1 = `${getBaseUrl()}/v1beta1`;
 
 // So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
 const throwWithApiError = (error: unknown): never => {
@@ -45,7 +49,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       {
         type: 'oauth_client_credentials',
         defaults: {
-          tokenUrl: `${BASE_URL}/users/oauth2/token`,
+          tokenUrl: `${ONE_PASSWORD_API_V1BETA1}/users/oauth2/token`,
           scope: 'openid',
           tokenEndpointAuthMethod: 'client_secret_basic',
         },
@@ -102,13 +106,16 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { accountUuid } = ctx.config as { accountUuid: string };
 
         try {
-          const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
-            params: {
-              ...(typedInput.filter && { filter: typedInput.filter }),
-              ...(typedInput.maxPageSize && { maxPageSize: typedInput.maxPageSize }),
-              ...(typedInput.pageToken && { pageToken: typedInput.pageToken }),
-            },
-          });
+          const response = await ctx.client.get(
+            `${ONE_PASSWORD_API_V1BETA1}/accounts/${accountUuid}/users`,
+            {
+              params: {
+                ...(typedInput.filter && { filter: typedInput.filter }),
+                ...(typedInput.maxPageSize && { maxPageSize: typedInput.maxPageSize }),
+                ...(typedInput.pageToken && { pageToken: typedInput.pageToken }),
+              },
+            }
+          );
           return response.data;
         } catch (error) {
           throwWithApiError(error);
@@ -133,7 +140,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(
-            `${BASE_URL}/accounts/${accountUuid}/users/${uuid}`
+            `${ONE_PASSWORD_API_V1BETA1}/accounts/${accountUuid}/users/${uuid}`
           );
           return response.data;
         } catch (error) {
@@ -162,7 +169,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
         try {
           const response = await ctx.client.post(
-            `${BASE_URL}/accounts/${accountUuid}/users/${uuid}:suspend`
+            `${ONE_PASSWORD_API_V1BETA1}/accounts/${accountUuid}/users/${uuid}:suspend`
           );
           return response.data;
         } catch (error) {
@@ -188,7 +195,7 @@ export const OnePasswordConnector: ConnectorSpec = {
 
         try {
           const response = await ctx.client.post(
-            `${BASE_URL}/accounts/${accountUuid}/users/${uuid}:reactivate`
+            `${ONE_PASSWORD_API_V1BETA1}/accounts/${accountUuid}/users/${uuid}:reactivate`
           );
           return response.data;
         } catch (error) {
@@ -197,6 +204,8 @@ export const OnePasswordConnector: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.onePassword.test.description', {
@@ -207,9 +216,12 @@ export const OnePasswordConnector: ConnectorSpec = {
       const { accountUuid } = ctx.config as { accountUuid: string };
 
       try {
-        const response = await ctx.client.get(`${BASE_URL}/accounts/${accountUuid}/users`, {
-          params: { maxPageSize: 1 },
-        });
+        const response = await ctx.client.get(
+          `${ONE_PASSWORD_API_V1BETA1}/accounts/${accountUuid}/users`,
+          {
+            params: { maxPageSize: 1 },
+          }
+        );
 
         if (response.status === 200) {
           return { ok: true, message: 'Successfully connected to 1Password Users API' };

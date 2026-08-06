@@ -23,7 +23,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { normalizeUrl } from '../../connector_utils';
 import {
   CallRestApiInputSchema,
@@ -38,6 +38,13 @@ import {
 } from './types';
 
 const ODATA_HEADERS = { Accept: 'application/json;odata=nometadata' };
+
+const getBaseUrl = (ctx: ActionContext): string => {
+  const { siteUrl } = ctx.config as { siteUrl: string };
+  return normalizeUrl(siteUrl);
+};
+
+const SHAREPOINT_API_PREFIX = '/_api';
 
 export const SharepointServer: ConnectorSpec = {
   metadata: {
@@ -74,9 +81,8 @@ export const SharepointServer: ConnectorSpec = {
       input: z.object({}).optional(),
       output: z.any(),
       handler: async (ctx) => {
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug('SharePoint Server getting web info');
-        const response = await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web`, {
+        const response = await ctx.client.get(`${getBaseUrl(ctx)}${SHAREPOINT_API_PREFIX}/web`, {
           headers: ODATA_HEADERS,
         });
         return response.data;
@@ -90,16 +96,18 @@ export const SharepointServer: ConnectorSpec = {
       input: z.object({}).optional(),
       output: ODataCollectionOutputSchema,
       handler: async (ctx) => {
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug('SharePoint Server getting lists');
-        const response = await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web/lists`, {
-          headers: ODATA_HEADERS,
-          params: {
-            $select:
-              'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
-            $expand: 'RootFolder',
-          },
-        });
+        const response = await ctx.client.get(
+          `${getBaseUrl(ctx)}${SHAREPOINT_API_PREFIX}/web/lists`,
+          {
+            headers: ODATA_HEADERS,
+            params: {
+              $select:
+                'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
+              $expand: 'RootFolder',
+            },
+          }
+        );
         return response.data;
       },
     },
@@ -112,11 +120,12 @@ export const SharepointServer: ConnectorSpec = {
       output: ODataCollectionOutputSchema,
       handler: async (ctx, input) => {
         const { listTitle } = input as { listTitle: string };
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server getting items of list "${listTitle}"`);
         const escapedListTitle = listTitle.replace(/'/g, "''");
         const response = await ctx.client.get(
-          `${normalizeUrl(siteUrl)}/_api/web/lists/GetByTitle('${escapedListTitle}')/items`,
+          `${getBaseUrl(
+            ctx
+          )}${SHAREPOINT_API_PREFIX}/web/lists/GetByTitle('${escapedListTitle}')/items`,
           {
             headers: ODATA_HEADERS,
           }
@@ -133,20 +142,16 @@ export const SharepointServer: ConnectorSpec = {
       output: GetFolderContentsOutputSchema,
       handler: async (ctx, input) => {
         const { path } = input as { path: string };
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server getting folder contents at "${path}"`);
         const escapedPath = path.replace(/'/g, "''");
+        const baseUrl = getBaseUrl(ctx);
         const [filesResponse, foldersResponse] = await Promise.all([
           ctx.client.get(
-            `${normalizeUrl(
-              siteUrl
-            )}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Files`,
+            `${baseUrl}${SHAREPOINT_API_PREFIX}/web/GetFolderByServerRelativeUrl('${escapedPath}')/Files`,
             { headers: ODATA_HEADERS }
           ),
           ctx.client.get(
-            `${normalizeUrl(
-              siteUrl
-            )}/_api/web/GetFolderByServerRelativeUrl('${escapedPath}')/Folders`,
+            `${baseUrl}${SHAREPOINT_API_PREFIX}/web/GetFolderByServerRelativeUrl('${escapedPath}')/Folders`,
             { headers: ODATA_HEADERS }
           ),
         ]);
@@ -165,11 +170,12 @@ export const SharepointServer: ConnectorSpec = {
       output: DownloadFileOutputSchema,
       handler: async (ctx, input) => {
         const { path } = input as { path: string };
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server downloading file at "${path}"`);
         const escapedPath = path.replace(/'/g, "''");
         const response = await ctx.client.get(
-          `${normalizeUrl(siteUrl)}/_api/web/GetFileByServerRelativeUrl('${escapedPath}')/$value`,
+          `${getBaseUrl(
+            ctx
+          )}${SHAREPOINT_API_PREFIX}/web/GetFileByServerRelativeUrl('${escapedPath}')/$value`,
           { responseType: 'arraybuffer' }
         );
         const buffer = Buffer.from(response.data);
@@ -189,10 +195,11 @@ export const SharepointServer: ConnectorSpec = {
       output: z.any(),
       handler: async (ctx, input) => {
         const { pageId } = input as { pageId: number };
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server getting site page contents for page ID ${pageId}`);
         const response = await ctx.client.get(
-          `${normalizeUrl(siteUrl)}/_api/web/lists/GetByTitle('Site Pages')/items(${pageId})`,
+          `${getBaseUrl(
+            ctx
+          )}${SHAREPOINT_API_PREFIX}/web/lists/GetByTitle('Site Pages')/items(${pageId})`,
           {
             headers: ODATA_HEADERS,
             params: {
@@ -212,16 +219,18 @@ export const SharepointServer: ConnectorSpec = {
       output: z.any(),
       handler: async (ctx, input) => {
         const { query, from, size } = input as { query: string; from?: number; size?: number };
-        const { siteUrl } = ctx.config as { siteUrl: string };
         ctx.log.debug(`SharePoint Server search: "${query}"`);
-        const response = await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/search/query`, {
-          headers: ODATA_HEADERS,
-          params: {
-            querytext: `'${query.replace(/'/g, "''")}'`,
-            ...(from !== undefined && { startRow: from }),
-            ...(size !== undefined && { rowLimit: size }),
-          },
-        });
+        const response = await ctx.client.get(
+          `${getBaseUrl(ctx)}${SHAREPOINT_API_PREFIX}/search/query`,
+          {
+            headers: ODATA_HEADERS,
+            params: {
+              querytext: `'${query.replace(/'/g, "''")}'`,
+              ...(from !== undefined && { startRow: from }),
+              ...(size !== undefined && { rowLimit: size }),
+            },
+          }
+        );
         return response.data;
       },
     },
@@ -238,8 +247,7 @@ export const SharepointServer: ConnectorSpec = {
           path: string;
           body?: unknown;
         };
-        const { siteUrl } = ctx.config as { siteUrl: string };
-        const url = `${normalizeUrl(siteUrl)}/${path}`;
+        const url = `${getBaseUrl(ctx)}/${path}`;
         ctx.log.debug(`SharePoint Server callRestApi ${method} ${url}`);
         const response = await ctx.client.request({
           method,
@@ -256,6 +264,8 @@ export const SharepointServer: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'SharePoint Server connector — usage guidance for LLM agents.',
@@ -300,10 +310,12 @@ export const SharepointServer: ConnectorSpec = {
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Server test handler');
       try {
-        const { siteUrl } = ctx.config as { siteUrl: string };
-        const response = await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web/title`, {
-          headers: ODATA_HEADERS,
-        });
+        const response = await ctx.client.get(
+          `${getBaseUrl(ctx)}${SHAREPOINT_API_PREFIX}/web/title`,
+          {
+            headers: ODATA_HEADERS,
+          }
+        );
         const title = response.data?.value ?? 'Unknown';
         return {
           ok: true,

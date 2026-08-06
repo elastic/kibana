@@ -17,7 +17,11 @@ import {
   XSOARRunActionParamsSchema,
   XSOARRunActionResponseSchema,
 } from '@kbn/connector-schemas/xsoar';
-import { connectorsSpecs } from '@kbn/connector-specs';
+import {
+  connectorsSpecs,
+  GENERIC_REQUEST_SUB_ACTION,
+  getGenericRequestInputSchema,
+} from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
 import { FetcherConfigSchema, KibanaHttpMethodSchema, KibanaStepMetaSchema } from '@kbn/workflows';
@@ -132,12 +136,26 @@ import {
 export const ConnectorSpecsInputSchemas = new Map<string, Record<string, z.ZodSchema>>(
   Object.values(connectorsSpecs).map((connectorSpec) => [
     connectorSpec.metadata.id,
-    Object.fromEntries(
-      Object.entries(connectorSpec.actions).map(([actionName, action]) => [
-        actionName,
-        action.input,
-      ])
-    ),
+    {
+      ...Object.fromEntries(
+        Object.entries(connectorSpec.actions).map(([actionName, action]) => [
+          actionName,
+          action.input,
+        ])
+      ),
+      // Every v2 connector gets the framework-synthesized generic request action
+      // (see create_connector_from_spec.ts) unless it opts out, so
+      // `{connector}.request` gets typed authoring support instead of the
+      // passthrough fallback. Connectors without a base URL only accept an
+      // absolute `url` (no `path`).
+      ...(connectorSpec.disableGenericRequest
+        ? {}
+        : {
+            [GENERIC_REQUEST_SUB_ACTION]: getGenericRequestInputSchema(
+              Boolean(connectorSpec.getBaseUrl)
+            ),
+          }),
+    },
   ])
 );
 

@@ -23,6 +23,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The version segment stays in paths.
+const getBaseUrl = (): string => 'https://otx.alienvault.com';
+const OTX_API_V1 = `${getBaseUrl()}/api/v1`;
+
 export const AlienVaultOTXConnector: ConnectorSpec = {
   metadata: {
     id: '.alienvault-otx',
@@ -63,7 +68,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
         const typedInput = input as { indicatorType: string; indicator: string; section?: string };
         const section = typedInput.section || 'general';
         const response = await ctx.client.get(
-          `https://otx.alienvault.com/api/v1/indicators/${typedInput.indicatorType}/${typedInput.indicator}/${section}`
+          `${OTX_API_V1}/indicators/${typedInput.indicatorType}/${typedInput.indicator}/${section}`
         );
         return {
           indicator: typedInput.indicator,
@@ -91,16 +96,13 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { query?: string; page?: number; limit?: number };
-        const response = await ctx.client.get(
-          'https://otx.alienvault.com/api/v1/pulses/subscribed',
-          {
-            params: {
-              ...(typedInput.query && { q: typedInput.query }),
-              page: typedInput.page || 1,
-              limit: typedInput.limit || 20,
-            },
-          }
-        );
+        const response = await ctx.client.get(`${OTX_API_V1}/pulses/subscribed`, {
+          params: {
+            ...(typedInput.query && { q: typedInput.query }),
+            page: typedInput.page || 1,
+            limit: typedInput.limit || 20,
+          },
+        });
         return {
           count: response.data.count,
           results: response.data.results,
@@ -118,9 +120,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { pulseId: string };
-        const response = await ctx.client.get(
-          `https://otx.alienvault.com/api/v1/pulses/${typedInput.pulseId}`
-        );
+        const response = await ctx.client.get(`${OTX_API_V1}/pulses/${typedInput.pulseId}`);
         return {
           id: response.data.id,
           name: response.data.name,
@@ -156,7 +156,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { indicatorType: string; indicator: string };
         const response = await ctx.client.get(
-          `https://otx.alienvault.com/api/v1/indicators/${typedInput.indicatorType}/${typedInput.indicator}/pulses`
+          `${OTX_API_V1}/indicators/${typedInput.indicatorType}/${typedInput.indicator}/pulses`
         );
         return {
           indicator: typedInput.indicator,
@@ -167,10 +167,12 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
       try {
-        await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
+        await ctx.client.get(`${OTX_API_V1}/pulses/subscribed`, {
           params: { limit: 1 },
         });
         return {

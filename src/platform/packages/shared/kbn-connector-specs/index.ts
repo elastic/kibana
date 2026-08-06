@@ -25,6 +25,23 @@ export {
 export { getConnectorSpec } from './src/get_connector_spec';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export {
+  GENERIC_REQUEST_SUB_ACTION,
+  GENERIC_REQUEST_METHODS,
+  DEFAULT_GENERIC_REQUEST_DESCRIPTION,
+  GenericRequestInputSchema,
+  GenericRequestUrlOnlyInputSchema,
+  getGenericRequestInputSchema,
+  GenericRequestOutputSchema,
+  buildGenericRequestHandler,
+  resolveGenericRequestUrl,
+} from './src/generic_request';
+export type {
+  GetBaseUrl,
+  GenericRequestInput,
+  GenericRequestMethod,
+  GenericRequestOutput,
+} from './src/generic_request';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,

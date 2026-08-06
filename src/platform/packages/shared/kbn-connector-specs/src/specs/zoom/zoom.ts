@@ -74,7 +74,11 @@ import {
   pickUserProfile,
 } from './types';
 
-const ZOOM_API_BASE = 'https://api.zoom.us/v2';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v2` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://api.zoom.us';
+const ZOOM_API_V2 = `${getBaseUrl()}/v2`;
 
 /**
  * Zoom UUIDs that begin with `/` or contain `//` must be double-encoded
@@ -131,7 +135,7 @@ export const Zoom: ConnectorSpec = {
       output: ZoomUserProfileSchema,
       handler: async (ctx) => {
         ctx.log.debug('Zoom whoAmI — fetching /users/me');
-        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
+        const { data } = await ctx.client.get(`${ZOOM_API_V2}/users/me`);
         return pickUserProfile(data);
       },
     },
@@ -153,7 +157,7 @@ export const Zoom: ConnectorSpec = {
         );
 
         const response = await ctx.client.get(
-          `${ZOOM_API_BASE}/users/${encodeURIComponent(typedInput.userId)}/meetings`,
+          `${ZOOM_API_V2}/users/${encodeURIComponent(typedInput.userId)}/meetings`,
           {
             params: {
               type: typedInput.type,
@@ -204,7 +208,7 @@ export const Zoom: ConnectorSpec = {
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting meeting details for ${typedInput.meetingId}`);
 
-        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}`);
+        const { data } = await ctx.client.get(`${ZOOM_API_V2}/meetings/${encodedId}`);
         return {
           uuid: data.uuid,
           id: data.id,
@@ -245,7 +249,7 @@ export const Zoom: ConnectorSpec = {
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting past meeting details for ${typedInput.meetingId}`);
 
-        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/past_meetings/${encodedId}`);
+        const { data } = await ctx.client.get(`${ZOOM_API_V2}/past_meetings/${encodedId}`);
         return {
           uuid: data.uuid,
           id: data.id,
@@ -280,7 +284,7 @@ export const Zoom: ConnectorSpec = {
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting recordings for meeting ${typedInput.meetingId}`);
 
-        const { data } = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}/recordings`);
+        const { data } = await ctx.client.get(`${ZOOM_API_V2}/meetings/${encodedId}/recordings`);
         return {
           topic: data.topic,
           start_time: data.start_time,
@@ -315,7 +319,7 @@ export const Zoom: ConnectorSpec = {
         ctx.log.debug(`Zoom listing recordings for user ${typedInput.userId}`);
 
         const { data } = await ctx.client.get(
-          `${ZOOM_API_BASE}/users/${encodeURIComponent(typedInput.userId)}/recordings`,
+          `${ZOOM_API_V2}/users/${encodeURIComponent(typedInput.userId)}/recordings`,
           {
             params: {
               ...(typedInput.from && { from: typedInput.from }),
@@ -389,7 +393,7 @@ export const Zoom: ConnectorSpec = {
         ctx.log.debug(`Zoom listing participants for past meeting ${typedInput.meetingId}`);
 
         const { data } = await ctx.client.get(
-          `${ZOOM_API_BASE}/past_meetings/${encodedId}/participants`,
+          `${ZOOM_API_V2}/past_meetings/${encodedId}/participants`,
           {
             params: {
               ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
@@ -422,16 +426,13 @@ export const Zoom: ConnectorSpec = {
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom listing registrants for meeting ${typedInput.meetingId}`);
 
-        const { data } = await ctx.client.get(
-          `${ZOOM_API_BASE}/meetings/${encodedId}/registrants`,
-          {
-            params: {
-              ...(typedInput.status && { status: typedInput.status }),
-              ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
-              ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
-            },
-          }
-        );
+        const { data } = await ctx.client.get(`${ZOOM_API_V2}/meetings/${encodedId}/registrants`, {
+          params: {
+            ...(typedInput.status && { status: typedInput.status }),
+            ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
+            ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
+          },
+        });
         return {
           page_size: data.page_size,
           next_page_token: data.next_page_token,
@@ -441,6 +442,8 @@ export const Zoom: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'Recordings — two strategies:',
@@ -459,7 +462,7 @@ export const Zoom: ConnectorSpec = {
       ctx.log.debug('Zoom test handler — checking /users/me');
 
       try {
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
+        const response = await ctx.client.get(`${ZOOM_API_V2}/users/me`);
         const displayName =
           `${response.data.first_name ?? ''} ${response.data.last_name ?? ''}`.trim() ||
           response.data.email ||

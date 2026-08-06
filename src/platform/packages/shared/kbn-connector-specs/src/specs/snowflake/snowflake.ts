@@ -71,6 +71,11 @@ const SNOWFLAKE_SQL_API_PATH = '/api/v2/statements';
 const SNOWFLAKE_REST_API_V2 = '/api/v2';
 const SNOWFLAKE_USER_AGENT = 'Kibana-Snowflake-Connector/1.0';
 
+const getBaseUrl = (ctx: ActionContext): string => {
+  const { accountUrl } = ctx.config as { accountUrl: string };
+  return normalizeUrl(accountUrl);
+};
+
 const buildListParams = (input: {
   like?: string;
   startsWith?: string;
@@ -137,13 +142,11 @@ const submitStatement = async (
   input: ExecuteStatementInput | RunQueryInput
 ): Promise<unknown> => {
   const {
-    accountUrl,
     warehouse: defaultWarehouse,
     database: defaultDatabase,
     defaultSchema,
     role: defaultRole,
   } = ctx.config as {
-    accountUrl: string;
     warehouse?: string;
     database?: string;
     defaultSchema?: string;
@@ -180,7 +183,7 @@ const submitStatement = async (
     };
   }
 
-  const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
+  const url = `${getBaseUrl(ctx)}${SNOWFLAKE_SQL_API_PATH}`;
 
   const response = await ctx.client.post(url, body, {
     params: { async: true },
@@ -391,12 +394,10 @@ export const Snowflake: ConnectorSpec = {
         'Check the status of a previously submitted SQL statement and retrieve results if execution is complete. Returns HTTP 200 with a ResultSet when finished, or HTTP 202 with a QueryStatus if still running. Use the statementHandle returned by runQuery. For large result sets, use the partition parameter to page through data.',
       input: GetStatementStatusInputSchema,
       handler: async (ctx, input: GetStatementStatusInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
-
         const params: Record<string, unknown> = {};
         if (input.partition !== undefined) params.partition = input.partition;
 
-        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}`;
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}`;
 
         const response = await ctx.client.get(url, {
           params,
@@ -413,11 +414,7 @@ export const Snowflake: ConnectorSpec = {
         'Cancel a running SQL statement in Snowflake. Use the statementHandle returned by runQuery. Returns a confirmation with the cancellation status. Only works on statements that are still executing.',
       input: CancelStatementInputSchema,
       handler: async (ctx, input: CancelStatementInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
-
-        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}/${
-          input.statementHandle
-        }/cancel`;
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}/cancel`;
 
         const response = await ctx.client.post(
           url,
@@ -437,11 +434,10 @@ export const Snowflake: ConnectorSpec = {
         'List Snowflake databases visible to the connector\'s role. Returns JSON objects (not SQL row arrays) with name, kind, owner, comment, created_on, and other metadata. Does not require a warehouse. Use this as the starting point for data discovery when the target database is unknown. Supports case-insensitive name filtering via "like" (SQL wildcards) and case-sensitive prefix filtering via "startsWith".',
       input: ListDatabasesInputSchema,
       handler: async (ctx, input: ListDatabasesInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
         if (input.history !== undefined) params.history = input.history;
 
-        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_REST_API_V2}/databases`;
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases`;
         const response = await ctx.client.get(url, { params });
         return response.data;
       },
@@ -453,12 +449,11 @@ export const Snowflake: ConnectorSpec = {
         'List schemas inside a Snowflake database. Returns JSON objects with name, database_name, owner, comment, and other metadata. Does not require a warehouse. Use after listDatabases to narrow down the target before listing tables or views. Database name is case-sensitive and must match exactly what listDatabases returned.',
       input: ListSchemasInputSchema,
       handler: async (ctx, input: ListSchemasInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(input.database)}/schemas`;
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+          input.database
+        )}/schemas`;
         const response = await ctx.client.get(url, { params });
         return response.data;
       },
@@ -470,13 +465,10 @@ export const Snowflake: ConnectorSpec = {
         'List tables inside a Snowflake schema. Returns JSON objects with name, database_name, schema_name, kind, rows, bytes, cluster_by, comment, and other metadata. Does not require a warehouse. Use after listSchemas to find the specific table to describe or query. Database and schema names are case-sensitive. Optional: "history" to include dropped tables.',
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
         if (input.history !== undefined) params.history = input.history;
 
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/tables`;
         const response = await ctx.client.get(url, { params });
@@ -490,12 +482,9 @@ export const Snowflake: ConnectorSpec = {
         "List views inside a Snowflake schema. Returns JSON objects with name, database_name, schema_name, owner, comment, and other metadata. Does not require a warehouse. Database and schema names are case-sensitive. Use describeView to retrieve a view's columns and underlying query text.",
       input: ListViewsInputSchema,
       handler: async (ctx, input: ListViewsInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/views`;
         const response = await ctx.client.get(url, { params });
@@ -509,11 +498,7 @@ export const Snowflake: ConnectorSpec = {
         'Get the full definition of a Snowflake table, including columns (name, type, nullable, default, comment), clustering keys, row count, size in bytes, owner, and other metadata. Returns a clean JSON Table object (not SQL row arrays). Does not require a warehouse. Use this before runQuery to build correct SELECT or JOIN queries against the table. Database, schema, and table names are all case-sensitive.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
-
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/tables/${encodeURIComponent(input.name)}`;
         const response = await ctx.client.get(url);
@@ -527,11 +512,7 @@ export const Snowflake: ConnectorSpec = {
         'Get the full definition of a Snowflake view, including columns, the underlying SELECT query text, owner, comment, and other metadata. Returns a clean JSON View object. Does not require a warehouse. Use to understand what a view exposes before querying it or building dependent logic. Database, schema, and view names are all case-sensitive.',
       input: DescribeViewInputSchema,
       handler: async (ctx, input: DescribeViewInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
-
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/views/${encodeURIComponent(input.name)}`;
         const response = await ctx.client.get(url);
@@ -545,12 +526,9 @@ export const Snowflake: ConnectorSpec = {
         'List Cortex Search services defined in a Snowflake schema. Cortex Search provides semantic + lexical search over indexed text columns. Returns JSON objects with name, database_name, schema_name, target_lag, warehouse, comment, and the underlying source query. Use before cortexSearch to discover what search services are available. Database and schema names are case-sensitive.',
       input: ListCortexSearchServicesInputSchema,
       handler: async (ctx, input: ListCortexSearchServicesInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/cortex-search-services`;
         const response = await ctx.client.get(url, { params });
@@ -564,16 +542,12 @@ export const Snowflake: ConnectorSpec = {
         'Run a natural-language query against a Snowflake Cortex Search service. Cortex Search performs hybrid semantic + lexical matching over the service\'s indexed search column and returns ranked results as JSON. Use for unstructured text retrieval (support docs, product catalogs, chat logs) — much better than LIKE or CONTAINS in SQL. Supports additional attribute filtering via the "filter" DSL (@eq, @contains, @gte, @lte, @and, @or, @not). Example filter: {"@and": [{"@eq": {"REGION": "US"}}, {"@gte": {"YEAR": 2024}}]}. Prefer limit<=20 to keep LLM context small.',
       input: CortexSearchInputSchema,
       handler: async (ctx, input: CortexSearchInput) => {
-        const { accountUrl } = ctx.config as { accountUrl: string };
-
         const body: Record<string, unknown> = { query: input.query };
         if (input.columns !== undefined) body.columns = input.columns;
         if (input.filter !== undefined) body.filter = input.filter;
         if (input.limit !== undefined) body.limit = input.limit;
 
-        const url = `${normalizeUrl(
-          accountUrl
-        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${getBaseUrl(ctx)}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/cortex-search-services/${encodeURIComponent(
           input.serviceName
@@ -590,8 +564,7 @@ export const Snowflake: ConnectorSpec = {
         'Verifies connection to Snowflake by executing SELECT CURRENT_VERSION() and returning the result.',
     }),
     handler: async (ctx) => {
-      const { accountUrl } = ctx.config as { accountUrl: string };
-      const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
+      const url = `${getBaseUrl(ctx)}${SNOWFLAKE_SQL_API_PATH}`;
 
       const response = await ctx.client.post(
         url,
@@ -616,6 +589,8 @@ export const Snowflake: ConnectorSpec = {
       };
     },
   },
+
+  getBaseUrl,
 
   skill: [
     '## Snowflake Connector',

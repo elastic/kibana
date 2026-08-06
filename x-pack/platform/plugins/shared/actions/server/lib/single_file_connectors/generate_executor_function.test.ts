@@ -10,6 +10,7 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { actionsConfigMock } from '../../actions_config.mock';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 describe('generateExecutorFunction', () => {
@@ -19,6 +20,7 @@ describe('generateExecutorFunction', () => {
   let mockGetAxiosInstanceWithAuth: jest.MockedFunction<GetAxiosInstanceWithAuthFn>;
   let mockAxiosInstance: object;
   let mockHandler: jest.Mock;
+  const configurationUtilities = actionsConfigMock.create();
 
   const makeExecOptions = (params: Record<string, unknown>) =>
     ({
@@ -59,6 +61,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -72,6 +75,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const subActionParams = { message: 'hello', count: 3 };
@@ -87,14 +91,42 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
       await executor({ ...opts, config, secrets });
 
       expect(mockHandler).toHaveBeenCalledWith(
-        { log: logger, client: mockAxiosInstance, config, secrets },
+        {
+          log: logger,
+          client: mockAxiosInstance,
+          config,
+          secrets,
+          ensureUriAllowed: expect.any(Function),
+        },
         {}
+      );
+    });
+
+    it('exposes an ensureUriAllowed helper that delegates to the allowedHosts allowlist', async () => {
+      let capturedEnsureUriAllowed: ((uri: string) => void) | undefined;
+      mockHandler.mockImplementation((ctx) => {
+        capturedEnsureUriAllowed = ctx.ensureUriAllowed;
+        return { result: 'ok' };
+      });
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      capturedEnsureUriAllowed?.('https://allowed.example.com/x');
+      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+        'https://allowed.example.com/x'
       );
     });
 
@@ -104,6 +136,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -119,6 +152,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -138,6 +172,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       await executor({
@@ -164,6 +199,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       await executor(
@@ -187,6 +223,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       await expect(
@@ -202,6 +239,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       await expect(
@@ -219,6 +257,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -242,6 +281,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -273,6 +313,7 @@ describe('generateExecutorFunction', () => {
           },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -301,6 +342,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -324,6 +366,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
@@ -337,6 +380,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -356,6 +400,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       await expect(
@@ -407,6 +452,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -433,6 +479,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result = await executor(
@@ -460,6 +507,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        configurationUtilities,
       });
 
       const result1 = await executor(

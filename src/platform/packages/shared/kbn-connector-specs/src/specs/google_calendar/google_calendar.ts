@@ -22,8 +22,11 @@ import type {
   ListEventsInput,
   FreeBusyInput,
 } from './types';
-// Google Calendar API constants
-const GOOGLE_CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/calendar/v3` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://www.googleapis.com';
+const GOOGLE_CALENDAR_API_V3 = `${getBaseUrl()}/calendar/v3`;
 const DEFAULT_MAX_RESULTS = 50;
 const MAX_RESULTS_LIMIT = 2500;
 
@@ -107,7 +110,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(
-            `${GOOGLE_CALENDAR_API_BASE}/calendars/${calendarId}/events`,
+            `${GOOGLE_CALENDAR_API_V3}/calendars/${calendarId}/events`,
             { params }
           );
 
@@ -130,7 +133,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(
-            `${GOOGLE_CALENDAR_API_BASE}/calendars/${calendarId}/events/${eventId}`
+            `${GOOGLE_CALENDAR_API_V3}/calendars/${calendarId}/events/${eventId}`
           );
 
           return response.data;
@@ -153,10 +156,9 @@ export const GoogleCalendar: ConnectorSpec = {
         }
 
         try {
-          const response = await ctx.client.get(
-            `${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`,
-            { params }
-          );
+          const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_V3}/users/me/calendarList`, {
+            params,
+          });
 
           return response.data;
         } catch (error: unknown) {
@@ -191,7 +193,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(
-            `${GOOGLE_CALENDAR_API_BASE}/calendars/${calendarId}/events`,
+            `${GOOGLE_CALENDAR_API_V3}/calendars/${calendarId}/events`,
             { params }
           );
 
@@ -220,7 +222,7 @@ export const GoogleCalendar: ConnectorSpec = {
         }
 
         try {
-          const response = await ctx.client.post(`${GOOGLE_CALENDAR_API_BASE}/freeBusy`, body);
+          const response = await ctx.client.post(`${GOOGLE_CALENDAR_API_V3}/freeBusy`, body);
 
           return response.data;
         } catch (error: unknown) {
@@ -240,13 +242,15 @@ export const GoogleCalendar: ConnectorSpec = {
     'Availability: Prefer freeBusy over listEvents when you only need to know whether someone is free or busy — it is more token-efficient.',
   ].join('\n'),
 
+  getBaseUrl,
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.googleCalendar.test.description', {
       defaultMessage: 'Verifies Google Calendar connection by fetching calendar list',
     }),
     handler: async (ctx) => {
       try {
-        const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
+        const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_V3}/users/me/calendarList`, {
           params: {
             maxResults: 1,
           },

@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Figma from './types';
-const FIGMA_API_BASE = 'https://api.figma.com';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v1` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://api.figma.com';
+const FIGMA_API_BASE = getBaseUrl();
 
 const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
 const FILE_PATH_PREFIX_SET: Set<string> = new Set(FILE_PATH_PREFIXES);
@@ -240,6 +244,8 @@ export const FigmaConnector: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'Use whoAmI to confirm which Figma account is connected before performing other actions.',

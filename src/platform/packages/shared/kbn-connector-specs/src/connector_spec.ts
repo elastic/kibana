@@ -26,6 +26,7 @@ import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { GetBaseUrl } from './generic_request';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -237,6 +238,16 @@ export interface ActionContext {
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Validates that a request target URL is permitted by the Kibana Actions
+   * `allowedHosts` allowlist, throwing when it is not. Provided by the executor
+   * so handlers that build request URLs from user-controlled input (e.g. the
+   * framework-synthesized generic `request` action) can guard against sending
+   * the connector's credentials to arbitrary hosts (SSRF / credential
+   * exfiltration). Optional so specs can be exercised in isolation without the
+   * full Actions plumbing.
+   */
+  ensureUriAllowed?: (uri: string) => void;
 }
 
 // ============================================================================
@@ -327,6 +338,34 @@ export interface ConnectorSpec {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
+
+  /**
+   * Resolves the connector's API base URL from the action context. Used by the
+   * framework-synthesized `request` action to support relative `path` requests,
+   * and can be reused by the connector's own action handlers as the single
+   * source of truth for the base URL. Leave the API version segment out of the
+   * base and keep it in per-action paths (e.g. base `https://api.zoom.us`, path
+   * `/v2/users/me`).
+   *
+   * Optional: multi-host connectors may omit it, in which case their `request`
+   * action only accepts an absolute `url`.
+   */
+  getBaseUrl?: GetBaseUrl;
+
+  /**
+   * Opt out of the framework-synthesized generic `request` action. Set this for
+   * connectors that do not expose a plain HTTP/REST surface (e.g. MCP connectors
+   * that only speak JSON-RPC), where a raw method/path/url request is
+   * meaningless.
+   */
+  disableGenericRequest?: boolean;
+
+  /**
+   * Overrides the human-readable description of the synthesized generic `request`
+   * action (surfaced in authoring UIs). Defaults to
+   * {@link DEFAULT_GENERIC_REQUEST_DESCRIPTION} when omitted.
+   */
+  genericRequestDescription?: string;
 
   test?: ConnectorTest;
 

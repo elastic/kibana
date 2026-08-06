@@ -10,8 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-const buildBaseUrl = (ctx: ActionContext): string =>
-  `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
+
+const getBaseUrl = (ctx: ActionContext): string =>
+  `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com`;
+
+const ZENDESK_API_V2 = '/api/v2';
 
 export const ZendeskConnector: ConnectorSpec = {
   metadata: {
@@ -115,7 +118,7 @@ export const ZendeskConnector: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = `${getBaseUrl(ctx)}${ZENDESK_API_V2}`;
         const params: Record<string, string | number | undefined> = {
           query: input.query,
           ...(input.sortBy && { sort_by: input.sortBy }),
@@ -150,7 +153,7 @@ export const ZendeskConnector: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = `${getBaseUrl(ctx)}${ZENDESK_API_V2}`;
         const params: Record<string, string | number | undefined> = {};
         if (input.page !== undefined && input.page !== null) params.page = input.page;
         if (input.perPage !== undefined && input.perPage !== null) params.per_page = input.perPage;
@@ -170,7 +173,7 @@ export const ZendeskConnector: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = `${getBaseUrl(ctx)}${ZENDESK_API_V2}`;
         const response = await ctx.client.get(`${baseUrl}/tickets/${input.ticketId}.json`, {
           params: { include: 'comment_count' },
         });
@@ -206,7 +209,7 @@ export const ZendeskConnector: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = `${getBaseUrl(ctx)}${ZENDESK_API_V2}`;
         const params: Record<string, string | number | boolean | undefined> = {};
         if (input.page !== undefined && input.page !== null) params.page = input.page;
         if (input.perPage !== undefined && input.perPage !== null) params.per_page = input.perPage;
@@ -227,12 +230,14 @@ export const ZendeskConnector: ConnectorSpec = {
         'Get the currently authenticated Zendesk user. Returns the user record for the API credentials in use. Useful for verifying which account is connected or resolving your own agent/user ID.',
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
-        const baseUrl = buildBaseUrl(ctx);
+        const baseUrl = `${getBaseUrl(ctx)}${ZENDESK_API_V2}`;
         const response = await ctx.client.get(`${baseUrl}/users/me.json`);
         return response.data;
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'Zendesk connector — usage guidance for LLMs.',
@@ -256,7 +261,7 @@ export const ZendeskConnector: ConnectorSpec = {
       defaultMessage: 'Verifies Zendesk connection by listing current user',
     }),
     handler: async (ctx) => {
-      const baseUrl = buildBaseUrl(ctx);
+      const baseUrl = `${getBaseUrl(ctx)}${ZENDESK_API_V2}`;
       try {
         const response = await ctx.client.get(`${baseUrl}/users/me.json`);
         const user = response.data?.user;

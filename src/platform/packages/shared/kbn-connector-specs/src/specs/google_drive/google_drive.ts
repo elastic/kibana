@@ -15,8 +15,11 @@ import {
   getEstimatedBase64OutputBytes,
 } from '../../connector_utils';
 import type { ConnectorSpec } from '../../connector_spec';
-// Google Drive API constants
-const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/drive/v3` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://www.googleapis.com';
+const GOOGLE_DRIVE_API_V3 = `${getBaseUrl()}/drive/v3`;
 const DEFAULT_PAGE_SIZE = 250;
 const MAX_PAGE_SIZE = 1000;
 const DEFAULT_FOLDER_ID = 'root';
@@ -223,7 +226,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         }
 
         try {
-          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_V3}/files`, {
             params,
           });
 
@@ -302,7 +305,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         }
 
         try {
-          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files`, {
+          const response = await ctx.client.get(`${GOOGLE_DRIVE_API_V3}/files`, {
             params,
           });
 
@@ -356,7 +359,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         try {
           // First, get file metadata to determine if it's a Google Workspace document
           const metadataResponse = await ctx.client.get(
-            `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}`,
+            `${GOOGLE_DRIVE_API_V3}/files/${typedInput.fileId}`,
             {
               params: {
                 fields: 'id, name, mimeType, size',
@@ -379,7 +382,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
               typedInput.responseType
             );
             contentResponse = await ctx.client.get(
-              `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}/export`,
+              `${GOOGLE_DRIVE_API_V3}/files/${typedInput.fileId}/export`,
               {
                 params: {
                   mimeType: resolvedMimeType,
@@ -392,7 +395,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             // fall back to base64 for binary types even when text was requested.
             useTextResponse &&= !!fileMetadata.mimeType?.startsWith('text/');
             contentResponse = await ctx.client.get(
-              `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}`,
+              `${GOOGLE_DRIVE_API_V3}/files/${typedInput.fileId}`,
               {
                 params: {
                   alt: 'media',
@@ -479,7 +482,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
           const results = await Promise.all(
             typedInput.fileIds.map(async (fileId) => {
               try {
-                const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}`, {
+                const response = await ctx.client.get(`${GOOGLE_DRIVE_API_V3}/files/${fileId}`, {
                   params: { fields: metadataFields, supportsAllDrives: true },
                 });
                 return response.data;
@@ -531,6 +534,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
     'For reading document content, prefer responseType "text" to avoid oversized base64 payloads.',
   ].join('\n'),
 
+  getBaseUrl,
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.googleDrive.test.description', {
       defaultMessage: 'Verifies Google Drive connection by fetching user information',
@@ -538,7 +543,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
       try {
-        const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
+        const response = await ctx.client.get(`${GOOGLE_DRIVE_API_V3}/about`, {
           params: {
             fields: 'user',
           },

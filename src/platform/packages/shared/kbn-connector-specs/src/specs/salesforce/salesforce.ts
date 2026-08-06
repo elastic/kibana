@@ -8,11 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 const SALESFORCE_API_VERSION = 'v66.0';
 
 /** Derive instance base URL from the full token URL (strip /services/oauth2/token and any path). */
-function getBaseUrl(tokenUrl: string | undefined): string {
+function resolveBaseUrlFromTokenUrl(tokenUrl: string | undefined): string {
   if (!tokenUrl || tokenUrl.trim() === '') {
     throw new Error(
       'Salesforce connector is not configured: tokenUrl (OAuth token endpoint) is required.'
@@ -23,6 +23,15 @@ function getBaseUrl(tokenUrl: string | undefined): string {
     : tokenUrl;
   return base.replace(/\/+$/, '');
 }
+
+/**
+ * Base URL for the framework-synthesized `request` action and the single source
+ * of truth reused by the handlers below. Salesforce derives the instance origin
+ * from the OAuth token URL in secrets; the `/services/data/<version>` API prefix
+ * stays in the per-action paths.
+ */
+const getBaseUrl = (ctx: ActionContext): string =>
+  resolveBaseUrlFromTokenUrl(ctx.secrets?.tokenUrl as string | undefined);
 
 /** Resolve Salesforce nextRecordsUrl (relative path) to a full URL. */
 function createPaginationUrl(baseUrl: string, nextRecordsUrl: string): string {
@@ -100,7 +109,7 @@ export const SalesforceConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { soql: string; nextRecordsUrl?: string };
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const baseUrl = getBaseUrl(ctx);
         if (typedInput.nextRecordsUrl) {
           const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
           const response = await ctx.client.get(url, {});
@@ -133,7 +142,7 @@ export const SalesforceConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string; recordId: string };
         validateSobjectName(typedInput.sobjectName);
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const baseUrl = getBaseUrl(ctx);
         const sobjectSegment = encodeURIComponent(typedInput.sobjectName.trim());
         const recordIdSegment = encodeURIComponent(typedInput.recordId);
         const response = await ctx.client.get(
@@ -162,7 +171,7 @@ export const SalesforceConnector: ConnectorSpec = {
           limit: number;
           nextRecordsUrl?: string;
         };
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const baseUrl = getBaseUrl(ctx);
         if (typedInput.nextRecordsUrl) {
           const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
           const response = await ctx.client.get(url, {});
@@ -202,7 +211,7 @@ export const SalesforceConnector: ConnectorSpec = {
           returning: string;
           nextRecordsUrl?: string;
         };
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string);
+        const baseUrl = getBaseUrl(ctx);
         if (typedInput.nextRecordsUrl) {
           const url = createPaginationUrl(baseUrl, typedInput.nextRecordsUrl);
           const response = await ctx.client.get(url, {});
@@ -233,7 +242,7 @@ export const SalesforceConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { sobjectName: string };
         validateSobjectName(typedInput.sobjectName);
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const baseUrl = getBaseUrl(ctx);
         const sobjectSegment = encodeURIComponent(typedInput.sobjectName.trim());
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/${sobjectSegment}/describe`,
@@ -258,7 +267,7 @@ export const SalesforceConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input) => {
         const typedInput = input as { contentVersionId: string };
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const baseUrl = getBaseUrl(ctx);
         const id = encodeURIComponent(typedInput.contentVersionId.trim());
         const url = `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/sobjects/ContentVersion/${id}/VersionData`;
         const response = await ctx.client.get(url, { responseType: 'arraybuffer' });
@@ -271,6 +280,8 @@ export const SalesforceConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.salesforce.test.description', {
       defaultMessage: 'Verifies Salesforce connection by running a simple query',
@@ -279,7 +290,7 @@ export const SalesforceConnector: ConnectorSpec = {
       ctx.log.debug('Salesforce test handler');
 
       try {
-        const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        const baseUrl = getBaseUrl(ctx);
         await ctx.client.get(`${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`, {
           params: { q: 'SELECT Id FROM User LIMIT 1' },
         });

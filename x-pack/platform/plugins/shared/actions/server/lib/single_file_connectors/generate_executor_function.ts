@@ -11,6 +11,7 @@ import {
   getFinitePositiveNumber,
   getHeaderValue,
 } from '@kbn/connector-specs';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -65,9 +66,11 @@ const getErrorMeta = ({
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  configurationUtilities,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  configurationUtilities: ActionsConfigurationUtilities;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -112,6 +115,10 @@ export const generateExecutorFunction = ({
       client: axiosInstance,
       secrets,
       config,
+      // Handlers that build request URLs from user-controlled input use this to
+      // enforce the Actions `allowedHosts` allowlist before sending the
+      // authenticated client at a host (e.g. the generic `request` action).
+      ensureUriAllowed: (uri: string) => configurationUtilities.ensureUriAllowed(uri),
     };
 
     try {

@@ -23,7 +23,11 @@ import {
   RunQueryInputSchema,
 } from './types';
 
-const BIGQUERY_API_BASE = 'https://bigquery.googleapis.com/bigquery/v2';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v2` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://bigquery.googleapis.com';
+const BIGQUERY_API_V2 = `${getBaseUrl()}/bigquery/v2`;
 const DEFAULT_LOCATION = 'US';
 const DEFAULT_MAX_RESULTS = 1000;
 const BIGQUERY_USER_AGENT = 'Kibana-BigQuery-Connector/1.0';
@@ -201,7 +205,7 @@ const submitQuery = async (
 
   try {
     const response = await ctx.client.post<BigQueryQueryResponse>(
-      `${BIGQUERY_API_BASE}/projects/${encodeURIComponent(projectId)}/queries`,
+      `${BIGQUERY_API_V2}/projects/${encodeURIComponent(projectId)}/queries`,
       body
     );
     return normalizeQueryResponse(response.data);
@@ -318,7 +322,7 @@ export const BigQuery: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get<BigQueryQueryResponse>(
-            `${BIGQUERY_API_BASE}/projects/${encodeURIComponent(
+            `${BIGQUERY_API_V2}/projects/${encodeURIComponent(
               projectId
             )}/queries/${encodeURIComponent(input.jobId)}`,
             { params }
@@ -344,7 +348,7 @@ export const BigQuery: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(
-            `${BIGQUERY_API_BASE}/projects/${encodeURIComponent(projectId)}/datasets`,
+            `${BIGQUERY_API_V2}/projects/${encodeURIComponent(projectId)}/datasets`,
             { params }
           );
           return response.data;
@@ -381,6 +385,8 @@ export const BigQuery: ConnectorSpec = {
       }
     },
   },
+
+  getBaseUrl,
 
   skill: [
     '## BigQuery Connector',

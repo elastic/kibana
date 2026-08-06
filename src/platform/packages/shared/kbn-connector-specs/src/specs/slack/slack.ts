@@ -52,7 +52,10 @@ import {
   type SlackWhoAmIInput,
 } from './types';
 
-const SLACK_API_BASE = 'https://slack.com/api';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below.
+const getBaseUrl = (): string => 'https://slack.com/api';
+const SLACK_API_BASE = getBaseUrl();
 
 const SLACK_RETRY_DEFAULT_BASE_DELAY_MS = 1000;
 const SLACK_RETRY_JITTER_MAX_MS = 250;
@@ -1100,6 +1103,8 @@ export const Slack: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {

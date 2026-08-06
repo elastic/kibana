@@ -22,7 +22,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
   SearchInputSchema,
   GetRecordInputSchema,
@@ -43,6 +43,14 @@ import type {
   GetAttachmentInput,
   DescribeTableInput,
 } from './types';
+
+const getBaseUrl = (ctx: ActionContext): string => {
+  const { instanceUrl } = ctx.config as { instanceUrl: string };
+  return instanceUrl;
+};
+
+const SERVICENOW_API_PREFIX = '/api/now';
+
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
@@ -108,8 +116,7 @@ export const ServicenowSearch: ConnectorSpec = {
       description: 'Search ServiceNow records using full-text search across a given table',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/${input.table}`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/${input.table}`;
         const limit = input.limit ?? 20;
 
         // GOTO123TEXTQUERY321 is ServiceNow's undocumented full-text search parameter
@@ -138,8 +145,9 @@ export const ServicenowSearch: ConnectorSpec = {
         'For knowledge articles (kb_knowledge table), request fields: sys_id,number,short_description,text,topic,category,author,sys_created_on,sys_updated_on,workflow_state,kb_knowledge_base,kb_category',
       input: GetRecordInputSchema,
       handler: async (ctx, input: GetRecordInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/${input.table}/${input.sysId}`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/${input.table}/${
+          input.sysId
+        }`;
 
         const response = await ctx.client.get(url, {
           params: {
@@ -157,8 +165,7 @@ export const ServicenowSearch: ConnectorSpec = {
       description: 'List records from a ServiceNow table with optional encoded query filter',
       input: ListRecordsInputSchema,
       handler: async (ctx, input: ListRecordsInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/${input.table}`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/${input.table}`;
         const limit = input.limit ?? 20;
 
         const response = await ctx.client.get(url, {
@@ -182,8 +189,7 @@ export const ServicenowSearch: ConnectorSpec = {
         'List available ServiceNow tables with their labels and descriptions. Use this to discover what tables exist in the instance before querying them.',
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/sys_db_object`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/sys_db_object`;
         const limit = input.limit ?? 50;
 
         const response = await ctx.client.get(url, {
@@ -208,8 +214,7 @@ export const ServicenowSearch: ConnectorSpec = {
         'List available ServiceNow knowledge bases with their titles and descriptions. Use this to discover what knowledge bases exist before searching for articles.',
       input: ListKnowledgeBasesInputSchema,
       handler: async (ctx, input: ListKnowledgeBasesInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/kb_knowledge_base`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/kb_knowledge_base`;
         const limit = input.limit ?? 20;
 
         const response = await ctx.client.get(url, {
@@ -233,8 +238,7 @@ export const ServicenowSearch: ConnectorSpec = {
         'Returns journal entries in chronological order. Call this after retrieving a record to understand its history.',
       input: GetCommentsInputSchema,
       handler: async (ctx, input: GetCommentsInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/sys_journal_field`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/sys_journal_field`;
         const limit = input.limit ?? 20;
 
         const response = await ctx.client.get(url, {
@@ -266,18 +270,18 @@ export const ServicenowSearch: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input: GetAttachmentInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
+        const baseUrl = getBaseUrl(ctx);
 
         // First get attachment metadata
         const metaResponse = await ctx.client.get(
-          `${instanceUrl}/api/now/attachment/${input.sysId}`,
+          `${baseUrl}${SERVICENOW_API_PREFIX}/attachment/${input.sysId}`,
           {}
         );
         const { file_name: fileName, content_type: contentType } = metaResponse.data.result;
 
         // Then download the content
         const contentResponse = await ctx.client.get(
-          `${instanceUrl}/api/now/attachment/${input.sysId}/file`,
+          `${baseUrl}${SERVICENOW_API_PREFIX}/attachment/${input.sysId}/file`,
           { responseType: 'arraybuffer' }
         );
         const buffer = Buffer.from(contentResponse.data);
@@ -298,10 +302,9 @@ export const ServicenowSearch: ConnectorSpec = {
         'querying it — for example, to know which fields to request or filter on.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
         // The /api/now/doc/table/schema endpoint returns the full flattened schema
         // including inherited fields from parent tables, and is accessible to non-admin users.
-        const url = `${instanceUrl}/api/now/doc/table/schema/${input.table}`;
+        const url = `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/doc/table/schema/${input.table}`;
 
         const response = await ctx.client.get(url, {});
 
@@ -309,6 +312,8 @@ export const ServicenowSearch: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'ServiceNow connector — cross-action usage guidance for LLMs.',
@@ -335,16 +340,18 @@ export const ServicenowSearch: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
         // Fetch the authenticated user's own record — readable by any authenticated user
         // regardless of role. Avoids relying on admin-only tables like sys_properties.
-        const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
-          params: {
-            sysparm_query: 'sys_created_on!=NULL',
-            sysparm_limit: 1,
-            sysparm_fields: 'sys_id',
-          },
-        });
+        const response = await ctx.client.get(
+          `${getBaseUrl(ctx)}${SERVICENOW_API_PREFIX}/table/sys_user`,
+          {
+            params: {
+              sysparm_query: 'sys_created_on!=NULL',
+              sysparm_limit: 1,
+              sysparm_fields: 'sys_id',
+            },
+          }
+        );
         const results = response.data?.result ?? [];
         if (results.length > 0) {
           return {

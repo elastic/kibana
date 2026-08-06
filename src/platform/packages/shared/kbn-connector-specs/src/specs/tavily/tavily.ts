@@ -71,6 +71,10 @@ export const TavilyConnector: ConnectorSpec = {
     fields: ['serverUrl'],
   },
 
+  // MCP connector: talks to an MCP server over JSON-RPC, so a generic HTTP
+  // request (method/path/url) is meaningless. Opt out of the synthesized action.
+  disableGenericRequest: true,
+
   actions: {
     tavilySearch: {
       isTool: true,

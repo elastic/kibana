@@ -227,15 +227,19 @@ const normalizeK8sError = (error: unknown): Error => {
   return error instanceof Error ? error : new Error(String(error));
 };
 
+const getBaseUrl = (ctx: ActionContext): string => {
+  const { apiUrl } = ctx.config as { apiUrl: string };
+  return apiUrl;
+};
+
 /** Central request helper: resolves the URL, applies headers, normalizes errors. */
 const k8sRequest = async (ctx: ActionContext, options: K8sRequestOptions): Promise<unknown> => {
   assertPathAllowed(options.path);
-  const { apiUrl } = ctx.config as { apiUrl: string };
   const client = ctx.client as AxiosInstance;
   try {
     const response = await client.request({
       method: options.method,
-      url: `${apiUrl}${options.path}`,
+      url: `${getBaseUrl(ctx)}${options.path}`,
       ...(options.params ? { params: options.params } : {}),
       ...(options.data !== undefined ? { data: options.data } : {}),
       ...(options.contentType ? { headers: { 'Content-Type': options.contentType } } : {}),
@@ -413,6 +417,11 @@ export const KubernetesConnector: ConnectorSpec = {
         }),
     })
   ),
+
+  // Kubernetes ships its own richer `request` action (with contentType and
+  // strategic-merge-patch handling), so opt out of the framework-synthesized
+  // generic request to avoid clashing with the reserved `request` key.
+  disableGenericRequest: true,
 
   actions: {
     request: {
@@ -697,6 +706,8 @@ export const KubernetesConnector: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'Kubernetes connector — usage guidance for LLMs.',

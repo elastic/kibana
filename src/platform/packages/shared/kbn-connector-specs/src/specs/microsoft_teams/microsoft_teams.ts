@@ -33,6 +33,11 @@ import type {
  */
 const userPath = (userId?: string): string => (userId ? `/users/${userId}` : '/me');
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The version segment stays in paths.
+const getBaseUrl = (): string => 'https://graph.microsoft.com';
+const GRAPH_API_V1 = `${getBaseUrl()}/v1.0`;
+
 const GraphCollectionOutputSchema = lazySchema(() =>
   z.object({
     value: z.array(z.any()).describe('Array of items returned from the API'),
@@ -186,14 +191,11 @@ export const MicrosoftTeams: ConnectorSpec = {
         }
         const base = userPath(input?.userId);
         ctx.log.debug('Microsoft Teams listing joined teams');
-        const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0${base}/joinedTeams`,
-          {
-            params: {
-              $select: 'id,displayName,description,isArchived,tenantId',
-            },
-          }
-        );
+        const response = await ctx.client.get(`${GRAPH_API_V1}${base}/joinedTeams`, {
+          params: {
+            $select: 'id,displayName,description,isArchived,tenantId',
+          },
+        });
         return response.data;
       },
     },
@@ -207,14 +209,11 @@ export const MicrosoftTeams: ConnectorSpec = {
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChannelsInput) => {
         ctx.log.debug(`Microsoft Teams listing channels for team ${input.teamId}`);
-        const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/teams/${input.teamId}/channels`,
-          {
-            params: {
-              $select: 'id,displayName,description,createdDateTime,membershipType,webUrl',
-            },
-          }
-        );
+        const response = await ctx.client.get(`${GRAPH_API_V1}/teams/${input.teamId}/channels`, {
+          params: {
+            $select: 'id,displayName,description,createdDateTime,membershipType,webUrl',
+          },
+        });
         return response.data;
       },
     },
@@ -231,7 +230,7 @@ export const MicrosoftTeams: ConnectorSpec = {
           `Microsoft Teams listing messages for channel ${input.channelId} in team ${input.teamId}`
         );
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/teams/${input.teamId}/channels/${input.channelId}/messages`,
+          `${GRAPH_API_V1}/teams/${input.teamId}/channels/${input.channelId}/messages`,
           {
             params: {
               ...(input.top !== undefined && { $top: input.top }),
@@ -258,7 +257,7 @@ export const MicrosoftTeams: ConnectorSpec = {
         }
         const base = userPath(input.userId);
         ctx.log.debug('Microsoft Teams listing chats');
-        const response = await ctx.client.get(`https://graph.microsoft.com/v1.0${base}/chats`, {
+        const response = await ctx.client.get(`${GRAPH_API_V1}${base}/chats`, {
           params: {
             $select: 'id,topic,createdDateTime,lastUpdatedDateTime,chatType,webUrl',
             ...(input.top !== undefined && { $top: input.top }),
@@ -277,14 +276,11 @@ export const MicrosoftTeams: ConnectorSpec = {
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatMessagesInput) => {
         ctx.log.debug(`Microsoft Teams listing messages for chat ${input.chatId}`);
-        const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/chats/${input.chatId}/messages`,
-          {
-            params: {
-              ...(input.top !== undefined && { $top: input.top }),
-            },
-          }
-        );
+        const response = await ctx.client.get(`${GRAPH_API_V1}/chats/${input.chatId}/messages`, {
+          params: {
+            ...(input.top !== undefined && { $top: input.top }),
+          },
+        });
         return response.data;
       },
     },
@@ -336,14 +332,13 @@ export const MicrosoftTeams: ConnectorSpec = {
         };
 
         ctx.log.debug('Microsoft Teams searching messages');
-        const response = await ctx.client.post(
-          'https://graph.microsoft.com/v1.0/search/query',
-          searchRequest
-        );
+        const response = await ctx.client.post(`${GRAPH_API_V1}/search/query`, searchRequest);
         return response.data;
       },
     },
   },
+
+  getBaseUrl,
 
   skill: [
     'Microsoft Teams connector — usage guidance:',
@@ -367,9 +362,7 @@ export const MicrosoftTeams: ConnectorSpec = {
 
       try {
         const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
-        const url = isAppOnly
-          ? 'https://graph.microsoft.com/v1.0/teams'
-          : 'https://graph.microsoft.com/v1.0/me/joinedTeams'; // bearer and oauth_authorization_code use delegated /me path
+        const url = isAppOnly ? `${GRAPH_API_V1}/teams` : `${GRAPH_API_V1}/me/joinedTeams`; // bearer and oauth_authorization_code use delegated /me path
 
         const response = await ctx.client.get(url, {
           params: { $select: 'id,displayName' },

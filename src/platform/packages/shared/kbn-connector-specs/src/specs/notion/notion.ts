@@ -10,6 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import type * as Notion from './types';
+
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v1` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://api.notion.com';
+const NOTION_API_V1 = `${getBaseUrl()}/v1`;
+
 export const NotionConnector: ConnectorSpec = {
   metadata: {
     id: '.notion',
@@ -79,7 +86,7 @@ export const NotionConnector: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input: Notion.SearchByTitleInput) => {
-        const response = await ctx.client.post('https://api.notion.com/v1/search', {
+        const response = await ctx.client.post(`${NOTION_API_V1}/search`, {
           query: input.query,
           filter: {
             value: input.queryObjectType,
@@ -108,10 +115,7 @@ export const NotionConnector: ConnectorSpec = {
         })
       ),
       handler: async (ctx, input: Notion.GetPageInput) => {
-        const response = await ctx.client.get(
-          `https://api.notion.com/v1/pages/${input.pageId}`,
-          {}
-        );
+        const response = await ctx.client.get(`${NOTION_API_V1}/pages/${input.pageId}`, {});
         return response.data;
       },
     },
@@ -132,7 +136,7 @@ export const NotionConnector: ConnectorSpec = {
       ),
       handler: async (ctx, input: Notion.GetDataSourceInput) => {
         const response = await ctx.client.get(
-          `https://api.notion.com/v1/data_sources/${input.dataSourceId}`,
+          `${NOTION_API_V1}/data_sources/${input.dataSourceId}`,
           {}
         );
         return response.data;
@@ -190,7 +194,7 @@ export const NotionConnector: ConnectorSpec = {
         }
 
         const response = await ctx.client.post(
-          `https://api.notion.com/v1/data_sources/${input.dataSourceId}/query`,
+          `${NOTION_API_V1}/data_sources/${input.dataSourceId}/query`,
           requestData
         );
         return response.data;
@@ -220,6 +224,8 @@ export const NotionConnector: ConnectorSpec = {
     'Use pageSize to control results per page; maximum allowed by Notion is 100.',
   ].join('\n'),
 
+  getBaseUrl,
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.notion.test.description', {
       defaultMessage: 'Verifies Notion connection by fetching metadata about given data source',
@@ -230,7 +236,7 @@ export const NotionConnector: ConnectorSpec = {
       ctx.log.debug('Notion test handler');
 
       try {
-        const response = await ctx.client.get('https://api.notion.com/v1/users');
+        const response = await ctx.client.get(`${NOTION_API_V1}/users`);
         const numOfUsers = response.data.results.length;
         return {
           ok: true,

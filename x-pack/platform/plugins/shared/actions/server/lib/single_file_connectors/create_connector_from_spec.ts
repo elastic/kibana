@@ -6,7 +6,14 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import {
+  TEST_CONNECTOR_SUB_ACTION,
+  GENERIC_REQUEST_SUB_ACTION,
+  DEFAULT_GENERIC_REQUEST_DESCRIPTION,
+  getGenericRequestInputSchema,
+  GenericRequestOutputSchema,
+  buildGenericRequestHandler,
+} from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 
@@ -30,19 +37,46 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
     );
   }
 
-  const baseActions = spec.actions ?? {};
-
-  if (!spec.test?.enabled) {
-    return baseActions;
+  // `request` is reserved for the framework-synthesized generic request action.
+  // Specs that opt out (`disableGenericRequest`) may define their own richer
+  // `request` action (e.g. Kubernetes), so only guard the key when we would
+  // actually synthesize the generic one.
+  if (!spec.disableGenericRequest && spec.actions?.[GENERIC_REQUEST_SUB_ACTION]) {
+    throw new Error(
+      `Connector spec "${spec.metadata.id}" defines a reserved action key "${GENERIC_REQUEST_SUB_ACTION}".`
+    );
   }
 
-  return {
-    ...baseActions,
-    [TEST_CONNECTOR_SUB_ACTION]: {
-      handler: spec.test.handler,
-      input: z4.unknown().optional(),
-    },
-  };
+  let actions: ConnectorSpec['actions'] = { ...(spec.actions ?? {}) };
+
+  // Every v2 connector gets a generic `request` action out of the box, unless it
+  // opts out (e.g. MCP connectors with no plain HTTP surface). It reaches
+  // arbitrary endpoints of the connector's API while reusing its authentication
+  // and error handling. `getBaseUrl` (when present) enables relative `path`
+  // requests; connectors without it can only be called with an absolute `url`.
+  if (!spec.disableGenericRequest) {
+    actions = {
+      ...actions,
+      [GENERIC_REQUEST_SUB_ACTION]: {
+        input: getGenericRequestInputSchema(Boolean(spec.getBaseUrl)),
+        output: GenericRequestOutputSchema,
+        handler: buildGenericRequestHandler(spec.getBaseUrl),
+        description: spec.genericRequestDescription ?? DEFAULT_GENERIC_REQUEST_DESCRIPTION,
+      },
+    };
+  }
+
+  if (spec.test?.enabled) {
+    actions = {
+      ...actions,
+      [TEST_CONNECTOR_SUB_ACTION]: {
+        handler: spec.test.handler,
+        input: z4.unknown().optional(),
+      },
+    };
+  }
+
+  return actions;
 };
 
 export const createConnectorTypeFromSpec = (
@@ -51,15 +85,14 @@ export const createConnectorTypeFromSpec = (
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
 
-  const hasTest = Boolean(spec.test?.enabled);
-  const hasActions = Boolean(spec.actions);
   const executableActions = buildExecutableActions(spec);
-  const hasExecutableActions = hasActions || hasTest;
+  const hasExecutableActions = Object.keys(executableActions).length > 0;
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
         actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
+        configurationUtilities: configUtils,
       })
     : undefined;
 

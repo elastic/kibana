@@ -24,7 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const VIRUSTOTAL_API_BASE_URL = 'https://www.virustotal.com/api/v3';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/api/v3` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://www.virustotal.com';
+const VIRUSTOTAL_API_V3 = `${getBaseUrl()}/api/v3`;
 const VIRUSTOTAL_RESOURCE_TYPES = ['analysis', 'url', 'domain', 'ip', 'file'] as const;
 const VIRUSTOTAL_DOMAIN_REGEX = z.regexes.domain;
 const VIRUSTOTAL_DOMAIN_SCHEMA = z.string().regex(VIRUSTOTAL_DOMAIN_REGEX);
@@ -182,7 +186,7 @@ export const VirusTotalConnector: ConnectorSpec = {
         const typedInput = input as { hash: string; failOnError?: boolean };
         try {
           const response = await ctx.client.get(
-            `${VIRUSTOTAL_API_BASE_URL}/files/${encodeURIComponent(typedInput.hash)}`
+            `${VIRUSTOTAL_API_V3}/files/${encodeURIComponent(typedInput.hash)}`
           );
           return {
             id: response.data.data.id,
@@ -220,7 +224,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
           if (isValidDomain(url)) {
             const response = await ctx.client.get(
-              `${VIRUSTOTAL_API_BASE_URL}/domains/${encodeURIComponent(normalizeDomain(url))}`
+              `${VIRUSTOTAL_API_V3}/domains/${encodeURIComponent(normalizeDomain(url))}`
             );
             return {
               id: response.data.data.id,
@@ -232,7 +236,7 @@ export const VirusTotalConnector: ConnectorSpec = {
           }
 
           const submitResponse = await ctx.client.post(
-            `${VIRUSTOTAL_API_BASE_URL}/urls`,
+            `${VIRUSTOTAL_API_V3}/urls`,
             new URLSearchParams({ url }),
             {
               headers: {
@@ -242,7 +246,7 @@ export const VirusTotalConnector: ConnectorSpec = {
           );
           const analysisId = submitResponse.data.data.id;
           const analysisResponse = await ctx.client.get(
-            `${VIRUSTOTAL_API_BASE_URL}/analyses/${encodeURIComponent(analysisId)}`
+            `${VIRUSTOTAL_API_V3}/analyses/${encodeURIComponent(analysisId)}`
           );
           return {
             id: analysisId,
@@ -290,7 +294,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(
-            `${VIRUSTOTAL_API_BASE_URL}/${getVirusTotalResourcePath(resourceType, typedInput.id)}`
+            `${VIRUSTOTAL_API_V3}/${getVirusTotalResourcePath(resourceType, typedInput.id)}`
           );
           const attributes = response.data.data.attributes;
           return {
@@ -333,7 +337,7 @@ export const VirusTotalConnector: ConnectorSpec = {
           const formData = new FormData();
           formData.append('file', new Blob([buffer]), typedInput.filename || 'file');
 
-          const response = await ctx.client.post(`${VIRUSTOTAL_API_BASE_URL}/files`, formData);
+          const response = await ctx.client.post(`${VIRUSTOTAL_API_V3}/files`, formData);
           return {
             id: response.data.data.id,
             type: response.data.data.type,
@@ -367,7 +371,7 @@ export const VirusTotalConnector: ConnectorSpec = {
         const typedInput = input as { ip: string; failOnError?: boolean };
         try {
           const response = await ctx.client.get(
-            `${VIRUSTOTAL_API_BASE_URL}/ip_addresses/${encodeURIComponent(typedInput.ip)}`
+            `${VIRUSTOTAL_API_V3}/ip_addresses/${encodeURIComponent(typedInput.ip)}`
           );
           return {
             id: response.data.data.id,
@@ -386,10 +390,12 @@ export const VirusTotalConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
       try {
-        await ctx.client.get(`${VIRUSTOTAL_API_BASE_URL}/ip_addresses/8.8.8.8`);
+        await ctx.client.get(`${VIRUSTOTAL_API_V3}/ip_addresses/8.8.8.8`);
         return {
           ok: true,
           message: 'Successfully connected to VirusTotal API',

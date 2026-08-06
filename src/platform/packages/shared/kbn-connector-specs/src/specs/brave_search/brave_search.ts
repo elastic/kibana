@@ -23,6 +23,11 @@ import type { ConnectorSpec } from '../../connector_spec';
 const DEFAULT_COUNT = 10;
 const DEFAULT_OFFSET = 0;
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The version segment stays in paths.
+const getBaseUrl = (): string => 'https://api.search.brave.com';
+const BRAVE_API_V1 = `${getBaseUrl()}/res/v1`;
+
 export const BraveSearchConnector: ConnectorSpec = {
   metadata: {
     id: '.brave-search',
@@ -84,7 +89,7 @@ export const BraveSearchConnector: ConnectorSpec = {
           offset: typedInput.offset || DEFAULT_OFFSET,
         };
 
-        const response = await ctx.client.get('https://api.search.brave.com/res/v1/web/search', {
+        const response = await ctx.client.get(`${BRAVE_API_V1}/web/search`, {
           params,
           headers: {
             Accept: 'application/json',
@@ -101,11 +106,13 @@ export const BraveSearchConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
       try {
         // Perform a simple test search
-        await ctx.client.get('https://api.search.brave.com/res/v1/web/search', {
+        await ctx.client.get(`${BRAVE_API_V1}/web/search`, {
           params: {
             q: 'test',
             count: 1,

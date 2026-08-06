@@ -23,6 +23,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below.
+const getBaseUrl = (): string => 'https://api.shodan.io';
+const SHODAN_API_BASE = getBaseUrl();
+
 export const ShodanConnector: ConnectorSpec = {
   metadata: {
     id: '.shodan',
@@ -50,7 +55,7 @@ export const ShodanConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; page?: number };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        const response = await ctx.client.get('https://api.shodan.io/shodan/host/search', {
+        const response = await ctx.client.get(`${SHODAN_API_BASE}/shodan/host/search`, {
           params: {
             query: typedInput.query,
             page: typedInput.page || 1,
@@ -75,12 +80,9 @@ export const ShodanConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        const response = await ctx.client.get(
-          `https://api.shodan.io/shodan/host/${typedInput.ip}`,
-          {
-            params: { key: apiKey },
-          }
-        );
+        const response = await ctx.client.get(`${SHODAN_API_BASE}/shodan/host/${typedInput.ip}`, {
+          params: { key: apiKey },
+        });
         return {
           ip: response.data.ip_str,
           ports: response.data.ports,
@@ -104,7 +106,7 @@ export const ShodanConnector: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; facets?: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        const response = await ctx.client.get('https://api.shodan.io/shodan/host/count', {
+        const response = await ctx.client.get(`${SHODAN_API_BASE}/shodan/host/count`, {
           params: {
             query: typedInput.query,
             ...(typedInput.facets && { facets: typedInput.facets }),
@@ -123,7 +125,7 @@ export const ShodanConnector: ConnectorSpec = {
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        const response = await ctx.client.get('https://api.shodan.io/shodan/services', {
+        const response = await ctx.client.get(`${SHODAN_API_BASE}/shodan/services`, {
           params: { key: apiKey },
         });
         return {
@@ -133,11 +135,13 @@ export const ShodanConnector: ConnectorSpec = {
     },
   },
 
+  getBaseUrl,
+
   test: {
     handler: async (ctx) => {
       try {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        await ctx.client.get('https://api.shodan.io/shodan/host/8.8.8.8', {
+        await ctx.client.get(`${SHODAN_API_BASE}/shodan/host/8.8.8.8`, {
           params: { key: apiKey },
         });
         return {

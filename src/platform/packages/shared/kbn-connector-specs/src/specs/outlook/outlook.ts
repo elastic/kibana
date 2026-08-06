@@ -29,7 +29,11 @@ import type {
   ListFoldersInput,
 } from './types';
 
-const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
+// Base URL for the framework-synthesized `request` action and the single source
+// of truth reused by the handlers below. The `/v1.0` API version stays in the
+// per-action paths.
+const getBaseUrl = (): string => 'https://graph.microsoft.com';
+const GRAPH_BASE = `${getBaseUrl()}/v1.0`;
 
 const GraphCollectionOutputSchema = z.object({
   value: z.array(z.any()).describe('Array of items returned from the API'),
@@ -229,6 +233,8 @@ export const Outlook: ConnectorSpec = {
       },
     },
   },
+
+  getBaseUrl,
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.outlook.test.description', {
