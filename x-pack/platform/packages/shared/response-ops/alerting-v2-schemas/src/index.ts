@@ -20,6 +20,10 @@ export {
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
+<<<<<<< HEAD
+export * from './episode_attachment_schema';
+=======
+>>>>>>> 5c326ccfe4381ff05f1d9c8d8797eb836a2ea8d7
 export * from './alert_episode_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';

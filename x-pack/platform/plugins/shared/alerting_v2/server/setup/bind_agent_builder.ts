@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
+import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
@@ -21,6 +22,7 @@ import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { RulesClient } from '../lib/rules_client';
+import { QueryServiceScopedToken } from '../lib/services/query_service/tokens';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
@@ -64,6 +66,15 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         logger,
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
+      }) as AttachmentTypeDefinition,
+    [Logger, CoreStart('injection')]
+  );
+  bind(AttachmentTypeToken).toResolvedValue(
+    (logger, injection) =>
+      createEpisodeAttachmentType({
+        logger,
+        getQueryService: (context) =>
+          resolveRequestScoped(injection, context.request, QueryServiceScopedToken),
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
   );
