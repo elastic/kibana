@@ -9,7 +9,7 @@ export const isWatchNotFoundError = (error: unknown): error is Error =>
   error instanceof Error && error.name === 'WatchNotFoundError';
 
 export const createWatchNotFoundError = (watchId: string): Error => {
-  const error = new Error(`Watch "${watchId}" not found`);
+  const error = Object.assign(new Error(`Watch "${watchId}" not found`), { statusCode: 404 });
   error.name = 'WatchNotFoundError';
   return error;
 };

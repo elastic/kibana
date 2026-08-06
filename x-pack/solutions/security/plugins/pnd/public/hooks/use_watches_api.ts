@@ -22,6 +22,13 @@ const retryOnTransientError = (failureCount: number, error: unknown): boolean =>
   return true;
 };
 
+export interface UpdateWatchSettingsBody {
+  enabled?: boolean;
+  description?: string;
+  autonomyLevel?: number;
+  scheduleInterval?: string;
+}
+
 export const useWatches = () => {
   const { services } = useKibana();
 
@@ -51,6 +58,68 @@ export const useWatch = (watchId: string | undefined) => {
     },
     enabled: Boolean(watchId),
     retry: retryOnTransientError,
+  });
+};
+
+/** POC: persist settings onto the user-owned workflow document. */
+export const useUpdateWatchSettings = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      watchId,
+      body,
+    }: {
+      watchId: string;
+      body: UpdateWatchSettingsBody;
+    }): Promise<GetWatchResponse> =>
+      services.http!.patch<GetWatchResponse>(buildWatchUrl(watchId), {
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify(body),
+      }),
+    onSuccess: async (data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
+      queryClient.setQueryData(queryKeys.watches.detail(variables.watchId), data);
+    },
+  });
+};
+
+/** POC: take a shipped catalogue update, re-applying customer settings. */
+export const useApplyWatchUpdate = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      watchId,
+      force,
+    }: {
+      watchId: string;
+      force?: boolean;
+    }): Promise<{
+      updated: boolean;
+      conflict?: boolean;
+      fromVersion?: number;
+      toVersion?: number;
+      watch?: GetWatchResponse['watch'];
+    }> =>
+      services.http!.post(`${PND_WATCHES_URL}/${encodeURIComponent(watchId)}/apply_update`, {
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify({ force: force ?? false }),
+      }),
+    onSuccess: async (data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
+      if (data.watch) {
+        queryClient.setQueryData(queryKeys.watches.detail(variables.watchId), {
+          watch: data.watch,
+        });
+      } else {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.watches.detail(variables.watchId),
+        });
+      }
+    },
   });
 };
 

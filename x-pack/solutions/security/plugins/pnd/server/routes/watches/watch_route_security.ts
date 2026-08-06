@@ -6,7 +6,7 @@
  */
 
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
+import { PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 
 /**
  * Live watch routes project managed Workflows. Require the same privilege pair
@@ -25,3 +25,14 @@ export const getLiveWatchReadPrivileges = () => [
 
 export const getWatchRoutePrivileges = (useMockData: boolean) =>
   useMockData ? [PND_API_PRIVILEGE_READ] : getLiveWatchReadPrivileges();
+
+/** POC: settings write + catalogue apply_update. */
+export const getLiveWatchWritePrivileges = () => [
+  PND_API_PRIVILEGE_WRITE,
+  WorkflowsManagementApiActions.create,
+  WorkflowsManagementApiActions.update,
+  WorkflowsManagementApiActions.read,
+];
+
+export const getWatchWritePrivileges = (useMockData: boolean) =>
+  useMockData ? [PND_API_PRIVILEGE_WRITE] : getLiveWatchWritePrivileges();

@@ -45,10 +45,18 @@ export interface WatchWorkflowsManagementClient {
   ): Promise<WorkflowExecutionDto | null>;
 
   createWorkflow(
-    workflow: { yaml: string },
+    workflow: { yaml: string; id?: string },
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto>;
+
+  /** POC: ordinary update path (yaml / enabled) for user-owned watches. */
+  updateWorkflow(
+    id: string,
+    workflow: { yaml?: string; enabled?: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<unknown>;
 
   deleteWorkflows(
     workflowIds: string[],
@@ -103,11 +111,20 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
   }
 
   createWorkflow(
-    workflow: { yaml: string },
+    workflow: { yaml: string; id?: string },
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     return this.management.createWorkflow(workflow, spaceId, request);
+  }
+
+  updateWorkflow(
+    id: string,
+    workflow: { yaml?: string; enabled?: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<unknown> {
+    return this.management.updateWorkflow(id, workflow, spaceId, request);
   }
 
   deleteWorkflows(

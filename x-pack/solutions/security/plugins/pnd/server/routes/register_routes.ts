@@ -11,6 +11,8 @@ import type { PndSpaceIdResolver } from '../types';
 import type { WatchWorkflowProjectionService } from '../services/watches/watch_workflow_projection_service';
 import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
+import { registerUpdateWatchRoute } from './watches/update_watch';
+import { registerApplyWatchUpdateRoute } from './watches/apply_watch_update';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
 import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
@@ -26,6 +28,8 @@ export interface RouteDependencies {
 export const registerRoutes = (deps: RouteDependencies): void => {
   registerListWatchesRoute(deps);
   registerGetWatchRoute(deps);
+  registerUpdateWatchRoute(deps);
+  registerApplyWatchUpdateRoute(deps);
   registerListInvestigationsRoute(deps);
   registerGetInvestigationRoute(deps);
   registerListInvestigationProposalsRoute(deps);

@@ -15,7 +15,12 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { PND_API_PRIVILEGE_READ, PND_FEATURE_ID, PND_PLUGIN_NAME } from '../common/constants';
+import {
+  PND_API_PRIVILEGE_READ,
+  PND_API_PRIVILEGE_WRITE,
+  PND_FEATURE_ID,
+  PND_PLUGIN_NAME,
+} from '../common/constants';
 import type { PndConfig } from './config';
 import type {
   PndPluginSetup,
@@ -25,7 +30,6 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { installStatic } from './managed_workflows/install_static';
 import type { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
@@ -68,7 +72,7 @@ export class PndPlugin
       privileges: {
         all: {
           app: ['kibana', PND_FEATURE_ID],
-          api: [PND_API_PRIVILEGE_READ],
+          api: [PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },
@@ -101,17 +105,13 @@ export class PndPlugin
       return {};
     }
 
-    const installationReady = installStatic({
-      enabled: this.config.enabled,
-      workflowsExtensions: plugins.workflowsExtensions,
-      logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(
-        `PND managed watch installation failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    });
+    // POC (watch-settings-e2e-mvp): skip managed installStatic so the
+    // pre-built / user-owned catalogue is the only set. Leftover managed
+    // docs are also filtered out of list/get. Re-enable for production.
+    this.logger.info(
+      'POC: skipping PND managed watch installStatic — using first-visit pre-built seed'
+    );
+    const installationReady = Promise.resolve();
 
     if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
       const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);

@@ -19,6 +19,18 @@ import {
   normalizeWorkflowTriggerType,
   projectWorkflowToWatch,
 } from './project_watch';
+import { ensurePrebuiltWatches } from './ensure_prebuilt_watches';
+import {
+  isPrebuiltWatchId,
+  PREBUILT_WATCH_CATALOG,
+} from './prebuilt_watch_catalog';
+import {
+  applyCatalogUpdate,
+  extractProvenance,
+  extractScheduleInterval,
+  updateWatchSettings,
+  type WatchSettingsPatch,
+} from './watch_settings_write';
 import { createWatchDeleteForbiddenError, createWatchNotFoundError } from './watch_errors';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
 
@@ -38,9 +50,27 @@ export class WatchWorkflowProjectionService {
     return this.management;
   }
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
+  /**
+   * POC: first-visit seed of the four user-owned pre-built watches.
+   * Must run under a KibanaRequest (createWorkflow requires one).
+   */
+  async ensurePrebuilt(request: KibanaRequest, spaceId: string): Promise<void> {
+    const management = this.requireManagement();
+    await ensurePrebuiltWatches({
+      management,
+      spaceId,
+      request,
+      logger: this.logger,
+    });
+  }
+
+  async list(request: KibanaRequest, spaceId: string): Promise<ListWatchesResponse> {
     await this.installationReady;
     const management = this.requireManagement();
+
+    // POC single-catalogue: seed user-owned pre-builts on first list visit.
+    await this.ensurePrebuilt(request, spaceId);
+
     // Managed catalog watches opt into `selector:watch` visibility; custom
     // unmanaged watches still match via tag `watch` under managedFilter `all`.
     // Default getWorkflows managedFilter is 'unmanaged' — must request 'all'.
@@ -60,9 +90,14 @@ export class WatchWorkflowProjectionService {
     const watches = result.results
       .filter((item) => {
         const tags = item.tags?.length ? item.tags : item.definition?.tags ?? [];
-        return tags.includes(WATCH_TAG);
+        if (!tags.includes(WATCH_TAG)) return false;
+        // POC: hide leftover managed system-* watches so the catalogue is the
+        // four user-owned pre-builts only (installStatic is also skipped).
+        if (item.managed === true) return false;
+        if (String(item.id).startsWith('system-security-watch-')) return false;
+        return true;
       })
-      .map(projectWorkflowToWatch)
+      .map((item) => this.enrichWatchProjection(projectWorkflowToWatch(item), item.definition))
       .sort(compareWatchesForDisplay);
 
     return ListWatchesResponse.parse({ watches });
@@ -78,6 +113,10 @@ export class WatchWorkflowProjectionService {
 
     const tags = detail.definition?.tags ?? [];
     if (!tags.includes(WATCH_TAG)) {
+      return undefined;
+    }
+    // POC: managed leftovers are not part of the pre-built catalogue.
+    if (detail.managed === true || watchId.startsWith('system-security-watch-')) {
       return undefined;
     }
 
@@ -110,7 +149,10 @@ export class WatchWorkflowProjectionService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const watch = projectWorkflowToWatch({ ...listItem, history, tags: detail.definition?.tags });
+      const watch = this.enrichWatchProjection(
+        projectWorkflowToWatch({ ...listItem, history, tags: detail.definition?.tags }),
+        detail.definition
+      );
 
       // Attach step summaries for the latest few runs
       const enrichedRuns = await Promise.all(
@@ -147,8 +189,75 @@ export class WatchWorkflowProjectionService {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem) });
+      return GetWatchResponse.parse({
+        watch: this.enrichWatchProjection(projectWorkflowToWatch(listItem), detail.definition),
+      });
     }
+  }
+
+  /** POC: write settings onto the user-owned workflow document (one store). */
+  async updateSettings(
+    request: KibanaRequest,
+    watchId: string,
+    spaceId: string,
+    patch: WatchSettingsPatch
+  ): Promise<GetWatchResponse> {
+    const management = this.requireManagement();
+    await updateWatchSettings({ management, watchId, spaceId, request, patch });
+    const projected = await this.get(watchId, spaceId);
+    if (!projected) {
+      throw createWatchNotFoundError(watchId);
+    }
+    return projected;
+  }
+
+  /** POC: take a shipped catalogue update, re-applying customer settings. */
+  async applyUpdate(
+    request: KibanaRequest,
+    watchId: string,
+    spaceId: string,
+    force?: boolean
+  ): Promise<{ result: Awaited<ReturnType<typeof applyCatalogUpdate>>; watch?: GetWatchResponse }> {
+    const management = this.requireManagement();
+    const result = await applyCatalogUpdate({
+      management,
+      watchId,
+      spaceId,
+      request,
+      force,
+    });
+    if (!result.updated) {
+      return { result };
+    }
+    const watch = await this.get(watchId, spaceId);
+    return { result, watch: watch ?? undefined };
+  }
+
+  private enrichWatchProjection<T extends ReturnType<typeof projectWorkflowToWatch>>(
+    watch: T,
+    definition: Parameters<typeof extractProvenance>[0]
+  ): T & {
+    updateAvailable?: boolean;
+    seedContentVersion?: number;
+    catalogVersion?: number;
+    scheduleInterval?: string;
+  } {
+    const provenance = extractProvenance(definition);
+    const scheduleInterval = extractScheduleInterval(definition);
+    if (!isPrebuiltWatchId(watch.id)) {
+      return scheduleInterval ? { ...watch, scheduleInterval } : watch;
+    }
+    const catalogVersion = PREBUILT_WATCH_CATALOG[watch.id].version;
+    const seedContentVersion = provenance?.seedContentVersion;
+    const updateAvailable =
+      typeof seedContentVersion === 'number' && seedContentVersion < catalogVersion;
+    return {
+      ...watch,
+      updateAvailable,
+      seedContentVersion,
+      catalogVersion,
+      scheduleInterval,
+    };
   }
 
   async createCustom(

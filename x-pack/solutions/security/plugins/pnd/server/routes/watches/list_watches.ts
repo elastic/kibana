@@ -48,7 +48,7 @@ export const registerListWatchesRoute = ({
             return response.ok({ body: { watches: [] } });
           }
 
-          const body: ListWatchesResponse = await projection.list(getSpaceId(request));
+          const body: ListWatchesResponse = await projection.list(request, getSpaceId(request));
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);

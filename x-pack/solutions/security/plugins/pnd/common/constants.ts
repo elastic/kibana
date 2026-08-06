@@ -24,3 +24,6 @@ export {
 
 /** API privilege for read-only PND internal routes. */
 export const PND_API_PRIVILEGE_READ = 'pnd_read' as const;
+
+/** POC: write privilege for watch settings / catalogue update routes. */
+export const PND_API_PRIVILEGE_WRITE = 'pnd_write' as const;

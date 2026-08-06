@@ -206,6 +206,16 @@ export const Watch = lazySchema(() =>
     autonomyLevel: AutonomyLevel,
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
+    /**
+     * POC (watch-settings-e2e-mvp): catalogue has a newer seedContentVersion
+     */
+    updateAvailable: z.boolean().optional(),
+    seedContentVersion: z.number().int().optional(),
+    catalogVersion: z.number().int().optional(),
+    /**
+     * POC: scheduled trigger `with.every` string (e.g. "15m", "1h")
+     */
+    scheduleInterval: z.string().optional(),
   })
 );
 export type Watch = z.infer<typeof Watch>;

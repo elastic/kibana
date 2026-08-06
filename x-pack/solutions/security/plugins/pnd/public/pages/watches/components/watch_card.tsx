@@ -95,15 +95,24 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {watch.draft ? (
-            <EuiBadge color="hollow">{i18n.DRAFT_BADGE}</EuiBadge>
-          ) : watch.enabled ? (
-            <EuiText size="xs" color="subdued">
-              {watch.metrics.lastRun ? i18n.lastRunLabel(watch.metrics.lastRun) : i18n.NEVER_RUN}
-            </EuiText>
-          ) : (
-            <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
-          )}
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {watch.updateAvailable ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent">Update</EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              {watch.draft ? (
+                <EuiBadge color="hollow">{i18n.DRAFT_BADGE}</EuiBadge>
+              ) : watch.enabled ? (
+                <EuiText size="xs" color="subdued">
+                  {watch.metrics.lastRun ? i18n.lastRunLabel(watch.metrics.lastRun) : i18n.NEVER_RUN}
+                </EuiText>
+              ) : (
+                <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 

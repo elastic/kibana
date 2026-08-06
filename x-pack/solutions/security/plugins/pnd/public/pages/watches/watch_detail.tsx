@@ -11,6 +11,8 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -18,8 +20,9 @@ import {
   EuiFormRow,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiRange,
+  EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -30,7 +33,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  AUTONOMY_LABELS,
   coverageFromSchedule,
   type AutonomyLevel,
   type Watch,
@@ -40,7 +42,11 @@ import {
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { useWatch } from '../../hooks/use_watches_api';
+import {
+  useApplyWatchUpdate,
+  useUpdateWatchSettings,
+  useWatch,
+} from '../../hooks/use_watches_api';
 import { AgentCapabilitiesList } from './components/agent_capabilities_list';
 import { AutonomyMeter } from './components/autonomy_meter';
 import { RecentRunsTable } from './components/recent_runs_table';
@@ -58,12 +64,36 @@ const SCOPE_COLOR: Record<string, string> = {
   denied: '#ef4444',
 };
 
+/** POC: three UI levels mapped onto shipped 1–5 AutonomyLevel. */
+type UiAutonomy = 'manual' | 'assisted' | 'supervised';
+
+const UI_AUTONOMY_TO_STORED: Record<UiAutonomy, AutonomyLevel> = {
+  manual: 1,
+  assisted: 3,
+  supervised: 5,
+};
+
+const storedToUiAutonomy = (level: AutonomyLevel): UiAutonomy => {
+  if (level <= 2) return 'manual';
+  if (level === 3) return 'assisted';
+  return 'supervised';
+};
+
+const SCHEDULE_INTERVAL_OPTIONS = [
+  { value: '15m', text: 'Every 15 minutes' },
+  { value: '1h', text: 'Every 1 hour' },
+  { value: '6h', text: 'Every 6 hours' },
+  { value: '1d', text: 'Every day' },
+];
+
 export const WatchDetailPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
   const { services } = useKibana();
   const { data, isLoading, error, refetch } = useWatch(watchId);
+  const updateSettings = useUpdateWatchSettings();
+  const applyUpdate = useApplyWatchUpdate();
 
   const [localWatch, setLocalWatch] = useState<Watch | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -79,12 +109,8 @@ export const WatchDetailPage: React.FC = () => {
     if (!data?.watch || data.watch.id !== watchId) {
       return;
     }
-    setLocalWatch((prev) => {
-      if (prev == null || prev.id !== data.watch.id) {
-        return data.watch;
-      }
-      return prev;
-    });
+    // Always accept server data after refetch/save so round-trip is visible.
+    setLocalWatch(data.watch);
   }, [data, watchId]);
 
   const stubToast = useCallback(() => {
@@ -108,9 +134,77 @@ export const WatchDetailPage: React.FC = () => {
     );
   }, []);
 
-  const onAutonomyChange = useCallback((level: AutonomyLevel) => {
-    setLocalWatch((prev) => (prev ? { ...prev, autonomyLevel: level } : prev));
+  const onUiAutonomyChange = useCallback((ui: UiAutonomy) => {
+    setLocalWatch((prev) =>
+      prev ? { ...prev, autonomyLevel: UI_AUTONOMY_TO_STORED[ui] } : prev
+    );
   }, []);
+
+  const onSave = useCallback(async () => {
+    if (!localWatch) return;
+    try {
+      const result = await updateSettings.mutateAsync({
+        watchId: localWatch.id,
+        body: {
+          enabled: localWatch.enabled,
+          description: localWatch.description,
+          autonomyLevel: localWatch.autonomyLevel,
+          ...(localWatch.scheduleInterval
+            ? { scheduleInterval: localWatch.scheduleInterval }
+            : {}),
+        },
+      });
+      setLocalWatch(result.watch);
+      services.notifications?.toasts.addSuccess('Watch settings saved');
+    } catch (err) {
+      services.notifications?.toasts.addError(
+        err instanceof Error ? err : new Error(String(err)),
+        { title: 'Failed to save watch settings' }
+      );
+    }
+  }, [localWatch, updateSettings, services.notifications]);
+
+  const onToggleEnabled = useCallback(
+    async (enabled: boolean) => {
+      if (!localWatch) return;
+      setLocalWatch({ ...localWatch, enabled, draft: !enabled ? localWatch.draft : false });
+      try {
+        const result = await updateSettings.mutateAsync({
+          watchId: localWatch.id,
+          body: { enabled },
+        });
+        setLocalWatch(result.watch);
+        services.notifications?.toasts.addSuccess(enabled ? 'Watch enabled' : 'Watch paused');
+      } catch (err) {
+        setLocalWatch(localWatch);
+        services.notifications?.toasts.addError(
+          err instanceof Error ? err : new Error(String(err)),
+          { title: 'Failed to toggle watch' }
+        );
+      }
+    },
+    [localWatch, updateSettings, services.notifications]
+  );
+
+  const onApplyCatalogUpdate = useCallback(async () => {
+    if (!localWatch) return;
+    try {
+      const result = await applyUpdate.mutateAsync({ watchId: localWatch.id });
+      if (result.watch) {
+        setLocalWatch(result.watch);
+      } else {
+        await refetch();
+      }
+      services.notifications?.toasts.addSuccess(
+        `Catalogue update applied (v${result.fromVersion} → v${result.toVersion})`
+      );
+    } catch (err) {
+      services.notifications?.toasts.addError(
+        err instanceof Error ? err : new Error(String(err)),
+        { title: 'Failed to apply catalogue update' }
+      );
+    }
+  }, [localWatch, applyUpdate, refetch, services.notifications]);
 
   const onToggleCallable = useCallback(
     (callableId: string) => {
@@ -208,10 +302,29 @@ export const WatchDetailPage: React.FC = () => {
           leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
           backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
           rightSideItems={[
-            <EuiButton key="save" fill onClick={stubToast}>
+            <EuiSwitch
+              key="enabled"
+              label={watch.enabled ? i18n.ACTIVE_BADGE : i18n.PAUSED_BADGE}
+              checked={watch.enabled}
+              onChange={(e) => onToggleEnabled(e.target.checked)}
+              compressed
+            />,
+            <EuiButton
+              key="save"
+              fill
+              onClick={onSave}
+              isLoading={updateSettings.isLoading}
+              data-test-subj="pndWatchSaveButton"
+            >
               {i18n.SAVE}
             </EuiButton>,
-            <EuiButtonEmpty key="discard" onClick={() => history.push('/watches')}>
+            <EuiButtonEmpty
+              key="discard"
+              onClick={() => {
+                if (data?.watch) setLocalWatch(data.watch);
+                else history.push('/watches');
+              }}
+            >
               {i18n.DISCARD}
             </EuiButtonEmpty>,
             ...(!watch.managed
@@ -232,6 +345,33 @@ export const WatchDetailPage: React.FC = () => {
           <p>{watch.description}</p>
         </EuiText>
         <EuiSpacer size="m" />
+
+        {watch.updateAvailable ? (
+          <>
+            <EuiCallOut
+              title={`Update available (v${watch.seedContentVersion ?? '?'} → v${
+                watch.catalogVersion ?? '?'
+              })`}
+              color="primary"
+              iconType="exportAction"
+            >
+              <p>
+                Elastic shipped an improved definition. Your settings (enabled, autonomy, cadence,
+                description) will be re-applied. Definition-body edits conflict and are warned.
+              </p>
+              <EuiButton
+                size="s"
+                fill
+                onClick={onApplyCatalogUpdate}
+                isLoading={applyUpdate.isLoading}
+                data-test-subj="pndWatchApplyUpdateButton"
+              >
+                Take update
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
 
         {isDeleteConfirmOpen ? (
           <EuiConfirmModal
@@ -315,7 +455,7 @@ export const WatchDetailPage: React.FC = () => {
 
         <EuiSpacer size="l" />
 
-        {/* Autonomy */}
+        {/* Autonomy — POC: three levels in UI, stored as 1 / 3 / 5 */}
         <SectionHeading title={i18n.AUTONOMY_TITLE} subtitle={i18n.AUTONOMY_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
           <EuiFormRow label={i18n.AUTONOMY_LEVEL} fullWidth>
@@ -326,30 +466,28 @@ export const WatchDetailPage: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    {watch.autonomyLevel} / 5
+                    stored {watch.autonomyLevel}/5 · UI{' '}
+                    {storedToUiAutonomy(watch.autonomyLevel)}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <EuiRange
-                min={1}
-                max={5}
-                step={1}
-                value={watch.autonomyLevel}
-                onChange={(e) =>
-                  onAutonomyChange(Number((e.target as HTMLInputElement).value) as AutonomyLevel)
-                }
-                showTicks
-                ticks={AUTONOMY_LABELS.map((label, i) => ({
-                  value: i + 1,
-                  label: i === 0 || i === 4 ? label : '',
-                }))}
-                fullWidth
-                compressed
+              <EuiButtonGroup
+                legend={i18n.AUTONOMY_LEVEL}
+                idSelected={storedToUiAutonomy(watch.autonomyLevel)}
+                onChange={(id) => onUiAutonomyChange(id as UiAutonomy)}
+                options={[
+                  { id: 'manual', label: 'Manual' },
+                  { id: 'assisted', label: 'Assisted' },
+                  { id: 'supervised', label: 'Supervised' },
+                ]}
+                buttonSize="compressed"
+                color="primary"
+                isFullWidth
               />
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued">
-                {i18n.AUTONOMY_GUARDRAILS_NOTE}
+                POC maps Manual→1, Assisted→3, Supervised→5 on the shipped 1–5 field.
               </EuiText>
             </div>
           </EuiFormRow>
@@ -359,6 +497,39 @@ export const WatchDetailPage: React.FC = () => {
 
         {/* Schedule */}
         <SectionHeading title={i18n.SCHEDULE_TITLE} subtitle={i18n.SCHEDULE_SUBTITLE} />
+        {watch.scheduleInterval ? (
+          <>
+            <EuiPanel hasBorder paddingSize="m">
+              <EuiFormRow
+                label="Schedule interval (Task Manager)"
+                helpText="Writable cadence for watches with a scheduled trigger. Writes triggers[].with.every."
+                fullWidth
+              >
+                <EuiSelect
+                  options={SCHEDULE_INTERVAL_OPTIONS}
+                  value={watch.scheduleInterval}
+                  onChange={(e) =>
+                    setLocalWatch((prev) =>
+                      prev ? { ...prev, scheduleInterval: e.target.value } : prev
+                    )
+                  }
+                  compressed
+                  fullWidth
+                  data-test-subj="pndWatchScheduleInterval"
+                />
+              </EuiFormRow>
+            </EuiPanel>
+            <EuiSpacer size="s" />
+          </>
+        ) : (
+          <>
+            <EuiCallOut size="s" color="warning" title="No scheduled trigger on this watch">
+              Cadence cannot drive Task Manager here (Floor/Deep are alert/manual). Change interval
+              on Officer or Dark.
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <SchedulePanel watch={watch} onScheduleChange={onScheduleChange} />
 
         <EuiSpacer size="l" />

@@ -100,7 +100,7 @@ describe('PndPlugin feature-flag gating', () => {
       expect(registerRoutes).toHaveBeenCalled();
     });
 
-    it('installs managed watch workflows during start', () => {
+    it('skips managed watch install during start (POC pre-built catalogue)', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();
       const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
@@ -110,12 +110,8 @@ describe('PndPlugin feature-flag gating', () => {
         workflowsExtensions,
       } as never);
 
-      expect(installStatic).toHaveBeenCalledWith(
-        expect.objectContaining({
-          enabled: true,
-          workflowsExtensions,
-        })
-      );
+      // POC watch-settings-e2e-mvp: installStatic intentionally skipped.
+      expect(installStatic).not.toHaveBeenCalled();
     });
   });
 });
