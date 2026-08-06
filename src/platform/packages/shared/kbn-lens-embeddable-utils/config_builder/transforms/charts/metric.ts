@@ -677,7 +677,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newColumn, false, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendlineX0`, newColumn, false);
     }
   }
 
