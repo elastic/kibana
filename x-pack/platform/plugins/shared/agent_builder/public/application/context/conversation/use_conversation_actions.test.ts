@@ -12,6 +12,7 @@ import {
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { AskUserQuestionPrompt } from '@kbn/agent-builder-common/agents';
 import type { ConversationsService } from '../../../services/conversations';
@@ -155,5 +156,54 @@ describe('createConversationActions.setAttachments', () => {
     actions.setAttachments({ attachments: attachmentFixture(2) });
 
     expect(queryClient.getQueryData<Conversation>(queryKey)).toBeUndefined();
+  });
+});
+
+describe('createConversationActions.onRoundComplete', () => {
+  it('applies the authoritative status and pending prompts to the cached round', () => {
+    const { queryClient, actions } = buildActions();
+    const queryKey = queryKeys.conversations.byId(conversationId);
+    const conversation = createNewConversation({ id: conversationId, agentId: 'agent-1' });
+    conversation.rounds.push(createNewRound({ userMessage: 'hello' }));
+    queryClient.setQueryData<Conversation>(queryKey, conversation);
+
+    const browserPrompt = {
+      type: AgentPromptType.browser_tool_call,
+      id: 'prompt-b1',
+      tool_id: 'capture_dashboard_screenshot',
+      params: {},
+    };
+    const completedRound = {
+      ...conversation.rounds[0],
+      status: ConversationRoundStatus.awaitingPrompt,
+      pending_prompts: [browserPrompt],
+    } as unknown as Parameters<typeof actions.onRoundComplete>[0];
+
+    actions.onRoundComplete(completedRound);
+
+    const cachedRound = queryClient.getQueryData<Conversation>(queryKey)?.rounds.at(-1);
+    expect(cachedRound?.status).toBe(ConversationRoundStatus.awaitingPrompt);
+    expect(cachedRound?.pending_prompts).toEqual([browserPrompt]);
+  });
+
+  it('clears stale pending prompts when the completed round has none', () => {
+    const { queryClient, actions } = buildActions();
+    const queryKey = queryKeys.conversations.byId(conversationId);
+    const conversation = createNewConversation({ id: conversationId, agentId: 'agent-1' });
+    conversation.rounds.push(createNewRound({ userMessage: 'hello' }));
+    queryClient.setQueryData<Conversation>(queryKey, conversation);
+    actions.addPendingPrompt({ prompt: pendingPrompt });
+
+    const completedRound = {
+      ...conversation.rounds[0],
+      status: ConversationRoundStatus.completed,
+      pending_prompts: undefined,
+    } as unknown as Parameters<typeof actions.onRoundComplete>[0];
+
+    actions.onRoundComplete(completedRound);
+
+    const cachedRound = queryClient.getQueryData<Conversation>(queryKey)?.rounds.at(-1);
+    expect(cachedRound?.status).toBe(ConversationRoundStatus.completed);
+    expect(cachedRound?.pending_prompts).toBeUndefined();
   });
 });

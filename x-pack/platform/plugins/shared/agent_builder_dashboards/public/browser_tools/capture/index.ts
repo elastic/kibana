@@ -53,23 +53,18 @@ const countRenderablePanels = (state: DashboardState): number =>
 
 export const captureDashboardScreenshot = async ({
   core,
-  conversationId,
+  attachments,
   dashboardAttachmentId,
 }: {
   core: CoreStart;
-  conversationId: string;
+  attachments: VersionedAttachment[];
   dashboardAttachmentId: string;
 }): Promise<CaptureDashboardScreenshotResult> => {
-  // TODO: Fetched from the server rather than read from the conversation UI state: the client
-  // only learns about attachments on `round_complete`, while this handler runs on the
-  // earlier `prompt_request` event — an attachment created in the same round (the primary
-  // generate → capture flow) may not be in the client cache yet. The persisted conversation
-  // is always at least as fresh. (Public attachments route; no single-attachment GET today.)
-  const { results } = await core.http.get<{ results: VersionedAttachment[] }>(
-    `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}/attachments`
-  );
-
-  const attachment = results.find(({ id }) => id === dashboardAttachmentId);
+  // Attachments come from the conversation UI's in-stream state (handler context), which
+  // includes attachments created during the current round. The persisted conversation must
+  // NOT be fetched here: persistence lags the stream (on a conversation's first round it is
+  // gated on title generation), so a fetch would miss the just-created dashboard attachment.
+  const attachment = attachments.find(({ id }) => id === dashboardAttachmentId);
   if (!attachment) {
     throw new Error(`Dashboard attachment '${dashboardAttachmentId}' was not found.`);
   }

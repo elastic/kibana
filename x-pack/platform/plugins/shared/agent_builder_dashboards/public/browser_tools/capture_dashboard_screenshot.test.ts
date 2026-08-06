@@ -34,26 +34,32 @@ describe('createCaptureDashboardScreenshotTool', () => {
     expect(() => tool.schema.parse({ dashboardAttachmentId: 'x'.repeat(257) })).toThrow();
   });
 
-  it('fails without a conversation id', async () => {
-    await expect(tool.handler({ dashboardAttachmentId: 'dash-1' }, {})).rejects.toThrow(
-      /conversation has not been persisted/
-    );
-    expect(mockCaptureDashboardScreenshot).not.toHaveBeenCalled();
-  });
-
-  it('delegates to the capture implementation with the conversation id', async () => {
+  it('delegates to the capture implementation with the context attachments', async () => {
     mockCaptureDashboardScreenshot.mockResolvedValue({ content: 'data:image/jpeg;base64,x' });
+    const attachments = [{ id: 'dash-1', type: 'dashboard', versions: [] }];
 
     const result = await tool.handler(
       { dashboardAttachmentId: 'dash-1' },
-      { conversationId: 'conv-1' }
+      { conversationId: 'conv-1', attachments: attachments as never }
     );
 
     expect(mockCaptureDashboardScreenshot).toHaveBeenCalledWith({
       core,
-      conversationId: 'conv-1',
+      attachments,
       dashboardAttachmentId: 'dash-1',
     });
     expect(result).toEqual({ content: 'data:image/jpeg;base64,x' });
+  });
+
+  it('delegates with an empty attachment list when the context provides none', async () => {
+    mockCaptureDashboardScreenshot.mockResolvedValue({ content: 'data:image/jpeg;base64,x' });
+
+    await tool.handler({ dashboardAttachmentId: 'dash-1' }, {});
+
+    expect(mockCaptureDashboardScreenshot).toHaveBeenCalledWith({
+      core,
+      attachments: [],
+      dashboardAttachmentId: 'dash-1',
+    });
   });
 });

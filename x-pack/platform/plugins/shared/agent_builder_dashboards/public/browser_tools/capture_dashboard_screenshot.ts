@@ -35,15 +35,14 @@ export const createCaptureDashboardScreenshotTool = ({
   schema: captureDashboardScreenshotSchema,
   returnsResult: true,
   resultType: 'image',
-  handler: async ({ dashboardAttachmentId }, { conversationId }) => {
-    if (!conversationId) {
-      throw new Error(
-        'Cannot capture a screenshot: the conversation has not been persisted yet, so the dashboard attachment cannot be resolved.'
-      );
-    }
+  handler: async ({ dashboardAttachmentId }, { attachments }) => {
     // The rendering + encoding machinery is heavy (DashboardRenderer, dom-to-image);
     // load it only when the tool actually runs.
     const { captureDashboardScreenshot } = await import('./capture');
-    return captureDashboardScreenshot({ core, conversationId, dashboardAttachmentId });
+    return captureDashboardScreenshot({
+      core,
+      attachments: attachments ?? [],
+      dashboardAttachmentId,
+    });
   },
 });

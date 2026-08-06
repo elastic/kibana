@@ -186,7 +186,10 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     isAwaitingPrompt,
   ]);
 
-  const browserToolHandlerContext = useMemo(() => ({ conversationId }), [conversationId]);
+  const browserToolHandlerContext = useMemo(
+    () => ({ conversationId, attachments: conversationAttachments }),
+    [conversationId, conversationAttachments]
+  );
 
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};

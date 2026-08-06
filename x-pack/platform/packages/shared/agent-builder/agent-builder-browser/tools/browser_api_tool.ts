@@ -6,6 +6,7 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { z, type ZodType } from '@kbn/zod/v4';
 
 /**
@@ -15,6 +16,12 @@ import { z, type ZodType } from '@kbn/zod/v4';
 export interface BrowserApiToolHandlerContext {
   /** Id of the conversation the tool call belongs to. Undefined for unsaved conversations. */
   conversationId?: string;
+  /**
+   * Attachments of the conversation the tool call belongs to, as streamed to the client.
+   * Includes attachments created during the current round, which may not be persisted yet —
+   * handlers must read attachments from here rather than fetching the stored conversation.
+   */
+  attachments?: VersionedAttachment[];
 }
 
 /**
