@@ -8,7 +8,8 @@ The evaluation system spans three packages:
 
 - `@kbn/evals-common` — shared schemas (OpenAPI-generated Zod types), constants, and Elasticsearch query builders. Used by both the plugin server routes and the CLI tooling in `@kbn/evals`.
 - `@kbn/evals` — dev-only CLI tooling for running offline evaluation suites against LLM-based workflows. Ingests evaluation score documents via the Kibana API and emits traces via OpenTelemetry.
-- `evals` plugin (this package) — Kibana server routes for experiment browsing, score ingestion, dataset management, tracing, and remote config, plus a React UI.
+- `@kbn/evals-runner` — server-safe runtime primitives shared between the plugin server and workflow steps (bounded-concurrency helpers, score-document builders, and the runner types). Unlike `@kbn/evals`, it is **not** dev-only, so it can be imported from production server code.
+- `evals` plugin (this package) — Kibana server routes for experiment browsing, score ingestion, dataset management, tracing, and remote config; custom Kibana Workflows steps for running experiments on the server; plus a React UI.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -73,12 +74,12 @@ node scripts/edot_collector
 
 The plugin reads from the following indices:
 
-| Index pattern                  | Source                | Contents                                |
-| ------------------------------ | --------------------- | --------------------------------------- |
-| `.evaluation-scores`           | Score ingestion API   | Evaluation score documents              |
-| `.evaluation-datasets`         | Datasets API          | Dataset metadata                        |
-| `.evaluation-dataset-examples` | Datasets API          | Dataset examples                        |
-| `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans               |
+| Index pattern                  | Source                | Contents                   |
+| ------------------------------ | --------------------- | -------------------------- |
+| `.evaluation-scores`           | Score ingestion API   | Evaluation score documents |
+| `.evaluation-datasets`         | Datasets API          | Dataset metadata           |
+| `.evaluation-dataset-examples` | Datasets API          | Dataset examples           |
+| `traces-*`                     | OTLP / EDOT collector | OpenTelemetry trace spans  |
 
 Run evaluation suites via the `@kbn/evals` CLI to populate the scores and traces indices. See the [`@kbn/evals` README](../../packages/shared/kbn-evals/README.md) for details.
 
@@ -88,12 +89,96 @@ The `@kbn/evals` CLI sends scores via `POST /internal/evals/scores` rather than 
 
 For a shared "golden cluster", set `EVAL_KBN_URL` (and optionally `EVAL_KBN_API_KEY`) to route score ingestion and dataset operations to a remote Kibana instance.
 
+## Workflow-based experiment execution
+
+In addition to the dev-only `@kbn/evals` CLI (which runs suites in CI), the plugin can run **experiments on the server** — from the "New experiment" UI, from Agent Builder, or from version-controlled workflow YAML. This is additive and does not change how evals run in CI.
+
+An **experiment** evaluates one task model against one or more datasets. Running the same configuration against several models produces multiple experiments you can compare.
+
+> Running experiments requires an **Enterprise** license (it runs on [Kibana Workflows](../../../../src/platform/plugins/shared/workflows_management)). When Workflows is unavailable, experiment execution is disabled; the rest of the plugin (browsing, ingestion, datasets, tracing) is unaffected.
+
+### Running experiments
+
+#### From the UI
+
+The **New experiment** button on the Experiments tab opens a form: choose one or more models to evaluate, what to evaluate (the task target), datasets, evaluators, and run options (repetitions, concurrency). Choosing two or more models produces one comparable experiment per model, and runs across many datasets are split up and run in parallel.
+
+"Run now" launches the run and opens the experiment detail page, which shows live progress and lets you cancel. "Save as workflow" instead persists a reusable workflow you can re-run later.
+
+#### From Agent Builder
+
+An `eval-experiment-authoring` skill lets you do the same thing from an Agent Builder chat: discover datasets, evaluators, task targets, and connectors, preview the experiment, then run it or save it as a workflow. It is available only when `xpack.evals.enabled` is set.
+
+#### From YAML
+
+You can also version-control an experiment as a workflow file and (re-)run it through Workflows Management — no UI required. A minimal single-model experiment:
+
+```yaml
+version: '1'
+name: Evaluate my-model
+description: Saved evaluation experiment
+enabled: true
+tags:
+  - evals
+  - evals-experiment
+settings:
+  timeout: 24h
+triggers:
+  - type: manual
+steps:
+  - name: start
+    type: ai.evals.startExperiment
+    with:
+      task_model:
+        id: my-model-connector-id
+  - name: evaluate
+    type: ai.evals.evaluateDataset
+    with:
+      experiment_id: '{{ steps.start.output.experiment_id }}'
+      execution_id: '{{ steps.start.output.execution_id }}'
+      connector_id: my-model-connector-id
+      dataset_ids:
+        - my-dataset-id
+      evaluators:
+        - name: correctness
+          connector_id: my-judge-connector-id # required for LLM evaluators
+      repetitions: 1
+      concurrency: 5
+```
+
+The full set of `ai.evals.*` steps:
+
+| Step                          | Purpose                                                        |
+| ----------------------------- | -------------------------------------------------------------- |
+| `ai.evals.startExperiment`    | Create the experiment/execution ids that group a run's scores. |
+| `ai.evals.resolveDataset`     | Load datasets and their examples.                              |
+| `ai.evals.executeTask`        | Run the thing being evaluated against one example.             |
+| `ai.evals.evaluateTrace`      | Grade one trace with one or more evaluators.                   |
+| `ai.evals.ingestScores`       | Persist evaluator scores for one example.                      |
+| `ai.evals.evaluateExample`    | Execute, evaluate, and ingest scores for a single example.     |
+| `ai.evals.evaluateDataset`    | Resolve datasets and evaluate every example (the main step).   |
+| `ai.evals.compareExperiments` | Statistically compare two or more experiments.                 |
+
+The Workflows YAML editor autocompletes and validates these steps and their inputs as you author.
+
+### What you can evaluate
+
+Each experiment runs one **task target** — the thing being evaluated for each example. Two are built in:
+
+| Task target                | Runs                                 |
+| -------------------------- | ------------------------------------ |
+| Direct inference (default) | A direct model call.                 |
+| Agent Builder agent        | An Agent Builder agent conversation. |
+
+Other plugins can contribute their own production feature as an additional target, so the real feature — not a reimplementation — is what gets evaluated.
+
 ## API routes
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
 
 - **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
-- **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. Supports remote forwarding to a configured golden-cluster Kibana.
+- **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
+- **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
 - **Scores** — bulk ingestion of evaluation score documents
 - **Examples** — per-example score history across experiments
 - **Traces** — span retrieval for a given trace ID
@@ -102,16 +187,29 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
 
+## Dataset tags and maturity
+
+Datasets carry two optional keyword fields for organization.
+
+- **`tags`** - up to 20 labels of at most 64 characters matching `^[a-zA-Z0-9][a-zA-Z0-9:._-]*$`; anything else is a 400. Stored lowercased and deduplicated, so `ESQL` and `esql` are one tag. Filtering by several tags matches datasets carrying _all_ of them.
+- **`maturity`** — `raw`, `cleaned`, or `golden`. Filtering by several levels matches _any_ of them.
+
+Writes are patch-like: a field omitted from a create, update, or upsert keeps its current value, so a suite can upsert examples without wiping tags curated in the UI. Send `tags: []` or `maturity: null` to clear.
+
+The listing also returns `facets` — the distinct tags and maturity levels with dataset counts. They follow the search term but ignore the active tag and maturity filters, so filter options stay stable as they are toggled.
+
+Concurrent writes are guarded with optimistic concurrency, so a suite adding examples cannot roll back tags saved from the UI while it was running. If many writers contend for the same dataset and the retries run out, a write that only refreshes `examples_count` is skipped and logged (the count catches up on the next change), while a metadata change that could not be applied fails the request rather than disappearing.
+
 ## Instrumentation profiles
 
 Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate`; when omitted, **`elastic-inference`** is used.
 
-| Profile | `user_query` | `agent_response` | `tool_calls` |
-| --- | --- | --- | --- |
-| `elastic-inference` (default) | LLM spans, `gen_ai.input.messages` (`genai_messages`) | LLM spans, `gen_ai.output.messages` (`genai_messages`) | TOOL spans via Elastic inference span kind |
-| `otel-genai-attributes` | Trace attributes `gen_ai.input.messages` (`genai_messages`) | Trace attributes `gen_ai.output.messages` (`genai_messages`) | `execute_tool` spans |
-| `otel-genai-events` | Log event `gen_ai.user.message` (string) | Log event `gen_ai.choice` (string) | `execute_tool` spans |
-| `claude-code` | Log event `user_prompt` (string) | Log event `api_response_body` (`anthropic_message`) | `claude_code.tool` spans (`prefixed_json`) |
+| Profile                       | `user_query`                                                | `agent_response`                                             | `tool_calls`                               |
+| ----------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
+| `elastic-inference` (default) | LLM spans, `gen_ai.input.messages` (`genai_messages`)       | LLM spans, `gen_ai.output.messages` (`genai_messages`)       | TOOL spans via Elastic inference span kind |
+| `otel-genai-attributes`       | Trace attributes `gen_ai.input.messages` (`genai_messages`) | Trace attributes `gen_ai.output.messages` (`genai_messages`) | `execute_tool` spans                       |
+| `otel-genai-events`           | Log event `gen_ai.user.message` (string)                    | Log event `gen_ai.choice` (string)                           | `execute_tool` spans                       |
+| `claude-code`                 | Log event `user_prompt` (string)                            | Log event `api_response_body` (`anthropic_message`)          | `claude_code.tool` spans (`prefixed_json`) |
 
 Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/evaluators/evidence/profiles.ts).
 
@@ -119,8 +217,8 @@ Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/ev
 
 The plugin UI is organized into four navigation tabs:
 
-- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results
-- **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor)
+- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results. The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
+- **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view
 - **Remotes** — configure remote Kibana instances for cross-cluster dataset management
 

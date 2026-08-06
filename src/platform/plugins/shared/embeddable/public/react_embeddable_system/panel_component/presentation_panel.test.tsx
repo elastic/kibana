@@ -97,10 +97,6 @@ describe('Presentation panel', () => {
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith('PANEL_BADGE_TRIGGER', {
         embeddable: api,
       });
-      expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
-        'PANEL_NOTIFICATION_TRIGGER',
-        { embeddable: api }
-      );
     });
 
     it('calls the custom getActions function when one is provided', async () => {
@@ -109,7 +105,7 @@ describe('Presentation panel', () => {
         ...defaultProps,
         getActions,
       });
-      expect(getActions).toHaveBeenCalledTimes(3);
+      expect(getActions).toHaveBeenCalledTimes(2);
       expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledTimes(0);
     });
 
@@ -134,7 +130,7 @@ describe('Presentation panel', () => {
       expect(screen.queryByTestId('embeddablePanelAction-actionA')).not.toBeInTheDocument();
     });
 
-    it('shows badges and notifications', async () => {
+    it('shows badges', async () => {
       const testAction = mockAction('testAction');
       const getActions = jest.fn().mockReturnValue([testAction]);
       await renderPresentationPanel({
@@ -142,7 +138,6 @@ describe('Presentation panel', () => {
         getActions,
       });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
-      expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
     });
 
     it('does not show badges when showBadges is false', async () => {
@@ -154,21 +149,6 @@ describe('Presentation panel', () => {
         showBadges: false,
       });
       expect(screen.queryByTestId('embeddablePanelBadge-testAction')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('embeddablePanelNotification-testAction')).toBeInTheDocument();
-    });
-
-    it('does not show notifications when showNotifications is false', async () => {
-      const testAction = mockAction('testAction');
-      const getActions = jest.fn().mockReturnValue([testAction]);
-      await renderPresentationPanel({
-        ...defaultProps,
-        getActions,
-        showNotifications: false,
-      });
-      expect(screen.queryByTestId('embeddablePanelBadge-testAction')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('embeddablePanelNotification-testAction')
-      ).not.toBeInTheDocument();
     });
   });
 

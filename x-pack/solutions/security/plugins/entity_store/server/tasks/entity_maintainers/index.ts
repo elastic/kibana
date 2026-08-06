@@ -26,6 +26,7 @@ import { entityMaintainersRegistry } from './entity_maintainers_registry';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { executeMaintainerRun } from './execution';
+import { shouldDeleteOrphanedEntityStoreTask } from '../should_delete_orphaned_task';
 
 /** Used when `RegisterEntityMaintainerConfig.minLicense` is omitted (minimum Kibana tier). */
 export const DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE: LicenseType = 'basic';
@@ -48,6 +49,7 @@ export async function scheduleEntityMaintainerTask({
   namespace,
   request,
   enabled,
+  taskStatus = EntityMaintainerTaskStatus.STARTED,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -56,6 +58,7 @@ export async function scheduleEntityMaintainerTask({
   namespace: string;
   request: KibanaRequest;
   enabled?: boolean;
+  taskStatus?: EntityMaintainerTaskStatus;
 }): Promise<void> {
   logger.debug(`Scheduling entity maintainer task: ${id}`);
   await taskManager.ensureScheduled(
@@ -63,7 +66,7 @@ export async function scheduleEntityMaintainerTask({
       id: getTaskId(id, namespace),
       taskType: getTaskType(id),
       schedule: { interval },
-      state: { namespace, taskStatus: EntityMaintainerTaskStatus.STARTED },
+      state: { namespace, taskStatus },
       params: {},
       enabled: enabled ?? true,
     },
@@ -110,9 +113,24 @@ export function registerEntityMaintainerTask({
             title,
             description,
             timeout: effectiveTimeout,
-            createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+            createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
               run: async () => {
                 const status = taskInstance.state;
+                const namespace =
+                  (typeof status?.metadata?.namespace === 'string'
+                    ? status.metadata.namespace
+                    : undefined) ??
+                  (typeof status?.namespace === 'string' ? status.namespace : undefined);
+
+                if (
+                  await shouldDeleteOrphanedEntityStoreTask({
+                    coreStart,
+                    namespace,
+                    logger,
+                  })
+                ) {
+                  return { state: status, shouldDeleteTask: true };
+                }
 
                 if (!fakeRequest) {
                   logger.error(`No fake request found, skipping run`);
@@ -123,7 +141,7 @@ export function registerEntityMaintainerTask({
                   status,
                   request: fakeRequest,
                   taskId: taskInstance.id,
-                  taskAbortController: abortController,
+                  signal,
                   id,
                   run,
                   setup,

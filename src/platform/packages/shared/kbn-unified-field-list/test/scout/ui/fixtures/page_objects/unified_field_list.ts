@@ -89,12 +89,18 @@ export class UnifiedFieldList {
     });
   }
 
+  private async waitUntilSidebarIsVisible(): Promise<void> {
+    await this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .waitFor({ state: 'visible' });
+  }
+
   async searchField(name: string): Promise<void> {
-    await this.waitUntilSidebarHasLoaded();
+    await this.waitUntilSidebarIsVisible();
     const searchInput = this.page.testSubj.locator('fieldListFiltersFieldSearch');
     await searchInput.fill(name);
     await expect(searchInput).toHaveValue(name);
-    await this.waitUntilSidebarHasLoaded();
+    await this.waitUntilSidebarIsVisible();
   }
 
   async getAvailableFieldCount(): Promise<number> {
@@ -186,10 +192,35 @@ export class UnifiedFieldList {
   }
 
   /**
+   * Remove a field from the selected fields
+   */
+  async clickFieldListItemRemove(field: string): Promise<void> {
+    if (!(await this.isFieldSelected(field))) {
+      return;
+    }
+
+    await this.page.testSubj.click(`fieldToggle-${field}`);
+
+    await this.page.testSubj
+      .locator('fieldListGroupedSelectedFields')
+      .locator(`[data-test-subj="field-${field}"]`)
+      .waitFor({ state: 'hidden' });
+  }
+
+  /**
    * Click a field list item to open details
    */
   async clickFieldListItem(field: string): Promise<void> {
-    await this.page.testSubj.click(`field-${field}`);
+    await this.getAvailableField(field).click();
+  }
+
+  getFieldDescription(field: string) {
+    return this.page.testSubj.locator(`fieldDescription-${field}`);
+  }
+
+  async closeFieldPopover(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'hidden' });
   }
 
   async openFieldEditor(field: string): Promise<void> {

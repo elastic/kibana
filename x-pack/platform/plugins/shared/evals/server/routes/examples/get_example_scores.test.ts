@@ -10,7 +10,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXAMPLE_SCORES_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXAMPLE_SCORES_URL, API_VERSIONS, buildSpaceFilter } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -65,7 +65,7 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       expect.objectContaining({
         query: {
           bool: {
-            must: [{ term: { 'example.id': 'example-123' } }],
+            must: [{ term: { 'example.id': 'example-123' } }, buildSpaceFilter('default')],
           },
         },
         size: 10000,

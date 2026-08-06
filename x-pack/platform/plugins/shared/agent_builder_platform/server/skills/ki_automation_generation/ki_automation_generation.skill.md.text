@@ -9,7 +9,7 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 ## What a KI is
 
 A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream.
-Use `.ai-index-ds-*` for timeseries KIs, `.ai-index-idx-*` otherwise.
+Use `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise.
 See the index templates for those prefixes for field details.
 
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
@@ -34,10 +34,18 @@ Apply these when deciding what KIs to generate and what each one should contain.
    and query templates. The agent traverses at ask-time for fresh values. Materialize a literal
    answer inside a KI **only for immutable facts** (e.g. a resolved case's root cause). Never
    materialize volatile facts (status, priority, counts, dates) — they rot and produce confidently
-   wrong answers. For those, provide an access pattern that reads live data.
+   wrong answers. For those, provide an access pattern that reads live data. Immutability implies a
+   **durability tier**: immutable-fact KIs are durable (omit `attributes.expires_at` so they never age out);
+   anything you cache that *can* drift gets a short TTL and is refreshed on re-run.
 
 3. **Access patterns must be grounded and validated.** Build every query from the index's real
-   mapping and sample documents — never invented field names. 
+   mapping and sample documents — never invented field names. Two query forms are both legitimate:
+   **parameterized templates** for "fill-in-the-blank" question-classes (the agent supplies the
+   value at ask-time), and **complete, runnable queries** for named detection conditions. Detection
+   KIs invert the usual "precompute the path, not the value" rule — they materialize the whole query
+   because the *condition* (not a volatile value) is the stable thing. Whichever form you use, ground
+   every threshold and field name in the observed data distributions (see `stats_distribution`
+   grounding step) before writing the query.
 
 4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
    eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
@@ -47,6 +55,12 @@ Apply these when deciding what KIs to generate and what each one should contain.
 5. **Keep a fallback.** A finite set of KIs cannot anticipate every question. If no KI fits,
    the agent falls back and queries raw data directly. KIs accelerate retrieval; they do not
    replace it.
+
+6. **Derive, don't ask.** Anything you can compute deterministically from the data or the query
+   text, compute it — don't ask the LLM to produce it. E.g. derive a detection's `query_type`
+   (`match` vs `stats`) by parsing the ES|QL, not by asking the model. The LLM's job is judgement
+   (what matters, why), not mechanical classification it will occasionally get wrong. Same instinct
+   applies to dedup and validation: enforce them in the workflow, not solely in the prompt.
 
 ## Access patterns
 
@@ -62,6 +76,10 @@ Access patterns:
 ```
 
 Keep example queries cheap: end with a small `| LIMIT n`.
+
+**ES|QL rules:** For detection KIs the full query is materialized, not parameterised, so these forms are allowed and expected:
+- `FROM <index> METADATA _id, _source` — carry document identity/source through the pipeline so detections can point back to the originating docs.
+- The full-text `field : "value"` (`: match`) operator — e.g. `WHERE message : "connection refused"` — for text-matching detection conditions in addition to `==`/`STATS`.
 
 **Connector sources — execute_connector_sub_action call:**
 ```
@@ -85,8 +103,9 @@ Choose the strategy (or combination) that fits the data source and question type
 | **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
 | **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
 | **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
+| **Detection / Feature ** | One detection KI per named condition; one feature KI per entity/dependency | Observability indices (logs, APM, metrics) where you need named, runnable detection conditions and structured feature extractions rather than per-document KIs. |
 
-Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier + Detection/Feature; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
 
 ## Available tools
 
@@ -227,12 +246,27 @@ The AI Index schema has these base fields (all required unless noted):
 
 | Field | Type | Purpose |
 |---|---|---|
-| `type` | keyword | Useful for categorization and grouping |
+| `type` | keyword | The **KI kind** — the top-level discriminator agents and queries filter on. Set it to the kind of KI this doc represents, e.g. `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value (see the per-strategy mapping under "Workflow shapes for each strategy"). **Not** the same as `query_type` (`match`/`stats`, a detection attribute) or `subtype` (a feature's `entity`/`dependency`/… class). |
 | `title` | text + semantic | Short display name; primary semantic surface |
 | `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins |
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
-| `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
+| `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on. Also holds every quality, grounding, and lifecycle field (`confidence`, `coverage`, `evidence`, `expires_at`, `excluded`, …) — see below. |
+| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Required top-level field for `ai-index-ds-*` datastreams. |
+
+**Everything else lives inside `attributes`.** Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
+
+| Field (under `attributes`) | Type | Purpose |
+|---|---|---|
+| `attributes.confidence` | number 0–1 (keyword under `flattened`) | **Correctness** — how sure we are the KI's facts are right, calibrated to evidence strength (see the calibration bands under "Quality & grounding contract"). Distinct from `coverage`. |
+| `attributes.coverage` | number 0–1 (keyword under `flattened`) | **Completeness** — how fully the KI's access patterns cover the source's question-classes, emitted by the profiling step. Lets agents prefer better-covered KIs when routing. Optional; most meaningful for Index Metadata KIs. Because `flattened` indexes values as keywords, cast with `TO_DOUBLE(attributes.coverage)` before any numeric sort/range in ES\|QL. |
+| `attributes.evidence` | string[] | Observed values that justify a materialized detection/fact; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
+| `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(attributes.expires_at)` in ES\|QL. |
+| `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
+
+Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
+
+**Required fields note**: only `@timestamp` is a declared top-level field you must write from the `sink_index_ki` step (set it to the current ISO date). Everything else — `confidence`, `coverage` (if you emit it), and the lifecycle fields — is written *inside* `attributes` and needs no mapping declaration, since `attributes` is `flattened`.
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
@@ -244,10 +278,16 @@ Use it for strategy-specific structured output: status, severity, themes, produc
 
 ```yaml
 id:          <index name or connector_id>
-type:        <type>
+type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "feature">
 title:       <display_name>
 tags:        [...]
+@timestamp:  <ISO date when KI was last profiled, e.g. "2025-07-21T10:00:00Z">
 attributes:
+  # Quality & lifecycle metadata (all under attributes — no declared mappings needed):
+  confidence:      <0.0–1.0 calibrated correctness score (see grounding contract)>
+  coverage:        <0.0–1.0 completeness score from profile_index (optional)>
+  expires_at:      "2025-08-20T10:00:00Z"   # omit for durable (immutable-fact) KIs
+  evidence:        ["~20% of spans are errors (1,204 / 6,033)"]
   # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
   key_fields:      [case_number, status, priority]
@@ -278,6 +318,38 @@ description: |
   <Shorter description/summary of the KI>
 ```
 
+## Quality & grounding contract
+
+These apply to **every** strategy — they are properties of a good KI, not of one recipe. Bake them
+into the `ai.prompt` instructions and the sink steps.
+
+**Non-empty grounding gate.** Do not emit a KI you cannot back with at least one stable identifying
+property *and* concrete evidence from the sampled data. A KI with no grounding is a hallucination
+with a confidence score — drop it rather than ship it.
+
+**Calibrated confidence.** Set `confidence` (0–1) on a shared scale, tied to evidence strength rather than an ad-hoc estimate:
+
+| Band | Meaning |
+|---|---|
+| 0.9–1.0 | Explicit, unambiguous evidence |
+| 0.7–0.89 | Strong pattern, multiple corroborating signals |
+| 0.5–0.69 | Clear indicators, some ambiguity |
+| 0.3–0.49 | Weak inference — must be tagged `inferred` in `tags` |
+| < 0.3 | Do not emit |
+
+**Evidence discipline.** Provide 2–5 short, specific `evidence[]` strings that quote real observed
+values in `field.path=value` notation (e.g. `service.name=checkout`, `error.type=timeout (312/1,204)`).
+When a KI is derived from specific documents, record the **minimal covering set** of source `_id`s
+(one per distinct source doc, not one per evidence string) — enough to trace every claim, no more.
+
+**Dedup & merge (not blind overwrite).** Idempotent upsert by a stable `id` catches only *exact*
+id collisions. Also treat two KIs as duplicates when they share a **fingerprint** — same `type` +
+`subtype` + same structured `attributes` — even if titles or slugs differ slightly. Derive the id
+from a normalized natural key (trim + lowercase the slug) so cosmetic variation collapses to one id.
+On a collision, **merge** rather than overwrite: union `evidence`/`tags`, average `confidence`, keep
+the richer `description`, shallow-merge `attributes`. This matters most for Cumulative / Wiki-style
+KIs (which enrich the same entity across runs) and for any scheduled re-run.
+
 ## Workflow quality checklist
 
 Before presenting any workflow to the user:
@@ -286,18 +358,26 @@ Before presenting any workflow to the user:
 - [ ] Steps ordered logically within foreach: reads before AI step
 - [ ] Pilot LIMIT is set to 1–3 outputs
 - [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
-- [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
+- [ ] Grounding contract honored: non-empty grounding gate, calibrated `confidence` bands, 2–5 `field=value` evidence strings (see "Quality & grounding contract")
+- [ ] `id` on `elasticsearch.index` is a stable value from a normalized natural key; collisions **merge** (union evidence/tags, average confidence) rather than blind-overwrite
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
+- [ ] `@timestamp` (the one declared extra top-level field) is written by `sink_index_ki`; `confidence`, `coverage` (if emitted), `evidence`, and `expires_at` are written *inside* `attributes` — never as top-level fields
+- [ ] Detection KIs carry the complete runnable query (not a template) in `content`; `query_type` is derived from the ES|QL, not LLM-supplied; every threshold + `evidence[]` string quotes an observed distribution; sample-floor + precision-first guardrails applied
+- [ ] `attributes.expires_at` (~30 days) is written to expiring KIs and **omitted** for durable (immutable-fact) KIs
+- [ ] Expiry-based freshness guard is implemented when the workflow runs on a schedule
 
 ## Workflow shapes for each strategy
 
 Use these descriptions as input to `platform.core.generate_workflow`. Do not submit YAML directly
 to the tool — describe the workflow in natural language using these shapes as the spec.
 
+Set the KI `type` field to the stable value for the strategy: Index Metadata → `index_metadata`; Bottom-Up → `document`; Selective / Outlier → `event`; Atomic Facts → `fact`; Cumulative / Wiki-style → `entity`; Detection / Feature → `detection` and `feature` respectively.
+
 **Index Metadata:**
 A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
-`elasticsearch.search` size 20 for sample docs, `ai.prompt` producing display_name, purpose,
+`elasticsearch.search` size 20 for sample docs using `function_score` with `random_score` (so
+each run samples different records rather than always returning the first-ingested documents), `ai.prompt` producing display_name, purpose,
 answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
 with question_type, esql_template, esql_example, params, returns). Then `elasticsearch.index`
 writing the KI document.
@@ -343,6 +423,42 @@ KI including access_patterns using `execute_connector_sub_action` syntax. `elast
 to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
+
+**Detection / Feature:**
+Targets Observability indices (logs, APM, metrics). It runs **two complementary profiling passes** in a single workflow — one for detection (query) KIs, one for feature (knowledge) KIs — so the two concerns stay independent and either can be tuned without disturbing the other.
+
+*Pre-analysis grounding (before either `ai.prompt`):* These feed the profiler real distributions so it sets **data-driven thresholds instead of guessing**.
+1. `sample_error_logs` — `elasticsearch.search` with `function_score` + `random_score`, filtered to error records (e.g. `attributes.processor.event == "error"`, or `log.level == "error"` for log streams), size 20. Use `FROM <index> METADATA _id, _source` so the sample carries doc identity.
+2. `log_patterns` — an `elasticsearch.esql.query` using `CATEGORIZE` to cluster messages into templates (e.g. `FROM <index> | STATS count = COUNT() BY pattern = CATEGORIZE(message) | SORT count DESC | LIMIT 25`), so the profiler sees the recurring message shapes rather than raw lines.
+3. `stats_distribution` — an `elasticsearch.esql.query` aggregating field-level distributions and totals: error types, log levels, host/service counts, error-vs-total ratios (e.g. `FROM <index> | STATS count = COUNT() BY error.type, log.level | SORT count DESC | LIMIT 50`). These observed counts are what every threshold and every `evidence[]` string must quote.
+
+*Pass 2a — detection (query) profiling:* An `ai.prompt` fed all three grounding results, emitting `detections[]`. Fan out one `elasticsearch.index` doc per detection. Each entry: `{ title, description, esql (complete runnable ES|QL — NOT a template), severity_score (0–1) }`. Put the complete `esql` into `content` as a materialized access pattern; **derive `query_type` (`match`/`stats`) from the ES|QL itself** (principle #6 — parse for a `STATS` command) rather than asking the model, and mirror `query_type` + `severity_score` into `attributes`. The `description` **must state the threshold and its baseline rationale** (e.g. "fires when error rate exceeds 20%, ~2× the observed baseline of ~10%"). Every threshold and every `evidence[]` string must be directly justified by a value from `stats_distribution` / `log_patterns` — no invented numbers.
+
+Detection guardrails (bake into the prompt):
+- **Sample floor.** A ratio-based detection must guard its denominator — e.g. `WHERE total > 20` (or `attempts >= 50`) — so it can't fire on a handful of documents. Tiny-denominator "spikes" are the dominant false-positive source.
+- **Precision over recall.** Prefer zero firings to false positives: set thresholds above the observed baseline with margin, not at it.
+- **Caps.** At most one `STATS` detection per distinct failure dimension, and a small cap (≈3) on detections per signal — resist emitting near-duplicate conditions.
+
+*Pass 2b — feature (knowledge) profiling:* A **separate** `ai.prompt` pass over the same grounding, emitting `features[]`. Fan out one `elasticsearch.index` doc per feature. Each entry: `{ title, description, subtype, slug (stable id), confidence (0–1), evidence_doc_ids[] (source `_id`s from the sample) }`. Put `subtype`, `slug`, `evidence_doc_ids`, and `confidence` into `attributes`. Choose whatever `subtype` values fit the data (for Observability, e.g. `entity`/`dependency`/`technology`/`schema`) — this is free-form strategy output, not a fixed schema.
+
+> **`feature` vs. `entity` (Cumulative / Wiki-style):** these are deliberately different granularities and can coexist. A `feature` KI is a lightweight **inventory / orientation** signal from a single profiling pass — "this index *contains* a service called `checkout`", "it *depends on* Postgres" — answering "what exists in this data?". A Cumulative `entity` KI is a deep **per-instance dossier** enriched over many runs — everything known about one specific entity — answering "tell me everything about X". Reach for `feature` to map the shape of an index; reach for Cumulative when an entity deserves its own evolving profile. If a `feature/entity` grows into a full dossier, promote it to a Cumulative `entity` KI.
+
+*Sinking:*
+- `sink_detection_ki` — `elasticsearch.index` with `id = <index>/<slug-of-title>`, `type = "detection"`, `@timestamp` (top-level), `content` (with the materialized query), and `attributes` (query_type, severity_score, confidence, evidence, expires_at).
+- `sink_feature_ki` — `elasticsearch.index` with `id = <index>/<slug>`, `type = "feature"`, `@timestamp` (top-level), `content`, and `attributes` (subtype, slug, evidence_doc_ids, confidence, evidence, expires_at).
+
+*Lifecycle and dedup:*
+- Set `attributes.expires_at` ~30 days from now; agents and the freshness guard treat an expired KI as stale, so a detection whose condition no longer appears in the data simply ages out.
+- **Expiry-based freshness guard** (not the simple `@timestamp` recency check Strategy 1 uses): before the grounding steps, query the target for the newest non-expired KI for this source index — `attributes.expires_at` is a `flattened` (keyword) string, so compare it as `WHERE TO_DATETIME(attributes.expires_at) > NOW()`; if one exists, skip the profiling run entirely.
+- Cross-run dedup: index with a stable `id = <index>/<normalized-slug>` so a re-run resolves to the same KI, and apply the fingerprint + merge rules from the grounding contract so near-duplicate detections/features (same condition, slightly different title) collapse into one rather than accumulating.
+
+## Adapting the recipe
+
+- **Scheduling:** When the workflow runs on a schedule, query `FROM <target_index> | WHERE id == "<index_name>" | KEEP @timestamp` to retrieve the KI's last-profiled date. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
+
+- **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, `coverage` meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
+
+- **Validate-and-repair broken `esql_example`:** The access-pattern validation step sets `on-failure.continue: true` so a broken query does not halt the workflow. When a query fails, do not ship the broken example silently. Use `platform.core.generate_esql` to repair it — pass the failing query, the error message, and the index mapping as context — then replace the original `esql_example` with the repaired query before indexing the KI.
 
 ## Handling edge cases
 

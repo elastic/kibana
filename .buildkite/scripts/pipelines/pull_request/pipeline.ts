@@ -24,6 +24,8 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
+  getPrChangesCached,
+  isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
@@ -62,6 +64,19 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       return;
     }
 
+    // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
+    const prChanges = await getPrChangesCached();
+    const scoutTestsOnly = isScoutTestsOnlyDiff(
+      prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      )
+    );
+    if (scoutTestsOnly) {
+      console.warn(
+        'Scout-tests-only diff detected — skipping OAS Snapshot, API Contracts, and Saved Objects checks'
+      );
+    }
+
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
     if (await doAllChangesMatch(/^renovate\.json$/)) {
@@ -74,7 +89,14 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+
+    // Gated together: check_api_contracts depends_on check_oas_snapshot.
+    if (!scoutTestsOnly) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml', cancelable)
+      );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+    }
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
@@ -640,9 +662,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     // Run Saved Objects checks systematically
-    pipeline.push(
-      getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
-    );
+    if (!scoutTestsOnly) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
+      );
+    }
 
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
     if (

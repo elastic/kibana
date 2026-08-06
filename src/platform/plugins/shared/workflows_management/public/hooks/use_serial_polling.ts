@@ -13,12 +13,7 @@ export interface UseSerialPollingParams {
   poll: () => Promise<unknown>;
   intervalMs: number | (() => number);
   enabled?: boolean;
-  /** When false, waits one interval before the first poll (use when an initial fetch already ran). */
   immediate?: boolean;
-  /**
-   * Restarts the polling loop when this value changes (e.g. a new execution id).
-   * Required when shouldStop can end the loop and the polled resource identity changes.
-   */
   pollKey?: string | number | boolean | null | undefined;
   shouldStop?: () => boolean;
 }
@@ -26,10 +21,6 @@ export interface UseSerialPollingParams {
 const resolveIntervalMs = (intervalMs: number | (() => number)): number =>
   typeof intervalMs === 'function' ? intervalMs() : intervalMs;
 
-/**
- * Polls serially: await poll(), then sleep(interval), then repeat.
- * At most one in-flight poll at a time; the next request starts only after the previous finishes.
- */
 export const useSerialPolling = ({
   poll,
   intervalMs,
@@ -59,11 +50,7 @@ export const useSerialPolling = ({
 
       while (!cancelled) {
         if (immediate || !isFirstIteration) {
-          try {
-            await pollRef.current();
-          } catch {
-            // Continue polling after interval on failure.
-          }
+          await pollRef.current().catch(() => undefined);
 
           if (cancelled || shouldStopRef.current()) {
             break;

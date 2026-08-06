@@ -1,0 +1,261 @@
+{
+  "sha1": "8820b251af80ad5106f85dd5f87e68138fa18d5b",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "2cda671208260e5-f1016fdba9c4fd3",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 25,
+        "column": 43
+      }
+    },
+    {
+      "id": "2cda671208260e5-09c2af8ec6f0579",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets deduplicates repeated indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 52,
+        "column": 11
+      }
+    },
+    {
+      "id": "2cda671208260e5-a83f5cc96bfd2e0",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets rejects requests with too many indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 89,
+        "column": 14
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-636502cc6b4aab7",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 31,
+        "column": 27
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-80d2384ccc7cf39",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices deduplicates fields with identical specifications without multiplying errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 54,
+        "column": 17
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-321984b4d3b12c2",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with duplicate field names that have conflicting specifications",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 81,
+        "column": 17
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-4f0585f79a79c69",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices returns errors in a deterministic order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 114,
+        "column": 65
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-8e5be94eacdeeed",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with too many indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 144,
+        "column": 11
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-580a4e38c30b335",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with too many fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 167,
+        "column": 14
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-2f2a07b2a54ca12",
+      "title": "Metrics Explorer API works for multiple metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 18,
+        "column": 76
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-6cdeeab251efa2c",
+      "title": "Metrics Explorer API applies filterQuery to data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 61,
+        "column": 33
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-db7a97ed5478e5f",
+      "title": "Metrics Explorer API works for empty metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 102,
+        "column": 5
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-58c582dc928a3f4",
+      "title": "Metrics Explorer API works for custom metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-34d1752efbd9822",
+      "title": "Metrics Explorer API works with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 192,
+        "column": 18
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-3441251c1284cca",
+      "title": "Metrics Explorer API works with multiple groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 239,
+        "column": 23
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-8464d7187ba38e1",
+      "title": "Metrics Explorer API returns 400 when requesting more than 20 metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 290,
+        "column": 10
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-5da5489abcb4d97",
+      "title": "Metrics Explorer API works when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 322,
+        "column": 18
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-381e2cbcdc9c5b0",
+      "title": "Metrics Explorer API works when there is no data with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 351,
+        "column": 12
+      }
+    }
+  ]
+}

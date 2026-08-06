@@ -8,37 +8,38 @@
  */
 
 import type { ScoutPage } from '..';
-import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
-const normalizeComputedColor = (color: string | undefined): string | undefined => {
-  if (!color) {
-    return undefined;
-  }
-
-  const rgbMatch = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-  if (rgbMatch) {
-    return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, 1)`;
-  }
-
-  return color;
-};
+/**
+ * Default timeout for `page.waitForFunction` readiness waits.
+ */
+const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 
 export class LensApp {
-  private readonly lensApp;
+  readonly lensApp;
+  readonly saveAndReturnButton;
+  readonly saveButton;
+  readonly saveModal;
+  readonly savedObjectTitleInput;
+  readonly confirmSaveButton;
+  /**
+   * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
+   * as well as `closeDimensionEditor` here.
+   */
+  protected readonly closeDimensionEditorButton;
+  readonly applyFlyoutButton;
+  readonly cancelFlyoutButton;
+  protected readonly codeEditor: KibanaCodeEditorWrapper;
+
   private readonly chartSwitchPopover;
   private readonly chartSwitchList;
-  private readonly saveAndReturnButton;
-  private readonly saveButton;
-  private readonly saveModal;
-  private readonly savedObjectTitleInput;
-  private readonly confirmSaveButton;
-  private readonly closeDimensionEditorButton;
-  public readonly applyChangesButton;
-  private readonly goBackToAppButton;
-  private readonly discardChangesModal;
-  private readonly confirmModalConfirmButton;
+  /**
+   * Formula Monaco textarea — Lens has no data-test-subj on the editor input.
+   * Note: `lnsFormulaWidget` is the overflow/suggest portal on `document.body`, not the editor.
+   */
+  private readonly formulaEditorTextarea;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(protected readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
     this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
     this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
@@ -50,19 +51,16 @@ export class LensApp {
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
-    this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
-    this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
-    this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
-    this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.formulaEditorTextarea = this.page.locator(
+      '.lnsFormula__editorContent .monaco-editor textarea'
+    );
+    this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
+    this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
+    this.codeEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
   async waitForLensApp() {
-    await this.lensApp.waitFor({ state: 'visible' });
-  }
-
-  async openFullEditor() {
-    await this.page.gotoApp('lens');
-    await this.waitForLensApp();
+    await this.lensApp.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   /**
@@ -78,24 +76,22 @@ export class LensApp {
       await searchInput.waitFor({ state: 'visible' });
       await searchInput.fill(options.search);
     }
-    await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
+    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    // Popover should close after selection; waiting avoids racing with subsequent assertions.
+    await this.chartSwitchList.waitFor({ state: 'hidden' });
   }
 
-  async applyFlyoutChanges() {
-    const applyFlyoutButton = this.getApplyFlyoutButton();
-    await applyFlyoutButton.scrollIntoViewIfNeeded();
-    await applyFlyoutButton.click();
-    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
+  private async openChartSwitchPopover() {
+    await this.chartSwitchPopover.click();
+    await this.chartSwitchList.waitFor({ state: 'visible' });
   }
 
-  async cancelFlyoutChanges() {
-    await this.getCancelFlyoutButton().click();
-    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
-  }
-
-  async applyChanges() {
-    await this.applyChangesButton.click();
-    await expect(this.applyChangesButton).toBeHidden();
+  /** Returns the chart type label shown in the chart switcher popover. */
+  async getChartSwitchType(): Promise<string> {
+    await this.chartSwitchPopover.waitFor({ state: 'visible' });
+    return (await this.chartSwitchPopover.innerText()).trim();
   }
 
   /**
@@ -105,22 +101,13 @@ export class LensApp {
   async saveAndReturn() {
     await this.saveAndReturnButton.waitFor({ state: 'visible' });
     await this.saveAndReturnButton.click();
-    await expect(this.lensApp).toBeHidden();
+    await this.lensApp.waitFor({ state: 'hidden' });
     await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
-  }
-
-  async goBackToPreviousApp() {
-    await this.goBackToAppButton.click();
-  }
-
-  async confirmDiscardChangesModal() {
-    await this.discardChangesModal.waitFor({ state: 'visible' });
-    await this.confirmModalConfirmButton.click();
   }
 
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms.
+   * a dashboard target, and confirms. Waits for the modal to close.
    */
   async save(
     title: string,
@@ -153,7 +140,18 @@ export class LensApp {
     }
 
     await this.confirmSaveButton.click();
-    await expect(this.saveModal).toBeHidden();
+    await this.saveModal.waitFor({ state: 'hidden' });
+  }
+
+  async applyFlyoutChanges() {
+    await this.applyFlyoutButton.scrollIntoViewIfNeeded();
+    await this.applyFlyoutButton.click();
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
+  }
+
+  async cancelFlyoutChanges() {
+    await this.cancelFlyoutButton.click();
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
   async configureXYDimensions(options?: {
@@ -191,109 +189,156 @@ export class LensApp {
     dimension: string;
     operation: string;
     field?: string;
+    formula?: string;
+    isPreviousIncompatible?: boolean;
     palette?: { mode: 'legacy' | 'colorMapping'; id: string };
+    disableEmptyRows?: boolean;
     keepOpen?: boolean;
   }) {
     await this.openDimensionSelector(opts.dimension);
-    await this.selectOperation(opts.operation);
+    if (opts.operation === 'formula') {
+      await this.switchToFormula();
+    } else {
+      await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
+    }
     if (opts.field) {
       await this.selectField(opts.field);
     }
+    if (opts.formula) {
+      await this.typeInFormula(opts.formula, { replace: true });
+    }
     if (opts.palette) {
       await this.setPalette(opts.palette.id, opts.palette.mode === 'legacy');
+    }
+    if (opts.disableEmptyRows) {
+      await this.setEuiSwitch('indexPattern-include-empty-rows', false);
     }
     if (!opts.keepOpen) {
       await this.closeDimensionEditor();
     }
   }
 
-  async closeDimensionEditorPanel() {
-    await this.closeDimensionEditor();
+  private async openDimensionSelector(dimension: string) {
+    await this.page.testSubj.locator(dimension).click();
+    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
   }
 
-  /** Closes the open dimension editor flyout. */
-  async closeDimensionEditor() {
-    await this.closeDimensionEditorButton.click();
-    await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
+  async switchToFormula() {
+    await this.page.testSubj.click('lens-dimensionTabs-formula');
   }
 
-  /** Removes all dimensions from the given panel, polling until none remain. */
-  async removeAllDimensions(dimensionTestSubj: string) {
-    const removeLocator = this.page.testSubj.locator(
-      `${dimensionTestSubj} > indexPattern-dimension-remove`
+  async selectOperation(operation: string, isPreviousIncompatible = false) {
+    const operationSelector = isPreviousIncompatible
+      ? `lns-indexPatternDimension-${operation} incompatible`
+      : `lns-indexPatternDimension-${operation}`;
+    const operationButton = this.page.testSubj.locator(operationSelector);
+    await operationButton.waitFor({ state: 'visible' });
+    await operationButton.scrollIntoViewIfNeeded();
+    await operationButton.click();
+    await this.page.waitForFunction(
+      (selector) =>
+        document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
+        'true',
+      operationSelector,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
-    await expect
-      .poll(
-        async () => {
-          const buttons = await removeLocator.all();
-          if (buttons.length > 0) {
-            await buttons[0].hover();
-            await buttons[0].click();
-          }
-          return removeLocator.count();
-        },
-        { timeout: 30_000 }
-      )
-      .toBe(0);
+  }
+
+  private async selectField(field: string) {
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   /**
-   * Activates the layer tab at `index`. Requires the tabs row to be visible (multi-layer charts).
-   * Tab `data-test-subj` values use layer ids (not numeric indices), so tabs are resolved by order.
+   * Types into the formula Monaco editor.
+   * Use `replace: true` to clear first (dimension configure). Omit replace to append
+   * (autocomplete paths). Lens auto-inserts quotes/parens after some tokens (e.g. `kql=`),
+   * so callers should `expect.poll(() => lens.getFormulaText())` for the final value.
    */
-  async activateLayerTab(index: number) {
-    const tabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
-    await expect.poll(async () => await tabsLocator.count()).toBeGreaterThan(index);
-
-    const tabs = await tabsLocator.all();
-    const tab = tabs[index];
-    if (!tab) {
-      throw new Error(`Layer tab not found at index ${index}`);
+  async typeInFormula(text: string, options?: { replace?: boolean; focus?: boolean }) {
+    if (options?.focus !== false) {
+      await this.focusFormulaEditor();
     }
-
-    await tab.click();
-    await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
-  }
-
-  /** Returns the selected axis side label from an open dimension editor. */
-  async getSelectedAxisSide(): Promise<string> {
-    const selectedButton = this.page.locator(
-      '[data-test-subj^="lnsXY_axisSide_groups_"][aria-pressed="true"]'
-    );
-    await selectedButton.waitFor({ state: 'visible' });
-    const text = (await selectedButton.innerText()).trim();
-    if (!text) {
-      throw new Error('Axis side button text not yet rendered');
+    if (options?.replace) {
+      const modelIndex = await this.getFormulaModelIndex();
+      await this.codeEditor.setCodeEditorValue('', modelIndex);
+      await this.focusFormulaEditor();
     }
-    return text;
+    await this.page.keyboard.type(text, { delay: 25 });
   }
 
-  /** Returns the selected bar orientation from the style settings flyout. */
-  async getSelectedBarOrientationSetting(): Promise<string> {
-    await this.openStyleSettingsFlyout();
+  /**
+   * Focuses the formula Monaco textarea (avoid `{ force: true }` — suggest portals intercept clicks).
+   */
+  private async focusFormulaEditor() {
+    await this.formulaEditorTextarea.waitFor({ state: 'attached' });
+    await this.formulaEditorTextarea.evaluate((el) => {
+      (el as HTMLTextAreaElement).focus();
+    });
+  }
 
-    const selectedButton = this.page.locator(
-      '[data-test-subj^="lns_barOrientation_"][aria-pressed="true"]'
+  /**
+   * Lens formula uses the last registered Monaco model (not always index 0).
+   * Needed by the Lens plugin's `getFormulaText` as well as `typeInFormula` here.
+   */
+  protected async getFormulaModelIndex(): Promise<number> {
+    return this.page.evaluate(() => {
+      const monacoEnv = (
+        window as unknown as {
+          MonacoEnvironment?: {
+            monaco?: { editor?: { getModels: () => unknown[] } };
+          };
+        }
+      ).MonacoEnvironment;
+      const models = monacoEnv?.monaco?.editor?.getModels() ?? [];
+      return Math.max(0, models.length - 1);
+    });
+  }
+
+  async setEuiSwitch(testSubj: string, checked: boolean) {
+    const switchLocator = this.page.testSubj.locator(testSubj);
+    await switchLocator.waitFor({ state: 'visible' });
+    const want = checked ? 'true' : 'false';
+    // EUI switch is React-controlled: Playwright `setChecked` clicks then immediately
+    // re-reads aria-checked and fails before Lens commits the update. Click when needed,
+    // then wait for the attribute (no expect() in the page object).
+    if ((await switchLocator.getAttribute('aria-checked')) !== want) {
+      await switchLocator.click();
+    }
+    await this.page.waitForFunction(
+      ([subj, expected]) =>
+        document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+        expected,
+      [testSubj, want] as const,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
-    await selectedButton.waitFor({ state: 'visible' });
-    return (await selectedButton.innerText()).trim();
   }
 
-  async setTermsNumberOfValues(value: number) {
-    const input = this.page.locator('input[data-test-subj="indexPattern-terms-values"]');
-    await input.waitFor({ state: 'visible' });
-    await input.click();
-    await input.fill(`${value}`);
-    await this.page.keyboard.press('Tab');
-    await expect(input).toHaveValue(`${value}`);
+  /**
+   * Closes the open dimension editor flyout.
+   * Caller must have the dimension editor open.
+   */
+  async closeDimensionEditor() {
+    // Suggested-value panels can remount and exceed the 10s actionTimeout.
+    await this.closeDimensionEditorButton.click({ timeout: 15_000 });
+    await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
-  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-    await this.page.testSubj.click('lnsDatatable_dynamicColoring_groups');
-    await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
+  /** Opens the palette panel flyout for the currently active dimension. */
+  async openPalettePanelFlyout() {
+    await this.page.testSubj.click('lns_colorEditing_trigger');
+    await this.page.testSubj.locator('lns-palettePanelFlyout').waitFor({
+      state: 'visible',
+    });
   }
 
-  async setPalette(paletteId: string, isLegacy: boolean) {
+  async closePalettePanelFlyout() {
+    await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
+    await this.page.testSubj
+      .locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
+      .waitFor({ state: 'hidden' });
+  }
+
+  private async setPalette(paletteId: string, isLegacy: boolean) {
     await this.openPalettePanelFlyout();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
@@ -301,6 +346,14 @@ export class LensApp {
     if ((await paletteModeToggle.getAttribute('aria-checked')) !== targetValue) {
       await paletteModeToggle.click();
     }
+    // Match `setEuiSwitch`: wait for the controlled toggle to commit before picking a palette.
+    await this.page.waitForFunction(
+      ([subj, expected]) =>
+        document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+        expected,
+      ['lns_colorMappingOrLegacyPalette_switch', targetValue] as const,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
 
     if (isLegacy) {
       await this.page.testSubj.click('lns-palettePicker');
@@ -313,326 +366,229 @@ export class LensApp {
     await this.closePalettePanelFlyout();
   }
 
-  async closePalettePanelFlyout() {
-    await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
-    await expect(
-      this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
-    ).toBeHidden();
+  /**
+   * Maps a caller-facing field id to its internal field-list `data-attr-field`/test-subj suffix.
+   * Needed by the Lens plugin's other drag-and-drop helpers as well as `dragFieldToWorkspace` here.
+   */
+  protected getFieldAttrName(field: string): string {
+    // The document-count field is stored internally as `___records___`; callers pass `records`.
+    return field === 'records' ? '___records___' : field;
   }
 
-  private async openDimensionSelector(dimension: string) {
-    await this.page.testSubj.locator(dimension).click();
-    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
-  }
-
-  /** Opens a dimension editor flyout from a dimension trigger inside a layer panel. */
-  async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
-    const editorsLocator = this.page.testSubj.locator(
-      `lns-layerPanel-${layerIndex} > ${dimension}`
-    );
-    await expect.poll(async () => await editorsLocator.count()).toBeGreaterThan(dimensionIndex);
-
-    const editors = await editorsLocator.all();
-    const editor = editors[dimensionIndex];
-    if (!editor) {
-      throw new Error(
-        `Dimension editor not found at index ${dimensionIndex} for "${dimension}" in layer ${layerIndex}`
-      );
+  protected getFieldListPanelFieldLocator(field: string) {
+    const attrField = this.getFieldAttrName(field);
+    if (field === 'records') {
+      // The document-count field always has type `document`, so the field-grouping hook
+      // routes it to the special-fields list — a plain <ul> with no container test-subj
+      // (unlike Available/Selected Fields, which are rendered as accordions). Match on
+      // the attribute directly.
+      return this.page.locator(`[data-attr-field="${attrField}"]`);
     }
-    await editor.click();
-    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+    // Prefer Available Fields — the same field can also appear under Selected Fields after use.
+    return this.page.locator(
+      `[data-test-subj="lnsIndexPatternAvailableFields"] [data-attr-field="${attrField}"]`
+    );
   }
 
-  async selectOperation(operation: string, isPreviousIncompatible = false) {
-    const operationSelector = isPreviousIncompatible
-      ? `lns-indexPatternDimension-${operation} incompatible`
-      : `lns-indexPatternDimension-${operation}`;
-    const operationButton = this.page.testSubj.locator(operationSelector);
-    await operationButton.waitFor({ state: 'visible' });
-    await operationButton.scrollIntoViewIfNeeded();
-    await operationButton.click();
-    await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
+  /**
+   * Drags a field onto the Lens workspace (FTR `dragFieldToWorkspace`).
+   * Uses HTML5 DnD — Playwright `dragTo` does not reliably drive Lens drop zones.
+   */
+  async dragFieldToWorkspace(field: string, visualizationTestSubj?: string) {
+    const fieldLocator = this.getFieldListPanelFieldLocator(field);
+    await fieldLocator.waitFor({ state: 'visible' });
+    const fieldTestSubj =
+      (await fieldLocator.getAttribute('data-test-subj')) ??
+      `lnsFieldListPanelField-${this.getFieldAttrName(field)}`;
+    await this.html5DragAndDrop(fieldTestSubj, 'lnsWorkspace');
+    await this.waitForLensDragDropToFinish();
+    if (visualizationTestSubj) {
+      await this.waitForVisualization(visualizationTestSubj);
+    } else {
+      await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+    }
   }
 
-  private async selectField(field: string) {
-    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
+  protected async waitForLensDragDropToFinish() {
+    // Lens DnD active-group class has no data-test-subj; matches FTR html5DragAndDrop settle wait.
+    await this.page.locator('.domDragDrop-isActiveGroup').waitFor({ state: 'hidden' });
   }
 
-  /** Clears the dimension field combo box (removes the currently selected field). */
-  async clearDimensionField() {
-    await this.page.components.comboBox('indexPattern-dimension-field').clear();
-  }
+  /**
+   * HTML5 DnD between test-subj chains (FTR `browser.html5DragAndDrop`).
+   * Chains use `>` separators (e.g. `panel > lns-dimensionTrigger`).
+   *
+   * Dispatches the same event sequence a browser does — dragstart, dragenter, dragover, drop,
+   * dragend — and waits for the target to report each state via `@kbn/dom-drag-drop` classes.
+   * Both waits matter: drop targets register with the drag-drop context only after the drag
+   * starts (`domDroppable--active`), and Lens resolves a drop against the target the last
+   * dragover selected (`domDroppable--hover`). Dropping without those lands a partial change,
+   * for example moving a dimension between groups removes it from the source group and never
+   * adds it to the target one.
+   *
+   * Needed by the Lens plugin's other drag-and-drop helpers as well as `dragFieldToWorkspace` here.
+   */
+  protected async html5DragAndDrop(from: string, to: string) {
+    await this.page.evaluate(
+      async ([fromChain, toChain]) => {
+        interface Transfer {
+          data: Record<string, string>;
+          setData: (key: string, value: string) => void;
+          getData: (key: string) => string;
+        }
 
-  private async openChartSwitchPopover() {
-    await this.chartSwitchPopover.click();
-    await this.chartSwitchList.waitFor({ state: 'visible' });
-  }
+        function createEvent(typeOfEvent: string) {
+          const event = document.createEvent('CustomEvent') as CustomEvent & {
+            dataTransfer: Transfer;
+          };
+          event.initCustomEvent(typeOfEvent, true, true, null);
+          event.dataTransfer = {
+            data: {},
+            setData(key: string, value: string) {
+              this.data[key] = value;
+            },
+            getData(key: string) {
+              return this.data[key];
+            },
+          };
+          return event;
+        }
 
-  async dragFieldToWorkspace(field: string) {
-    const fieldLocator = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
-    const dropTarget = this.page.testSubj.locator('workspace-drag-drop-prompt');
-    await fieldLocator.dragTo(dropTarget);
-    await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
-  }
+        function queryChain(chain: string): Element | null {
+          const parts = chain.split('>').map((p) => p.trim());
+          let nodes: Element[] = [document.body];
+          for (const part of parts) {
+            const next: Element[] = [];
+            for (const node of nodes) {
+              next.push(...Array.from(node.querySelectorAll(`[data-test-subj="${part}"]`)));
+            }
+            nodes = next;
+          }
+          return nodes[0] ?? null;
+        }
 
-  getConvertToEsqlButton() {
-    return this.page.getByRole('button', { name: 'Convert to ES|QL' });
-  }
+        const origin = queryChain(fromChain);
+        if (!origin) {
+          throw new Error(`html5DragAndDrop: origin not found for ${fromChain}`);
+        }
 
-  getConvertToEsqModal() {
-    return this.page.getByTestId('lnsConvertToEsqlModal');
-  }
+        // Starting a drag re-renders the drop targets, which replaces their DOM nodes, so
+        // re-resolve the target on every step instead of holding on to a detached node.
+        async function waitForTargetWithClass(className: string, timeout: number) {
+          const deadline = Date.now() + timeout;
+          while (Date.now() < deadline) {
+            const element = queryChain(toChain);
+            if (element?.closest('.domDroppable')?.classList.contains(className)) {
+              return element;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          return null;
+        }
 
-  getConvertToEsqModalConfirmButton() {
-    return this.page.getByTestId('confirmModalConfirmButton');
-  }
+        const dragStartEvent = createEvent('dragstart');
+        origin.dispatchEvent(dragStartEvent);
 
-  getApplyFlyoutButton() {
-    return this.page.getByTestId('applyFlyoutButton');
-  }
+        // A target that never turns active rejects this drag (Lens has no drop type for it),
+        // in which case dropping on it is a no-op: still dispatch the events so the caller's
+        // assertions, not this helper, describe what the application did.
+        const activeTarget = await waitForTargetWithClass('domDroppable--active', 2_000);
+        if (activeTarget) {
+          const dragEnterEvent = createEvent('dragenter');
+          dragEnterEvent.dataTransfer = dragStartEvent.dataTransfer;
+          activeTarget.dispatchEvent(dragEnterEvent);
 
-  getSecondaryFlyoutBackButton() {
-    return this.page.getByTestId('lns-indexPattern-dimensionContainerClose');
-  }
+          const dragOverEvent = createEvent('dragover');
+          dragOverEvent.dataTransfer = dragStartEvent.dataTransfer;
+          activeTarget.dispatchEvent(dragOverEvent);
 
-  getInlineEditor() {
-    return this.page.getByTestId('customizeLens');
-  }
+          if (!(await waitForTargetWithClass('domDroppable--hover', 5_000))) {
+            throw new Error(`html5DragAndDrop: ${toChain} never became the hovered drop target`);
+          }
+        }
 
-  getCancelFlyoutButton() {
-    return this.page.getByTestId('cancelFlyoutButton');
-  }
+        const dropTarget = queryChain(toChain);
+        if (!dropTarget) {
+          throw new Error(`html5DragAndDrop: target disappeared for ${toChain}`);
+        }
+        const dropEvent = createEvent('drop');
+        dropEvent.dataTransfer = dragStartEvent.dataTransfer;
+        dropTarget.dispatchEvent(dropEvent);
 
-  getEditInLensButton() {
-    return this.page.getByTestId('navigateToLensEditorLink');
+        const dragEndEvent = createEvent('dragend');
+        dragEndEvent.dataTransfer = dropEvent.dataTransfer;
+        origin.dispatchEvent(dragEndEvent);
+      },
+      [from, to] as [string, string]
+    );
   }
 
   /**
    * Waits for the Lens visualization workspace to finish rendering.
-   * Polls `data-rendering-count` on the visualization container until it
-   * stabilises across two consecutive reads (500 ms apart).
+   * Polls the render count until it stabilises across two consecutive reads (500 ms apart),
+   * reading `data-rendering-count` from the embeddable container where it exists (dashboards)
+   * and falling back to the Elastic Charts render count, which is all the Lens editor renders.
+   *
+   * When `options.afterCount` is set, also requires at least one newer completed render than
+   * that baseline before settling — use this after an edit that must land in a subsequent
+   * chart pass (e.g. reference-line style) so a settle on the pre-edit count can't win the race.
    */
-  async waitForVisualization(chartSubj = 'lnsVisualizationContainer') {
+  async waitForVisualization(
+    chartSubj = 'lnsVisualizationContainer',
+    options?: { afterCount?: number }
+  ) {
     const workspace = this.page.testSubj.locator('lnsWorkspace');
-    await workspace.waitFor({ state: 'visible' });
+    await workspace.waitFor({ state: 'visible', timeout: 20_000 });
 
     const container = workspace.getByTestId(chartSubj);
     await container.waitFor({ state: 'visible' });
 
-    let prevCount: string | null = null;
-    await expect
-      .poll(
-        async () => {
-          const count = await container.getAttribute('data-rendering-count');
+    const afterCount = options?.afterCount;
+    const clearPrevRenderCount = async () => {
+      await this.page.evaluate(() => {
+        delete (window as unknown as { __lensScoutPrevRenderCount?: string })
+          .__lensScoutPrevRenderCount;
+      });
+    };
+    await clearPrevRenderCount();
+    try {
+      await this.page.waitForFunction(
+        ({ subj, minExclusive }) => {
+          const workspaceEl = document.querySelector('[data-test-subj="lnsWorkspace"]');
+          const el = workspaceEl?.querySelector(`[data-test-subj="${subj}"]`);
+          if (!el) {
+            return false;
+          }
+          const chartStatus = el.querySelector('.echChartStatus');
+          const count =
+            el.getAttribute('data-rendering-count') ??
+            (chartStatus?.getAttribute('data-ech-render-complete') === 'true'
+              ? chartStatus.getAttribute('data-ech-render-count')
+              : null);
           if (count === null) {
-            return true;
+            // Not an Elastic Charts visualization (e.g. a data table): nothing left to poll.
+            return !chartStatus;
           }
           if (count === '0') {
+            delete (window as unknown as { __lensScoutPrevRenderCount?: string })
+              .__lensScoutPrevRenderCount;
             return false;
           }
-          if (prevCount === count) {
-            return true;
+          if (minExclusive != null && Number(count) <= minExclusive) {
+            return false;
           }
-          prevCount = count;
-          return false;
+          const win = window as unknown as { __lensScoutPrevRenderCount?: string };
+          const prev = win.__lensScoutPrevRenderCount;
+          win.__lensScoutPrevRenderCount = count;
+          return prev === count;
         },
-        { intervals: [500] }
-      )
-      .toBe(true);
-  }
-
-  /** Returns the number of layers in the Lens editor (unified-tabs row is hidden for a single layer). */
-  async getLayerCount(): Promise<number> {
-    const tabs = await this.page.locator('[data-test-subj^="unifiedTabs_tab_"]').count();
-    return tabs === 0 ? 1 : tabs;
-  }
-
-  /** Locator for all dimension-trigger buttons in the Lens config panel. */
-  getDimensionTriggerLocator() {
-    return this.page.testSubj.locator('lns-dimensionTrigger');
-  }
-
-  /** Returns all dimension-trigger button locators currently rendered in the editor. */
-  getDimensionTriggers() {
-    return this.getDimensionTriggerLocator().all();
-  }
-
-  /** Returns visible labels for all dimension triggers inside a dimension panel. */
-  private async getDimensionTriggersTexts(dimension: string): Promise<string[]> {
-    const triggersLocator = this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
-    await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(0);
-
-    const triggers = await triggersLocator.all();
-    const texts: string[] = [];
-    for (const trigger of triggers) {
-      texts.push(await trigger.innerText());
+        { subj: chartSubj, minExclusive: afterCount ?? null },
+        // Chart data + render-count settle often exceeds the 10s actionTimeout; keep below the 60s test timeout.
+        { polling: 500, timeout: 30_000 }
+      );
+    } finally {
+      // Clear even on timeout so a leftover prev===count can't false-settle the next call.
+      await clearPrevRenderCount();
     }
-    // Lens inserts zero-width spaces around dots in field names for line-breaking.
-    return texts.map((text) => text.replace(/\u200b/g, '').trim());
-  }
-
-  /** Returns the visible label of a dimension trigger inside a dimension panel. */
-  async getDimensionTriggerText(dimension: string, index = 0): Promise<string> {
-    const dimensionTexts = await this.getDimensionTriggersTexts(dimension);
-    const text = dimensionTexts[index];
-    if (text === undefined) {
-      throw new Error(`Dimension trigger not found at index ${index} for "${dimension}"`);
-    }
-    return text;
-  }
-
-  /** Returns the chart type label shown in the chart switcher popover. */
-  async getChartSwitchType(): Promise<string> {
-    await this.chartSwitchPopover.waitFor({ state: 'visible' });
-    return (await this.chartSwitchPopover.innerText()).trim();
-  }
-
-  private async openStyleSettingsFlyout() {
-    await this.page.locator('button[data-test-subj="style"]').click();
-    await this.page.locator('#lnsDimensionContainerTitle').waitFor({ state: 'visible' });
-  }
-
-  /** Reads the selected donut hole size from the style settings flyout. */
-  async getDonutHoleSize(): Promise<string> {
-    await this.openStyleSettingsFlyout();
-    const selectedOptions = await this.page.components
-      .comboBox('lnsEmptySizeRatioOption')
-      .getSelectedOptions();
-    return selectedOptions[0] ?? '';
-  }
-
-  /**
-   * Hovers over a dimension-trigger button so that metric tiles are in their
-   * default (un-hovered) state before asserting colors.
-   */
-  async hoverOverDimensionButton(index = 0) {
-    const triggersLocator = this.getDimensionTriggerLocator();
-    await expect.poll(async () => await triggersLocator.count()).toBeGreaterThan(index);
-
-    const triggers = await triggersLocator.all();
-    const trigger = triggers[index];
-    if (!trigger) {
-      throw new Error(`Dimension trigger not found at index ${index}`);
-    }
-    await trigger.hover();
-    // Move the pointer off the metric tiles so hover styles do not affect color assertions.
-    await this.page.testSubj.locator('lns-layerPanel-0').hover();
-  }
-
-  /** Reads the current state of every metric tile inside `[data-test-subj="mtrVis"]`. */
-  async getMetricVisualizationData() {
-    const tiles = await this.page.locator('[data-test-subj="mtrVis"] .echChart li').all();
-    const showingBar = (await this.page.locator('.echSingleMetricProgress').count()) > 0;
-
-    const data = [];
-    for (const tile of tiles) {
-      const getText = async (selector: string) => {
-        const el = tile.locator(selector);
-        if ((await el.count()) === 0) return undefined;
-        return el.evaluate((node) => (node as HTMLElement).innerText);
-      };
-      const getColor = async (selector: string) => {
-        const el = tile.locator(selector);
-        if ((await el.count()) === 0) return undefined;
-        const color = await el.evaluate((node) => getComputedStyle(node).backgroundColor);
-        return normalizeComputedColor(color);
-      };
-
-      data.push({
-        title: await getText('h2'),
-        subtitle: await getText('.echMetricText__subtitle'),
-        extraText: await getText('.echMetricText__extraBlock'),
-        value: await getText('.echMetricText__valueBlock'),
-        color: await getColor('.echMetric'),
-        trendlineColor: await (async () => {
-          const el = tile.locator('.echSingleMetricSparkline__svg > rect');
-          if ((await el.count()) === 0) return undefined;
-          return (await el.getAttribute('fill')) ?? undefined;
-        })(),
-        showingTrendline: (await tile.locator('.echSingleMetricSparkline').count()) > 0,
-        showingBar,
-      });
-    }
-
-    return data;
-  }
-
-  async openMessageList() {
-    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
-    await trigger.click();
-  }
-
-  async closeMessageList() {
-    const trigger = this.page.testSubj.locator('lens-message-list-trigger');
-    await trigger.click();
-  }
-
-  getMessageListItems(severity: 'warning' | 'error') {
-    return this.page.testSubj.locator(`lens-message-list-${severity}`);
-  }
-
-  /** Opens the palette panel flyout for the currently active dimension. */
-  async openPalettePanelFlyout() {
-    await this.page.testSubj.click('lns_colorEditing_trigger');
-    await this.page.testSubj.locator('lns-palettePanelFlyout').waitFor({
-      state: 'visible',
-      timeout: 10_000,
-    });
-  }
-
-  /** Reads color-stop values and colors from the currently open palette panel. */
-  async getPaletteColorStops(expectedStopsCount?: number) {
-    const palettePanel = this.page.testSubj.locator('lns-palettePanelFlyout');
-    const stopInputsLocator = palettePanel.locator(
-      '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
-    );
-    const colorAnchorsLocator = palettePanel.locator('[data-test-subj="euiColorPickerAnchor"]');
-
-    const readColorStops = async () => {
-      const stopInputs = await stopInputsLocator.all();
-      const colorAnchors = await colorAnchorsLocator.all();
-
-      const colorStops = [];
-      for (let i = 0; i < stopInputs.length; i++) {
-        const input = stopInputs[i];
-        const colorAnchor = colorAnchors[i];
-        colorStops.push({
-          stop: await input.getAttribute('value'),
-          color:
-            colorAnchor != null
-              ? normalizeComputedColor(
-                  await colorAnchor.evaluate((node) => getComputedStyle(node).backgroundColor)
-                )
-              : undefined,
-        });
-      }
-
-      return colorStops;
-    };
-
-    let prevColorStopsJson: string | null = null;
-    await expect
-      .poll(
-        async () => {
-          const stopCount = await stopInputsLocator.count();
-          if (expectedStopsCount !== undefined && stopCount !== expectedStopsCount) {
-            return false;
-          }
-          if (stopCount === 0) {
-            return false;
-          }
-
-          const colorStopsJson = JSON.stringify(await readColorStops());
-          if (prevColorStopsJson === colorStopsJson) {
-            return true;
-          }
-          prevColorStopsJson = colorStopsJson;
-          return false;
-        },
-        { intervals: [500], timeout: 20_000 }
-      )
-      .toBe(true);
-
-    return readColorStops();
   }
 }

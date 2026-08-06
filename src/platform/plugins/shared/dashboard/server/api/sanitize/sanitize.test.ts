@@ -72,7 +72,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      validate: jest.fn().mockReturnValue(baseDashboardState),
+      parse: jest.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(
@@ -109,7 +109,7 @@ describe('sanitize', () => {
     });
 
     const dashboardStateSchema = {
-      validate: jest.fn().mockReturnValue(baseDashboardState),
+      parse: jest.fn().mockReturnValue(baseDashboardState),
     };
 
     const result = await sanitize(

@@ -1,5 +1,5 @@
 {
-  "sha1": "078b3702a17ed6fd2e8e712495c849c667d53aaf",
+  "sha1": "6ce1407b4726d72bbf1708f928aea3644007f37a",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -49,8 +49,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 38,
+        "column": 32
       }
     }
   ]

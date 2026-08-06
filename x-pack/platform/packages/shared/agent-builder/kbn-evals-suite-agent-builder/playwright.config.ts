@@ -18,4 +18,5 @@ export default createPlaywrightEvalsConfig({
   // for longer/higher-confidence runs.
   repetitions: 1,
   timeout: 4 * 60 * 60_000, // 4 hours timeout given large datasets in use
+  workers: 2,
 });

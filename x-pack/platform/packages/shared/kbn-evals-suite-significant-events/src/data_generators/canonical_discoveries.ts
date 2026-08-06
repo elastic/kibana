@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Discovery } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 const CANONICAL_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
@@ -23,8 +23,8 @@ export const canonicalDiscoveryFromGroundTruth = ({
 }: {
   streamName: string;
   scenarioId: string;
-  discovery: Partial<Discovery>;
-}): Discovery => {
+  discovery: Partial<SignificantEvent>;
+}): SignificantEvent => {
   const signals = discovery.signals ?? [];
   const streamNames =
     discovery.stream_names ??
@@ -37,19 +37,16 @@ export const canonicalDiscoveryFromGroundTruth = ({
 
   return {
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
-    kind: discovery.kind ?? 'discovery',
-    discovery_id: discovery.discovery_id ?? `${scenarioId}-canonical`,
+    event_uuid: discovery.event_uuid ?? `${scenarioId}-canonical`,
     event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
+    status: discovery.status ?? 'open',
     stream_names: streamNames,
     symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
     summary: discovery.summary ?? '',
     severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
-    processed: discovery.processed ?? false,
-    // Strip `confirmed` from input signals — per Critical Rule #4 in the judge prompt,
-    // input signals arrive without confirmed stamps; the judge stamps confirmed only
-    // from its own execute_esql results.
+    // Strip discovery-side confirmation before judge evaluation.
     ...(discovery.signals
       ? {
           signals: discovery.signals.map(({ confirmed: _omitted, ...rest }) => rest),
