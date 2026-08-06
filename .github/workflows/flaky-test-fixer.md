@@ -272,7 +272,7 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 
 ## Fix guardrails
 
-{{#import .github/workflows/shared/fix-guardrails.md}}
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
 
 ## Validate the investigation is current
 
