@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { stringify } from 'yaml';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../../common/lib/api';
@@ -115,7 +115,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
           .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
           .set('kbn-xsrf', 'true')
-          .send(buildCreateBody({ name: 'not_priority' }))
+          .send(
+            buildCreateBody({
+              name: 'not_priority',
+              definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            })
+          )
           .expect(400);
 
         expect(body.message).to.contain('must match the name in the YAML definition');

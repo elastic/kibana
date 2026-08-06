@@ -203,26 +203,6 @@ export const create = async (
       throwIfMalformedFieldLinkage(mirror.malformedFields);
       logUnresolvedMirrorKeys(mirror.unresolvedKeys, { owner: query.owner, logger });
 
-      // Definition-aware validation of the FINAL map: the pre-mirror validation above only saw
-      // the request's extended_fields; mirrored entries must also be valid keys with valid
-      // values. `partial: true` — the mirror never makes an absent field "required-missing".
-      if (
-        mirror.extendedFields != null &&
-        mirror.extendedFields !== normalizedCase.extended_fields
-      ) {
-        const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
-        await validateCaseExtendedFields({
-          extendedFields: mirror.extendedFields,
-          templateId: query.template?.id,
-          globalFields,
-          templatesService,
-          fieldDefinitionsService,
-          owner: query.owner,
-          partial: true,
-          preResolvedTemplateFields: resolvedTemplateFields,
-        });
-      }
-
       // Return type includes null when input is null; CasePostRequest.extended_fields is never null.
       normalizedCase.extended_fields = mirror.extendedFields ?? undefined;
     }

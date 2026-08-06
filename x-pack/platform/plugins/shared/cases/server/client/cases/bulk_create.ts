@@ -25,17 +25,12 @@ import type {
   CasePostRequest,
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
-import {
-  validateCustomFields,
-  resolveGlobalFields,
-  validateCaseExtendedFields,
-} from './validators';
+import { validateCustomFields } from './validators';
 import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
-import type { InlineField } from '../../../common/types/domain/template/fields';
 import type { FieldLinkIndexes } from '../../common/utils/field_link_resolution';
 import {
   loadFieldLinkIndexes,
@@ -95,9 +90,8 @@ export const bulkCreate = async (
     const bulkCreateRequest: BulkCreateCasesArgs['cases'] = [];
 
     // Per-owner caches: the request may span owners, but every case of one owner
-    // shares the same link indexes and global field set.
+    // shares the same link indexes.
     const linkIndexesByOwner = new Map<string, FieldLinkIndexes>();
-    const globalFieldsByOwner = new Map<string, InlineField[]>();
 
     for (const theCase of casesWithIds) {
       const customFieldsConfiguration = customFieldsConfigurationMap.get(theCase.owner);
@@ -113,7 +107,7 @@ export const bulkCreate = async (
         }
       }
 
-      const { request, extendedFields } = createBulkCreateCaseRequest({
+      const { request } = createBulkCreateCaseRequest({
         theCase,
         user,
         customFieldsConfiguration,
@@ -121,26 +115,6 @@ export const bulkCreate = async (
         logger,
       });
       bulkCreateRequest.push(request);
-
-      // Definition-aware validation of the FINAL extended_fields map (request-provided
-      // entries + mirrored entries). `partial: true` — bulk create never enforces
-      // required-field completeness on the map itself.
-      if (templatesEnabled && extendedFields && Object.keys(extendedFields).length > 0) {
-        let globalFields = globalFieldsByOwner.get(theCase.owner);
-        if (!globalFields) {
-          globalFields = await resolveGlobalFields(theCase.owner, fieldDefinitionsService);
-          globalFieldsByOwner.set(theCase.owner, globalFields);
-        }
-        await validateCaseExtendedFields({
-          extendedFields,
-          templateId: theCase.template?.id,
-          globalFields,
-          templatesService,
-          fieldDefinitionsService,
-          owner: theCase.owner,
-          partial: true,
-        });
-      }
     }
 
     // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
@@ -313,8 +287,6 @@ const createBulkCreateCaseRequest = ({
   logger: CasesClientArgs['logger'];
 }): {
   request: BulkCreateCasesArgs['cases'][number];
-  /** The final extended_fields map for post-mirror definition-aware validation. */
-  extendedFields: Record<string, string> | undefined;
 } => {
   const { id, ...caseWithoutId } = theCase;
 
@@ -364,7 +336,6 @@ const createBulkCreateCaseRequest = ({
         newCase: normalizedCase,
       }),
     },
-    extendedFields: normalizedCase.extended_fields,
   };
 };
 
