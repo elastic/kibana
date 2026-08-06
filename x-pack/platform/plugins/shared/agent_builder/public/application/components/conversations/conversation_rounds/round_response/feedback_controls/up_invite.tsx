@@ -29,7 +29,7 @@ interface UpInviteProps {
 export const UpInvite: React.FC<UpInviteProps> = ({ onTellUsMore, onDismiss }) => (
   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
+      <EuiText size="xs">
         <span>{labels.prompt}</span>
       </EuiText>
     </EuiFlexItem>

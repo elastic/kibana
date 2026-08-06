@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -53,6 +53,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   isLastRound,
   rawRound,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { addSuccessToast } = useToasts();
   const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
   const { services } = useKibana();
@@ -66,6 +67,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     modalOpen,
     inviteVisible,
     submitted,
+    submittedFading,
     isSubmitting,
     setVote,
     toggleChip,
@@ -193,41 +195,52 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
               <RoundMetadataPopover rawRound={rawRound} />
             </EuiFlexItem>
           )}
-
-          {showFeedback && <EuiFlexItem grow />}
-
           {showFeedback && (
-            <>
-              <EuiFlexItem grow={false}>
-                <ThumbButton
-                  direction="up"
-                  isActive={vote === 'up'}
-                  onClick={() => setVote('up')}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ThumbButton
-                  direction="down"
-                  isActive={vote === 'down'}
-                  onClick={() => setVote('down')}
-                />
-              </EuiFlexItem>
-            </>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                gutterSize="s"
+                alignItems="center"
+                responsive={false}
+                css={css`
+                  padding-left: ${euiTheme.size.s};
+                  margin-left: ${euiTheme.size.xxs};
+                  border-left: ${euiTheme.border.thin};
+                `}
+              >
+                <EuiFlexItem grow={false}>
+                  <ThumbButton
+                    direction="up"
+                    isActive={vote === 'up'}
+                    onClick={() => setVote('up')}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ThumbButton
+                    direction="down"
+                    isActive={vote === 'down'}
+                    onClick={() => setVote('down')}
+                  />
+                </EuiFlexItem>
+                {(submitted || (vote === 'up' && inviteVisible)) && (
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      opacity: ${submittedFading ? 0 : 1};
+                      transition: opacity ${submittedFading ? '0.5s' : '0s'} ease;
+                    `}
+                  >
+                    {submitted ? (
+                      <FeedbackSubmitted />
+                    ) : (
+                      <UpInvite onTellUsMore={openModal} onDismiss={dismissInvite} />
+                    )}
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-
-      {showFeedback && submitted && (
-        <EuiFlexItem grow={false}>
-          <FeedbackSubmitted />
-        </EuiFlexItem>
-      )}
-
-      {showFeedback && vote === 'up' && inviteVisible && !submitted && (
-        <EuiFlexItem grow={false}>
-          <UpInvite onTellUsMore={openModal} onDismiss={dismissInvite} />
-        </EuiFlexItem>
-      )}
 
       {showFeedback && vote !== null && modalOpen && (
         <FeedbackModal

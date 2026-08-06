@@ -38,7 +38,7 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange, shouldF
           })}
           value={value}
           onChange={(e) => onChange(e.target.value.slice(0, MAX_CHARS))}
-          rows={3}
+          rows={2}
           resize="vertical"
           fullWidth
           data-test-subj="roundFeedbackCommentInput"
