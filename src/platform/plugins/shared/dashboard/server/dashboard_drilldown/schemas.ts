@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 
-export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.extends({
-  dashboard_id: schema.string(),
-});
+export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.and(
+  z.object({
+    dashboard_id: z.string(),
+  })
+);

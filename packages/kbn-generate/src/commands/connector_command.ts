@@ -43,19 +43,6 @@ const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/data-context-sources-conn
 const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
 const TOC_SECTION_FILE = 'connectors-kibana/data-context-sources-connectors.md';
 
-const ULTIMATE_PRIORITY_RULES_COMMENT = `
-####
-## These rules are always last so they take ultimate priority over everything else
-####
-`;
-const GENERATED_END = `
-####
-## Everything below this line overrides the default assignments for each package.
-## Items lower in the file have higher precedence:
-##  https://help.github.com/articles/about-codeowners/
-####
-`;
-
 export const ConnectorCommand: GenerateCommand = {
   name: 'connector',
   description:
@@ -130,6 +117,13 @@ export const ConnectorCommand: GenerateCommand = {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
 
+    const pkgVersion = (
+      JSON.parse(await Fsp.readFile(Path.resolve(REPO_ROOT, 'package.json'), 'utf8')) as {
+        version: string;
+      }
+    ).version;
+    const previewVersion = pkgVersion.split('.').slice(0, 2).join('.');
+
     const connectorDir = Path.resolve(CONNECTORS_ROOT, connectorName);
     const kebabName = connectorName.replace(/_/g, '-');
     const iconDir = Path.resolve(connectorDir, 'icon');
@@ -182,6 +176,7 @@ export const ConnectorCommand: GenerateCommand = {
         name: connectorName,
         displayName,
         kebabName,
+        version: previewVersion,
       },
     });
     log.info('Wrote', Path.relative(REPO_ROOT, docsFilePath));
@@ -228,44 +223,52 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
-    // append to CODEOWNERS: insert within the overrides section (below GENERATED_END)
+    // append to CODEOWNERS: insert within the # Connector Specs section, alphabetically
     // Each connector gets its own line to allow different team ownership
     {
-      let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
+      const content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
       const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
       if (content.includes(line)) {
         log.info('CODEOWNERS already has rule for', connectorName);
       } else {
-        const genEndIdx = content.indexOf(GENERATED_END);
-        const ultIdx = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
-        const prefix = genEndIdx !== -1 ? content.slice(0, genEndIdx + GENERATED_END.length) : '';
-        const middle =
-          genEndIdx !== -1
-            ? content.slice(genEndIdx + GENERATED_END.length, ultIdx === -1 ? undefined : ultIdx)
-            : content.slice(0, ultIdx === -1 ? undefined : ultIdx);
-        const suffix = ultIdx === -1 ? '' : content.slice(ultIdx);
-
-        const middleLines = middle.split('\n');
+        const lines = content.split('\n');
+        let inConnectorSpecsSection = false;
         let insertAt = -1;
-        for (let i = middleLines.length - 1; i >= 0; i--) {
-          const l = middleLines[i];
-          if (l && !l.trim().startsWith('#') && l.includes('kbn-connector-specs')) {
-            insertAt = i + 1;
-            break;
+        let lastSpecsIdx = -1;
+
+        for (let i = 0; i < lines.length; i++) {
+          const trimmed = lines[i].trim();
+          if (trimmed === '# Connector Specs') {
+            inConnectorSpecsSection = true;
+            continue;
+          }
+          if (!inConnectorSpecsSection) continue;
+          // Stop at the next section header
+          if (trimmed.startsWith('#') && trimmed.length > 1) break;
+
+          const m = trimmed.match(
+            /^src\/platform\/packages\/shared\/kbn-connector-specs\/src\/specs\/([^/]+)\//
+          );
+          if (m) {
+            lastSpecsIdx = i;
+            if (insertAt === -1 && m[1] > connectorName) {
+              insertAt = i;
+            }
           }
         }
 
-        if (insertAt === -1) {
-          // no existing kbn-connector-specs rule in overrides; add to top of overrides
-          const updatedMiddle = (middle.endsWith('\n') ? middle : middle + '\n') + line + '\n';
-          content = prefix + updatedMiddle + suffix;
-        } else {
-          middleLines.splice(insertAt, 0, line);
-          content = prefix + middleLines.join('\n') + (middle.endsWith('\n') ? '' : '\n') + suffix;
+        // No alphabetically later entry — append after the last specs/** line
+        if (insertAt === -1 && lastSpecsIdx !== -1) {
+          insertAt = lastSpecsIdx + 1;
         }
 
-        await Fsp.writeFile(CODEOWNERS_FILE, content);
-        log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
+        if (insertAt !== -1) {
+          lines.splice(insertAt, 0, line);
+          await Fsp.writeFile(CODEOWNERS_FILE, lines.join('\n'));
+          log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
+        } else {
+          log.warning('Could not find # Connector Specs section in CODEOWNERS');
+        }
       }
     }
 

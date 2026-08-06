@@ -67,8 +67,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const failedAndDegradedDatasetName = 'synth.2';
   const failedAndDegradedDataStreamName = `logs-${failedAndDegradedDatasetName}-${defaultNamespace}`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/278245
-  describe.skip('Dataset Quality Details', () => {
+  describe('Dataset Quality Details', () => {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -222,13 +221,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
-        expect(parseInt(degradedDocs, 10)).to.be(1);
-        expect(parseInt(services, 10)).to.be(3);
-        expect(parseInt(hosts, 10)).to.be(52);
-        expect(parseInt(size, 10)).to.be.greaterThan(0);
+        // The `size` KPI is backed by the metering stats API, which can lag behind
+        // the other KPIs, so retry until every value has populated to avoid a NaN read.
+        await retry.tryForTime(30 * 1000, async () => {
+          const { docsCountTotal, degradedDocs, services, hosts, size } =
+            await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+          expect(parseInt(docsCountTotal, 10)).to.be(226);
+          expect(parseInt(degradedDocs, 10)).to.be(1);
+          expect(parseInt(services, 10)).to.be(3);
+          expect(parseInt(hosts, 10)).to.be(52);
+          expect(parseInt(size, 10)).to.be.greaterThan(0);
+        });
       });
     });
 

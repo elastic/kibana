@@ -17,7 +17,7 @@ project:
   owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/ml/server-schemas
 dependsOn:
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/ml-anomaly-utils'
   - '@kbn/presentation-publishing-schemas'
 tags:
