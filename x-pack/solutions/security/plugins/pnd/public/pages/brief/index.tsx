@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -24,7 +23,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
@@ -32,6 +31,7 @@ import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
+import { BriefingContainer } from '../../components/briefing_container';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
@@ -56,16 +56,33 @@ const matchesBucket = (investigation: Investigation, bucket: i18n.BriefBucket): 
 
 const BriefCard: React.FC<{
   investigation: Investigation;
-  accent: string;
+  hasBorder: boolean;
   onOpen: () => void;
   onOpenChat: () => void;
-}> = ({ investigation, accent, onOpen, onOpenChat }) => {
+}> = ({ investigation, hasBorder, onOpen, onOpenChat }) => {
+  const { euiTheme } = useEuiTheme();
   const inMotion = investigation.status === 'in-progress';
 
   return (
     <EuiPanel
       paddingSize="m"
-      hasBorder
+      role="button"
+      tabIndex={0}
+      aria-label={investigation.title}
+      borderRadius="none"
+      css={{
+        cursor: 'pointer',
+        borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
+        borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
+        boxSizing: 'border-box',
+        boxShadow: 'none',
+        '&:hover': {
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          boxShadow: 'none',
+        },
+      }}
+      hasBorder={false}
+      hasShadow={false}
       onClick={onOpen}
       onKeyDown={(event: React.KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -73,13 +90,6 @@ const BriefCard: React.FC<{
           onOpen();
         }
       }}
-      role="button"
-      tabIndex={0}
-      aria-label={investigation.title}
-      css={css`
-        cursor: pointer;
-        border-left: 3px solid ${accent};
-      `}
     >
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         {investigation.priorityScore != null ? (
@@ -171,7 +181,6 @@ const BriefCard: React.FC<{
 };
 
 export const BriefPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const { data, isLoading, error } = useInvestigations();
   const [selectedBucket, setSelectedBucket] = useState<i18n.BriefBucket>('all');
@@ -249,23 +258,8 @@ export const BriefPage: React.FC = () => {
     return groups;
   }, [filtered]);
 
-  const bucketAccent = (bucket: Exclude<i18n.BriefBucket, 'all'>): string => {
-    switch (bucket) {
-      case 'contain':
-        return euiTheme.colors.danger;
-      case 'escalate':
-        return euiTheme.colors.warning;
-      case 'investigate':
-        return euiTheme.colors.primary;
-      case 'tune':
-        return euiTheme.colors.accent;
-      default:
-        return euiTheme.border.color;
-    }
-  };
-
   return (
-    <PndPageSection>
+    <PndPageSection restrictWidth="900px">
       <PndPageHeader
         title={
           <>
@@ -356,44 +350,22 @@ export const BriefPage: React.FC = () => {
 
       {!isLoading && !error
         ? grouped.map((group) => (
-            <div key={group.id} css={{ marginBottom: euiTheme.size.l }}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    color={BUCKET_COLORS[group.id] as 'danger' | 'warning' | 'primary' | 'accent'}
-                  >
-                    {group.label}
-                  </EuiBadge>
+            <BriefingContainer
+              briefingId={group.id}
+              briefingType={group.id as RecommendedAction}
+              briefingList={group.items}
+            >
+              {group.items.map((investigation, i) => (
+                <EuiFlexItem key={investigation.id} grow={false}>
+                  <BriefCard
+                    investigation={investigation}
+                    hasBorder={i < group.items.length - 1}
+                    onOpen={() => history.push(`/investigations/${investigation.id}`)}
+                    onOpenChat={() => history.push('/chats')}
+                  />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {group.items.length}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.pnd.brief.sectionBlurb"
-                      defaultMessage="{count, plural, one {# investigation} other {# investigations}}"
-                      values={{ count: group.items.length }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                {group.items.map((investigation) => (
-                  <EuiFlexItem key={investigation.id} grow={false}>
-                    <BriefCard
-                      investigation={investigation}
-                      accent={bucketAccent(group.id)}
-                      onOpen={() => history.push(`/investigations/${investigation.id}`)}
-                      onOpenChat={() => history.push('/chats')}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </div>
+              ))}
+            </BriefingContainer>
           ))
         : null}
     </PndPageSection>
