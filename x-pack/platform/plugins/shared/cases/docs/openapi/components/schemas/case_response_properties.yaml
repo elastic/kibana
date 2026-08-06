@@ -98,6 +98,14 @@ properties:
       zero.
     nullable: true
     example: 120
+  extended_fields:
+    type: object
+    x-state: Technical preview
+    description: >
+      The case's stored field values, keyed by storage key (for example
+      `priority_as_keyword`). Requires the `xpack.cases.templates.enabled` setting.
+    additionalProperties:
+      type: string
   external_service:
     $ref: 'external_service.yaml'
   id:
