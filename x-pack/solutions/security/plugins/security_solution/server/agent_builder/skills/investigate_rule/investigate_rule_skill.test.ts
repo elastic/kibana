@@ -43,6 +43,14 @@ describe('investigateRuleSkill', () => {
       expect(investigateRuleSkill.description).toContain('Single-rule noise');
     });
 
+    it('defines the structured tuning proposal contract', () => {
+      expect(investigateRuleSkill.content).toContain('## Structured Tuning Proposal');
+      expect(investigateRuleSkill.content).toContain('`change_type`');
+      expect(investigateRuleSkill.content).toContain('`proposed_query`');
+      expect(investigateRuleSkill.content).toContain('`rekey_required`');
+      expect(investigateRuleSkill.description).toContain('structured tuning proposal');
+    });
+
     it('returns the expected registry tool IDs', () => {
       const tools = investigateRuleSkill.getRegistryTools?.();
       expect(tools).toBeDefined();

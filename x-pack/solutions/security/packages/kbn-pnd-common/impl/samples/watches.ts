@@ -8,10 +8,12 @@
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
+  WATCH_DETECTION_TAG,
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,
   WATCH_TAG,
@@ -260,11 +262,75 @@ const deepWatchBase: Watch = {
   ],
 };
 
+const detectionWatchBase: Watch = {
+  id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  name: 'Detection Watch',
+  tags: [WATCH_TAG, WATCH_DETECTION_TAG],
+  color: '#e7664c',
+  icon: 'sparkles',
+  enabled: true,
+  draft: false,
+  managed: true,
+  sortOrder: 50,
+  mandate: 'Detection engineering',
+  description:
+    'Dispatches to one worker per run: rule tuning on a schedule, or rule creation for a reported detection gap.',
+  schedule: {
+    set: true,
+    mode: 'always',
+    from: 0,
+    to: 23,
+    onDemand: true,
+    cadence: 'sweep',
+    every: 60,
+    handoff: 'none',
+  },
+  triggers: [
+    { type: 'schedule', summary: 'Schedule · hourly' },
+    { type: 'manual', summary: 'Manual / on demand' },
+  ],
+  coverage: [[0, 24]],
+  scopeSummary: 'Detection rules · security alerts',
+  scopes: [
+    { name: 'Detection rules', access: 'full', label: 'Read + act' },
+    { name: 'Security alerts', access: 'full', label: 'Read' },
+  ],
+  callables: [
+    {
+      id: 'system-security-rule-tuning',
+      name: 'Rule tuning',
+      kind: 'workflow',
+      summary: 'Diagnose noisy rules and apply approved query changes',
+      gated: true,
+      enabled: true,
+      lastRun: null,
+    },
+    {
+      id: 'system-security-rule-creation',
+      name: 'Rule creation',
+      kind: 'workflow',
+      summary: 'Draft an ES|QL rule for a detection gap and create it on approval',
+      gated: true,
+      enabled: true,
+      lastRun: null,
+    },
+  ],
+  autonomyLevel: 2,
+  metrics: {
+    runs7d: null,
+    acceptedPct: null,
+    timeSaved: null,
+    lastRun: null,
+  },
+  recentRuns: [],
+};
+
 export const MOCK_MANAGED_WATCHES: Watch[] = [
   floorWatchBase,
   officerWatchBase,
   darkWatchBase,
   deepWatchBase,
+  detectionWatchBase,
 ];
 
 export const createMockWatch = (overrides: Partial<Watch> = {}): Watch => ({

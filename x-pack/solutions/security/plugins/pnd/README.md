@@ -101,8 +101,15 @@ Owner plugin id: `pnd`. Catalog definitions:
 - `system-security-watch-officer`
 - `system-security-watch-dark`
 - `system-security-watch-deep`
+- `system-security-watch-detection`
 
 YAML + registry entries: `src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/`. Visibility: `selector:watch` + `solution:security`.
+
+Workers are installed alongside the watches but carry no `watch` selector, so they stay out of the catalog. A Watch reaches them with `workflow.execute`, and they surface on the Watch detail page as callables of kind `workflow`:
+
+- `system-security-rule-tuning` — called by Detection Watch on its scheduled sweep
+- `system-security-rule-creation` — called by Detection Watch when a caller supplies an ATT&CK technique
+- `system-security-rule-preview` — called by both of the above
 
 ### Managed definition `version` vs product “v1”
 

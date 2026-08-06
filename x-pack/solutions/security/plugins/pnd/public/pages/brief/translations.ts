@@ -113,6 +113,10 @@ export const WATCH_TIER_DEEP = i18n.translate('xpack.pnd.brief.watchTier.deep', 
   defaultMessage: 'Deep Watch',
 });
 
+export const WATCH_TIER_DETECTION = i18n.translate('xpack.pnd.brief.watchTier.detection', {
+  defaultMessage: 'Detection Watch',
+});
+
 export const DEFAULT_ACTION = i18n.translate('xpack.pnd.brief.defaultAction', {
   defaultMessage: 'Review',
 });
@@ -134,6 +138,8 @@ export const watchTierLabel = (tier?: string): string => {
       return WATCH_TIER_DARK;
     case 'deep':
       return WATCH_TIER_DEEP;
+    case 'detection':
+      return WATCH_TIER_DETECTION;
     case 'floor':
     default:
       return WATCH_TIER_FLOOR;

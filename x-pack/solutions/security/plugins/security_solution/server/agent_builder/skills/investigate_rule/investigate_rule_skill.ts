@@ -206,6 +206,9 @@ The output must always contain these five sections, in order. Use a \`##\` heade
 section (e.g. \`## Alert Volume\`) — **do not use numbered list items for sections**; tables
 placed inside a list item do not render in the Security UI.
 
+When an automated workflow requests structured output, also return one tuning proposal
+for human review. This remains a recommendation; the skill does not apply the change.
+
 ### Alert volume and entity breakdown (always required — from the noise query)
 
 Show the total alert count and status breakdown (open / closed). Then present the
@@ -271,10 +274,26 @@ When you have identified a fix:
 - Describe it in plain text and tell the user how to perform it themselves in the
   Detection Rules UI (e.g., add an exception, narrow the query, adjust the
   threshold, or configure alert suppression).
-- Do **not** offer to make the change, claim you can change the rule, hand off to
-  a mutation skill, or emit an auto-applied / machine-actionable change. (Describing a
-  structured exception in plain text for the analyst to create themselves is fine — that
-  is guidance, not a rule mutation.)
+- Do **not** offer to make the change, claim you can change the rule, or hand off to
+  a mutation skill. In an automated workflow, you may return a structured proposal
+  for a downstream human approval step.
+
+---
+
+## Structured Tuning Proposal
+
+When a workflow requests structured output, return exactly one proposal:
+
+- \`change_type\`: \`exception\`, \`suppression\`, \`query\`, or \`threshold\`.
+- \`summary\`: evidence-based explanation naming the rule and noisy pattern.
+- \`current_query\` and \`proposed_query\`: exact before and after queries for a
+  query change. Leave \`proposed_query\` empty for other change types.
+- \`exception_condition\`: the tightest AND condition for an exception.
+- \`rekey_required\`: true for query, suppression, and threshold changes; false
+  for exceptions.
+
+Prefer an exception for confirmed dispositions. Propose a query change only when
+the evidence shows the rule itself over-matches.
 
 ---
 
@@ -310,6 +329,7 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
       'broad query, or a threshold misconfiguration. If no rule attachment is present yet (e.g. the user selected ' +
       'one rule from find-security-rules output), the skill resolves the rule by its rule_id (detection rule signature ID) ' +
       'and creates the attachment before proceeding. ' +
+      'Automated workflows can request a structured tuning proposal for downstream human approval; the skill still never applies changes. ' +
       'Do not use for plural list, rank, or count requests for noisy rules; use find-security-rules until a single rule is selected.',
     content: SKILL_CONTENT,
     getRegistryTools: () => [SECURITY_ALERTS_TOOL_ID],

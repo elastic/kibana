@@ -18,7 +18,7 @@ import {
 describe('PND schema smoke tests', () => {
   it('parses mock watches through ListWatchesResponse', () => {
     const result = ListWatchesResponse.parse({ watches: MOCK_MANAGED_WATCHES });
-    expect(result.watches).toHaveLength(4);
+    expect(result.watches).toHaveLength(5);
     result.watches.forEach((watch: Watch) => {
       expect(watch.tags).toContain('watch');
       expect(watch.managed).toBe(true);

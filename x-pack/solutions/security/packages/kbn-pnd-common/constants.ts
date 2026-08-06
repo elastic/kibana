@@ -35,12 +35,14 @@ export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as c
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
 export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
 export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
+export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 
 export const SYSTEM_SECURITY_WATCH_IDS = [
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
 ] as const;
 
 export const WATCH_TAG = 'watch' as const;
@@ -48,6 +50,7 @@ export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_DARK_TAG = 'watch-dark' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
+export const WATCH_DETECTION_TAG = 'watch-detection' as const;
 export const WATCH_CUSTOM_TAG = 'watch-custom' as const;
 
 export const WATCH_TIER_TAGS = [
@@ -55,6 +58,7 @@ export const WATCH_TIER_TAGS = [
   WATCH_OFFICER_TAG,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
+  WATCH_DETECTION_TAG,
 ] as const;
 
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
