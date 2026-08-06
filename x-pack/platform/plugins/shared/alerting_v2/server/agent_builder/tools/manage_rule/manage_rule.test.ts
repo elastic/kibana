@@ -333,6 +333,33 @@ describe('manageRuleTool', () => {
       expect(ctx.attachments.update).not.toHaveBeenCalled();
     });
 
+    it('does not execute operations or ES queries when unauthorized', async () => {
+      const unauthorizedTool = manageRuleTool({
+        getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
+      });
+      const ctx = createContext();
+
+      await unauthorizedTool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Should Not Execute' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | STATS AVG(cpu) BY host.name' },
+              },
+            },
+          ],
+        },
+        ctx
+      );
+
+      expect(getEsqlQueryMock(ctx)).not.toHaveBeenCalled();
+      expect(getFieldCapsMock(ctx)).not.toHaveBeenCalled();
+      expect(ctx.attachments.getAttachmentRecord).not.toHaveBeenCalled();
+    });
+
     it('resolves the PrivilegeChecker with the handler request', async () => {
       const checkerMock = createPrivilegeCheckerMock(true);
       const getPrivilegeChecker = jest.fn().mockReturnValue(checkerMock);
@@ -366,3 +393,4 @@ describe('manageRuleTool', () => {
     });
   });
 });
+

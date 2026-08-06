@@ -33,6 +33,7 @@ import {
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
 } from './evaluators/expected_attachment';
+import { createExpectedToolErrorEvaluator } from './evaluators/expected_tool_error';
 import { messagesFromRounds, skippedResult, withLowScoreLogging } from './evaluator_utils';
 import type { ConversationTurnResult, EvaluateDataset, RuleManagementExample } from './types';
 
@@ -195,6 +196,7 @@ export const createEvaluateDataset = ({
         createExpectedSkillEvaluator(),
         createExpectedToolCalledEvaluator(),
         createExpectedAnyOfToolIdsEvaluator(),
+        createExpectedToolErrorEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
         createExpectedAttachmentDataEvaluator(),
         createCriteriaEvaluator(evaluators),

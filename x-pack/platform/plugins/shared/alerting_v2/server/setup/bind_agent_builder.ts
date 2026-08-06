@@ -56,6 +56,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       createRuleAttachmentType({
         logger,
         getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
   );
@@ -65,6 +67,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         logger,
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
   );

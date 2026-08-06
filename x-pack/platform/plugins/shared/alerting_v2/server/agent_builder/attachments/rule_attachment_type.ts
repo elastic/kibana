@@ -17,10 +17,12 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '../../lib/rules_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 
 interface CreateRuleAttachmentTypeOptions {
   logger: Logger;
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
+  getPrivilegeChecker: (context: { request: AttachmentResolveContext['request'] }) => PrivilegeChecker;
 }
 
 const formatRuleAttachmentDescription = (
@@ -46,6 +48,7 @@ const formatRuleAttachmentDescription = (
 export const createRuleAttachmentType = ({
   logger,
   getRulesClient,
+  getPrivilegeChecker,
 }: CreateRuleAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof RULE_ATTACHMENT_TYPE,
   RuleAttachmentData
@@ -65,6 +68,13 @@ export const createRuleAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<RuleAttachmentData | undefined> => {
     try {
+      const privilegeChecker = getPrivilegeChecker({ request: context.request });
+      const canRead = await privilegeChecker.canRead('rules');
+      if (!canRead) {
+        logger.debug(`Unauthorized to resolve rule attachment "${origin}": missing Rules: Read`);
+        return undefined;
+      }
+
       const rulesClient = getRulesClient(context);
       const rule = await rulesClient.getRule({ id: origin });
       return ruleAttachmentDataSchema.parse(rule);

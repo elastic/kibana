@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import {
+  ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
   RULE_MANAGEMENT_SKILL_ID,
 } from '../../src/constants';
@@ -42,6 +43,49 @@ evaluate.describe(
                   ],
                   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
                   expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                  expectedToolError: {
+                    toolId: ALERTING_TOOL_IDS.manageRule,
+                    messageContains: 'Rules: All',
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'unprivileged user cannot compose action policies',
+      async ({ unprivilegedEvaluateDataset }) => {
+        await unprivilegedEvaluateDataset({
+          dataset: {
+            name: 'alerting-v2: action policy privilege enforcement',
+            description:
+              'Verifies that a read-only user (alerting_v2_action_policies: read, no write) is ' +
+              'refused when asking the agent to compose or modify an action policy. The agent ' +
+              'should surface the missing privilege (Action Policies: All) rather than composing ' +
+              'the policy.',
+            examples: [
+              {
+                input: {
+                  turns: [
+                    'Create a notification policy that emails oncall@example.com whenever any alert fires.',
+                  ],
+                },
+                output: {
+                  criteria: [
+                    'The assistant does NOT successfully compose an action policy attachment — it refuses or reports a privilege error.',
+                    'The response mentions the missing privilege "Action Policies: All" (or equivalent wording indicating the user lacks write/manage access to action policies).',
+                    'The assistant does NOT render an action policy attachment with a "Create policy" button.',
+                    'The assistant suggests the user ask an administrator for the required privilege or mentions that discovery (read-only) is still available.',
+                  ],
+                  expectedSkills: [ACTION_POLICY_MANAGEMENT_SKILL_ID],
+                  expectedToolIds: [ALERTING_TOOL_IDS.manageActionPolicy],
+                  expectedToolError: {
+                    toolId: ALERTING_TOOL_IDS.manageActionPolicy,
+                    messageContains: 'Action Policies: All',
+                  },
                 },
               },
             ],

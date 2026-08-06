@@ -15,6 +15,7 @@ import type {
 import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RulesClient } from '../../lib/rules_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { createRuleAttachmentType } from './rule_attachment_type';
 
 const baseRuleData: RuleAttachmentData = {
@@ -68,6 +69,12 @@ describe('createRuleAttachmentType', () => {
   let getRule: jest.Mock;
   let definition: AttachmentTypeDefinition<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
+  const createPrivilegeCheckerMock = (canReadResult: boolean = true) =>
+    ({
+      canRead: jest.fn().mockResolvedValue(canReadResult),
+      canWrite: jest.fn().mockResolvedValue(true),
+    }) as unknown as PrivilegeChecker;
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     getRule = jest.fn();
@@ -75,6 +82,7 @@ describe('createRuleAttachmentType', () => {
     definition = createRuleAttachmentType({
       logger,
       getRulesClient: () => rulesClient,
+      getPrivilegeChecker: () => createPrivilegeCheckerMock(true),
     });
   });
 
@@ -310,6 +318,40 @@ describe('createRuleAttachmentType', () => {
   describe('getTools', () => {
     it('returns an empty list (no inline tools exposed via the attachment)', () => {
       expect(definition.getTools!()).toEqual([]);
+    });
+  });
+
+  describe('authorization', () => {
+    it('returns undefined when user lacks Rules: Read on resolve', async () => {
+      const rulesClient = { getRule } as unknown as RulesClient;
+      const unauthorizedDefinition = createRuleAttachmentType({
+        logger,
+        getRulesClient: () => rulesClient,
+        getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
+      });
+
+      const result = await unauthorizedDefinition.resolve!(
+        'rule-1',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getRule).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Unauthorized to resolve rule attachment "rule-1"')
+      );
+    });
+
+    it('resolves rule data when user has Rules: Read', async () => {
+      getRule.mockResolvedValueOnce(baseRuleData);
+
+      const result = await definition.resolve!(
+        'rule-1',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
+
+      expect(result).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
+      expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
     });
   });
 });

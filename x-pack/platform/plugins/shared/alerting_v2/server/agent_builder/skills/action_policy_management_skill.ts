@@ -109,9 +109,7 @@ Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query 
 
 ## Privileges
 
-The \`${ALERTING_TOOL_IDS.manageActionPolicy}\` tool requires the **Action Policies: All** Kibana privilege. If the user lacks this privilege the tool returns an error with the missing privilege name — relay that message to the user verbatim.
-
-Users with only **Action Policies: Read** can still discover and inspect existing action policies via \`platform.core.sml_search\` and \`platform.core.sml_attach\`, but cannot compose or modify action policy attachments.`,
+The \`${ALERTING_TOOL_IDS.manageActionPolicy}\` tool requires the **Action Policies: All** Kibana privilege. Read-only users can discover and inspect action policies via \`platform.core.sml_search\` and \`platform.core.sml_attach\`.`,
       },
       {
         name: 'action-policy-schema',

@@ -79,9 +79,7 @@ When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${
 
 ## Privileges
 
-The \`${ALERTING_TOOL_IDS.manageRule}\` tool requires the **Rules: All** Kibana privilege. If the user lacks this privilege the tool returns an error with the missing privilege name — relay that message to the user verbatim.
-
-Users with only **Rules: Read** can still discover and inspect existing rules via \`platform.core.sml_search\` and \`platform.core.sml_attach\`, but cannot compose or modify rule attachments.`,
+The \`${ALERTING_TOOL_IDS.manageRule}\` tool requires the **Rules: All** Kibana privilege. Read-only users can discover and inspect rules via \`platform.core.sml_search\` and \`platform.core.sml_attach\`.`,
       },
       {
         name: 'rule-schema',
