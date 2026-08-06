@@ -27,6 +27,18 @@ const SKIP_DIRS = new Set([
   'data',
 ]);
 
+/**
+ * Splits a suite across several CI steps so a long suite fits inside the Buildkite step timeout.
+ * Each shard becomes its own step (per connector) with its own Scout stack, filtered by Playwright
+ * `--grep` / `--grep-invert`. Prefer expressing the last shard as `grepInvert` of the others so a
+ * newly added test is never silently excluded from every shard.
+ */
+export interface EvalSuiteShard {
+  id: string;
+  grep?: string;
+  grepInvert?: string;
+}
+
 export interface EvalSuiteMetadata {
   id: string;
   name?: string;
@@ -35,6 +47,8 @@ export interface EvalSuiteMetadata {
   tags?: string[];
   ciLabels?: string[];
   serverConfigSet?: string;
+  shards?: EvalSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 export interface EvalSuiteDefinition {
@@ -49,6 +63,8 @@ export interface EvalSuiteDefinition {
   description?: string;
   source: 'metadata' | 'discovery';
   serverConfigSet?: string;
+  shards?: EvalSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 interface MetadataFile {
@@ -154,6 +170,8 @@ const normalizeSuite = (
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
     serverConfigSet: metadata?.serverConfigSet,
+    shards: metadata?.shards,
+    stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };
 };
 

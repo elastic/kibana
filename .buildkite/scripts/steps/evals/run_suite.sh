@@ -14,6 +14,11 @@ if [[ -z "$EVAL_SUITE_ID" ]]; then
   exit 1
 fi
 
+# Boot disk for the fanout agents. Eval steps bootstrap the workspace, unpack the Kibana
+# distributable and run a local ES + Kibana; on the image default ES ends up under its merge
+# disk watermark and stops merging segments. Keep in sync with `pipelines/evals/eval_pipeline.ts`.
+EVAL_AGENT_DISK_SIZE_GB="${EVAL_AGENT_DISK_SIZE_GB:-130}"
+
 # Tag inference traffic with `X-Elastic-Product-Use-Case` (forwarded from inference connector telemetry).
 # The value should be the platform-level `pluginId` use-case identifier.
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
@@ -34,6 +39,8 @@ EVAL_SUITE_INFO="$(
 )"
 EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
+# Per-suite step timeout for suites that legitimately need longer than the 120m default.
+EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -68,7 +75,15 @@ record_suite_failure() {
   local failure_key="kbn-evals:suite-failures:${suite_key_safe}:${project_key_safe}"
   buildkite-agent meta-data set "$failure_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
 
+  # Shards of one model run as separate steps but share EVAL_PROJECT, and each records a
+  # different excerpt, so the log needs a key per shard or the last step to fail wins.
   local failure_log_key="kbn-evals:suite-failure-log:${suite_key_safe}:${project_key_safe}"
+  if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
+    local shard_key_safe
+    shard_key_safe="$(printf '%s' "$EVAL_SHARD_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+    failure_log_key="${failure_log_key}:${shard_key_safe}"
+  fi
+
   if [[ -n "${KBN_EVALS_RUN_LOG:-}" && -f "${KBN_EVALS_RUN_LOG}" ]]; then
     local excerpt
     excerpt="$(
@@ -173,19 +188,58 @@ EOF
         fanout_preemptible=false
       fi
 
+      # Suites that don't fit one step declare `shards` in evals.suites.json; each shard becomes a
+      # separate step (with its own Scout stack) filtered by Playwright --grep/--grep-invert.
+      # An explicit EVAL_GREP is a manual override, so it takes precedence over the shard split.
+      # Expanded into parallel arrays rather than read positionally from a delimited row, because
+      # bash collapses runs of tabs when splitting and would shift a shard with an empty `grep`.
+      shard_ids=()
+      shard_greps=()
+      shard_grep_inverts=()
+      shard_count=0
+      if [[ -z "${EVAL_GREP:-}" ]]; then
+        shard_count="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '(.shards // []) | length' 2>/dev/null || echo 0)"
+        [[ "$shard_count" =~ ^[0-9]+$ ]] || shard_count=0
+      fi
+
+      for ((shard_index = 0; shard_index < shard_count; shard_index++)); do
+        shard_ids+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].id // ""')")
+        shard_greps+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].grep // ""')")
+        shard_grep_inverts+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].grepInvert // ""')")
+      done
+
+      # No shards configured: a single step per connector, honouring any manual grep overrides.
+      if ((shard_count == 0)); then
+        shard_ids=("")
+        shard_greps=("${EVAL_GREP:-}")
+        shard_grep_inverts=("${EVAL_GREP_INVERT:-}")
+      fi
+
+      # Explicit env override wins, then the suite's own budget, then the 120m default that lets
+      # most suite/model combinations through without per-suite special-casing.
+      timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
+
       fanout_step_keys=()
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
-        step_key="kbn-evals-${group_key_safe}-${key_safe}"
-        fanout_step_keys+=("$step_key")
 
-        # Default BK step timeout is 120m to allow slower models/suites without
-        # needing per-suite/per-model special-casing. Can be overridden if needed.
-        timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}"
+        for ((shard_index = 0; shard_index < ${#shard_ids[@]}; shard_index++)); do
+          shard_id="${shard_ids[$shard_index]}"
+          shard_grep="${shard_greps[$shard_index]}"
+          shard_grep_invert="${shard_grep_inverts[$shard_index]}"
 
-        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
-      - label: "LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
+          step_key="kbn-evals-${group_key_safe}-${key_safe}"
+          step_label="LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
+          if [[ -n "$shard_id" ]]; then
+            shard_key_safe="$(printf '%s' "$shard_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+            step_key="${step_key}-${shard_key_safe}"
+            step_label="${step_label} [${shard_id}]"
+          fi
+          fanout_step_keys+=("$step_key")
+
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "${step_label}"
         key: "${step_key}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
         env:
@@ -199,10 +253,12 @@ EOF
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_PROJECT: "${connector_id}"
+          EVAL_SHARD_ID: "${shard_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
-          EVAL_GREP: "${EVAL_GREP:-}"
+          EVAL_GREP: "${shard_grep}"
+          EVAL_GREP_INVERT: "${shard_grep_invert}"
           EVALUATION_REPETITIONS: "${EVALUATION_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
@@ -212,17 +268,19 @@ EOF
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}
 EOF
 
-        if [[ "$fanout_preemptible" == "true" ]]; then
-          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+          if [[ "$fanout_preemptible" == "true" ]]; then
+            cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
         retry:
           automatic:
             - exit_status: "-1"
               limit: 3
 EOF
-        fi
+          fi
+        done
       done <<<"$CONNECTOR_IDS"
 
       # Resolve a PR number (if any) so triage can be posted as a PR comment:
@@ -394,6 +452,13 @@ EOF
   fi
 fi
 
+# Free space on the ES data path drives the merge scheduler's disk watermark: once it drops below
+# `min(5% of total, 100GB)` Elasticsearch stops merging segments and only says so in a repeated
+# warning. Record the numbers up front so a recurrence is diagnosable from the build log alone.
+echo "--- Disk usage before starting Scout"
+df -h .
+du -sh .es node_modules "${KIBANA_BUILD_LOCATION:-}" 2>/dev/null || true
+
 # Start Scout server in background (run Kibana from the distributable)
 SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
 if [[ -n "${EVAL_SERVER_CONFIG_SET:-}" ]]; then
@@ -515,11 +580,15 @@ done
 
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
-# If EVAL_GREP is set, pass Playwright --grep to filter tests by name/pattern.
+# If EVAL_GREP / EVAL_GREP_INVERT are set, pass Playwright --grep / --grep-invert to filter tests
+# by name/pattern. Sharded suites use these to split one suite across several steps.
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
 EVAL_RUN_ARGS=()
 if [[ -n "${EVAL_GREP:-}" ]]; then
   EVAL_RUN_ARGS+=(--grep "${EVAL_GREP}")
+fi
+if [[ -n "${EVAL_GREP_INVERT:-}" ]]; then
+  EVAL_RUN_ARGS+=(--grep-invert "${EVAL_GREP_INVERT}")
 fi
 
 run_eval_suite() {

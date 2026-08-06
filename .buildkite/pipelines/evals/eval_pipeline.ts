@@ -133,6 +133,13 @@ function normalizeEvaluationConnectorId(raw: string): string {
 }
 
 /**
+ * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
+ * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
+ * stops merging segments. Keep in sync with the fanout steps in `steps/evals/run_suite.sh`.
+ */
+const EVAL_AGENT_DISK_SIZE_GB = 130;
+
+/**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
  * PR evals set `EVAL_PREEMPTIBLE=0` so a lost worker/timeout doesn't silently re-run the suite.
  */
@@ -200,6 +207,7 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
+        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,

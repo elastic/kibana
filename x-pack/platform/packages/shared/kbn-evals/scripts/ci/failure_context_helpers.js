@@ -40,8 +40,29 @@ const WEEKLY_ROLLUP_OUTPUT_INSTRUCTIONS = `Output exactly these bullets, in this
 
 Constraints: base everything on the per-suite triage above (do not invent suites, models, or causes); no second person, narration, or preamble; portable markdown only (bullets and inline \`code\`; no bold, headings, links, or code fences); stay under 900 characters.`;
 
-function failureLogMetadataKey(suiteId, project) {
-  return `kbn-evals:suite-failure-log:${slugifyId(suiteId)}:${slugifyId(project)}`;
+function failureLogMetadataKey(suiteId, project, shardId) {
+  const base = `kbn-evals:suite-failure-log:${slugifyId(suiteId)}:${slugifyId(project)}`;
+  return shardId ? `${base}:${slugifyId(shardId)}` : base;
+}
+
+/**
+ * Every metadata key holding a log excerpt for one model: the unsharded key plus
+ * one per shard. The unsharded key is always returned so a failed `meta-data keys`
+ * listing degrades to the pre-sharding behaviour rather than dropping the excerpt.
+ *
+ * Slugified shard ids cannot contain `:`, so matching on the `:` boundary keeps
+ * models whose slugs share a prefix (`gpt-5` vs `gpt-5-mini`) from bleeding into
+ * each other.
+ *
+ * @param {string[]} allKeys
+ * @param {string} suiteId
+ * @param {string} project
+ * @returns {string[]}
+ */
+function failureLogMetadataKeysForProject(allKeys, suiteId, project) {
+  const base = failureLogMetadataKey(suiteId, project);
+  const shardKeys = allKeys.filter((key) => key.startsWith(`${base}:`)).sort();
+  return [base, ...shardKeys];
 }
 
 function truncateText(text, maxChars) {
@@ -389,6 +410,7 @@ module.exports = {
   TRIAGE_SYSTEM_PROMPT,
   resolveTriageModelId,
   failureLogMetadataKey,
+  failureLogMetadataKeysForProject,
   truncateText,
   redactSecrets,
   truncateContextJson,

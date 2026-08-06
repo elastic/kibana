@@ -97,6 +97,17 @@
       "ciLabels": [
         "evals:significant-events"
       ],
+      "stepTimeoutInMinutes": 150,
+      "shards": [
+        {
+          "id": "discovery-and-queries",
+          "grep": "KI query generation|Significant Events Discovery"
+        },
+        {
+          "id": "features",
+          "grepInvert": "KI query generation|Significant Events Discovery"
+        }
+      ],
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-4.6-sonnet",
         "eis/anthropic-claude-4.6-opus",

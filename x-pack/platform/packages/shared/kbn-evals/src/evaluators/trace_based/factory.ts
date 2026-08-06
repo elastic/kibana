@@ -89,19 +89,9 @@ export function createTraceBasedEvaluator({
           minTimeout: 2000,
           maxTimeout: 60000,
           onFailedAttempt: (error) => {
-            const isLastAttempt = error.retriesLeft === 0;
-
-            if (isLastAttempt) {
-              log.error(
-                new Error(`Failed to retrieve ${name} after ${error.attemptNumber} attempts`, {
-                  cause: error,
-                })
-              );
-            } else {
-              log.warning(
-                `${name} query failed on attempt ${error.attemptNumber}; retrying... (traceId: ${traceId})`
-              );
-            }
+            log.debug(
+              `${name} query failed on attempt ${error.attemptNumber}, ${error.retriesLeft} retries left (traceId: ${traceId}): ${error.message}`
+            );
           },
         });
 
@@ -111,9 +101,11 @@ export function createTraceBasedEvaluator({
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
 
+        // Exhausting the retry budget is not a suite failure while a usable value is still
+        // available, so this stays below `error` to keep genuine failures visible in CI output.
         if (lastResult !== undefined) {
           log.warning(
-            `${name} returning potentially incomplete result for trace ${traceId}: ${lastResult}`
+            `${name} returning potentially incomplete result for trace ${traceId}: ${lastResult} (${errorMessage})`
           );
           return {
             score: lastResult,

@@ -37,6 +37,7 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite agent-builder --judge bedrock-claude
     node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
     node scripts/evals run --suite agent-builder --grep "product documentation"
+    node scripts/evals run --suite significant-events --grep-invert "KI query generation"
     node scripts/evals run --suite streams --dry-run
   `,
   flags: {
@@ -48,6 +49,7 @@ export const runSuiteCmd: Command<void> = {
       'evaluation-connector-id',
       'repetitions',
       'grep',
+      'grep-invert',
       'profile',
       'datasets-profile',
       'export-profile',
@@ -137,6 +139,11 @@ export const runSuiteCmd: Command<void> = {
     const grep = flagsReader.string('grep');
     if (grep) {
       args.push('--grep', grep);
+    }
+
+    const grepInvert = flagsReader.string('grep-invert');
+    if (grepInvert) {
+      args.push('--grep-invert', grepInvert);
     }
 
     const positionals = flagsReader.getPositionals();

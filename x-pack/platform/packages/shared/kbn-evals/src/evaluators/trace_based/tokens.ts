@@ -78,16 +78,28 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
-      // TO_LONG resolves union types (integer vs long across trace index generations).
+      // `input_tokens` is only used as a liveness probe for the trace: providers that never report
+      // prompt caching (most `.inference`/EIS models) omit the cache_read attribute entirely, so
+      // SUM returns null forever. Without the probe, that is indistinguishable from a trace that
+      // has not finished indexing and every example burns the full retry budget.
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace.id == "${traceId}"
         | STATS 
-        cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens))`,
+        cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),
+        input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
         const cachedTokensIdx = columns.findIndex((col) => col.name === 'cached_tokens');
-        return row[cachedTokensIdx];
+        const inputTokensIdx = columns.findIndex((col) => col.name === 'input_tokens');
+        const cachedTokens = row[cachedTokensIdx];
+
+        if (cachedTokens !== null && cachedTokens !== undefined) {
+          return cachedTokens;
+        }
+
+        const inputTokens = row[inputTokensIdx];
+        return inputTokens === null || inputTokens === undefined ? null : 0;
       },
       isResultValid: (result) => result !== null,
     },

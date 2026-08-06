@@ -31,5 +31,7 @@ process.stdout.write(
     id: suite.id,
     name: suite.name,
     slackChannel: suite.slackChannel,
+    shards: Array.isArray(suite.shards) ? suite.shards : [],
+    stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
   })
 );
