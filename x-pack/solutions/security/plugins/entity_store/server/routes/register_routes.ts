@@ -32,8 +32,6 @@ import {
   registerResolutionRulesDisable,
   registerUpdate,
   registerCheckPrivileges,
-  registerGetPreferences,
-  registerUpdatePreferences,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -46,8 +44,6 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerForceRemoteExtractToUpdates(router);
   registerForceHistorySnapshot(router);
   registerCheckPrivileges(router);
-  registerGetPreferences(router);
-  registerUpdatePreferences(router);
   registerCRUDCreate(router);
   registerCRUDUpdate(router);
   registerCRUDBulkUpdate(router);

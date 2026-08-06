@@ -59,7 +59,7 @@ const sharedFilterFields = {
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted matches all outcomes. Pass "dispatched", "throttled", and/or "dispatch_failed" to narrow.'
+      'Outcome filter. When omitted matches all outcomes. Pass one or more of "dispatched", "throttled", "dispatch_failed" to narrow.'
     ),
 };
 

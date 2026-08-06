@@ -73,6 +73,7 @@ import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 import { inferenceModelRoutes } from './routes/inference_models';
+import { registerAnomalyDetectionAgentBuilder } from './agent_builder/register_anomaly_detection';
 import { registerEmbeddables } from './lib/register_embeddables';
 
 export type MlPluginSetup = SharedServices;
@@ -104,7 +105,6 @@ export class MlServerPlugin
   };
   private compatibleModuleType: CompatibleModule | null = null;
   private serverless: ServerlessInfo;
-
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
@@ -314,6 +314,16 @@ export class MlServerPlugin
           .getStartServices()
           .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
       registerCollector(plugins.usageCollection, getIndexForType);
+    }
+
+    if (plugins.agentBuilder && this.enabledFeatures.ad) {
+      registerAnomalyDetectionAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        resolveMlCapabilities,
+        authorization: plugins.security?.authz,
+        mlLicense: this.mlLicense,
+        enabledFeatures: this.enabledFeatures,
+      });
     }
 
     return { ...sharedServicesProviders };

@@ -79,6 +79,7 @@
     "@kbn/scout",
     "@kbn/object-utils",
     "@kbn/alerting-v2-constants",
+    "@kbn/alerting-v2-common-queries",
     "@kbn/alerting-v2-utils",
     "@kbn/alerting-v2-episodes-ui",
     "@kbn/kibana-react-plugin",
@@ -133,7 +134,10 @@
     "@kbn/content-list-provider",
     "@kbn/content-list-toolbar",
     "@kbn/es",
-    "@kbn/test-es-server"
+    "@kbn/test-es-server",
+    "@kbn/security-authorization-core",
+    "@kbn/security-plugin-types-server",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

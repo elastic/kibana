@@ -28,9 +28,18 @@ export interface CustomFieldType<T extends CaseUICustomField> {
     canUpdate: boolean;
     /**
      * `classic` — pencil + view mode (legacy case view).
-     * `inline` — always-visible input with confirm/cancel (redesign case view).
+     * `inline` — label/value row with an edit affordance, matching the template fields section
+     * (redesign case view).
      */
     editVariant?: 'classic' | 'inline';
+    /**
+     * `inline` only: the section (not this field) owns edit mode — every field in the section
+     * switches to its editable form together, the same way the template fields section works.
+     * Ignored for `classic`, which keeps its own always-independent per-field edit state.
+     */
+    isSectionEditing?: boolean;
+    /** `inline` only: requests that the whole section enter edit mode. */
+    onRequestSectionEdit?: () => void;
   }>;
   Create: React.FC<{
     customFieldConfiguration: CasesConfigurationUICustomField;
