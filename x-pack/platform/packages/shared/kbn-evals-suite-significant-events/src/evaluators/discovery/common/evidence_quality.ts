@@ -7,6 +7,7 @@
 
 import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import {
+  ASSESSMENT_NOTE_ROLE_RULE,
   MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
@@ -35,7 +36,7 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every signal the agent verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must describe the check in one to three plain sentences covering what was checked, what the data showed, and what that means for the event. The four-part template ("Testing: … Expected if true: … Found: … Verdict: …") is not acceptable for these agent-authored entries. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format, including the four-part template. Signals without a confirmed value were not verified and are exempt.',
+    text: 'Every signal the agent verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must use the grounding contract: "Found: … Impact: … Verdict: …". Found must identify the observed row signature and target, Impact must state the outcome for the affected operation, and Verdict must be `confirms`, `refutes`, or `inconclusive`. Do not add process narration or a "Testing: … Expected: …" preamble. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format. Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
@@ -54,12 +55,35 @@ const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'summary_observed_state',
-    text: `Summary leads with the normalized observed error signature and affected component or dependency path, then describes the affected operation and scoped impact. ${SUMMARY_ROLE_RULE} It does not narrate queries, detections, analysis steps, p_value, severity_score, or memory-page presence.`,
+    text: `Summary leads with the normalized observed error signature and affected component or dependency path, preserving decisive technical details such as the error type/code, operation, protocol, endpoint, port, and relevant non-sensitive address. It may use query KI context or resolved feature metadata to clarify that path without asserting it as a proven cause. It then describes the affected operation and scoped impact. ${SUMMARY_ROLE_RULE} It does not include p_value or severity_score.`,
     score: 1,
   },
   {
     id: 'assessment_note_reasoning_only',
-    text: 'assessment_note is concise operator-facing lifecycle detail that explains the assessment decision, ambiguity, or caveat. It does not repeat the observed condition, error signature, impact, signal descriptions, or detection artifacts.',
+    text: `assessment_note is operator-facing lifecycle reasoning and may be detailed when that improves the decision record. ${ASSESSMENT_NOTE_ROLE_RULE} It must add status, severity, confidence, or uncertainty reasoning rather than merely repeat the observed condition, error signature, impact, or signal description.`,
+    score: 1,
+  },
+  {
+    id: 'event_local_narrative',
+    text: 'Each event narrative refers only to that event’s final signals, causal_features, and blast_radius. Do not copy a symptom_hypothesis, summary, or assessment_note from another discovery component; names, mechanisms, and impacts must match the event’s own evidence.',
+    score: 1,
+  },
+  {
+    id: 'off_topic_error_narrative_focus',
+    text: 'When a concrete off-topic error creates its own event, symptom_hypothesis and summary focus on the observed error, affected operation, and bounded impact. Do not repeat the authored rule that the row refuted; keep that rule-to-row mismatch in the signal description or assessment_note.',
+    score: 1,
+  },
+];
+
+const SIGNAL_EVIDENCE_CONSISTENCY_CRITERIA: EvaluationCriterion[] = [
+  {
+    id: 'signal_confirmation_matches_evidence',
+    text: 'Set `confirmed: true` only when a found row directly confirms the rule’s failure, degradation, exposure, or evidenced cascade. A healthy, positive, unrelated, empty, errored, or ambiguous result must never be `confirmed: true`; use `false` for verified healthy/positive/unrelated rows and omit it for empty or errored evidence.',
+    score: 1,
+  },
+  {
+    id: 'event_decision_matches_signal_evidence',
+    text: 'If no signal confirms a failure, degradation, or exposure, dismiss the event unless independent current evidence leaves one plausibly unresolved. In that case, keep it open with an explicit evidence gap. A concrete non-benign error in an off-topic found row directly confirms a separate observed-error event: keep the original rule signal `confirmed: false`, but create or merge an `open` event grounded only in that row’s error signature and impact. The exception does not apply to healthy, ambiguous, or merely unrelated rows; evaluate the observed-error event’s severity and confidence from its direct evidence rather than the source rule’s `confirmed` value. Exception: close an established same-rule episode when a successful exact query has verified healthy/opposite rows or no matching failure rows, even if the detection direction is ambiguous and the prior signal was unconfirmed. Do not create a new dismissed event for that recovery reconciliation. A query error, telemetry gap, or unrelated result blocks closure. Do not infer a root cause, impact, or severity tier from empty evidence alone.',
     score: 1,
   },
 ];
@@ -92,5 +116,20 @@ export const createNarrativeFieldsEvaluator = <
     name: 'narrative_fields_quality',
     criteriaFn,
     criteria: NARRATIVE_FIELDS_CRITERIA,
+    transformOutput,
+  });
+
+/** LLM evaluator: grades whether signal confirmation and event decisions match grounded evidence. */
+export const createSignalEvidenceConsistencyEvaluator = <
+  TExample extends Example,
+  TOutput extends TaskOutput
+>({
+  criteriaFn,
+  transformOutput,
+}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
+  createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
+    name: 'signal_evidence_consistency',
+    criteriaFn,
+    criteria: SIGNAL_EVIDENCE_CONSISTENCY_CRITERIA,
     transformOutput,
   });

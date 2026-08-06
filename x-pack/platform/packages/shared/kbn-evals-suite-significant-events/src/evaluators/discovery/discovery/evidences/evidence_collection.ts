@@ -24,6 +24,11 @@ const detectionSignalsByRuleUuid = (
   return signalsByRuleUuid;
 };
 
+const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
+  signal.evidence == null &&
+  signal.confirmed === undefined &&
+  /no backed query KI (?:matched|available)/i.test(signal.description);
+
 /** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
@@ -53,7 +58,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         issues.push(`missing signal for input rule "${ruleUuid}"`);
       } else if (signals.length > 1) {
         issues.push(`duplicate signals for input rule "${ruleUuid}"`);
-      } else if (signals[0].evidence == null) {
+      } else if (signals[0].evidence == null && !hasQuietNoQueryDisposition(signals[0])) {
         issues.push(`no ES|QL evidence for input rule "${ruleUuid}"`);
       } else {
         covered++;

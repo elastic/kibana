@@ -59,6 +59,14 @@ describe('groupingCorrectnessEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('ignores valid standalone signals outside the declared expected event universe', async () => {
+    const result = await evaluate(
+      [buildEvent('a', 'b'), { ...buildEvent('unrelated-positive'), status: 'dismissed' }],
+      [['a', 'b']]
+    );
+    expect(result.score).toBe(1);
+  });
+
   it('scores 0 when independent rules were merged', async () => {
     const result = await evaluate([buildEvent('a', 'b')], [['a'], ['b']]);
     expect(result.score).toBe(0);

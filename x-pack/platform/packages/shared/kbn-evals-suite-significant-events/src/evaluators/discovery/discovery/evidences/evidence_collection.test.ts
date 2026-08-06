@@ -20,15 +20,18 @@ const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
 
 const detectionSignal = (
   ruleUuid: string,
-  evidence: 'found' | 'no-query' | 'missing' = 'found'
+  evidence: 'found' | 'quiet' | 'missing' = 'found'
 ): SignalEntry => ({
   type: 'detection',
-  description: 'Testing: something. Expected: error. Found: 1 row. Verdict: confirms.',
+  description:
+    evidence === 'quiet'
+      ? 'No backed query KI matched this detection.'
+      : 'Testing: something. Expected: error. Found: 1 row. Verdict: confirms.',
   ...(evidence === 'found' ? { confirmed: true } : {}),
   stream_name: 'logs',
   ...(evidence === 'found'
     ? { evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' as const } }
-    : evidence === 'no-query'
+    : evidence === 'quiet'
     ? { evidence: null }
     : {}),
   metadata: {
@@ -82,15 +85,18 @@ describe('evidenceCollectionEvaluator', () => {
     expect(result.explanation).toContain('missing signal for input rule "r2"');
   });
 
-  it.each(['no-query', 'missing'] as const)(
-    'rejects %s evidence for an input rule',
-    async (evidence) => {
-      const result = await evaluate([{ signals: [detectionSignal('r1', evidence)] }], ['r1']);
+  it('accepts an explicitly quiet signal with no backed query KI', async () => {
+    const result = await evaluate([{ signals: [detectionSignal('r1', 'quiet')] }], ['r1']);
 
-      expect(result.score).toBe(0);
-      expect(result.explanation).toContain('no ES|QL evidence for input rule "r1"');
-    }
-  );
+    expect(result.score).toBe(1);
+  });
+
+  it.each(['missing'] as const)('rejects %s evidence for an input rule', async (evidence) => {
+    const result = await evaluate([{ signals: [detectionSignal('r1', evidence)] }], ['r1']);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('no ES|QL evidence for input rule "r1"');
+  });
 
   it('rejects duplicate signals', async () => {
     const result = await evaluate(

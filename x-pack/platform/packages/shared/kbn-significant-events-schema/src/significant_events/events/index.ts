@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
+  ASSESSMENT_NOTE_ROLE_RULE,
   MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_ID_LENGTH,
   NO_RAW_SENSITIVE_VALUES_RULE,
@@ -71,6 +72,7 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .describe(
       dedent`
         Concise operator-facing rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        ${ASSESSMENT_NOTE_ROLE_RULE}
         Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, detection artifacts, or memory-page presence.
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}

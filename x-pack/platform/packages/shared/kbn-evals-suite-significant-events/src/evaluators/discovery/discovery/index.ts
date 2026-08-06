@@ -18,6 +18,7 @@ import {
 import {
   createEvidenceDescriptionEvaluator,
   createNarrativeFieldsEvaluator,
+  createSignalEvidenceConsistencyEvaluator,
 } from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
@@ -60,6 +61,7 @@ export const createDiscoveryEvaluators = (
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
     createNarrativeFieldsEvaluator({ criteriaFn }),
+    createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
     createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];

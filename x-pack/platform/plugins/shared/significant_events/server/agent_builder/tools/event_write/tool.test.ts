@@ -78,6 +78,35 @@ describe('events_write tool', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
 
+  it('rejects duplicate detection rules across event items', () => {
+    const signal = {
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: error. Impact: requests failed. Verdict: confirms.',
+      confirmed: true,
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    };
+
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        { ...input, signals: [signal] },
+        { ...input, signals: [signal] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.at(-1)?.message).toBe(
+        'Each detection rule UUID may appear in only one event item per write'
+      );
+    }
+  });
+
   it('normalizes an empty event_id to an omitted event_id', () => {
     const result = eventsWriteSchema.parse({
       items: [{ ...input, event_id: '' }],

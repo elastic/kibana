@@ -14,12 +14,13 @@ const STATUS_DECISION_RUBRIC = [
   'You cannot run queries. Use the signal counts in the summary and the agent output evidence.',
   '',
   'Status gates:',
-  '- `open`: a current failure, material degradation, or sensitive-data exposure is confirmed, or a verification gap leaves one of those conditions plausible.',
-  '- `status: "dismissed"`: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmedSignalCount == 0`), with no plausible failure, degradation, or exposure left unverified.',
-  '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires recovery-lens grounding with verified healthy or opposite rows.',
-  '- `closed` for a settled episode requires every signal to be settled/downward. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with verified healthy or opposite rows. Shape alone is insufficient.',
+  '- `open`: a current failure, material degradation, or sensitive-data exposure is confirmed, or a verification gap leaves one of those conditions plausible. A concrete non-benign error in a found off-topic row directly confirms a separate observed-error event even though its source rule signal is `confirmed: false`; judge that event from the row’s error signature and impact.',
+  '- `dismissed`: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmedSignalCount == 0`), with no plausible failure, degradation, or exposure left unverified. A concrete non-benign error found in an off-topic row is independent current evidence: reject the original rule, but represent the observed error with an `open` event rather than dismissing it.',
+  '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires recovery-lens grounding with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows.',
+  '- An open event with the same rule may be reconciled to `closed` even when its prior signal is unconfirmed, if a current exact query shows verified healthy/opposite rows or no matching failure rows. This exception applies to directionally ambiguous detections, preserves the existing episode, and does not create a new dismissed event.',
+  '- `closed` for a settled episode requires every signal to be settled/downward or to satisfy the same-rule recovery reconciliation exception. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows. A query error, telemetry gap, unrelated result, or active failure row blocks closure.',
   '',
-  'Hard constraints: a matching healthy or positive row is verified but does not confirm an incident; mark it rejected and dismiss when no failure, degradation, or exposure remains. A query error or telemetry gap is not recovery and requires `open` only when one of those conditions remains plausible. A `dip` alone establishes neither active failure nor recovery.',
+  'Hard constraints: a matching healthy or positive row is verified but does not confirm an incident; mark it rejected and dismiss when no failure, degradation, or exposure remains. The observed-error exception applies only to a concrete non-benign error, not healthy, ambiguous, or merely unrelated rows. A successful empty recovery-lens query can support closure; a query error or telemetry gap cannot. A `dip` alone establishes neither active failure nor recovery.',
 ].join('\n');
 
 /**
