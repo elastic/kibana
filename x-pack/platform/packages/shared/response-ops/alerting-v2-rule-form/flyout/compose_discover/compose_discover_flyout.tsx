@@ -856,15 +856,11 @@ export function ComposeDiscoverFlyout({
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
-    if (isAlert && queryToCommit.format === 'standalone') {
+    if (isAlert && queryToCommit.format === 'composed') {
       const currentNoData = methods.getValues('noDataStrategy');
-      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'standalone');
+      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'composed');
       if (resolvedNoData !== currentNoData) {
         methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
-      }
-      if (uiState.recoveryType === 'custom') {
-        dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: 'default', isBuilderMode });
-        methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       }
     }
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
@@ -886,9 +882,7 @@ export function ComposeDiscoverFlyout({
     currentStep?.id,
     uiState.yamlMode,
     uiState.manualSplitEnabled,
-    uiState.recoveryType,
     isAlert,
-    isBuilderMode,
     methods,
     dispatch,
     cancelYamlParse,

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -43,8 +42,6 @@ export function OutcomeStep({
   const kind = useWatch<FormValues, 'kind'>({ name: 'kind' });
   const isAlert = kind === 'alert';
   const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
-  const query = useWatch<FormValues, 'query'>({ name: 'query' });
-  const isQueryStandalone = query.format === 'standalone';
 
   return (
     <>
@@ -73,11 +70,6 @@ export function OutcomeStep({
           <NoDataStrategySelect
             value={noDataStrategy ?? 'none'}
             onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
-            disabled={isQueryStandalone}
-            disabledReason={i18n.translate(
-              'xpack.alertingV2.composeDiscover.outcome.noDataDisabledReason',
-              { defaultMessage: 'An alert condition is required to act on no data.' }
-            )}
             compressed
             data-test-subj="composeDiscoverNoDataStrategy"
           />

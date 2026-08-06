@@ -57,14 +57,14 @@ describe('isNonRepresentableRule', () => {
     ).toBe(false);
   });
 
-  it('returns false for alert + standalone with only breach.query (conditionless rule)', () => {
+  it('returns true for any alert + standalone rule', () => {
     expect(
       isNonRepresentableRule(
         createMockRule({
           query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         })
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('returns true for alert + standalone with a recovery block', () => {
@@ -75,20 +75,6 @@ describe('isNonRepresentableRule', () => {
             format: 'standalone',
             breach: { query: 'FROM logs-*' },
             recovery: { query: 'FROM logs-* | WHERE count < 1' },
-          },
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('returns true for alert + standalone with a no_data block', () => {
-    expect(
-      isNonRepresentableRule(
-        createMockRule({
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-*' },
-            no_data: { query: 'FROM logs-* | STATS count = count()' },
           },
         })
       )

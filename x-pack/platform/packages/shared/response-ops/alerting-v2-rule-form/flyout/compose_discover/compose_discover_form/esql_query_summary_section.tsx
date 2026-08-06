@@ -18,8 +18,8 @@ import { splitResultToRuleQuery } from '../use_heuristic_split';
  * Read-only summary of the applied ES|QL query on step 1. The heuristic split
  * is no longer shown in the editor (unified create flow) — it is surfaced here,
  * read-only, with copy + an edit CTA. A successful split is a `composed` query
- * (base + alert segment); a base-only query with no alert condition is persisted
- * as `standalone` (the whole query is the breach query, so every row is a breach).
+ * (base + alert segment); a base-only query is still `composed` with an empty
+ * segment (save rejects it until a condition is added — surfaced via toast).
  *
  * Signal rules always render as a single query block — we never display a
  * guessed base/condition split for signal, even if the in-progress query is

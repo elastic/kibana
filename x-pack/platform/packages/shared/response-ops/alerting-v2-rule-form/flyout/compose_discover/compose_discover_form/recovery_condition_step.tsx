@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useWatch } from 'react-hook-form';
 import { EuiFormRow, EuiHorizontalRule, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -15,7 +14,6 @@ import type {
   CustomRecoveryRenderProps,
   RecoveryType,
 } from '../types';
-import type { FormValues } from '../../../form/types';
 import { RecoveryDelayField } from '../../../form/fields/recovery_delay_field';
 
 const defaultRecoveryLabel = i18n.translate(
@@ -35,10 +33,7 @@ const customRecoveryLabel = i18n.translate(
 
 const customRecoveryDescription = i18n.translate(
   'xpack.alertingV2.composeDiscover.recoveryCondition.customRecoveryDescription',
-  {
-    defaultMessage:
-      'Define a custom recovery condition. An alert condition is required in your query.',
-  }
+  { defaultMessage: 'Define a custom recovery condition.' }
 );
 
 const noRecoveryLabel = i18n.translate(
@@ -99,41 +94,28 @@ const RECOVERY_TYPE_OPTIONS: Array<{
 interface RecoveryTypeSelectorProps {
   recoveryType: RecoveryType;
   onRecoveryTypeChange: (type: RecoveryType) => void;
-  customDisabled?: boolean;
 }
 
 const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
   recoveryType,
   onRecoveryTypeChange,
-  customDisabled = false,
-}) => {
-  const options = customDisabled
-    ? RECOVERY_TYPE_OPTIONS.map((opt) =>
-        opt.value === 'custom' ? { ...opt, disabled: true } : opt
-      )
-    : RECOVERY_TYPE_OPTIONS;
-
-  return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel',
-        {
-          defaultMessage: 'Recovery',
-        }
-      )}
+}) => (
+  <EuiFormRow
+    label={i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel', {
+      defaultMessage: 'Recovery',
+    })}
+    fullWidth
+  >
+    <EuiSuperSelect
+      compressed
+      options={RECOVERY_TYPE_OPTIONS}
+      valueOfSelected={recoveryType}
+      onChange={(val) => onRecoveryTypeChange(val as RecoveryType)}
       fullWidth
-    >
-      <EuiSuperSelect
-        compressed
-        options={options}
-        valueOfSelected={recoveryType}
-        onChange={(val) => onRecoveryTypeChange(val as RecoveryType)}
-        fullWidth
-        data-test-subj="composeDiscoverRecoveryType"
-      />
-    </EuiFormRow>
-  );
-};
+      data-test-subj="composeDiscoverRecoveryType"
+    />
+  </EuiFormRow>
+);
 
 interface RecoveryConditionStepProps {
   state: ComposeDiscoverState;
@@ -148,15 +130,11 @@ export function RecoveryConditionStep({
   onRecoveryTypeChange,
   renderCustomRecovery,
 }: RecoveryConditionStepProps) {
-  const query = useWatch<FormValues, 'query'>({ name: 'query' });
-  const isQueryStandalone = query.format === 'standalone';
-
   return (
     <>
       <RecoveryTypeSelector
         recoveryType={state.recoveryType}
         onRecoveryTypeChange={onRecoveryTypeChange}
-        customDisabled={isQueryStandalone}
       />
 
       {state.recoveryType === 'custom' && renderCustomRecovery && (

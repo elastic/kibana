@@ -30,10 +30,8 @@ describe('getTimeFieldResolutionQuery', () => {
     );
   });
 
-  it('returns the breach query for standalone alert rules when committed', () => {
-    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe(
-      standaloneQuery.breach.query
-    );
+  it('returns empty for standalone alert queries (YAML-only; form never authors them)', () => {
+    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe('');
   });
 
   it('returns empty when the query is not committed', () => {

@@ -1404,6 +1404,7 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('forced YAML mode for non-representable rules', () => {
+    // Any alert + standalone is YAML-only, including breach-only rules.
     const nonRepresentableRule = {
       id: 'test-rule-id',
       kind: 'alert' as const,
@@ -1413,10 +1414,8 @@ describe('ComposeDiscoverFlyout', () => {
       schedule: { every: '5m', lookback: '1m' },
       query: {
         format: 'standalone' as const,
-        breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h | WHERE c > 100' },
-        recovery: { query: 'FROM logs-* | WHERE c < 10' },
+        breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h' },
       },
-      recovery_strategy: 'query' as const,
     };
 
     const representableRule = {

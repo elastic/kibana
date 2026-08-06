@@ -16,9 +16,11 @@ const COMPOSED_VALID_STRATEGIES = new Set<NoDataStrategy>(['none', 'last_known_s
  * format-appropriate default. Callers should skip `setValue` when the result
  * equals the current value to avoid dirtying an unchanged form.
  *
- * - standalone: only `'none'` is valid (form cannot produce a `no_data` block)
  * - composed: `'none' | 'last_known_status' | 'recover'` are valid; default
  *   `'last_known_status'` when missing/invalid (`emit` is YAML-only)
+ * - standalone: only `'none'` is valid — kept as a defensive branch for
+ *   signal→alert transitions before the heuristic rewrite lands; alert +
+ *   standalone rules are YAML-only and never authored by the form
  */
 export const resolveNoDataStrategyForQuery = (
   current: NoDataStrategy | undefined,
