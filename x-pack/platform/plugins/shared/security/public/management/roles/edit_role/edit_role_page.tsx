@@ -28,11 +28,13 @@ import useAsync from 'react-use/lib/useAsync';
 
 import type { BuildFlavor } from '@kbn/config';
 import type {
+  ApplicationStart,
   Capabilities,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
   NotificationsStart,
+  OverlayStart,
   ScopedHistory,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -49,9 +51,11 @@ import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { API_VERSIONS as SPACES_API_VERSIONS } from '@kbn/spaces-plugin/common';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { DeleteRoleButton } from './delete_role_button';
+import { hasRoleChanged } from './has_role_changed';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
@@ -95,6 +99,8 @@ export interface Props extends StartServices {
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
+  overlays: OverlayStart;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   spacesApiUi?: SpacesApiUi;
   buildFlavor: BuildFlavor;
   cloudOrgUrl?: string;
@@ -208,6 +214,9 @@ function useRole(
   roleName?: string
 ) {
   const [role, setRole] = useState<Role | null>(null);
+  // A pristine copy of the role as it was loaded, used to detect unsaved changes. It has to be a
+  // deep copy: the privilege forms edit their own copy of the role in place.
+  const [initialRole, setInitialRole] = useState<Role | null>(null);
 
   useEffect(() => {
     const rolePromise = roleName
@@ -251,7 +260,10 @@ function useRole(
           fetchedRole.elasticsearch.indices.push(emptyOption);
         }
 
-        setRole(action === 'clone' ? prepareRoleClone(fetchedRole) : copyRole(fetchedRole));
+        const loadedRole =
+          action === 'clone' ? prepareRoleClone(fetchedRole) : copyRole(fetchedRole);
+        setInitialRole(copyRole(loadedRole));
+        setRole(loadedRole);
       })
       .catch((err: IHttpFetchError) => {
         if (err.response?.status === 404) {
@@ -268,7 +280,7 @@ function useRole(
       });
   }, [roleName, action, fatalErrors, rolesAPIClient, notifications, license, backToRoleList]);
 
-  return [role, setRole] as [Role | null, typeof setRole];
+  return [role, setRole, initialRole] as [Role | null, typeof setRole, Role | null];
 }
 
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
@@ -335,6 +347,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   uiCapabilities,
   notifications,
   history,
+  overlays,
+  navigateToUrl,
   spacesApiUi,
   buildFlavor,
   cloudOrgUrl,
@@ -349,7 +363,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
     // so this error edge case is an acceptable tradeoff.
     throw new Error('The dataViews plugin is required for this page, but it is not available');
   }
-  const backToRoleList = useCallback(() => history.push('/'), [history]);
+  // Once the user has chosen to leave — by saving, deleting, or cancelling — their changes are
+  // either persisted or deliberately discarded, so the unsaved changes prompt must not fire on the
+  // way back to the role list. `hasUnsavedChanges` cannot tell the difference on its own: it
+  // compares against the role as it was loaded, and saving does not change what was loaded.
+  // The save and delete paths set this before their request goes out, which also leaves React a
+  // full round trip to tear the prompt's navigation block down before the redirect.
+  const [isLeaving, setIsLeaving] = useState(false);
+  const backToRoleList = useCallback(() => {
+    setIsLeaving(true);
+    history.push('/');
+  }, [history]);
   const hasReadOnlyPrivileges = !useCapabilities('roles').save;
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
@@ -365,7 +389,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const features = useFeatures(getFeatures, fatalErrors);
   const featureCheckState = useFeatureCheck(http, buildFlavor);
   const remoteClustersState = useRemoteClusters(http);
-  const [role, setRole] = useRole(
+  const [role, setRole, initialRole] = useRole(
     rolesAPIClient,
     fatalErrors,
     notifications,
@@ -382,6 +406,28 @@ export const EditRolePage: FunctionComponent<Props> = ({
       backToRoleList();
     }
   }, [hasReadOnlyPrivileges, isEditingExistingRole]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: Boolean(
+      role && initialRole && !isLeaving && hasRoleChanged(initialRole, role)
+    ),
+    http,
+    openConfirm: overlays.openConfirm,
+    navigateToUrl,
+    history,
+    titleText: i18n.translate('xpack.security.management.editRole.unsavedChangesPromptTitle', {
+      defaultMessage: 'Leave without saving?',
+    }),
+    messageText: i18n.translate('xpack.security.management.editRole.unsavedChangesPromptMessage', {
+      defaultMessage: "Unsaved changes won't be applied to the role and will be lost.",
+    }),
+    cancelButtonText: i18n.translate('xpack.security.management.editRole.keepEditingButton', {
+      defaultMessage: 'Keep editing',
+    }),
+    confirmButtonText: i18n.translate('xpack.security.management.editRole.leavePageButton', {
+      defaultMessage: 'Leave',
+    }),
+  });
 
   if (
     !role ||
@@ -678,8 +724,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
+        setIsLeaving(true);
         await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
       } catch (error) {
+        // the role was not saved, so the user does still have changes worth warning them about
+        setIsLeaving(false);
+
         if (!isEditingExistingRole && error?.body?.statusCode === 409) {
           setCreatingRoleAlreadyExists(true);
           window.scroll({ top: 0, behavior: 'smooth' });
@@ -752,8 +802,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const handleDeleteRole = async () => {
     try {
+      setIsLeaving(true);
       await rolesAPIClient.deleteRole(role.name);
     } catch (error) {
+      // the role is still there, and so are the user's unsaved changes to it
+      setIsLeaving(false);
+
       notifications.toasts.addDanger(
         error?.data?.message ??
           i18n.translate('xpack.security.management.editRole.errorDeletingRoleError', {

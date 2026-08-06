@@ -6,10 +6,12 @@
  */
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -215,7 +217,7 @@ function getProps({
   } as any);
 
   const { fatalErrors } = coreMock.createSetup();
-  const { http, docLinks, notifications, rendering } = coreMock.createStart();
+  const { http, docLinks, notifications, overlays, rendering } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
       if (!spacesEnabled) {
@@ -251,6 +253,8 @@ function getProps({
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
     history: scopedHistoryMock.create(),
+    overlays,
+    navigateToUrl: jest.fn(),
     spacesApiUi,
     buildFlavor,
     userProfile: userProfileMock,
@@ -1058,6 +1062,144 @@ describe('<EditRolePage />', () => {
       expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
       expectSaveFormButtons();
     });
+  });
+
+  describe('unsaved changes', () => {
+    const role: Role = {
+      name: 'my custom role',
+      description: 'a role',
+      metadata: {},
+      elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+      kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+    };
+
+    // A real ScopedHistory, rather than `scopedHistoryMock`: the prompt works by installing a
+    // `history.block` handler, which the mock does not implement.
+    const renderEditRolePage = async ({ existingRole = true } = {}) => {
+      const history = new CoreScopedHistory(
+        createMemoryHistory({
+          initialEntries: [existingRole ? '/mock/edit/my_role' : '/mock/edit'],
+        }),
+        '/mock'
+      );
+      const props = {
+        ...getProps({ action: 'edit', role: existingRole ? role : undefined }),
+        history,
+      };
+      props.overlays.openConfirm.mockResolvedValue(false);
+
+      render(
+        <I18nProvider>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </I18nProvider>
+      );
+
+      await waitForRender();
+
+      return {
+        history,
+        openConfirm: props.overlays.openConfirm,
+        rolesAPIClient: props.rolesAPIClient,
+      };
+    };
+
+    const editDescription = (value: string) =>
+      fireEvent.change(screen.getByTestId('roleFormDescriptionInput'), { target: { value } });
+
+    it('does not prompt when leaving an untouched role', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      history.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('does not prompt when leaving an untouched create form', async () => {
+      // the create form pre-populates an empty index privilege, which is not a user change
+      const { history, openConfirm } = await renderEditRolePage({ existingRole: false });
+
+      history.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('prompts when leaving a create form with unsaved changes', async () => {
+      const { history, openConfirm } = await renderEditRolePage({ existingRole: false });
+
+      fireEvent.change(screen.getByTestId('roleFormNameInput'), {
+        target: { value: 'my_new_role' },
+      });
+      history.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      expect(history.location.pathname).toBe('/edit');
+    });
+
+    it('prompts when leaving a role with unsaved changes', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      history.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      // navigation stays blocked until the user confirms
+      expect(history.location.pathname).toBe('/edit/my_role');
+    });
+
+    it('does not prompt when the change has been reverted', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      editDescription('a role');
+      history.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/');
+    });
+
+    it('does not prompt after the role has been saved', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      fireEvent.click(screen.getByTestId('roleFormSaveButton'));
+
+      await waitFor(() => {
+        expect(history.location.pathname).toBe('/');
+      });
+      expect(openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('prompts again when saving the role failed', async () => {
+      const { history, openConfirm, rolesAPIClient } = await renderEditRolePage();
+      rolesAPIClient.saveRole.mockRejectedValue(new Error('could not save'));
+
+      editDescription('a different role');
+      fireEvent.click(screen.getByTestId('roleFormSaveButton'));
+      await waitForRender();
+
+      // the role was never saved, so those changes are still worth warning about
+      history.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      expect(history.location.pathname).toBe('/edit/my_role');
+    });
+
+    // Note: the Cancel path is deliberately not covered here. It navigates synchronously from the
+    // click handler that resets state, and jsdom and a real browser disagree about whether the
+    // prompt's navigation block has been torn down by then — jsdom reports a prompt that the
+    // browser does not show. Asserting either way would encode a jsdom artifact. The save and
+    // delete paths above are safe to assert on because they reset state *before* their request
+    // goes out, so the teardown is a full task ahead of the redirect.
   });
 });
 
