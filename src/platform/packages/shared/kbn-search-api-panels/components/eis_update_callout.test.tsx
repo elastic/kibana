@@ -72,7 +72,7 @@ describe('EisUpdateCallout', () => {
   it('calls onDismissPromo when dismiss button is clicked', () => {
     renderEisUpdateCallout();
 
-    const dismissButton = screen.getByTestId('euiDismissCalloutButton');
+    const dismissButton = screen.getByTestId(`${dataId}-dismiss`);
     fireEvent.click(dismissButton);
 
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
@@ -116,7 +116,7 @@ describe('EisUpdateCallout', () => {
   it('renders documentation link with correct href', () => {
     renderEisUpdateCallout();
 
-    const docLink = screen.getByText(EIS_CALLOUT_DOCUMENTATION_BTN);
+    const docLink = screen.getByTestId(`${dataId}-secondaryAction`);
     expect(docLink).toHaveAttribute('href', ctaLink);
   });
 });
