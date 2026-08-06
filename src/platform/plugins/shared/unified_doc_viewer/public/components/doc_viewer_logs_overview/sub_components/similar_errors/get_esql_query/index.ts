@@ -11,6 +11,7 @@ import type { ESQLAstExpression } from '@elastic/esql/types';
 import { fieldConstants } from '@kbn/discover-utils';
 import { esqlColumn } from '../../../../../utils/esql_column';
 import {
+  type NonEmptyArray,
   esqlAnd,
   esqlEquals,
   esqlFunction,
@@ -41,7 +42,7 @@ export function getEsqlQuery({
     return undefined;
   }
 
-  const conditions: ESQLAstExpression[] = [
+  const conditions: NonEmptyArray<ESQLAstExpression> = [
     esqlEquals(fieldConstants.SERVICE_NAME_FIELD, serviceName),
   ];
 

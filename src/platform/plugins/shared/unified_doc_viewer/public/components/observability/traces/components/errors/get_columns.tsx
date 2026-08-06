@@ -23,7 +23,7 @@ import {
 } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import { esqlAnd, esqlEquals } from '../../../../../utils/esql_expressions';
+import { type NonEmptyArray, esqlAnd, esqlEquals } from '../../../../../utils/esql_expressions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
@@ -46,7 +46,7 @@ function createWhereClause({
   source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
 }): ESQLAstExpression {
-  const conditions: ESQLAstExpression[] = [esqlEquals(TRACE_ID, traceId)];
+  const conditions: NonEmptyArray<ESQLAstExpression> = [esqlEquals(TRACE_ID, traceId)];
 
   if (docId) {
     conditions.push(esqlEquals(SPAN_ID, docId));

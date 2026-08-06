@@ -29,6 +29,16 @@ import { esqlColumn } from './esql_column';
  * removed and the call sites can go back to the tagged templates.
  */
 
+/**
+ * An array guaranteed to hold at least one element. Build one by annotating an
+ * accumulator that already contains its first element; `push` still works, while
+ * passing a possibly-empty `T[]` fails to compile.
+ *
+ *     const conditions: NonEmptyArray<ESQLAstExpression> = [first];
+ *     if (optional) conditions.push(second);
+ */
+export type NonEmptyArray<T> = [T, ...T[]];
+
 /** A string literal node, escaped only once at print time (never re-parsed). */
 export const esqlString = (value: string): ESQLStringLiteral =>
   Builder.expression.literal.string(value);
@@ -41,19 +51,26 @@ export const esqlEquals = (field: string, value: string): ESQLAstExpression =>
 export const esqlFunction = (name: string, args: ESQLAstItem[]): ESQLAstExpression =>
   Builder.expression.func.call(name, args);
 
-/** Combine expressions with `AND`, matching the left-associative shape the printer emits. */
-export const esqlAnd = (expressions: ESQLAstExpression[]): ESQLAstExpression =>
+/**
+ * Combine expressions with `AND`, matching the left-associative shape the
+ * printer emits.
+ */
+export const esqlAnd = (expressions: NonEmptyArray<ESQLAstExpression>): ESQLAstExpression =>
   expressions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
 
-/** Combine expressions with `OR`, matching the left-associative shape the printer emits. */
-export const esqlOr = (expressions: ESQLAstExpression[]): ESQLAstExpression =>
+/**
+ * Combine expressions with `OR`, matching the left-associative shape the
+ * printer emits.
+ */
+export const esqlOr = (expressions: NonEmptyArray<ESQLAstExpression>): ESQLAstExpression =>
   expressions.reduce((left, right) => Builder.expression.func.binary('or', [left, right]));
 
 /**
  * `field IN ("a", "b")`. Uses a `tuple` list so the printer emits parentheses
- * (valid ES|QL) rather than the square brackets of a plain list literal.
+ * (valid ES|QL) rather than the square brackets of a plain list literal. The
+ * values are non-empty because `IN ()` does not parse.
  */
-export const esqlIn = (field: string, values: string[]): ESQLAstExpression =>
+export const esqlIn = (field: string, values: NonEmptyArray<string>): ESQLAstExpression =>
   Builder.expression.func.binary('in', [
     esqlColumn(field),
     Builder.expression.list.tuple({ values: values.map(esqlString) }),

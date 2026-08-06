@@ -250,13 +250,10 @@ export function getOutgoingSpanLinksESQL(
     return undefined;
   }
 
-  const traceIds: string[] = [];
-  const spanIds: string[] = [];
+  const [{ traceId: firstTraceId, spanId: firstSpanId }, ...otherLinks] = spanLinks;
 
-  spanLinks.forEach(({ traceId, spanId }) => {
-    traceIds.push(traceId);
-    spanIds.push(spanId);
-  });
-
-  return esqlAnd([esqlIn(TRACE_ID_FIELD, traceIds), esqlIn(SPAN_ID_FIELD, spanIds)]);
+  return esqlAnd([
+    esqlIn(TRACE_ID_FIELD, [firstTraceId, ...otherLinks.map(({ traceId }) => traceId)]),
+    esqlIn(SPAN_ID_FIELD, [firstSpanId, ...otherLinks.map(({ spanId }) => spanId)]),
+  ]);
 }

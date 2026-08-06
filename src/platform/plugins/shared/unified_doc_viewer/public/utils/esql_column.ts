@@ -14,5 +14,8 @@ import type { ESQLColumn } from '@elastic/esql/types';
  * Builds a column reference from a dotted field name. The segments are passed
  * separately so each one is quoted on its own; handing `esql.col` the whole
  * name would emit a single backtick-quoted identifier instead.
+ *
+ * Callers pass an already-validated field name: an empty segment prints as an
+ * empty backtick-quoted identifier (`` `` ``), which Elasticsearch rejects.
  */
 export const esqlColumn = (field: string): ESQLColumn => esql.col(field.split('.'));
