@@ -18,17 +18,21 @@ import {
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { UserAttributes } from '@kbn/inference-tracing';
 import {
   collectAndWriteEvents,
   handleAgentExecution,
   serializeExecutionError,
+  setUserAttributes,
 } from './execution_runner';
 import {
   createConversationClientMock,
   createEmptyConversation,
   createRound,
 } from '../../test_utils';
-import { executeAgent$, resolveServices } from './utils';
+import { withConverseSpan } from '../../tracing';
+import { executeAgent$, generateTitle, resolveServices } from './utils';
+import type { Span } from '@opentelemetry/api';
 
 jest.mock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -37,15 +41,65 @@ jest.mock('./utils', () => {
     ...actual,
     executeAgent$: jest.fn(),
     resolveServices: jest.fn(),
+    generateTitle: jest.fn(),
+  };
+});
+
+const mockSpanSetAttribute = jest.fn();
+
+jest.mock('../../tracing', () => {
+  const actual = jest.requireActual('../../tracing');
+
+  return {
+    ...actual,
+    withConverseSpan: jest.fn(
+      (_opts: unknown, cb: (span: { setAttribute: jest.Mock }) => unknown) =>
+        cb({ setAttribute: mockSpanSetAttribute })
+    ),
   };
 });
 
 const executeAgentMock = executeAgent$ as jest.MockedFunction<typeof executeAgent$>;
 const resolveServicesMock = resolveServices as jest.MockedFunction<typeof resolveServices>;
+const withConverseSpanMock = withConverseSpan as jest.MockedFunction<typeof withConverseSpan>;
+const generateTitleMock = generateTitle as jest.MockedFunction<typeof generateTitle>;
+
+const createModelProviderMock = () => ({
+  getDefaultModel: jest.fn().mockResolvedValue({
+    chatModel: { getConnector: () => ({ type: '.gen-ai' }) },
+  }),
+  selectModel: jest.fn().mockResolvedValue({
+    chatModel: { getConnector: () => ({ type: '.gen-ai' }) },
+  }),
+});
+
+const createDeps = ({
+  conversationClient,
+  getConversationRoundAuthor = jest.fn().mockResolvedValue(undefined),
+}: {
+  conversationClient: ReturnType<typeof createConversationClientMock>;
+  getConversationRoundAuthor?: jest.Mock;
+}) =>
+  ({
+    logger: loggingSystemMock.createLogger(),
+    runAgent: jest.fn(),
+    agentService: {
+      getRegistry: jest
+        .fn()
+        .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
+    },
+    meteringService: {
+      reportExecution: jest.fn().mockResolvedValue(undefined),
+    },
+    conversationService: {
+      getConversationRoundAuthor,
+    },
+  } as never);
 
 describe('handleAgentExecution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    generateTitleMock.mockReturnValue(of('Generated title'));
   });
 
   it('reports metering with the resolved conversation id when continuing by origin', async () => {
@@ -73,13 +127,7 @@ describe('handleAgentExecution', () => {
     resolveServicesMock.mockResolvedValue({
       conversationClient,
       selectedConnectorId: 'connector-1',
-      modelProvider: {
-        getDefaultModel: jest.fn().mockResolvedValue({
-          chatModel: {
-            getConnector: () => ({ type: '.gen-ai' }),
-          },
-        }),
-      },
+      modelProvider: createModelProviderMock(),
     } as never);
 
     const reportExecution = jest.fn().mockResolvedValue(undefined);
@@ -151,30 +199,10 @@ describe('handleAgentExecution', () => {
       resolveServicesMock.mockResolvedValue({
         conversationClient,
         selectedConnectorId: 'connector-1',
-        modelProvider: {
-          getDefaultModel: jest.fn().mockResolvedValue({
-            chatModel: {
-              getConnector: () => ({ type: '.gen-ai' }),
-            },
-          }),
-        },
+        modelProvider: createModelProviderMock(),
       } as never);
 
-      const deps = {
-        logger: loggingSystemMock.createLogger(),
-        runAgent: jest.fn(),
-        agentService: {
-          getRegistry: jest
-            .fn()
-            .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
-        },
-        meteringService: {
-          reportExecution: jest.fn().mockResolvedValue(undefined),
-        },
-        conversationService: {
-          getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
-        },
-      } as never;
+      const deps = createDeps({ conversationClient });
 
       return { conversationClient, deps };
     };
@@ -243,29 +271,11 @@ describe('handleAgentExecution', () => {
       resolveServicesMock.mockResolvedValue({
         conversationClient,
         selectedConnectorId: 'connector-1',
-        modelProvider: {
-          getDefaultModel: jest.fn().mockResolvedValue({
-            chatModel: { getConnector: () => ({ type: '.gen-ai' }) },
-          }),
-        },
+        modelProvider: createModelProviderMock(),
       } as never);
 
       const getConversationRoundAuthor = jest.fn().mockResolvedValue(author);
-      const deps = {
-        logger: loggingSystemMock.createLogger(),
-        runAgent: jest.fn(),
-        agentService: {
-          getRegistry: jest
-            .fn()
-            .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
-        },
-        meteringService: {
-          reportExecution: jest.fn().mockResolvedValue(undefined),
-        },
-        conversationService: {
-          getConversationRoundAuthor,
-        },
-      } as never;
+      const deps = createDeps({ conversationClient, getConversationRoundAuthor });
 
       const events$ = await handleAgentExecution({
         execution: {
@@ -289,6 +299,126 @@ describe('handleAgentExecution', () => {
       );
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
+  });
+
+  describe('converse span user identity', () => {
+    it('sets the round author on the span for public UPDATE', async () => {
+      const author = { id: 'author-id', username: 'author' };
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+        user: { id: 'owner-id', username: 'owner' },
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
+
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({
+          conversationClient,
+          getConversationRoundAuthor: jest.fn().mockResolvedValue(author),
+        }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(withConverseSpanMock).toHaveBeenCalled();
+      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'author-id');
+      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'author');
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'owner-id');
+    });
+
+    it('defers private CREATE identity until ConversationCreatedEvent', async () => {
+      const createdUser = { id: 'created-user-id', username: 'created_user' };
+      const createdConversation = createEmptyConversation({
+        id: 'new-conversation',
+        agent_id: 'test-agent',
+        user: createdUser,
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.create.mockResolvedValue(createdConversation);
+
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserId, 'unknown');
+      expect(mockSpanSetAttribute).not.toHaveBeenCalledWith(UserAttributes.UserName, 'unknown');
+      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'created-user-id');
+      expect(mockSpanSetAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'created_user');
+    });
+  });
+});
+
+describe('setUserAttributes', () => {
+  it('sets user.id and user.name when both are present', () => {
+    const span = { setAttribute: jest.fn() } as unknown as Span;
+
+    setUserAttributes(span, { id: 'profile-1', username: 'jane' });
+
+    expect(span.setAttribute).toHaveBeenCalledWith(UserAttributes.UserId, 'profile-1');
+    expect(span.setAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'jane');
+  });
+
+  it('sets only the fields that are present', () => {
+    const span = { setAttribute: jest.fn() } as unknown as Span;
+
+    setUserAttributes(span, { username: 'jane' });
+
+    expect(span.setAttribute).toHaveBeenCalledTimes(1);
+    expect(span.setAttribute).toHaveBeenCalledWith(UserAttributes.UserName, 'jane');
+  });
+
+  it('is a no-op when span is undefined', () => {
+    expect(() => setUserAttributes(undefined, { id: 'profile-1', username: 'jane' })).not.toThrow();
   });
 });
 

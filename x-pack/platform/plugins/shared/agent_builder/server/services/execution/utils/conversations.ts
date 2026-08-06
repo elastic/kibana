@@ -152,11 +152,7 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({
-        agentId,
-        accessControl,
-        origin,
-      }),
+      ...placeholderConversation({ agentId, accessControl, origin }),
       operation: 'CREATE',
     };
   }
@@ -179,12 +175,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({
-        conversationId,
-        agentId,
-        accessControl,
-        origin,
-      }),
+      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
       operation: 'CREATE',
     };
   }
