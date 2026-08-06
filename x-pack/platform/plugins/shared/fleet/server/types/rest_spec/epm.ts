@@ -521,16 +521,16 @@ const ConflictTypeSchema = schema.oneOf([
 ]);
 
 const ConflictingTemplateSchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   priority: schema.number(),
   conflictType: ConflictTypeSchema,
 });
 
 export const NamespaceConflictWarningSchema = schema.object({
-  dataStreamName: schema.string(),
-  namespace: schema.string(),
-  baseTemplateName: schema.string(),
-  nsTemplateName: schema.string(),
+  dataStreamName: schema.string({ maxLength: 1000 }),
+  namespace: schema.string({ maxLength: 255 }),
+  baseTemplateName: schema.string({ maxLength: 1000 }),
+  nsTemplateName: schema.string({ maxLength: 1000 }),
   conflictingTemplates: schema.arrayOf(ConflictingTemplateSchema, { maxSize: 100 }),
 });
 
@@ -778,7 +778,7 @@ export const GetFileRequestSchema = {
 };
 
 const PackageRequestParamsSchema = schema.object({
-  pkgName: schema.string({ meta: { description: 'Package name' } }),
+  pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
 });
 
 export const NamespacePreflightCheckRequestSchema = {
