@@ -87,17 +87,24 @@ export const ATTRIBUTES_TITLE = i18n.translate(
   }
 );
 
-export const TEMPLATE_FIELDS_TITLE = i18n.translate(
-  'xpack.cases.casesRedesign.details.templateFieldsTitle',
+export const CUSTOM_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.casesRedesign.details.customFieldsSectionTitle',
   {
-    defaultMessage: 'Template fields',
+    defaultMessage: 'Custom fields',
   }
 );
 
-export const NO_TEMPLATE_SELECTED = i18n.translate(
-  'xpack.cases.casesRedesign.details.noTemplateSelected',
+export const NO_TEMPLATE_APPLIED = i18n.translate(
+  'xpack.cases.casesRedesign.details.noTemplateApplied',
   {
-    defaultMessage: 'No template selected',
+    defaultMessage: 'No template applied',
+  }
+);
+
+export const APPLY_TEMPLATE_TO_SEE_FIELDS = i18n.translate(
+  'xpack.cases.casesRedesign.details.applyTemplateToSeeFields',
+  {
+    defaultMessage: 'Apply a template to see its fields here.',
   }
 );
 
@@ -170,9 +177,57 @@ export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.a
   defaultMessage: 'Add connector',
 });
 
+export const CONNECTOR_SETTINGS_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.details.connectorSettingsAriaLabel',
+  {
+    defaultMessage: 'Connector settings',
+  }
+);
+
 export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
   'xpack.cases.casesRedesign.details.legacyCustomFieldsTitle',
   {
     defaultMessage: 'Legacy custom fields',
+  }
+);
+
+export const RESIZE_SIDEBAR = i18n.translate('xpack.cases.casesRedesign.details.resizeSidebar', {
+  defaultMessage: 'Resize the case details panel',
+});
+
+export const NO_VALUE = i18n.translate('xpack.cases.casesRedesign.details.noValue', {
+  defaultMessage: 'No value',
+});
+
+export const UNSAVED_CHANGES_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.casesRedesign.details.unsavedChangesCount', {
+    values: { count },
+    defaultMessage: '{count} unsaved',
+  });
+
+export const REVERT_FIELD = i18n.translate('xpack.cases.casesRedesign.details.revertField', {
+  defaultMessage: 'Revert',
+});
+
+export const FIELD_MODIFIED = i18n.translate('xpack.cases.casesRedesign.details.fieldModified', {
+  defaultMessage: 'Modified',
+});
+
+export const CHANGE_TEMPLATE = i18n.translate('xpack.cases.casesRedesign.details.changeTemplate', {
+  defaultMessage: 'Change template',
+});
+
+export const CHANGE_TEMPLATE_HINT = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateHint',
+  {
+    defaultMessage:
+      "The current template's fields will be hidden, but their saved values stay on the case. To remove the values, clear the fields before changing the template.",
+  }
+);
+
+export const CHANGE_TEMPLATE_HINT_ARIA = i18n.translate(
+  'xpack.cases.casesRedesign.details.changeTemplateHintAriaLabel',
+  {
+    defaultMessage: 'What happens to saved values',
   }
 );

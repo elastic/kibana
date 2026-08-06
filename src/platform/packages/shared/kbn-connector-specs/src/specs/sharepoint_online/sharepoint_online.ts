@@ -780,19 +780,10 @@ export const SharepointOnline: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Online test handler');
-
-      try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/');
-        const siteName = response.data.displayName || 'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to SharePoint Online: ${siteName}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get('https://graph.microsoft.com/v1.0/');
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

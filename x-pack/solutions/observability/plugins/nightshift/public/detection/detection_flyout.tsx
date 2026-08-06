@@ -128,8 +128,8 @@ export function DetectionFlyout({
   const handleOpenInChat = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
-      autoSendInitialMessage: true,
-      initialMessage: i18n.translate('xpack.observability.nightshift.detectionFlyout.chatPrompt', {
+      autoSendInitialMessage: false,
+      initialMessage: i18n.translate('xpack.nightshift.detectionFlyout.chatPrompt', {
         defaultMessage: 'Tell me about the {ruleName} detection',
         values: { ruleName: title },
       }),
@@ -172,7 +172,7 @@ export function DetectionFlyout({
           <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiBadge color="default">
-                {i18n.translate('xpack.observability.nightshift.detectionFlyout.detectionBadge', {
+                {i18n.translate('xpack.nightshift.detectionFlyout.detectionBadge', {
                   defaultMessage: 'Detection',
                 })}
               </EuiBadge>
@@ -185,12 +185,9 @@ export function DetectionFlyout({
             {signal?.confirmed === false && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning">
-                  {i18n.translate(
-                    'xpack.observability.nightshift.detectionFlyout.unconfirmedBadge',
-                    {
-                      defaultMessage: 'Unconfirmed',
-                    }
-                  )}
+                  {i18n.translate('xpack.nightshift.detectionFlyout.unconfirmedBadge', {
+                    defaultMessage: 'Unconfirmed',
+                  })}
                 </EuiBadge>
               </EuiFlexItem>
             )}
@@ -205,7 +202,7 @@ export function DetectionFlyout({
           {summary && (
             <>
               <FlyoutSectionTitle>
-                {i18n.translate('xpack.observability.nightshift.detectionFlyout.summaryTitle', {
+                {i18n.translate('xpack.nightshift.detectionFlyout.summaryTitle', {
                   defaultMessage: 'Summary',
                 })}
               </FlyoutSectionTitle>
@@ -222,7 +219,7 @@ export function DetectionFlyout({
           {(isLoadingStreamFeatures || isStreamFeaturesError || associatedEntities.length > 0) && (
             <>
               <FlyoutSectionTitle>
-                {i18n.translate('xpack.observability.nightshift.detectionFlyout.entitiesTitle', {
+                {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
                   defaultMessage: 'Impacted entities',
                 })}
               </FlyoutSectionTitle>
@@ -240,10 +237,9 @@ export function DetectionFlyout({
                   color="warning"
                   iconType="warning"
                   size="s"
-                  title={i18n.translate(
-                    'xpack.observability.nightshift.detectionFlyout.entitiesErrorTitle',
-                    { defaultMessage: 'Unable to load impacted entities' }
-                  )}
+                  title={i18n.translate('xpack.nightshift.detectionFlyout.entitiesErrorTitle', {
+                    defaultMessage: 'Unable to load impacted entities',
+                  })}
                 >
                   <EuiButtonEmpty
                     color="warning"
@@ -253,10 +249,9 @@ export function DetectionFlyout({
                     onClick={() => refetchStreamFeatures()}
                     size="s"
                   >
-                    {i18n.translate(
-                      'xpack.observability.nightshift.detectionFlyout.entitiesRetryButtonText',
-                      { defaultMessage: 'Retry' }
-                    )}
+                    {i18n.translate('xpack.nightshift.detectionFlyout.entitiesRetryButtonText', {
+                      defaultMessage: 'Retry',
+                    })}
                   </EuiButtonEmpty>
                 </EuiCallOut>
               )}
@@ -285,7 +280,7 @@ export function DetectionFlyout({
           )}
 
           <FlyoutSectionTitle>
-            {i18n.translate('xpack.observability.nightshift.detectionFlyout.trendTitle', {
+            {i18n.translate('xpack.nightshift.detectionFlyout.trendTitle', {
               defaultMessage: 'Trend',
             })}
           </FlyoutSectionTitle>
@@ -303,7 +298,7 @@ export function DetectionFlyout({
               >
                 <EuiFlexItem grow={false}>
                   <FlyoutSectionTitle>
-                    {i18n.translate('xpack.observability.nightshift.detectionFlyout.esqlTitle', {
+                    {i18n.translate('xpack.nightshift.detectionFlyout.esqlTitle', {
                       defaultMessage: 'ES|QL query',
                     })}
                   </FlyoutSectionTitle>
@@ -320,10 +315,9 @@ export function DetectionFlyout({
                         element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT,
                       })}
                     >
-                      {i18n.translate(
-                        'xpack.observability.nightshift.detectionFlyout.openInDiscoverLinkText',
-                        { defaultMessage: 'Open in Discover' }
-                      )}
+                      {i18n.translate('xpack.nightshift.detectionFlyout.openInDiscoverLinkText', {
+                        defaultMessage: 'Open in Discover',
+                      })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 )}
@@ -365,12 +359,9 @@ export function DetectionFlyout({
                     detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
                   })}
                 >
-                  {i18n.translate(
-                    'xpack.observability.nightshift.detectionFlyout.openInChatButtonLabel',
-                    {
-                      defaultMessage: 'Open in chat',
-                    }
-                  )}
+                  {i18n.translate('xpack.nightshift.detectionFlyout.openInChatButtonLabel', {
+                    defaultMessage: 'Open in chat',
+                  })}
                 </AiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

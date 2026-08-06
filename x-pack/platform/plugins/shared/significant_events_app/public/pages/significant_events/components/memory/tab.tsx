@@ -28,7 +28,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import {
   useConsolidateMemory,
@@ -55,8 +55,13 @@ export function MemoryTab() {
   const [showCreateFlyout, setShowCreateFlyout] = useState(false);
 
   const {
-    ui: { manage: canManage },
-  } = useSignificantEventsPrivileges();
+    core: {
+      application: {
+        capabilities: { streams },
+      },
+    },
+  } = useKibana();
+  const canManage = streams?.manage === true;
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
@@ -216,6 +221,12 @@ export function MemoryTab() {
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.significantEventsApp.memory.workflowActionsButton',
+                      {
+                        defaultMessage: 'Workflow actions',
+                      }
+                    )}
                     button={
                       <EuiToolTip
                         content={i18n.translate(

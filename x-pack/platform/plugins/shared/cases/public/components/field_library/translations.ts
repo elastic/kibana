@@ -32,6 +32,11 @@ export const ERROR_UPDATING_FIELD_DEFINITION = i18n.translate(
   { defaultMessage: 'Failed to update field definition' }
 );
 
+export const ERROR_REORDERING_GLOBAL_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.errorReorderingGlobalFieldDefinitions',
+  { defaultMessage: 'Failed to update global field order' }
+);
+
 export const SUCCESS_DELETING_FIELD_DEFINITION = i18n.translate(
   'xpack.cases.fieldLibrary.successDeletingFieldDefinition',
   { defaultMessage: 'Field definition deleted successfully' }
@@ -43,11 +48,11 @@ export const ERROR_DELETING_FIELD_DEFINITION = i18n.translate(
 );
 
 export const FIELD_LIBRARY_TITLE = i18n.translate('xpack.cases.fieldLibrary.title', {
-  defaultMessage: 'Field Library',
+  defaultMessage: 'Field library',
 });
 
 export const FIELD_LIBRARY_DESCRIPTION = i18n.translate('xpack.cases.fieldLibrary.description', {
-  defaultMessage: 'Manage reusable field definitions that can be inserted into case templates.',
+  defaultMessage: 'Define a field once, then show it on every case or add it to any template.',
 });
 
 export const CREATE_FIELD_DEFINITION = i18n.translate(
@@ -63,6 +68,15 @@ export const EDIT_FIELD_DEFINITION = i18n.translate(
 export const DELETE_FIELD_DEFINITION = i18n.translate(
   'xpack.cases.fieldLibrary.deleteFieldDefinition',
   { defaultMessage: 'Delete field definition' }
+);
+
+export const MOVE_GLOBAL_FIELD_UP = i18n.translate('xpack.cases.fieldLibrary.moveGlobalFieldUp', {
+  defaultMessage: 'Move global field up',
+});
+
+export const MOVE_GLOBAL_FIELD_DOWN = i18n.translate(
+  'xpack.cases.fieldLibrary.moveGlobalFieldDown',
+  { defaultMessage: 'Move global field down' }
 );
 
 export const COPY_FIELD = i18n.translate('xpack.cases.fieldLibrary.copyField', {
@@ -87,12 +101,11 @@ export const INSERT_FIELD = i18n.translate('xpack.cases.fieldLibrary.insertField
 });
 
 export const FIELD_LIBRARY_PANEL_TITLE = i18n.translate('xpack.cases.fieldLibrary.panelTitle', {
-  defaultMessage: 'Field Library',
+  defaultMessage: 'Field library',
 });
 
 export const FIELD_LIBRARY_PANEL_EMPTY = i18n.translate('xpack.cases.fieldLibrary.panelEmpty', {
-  defaultMessage:
-    'No reusable field definitions yet. Create some in the Field Library to insert them here.',
+  defaultMessage: 'No fields yet. Create one in the field library to insert it here.',
 });
 
 export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
@@ -101,20 +114,20 @@ export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
     values: { fieldName },
   });
 
-export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn', {
-  defaultMessage: 'Name',
-});
-
 export const LABEL_COLUMN = i18n.translate('xpack.cases.fieldLibrary.labelColumn', {
   defaultMessage: 'Label',
+});
+
+export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn', {
+  defaultMessage: 'Name (field key)',
 });
 
 export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descriptionColumn', {
   defaultMessage: 'Description',
 });
 
-export const REQUIRED_COLUMN = i18n.translate('xpack.cases.fieldLibrary.requiredColumn', {
-  defaultMessage: 'Required',
+export const CONTROL_TYPE_COLUMN = i18n.translate('xpack.cases.fieldLibrary.controlTypeColumn', {
+  defaultMessage: 'Control type',
 });
 
 export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
@@ -128,10 +141,6 @@ export const REQUIRED_ON_CLOSE_BADGE = i18n.translate(
 
 export const OWNER_COLUMN = i18n.translate('xpack.cases.fieldLibrary.ownerColumn', {
   defaultMessage: 'Owner',
-});
-
-export const ACTIONS_COLUMN = i18n.translate('xpack.cases.fieldLibrary.actionsColumn', {
-  defaultMessage: 'Actions',
 });
 
 export const FIELD_DEFINITION_FORM_TITLE_CREATE = i18n.translate(
@@ -187,7 +196,7 @@ export const FIELD_DEFINITION_YAML_INVALID_SYNTAX = i18n.translate(
 
 export const FIELD_DEFINITION_FORM_DESCRIPTION = i18n.translate(
   'xpack.cases.fieldLibrary.fieldDefinitionFormDescription',
-  { defaultMessage: 'Create a reusable field for case templates.' }
+  { defaultMessage: 'Define a field you can apply to every case or add to any template.' }
 );
 
 export const FIELD_DEFINITION_PREVIEW_LABEL = i18n.translate(
@@ -222,17 +231,84 @@ export const APPLY_TO_ALL_CASES_HELP_TEXT = i18n.translate(
   }
 );
 
-export const APPLY_TO_ALL_CASES_COLUMN = i18n.translate('xpack.cases.fieldLibrary.isGlobalColumn', {
-  defaultMessage: 'Global field',
+export const GLOBAL_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionTitle',
+  { defaultMessage: 'Global fields' }
+);
+
+export const GLOBAL_FIELDS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionDescription',
+  {
+    defaultMessage:
+      "These fields appear on every case, even when no template is applied. On a case, they're listed before the template's fields — drag to reorder them.",
+  }
+);
+
+export const GLOBAL_FIELDS_SECTION_EMPTY_LINK = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionEmptyLink',
+  { defaultMessage: 'create or edit a field definition' }
+);
+
+export const TEMPLATE_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionTitle',
+  { defaultMessage: 'Reusable fields' }
+);
+
+export const TEMPLATE_FIELDS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionDescription',
+  {
+    defaultMessage:
+      'Add these fields to any template. They appear on a case only when that template is applied.',
+  }
+);
+
+export const TEMPLATE_FIELDS_SECTION_EMPTY_LINK = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionEmptyLink',
+  { defaultMessage: 'Create a field definition' }
+);
+
+export const REORDER_DISABLED_WHILE_SEARCHING = i18n.translate(
+  'xpack.cases.fieldLibrary.reorderDisabledWhileSearching',
+  { defaultMessage: 'Clear the search to reorder these fields.' }
+);
+
+export const EDIT_FIELD_DEFINITION_NAMED = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.editFieldDefinitionNamed', {
+    defaultMessage: 'Edit {name}',
+    values: { name },
+  });
+
+export const NO_MATCHING_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.noMatchingFieldDefinitions',
+  { defaultMessage: 'No fields match your search.' }
+);
+
+export const SEARCH_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.searchFieldDefinitions',
+  { defaultMessage: 'Search fields' }
+);
+
+export const FIELD_ACTIONS_MENU = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldActionsMenu', {
+    defaultMessage: 'Actions for {name}',
+    values: { name },
+  });
+
+export const REORDER_FIELD_HANDLE = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.reorderFieldHandle', {
+    defaultMessage: 'Reorder {name}',
+    values: { name },
+  });
+
+export const SAVING_FIELD_ORDER = i18n.translate('xpack.cases.fieldLibrary.savingFieldOrder', {
+  defaultMessage: 'Saving order…',
 });
 
-export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalFieldYes', {
-  defaultMessage: 'Yes',
-});
-
-export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
-  defaultMessage: 'No',
-});
+export const FIELD_MOVED_ANNOUNCEMENT = (name: string, position: number, total: number) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldMovedAnnouncement', {
+    defaultMessage: 'Moved {name} to position {position} of {total}.',
+    values: { name, position, total },
+  });
 
 export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
   'xpack.cases.fieldLibrary.tableCaption',
