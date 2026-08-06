@@ -241,7 +241,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible fix for this flaky-test issue. Prefer a test-side fix, but when the root cause is in application code, a minimal application-side fix is welcome — don't paper over a product bug with a test-side workaround. Do not open a PR if any of the following is true:
+Open a single draft PR with the smallest possible fix for this flaky-test issue. Prefer a test-side fix, but when the root cause is in application code, a minimal application-side fix is welcome — don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
 - you cannot identify a credible fix; or
