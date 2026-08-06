@@ -62,6 +62,15 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
     await discoverScoutSpace.uiSettings.set({ defaultIndex: STARTER_DATA_VIEW_ID });
   });
 
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    const { discover, datePicker } = pageObjects;
+    await browserAuth.loginAsPrivilegedUser();
+    await discover.goto({ queryMode: 'classic' });
+    await discover.waitUntilTabIsLoaded();
+    await datePicker.setCommonlyUsedTime('This_week');
+    await discover.waitUntilSearchingHasFinished();
+  });
+
   spaceTest.afterAll(async ({ esClient, discoverScoutSpace }) => {
     await Promise.all([
       esClient.indices.delete({ index: INDEX_000001, ignore_unavailable: true }),
@@ -71,45 +80,30 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
     await discoverScoutSpace.uiSettings.unset('defaultIndex');
   });
 
-  spaceTest(
-    'creates ad hoc and saved data views from the search bar',
-    async ({ browserAuth, pageObjects }) => {
-      const { discover, datePicker, unifiedFieldList } = pageObjects;
+  spaceTest('creates an ad hoc data view from the search bar', async ({ pageObjects }) => {
+    const { discover, unifiedFieldList } = pageObjects;
 
-      await browserAuth.loginAsPrivilegedUser();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
-      await datePicker.setCommonlyUsedTime('This_week');
-      await discover.waitUntilSearchingHasFinished();
+    await discover.createDataViewFromSearchBar({ name: 'data-view-index-', adHoc: true });
+    await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await spaceTest.step('creates an ad hoc data view', async () => {
-        await discover.createDataViewFromSearchBar({ name: 'data-view-index-', adHoc: true });
-        await unifiedFieldList.waitUntilSidebarHasLoaded();
+    expect(await discover.getHitCountInt()).toBe(2);
+    expect(await unifiedFieldList.getAvailableFieldCount()).toBe(3);
+  });
 
-        expect(await discover.getHitCountInt()).toBe(2);
-        expect(await unifiedFieldList.getAvailableFieldCount()).toBe(3);
-      });
+  spaceTest('creates a saved data view from the search bar', async ({ pageObjects }) => {
+    const { discover, unifiedFieldList } = pageObjects;
 
-      await spaceTest.step('creates a saved data view', async () => {
-        await discover.createDataViewFromSearchBar({ name: INDEX_000001, adHoc: false });
-        await unifiedFieldList.waitUntilSidebarHasLoaded();
+    await discover.createDataViewFromSearchBar({ name: INDEX_000001, adHoc: false });
+    await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await expect.poll(() => discover.getHitCountInt()).toBe(1);
-        expect(await unifiedFieldList.getAvailableFieldCount()).toBe(2);
-      });
-    }
-  );
+    await expect.poll(() => discover.getHitCountInt()).toBe(1);
+    expect(await unifiedFieldList.getAvailableFieldCount()).toBe(2);
+  });
 
   spaceTest(
     'edits data view index pattern and time field from search bar',
-    async ({ browserAuth, page, pageObjects }) => {
+    async ({ page, pageObjects }) => {
       const { discover, datePicker, unifiedFieldList } = pageObjects;
-
-      await browserAuth.loginAsPrivilegedUser();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
-      await datePicker.setCommonlyUsedTime('This_week');
-      await discover.waitUntilSearchingHasFinished();
 
       await spaceTest.step(
         'edits data view to use a different index pattern and time field',
