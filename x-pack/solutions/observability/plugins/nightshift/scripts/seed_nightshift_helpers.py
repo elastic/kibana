@@ -748,6 +748,77 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
 }
 
 
+# Nightshift only surfaces a blast_radius entity when its feature_id resolves to a knowledge
+# indicator with subtype "service" — anything unresolved is dropped rather than shown as a stream
+# name. The entries above cover the origin services; these are the downstream ones they impact.
+IMPACTED_SERVICE_DESCRIPTIONS: dict[str, str] = {
+    "billing-api": (
+        "Invoicing API that settles completed orders. Charge submissions back up behind "
+        "payment-service retries."
+    ),
+    "catalog-service": (
+        "Product catalog reads backing browse and category pages. Slow responses surface as "
+        "empty shelves on the storefront."
+    ),
+    "fulfillment-api": (
+        "Warehouse fulfilment hand-off. Orders stall in 'awaiting dispatch' while upstream "
+        "processing retries."
+    ),
+    "inventory-service": (
+        "Stock level lookups and reservations. Oversell risk rises when reservations are not "
+        "confirmed promptly."
+    ),
+    "ledger-service": (
+        "Double-entry ledger recording settled payments. Unreconciled entries accumulate while "
+        "payment-service is degraded."
+    ),
+    "notification-service": (
+        "Transactional email and push delivery. Order and payment notifications queue when the "
+        "gateway sheds load."
+    ),
+    "payment-gateway": (
+        "Card authorisation front end for payment-service. Authorisation attempts time out under "
+        "heap pressure."
+    ),
+    "search-api": (
+        "Product search and typeahead. Query latency tracks web-frontend degradation."
+    ),
+}
+
+
+def build_impacted_service_feature(feature_id: str, stream_name: str) -> dict:
+    return {
+        "id": feature_id,
+        "stream_name": stream_name,
+        "type": "entity",
+        "subtype": "service",
+        "title": feature_id,
+        "description": IMPACTED_SERVICE_DESCRIPTIONS.get(
+            feature_id, f"Downstream service impacted through {stream_name}."
+        ),
+        "properties": {"service.name": feature_id},
+        "confidence": 78,
+        "evidence": [f"service.name = {feature_id}"],
+        "tags": ["downstream"],
+    }
+
+
+def add_impacted_service_features() -> None:
+    """Derived, not hand-written, so a new blast_radius entity cannot silently become invisible."""
+    seeded = {feature["id"] for features in KI_FEATURES_BY_STREAM.values() for feature in features}
+    for entries in BLAST_RADIUS_BY_EVENT_ID.values():
+        for entry in entries:
+            if entry["type"] != "entity" or entry["feature_id"] in seeded:
+                continue
+            seeded.add(entry["feature_id"])
+            KI_FEATURES_BY_STREAM.setdefault(entry["stream_name"], []).append(
+                build_impacted_service_feature(entry["feature_id"], entry["stream_name"])
+            )
+
+
+add_impacted_service_features()
+
+
 def es_request(
     method: str,
     path: str,
@@ -1054,8 +1125,9 @@ def seed_ki_features() -> None:
             f"  - Set KIBANA_URL to include your base path (detected: {KIBANA_URL})\n"
             "  - Ensure Kibana is running from this repo with Streams + Significant Events\n"
             "  - Re-run with --clean so backing streams are recreated as data streams\n"
-            "\nEntity pills still render via detection signals, but Summary/Evidence "
-            "in the entity flyout will be thinner without KI features.",
+            "\nWithout KI features Nightshift shows no impacted services at all: a "
+            "blast_radius entity is only surfaced when it resolves to a knowledge "
+            'indicator with subtype "service".',
             file=sys.stderr,
         )
         return
