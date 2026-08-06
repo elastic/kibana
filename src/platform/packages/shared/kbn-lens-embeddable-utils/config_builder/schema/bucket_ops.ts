@@ -427,7 +427,8 @@ export const bucketHistogramOperationSchema = schema.object(
         schema.number({
           min: LENS_HISTOGRAM_GRANULARITY_MIN,
           meta: {
-            description: 'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
+            description:
+              'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
           },
         }),
         schema.literal('auto'),
