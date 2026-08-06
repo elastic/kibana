@@ -27,31 +27,21 @@ export interface UserStorageClientParams {
 }
 
 /**
- * Browser-side {@link IUserStorageClient}: a synchronous in-memory cache
- * seeded from preloaded (server-injected) metadata (for keys with `preload: true`),
- * with HTTP-backed writes and per-key lazy fetching for non-injected keys.
+ * Browser-side {@link IUserStorageClient}: an in-memory cache seeded from
+ * server-injected values for `preload: true` keys, with HTTP-backed writes and
+ * per-key lazy fetching for the rest.
  *
- * Lazy fetch behaviour:
- * - The first cache miss via `get(key)` / `get$(key)` / `getState$(key)` for a
- *   key absent from the cache triggers a `GET /internal/user_storage/{key}`
- *   request. Once the response arrives, the cache is populated and `get$` /
- *   `getState$` subscribers for that key receive the resolved value. Concurrent
- *   callers for the same uncached key share a single in-flight request.
- * - "Absent from the cache" is a plain `cache[key] === undefined` check. This is
- *   sound because the server contract guarantees a resolved value is never
- *   `undefined` (registration rejects schemas that accept `undefined`/`null` and
- *   requires a schema-valid `defaultValue` — see the server-internal
- *   `UserStorageService.register`), so a hydrated entry is always non-`undefined`
- *   and `undefined` unambiguously means "not yet fetched".
- * - Fetch failures are published to `getHttpError$` but do not cause `get$`
- *   to error or complete; `get()` rejects and `getState$` emits `{status:'error'}`.
- *   The cache entry remains absent, so the next call retries the fetch.
- * - `getUpdate$()` does **not** emit for lazy-fetch hydrations; only explicit
- *   `set` / `remove` calls produce update events.
- *
- * When `isAvailable()` is `false` the server injects no values and every route
- * would answer 403, so no HTTP request is made at all: reads resolve to their
- * `defaultValue` and writes reject locally.
+ * - A cache miss on `get` / `get$` / `getState$` triggers one `GET` that
+ *   concurrent callers for that key share.
+ * - `cache[key] === undefined` means "not yet fetched": registration rejects
+ *   schemas accepting `undefined`/`null` and requires a valid `defaultValue`,
+ *   so a hydrated entry is never `undefined`.
+ * - Fetch failures go to `getHttpError$` and leave the cache absent so the next
+ *   read retries. `get$` neither errors nor completes; `get()` rejects and
+ *   `getState$` emits `{status:'error'}`.
+ * - `getUpdate$()` emits for `set`/`remove` only, never for lazy hydration.
+ * - When `isAvailable()` is `false` nothing is injected and every route answers
+ *   403, so no request is made: reads resolve to `defaultValue`, writes reject.
  *
  * @internal
  */
@@ -181,8 +171,7 @@ export class UserStorageClient implements IUserStorageClient {
 
     let stored: T;
     try {
-      // Cache the server-validated value (post-transform/strip) rather than
-      // the raw input, so the browser state stays in sync with what ES holds.
+      // Cache what ES holds - the server-validated value, not the raw input.
       stored = (await this.api.set(key, value)) as T;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -238,10 +227,7 @@ export class UserStorageClient implements IUserStorageClient {
     return this.httpErrors$.asObservable();
   }
 
-  /**
-   * Throws when user storage is unavailable, so a write fails with an actionable
-   * message instead of a 403. Not published to `getHttpError$` - no request was made.
-   */
+  /** Fails a write with an actionable message instead of a 403. Not an http error - no request was made. */
   private assertAvailable(operation: 'set' | 'remove', key: string): void {
     if (!this.available) {
       throw new Error(
@@ -251,16 +237,12 @@ export class UserStorageClient implements IUserStorageClient {
   }
 
   /**
-   * Starts (or joins an already-started) lazy GET for `key`, resolving with
-   * the fetched value. Resolves immediately from the cache if already hydrated.
-   * Rejects if the underlying HTTP request fails; the failure is also published
-   * to `getHttpError$` before rejecting, and the key is removed from the
-   * in-flight map so the next call retries.
+   * Starts or joins the lazy GET for `key`, resolving from the cache when already
+   * hydrated. Rejects on HTTP failure, after publishing to `getHttpError$` and
+   * clearing the in-flight entry so the next call retries.
    *
-   * If a successful `set`/`remove` completes while the GET is in flight, both a
-   * fetched value and a fetch error are stale and discarded: a `set` leaves an
-   * authoritative cache value, a `remove` triggers a post-remove GET for the
-   * registered default.
+   * A `set`/`remove` landing mid-flight makes both outcomes stale: `set` leaves an
+   * authoritative value, `remove` leaves the cache absent so a fresh GET runs.
    */
   private startFetch(key: string): Promise<unknown> {
     // Nothing to fetch without user storage; readers fall back to their defaults.
@@ -274,8 +256,7 @@ export class UserStorageClient implements IUserStorageClient {
 
     const getCurrentOrRefetch = () => {
       const current = this.cache[key];
-      // A set leaves an authoritative value; a remove leaves the cache absent, so
-      // fetch the registered default from the post-remove state.
+      // Absent means a remove landed; refetch for the registered default.
       return current !== undefined ? current : this.startFetch(key);
     };
 
@@ -293,8 +274,7 @@ export class UserStorageClient implements IUserStorageClient {
         return value;
       },
       (error: unknown) => {
-        // A stale GET error is obsolete too — recover from the post-write state
-        // instead of publishing it.
+        // Recover from the post-write state rather than publishing an obsolete error.
         if (isStale()) {
           return getCurrentOrRefetch();
         }

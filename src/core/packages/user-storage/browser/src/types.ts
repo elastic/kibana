@@ -64,7 +64,8 @@ export interface IUserStorageClient {
    * over the lifetime of a page load.
    *
    * Gate save/delete affordances on this rather than querying user profile state
-   * directly.
+   * directly. Reads need no guard: when `false` they resolve to their `defaultValue`
+   * without issuing a request.
    */
   isAvailable(): boolean;
 
@@ -122,6 +123,8 @@ export interface IUserStorageClient {
    * server-validated form of the value (after any Zod transforms or stripping),
    * which is also what gets cached locally. On HTTP failure the cache is left
    * untouched, the error is published to `getHttpError$`, and the promise rejects.
+   *
+   * Rejects without issuing a request when `isAvailable()` is `false`.
    */
   set<T = unknown>(key: string, value: T): Promise<T>;
 
@@ -129,6 +132,8 @@ export interface IUserStorageClient {
    * Removes the user override via `DELETE /internal/user_storage/{key}`.
    * On success the cached value is deleted (subsequent reads fall back to
    * `defaultValue`) and subscribers are notified.
+   *
+   * Rejects without issuing a request when `isAvailable()` is `false`.
    */
   remove(key: string): Promise<void>;
 
