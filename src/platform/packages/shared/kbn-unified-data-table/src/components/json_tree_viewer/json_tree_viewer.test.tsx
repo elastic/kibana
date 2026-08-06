@@ -163,7 +163,7 @@ describe('JsonTreeViewer', () => {
     });
   });
 
-  describe('Auto expand nodes that contains a search mathc', () => {
+  describe('Auto expand nodes that contain a search match', () => {
     const doc = { user: { city: 'Berlin' }, org: { name: 'Acme' } };
 
     it('expands a collapsed container so a hidden match renders, leaving non-matches collapsed', () => {
@@ -177,6 +177,18 @@ describe('JsonTreeViewer', () => {
       render(<JsonTreeViewer json={doc} />);
       expect(screen.queryByTestId(rowTestId('user.city'))).not.toBeInTheDocument();
       expect(screen.queryByTestId(rowTestId('org.name'))).not.toBeInTheDocument();
+    });
+
+    it('reveals a nested match hidden past the collection pager budget', () => {
+      // `logs` has 15 fields; the match sits at index 12, past the 10-child cap.
+      const nestedDoc = {
+        logs: Object.fromEntries(
+          Array.from({ length: 15 }, (_, i) => [`field_${i}`, i === 12 ? 'needle' : `other_${i}`])
+        ),
+      };
+      render(<JsonTreeViewer json={nestedDoc} expandNodesContainingTerm="needle" />);
+
+      expect(screen.getByTestId(rowTestId('logs.field_12'))).toHaveTextContent('"needle"');
     });
   });
 

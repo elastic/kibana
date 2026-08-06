@@ -14,10 +14,11 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   buildNodes,
   buildRows,
-  collectContainersWithMatch,
+  collectSearchMatches,
   collectExpandableIds,
   type FormatValue,
   type JsonValue,
+  type SearchMatches,
 } from './tree_model';
 import {
   useRovingTreeNavigation,
@@ -46,7 +47,7 @@ export interface JsonTreeViewerProps {
   formatValue?: FormatValue;
 }
 
-const EMPTY_ID_SET: ReadonlySet<string> = new Set();
+const EMPTY_SEARCH_MATCHES: SearchMatches = { containers: new Set(), reveals: new Map() };
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
   json,
@@ -61,23 +62,30 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
-  const expandedBySearchNodes = useMemo(
-    () => (searchTermLower ? collectContainersWithMatch(nodes, searchTermLower) : EMPTY_ID_SET),
+  const searchMatches = useMemo(
+    () => (searchTermLower ? collectSearchMatches(nodes, searchTermLower) : EMPTY_SEARCH_MATCHES),
     [nodes, searchTermLower]
   );
 
   const expansion = useTreeExpansion({
     initialState,
     onStateChange,
-    expandedBySearchNodes,
+    expandedBySearchNodes: searchMatches.containers,
     expandableIds,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);
 
   const rows = useMemo(
-    () => buildRows(nodes, rootType, expansion.effectiveExpanded, expansion.revealed),
-    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed]
+    () =>
+      buildRows(
+        nodes,
+        rootType,
+        expansion.effectiveExpanded,
+        expansion.revealed,
+        searchMatches.reveals
+      ),
+    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed, searchMatches.reveals]
   );
 
   const nav = useRovingTreeNavigation(rows, expansion);

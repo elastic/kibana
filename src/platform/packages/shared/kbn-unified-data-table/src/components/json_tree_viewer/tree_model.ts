@@ -27,6 +27,10 @@ export type JsonValue = Record<string, unknown> | unknown[] | JsonPrimitive | un
 export const INITIAL_CHILDREN = 10;
 export const CHILDREN_INCREMENT = 10;
 
+// Upper bound on how far a search term may auto-reveal a single list.
+// We need to put a limit to not blow up the DOM.
+export const MAX_SEARCH_REVEAL = 100;
+
 export const ROOT_ID = 'json-viewer-$root';
 
 export const OPEN_BRACKET = { object: '{', array: '[' } as const;
@@ -180,8 +184,10 @@ export const buildRows = (
   nodes: JsonNode[],
   rootType: CollectionType,
   expanded: ReadonlySet<string>,
-  revealed: ReadonlyMap<string, number>
-): RenderRow[] => flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []);
+  revealed: ReadonlyMap<string, number>,
+  revealedBySearch: ReadonlyMap<string, number>
+): RenderRow[] =>
+  flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, revealedBySearch, 0, null, []);
 
 const flattenRows = (
   nodes: JsonNode[],
@@ -189,12 +195,16 @@ const flattenRows = (
   listType: CollectionType,
   expanded: ReadonlySet<string>,
   revealed: ReadonlyMap<string, number>,
+  revealedBySearch: ReadonlyMap<string, number>,
   depth: number,
   parentId: string | null,
   out: RenderRow[]
 ): RenderRow[] => {
-  // Display the initial children count or the provided revealed count, whichever is smaller.
-  const shown = Math.min(revealed.get(listId) ?? INITIAL_CHILDREN, nodes.length);
+  // Show whichever is larger: the user's revealed count (default INITIAL_CHILDREN) or the count the
+  // active search needs to surface a match deeper than the pager budget.
+  const userShown = Math.min(revealed.get(listId) ?? INITIAL_CHILDREN, nodes.length);
+  const searchShown = Math.min(revealedBySearch.get(listId) ?? 0, nodes.length);
+  const shown = Math.max(userShown, searchShown);
 
   for (let index = 0; index < shown; index++) {
     const node = nodes[index];
@@ -220,6 +230,7 @@ const flattenRows = (
         node.collectionType,
         expanded,
         revealed,
+        revealedBySearch,
         depth + 1,
         node.id,
         out
@@ -235,7 +246,7 @@ const flattenRows = (
   }
 
   const hidden = nodes.length - shown;
-  const canShowFewer = shown > INITIAL_CHILDREN;
+  const canShowFewer = userShown > INITIAL_CHILDREN;
   if (hidden > 0 || canShowFewer) {
     out.push({
       kind: 'pager',
@@ -302,26 +313,50 @@ export const nodeToJsonValue = (node: JsonNode): JsonValue => {
   return object;
 };
 
+export interface SearchMatches {
+  /** Every collection whose subtree contains a match; auto-expanded so the match renders. */
+  containers: ReadonlySet<string>;
+  /**
+   * The minimum number of children that list must reveal ("Show more") a node containing a match is visible.
+   */
+  reveals: ReadonlyMap<string, number>;
+}
+
 /**
- * Collects the ids of every collection whose subtree contains the term.
- **/
-export const collectContainersWithMatch = (
-  nodes: JsonNode[],
-  termLower: string
-): ReadonlySet<string> => {
-  const matched = new Set<string>();
-  const visit = (node: JsonNode): boolean => {
+ * Collects the nodes that needs to be expanded / reveladed to display a search match.
+ */
+export const collectSearchMatches = (nodes: JsonNode[], termLower: string): SearchMatches => {
+  const containers = new Set<string>();
+  const reveals = new Map<string, number>();
+
+  const bumpReveal = (listId: string, index: number) => {
+    const needed = index + 1;
+    if (
+      needed > INITIAL_CHILDREN &&
+      needed <= MAX_SEARCH_REVEAL &&
+      needed > (reveals.get(listId) ?? 0)
+    ) {
+      reveals.set(listId, needed);
+    }
+  };
+
+  const visit = (node: JsonNode, listId: string, index: number): boolean => {
+    let hasMatch: boolean;
     if (node.kind === 'leaf') {
-      return String(node.value).toLowerCase().includes(termLower);
+      hasMatch = String(node.value).toLowerCase().includes(termLower);
+    } else {
+      hasMatch = false;
+      node.children.forEach((child, childIndex) => {
+        if (visit(child, node.id, childIndex)) hasMatch = true;
+      });
+      if (hasMatch) containers.add(node.id);
     }
 
-    let hasMatch = false;
-    for (const child of node.children) {
-      if (visit(child)) hasMatch = true;
-    }
-    if (hasMatch) matched.add(node.id);
+    // Check if the node needs to be revealed.
+    if (hasMatch) bumpReveal(listId, index);
     return hasMatch;
   };
-  nodes.forEach(visit);
-  return matched;
+
+  nodes.forEach((node, index) => visit(node, ROOT_ID, index));
+  return { containers, reveals };
 };
