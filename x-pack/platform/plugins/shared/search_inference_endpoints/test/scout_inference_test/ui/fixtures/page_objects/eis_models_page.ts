@@ -45,6 +45,7 @@ export class EisModelsPage {
   readonly manageRegionsCancelButton: Locator;
   readonly manageRegionsSaveButton: Locator;
   readonly manageRegionsCallout: Locator;
+  readonly manageRegionsCalloutDismiss: Locator;
   readonly manageRegionsErrorCallout: Locator;
   readonly manageRegionsLoading: Locator;
   readonly manageRegionsNoGeos: Locator;
@@ -53,12 +54,18 @@ export class EisModelsPage {
   readonly manageRegionsRegionsTab: Locator;
   readonly manageRegionsSelectAllButton: Locator;
   readonly manageRegionsExpandAllButton: Locator;
+  readonly manageRegionsCustomPolicyToggle: Locator;
   // Confirm Region Change Modal
   readonly confirmRegionChangeModal: Locator;
   readonly confirmRegionChangeModalGeoList: Locator;
   readonly confirmRegionChangeModalRegionList: Locator;
   readonly confirmRegionChangeSaveButton: Locator;
   readonly confirmRegionChangeCancelButton: Locator;
+  // Confirm Delete Region Policy Modal
+  readonly confirmDeleteRegionPolicyModal: Locator;
+  readonly confirmDeleteRegionPolicySaveButton: Locator;
+  readonly confirmDeleteRegionPolicyCancelButton: Locator;
+  readonly confirmDeleteRegionPolicyAcknowledge: Locator;
 
   constructor(private readonly page: ScoutPage) {
     // Header
@@ -102,6 +109,7 @@ export class EisModelsPage {
     this.manageRegionsCancelButton = this.page.testSubj.locator('manageRegionsCancelButton');
     this.manageRegionsSaveButton = this.page.testSubj.locator('manageRegionsSaveButton');
     this.manageRegionsCallout = this.page.testSubj.locator('manageRegionsCallout');
+    this.manageRegionsCalloutDismiss = this.page.testSubj.locator('manageRegionsCalloutDismiss');
     this.manageRegionsErrorCallout = this.page.testSubj.locator('manageRegionsErrorCallout');
     this.manageRegionsLoading = this.page.testSubj.locator('manageRegionsLoading');
     this.manageRegionsNoGeos = this.page.testSubj.locator('manageRegionsNoGeos');
@@ -110,12 +118,32 @@ export class EisModelsPage {
     this.manageRegionsRegionsTab = this.page.testSubj.locator('manageRegionsRegionsTab');
     this.manageRegionsSelectAllButton = this.page.testSubj.locator('manageRegionsSelectAllButton');
     this.manageRegionsExpandAllButton = this.page.testSubj.locator('manageRegionsExpandAllButton');
+    this.manageRegionsCustomPolicyToggle = this.page.testSubj.locator(
+      'manageRegionsCustomPolicyToggle'
+    );
     // Confirm Region Change Modal
     this.confirmRegionChangeModal = this.page.testSubj.locator('confirmRegionChangeModal');
     this.confirmRegionChangeModalGeoList = this.page.testSubj.locator('confirmModalGeoList');
     this.confirmRegionChangeModalRegionList = this.page.testSubj.locator('confirmModalRegionList');
-    this.confirmRegionChangeSaveButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.confirmRegionChangeCancelButton = this.page.testSubj.locator('confirmModalCancelButton');
+    this.confirmRegionChangeSaveButton = this.confirmRegionChangeModal.locator(
+      '[data-test-subj="confirmModalConfirmButton"]'
+    );
+    this.confirmRegionChangeCancelButton = this.confirmRegionChangeModal.locator(
+      '[data-test-subj="confirmModalCancelButton"]'
+    );
+    // Confirm Delete Region Policy Modal
+    this.confirmDeleteRegionPolicyModal = this.page.testSubj.locator(
+      'confirmDeleteRegionPolicyModal'
+    );
+    this.confirmDeleteRegionPolicyAcknowledge = this.page.testSubj.locator(
+      'confirmDeleteRegionPolicyAcknowledge'
+    );
+    this.confirmDeleteRegionPolicySaveButton = this.confirmDeleteRegionPolicyModal.locator(
+      '[data-test-subj="confirmModalConfirmButton"]'
+    );
+    this.confirmDeleteRegionPolicyCancelButton = this.confirmDeleteRegionPolicyModal.locator(
+      '[data-test-subj="confirmModalCancelButton"]'
+    );
   }
 
   // --- Navigation ---
