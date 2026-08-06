@@ -7,6 +7,7 @@
 
 import { useParams } from 'react-router-dom';
 import React, { useMemo } from 'react';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
@@ -39,6 +40,7 @@ export const SynonymsSetDetail = () => {
       data-test-subj="searchSynonymsSetDetailPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
+      <SuppressChromeBackButton />
       <KibanaPageTemplate.Header
         pageTitle={synonymsSetId}
         restrictWidth

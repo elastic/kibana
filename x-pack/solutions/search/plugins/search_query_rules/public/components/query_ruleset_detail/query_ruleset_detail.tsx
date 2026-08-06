@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useParams } from 'react-router-dom';
@@ -235,6 +236,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
 
   return (
     <QueryRulesPageTemplate>
+      <SuppressChromeBackButton />
       {!isInitialLoading && !isError && !!queryRuleset && !blockRender && (
         <KibanaPageTemplate.Header
           pageTitle={rulesetId}
