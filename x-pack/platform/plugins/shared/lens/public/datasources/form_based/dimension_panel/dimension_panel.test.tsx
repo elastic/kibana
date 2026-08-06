@@ -9,7 +9,7 @@ import type { ShallowWrapper } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import { screen, act, within } from '@testing-library/react';
+import { screen, act, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import type { EuiListGroupItemProps, EuiComboBoxProps } from '@elastic/eui';
@@ -336,12 +336,11 @@ describe('FormBasedDimensionEditor', () => {
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
   it('should list all field names and document as a whole in prioritized order', async () => {
-    const user = userEvent.setup();
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByTestId('comboBoxToggleListButton')[0];
     const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-    await user.click(comboBoxButton);
+    fireEvent.click(comboBoxButton);
 
     const allOptions = [
       'Records',
@@ -355,7 +354,8 @@ describe('FormBasedDimensionEditor', () => {
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
     // press arrow up to go back to the beginning
-    await user.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
+    fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
   }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
 
