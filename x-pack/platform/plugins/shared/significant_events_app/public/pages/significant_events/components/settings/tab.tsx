@@ -51,7 +51,6 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
-import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
@@ -82,8 +81,7 @@ export function SettingsTab() {
   // settings routes used by `core.settings.client`/`globalClient` (require
   // `advancedSettings.save`). Gate the whole form on both so the user never
   // triggers a partial save that 403s halfway through.
-  const { ui: streamsUiPrivileges } = useSignificantEventsPrivileges();
-  const canManageStreams = streamsUiPrivileges.manage;
+  const canManageStreams = core.application.capabilities.streams?.manage === true;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
 

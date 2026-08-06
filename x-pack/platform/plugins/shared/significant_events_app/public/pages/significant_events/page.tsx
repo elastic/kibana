@@ -14,7 +14,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
-import { useSignificantEventsPrivileges } from '../../hooks/use_significant_events_privileges';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
 import { RedirectTo } from '../../components/redirect_to';
@@ -59,7 +58,10 @@ export function SignificantEventsPage() {
   const router = useSignificantEventsAppRouter();
   const {
     core: {
-      application: { getUrlForApp },
+      application: {
+        getUrlForApp,
+        capabilities: { streams },
+      },
       chrome,
       notifications: { toasts },
     },
@@ -68,8 +70,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const { ui: streamsUiPrivileges } = useSignificantEventsPrivileges();
-  const canManageStreams = streamsUiPrivileges.manage;
+  const canManageStreams = streams?.manage === true;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
