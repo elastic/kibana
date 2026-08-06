@@ -9,32 +9,15 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 
-/**
- * Field the metrics grid is sorted by. Mirrors the viewer's `METRICS_SORT_BY`
- * values (`@kbn/unified-chart-section-viewer`).
- */
 export type MetricsGridSortField = 'alphabetically' | 'recency';
 
-/**
- * Direction the metrics grid is sorted in. Mirrors the viewer's
- * `METRICS_SORT_DIRECTION` values.
- */
 export type MetricsGridSortDirection = 'asc' | 'desc';
 
-/**
- * Serializable shape of the metrics grid sort selection persisted in Discover's
- * profile state.
- */
 export interface MetricsGridSort extends SerializableRecord {
   field: MetricsGridSortField;
   direction: MetricsGridSortDirection;
 }
 
-/**
- * Default metrics grid sort. Kept equal to the viewer's `DEFAULT_METRICS_SORT`
- * (`['alphabetically', 'asc']`); a drift-guard test in
- * `@kbn/unified-chart-section-viewer` (`src/common/constants.test.ts`) enforces this.
- */
 export const METRICS_GRID_SORT_DEFAULTS: MetricsGridSort = {
   field: 'alphabetically',
   direction: 'asc',

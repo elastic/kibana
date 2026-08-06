@@ -11,11 +11,7 @@ import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { DEFAULT_METRICS_SORT } from './constants';
 
 describe('DEFAULT_METRICS_SORT', () => {
-  it('stays in sync with METRICS_GRID_SORT_DEFAULTS from @kbn/discover-utils (drift guard)', () => {
-    // METRICS_GRID_SORT_DEFAULTS intentionally duplicates this package's
-    // values so Discover's `common` code never imports the React viewer
-    // barrel. A drift between the two would surface as a spurious
-    // "non-default" sort being persisted (or a real default being stripped).
+  it('stays in sync with METRICS_GRID_SORT_DEFAULTS from @kbn/discover-utils', () => {
     expect([METRICS_GRID_SORT_DEFAULTS.field, METRICS_GRID_SORT_DEFAULTS.direction]).toEqual([
       ...DEFAULT_METRICS_SORT,
     ]);

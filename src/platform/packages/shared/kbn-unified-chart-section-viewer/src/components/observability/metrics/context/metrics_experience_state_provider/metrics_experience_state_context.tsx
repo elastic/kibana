@@ -28,8 +28,6 @@ import {
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   profileId: string;
   gridSettings: MetricsGridSettings;
-  // Sourced from the host's persistent profile state (no longer restorable
-  // state), so it is declared explicitly here rather than inherited.
   metricsSort: MetricsSort;
   recentlyExploredMetrics: readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
@@ -78,9 +76,7 @@ export function MetricsExperienceStateProvider({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
   );
 
-  // When sorting is disabled, ignore any host-provided sort (e.g. state
-  // persisted or shared while the flag was on) and swallow change requests so
-  // no sorting behavior runs and no new sort state is written while it is off.
+  // When sorting is disabled, ignore any host-provided sort
   const effectiveMetricsSort = isSortingEnabled ? metricsSort : DEFAULT_METRICS_SORT;
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({

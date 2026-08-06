@@ -246,8 +246,6 @@ describe('MetricsExperienceStateProvider', () => {
   });
 
   describe('metricsSort', () => {
-    // Sorting is gated behind the IS_SORTING_ENABLED feature flag (default
-    // off), so sort tests run with the flag enabled unless stated otherwise.
     const createSortWrapper =
       (
         props: { metricsSort?: MetricsSort; onMetricsSortChange?: (sort: MetricsSort) => void },

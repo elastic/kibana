@@ -31,8 +31,6 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
 
 const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
-    // The state provider reads feature flags from the external services
-    // context, so it must be mounted below ExternalServicesProvider.
     <ExternalServicesProvider externalServices={props.externalServices}>
       <MetricsExperienceStateProvider
         profileId={props.profileId}
