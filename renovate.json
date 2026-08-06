@@ -2254,7 +2254,6 @@
         "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
-        "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
         "@langchain/langgraph-checkpoint",
