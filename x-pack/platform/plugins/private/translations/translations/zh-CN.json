@@ -56337,7 +56337,6 @@
     "xpack.streams.tour.subtitle": "Streams",
     "xpack.streams.welcomeCallout.description": "现有的 Elasticsearch 数据流作为经典流显示在此列表中，因此您可以集中管理字段提取和保留。",
     "xpack.streams.welcomeCallout.descriptionSecondLine": "要尝试完整的托管层次结构体验，请在载入新数据时在摄取选择器中选择“Wired Streams”。",
-    "xpack.streams.welcomeCallout.dismissButton": "不再显示此内容",
     "xpack.streams.welcomeCallout.docsButton": "查看文档",
     "xpack.streams.welcomeCallout.startTourButton": "开始导览",
     "xpack.streams.welcomeCallout.title": "欢迎使用 Streams，这是我们的下一代数据管理模型，可在单一位置集中管理您的数据。",

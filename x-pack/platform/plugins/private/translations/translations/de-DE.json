@@ -56155,7 +56155,6 @@
     "xpack.streams.tour.subtitle": "Streams",
     "xpack.streams.welcomeCallout.description": "Bestehende Elasticsearch-Daten-Streams erscheinen in dieser Liste als klassische Streams, damit Sie Feldextraktion und Speicherverwaltung an einem zentralen Ort verwalten können.",
     "xpack.streams.welcomeCallout.descriptionSecondLine": "Um die Funktionen der vollständig verwalteten Hierarchie zu testen, wählen Sie beim Onboarding neuer Daten im Auswahlfeld „Ingestion“ die Option „Wired Streams“ aus.",
-    "xpack.streams.welcomeCallout.dismissButton": "Nicht wieder anzeigen",
     "xpack.streams.welcomeCallout.docsButton": "Dokumentation ansehen",
     "xpack.streams.welcomeCallout.startTourButton": "Tour starten",
     "xpack.streams.welcomeCallout.title": "Willkommen bei Streams, unserem Modell der nächsten Generation zur Verwaltung Ihrer Daten an einem zentralen Ort",

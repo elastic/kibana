@@ -55912,7 +55912,6 @@
     "xpack.streams.tour.subtitle": "Flux",
     "xpack.streams.welcomeCallout.description": "Les flux de données Elasticsearch existants apparaissent dans cette liste comme des flux classiques, ce qui vous permet de gérer l'extraction et la conservation des champs au même endroit.",
     "xpack.streams.welcomeCallout.descriptionSecondLine": "Pour profiter pleinement de l'expérience complète de la hiérarchie gérée, sélectionnez \"Wired Streams\" dans le sélecteur d’ingestion lors de l’intégration de nouvelles données.",
-    "xpack.streams.welcomeCallout.dismissButton": "Ne plus afficher",
     "xpack.streams.welcomeCallout.docsButton": "Afficher les documents",
     "xpack.streams.welcomeCallout.startTourButton": "Commencer la visite",
     "xpack.streams.welcomeCallout.title": "Bienvenue à Streams, notre modèle de nouvelle génération pour gérer vos données en un seul endroit.",

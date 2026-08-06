@@ -56332,7 +56332,6 @@
     "xpack.streams.tour.subtitle": "Streams",
     "xpack.streams.welcomeCallout.description": "既存のElasticsearchデータストリームは、このリストにクラシックストリームとして表示されるため、フィールドの抽出と保持を1か所で管理できます。",
     "xpack.streams.welcomeCallout.descriptionSecondLine": "新しいデータをオンボーディングする際、フルマネージド階層の体験を試すには、インジェストセレクターで「Wired Streams」を選択してください。",
-    "xpack.streams.welcomeCallout.dismissButton": "今後表示しない",
     "xpack.streams.welcomeCallout.docsButton": "ドキュメントを表示",
     "xpack.streams.welcomeCallout.startTourButton": "ツアーを開始",
     "xpack.streams.welcomeCallout.title": "データを一元管理できる次世代モデル、Streams へようこそ",
