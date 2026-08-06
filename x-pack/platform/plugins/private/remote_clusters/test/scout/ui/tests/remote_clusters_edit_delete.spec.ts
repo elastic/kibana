@@ -7,31 +7,32 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, testData, seedSniffCluster, seedProxyCluster, removeCluster } from '../fixtures';
+import {
+  test,
+  testData,
+  seedSniffCluster,
+  seedProxyCluster,
+  removeCluster,
+  expectNoA11yViolations,
+} from '../fixtures';
 import type { RemoteClustersPage } from '../fixtures/page_objects/remote_clusters_page';
 
-const { REMOTE_CLUSTERS_ADMIN_ROLE, A11Y_SELECTORS, SNIFF_CLUSTER_NAME, PROXY_CLUSTER_NAME } =
-  testData;
+const { REMOTE_CLUSTERS_ADMIN_ROLE, SNIFF_CLUSTER_NAME, PROXY_CLUSTER_NAME } = testData;
 
 const runEditDeleteJourney = async (
   page: ScoutPage,
   remoteClusters: RemoteClustersPage,
   clusterName: string
 ) => {
-  const expectNoA11yViolations = async () => {
-    const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-    expect(violations).toStrictEqual([]);
-  };
-
   await test.step('list view shows the remote cluster', async () => {
     await expect(remoteClusters.clusterLink(clusterName)).toBeVisible();
-    await expectNoA11yViolations();
+    await expectNoA11yViolations(page);
   });
 
   await test.step('details flyout', async () => {
     await remoteClusters.openClusterDetails(clusterName);
     await expect(remoteClusters.detailsFlyoutTitle).toHaveText(clusterName);
-    await expectNoA11yViolations();
+    await expectNoA11yViolations(page);
     await remoteClusters.closeFlyout();
   });
 
@@ -40,7 +41,7 @@ const runEditDeleteJourney = async (
     await expect(remoteClusters.deleteModalTitle).toHaveText(
       `Remove remote cluster '${clusterName}'?`
     );
-    await expectNoA11yViolations();
+    await expectNoA11yViolations(page);
     await remoteClusters.cancelDeleteModal();
   });
 
@@ -49,7 +50,7 @@ const runEditDeleteJourney = async (
     await expect(remoteClusters.pageTitle).toHaveText('Edit remote cluster');
     await remoteClusters.openRequestFlyout();
     await expect(remoteClusters.requestFlyoutTitle).toHaveText(`Request for '${clusterName}'`);
-    await expectNoA11yViolations();
+    await expectNoA11yViolations(page);
   });
 };
 

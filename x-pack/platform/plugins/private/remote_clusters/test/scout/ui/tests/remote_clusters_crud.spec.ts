@@ -6,9 +6,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, testData, removeCluster } from '../fixtures';
+import { test, testData, removeCluster, expectNoA11yViolations } from '../fixtures';
 
-const { REMOTE_CLUSTERS_ADMIN_ROLE, A11Y_SELECTORS } = testData;
+const { REMOTE_CLUSTERS_ADMIN_ROLE } = testData;
 
 const CLUSTER_NAME = 'testName';
 // Scout's local stateful env renders the Cloud (proxy-address) add-form, so the
@@ -34,34 +34,29 @@ test.describe('Remote Clusters - add cluster', { tag: ['@local-stateful-classic'
   }) => {
     const { remoteClusters } = pageObjects;
 
-    const expectNoA11yViolations = async () => {
-      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toStrictEqual([]);
-    };
-
     await test.step('remote clusters landing page', async () => {
       // Not the empty-state prompt specifically: another suite may have a remote on the shared
       // cluster, so the populated list can render instead. Assert the entry point and scan a11y.
       await expect(remoteClusters.createButton).toBeVisible();
-      await expectNoA11yViolations();
+      await expectNoA11yViolations(page);
     });
 
     await test.step('trust step', async () => {
       await remoteClusters.startAddWizard();
       await expect(remoteClusters.pageTitle).toHaveText('Add remote cluster');
-      await expectNoA11yViolations();
+      await expectNoA11yViolations(page);
     });
 
     await test.step('connection form step', async () => {
       await remoteClusters.completeTrustStepWithCert();
       await expect(remoteClusters.formNextButton).toBeVisible();
-      await expectNoA11yViolations();
+      await expectNoA11yViolations(page);
     });
 
     await test.step('request flyout', async () => {
       await remoteClusters.openRequestFlyout();
       await expect(remoteClusters.requestFlyoutTitle).toHaveText('Request');
-      await expectNoA11yViolations();
+      await expectNoA11yViolations(page);
       await remoteClusters.closeFlyout();
     });
 
@@ -69,7 +64,7 @@ test.describe('Remote Clusters - add cluster', { tag: ['@local-stateful-classic'
       await remoteClusters.fillForm(CLUSTER_NAME, CLUSTER_ADDRESS);
       await remoteClusters.goToReviewStep();
       await expect(remoteClusters.reviewNextButton).toBeVisible();
-      await expectNoA11yViolations();
+      await expectNoA11yViolations(page);
     });
 
     await test.step('submit and view details', async () => {

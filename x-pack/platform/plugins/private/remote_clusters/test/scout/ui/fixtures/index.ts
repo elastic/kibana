@@ -29,3 +29,4 @@ export const test = base.extend<RemoteClustersFixtures, ScoutWorkerFixtures>({
 
 export * as testData from './constants';
 export { seedSniffCluster, seedProxyCluster, removeCluster } from './remote_cluster_settings';
+export { expectNoA11yViolations } from './expect_no_a11y_violations';
