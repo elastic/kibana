@@ -142,9 +142,6 @@ spaceTest.describe(
           );
           const newId = await discover.getCurrentDataViewId();
           expect(newId).not.toBe(prevId);
-
-          // Close any toasts from the data view ID update before navigating back
-          await toasts.closeAll();
         });
 
         await spaceTest.step(
