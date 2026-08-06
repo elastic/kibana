@@ -649,7 +649,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: ga
+          stack: removed 9.6
           ech: ga
           ece: ga
           eck: ga
