@@ -68,7 +68,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     inviteVisible,
     submitted,
     submittedFading,
-    isSubmitting,
     setVote,
     toggleChip,
     setComment,
@@ -247,7 +246,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           vote={vote}
           chips={chips}
           comment={comment}
-          isSubmitting={isSubmitting}
           onToggleChip={toggleChip}
           onCommentChange={setComment}
           onSubmit={submit}

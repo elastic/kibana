@@ -40,10 +40,9 @@ interface FeedbackModalProps {
   vote: 'up' | 'down';
   chips: string[];
   comment: string;
-  isSubmitting: boolean;
   onToggleChip: (chip: string) => void;
   onCommentChange: (value: string) => void;
-  onSubmit: () => Promise<void>;
+  onSubmit: () => void;
   onClose: () => void;
 }
 
@@ -51,7 +50,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   vote,
   chips,
   comment,
-  isSubmitting,
   onToggleChip,
   onCommentChange,
   onSubmit,
@@ -78,16 +76,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} isDisabled={isSubmitting}>
-          {labels.cancel}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          isLoading={isSubmitting}
-          isDisabled={isSubmitting}
-          onClick={onSubmit}
-          data-test-subj="roundFeedbackSubmitButton"
-        >
+        <EuiButtonEmpty onClick={onClose}>{labels.cancel}</EuiButtonEmpty>
+        <EuiButton fill onClick={onSubmit} data-test-subj="roundFeedbackSubmitButton">
           {labels.submit}
         </EuiButton>
       </EuiModalFooter>

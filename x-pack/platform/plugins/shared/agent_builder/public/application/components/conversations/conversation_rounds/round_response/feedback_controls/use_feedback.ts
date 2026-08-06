@@ -6,8 +6,16 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useToasts } from '../../../../../hooks/use_toasts';
+
+const labels = {
+  submitError: i18n.translate('xpack.agentBuilder.feedbackControls.submitError', {
+    defaultMessage: 'Failed to save feedback, please try again',
+  }),
+};
 
 type Vote = 'up' | 'down' | null;
 
@@ -19,7 +27,6 @@ export interface FeedbackState {
   inviteVisible: boolean;
   submitted: boolean;
   submittedFading: boolean;
-  isSubmitting: boolean;
 }
 
 export interface UseFeedbackReturn extends FeedbackState {
@@ -29,7 +36,7 @@ export interface UseFeedbackReturn extends FeedbackState {
   openModal: () => void;
   closeModal: () => void;
   dismissInvite: () => void;
-  submit: () => Promise<void>;
+  submit: () => void;
 }
 
 const SUBMITTED_VISIBLE_MS = 2500;
@@ -41,6 +48,7 @@ export const useFeedback = (
 ): UseFeedbackReturn => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
+  const { addErrorToast } = useToasts();
   const [vote, setVoteState] = useState<Vote>(initialFeedback?.vote ?? null);
   const [chips, setChips] = useState<string[]>([]);
   const [comment, setCommentState] = useState('');
@@ -48,9 +56,7 @@ export const useFeedback = (
   const [inviteVisible, setInviteVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedFading, setSubmittedFading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Refs so callbacks always see latest values without re-creating
   const voteRef = useRef(vote);
   const chipsRef = useRef(chips);
   const commentRef = useRef(comment);
@@ -136,35 +142,41 @@ export const useFeedback = (
 
   const dismissInvite = useCallback(() => setInviteVisible(false), []);
 
-  const submit = useCallback(async () => {
+  const submit = useCallback(() => {
     const currentVote = voteRef.current;
     if (!currentVote || !conversationId) return;
-    setIsSubmitting(true);
-    try {
-      await conversationsService.submitRoundFeedback({
+
+    const currentChips = chipsRef.current;
+    const currentComment = commentRef.current;
+
+    setModalOpen(false);
+
+    conversationsService
+      .submitRoundFeedback({
         conversationId,
         roundId,
         vote: currentVote,
-        chips: chipsRef.current,
-        comment: commentRef.current,
-      });
-      setSubmitted(true);
-      setSubmittedFading(false);
-      setModalOpen(false);
+        chips: currentChips,
+        comment: currentComment,
+      })
+      .then(() => {
+        setSubmitted(true);
+        setSubmittedFading(false);
 
-      // After SUBMITTED_VISIBLE_MS, start fading; remove after fade completes
-      clearSubmittedTimers();
-      timer1Ref.current = setTimeout(() => {
-        setSubmittedFading(true);
-        timer2Ref.current = setTimeout(() => {
-          setSubmitted(false);
-          setSubmittedFading(false);
-        }, SUBMITTED_FADE_MS);
-      }, SUBMITTED_VISIBLE_MS);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [conversationId, conversationsService, roundId, clearSubmittedTimers]);
+        clearSubmittedTimers();
+        timer1Ref.current = setTimeout(() => {
+          setSubmittedFading(true);
+          timer2Ref.current = setTimeout(() => {
+            setSubmitted(false);
+            setSubmittedFading(false);
+          }, SUBMITTED_FADE_MS);
+        }, SUBMITTED_VISIBLE_MS);
+      })
+      .catch(() => {
+        addErrorToast({ title: labels.submitError });
+        reset();
+      });
+  }, [conversationId, conversationsService, roundId, clearSubmittedTimers, addErrorToast, reset]);
 
   return {
     vote,
@@ -174,7 +186,6 @@ export const useFeedback = (
     inviteVisible,
     submitted,
     submittedFading,
-    isSubmitting,
     setVote,
     toggleChip,
     setComment,
