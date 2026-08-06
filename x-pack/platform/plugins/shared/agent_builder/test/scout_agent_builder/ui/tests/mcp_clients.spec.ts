@@ -53,7 +53,7 @@ test.describe.skip(
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.openMcpClientCreate();
       await pageObjects.agentBuilder.fillMcpClientName(clientName);
-      await pageObjects.agentBuilder.selectMcpClientLogo();
+      await pageObjects.agentBuilder.selectMcpClientLogo('Claude');
       const clientId = await pageObjects.agentBuilder.submitMcpClientCreate();
       createdClientIds.push(clientId);
 
