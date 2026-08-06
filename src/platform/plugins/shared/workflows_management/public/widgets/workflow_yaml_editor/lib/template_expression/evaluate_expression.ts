@@ -13,7 +13,7 @@ import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
 // Create a liquid engine instance with the same configuration as the server.
-// Custom filters (json_parse, entries, pick) are registered inside createWorkflowLiquidEngine.
+// Custom filters (json_parse, entries, pick, chunk) are registered inside createWorkflowLiquidEngine.
 const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: true, // Match server-side behavior - error on unknown filters
   strictVariables: false,

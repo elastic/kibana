@@ -142,4 +142,21 @@ export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
       paths.filter((path): path is string => typeof path === 'string')
     );
   });
+
+  // Splits an array into consecutive groups of at most `size` items, so a `foreach` can
+  // iterate batches instead of single items
+  engine.registerFilter('chunk', (value: unknown, size: unknown): unknown => {
+    if (!Array.isArray(value)) {
+      return value;
+    }
+    const groupSize = Math.floor(Number(size));
+    if (!Number.isFinite(groupSize) || groupSize < 1) {
+      return value.length > 0 ? [value] : [];
+    }
+    const groups: unknown[][] = [];
+    for (let index = 0; index < value.length; index += groupSize) {
+      groups.push(value.slice(index, index + groupSize));
+    }
+    return groups;
+  });
 };
