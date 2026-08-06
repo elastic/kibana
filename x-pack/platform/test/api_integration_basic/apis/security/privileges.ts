@@ -404,6 +404,8 @@ export default function ({ getService }: FtrProviderContext) {
               'blocklist_read',
               'endpoint_exceptions_all',
               'endpoint_exceptions_read',
+              'custom_yara_signatures_all',
+              'custom_yara_signatures_read',
               'endpoint_list_all',
               'endpoint_list_read',
               'event_filters_all',
