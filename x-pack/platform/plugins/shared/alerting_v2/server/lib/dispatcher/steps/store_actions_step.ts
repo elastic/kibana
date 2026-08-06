@@ -6,19 +6,17 @@
  */
 
 import { inject, injectable } from 'inversify';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../../resources/datastreams/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
-  NotificationGroup,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { getUnmatchedEpisodes } from './unmatched_episodes';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -29,14 +27,7 @@ export class StoreActionsStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const {
-      suppressed = [],
-      throttled = [],
-      dispatch = [],
-      dispatchable = [],
-      policies,
-      rules,
-    } = state;
+    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [], policies } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
 
@@ -50,8 +41,6 @@ export class StoreActionsStep implements DispatcherStep {
     }
 
     const now = new Date();
-    const spaceIdForEpisode = (episode: AlertEpisode) =>
-      rules?.get(episode.rule_id)?.spaceId ?? 'default';
 
     await this.storageService.bulkIndexDocs<AlertAction>({
       index: ALERT_ACTIONS_DATA_STREAM,
@@ -62,7 +51,7 @@ export class StoreActionsStep implements DispatcherStep {
             actionType: 'suppress',
             now,
             reason: episode.reason,
-            spaceId: spaceIdForEpisode(episode),
+            spaceId: episode.space_id,
           })
         ),
         ...throttled.flatMap((group) =>
@@ -72,7 +61,7 @@ export class StoreActionsStep implements DispatcherStep {
               actionType: 'suppress',
               now,
               reason: `suppressed by throttled policy ${group.policyId}`,
-              spaceId: spaceIdForEpisode(episode),
+              spaceId: episode.space_id,
             })
           )
         ),
@@ -83,23 +72,23 @@ export class StoreActionsStep implements DispatcherStep {
               actionType: 'fire',
               now,
               reason: `dispatched by policy ${group.policyId}`,
-              spaceId: spaceIdForEpisode(episode),
+              spaceId: episode.space_id,
             })
           )
         ),
         ...dispatch.map((group) => {
           const groupingMode = policies?.get(group.policyId)?.groupingMode ?? 'per_episode';
           const firstEpisode = group.episodes[0];
-          const spaceId = firstEpisode ? spaceIdForEpisode(firstEpisode) : 'default';
+          const spaceId = firstEpisode?.space_id ?? 'default';
           const action: AlertAction = {
             '@timestamp': now.toISOString(),
             actor: 'system',
             action_type: 'notified',
-            rule_id: firstEpisode?.rule_id ?? 'unknown',
+            rule_id: firstEpisode?.rule_id ?? null,
             group_hash: firstEpisode?.group_hash ?? 'unknown',
             last_series_event_timestamp: now.toISOString(),
-            notification_group_id: group.id,
-            source: 'internal',
+            action_group_id: group.id,
+            source: firstEpisode?.source,
             reason: `notified by policy ${group.policyId}`,
             space_id: spaceId,
           };
@@ -113,8 +102,8 @@ export class StoreActionsStep implements DispatcherStep {
             episode,
             actionType: 'unmatched',
             now,
-            reason: 'no matching notification policy',
-            spaceId: spaceIdForEpisode(episode),
+            reason: 'no matching action policy',
+            spaceId: episode.space_id,
           })
         ),
       ],
@@ -122,23 +111,6 @@ export class StoreActionsStep implements DispatcherStep {
 
     return { type: 'continue' };
   }
-}
-
-function getUnmatchedEpisodes(
-  dispatchable: readonly AlertEpisode[],
-  dispatch: readonly NotificationGroup[],
-  throttled: readonly NotificationGroup[]
-): AlertEpisode[] {
-  const handledEpisodeKeys = new Set<string>();
-  for (const group of [...dispatch, ...throttled]) {
-    for (const episode of group.episodes) {
-      handledEpisodeKeys.add(`${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`);
-    }
-  }
-
-  return dispatchable.filter(
-    (ep) => !handledEpisodeKeys.has(`${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`)
-  );
 }
 
 function toAction({
@@ -161,7 +133,7 @@ function toAction({
     actor: 'system',
     action_type: actionType,
     rule_id: episode.rule_id,
-    source: 'internal',
+    source: episode.source,
     reason,
     space_id: spaceId,
   };

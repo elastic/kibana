@@ -9,13 +9,16 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
+import { commaCompleteItem, newLineAndPipeCompleteItems } from '../complete_items';
 import type { ICommandCallbacks } from '../types';
 import type { ISuggestionItem, ICommandContext } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
-import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
+import {
+  endsWithComma as textEndsWithComma,
+  endsWithWhitespace,
+} from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -36,8 +39,8 @@ export async function autocomplete(
 
   const hasField = commandArgs.length >= 1;
   const hasPatterns = commandArgs.length >= 2;
-  const endsWithSpace = /\s$/.test(innerText);
-  const endsWithComma = TRAILING_COMMA_REGEX.test(innerText);
+  const endsWithSpace = endsWithWhitespace(innerText);
+  const endsWithComma = textEndsWithComma(innerText);
 
   // No field yet OR still typing field name (no patterns and no trailing space) - suggest field names
   if (!hasField || (hasField && !hasPatterns && !endsWithSpace)) {
@@ -75,10 +78,7 @@ export async function autocomplete(
 
   // Has at least one pattern - suggest pipe or comma for more patterns
   if (hasPatterns) {
-    return [
-      withAutoSuggest(pipeCompleteItem),
-      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
-    ];
+    return [...newLineAndPipeCompleteItems, withAutoSuggest({ ...commaCompleteItem, text: ', ' })];
   }
 
   return [];

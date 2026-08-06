@@ -13,11 +13,11 @@ import type {
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID } from '../../../../common/constants';
 import type { EntityAttachment } from './types';
 import { isFlyoutCapableIdentifierType } from './types';
 import { normaliseEntityAttachment } from './payload';
@@ -28,6 +28,8 @@ import {
   navigateToEntityAnalyticsWithFlyoutInApp,
   type SecurityAgentBuilderChrome,
 } from '../entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from '../entity_analytics_agent_navigation_context';
+import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.entity.label',
@@ -98,6 +100,7 @@ export const createEntityAttachmentDefinition = ({
   chrome,
   resolveSecurityCanvasContext,
   searchSession,
+  uiSettings,
 }: {
   experimentalFeatures: ExperimentalFeatures;
   application?: ApplicationStart;
@@ -105,7 +108,12 @@ export const createEntityAttachmentDefinition = ({
   chrome?: SecurityAgentBuilderChrome;
   resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
+  uiSettings?: IUiSettingsClient;
 }): AttachmentUIDefinition<EntityAttachment> => {
+  const getIsNewFlyoutEnabled = (): boolean =>
+    !experimentalFeatures.newFlyoutSystemDisabled &&
+    (uiSettings?.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false);
+
   const baseDefinition: AttachmentUIDefinition<EntityAttachment> = {
     getLabel: (attachment) => {
       const customLabel = attachment?.data?.attachmentLabel;
@@ -117,14 +125,21 @@ export const createEntityAttachmentDefinition = ({
     },
     getIcon: () => 'user',
     renderInlineContent: (props) => (
-      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
-        <LazyEntityAttachmentInlineContent
-          {...props}
-          experimentalFeatures={experimentalFeatures}
-          application={application}
-          searchSession={searchSession}
-        />
-      </React.Suspense>
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={props.openSidebarConversation}
+        searchSession={searchSession}
+        isNewFlyoutEnabled={getIsNewFlyoutEnabled()}
+      >
+        <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+          <LazyEntityAttachmentInlineContent
+            {...props}
+            experimentalFeatures={experimentalFeatures}
+          />
+        </React.Suspense>
+      </EntityAnalyticsAgentNavigationProvider>
     ),
   };
 
@@ -138,28 +153,40 @@ export const createEntityAttachmentDefinition = ({
   return {
     ...baseDefinition,
     canvasWidth: ENTITY_CANVAS_WIDTH,
-    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
-      <React.Suspense
-        fallback={
-          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>, { closeCanvas }) => (
+      <EntityAnalyticsAgentNavigationProvider
+        application={resolvedApplication}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={props.openSidebarConversation}
+        searchSession={searchSession}
+        isNewFlyoutEnabled={getIsNewFlyoutEnabled()}
+        closeCanvas={closeCanvas}
       >
-        <LazyEntityAttachmentCanvasContent
-          {...props}
-          experimentalFeatures={experimentalFeatures}
-          application={resolvedApplication}
-          agentBuilder={agentBuilder}
-          chrome={chrome}
-          resolveSecurityCanvasContext={resolvedResolveCanvasContext}
-          searchSession={searchSession}
-        />
-      </React.Suspense>
+        <React.Suspense
+          fallback={
+            <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 200 }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <LazyEntityAttachmentCanvasContent
+            {...props}
+            experimentalFeatures={experimentalFeatures}
+            resolveSecurityCanvasContext={resolvedResolveCanvasContext}
+          />
+        </React.Suspense>
+      </EntityAnalyticsAgentNavigationProvider>
     ),
-    getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
+    getActionButtons: ({
+      attachment,
+      isCanvas,
+      openCanvas,
+      openSidebarConversation,
+      closeCanvas,
+    }) => {
       const parsed = normaliseEntityAttachment(attachment);
       if (!parsed || !parsed.isSingle) {
         return [];
@@ -175,6 +202,7 @@ export const createEntityAttachmentDefinition = ({
             icon: 'popout',
             type: ActionButtonType.SECONDARY,
             handler: () => {
+              closeCanvas?.();
               const rightPanel = buildEntityRightPanel(identifier);
               if (rightPanel) {
                 navigateToEntityAnalyticsWithFlyoutInApp({
@@ -185,6 +213,7 @@ export const createEntityAttachmentDefinition = ({
                   chrome,
                   openSidebarConversation,
                   searchSession,
+                  isNewFlyoutEnabled: getIsNewFlyoutEnabled(),
                 });
                 return;
               }

@@ -161,6 +161,49 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema
   ) satisfies z.Schema<DissectProcessor>;
 
 /**
+ * URI parts processor
+ */
+
+export interface UriPartsProcessor extends ProcessorBaseWithWhere {
+  action: 'uri_parts';
+  from: string;
+  to?: string;
+  keep_original?: boolean;
+  remove_if_successful?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const uriPartsProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('uri_parts'),
+    from: StreamlangSourceField.describe('Source field holding the URI string to parse'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe(
+        'Target field / column prefix for the extracted URI components (defaults to "url"). ' +
+          'May equal `from` — the canonical ECS shape parses the `url` field in place. ' +
+          'Note: combining `to === from` with `remove_if_successful: true` nulls the parsed ' +
+          'object after writing it.'
+      ),
+    keep_original: z
+      .optional(z.boolean())
+      .describe(
+        'If true (default), preserve the original URI string alongside the extracted parts'
+      ),
+    remove_if_successful: z
+      .optional(z.boolean())
+      .describe(
+        'If true, remove the source field after a successful parse. Source field is kept on failure.'
+      ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'URI parts processor - Parse a URI into components (scheme, domain, port, path, query, fragment, ...)'
+  ) satisfies z.Schema<UriPartsProcessor>;
+
+/**
  * Date processor
  */
 
@@ -745,11 +788,99 @@ export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
   override: z.optional(z.boolean()),
 }) satisfies z.Schema<EnrichProcessor>;
 
+/**
+ * User agent processor
+ */
+
+export const userAgentProperties = ['name', 'os', 'device', 'original', 'version'] as const;
+
+export type UserAgentProperty = (typeof userAgentProperties)[number];
+
+export interface UserAgentProcessor extends ProcessorBaseWithWhere {
+  action: 'user_agent';
+  from: string;
+  to?: string;
+  regex_file?: string;
+  properties?: UserAgentProperty[];
+  extract_device_type?: boolean;
+  ignore_missing?: boolean;
+}
+
+export const userAgentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('user_agent'),
+    from: StreamlangSourceField.describe('The field containing the user agent string'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('The field that will be filled with the user agent details'),
+    regex_file: z
+      .optional(NonEmptyString)
+      .describe(
+        'Custom regex file name containing the regular expressions for parsing the user agent string'
+      ),
+    properties: z
+      .optional(z.array(z.enum(userAgentProperties)))
+      .describe('Specific properties to extract (defaults to all)'),
+    extract_device_type: z
+      .optional(z.boolean())
+      .describe('Extracts device type from the user agent string'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .refine(
+    (obj) => {
+      const target = obj.to ?? 'user_agent';
+      return (
+        !obj.where ||
+        (obj.where && isAlwaysCondition(obj.where)) ||
+        (obj.where && Boolean(target) && obj.from !== target)
+      );
+    },
+    {
+      message:
+        'User agent processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  )
+  .describe(
+    'User agent processor - Extract browser, OS, and device details from a user agent string'
+  ) satisfies z.Schema<UserAgentProcessor>;
+
+/**
+ * Registered domain processor
+ */
+
+export interface RegisteredDomainProcessor extends ProcessorBaseWithWhere {
+  action: 'registered_domain';
+  expression: string;
+  prefix: string;
+  ignore_missing?: boolean;
+}
+
+export const registeredDomainSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('registered_domain'),
+    expression: StreamlangSourceField.describe(
+      'The string expression containing the FQDN to parse'
+    ),
+    prefix: NonEmptyString.describe(
+      'The prefix for the output columns. The extracted parts are available as prefix.part_name'
+    ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when expression field is missing'),
+  })
+  .describe(
+    'Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN'
+  ) satisfies z.Schema<RegisteredDomainProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | DropDocumentProcessor
   | GrokProcessor
+  | UriPartsProcessor
   | MathProcessor
   | RenameProcessor
   | SetProcessor
@@ -769,11 +900,14 @@ export type StreamlangProcessorDefinition =
   | NetworkDirectionProcessor
   | JsonExtractProcessor
   | EnrichProcessor
+  | UserAgentProcessor
+  | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
+  uriPartsProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
   mathProcessorSchema,
@@ -795,6 +929,8 @@ export const streamlangProcessorSchema = z.union([
   networkDirectionProcessorSchema,
   jsonExtractProcessorSchema,
   enrichProcessorSchema,
+  userAgentProcessorSchema,
+  registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -809,6 +945,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     renameProcessorSchema,
     grokProcessorSchema,
     dissectProcessorSchema,
+    uriPartsProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
     redactProcessorSchema,
@@ -816,6 +953,8 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     splitProcessorSchema,
     jsonExtractProcessorSchema,
     enrichProcessorSchema,
+    userAgentProcessorSchema,
+    registeredDomainSchema,
   ])
 );
 

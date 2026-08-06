@@ -36,6 +36,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
+  /**
+   * Purpose: Dashboard permissions test
+   *
+   * Migration: Migrate to scout
+   */
   // Failing: See https://github.com/elastic/kibana/issues/257665
   describe.skip('dashboard feature controls security', () => {
     before(async () => {
@@ -106,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.existOrFail('newItemButton');
+        await dashboard.expectCreateButtonExists();
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -288,7 +293,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.missingOrFail('newItemButton');
+        await dashboard.expectCreateButtonMissing();
       });
 
       it(`shows read-only badge`, async () => {
@@ -396,7 +401,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
-        await testSubjects.missingOrFail('newItemButton');
+        await dashboard.expectCreateButtonMissing();
       });
 
       it(`shows read-only badge`, async () => {

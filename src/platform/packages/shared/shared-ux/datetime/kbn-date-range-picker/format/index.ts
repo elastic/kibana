@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { durationToDisplayShortText } from './format_duration';
+export { durationToDisplayShortText, durationToDisplayFullText } from './format_duration';
 export {
   applyTimePrecision,
   dateMathToRelativeParts,

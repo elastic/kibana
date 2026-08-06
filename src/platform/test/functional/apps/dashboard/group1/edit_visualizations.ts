@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const createVegaVis = async (title?: string) => {
-    await dashboardAddPanel.clickAddCustomVisualization();
+    await dashboardAddPanel.clickAddVega();
     await fillSpecAndGo(getTestSpec());
 
     await visChart.waitForVisualizationRenderingStabilized();

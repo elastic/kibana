@@ -4,74 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  coreFeatureFlagsMock,
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { getRulesClientMockParams } from '../../../../test_utils';
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
 const alertsService = alertsServiceMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-  taskManager,
-  ruleTypeRegistry,
-  unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
+
+const { rulesClientParams, taskManager, auditLogger } = getRulesClientMockParams({
+  kibanaVersion,
   createAPIKey: createAPIKeyMock,
   logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
   alertsService,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  isSystemAction: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 describe('bulkUntrackAlerts()', () => {
   let rulesClient: RulesClient;

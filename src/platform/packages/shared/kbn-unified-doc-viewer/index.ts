@@ -23,4 +23,6 @@ export {
   useDocViewerSpanLogViewedEvent,
   useDocViewerTabViewedEvent,
   useDocViewerViewedEvent,
+  FieldActionsProvider,
+  useUIFieldActions,
 } from './src';

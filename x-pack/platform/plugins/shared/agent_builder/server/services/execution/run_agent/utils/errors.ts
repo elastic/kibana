@@ -10,6 +10,7 @@ import {
   isToolValidationError,
   isContextLengthExceededError,
 } from '@kbn/inference-common/src/chat_complete/errors';
+import { isInferenceProviderError, isInferenceRequestError } from '@kbn/inference-common';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import {
@@ -22,28 +23,6 @@ const recoverableErrorCodes = [
   ErrCodes.toolValidationError,
   ErrCodes.emptyResponse,
 ];
-
-/** Matches "Status code: xxx" in connector error messages */
-const CONNECTOR_STATUS_CODE_REGEXP = /Status code: ([0-9]{3})/i;
-/** Matches "status [xxx]" in ES inference API error messages */
-const INFERENCE_STATUS_CODE_REGEXP = /status \[([0-9]{3})\]/i;
-
-/**
- * Parses connector error messages and returns the HTTP status code when present
- * (4xx, 5xx) so it can be propagated to the client.
- */
-const parseConnectorStatusCode = (message: string): number | null => {
-  if (!message.includes('Error calling connector:')) {
-    return null;
-  }
-  const match =
-    CONNECTOR_STATUS_CODE_REGEXP.exec(message) ?? INFERENCE_STATUS_CODE_REGEXP.exec(message);
-  if (!match) {
-    return null;
-  }
-  const statusCode = parseInt(match[1], 10);
-  return statusCode >= 400 && statusCode < 600 ? statusCode : null;
-};
 
 /**
  * Converts an error which occurred during the execution of the agent to our error format,
@@ -65,11 +44,13 @@ export const convertError = (error: Error): AgentBuilderAgentExecutionError => {
   } else if (isContextLengthExceededError(error)) {
     return createAgentExecutionError(error.message, ErrCodes.contextLengthExceeded, {});
   }
-  const connectorStatusCode = parseConnectorStatusCode(error.message);
-  if (connectorStatusCode !== null) {
-    return createAgentExecutionError(error.message, ErrCodes.connectorError, {
-      statusCode: connectorStatusCode,
-    });
+  if (isInferenceProviderError(error) || isInferenceRequestError(error)) {
+    const status = error.meta?.status;
+    if (typeof status === 'number' && status >= 400 && status < 600) {
+      return createAgentExecutionError(error.message, ErrCodes.connectorError, {
+        statusCode: status,
+      });
+    }
   }
   return createAgentExecutionError(error.message, ErrCodes.unknownError, {});
 };

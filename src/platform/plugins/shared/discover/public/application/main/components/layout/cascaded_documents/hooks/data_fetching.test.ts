@@ -184,6 +184,59 @@ describe('data_fetching related hooks', () => {
       expect(result.current.columnTypes.get('ext')).toBe('array');
     });
 
+    it('should package scalar string aggregation values into arrays', () => {
+      const mockRows = createMockRows([{ category: 'A', count: 10, host: 'host-1' }]);
+
+      const queryMetaWithStringValues: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'host', aggregation: 'values' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: queryMetaWithStringValues,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.host).toEqual(['host-1']);
+      expect(result.current.columnTypes.get('host')).toBe('array');
+    });
+
+    it('should concatenate scalar string aggregation values across rows in the same group', () => {
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, host: 'host-1' },
+        { category: 'A', count: 5, host: 'host-2' },
+      ]);
+
+      const queryMetaWithStringValues: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'host', aggregation: 'values' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: queryMetaWithStringValues,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.host).toEqual(['host-1', 'host-2']);
+      expect(result.current.columnTypes.get('host')).toBe('array');
+    });
+
     it('should resolve esql variable for group key', () => {
       const mockRows = createMockRows([
         { actualField: 'X', count: 10 },
@@ -224,9 +277,11 @@ describe('data_fetching related hooks', () => {
         availableCascadeGroups: ['category'],
         selectedCascadeGroups: ['category'],
         cascadedDocumentsFetcher: createMockFetcher(),
+        cascadedColumnsMeta: {},
         esqlQuery,
         esqlVariables: undefined,
         timeRange: undefined,
+        isApproximate: false,
         viewModeToggle: undefined,
         expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
         expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
@@ -337,7 +392,30 @@ describe('data_fetching related hooks', () => {
           esqlVariables: contextValue.esqlVariables,
           timeRange: contextValue.timeRange,
           dataView,
+          isApproximate: contextValue.isApproximate,
         });
+      });
+
+      it('forwards isApproximate from the context so drill-downs match the active search mode', async () => {
+        const mockRow = createMockRowData();
+        const { Wrapper, contextValue } = createWrapper({ isApproximate: true });
+        const dataView = dataViewWithTimefieldMock;
+
+        const { result } = renderHook(() => useDataCascadeRowExpansionHandlers({ dataView }), {
+          wrapper: Wrapper,
+        });
+
+        await act(async () => {
+          await result.current.onCascadeLeafNodeExpanded({
+            row: mockRow,
+            nodePath: ['category'],
+            nodePathMap: { category: 'A' },
+          });
+        });
+
+        expect(contextValue.cascadedDocumentsFetcher.fetchCascadedDocuments).toHaveBeenCalledWith(
+          expect.objectContaining({ isApproximate: true })
+        );
       });
     });
 

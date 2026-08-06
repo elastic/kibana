@@ -16,6 +16,7 @@
       "cloud",
       "data",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "dataViews",
       "dataVisualizer",
       "discover",
@@ -49,7 +50,8 @@
       "observabilityAIAssistant",
       "usageCollection",
       "cases",
-      "cps"
+      "cps",
+      "agentBuilder"
     ],
     "requiredBundles": [
       "cases",

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -57,8 +57,16 @@ describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
+  // Spy-able activity writer so the `.cases-activity` mirror assertions
+  // below can inspect the fire-and-forget dispatches. `jest.resetAllMocks`
+  // in `beforeEach` clears call state between tests.
+  const analyticsV2ActivityWriter = {
+    upsertAction: jest.fn(),
+    bulkUpsertActions: jest.fn(),
+    bulkDeleteActionsByCaseIds: jest.fn(),
+    bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+  };
 
   let persister: UserActionPersister;
 
@@ -72,9 +80,9 @@ describe('UserActionPersister', () => {
     persister = new UserActionPersister({
       log: mockLogger,
       unsecuredSavedObjectsClient,
-      persistableStateAttachmentTypeRegistry,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
+      analyticsV2ActivityWriter,
     });
   });
 
@@ -109,6 +117,71 @@ describe('UserActionPersister', () => {
   });
 
   const testUser = { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' };
+
+  describe('cases-analytics v2 activity mirror', () => {
+    it('mirrors a single created user action to the activity writer', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        attributes: createUserActionSO(),
+        id: 'ua-1',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        references: [],
+      });
+
+      await persister.createUserAction(getRequest());
+
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledTimes(1);
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'ua-1' })
+      );
+    });
+
+    it('mirrors only the successfully-persisted entries on bulk create', async () => {
+      // One success, one per-item failure (409). The failed entry must be
+      // excluded so we never mirror a doc that wasn't actually persisted —
+      // reconciliation can't repair that (a never-persisted user action has
+      // no SO to walk).
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: createUserActionSO(),
+            id: 'ua-ok',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+          // A per-item failure has `error` and no `attributes`/`references`;
+          // cast to the response element type since the SO API's typed
+          // shape doesn't model the error variant inline.
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).toHaveBeenCalledTimes(1);
+      const mirrored = analyticsV2ActivityWriter.bulkUpsertActions.mock.calls[0][0];
+      expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['ua-ok']);
+    });
+
+    it('does not dispatch to the activity writer when every bulk entry errored', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
+    });
+  });
 
   describe('Decoding requests', () => {
     describe('createUserAction', () => {
@@ -358,6 +431,43 @@ describe('UserActionPersister', () => {
       });
     });
 
+    it('suppresses the customFields user action when templates v2 mirrors the edit into extended_fields', () => {
+      // Reproduces the reported bug: replace_custom_field.ts / bulk_update.ts write customFields
+      // and its mirrored extended_fields value in the same patch when templates are enabled.
+      // Both keys land in updatedAttributes, but only one activity-log entry should surface —
+      // extended_fields is what templates v2 renders and already reflects the customFields value.
+      const combinedRequest = {
+        cases: [
+          {
+            ...patchUpdateCustomFieldsCasesRequest.cases[0],
+            updatedAttributes: {
+              ...patchUpdateCustomFieldsCasesRequest.cases[0].updatedAttributes,
+              extended_fields: { risk_score: 'high' },
+            },
+          },
+        ],
+      };
+
+      expect(
+        persister.buildUserActions({
+          updatedCases: combinedRequest,
+          user: testUser,
+        })
+      ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+    });
+
+    it('still creates the customFields user action when extended_fields did not also change', () => {
+      // customFields-only updates (templates disabled, or a field with no migrated global-field
+      // counterpart) must be unaffected — extended_fields is absent from the patch in that case.
+      const result = persister.buildUserActions({
+        updatedCases: patchUpdateCustomFieldsCasesRequest,
+        user: testUser,
+      });
+
+      expect(result['1']).toHaveLength(1);
+      expect(result['1'][0].parameters.attributes.type).toBe('customFields');
+    });
+
     describe('template', () => {
       it('creates a user action when a template is applied', () => {
         expect(
@@ -375,6 +485,33 @@ describe('UserActionPersister', () => {
             user: testUser,
           })
         ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
+      });
+
+      it('records the resolved template name on the applied-template user action', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+            templateNamesByKey: new Map([['tmpl-1@3', 'My Template']]),
+          })
+        ).toEqual(
+          getTemplateUserActions({
+            isMock: false,
+            payload: { id: 'tmpl-1', version: 3, name: 'My Template' },
+          })
+        );
+      });
+
+      it('does not record a name when only a different version of the template id is resolved', () => {
+        // The applied version is 3; a name keyed to another version must not leak in, since names
+        // can change across versions and the payload must snapshot the applied version's name.
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+            templateNamesByKey: new Map([['tmpl-1@2', 'Old Name']]),
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
       });
     });
 

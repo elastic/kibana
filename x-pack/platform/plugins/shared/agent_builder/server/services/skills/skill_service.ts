@@ -73,8 +73,8 @@ class SkillServiceImpl implements SkillService {
   private readonly skillFullPaths: Set<string> = new Set();
 
   /**
-   * Promise chain used to serialize dynamic registration / unregistration
-   * so that the async validate-then-mutate sequence is atomic.
+   * Promise chain used to serialize dynamic registration so that the async
+   * validate-then-mutate sequence is atomic.
    */
   private mutationQueue: Promise<unknown> = Promise.resolve();
 
@@ -128,15 +128,43 @@ class SkillServiceImpl implements SkillService {
         });
         const toolRegistry = await getToolRegistry({ request });
         const soClient = savedObjects.getScopedClient(request);
-        const experimentalFeaturesEnabled = await uiSettings
-          .asScopedToClient(soClient)
-          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+        const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+        const globalUiSettingsClient = uiSettings.globalAsScopedToClient(soClient);
+        const uiSettingKeys = [
+          ...new Set(
+            [...this.skills.values()]
+              .filter((skill) => skill.uiSettingRequired)
+              .map((skill) =>
+                typeof skill.uiSettingRequired === 'string'
+                  ? skill.uiSettingRequired
+                  : skill.uiSettingRequired!.key
+              )
+          ),
+        ];
+        const [experimentalFeaturesEnabled, namespaceSettingValues, globalSettingValues] =
+          await Promise.all([
+            uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
+            Promise.all(uiSettingKeys.map((key) => uiSettingsClient.get(key))),
+            Promise.all(uiSettingKeys.map((key) => globalUiSettingsClient.get(key))),
+          ]);
+        // Use the namespace value when it is explicitly defined; otherwise fall back
+        // to the global-scoped value so skills can gate on global settings.
+        const uiSettingValues = new Map(
+          uiSettingKeys.map((key, index) => {
+            const namespaceValue = namespaceSettingValues[index];
+            return [
+              key,
+              namespaceValue !== undefined ? namespaceValue : globalSettingValues[index],
+            ];
+          })
+        );
 
         return createSkillRegistry({
           builtinProvider,
           persistedProvider,
           toolRegistry,
           experimentalFeaturesEnabled,
+          uiSettingValues,
         });
       },
       registerSkill: (skill) => {

@@ -20,6 +20,7 @@ import { IndicesCheckContext } from './contexts/indices_check_context';
 import { useIndicesCheck } from './hooks/use_indices_check';
 import { useResultsRollup } from './hooks/use_results_rollup';
 import { ilmPhaseOptionsStatic, EMPTY_STAT } from './constants';
+import { ilmPhasesFromSelectedOptions } from './utils/ilm_phases_from_selected_options';
 import { DataQualitySummary } from './data_quality_summary';
 import { DataQualityDetails } from './data_quality_details';
 
@@ -104,7 +105,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [toasts]
   );
   const ilmPhases: string[] = useMemo(
-    () => selectedIlmPhaseOptions.map(({ label }) => label),
+    () => ilmPhasesFromSelectedOptions(selectedIlmPhaseOptions),
     [selectedIlmPhaseOptions]
   );
 

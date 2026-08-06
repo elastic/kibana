@@ -27,11 +27,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
+import type { Module, RecognizeModuleResult } from '@kbn/ml-common-types/modules';
 import {
   usePermissionCheck,
   createPermissionFailureMessage,
 } from '../../capabilities/check_capabilities';
-import type { Module, RecognizeModuleResult } from '../../../../common/types/modules';
 import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';

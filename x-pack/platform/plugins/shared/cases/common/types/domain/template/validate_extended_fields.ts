@@ -5,18 +5,36 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
-import type { FieldSchema } from './fields';
-import { FieldType } from './fields';
+import type { InlineField, RefField } from './fields';
+import { FieldType, isInlineField, isDisplayOnlyField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
+import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
 
-type FieldSchemaType = z.infer<typeof FieldSchema>;
+// Lucene's keyword-term limit is measured in UTF-8 bytes, while string.length
+// counts UTF-16 code units and can undercount non-ASCII input.
+const textEncoder = new TextEncoder();
+
+export const validateExtendedFieldValueSizes = (
+  extendedFields: Record<string, string>
+): string[] => {
+  const errors: string[] = [];
+
+  for (const [key, value] of Object.entries(extendedFields)) {
+    if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
+      errors.push(
+        `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    }
+  }
+
+  return errors;
+};
 
 const validatePattern = (
   label: string,
   value: string,
-  validation: FieldSchemaType['validation'],
+  validation: InlineField['validation'],
   errors: string[]
 ): void => {
   if (!validation?.pattern) return;
@@ -33,7 +51,7 @@ const validatePattern = (
 const validateLengthConstraints = (
   label: string,
   value: string,
-  validation: FieldSchemaType['validation'],
+  validation: InlineField['validation'],
   errors: string[]
 ): void => {
   if (validation?.min_length !== undefined && value.length < validation.min_length) {
@@ -47,7 +65,7 @@ const validateLengthConstraints = (
 const validateNumericConstraints = (
   label: string,
   value: string,
-  validation: FieldSchemaType['validation'],
+  validation: InlineField['validation'],
   errors: string[]
 ): void => {
   const num = Number(value);
@@ -92,7 +110,13 @@ const validateCheckboxGroupOptions = (
   }
 };
 
-const validateField = (field: FieldSchemaType, value: string, errors: string[]): void => {
+const validateToggleValue = (label: string, value: string, errors: string[]): void => {
+  if (value !== 'true' && value !== 'false') {
+    errors.push(`Field "${label}" must be either true or false`);
+  }
+};
+
+const validateField = (field: InlineField, value: string, errors: string[]): void => {
   const label = field.label ?? field.name;
 
   validatePattern(label, value, field.validation, errors);
@@ -115,41 +139,51 @@ const validateField = (field: FieldSchemaType, value: string, errors: string[]):
       (field.metadata as { options?: string[] })?.options ?? [],
       errors
     );
+  } else if (field.control === FieldType.TOGGLE) {
+    validateToggleValue(label, value, errors);
   }
 };
 
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,
-  fields: FieldSchemaType[]
+  fields: Array<RefField | InlineField>,
+  { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
 ): string[] => {
-  const errors: string[] = [];
+  let errors: string[] = [];
+  // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
+  // `extended_fields`, so they take no part in value/required validation. Dropping them here also
+  // ensures their snake key is treated as an unknown key if it is ever submitted.
+  const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
 
   // 1. Build valid key set
-  const validKeys = new Set(fields.map((f) => getFieldSnakeKey(f.name, f.type)));
+  const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
-  // 2. Unknown keys
+  // 2. Unknown keys + value-size backstop
   for (const key of Object.keys(extendedFields)) {
     if (!validKeys.has(key)) {
       errors.push(`Unknown extended field key: "${key}"`);
     }
   }
+  errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
 
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
   const fieldTypeMap: Record<string, string> = {};
-  for (const field of fields) {
+  for (const field of inlineFields) {
     fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
   }
 
   // 4. Per-field validation
-  for (const field of fields) {
+  for (const field of inlineFields) {
     const isHidden =
       field.display?.show_when != null &&
       !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
 
-    if (!isHidden) {
-      const value = fieldValues[field.name];
+    // In partial-update mode, skip fields not present in the request — the server
+    // merges them so an absent key retains its existing stored value.
+    const value = fieldValues[field.name];
+    if (!isHidden && !(partial && value === undefined)) {
       const isArrayField =
         field.control === FieldType.CHECKBOX_GROUP || field.control === FieldType.USER_PICKER;
       const isEmpty =
@@ -159,7 +193,8 @@ export const validateExtendedFields = (
         field.validation?.required === true ||
         (field.validation?.required_when
           ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
-          : false);
+          : false) ||
+        (onClose && field.validation?.required_on_close === true);
 
       if (isRequired && isEmpty) {
         errors.push(`Field "${field.label ?? field.name}" is required`);

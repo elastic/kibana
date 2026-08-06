@@ -25,7 +25,6 @@ import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
   MULTI_VALUE_CLICK_TRIGGER,
   CELL_VALUE_TRIGGER,
   ESQL_CONTROL_TRIGGER,
@@ -49,6 +48,7 @@ import {
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
   SECURITY_CELL_ACTIONS_ALERTS_COUNT,
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  FEATURED_ADD_PANEL_TRIGGER,
 } from '../common/trigger_ids';
 import type { Trigger } from './types';
 
@@ -117,6 +117,9 @@ export const triggers: { [key: string]: Trigger } = {
       defaultMessage: "A new action will appear to the dashboard's add panel menu",
     }),
   },
+  [FEATURED_ADD_PANEL_TRIGGER]: {
+    id: FEATURED_ADD_PANEL_TRIGGER,
+  },
   [ALERT_RULE_TRIGGER]: {
     id: ALERT_RULE_TRIGGER,
     title: i18n.translate('uiActions.triggers.dashboard.alertRule.title', {
@@ -172,15 +175,6 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.panelBadgeTrigger.description', {
       defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
-    }),
-  },
-  [PANEL_NOTIFICATION_TRIGGER]: {
-    id: PANEL_NOTIFICATION_TRIGGER,
-    title: i18n.translate('uiActions.triggers.panelNotificationTrigger.title', {
-      defaultMessage: 'Panel notifications',
-    }),
-    description: i18n.translate('uiActions.triggers.panelNotificationTrigger.description', {
-      defaultMessage: 'Actions appear in top-right corner of a panel.',
     }),
   },
   [MULTI_VALUE_CLICK_TRIGGER]: {

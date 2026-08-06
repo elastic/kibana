@@ -17,7 +17,7 @@ import { TestProvidersComponent } from '../../../../common/mock';
 import {
   EVENT_TITLE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 

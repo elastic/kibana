@@ -11,7 +11,6 @@ import type {
 } from '@kbn/core/server';
 import type { DataUsageConfigType } from './config';
 
-import { DataUsagePlugin } from './plugin';
 import type {
   DataUsageServerSetup,
   DataUsageServerStart,
@@ -35,5 +34,7 @@ export const plugin: PluginInitializer<
   DataUsageServerStart,
   DataUsageSetupDependencies,
   DataUsageStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<DataUsageConfigType>) =>
-  await new DataUsagePlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<DataUsageConfigType>) => {
+  const { DataUsagePlugin } = await import('./plugin');
+  return new DataUsagePlugin(pluginInitializerContext);
+};

@@ -60,6 +60,8 @@ export function SecuritySolutionEndpointRegistryHelpers() {
       const args: string[] = [
         '-v',
         `${packageRegistryConfig}:/package-registry/config.yml`,
+        '-e',
+        'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
         ...dockerArgs,
       ];
       return defineDockerServersConfig({

@@ -11,11 +11,9 @@ import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
-import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { SupportedDataType } from '../types';
 
-/** Matches a trailing comma (with optional whitespace) at end of text — used to detect "starting a new argument/expression" */
-export const TRAILING_COMMA_REGEX = /,\s*$/;
+export { getTrailingIdentifier } from './regex';
 
 export const techPreviewLabel = i18n.translate(
   'kbn-esql-language.esql.autocomplete.techPreviewLabel',
@@ -146,6 +144,10 @@ export function findPipeOutsideQuotes(text: string, start: number = 0): number {
   return -1;
 }
 
+export function getLastNonWhitespaceChar(text: string) {
+  return text[text.trimEnd().length - 1];
+}
+
 /**
  * Are we after a comma? i.e. STATS fieldA, <here>
  */
@@ -163,13 +165,6 @@ export function unescapeColumnName(columnName: string) {
     return columnName.slice(1, -1).replace(/``/g, '`');
   }
   return columnName;
-}
-
-/** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
-export function getTrailingIdentifier(text: string): string | undefined {
-  const match = text.match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
-
-  return match ? match[1] : undefined;
 }
 
 /**

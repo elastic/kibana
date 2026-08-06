@@ -9,6 +9,7 @@
 
 import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { resolveCollisionId } from '@kbn/human-readable-id';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
@@ -16,10 +17,10 @@ import type {
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
-import { resolveCollisionId } from '../../../../common/lib/import';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
@@ -34,6 +35,8 @@ type HttpError = IHttpFetchError<ResponseErrorBody>;
 export interface UpdateWorkflowParams {
   id: string;
   workflow: Partial<WorkflowDetailDto>;
+  /** Workflow definition from list/detail cache; used for enable/disable telemetry metadata. */
+  workflowDefinition?: Partial<WorkflowYaml> | null;
   isBulkAction?: boolean;
   bulkActionCount?: number;
   /**
@@ -46,10 +49,18 @@ export interface UpdateWorkflowParams {
 export interface PreflightImportResult {
   format: 'zip' | 'yaml';
   totalWorkflows: number;
-  conflicts: Array<{ id: string; existingName: string }>;
+  /** IDs of workflows that already exist in the index (including tombstones / cross-space). */
+  conflicts: string[];
   parseErrors: string[];
   workflows: WorkflowPreview[];
   rawWorkflows: Array<{ id: string; originalId: string; yaml: string }>;
+  /**
+   * True when the server-side conflict check could not be completed. The
+   * preview is still shown from the client-side parse, but the import button
+   * remains enabled with a non-blocking warning so the user is informed that
+   * conflicts were not verified and the import may fail.
+   */
+  conflictCheckFailed?: boolean;
 }
 
 export interface ImportWorkflowsResult {
@@ -61,7 +72,8 @@ export interface ImportWorkflowsParams {
   workflows: Array<{ id: string; originalId: string; yaml: string }>;
   overwrite?: boolean;
   generateNewIds?: boolean;
-  conflictIds: Array<{ id: string; existingName: string }>;
+  /** Existing workflow IDs that conflict with the ones being imported. */
+  conflictIds: string[];
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -152,6 +164,7 @@ export function useWorkflowActions() {
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
+        workflowDefinition: variables.workflowDefinition,
         hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: variables.isBulkAction ?? false,
@@ -168,6 +181,7 @@ export function useWorkflowActions() {
       telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
+        workflowDefinition: variables.workflowDefinition,
         hasValidationErrors: false,
         validationErrorCount: 0,
         isBulkAction: variables.isBulkAction ?? false,
@@ -253,7 +267,10 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useRunWorkflow<{ triggerTab?: WorkflowTriggerTab }>({
+  const runWorkflow = useRunWorkflow<{
+    triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
+  }>({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -265,6 +282,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: undefined,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
 
       // FIX: ensure workflow execution document is created at the end of the mutation
@@ -284,6 +302,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: errorObj,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
     },
   });
@@ -355,23 +374,32 @@ export function useWorkflowActions() {
   const preflightImportWorkflows = useMutation<PreflightImportResult, HttpError, { file: File }>({
     mutationKey: ['POST', 'workflows', '_import', 'preflight'],
     mutationFn: async ({ file }) => {
+      // Parse entirely on the client side — this is the source of truth for the
+      // preview table and must always succeed regardless of server availability.
       const clientResult = await parseImportFile(file);
 
-      let conflicts: PreflightImportResult['conflicts'] = [];
-      if (clientResult.workflowIds.length > 0) {
-        const conflictResponse = await api.mgetWorkflows({
-          ids: clientResult.workflowIds,
-          source: ['name'],
-        });
-        conflicts = conflictResponse
-          .map((w) => ({ id: w.id, existingName: w.name }))
-          .filter((w): w is { id: string; existingName: string } => w.existingName !== undefined);
+      // The conflict check is best-effort: if it fails for any reason we still
+      // show the preview and let the user proceed (the import itself will surface
+      // any collisions via a proper error). Never allow a conflict-check failure
+      // to prevent the preview from rendering.
+      let conflicts: string[] = [];
+      let conflictCheckFailed = false;
+      if (clientResult.rawWorkflows.length > 0) {
+        try {
+          const conflictResponse = await api.checkWorkflowIdConflicts({
+            workflows: clientResult.rawWorkflows.map(({ id, yaml }) => ({ id, yaml })),
+          });
+          conflicts = conflictResponse.existingIds;
+        } catch {
+          conflictCheckFailed = true;
+        }
       }
 
       return {
         format: clientResult.format,
         totalWorkflows: clientResult.totalWorkflows,
         conflicts,
+        conflictCheckFailed,
         parseErrors: clientResult.parseErrors,
         workflows: clientResult.workflows,
         rawWorkflows: clientResult.rawWorkflows,
@@ -395,7 +423,7 @@ export function useWorkflowActions() {
       let processedWorkflows: Array<{ id: string; yaml: string }>;
 
       if (generateNewIds) {
-        const conflictIdMapping = new Set(conflictIds.map((c) => c.id));
+        const conflictIdMapping = new Set(conflictIds);
         const idMapping = new Map<string, string>();
         for (const w of workflows) {
           const id = resolveCollisionId(w.id, conflictIdMapping, `workflow-${generateUuid()}`);

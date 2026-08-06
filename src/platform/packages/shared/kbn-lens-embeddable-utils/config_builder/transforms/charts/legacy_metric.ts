@@ -14,8 +14,10 @@ import type {
   TextBasedLayer,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
@@ -48,6 +50,7 @@ import {
   fromColorByValueLensStateToAPI,
   isAutoColor,
   isColorByValueAbsolute,
+  isColorByValuePalette,
 } from '../coloring';
 import { isEsqlTableTypeDataSource } from '../../utils';
 import { stripUndefined } from './utils';
@@ -61,15 +64,21 @@ function buildVisualizationState(config: LegacyMetricConfig): LegacyMetricVisual
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     accessor: ACCESSOR,
-    size: layer.metric.size,
-    titlePosition: layer.metric.labels?.alignment,
-    textAlign: layer.metric.values?.alignment,
+    ...(layer.metric.size ? { size: layer.metric.size } : {}),
+    ...(layer.metric.labels?.alignment ? { titlePosition: layer.metric.labels?.alignment } : {}),
+    ...(layer.metric.values?.alignment ? { textAlign: layer.metric.values?.alignment } : {}),
     ...(layer.metric.apply_color_to
       ? stripUndefined({
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
           palette:
             layer.metric.color && !isAutoColor(layer.metric.color)
-              ? fromColorByValueAPIToLensState(layer.metric.color)
+              ? // Legacy metric is always a single value with no data range, so a named
+                // palette colors it across an absolute range (useNumericRange = true).
+                fromColorByValueAPIToLensState(
+                  layer.metric.color,
+                  LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS,
+                  true
+                )
               : undefined,
         })
       : { colorMode: 'None' }),
@@ -130,7 +139,7 @@ function reverseBuildVisualizationState(
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
       const color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
-      if (isColorByValueAbsolute(color) || isAutoColor(color)) {
+      if (isColorByValueAbsolute(color) || isAutoColor(color) || isColorByValuePalette(color)) {
         props.metric.color = color;
       }
     }
@@ -189,6 +198,7 @@ export function fromAPItoLensState(
     visualizationType: 'lnsLegacyMetric',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,

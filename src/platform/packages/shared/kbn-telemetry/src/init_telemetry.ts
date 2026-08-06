@@ -9,6 +9,8 @@
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
 import { initMetrics } from '@kbn/metrics';
+import { context } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 
 import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
 import { buildOtelResources } from './build_otel_resources';
@@ -46,23 +48,31 @@ export const initTelemetry = (
   // resource.attributes.*
   const resource = buildOtelResources(serviceName);
 
+  // The context manager runs unconditionally (outside the telemetry.enabled gate) because the
+  // dedicated inference tracer provider needs context.active() for span parent-child propagation
+  // and baggage for inference context detection, even when global tracing is off.
+  const contextManager = new AsyncLocalStorageContextManager();
+  context.setGlobalContextManager(contextManager);
+  contextManager.enable();
+
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {
       maybeInitAutoInstrumentations();
+    }
+
+    // Synchronous: OtelAppender captures the global provider at construction; MeterProvider defers async resource attrs until first export.
+    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+      initMetrics({
+        resource,
+        metricsConfig: telemetryConfig.metrics,
+        monitoringCollectionConfig,
+      });
     }
 
     const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
     asyncSettled.then(() => {
       if (telemetryConfig.tracing.enabled) {
         initTracing({ resource, tracingConfig: telemetryConfig.tracing });
-      }
-
-      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-        initMetrics({
-          resource,
-          metricsConfig: telemetryConfig.metrics,
-          monitoringCollectionConfig,
-        });
       }
     });
   }

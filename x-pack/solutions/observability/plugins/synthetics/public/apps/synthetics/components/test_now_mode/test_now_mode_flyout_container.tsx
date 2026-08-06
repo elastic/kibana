@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTestFlyoutOpen } from './hooks/use_test_flyout_open';
 import { TestNowModeFlyout } from './test_now_mode_flyout';
 import { ManualTestRunMode } from './manual_test_run_mode/manual_test_run_mode';

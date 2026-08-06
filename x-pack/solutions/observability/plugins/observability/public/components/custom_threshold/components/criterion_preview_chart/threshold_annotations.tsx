@@ -56,7 +56,8 @@ export function ThresholdAnnotations({
           },
         }}
       />
-      {sortedThresholds.length === 2 && comparator === COMPARATORS.BETWEEN ? (
+      {sortedThresholds.length === 2 &&
+      (comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE) ? (
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}
@@ -78,7 +79,9 @@ export function ThresholdAnnotations({
           />
         </>
       ) : null}
-      {sortedThresholds.length === 2 && comparator === COMPARATORS.NOT_BETWEEN ? (
+      {sortedThresholds.length === 2 &&
+      (comparator === COMPARATORS.NOT_BETWEEN ||
+        comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE) ? (
         <>
           <RectAnnotation
             id={`${id}-lower-threshold`}

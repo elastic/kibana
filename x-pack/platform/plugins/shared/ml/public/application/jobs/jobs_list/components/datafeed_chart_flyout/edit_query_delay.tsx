@@ -18,9 +18,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { useMlApi } from '../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 
 const tooltipContent = i18n.translate(
   'xpack.ml.jobsList.datafeedChart.editQueryDelay.tooltipContent',

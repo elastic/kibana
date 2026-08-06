@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createServiceMapSkill } from './skills/service_map';
 import { createServiceMapAttachmentType } from './attachments/service_map';
 

@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
@@ -40,6 +41,7 @@ import {
   LAST_SEEN_COLUMN,
   RISK_SCORE_COLUMN,
   ACTIONS_COLUMN,
+  ADD_ENTITIES_TABLE_CAPTION,
 } from './translations';
 import {
   ADD_ENTITIES_SECTION_TEST_ID,
@@ -119,22 +121,26 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
           return (
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="expand"
-                  color="primary"
-                  aria-label={EXPAND_ENTITY_BUTTON}
-                  onClick={() => onEntityNameClick?.(entity)}
-                />
+                <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="expand"
+                    color="primary"
+                    aria-label={EXPAND_ENTITY_BUTTON}
+                    onClick={() => onEntityNameClick?.(entity)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="plus"
-                  color="primary"
-                  aria-label={ADD_ENTITY_BUTTON}
-                  onClick={() => onAddEntity(entity)}
-                  disabled={disabled || !!addingEntityId}
-                  isLoading={isThisEntityAdding}
-                />
+                <EuiToolTip content={ADD_ENTITY_BUTTON} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="plus"
+                    color="primary"
+                    aria-label={ADD_ENTITY_BUTTON}
+                    onClick={() => onAddEntity(entity)}
+                    disabled={disabled || !!addingEntityId}
+                    isLoading={isThisEntityAdding}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -242,6 +248,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         )}
         <EuiBasicTable
           data-test-subj={ADD_ENTITIES_TABLE_TEST_ID}
+          tableCaption={ADD_ENTITIES_TABLE_CAPTION}
           items={records}
           columns={columns}
           loading={isLoading}

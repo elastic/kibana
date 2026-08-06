@@ -113,19 +113,19 @@ export function compileTemplate(
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
 
-  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-
-  // Normalize multi-line double-quoted YAML scalars. The yaml package (unlike
-  // js-yaml) rejects literal newlines inside double-quoted strings. Values that
-  // were JSON-stringified and then had parameters resolved may contain actual
-  // newlines (doubled by handleMultilineStringFormatter). Apply YAML double-quoted
-  // folding semantics: N consecutive newlines become N-1 \n escape sequences,
-  // matching the output that js-yaml.load produced from the multi-line format.
-  compiledTemplate = compiledTemplate.replace(/"(?:[^"\\]|\\.)*"/gs, (match) =>
-    match.includes('\n')
+  // Must run before replaceRootLevelYamlVariables: yaml.stringify output may contain
+  // double-quoted scalars with literal newlines that the yaml parser rejects.
+  // The alternation skips YAML single-quoted scalars first (including any `"` they
+  // contain) so that a `"` inside e.g. `'user"name'` is never treated as a
+  // double-quote delimiter.
+  compiledTemplate = compiledTemplate.replace(/'(?:[^']|'')*'|"(?:[^"\\]|\\.)*"/gs, (match) => {
+    if (match[0] === "'") return match; // single-quoted scalar — no escaping needed
+    return match.includes('\n')
       ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
-      : match
-  );
+      : match;
+  });
+
+  compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
 
   try {
     const yamlFromCompiledTemplate = parse(compiledTemplate);
@@ -342,7 +342,7 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
     patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), () =>
-      val ? stringify(val) : ''
+      val ? stringify(val, { collectionStyle: 'block', lineWidth: 0 }) : ''
     );
   });
 

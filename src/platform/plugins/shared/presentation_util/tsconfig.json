@@ -29,7 +29,7 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/field-utils",
     "@kbn/core-ui-settings-browser",
-    "@kbn/utility-types",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

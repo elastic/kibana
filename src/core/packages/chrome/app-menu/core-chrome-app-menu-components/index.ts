@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppMenuComponent } from './src';
+export { AppMenuComponent, type AppMenuBreakpointSource } from './src';
 export { AppMenuItem } from './src';
 export { AppMenuActionButton } from './src';
 export { AppMenuOverflowButton } from './src';
@@ -22,12 +22,15 @@ export type {
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
+  AppMenuStaticItem,
 } from './src';
 
+export { APP_MENU_ITEM_LIMIT, APP_MENU_SHARE_ID } from './src';
+
 export {
-  APP_MENU_ITEM_LIMIT,
-  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-  APP_MENU_NOTIFICATION_INDICATOR_TOP,
+  APP_MENU_TEST_SUBJECTS,
+  getAppMenuItemTestSubj,
+  getAppMenuActionButtonTestSubj,
 } from './src';
 
 export {
@@ -40,4 +43,5 @@ export {
   getPopoverPanels,
   getPopoverActionItems,
   getIsSelectedColor,
+  hasNonGlobalStaticItems,
 } from './src';

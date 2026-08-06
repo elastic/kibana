@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
+import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
@@ -158,6 +159,27 @@ describe('generateExecutorFunction', () => {
         profileUid,
       });
     });
+
+    it('passes fetchOptions max_content_length to getAxiosInstanceWithAuth', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      await executor(
+        makeExecOptions({
+          subAction: 'testAction',
+          subActionParams: {},
+          fetchOptions: { max_content_length: 20 * 1024 * 1024 },
+        })
+      );
+
+      expect(mockGetAxiosInstanceWithAuth).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxContentLength: 20 * 1024 * 1024,
+        })
+      );
+    });
   });
 
   describe('unrecognized subAction', () => {
@@ -210,6 +232,92 @@ describe('generateExecutorFunction', () => {
       });
     });
 
+    it('includes content-length from Axios error response headers', async () => {
+      const error = new Error('maxContentLength size of 1048576 exceeded') as Error & {
+        response?: { headers?: Record<string, string> };
+      };
+      error.response = { headers: { 'content-length': '10485760' } };
+      mockHandler.mockRejectedValue(error);
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'maxContentLength size of 1048576 exceeded',
+        actionId: connectorId,
+        errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
+      });
+    });
+
+    it('uses action responseSizeHeader when extracting Axios error response size', async () => {
+      const error = new Error('maxContentLength size of 1048576 exceeded') as Error & {
+        request?: { res?: { headers?: Record<string, string> } };
+      };
+      error.request = { res: { headers: { 'x-resource-size': '2048' } } };
+      mockHandler.mockRejectedValue(error);
+
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: {
+            isTool: true,
+            input: {} as never,
+            responseSizeHeader: 'x-resource-size',
+            handler: mockHandler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'maxContentLength size of 1048576 exceeded',
+        actionId: connectorId,
+        errorMeta: { contentLengthBytes: 2048 },
+      });
+    });
+
+    it('merges connector-provided error metadata with Axios header metadata', async () => {
+      const error = new Error('maxContentLength size of 1048576 exceeded') as Error & {
+        response?: { headers?: Record<string, string> };
+      };
+      error.response = { headers: { 'content-length': '10485760' } };
+      setConnectorActionErrorMeta(error, {
+        contentLengthBytes: 20 * 1024 * 1024,
+        estimatedOutputBytes: 28 * 1024 * 1024,
+      });
+      mockHandler.mockRejectedValue(error);
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'maxContentLength size of 1048576 exceeded',
+        actionId: connectorId,
+        errorMeta: {
+          contentLengthBytes: 20 * 1024 * 1024,
+          estimatedOutputBytes: 28 * 1024 * 1024,
+        },
+      });
+    });
+
     it('logs the error message when the handler throws', async () => {
       mockHandler.mockRejectedValue(new Error('handler failed'));
 
@@ -253,6 +361,89 @@ describe('generateExecutorFunction', () => {
       await expect(
         executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }))
       ).resolves.toMatchObject({ status: 'error' });
+    });
+
+    it('returns status error with the allowedHosts message and no retry when ctx.client rejects with a policy error', async () => {
+      const policyMessage =
+        'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
+      const policyError = new Error(policyMessage);
+
+      const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
+      mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
+
+      mockHandler.mockImplementation(async (ctx: { client: typeof denyingClient }) => {
+        return ctx.client.get('https://denied.example.com/api');
+      });
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: policyMessage,
+        actionId: connectorId,
+      });
+      expect(result).not.toHaveProperty('retry');
+    });
+  });
+
+  describe('_test subAction', () => {
+    it('returns status ok when the test handler resolves', async () => {
+      const testHandler = jest.fn().mockResolvedValue({ message: 'connected' });
+      const actions: ConnectorSpec['actions'] = {
+        [TEST_CONNECTOR_SUB_ACTION]: {
+          isTool: false,
+          input: {} as never,
+          handler: testHandler,
+        },
+      };
+
+      const executor = generateExecutorFunction({
+        actions,
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'ok',
+        data: { message: 'connected' },
+        actionId: connectorId,
+      });
+    });
+
+    it('returns status error when the test handler throws', async () => {
+      const testHandler = jest.fn().mockRejectedValue(new Error('connection failed'));
+      const actions: ConnectorSpec['actions'] = {
+        [TEST_CONNECTOR_SUB_ACTION]: {
+          isTool: false,
+          input: {} as never,
+          handler: testHandler,
+        },
+      };
+
+      const executor = generateExecutorFunction({
+        actions,
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'connection failed',
+        actionId: connectorId,
+      });
     });
   });
 

@@ -40,6 +40,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     `${getFullPath(src)}:${dest}`,
   ]);
 
+  dockerArgs.push('-e', 'EPR_REQUIRE_PACKAGE_SIGNATURES=false');
+
   const dockerServers = !skipRunningDockerRegistry
     ? defineDockerServersConfig({
         registry: {
@@ -95,7 +97,11 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableSloTemplates: true,
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
-          enableResolveDependencies: true,
+          enableCloudOnboardingDeployments: true,
+          installIntegrationsKnowledge: false,
+          // Keep the legacy agentless APIs enabled here so the base suite exercises legacy behavior;
+          // config.agentless_legacy_disabled.ts overrides this to true for the rejection tests.
+          disableAgentlessLegacyAPI: false,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,

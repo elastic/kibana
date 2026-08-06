@@ -36,6 +36,106 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+% BREAKING CHANGES
+% Paste in breaking-changes.md
+
+## 9.5.0 [kibana-9.5.0-breaking-changes]
+
+$$$kibana-274792$$$
+::::{dropdown} Update Dashboards and Visualizations API requests to use short-hand duration units
+**Details**<br> The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs for both by-value and by-reference panels.
+
+**Impact**<br> API requests that configure duration formats with previous verbose unit names, such as `milliseconds`, `minutes`, `humanize`, or `asMilliseconds`, are rejected.
+
+**Action**<br> Update the duration `from` and `to` values in visualization and dashboard panel API payloads to the short-hand units, such as `ms`, `min`, `auto`, or `auto-approximate`.
+
+View [#274792]({{kib-pull}}274792).
+::::
+
+$$$kibana-268951$$$
+::::{dropdown} Update clients for the new Dashboards API search schema and page size limit
+**Details**<br> The response envelope for the Dashboards API search endpoint changes from `{ dashboards, page, total }` to `{ data, meta }`. The pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1,000.
+
+**Impact**<br> Clients that read `dashboards`, `page`, or `total` at the top level no longer receive those fields. Requests with `per_page` above 1,000 are rejected.
+
+**Action**<br> Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1,000.
+
+View [#268951]({{kib-pull}}268951).
+::::
+
+$$$kibana-272894$$$
+::::{dropdown} Update clients for the dedicated Managed integrations API response model
+**Details**<br> `POST /api/fleet/managed_integrations` (previously `POST /api/fleet/agentless_policies`) now returns a dedicated `ManagedIntegration` response model instead of the internal `PackagePolicy` shape. The `format` query parameter is removed. The request body no longer accepts `description`, `var_group_selections`, `additional_datastreams_permissions`, or `condition`.
+
+**Impact**<br> External API clients that read `PackagePolicy` fields such as `policy_ids`, `revision`, `supports_agentless`, `secret_references`, `output_id`, `fleet_server_host_id`, or `enabled` from the response receive a different payload. Requests that include removed body fields or the `format` query parameter fail validation.
+
+**Action**<br> Update integrations to consume the `ManagedIntegration` fields (`id`, `name`, `namespace`, `package`, `inputs`, `vars`, `global_data_tags`, `cloud_connector`, and timestamps). Remove the `format` query parameter and dropped request body fields from create calls.
+
+View [#272894]({{kib-pull}}272894).
+::::
+
+$$$kibana-268942$$$
+::::{dropdown} Grant `cluster:monitor` to access the full `GET /api/status` payload
+**Details**<br> `GET /api/status` now requires the {{es}} `cluster:monitor` privilege to return the full payload, including host info, build details, core and plugin status, and metrics. Authenticated callers without `monitor`, and callers when the privilege check fails, receive `{ "status": { "overall": { "level": "<level>" } } }`. Unauthenticated Kubernetes liveness and readiness probes are unchanged. The `/status` UI shows an informational prompt for users without `monitor` when the bypass is turned off.
+
+**Impact**<br> Monitoring scripts or automation that call `/api/status` with credentials lacking `cluster:monitor` receive a redacted response instead of build, host, and plugin details. The `/status` page shows limited information for those users.
+
+**Action**<br> Grant `cluster:monitor` to monitoring users and roles that need the full status payload. While updating roles, set `status.statusPageBypassMonitorPrivilege: true` to preserve the previous authenticated behavior.
+
+View [#268942]({{kib-pull}}268942).
+::::
+
+$$$kibana-267517$$$
+::::{dropdown} Update external plugins that use field formatter HTML output
+**Details**<br> {{kib}} 9.5 removes HTML string output from field formatters, including the `'html'` content type and related conversion utilities. Field formatters now return plain text or React elements. This change does not affect formatted values in the {{kib}} UI.
+
+**Impact**<br> External plugins that request `'html'` output or consume HTML strings from field formatters must be updated for {{kib}} 9.5.
+
+**Action**<br> When updating your external plugin, replace HTML formatting calls with `convertToText()` or `convertToReact()`. For `@kbn/discover-utils`, use `formatFieldValueText` or `formatFieldValueReact`.
+
+View [#267517]({{kib-pull}}267517).
+::::
+
+$$$kibana-280959$$$
+::::{dropdown} Managed integrations can no longer be created, updated, upgraded, or copied through the package policy and agent policy APIs
+**Details**<br> Creating, updating, upgrading, or copying managed integrations (formerly agentless) through the {{fleet}} package policy (`/api/fleet/package_policies`) and agent policy (`/api/fleet/agent_policies`) APIs is no longer supported. These operations are served exclusively by the Managed integrations API (`/api/fleet/managed_integrations`). This affects Elastic Cloud Hosted deployments and Elastic Cloud Serverless projects where managed integrations are enabled. Self-managed deployments are not affected.
+
+**Impact**<br> Requests that create, update, upgrade, or copy managed integrations through the package policy or agent policy APIs now fail with a `400` error. Existing managed integrations are not affected: they keep running and are upgraded and reconciled automatically, with no action required. Only clients that call the package policy or agent policy APIs directly for these write operations need to change.
+
+**Action**<br> Use the Managed integrations API (`/api/fleet/managed_integrations`) to create, update, upgrade, or copy managed integrations, and update any automation that relied on the package policy or agent policy APIs for these operations.
+
+View [#280959]({{kib-pull}}280959).
+::::
+
+## 9.4.0 [kibana-9.4.0-breaking-changes]
+
+$$$kibana-255122-9.4.0$$$
+::::{dropdown} The `_source` field mode is now saved to the template index settings
+**Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
+
+**Impact**<br> When you edit a template in the UI, any existing `mappings._source.mode` setting is automatically moved to the index settings and removed from mappings.
+
+**Action**<br> The migration happens automatically when you edit a template in the **Index Management** UI. If you manage templates outside the UI (via API or configuration files), update them to use `settings.index.mapping.source.mode` instead of `mappings._source.mode`.
+
+View [#255122]({{kib-pull}}255122).
+::::
+
+
+$$$kibana-249855$$$
+::::{dropdown} {{esql}} tool parameter types simplified in Agent Builder API
+**Details**<br> The Agent Builder {{esql}} tool API now uses simplified parameter types aligned with {{esql}}'s actual capabilities instead of Elasticsearch field types. The supported `configuration.params[*].type` values are now: `string`, `integer`, `float`, `boolean`, and `date`. Previously accepted types (`text`, `keyword`, `long`, `double`, `object`, `nested`) are no longer valid for new API requests. Additionally, `defaultValue` is now restricted to `string | number | boolean` and requires `optional: true` to be set.
+
+**Impact**<br> API calls to `POST /api/agent_builder/tools` or `PUT /api/agent_builder/tools/{id}` that use legacy parameter types will be rejected with a 400 error. Existing tools stored with legacy types are automatically migrated on read: `text`/`keyword`/`object`/`nested` become `string`, `long` becomes `integer`, and `double` becomes `float`. Legacy `object`/`nested` default values are JSON-stringified.
+
+**Action**<br> Update any integrations that create or update {{esql}} tools via the API to use the new type values:
+- Use `string` instead of `text`, `keyword`, `object`, or `nested`
+- Use `integer` instead of `long`
+- Use `float` instead of `double`
+- Ensure `defaultValue` is only provided when `optional: true`
+
+View [#249855]({{kib-pull}}249855).
+::::
+
 ## 9.3.2 [kibana-9.3.2-breaking-changes]
 $$$kibana-255122$$$
 ::::{dropdown} The `_source` field mode is now saved to the template index settings

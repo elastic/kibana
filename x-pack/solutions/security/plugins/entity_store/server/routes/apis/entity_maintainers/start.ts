@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
+import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import { maintainerIdParamsSchema } from './utils/validator';
 
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
@@ -30,16 +31,19 @@ export function registerStartMaintainer(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(maintainerIdParamsSchema),
+            params: buildStrictRouteValidationWithZod(maintainerIdParamsSchema),
           },
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, entityMaintainersClient } = entityStoreCtx;
+        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
         const { id } = req.params;
 
         logger.debug(`Start maintainer API invoked for id: ${id}`);
+
+        const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
+        if (forbidden) return forbidden;
 
         await entityMaintainersClient.start(id, req);
 

@@ -55,12 +55,18 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    const expectedCommandLine = process.env.CI
-      ? 'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
-      : 'node node_modules/jest-worker/build/workers/processChild.js';
+    const expectedCommandLineMultiple =
+      'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests';
+    const expectedMoonCommandLine =
+      'node scripts/jest.js --passWithNoTests --config src/platform/packages/shared/kbn-test/jest.config.js --maxWorkers=2 --json --passWithNoTests';
+    const expectedCommandLineSingle = 'node node_modules/jest-worker/build/workers/processChild.js';
 
     expect(testsuite.$).toMatchObject({
-      'command-line': expectedCommandLine,
+      'command-line': expect.stringMatching(
+        new RegExp(
+          `(${expectedCommandLineMultiple}|${expectedMoonCommandLine}|${expectedCommandLineSingle})`
+        )
+      ),
       failures: '2',
       name: 'test',
       skipped: '1',

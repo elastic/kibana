@@ -6,6 +6,7 @@
  */
 
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { asEsqlRows } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsQuery,
   type AlertEpisodeAction,
@@ -13,24 +14,27 @@ import {
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchEpisodeActionsOptions {
+  spaceId: string;
   episodeIds: string[];
   abortSignal?: AbortSignal;
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
 /**
  * Executes an ES|QL query to fetch latest acknowledge action and assignee by episode.
  */
 export const fetchEpisodeActions = ({
+  spaceId,
   episodeIds,
   abortSignal,
-  services: { expressions },
+  expressions,
 }: FetchEpisodeActionsOptions): Promise<AlertEpisodeAction[]> => {
-  return executeEsqlQuery<AlertEpisodeAction>({
+  const query = buildEpisodeActionsQuery(spaceId, episodeIds);
+  return executeEsqlQuery({
     expressions,
-    query: buildEpisodeActionsQuery(episodeIds).print('basic'),
+    query: query.print('basic'),
     input: null,
     abortSignal,
     noCache: true,
-  });
+  }).then((rows) => asEsqlRows(query, rows));
 };

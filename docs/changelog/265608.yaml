@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/265608
+issues:
+- https://github.com/elastic/streams-program/issues/554
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Search and data
+title: Add URI parts processor in Streams
+description: Adds a URI parts processor that parses a URI string into its component parts (scheme, domain, path, port, query, fragment) and stores them as structured fields.

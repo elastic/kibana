@@ -65,6 +65,14 @@ export const buildServerESQLCallbacks = ({
       }
     },
 
+    getDatasets: async () => {
+      try {
+        return await service.getDatasets();
+      } catch {
+        return { datasets: [] };
+      }
+    },
+
     getInferenceEndpoints: async (taskType) => {
       return service.getInferenceEndpoints(taskType);
     },

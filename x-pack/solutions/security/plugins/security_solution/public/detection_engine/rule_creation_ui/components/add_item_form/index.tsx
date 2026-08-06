@@ -8,11 +8,12 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { ChangeEvent } from 'react';
@@ -153,13 +154,15 @@ export const AddItem = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="danger"
-                    iconType="trash"
-                    isDisabled={isDisabled || (isEmpty(item) && values.length === 1)}
-                    onClick={() => removeItem(index)}
-                    aria-label={RuleI18n.DELETE}
-                  />
+                  <EuiToolTip content={RuleI18n.DELETE} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      color="danger"
+                      iconType="trash"
+                      isDisabled={isDisabled || (isEmpty(item) && values.length === 1)}
+                      onClick={() => removeItem(index)}
+                      aria-label={RuleI18n.DELETE}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
 

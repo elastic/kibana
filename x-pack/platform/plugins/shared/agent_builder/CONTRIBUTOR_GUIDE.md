@@ -220,6 +220,25 @@ agentBuilderSetup.tools.register({
 });
 ```
 
+### Marking a tool as experimental
+
+Individual built-in tools (and other static tool registrations) can be flagged as experimental by setting `experimental: true` on the registration.
+Experimental tools are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.experimental.my-tool',
+  type: ToolType.builtin,
+  description: 'An experimental tool only visible when experimental features are on',
+  tags: [],
+  schema: z.object({}),
+  experimental: true,
+  handler: async () => ({ results: [] }),
+});
+```
+
 ## Registering built-in agents
 
 ### Registering the agent
@@ -267,36 +286,6 @@ agentBuilder.agents.register({
           'platform.dashboard.edit_dashboard',
           '[...]',
         ],
-      },
-    ],
-  },
-});
-```
-
-### Specific research and answer instructions
-
-It is possible to specify specific research and answer instructions for an agent, to avoid
-mixing instructions, which can sometimes be confusing for the agent. It also allows to specify
-different instructions for each step of the agent's flow..
-
-```ts
-agentBuilder.agents.register({
-  id: 'platform.core.dashboard',
-  name: 'Dashboard agent',
-  description: 'Agent specialized in dashboard related tasks',
-  avatar_icon: 'dashboardApp',
-  configuration: {
-    research: {
-      instructions:
-        'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...',
-    },
-    answer: {
-      instructions:
-        'When answering, if a dashboard configuration is present in the results, always render it using [...]',
-    },
-    tools: [
-      {
-        tool_ids: [someListOfToolIds],
       },
     ],
   },
@@ -358,6 +347,16 @@ const textAttachmentType: AttachmentTypeDefinition = {
 
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
+
+#### Adding the attachment type to the allow list
+
+Similar to tools and agents, we keep a hardcoded list of registered attachment types to trigger a code review from the team when
+attachment types are added.
+
+To add an attachment type to the allow list, simply add the attachment type's id to the `AGENT_BUILDER_BUILTIN_ATTACHMENTS` array,
+in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
+
+(Kibana will fail to start otherwise, with an explicit error message explaining what to do)
 
 #### `getAgentDescription` — describing inline rendering to the agent
 
@@ -495,6 +494,7 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
 
 #### Canvas flyout width
@@ -774,6 +774,104 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 4. The UI shows a panel listing stale attachments, letting the user add the refreshed version or dismiss
 
 Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
+****
+## Registering renderers
+
+Renderers let the agent display rich, typed objects inline in a chat reply — dashboards, tables, or any
+plugin-owned visualization. This is not generative UI: the agent produces a typed data payload, and a
+predefined renderer registered by your plugin draws it. Attachments (above) are an *input-to-LLM*
+abstraction; renderers are an *output* abstraction, and the two are independent.
+
+**How it works end-to-end:**
+
+1. When the bash tool is enabled (`agentBuilder:bashSupport` advanced setting) and at least one renderer
+   is registered, the agent's prompt advertises every registered render type and its payload JSON schema.
+2. The agent writes the payload to a file in its `/workspace` virtual filesystem using bash. The file
+   content is the raw payload matching your schema (no wrapper). The recommended location is
+   `/workspace/renders/{type}/{id}.json`, with a new file per create/edit so earlier replies keep their
+   original render.
+3. The agent emits a directive in its reply: `<render path="/workspace/renders/{type}/{id}.json" type="{type}" />`.
+   The `type` attribute selects the renderer.
+4. When the round completes, the browser fetches the file (via a conversation-scoped internal API),
+   validates it against your renderer's `payloadSchema`, and mounts your `render` function. Any failure
+   (missing file, invalid payload, unknown type) shows a structured error callout instead. Renders resolve
+   on round completion and on reload — the workspace is only persisted at the end of a round, so a
+   skeleton is shown while the round is streaming.
+
+Renderer output is wrapped in an error boundary, so a throwing renderer degrades to an error callout
+rather than taking down the chat.
+
+### Server-side registration
+
+Register the renderer type using the `renderers.register` API of the `agentBuilder` plugin's setup contract.
+This is what advertises the type (and its payload schema) to the agent:
+
+```ts
+class MyPlugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.renderers.register(myRendererDefinition);
+  }
+}
+```
+
+```ts
+import { z } from '@kbn/zod/v4';
+import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
+
+// Define the payload schema once in your plugin's common/ folder and import it
+// on both the server and browser sides, so what the agent is told to produce is
+// exactly what the browser validates.
+const tablePayloadSchema = z.object({
+  columns: z.array(z.string()),
+  rows: z.array(z.record(z.string(), z.unknown())),
+});
+
+const tableRendererDefinition: RendererTypeDefinition = {
+  // unique renderer type; correlates the server and browser registrations and the <render> directive
+  type: 'table',
+  // zod schema the payload is validated against before mounting
+  payloadSchema: tablePayloadSchema,
+  // optional description injected into the agent prompt alongside the schema
+  getAgentDescription: () => 'Renders a dataset as an interactive table.',
+};
+```
+
+### Browser-side registration
+
+Register the matching UI definition using the `renderers.register` API of the `agentBuilder` plugin's
+start contract. **A renderer type must be registered on both sides with the same `type`** — a
+server-only registration means the agent is told it can render the type, but directives for it will
+fail to resolve in the UI.
+
+```ts
+import React from 'react';
+import { EuiBasicTable } from '@elastic/eui';
+import type { RendererUIDefinition } from '@kbn/agent-builder-browser';
+
+const tableRendererUIDefinition: RendererUIDefinition<typeof tablePayloadSchema> = {
+  type: 'table',
+  payloadSchema: tablePayloadSchema,
+  // renders the validated payload inline in the conversation
+  render: (payload) => (
+    <EuiBasicTable
+      columns={payload.columns.map((column) => ({ field: column, name: column }))}
+      items={payload.rows}
+    />
+  ),
+};
+
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.renderers.register(tableRendererUIDefinition);
+  }
+}
+```
+
+`RendererUIDefinition` also accepts optional members reserved for the canvas (expanded flyout) surface:
+`getHeader`, `getActionButtons`, `renderCanvas`, and `canvasWidth`. Refer to
+[`RendererUIDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/renderers/contract.ts)
+and [`RendererTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/renderers/type_definition.ts)
+for the full contracts.
 
 ## Chat integration and pending attachments
 
@@ -905,6 +1003,46 @@ class MyPlugin {
 }
 ```
 
+### Chat events: per-conversation streams
+
+`events.chat$` exposes a hot observable of every chat event from every in-flight
+conversation. Concurrent per-conversation streams are now supported, so this stream
+interleaves events across conversations, and most event payloads do not carry a
+`conversation_id` you can filter on directly. **`chat$` is deprecated.**
+
+Use `events.getChatEvents$(conversationId)` instead. It returns a hot observable
+scoped to a single conversation — every event is tagged with the conversation that
+produced it, and the returned stream filters to the matching tag.
+
+```ts
+// Before — works only when a single conversation streams at a time.
+agentBuilder.events.chat$
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to a known conversation id.
+agentBuilder.events
+  .getChatEvents$(conversationId)
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to whichever conversation the chat surface is currently focused on.
+agentBuilder.events.ui.activeConversation$
+  .pipe(
+    filter((c): c is ActiveConversation => c?.id != null),
+    switchMap((c) => agentBuilder.events.getChatEvents$(c.id!))
+  )
+  .subscribe((event) => { ... });
+```
+
+`switchMap` cancels the previous per-conversation subscription whenever the active
+conversation changes — e.g. when a consumer follows the user's focus.
+
+All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddable,
+or full-page chat), and the UI generates a client-side conversation UUID before
+each request. Plugins consuming this contract have access to that id via
+`events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
@@ -997,7 +1135,7 @@ does; the skill tells it *when* to do it.
 
 ### Marking a skill as experimental
 
-Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition.
 Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
 
 **Example:**
@@ -1031,7 +1169,7 @@ attach them to a conversation.
 │  │  SmlTypeDefinition         │ ← you provide this           │
 │  │  • id                      │                              │
 │  │  • list()                  │                              │
-│  │  • getSmlData()            │                              │
+│  │  • getSmlEntry()           │                              │
 │  │  • toAttachment()          │                              │
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
@@ -1059,32 +1197,32 @@ attach them to a conversation.
 | Concept | Description |
 |---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
-| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
-| **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **SML Document** | A single indexed entry stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `entry_ids` from `sml_search`;  `entry_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
 
 #### Data flow
 
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
    For each registered SML type it calls `list()` to enumerate items, detects
-   changes via timestamps, and calls `getSmlData()` for new/updated items.
+   changes via timestamps, and calls `getSmlEntry()` for new/updated items.
 2. **Index**: Results are written to the `.chat-sml-data` system index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
    the data index, filtering by the user's current space and checking Kibana
    privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach` with `chunk_ids`, the service loads each chunk, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
+4. **Attach**: When the AI agent calls `sml_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
 - The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
   content from all spaces.
 - Access control is enforced at **query time**: results are filtered by space
-  and by Kibana feature privileges (the `permissions` array you set in
-  `getSmlData`).
+  and by Kibana feature privileges (the `permissions` your optional
+  `getPermissions` hook returns).
 
 ---
 
@@ -1096,7 +1234,8 @@ Create a file in your plugin (e.g.
 `server/sml_types/my_asset.ts`). You need to implement four things:
 
 ```typescript
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1131,29 +1270,30 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Fetch the full data for a single item to index.
-  // Return undefined to skip the item (e.g. if it was deleted).
-  getSmlData: async (originId, context) => {
+  // Fetch the data to index for a single origin. Every SML type produces
+  // exactly one entry per originId — return undefined to skip the item
+  // (e.g. if it was deleted).
+  getSmlEntry: async (originId, context) => {
     try {
       const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
       const attrs = so.attributes as { title?: string; description?: string };
 
       return {
-        chunks: [
-          {
-            type: 'my-asset',
-            title: attrs.title ?? originId,
-            content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
-            // Kibana feature privileges required to access this item.
-            // Users without these privileges won't see the item in search results.
-            permissions: ['saved_object:my-saved-object-type/get'],
-          },
-        ],
+        type: 'my-asset',
+        title: attrs.title ?? originId,
+        content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
       };
     } catch {
       return undefined;
     }
   },
+
+  // Optional: compute the permissions that gate access to the entry.
+  // Omit for resources that are intentionally public within the space.
+  // Prefer `kibanaSavedObjectPermissions` for saved-object-backed types
+  // instead of hand-writing the privilege string.
+  getPermissions: () =>
+    kibanaSavedObjectPermissions({ savedObjectType: 'my-saved-object-type' }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1205,19 +1345,22 @@ memory, so even types with millions of items won't cause OOM.
 Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
 all spaces. The crawler indexes everything; access control happens at query time.
 
-##### `getSmlData()` — Chunks and permissions
+##### `getSmlEntry()` and `getPermissions()` — One entry, explicit permissions
 
-You can return multiple chunks per item (e.g. if a dashboard has multiple
-panels). Each chunk gets its own document in the SML index.
+`getSmlEntry` returns exactly one entry per originId (e.g. a dashboard with
+many panels is still a single entry — its panel titles just become part of
+`content`, as in the example above).
 
-The `permissions` array should list the Kibana saved object privileges
+The optional `getPermissions` hook returns the Kibana saved object privileges
 required to access the underlying asset. Common patterns:
 
-- `['saved_object:lens/get']` for Lens visualizations
-- `['saved_object:dashboard/get']` for dashboards
-- `['saved_object:search/get']` for saved searches
+- `kibanaSavedObjectPermissions({ savedObjectType: 'lens' })` for Lens visualizations
+- `kibanaSavedObjectPermissions({ savedObjectType: 'dashboard' })` for dashboards
+- `kibanaSavedObjectPermissions({ savedObjectType: 'search' })` for saved searches
 
 Users without the listed privileges won't see the item in `sml_search` results.
+Omit `getPermissions` only when the resource is intentionally public within
+the space.
 
 ##### `toAttachment()` — Resolving saved objects
 
@@ -1250,7 +1393,7 @@ The visualization SML type is registered in
 It:
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: ['saved_object:lens/get']`
+- Sets `permissions: { kibana: { privileges: [{ name: 'saved_object:lens/get' }] }, elasticsearch: { indices: [] } }`
 - Converts results back to Lens API format for the attachment renderer
 - Uses a 1-hour crawl interval
 
@@ -1260,4 +1403,134 @@ setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 ```
 
 The full implementation is ~130 lines and serves as the reference for new types.
+
+## Streams lifecycle (frontend)
+
+The chat streaming layer lives across two folders:
+
+- `public/application/context/streaming/` — the lifted provider, its context hook, the
+  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+- `public/application/hooks/` — the per-conversation convenience hook
+  (`use_conversation_stream.ts`) and the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`). They live here because they compose
+  `useConversation` (a sibling in `hooks/`) with the streaming context.
+
+This section documents how mutations, lifted state, and the React Query cache fit
+together. Read this before touching any of: `streaming_context.tsx`,
+`use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
+`use_is_any_conversation_streaming.ts`.
+
+### The lift
+
+`<StreamingProvider>` is mounted **once** above the routes/sidebar:
+
+- Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
+  routes, so it can read streaming state directly.
+- Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
+  instance because each instance has its own `QueryClient`.
+
+The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
+is derived from the same context and is used by the page-leave guard and the
+embeddable welcome-message dismiss — both genuinely care about "is anything in
+flight, anywhere?". Anything inside the conversation tree should use the per-conversation
+scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
+
+
+### Lifted state
+
+`StreamingProvider` owns two slices with split lifecycles:
+
+- `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
+  in-flight stream. Set synchronously when each mutation kicks off; deleted in the
+  mutation's `finally`. Multiple entries can coexist — concurrent streams are
+  supported, one per conversation. Native `Map` rather than `Record` because the
+  same key shape pairs with the `Map<conversationId, AbortController>` ref each
+  mutation hook holds, and `cancelAllStreams` iterates this map's keys.
+- `byConversationId: Record<string, StreamRecord>` — per-conversation
+  `pendingMessage`, `error`, `errorSteps`. Persists across stream end so a user
+  can hit Retry after a failure. Mutated via immer; lifecycle is unrelated to
+  in-flight streams so it stayed a plain record.
+
+### Mutations: single-scope `mutationFn`
+
+`useSendMessageMutation` and `useResumeRoundMutation` use a **single-scope `mutationFn`
+with `try / catch / finally`**, not React Query's lifecycle methods (`onMutate`,
+`onSuccess`, `onError`, `onSettled`). The shape is:
+
+```ts
+mutationFn: async (vars) => {
+  // setup phase (sync, before any await): seed the optimistic round, set pending message.
+  // Note: `activeStream` is set by the provider's `mutateSendMessage` wrapper *before*
+  // `mutate()` returns — not here.
+  const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
+
+  try {
+    await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
+    // success cleanup
+  } catch (err) {
+    // error cleanup
+    throw err;
+  } finally {
+    // cleanup: invalidate cache (skipped if round paused on HITL),
+    // delete this conversation's `activeStreams` entry, delete its abort controller.
+  }
+}
+```
+
+Each mutation hook holds a `Map<conversationId, AbortController>` ref so concurrent
+streams have independent cancel signals. The map is keyed by `vars.conversationId`,
+the cancel helper takes the same key, and the `finally` block deletes only the
+entry it installed (compared by reference so a re-mutate's controller isn't
+clobbered).
+
+**Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
+happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
+the work across lifecycle callbacks forces you to bridge state between scopes via refs
+or React Query's `context` return — neither is clean for streaming. With single-scope,
+`streamActions` and `vars` are visible throughout. No refs to bridge phases. Reads
+top-to-bottom.
+
+### Each conversation owns its streaming lifecycle
+
+Every `mutationFn` invocation builds its **own** `streamActions` instance via
+`createConversationActions({ conversationId: vars.conversationId, ... })`. That instance
+is closure-bound to the mutation's conversation id. **Stream events target the
+conversation the mutation was started for, regardless of where the user has navigated.**
+
+If the user submits on conversation A and immediately switches to B, the stream events
+keep writing to A's cache. B loads cleanly from the server.
+
+### Per-conversation `useConversation` gate
+
+`useConversation` is disabled for a conversation when (a) a stream is currently writing
+to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
+authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
+or with the resume mutation about to fire on Approve (HITL). Other conversations stay
+free to refetch — switch to conversation B while A streams and B loads cleanly. See the
+inline comment on the `enabled` predicate for details.
+
+### Concurrent streams
+
+The app supports concurrent per-conversation streams. Submitting on conversation B
+while A is mid-stream starts a second stream alongside A — A keeps writing to its
+cache, B writes to its own. Cancelling one doesn't affect the other.
+
+What this means in practice:
+
+- **Submit gate** (`conversation_input.tsx`) is per-conversation: `isResponseLoading`
+  from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
+  no `conversationId`, so `isResponseLoading` is `false` and submit is always
+  allowed there even while other conversations stream.
+- **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
+  `isResponseLoading && !isResuming`. Other in-flight conversations cannot
+  corrupt this conversation's cache because `streamActions` are closure-bound
+  to `vars.conversationId`.
+- **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
+  The mutation hooks hold `Map<conversationId, AbortController>` refs so cancels
+  hit only the targeted controller.
+- **Page-leave guard** is the lone remaining global check. If any stream is in
+  flight when the user navigates away, a confirm dialog appears; on confirm,
+  `cancelAllStreams()` aborts every controller in the map before the platform
+  proceeds.
 

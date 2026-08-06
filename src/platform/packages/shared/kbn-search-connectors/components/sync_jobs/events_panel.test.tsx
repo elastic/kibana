@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { TriggerMethod } from '../..';
 
@@ -27,12 +28,18 @@ describe('EventsPanel', () => {
   };
 
   it('renders', () => {
-    const wrapper = shallow(<SyncJobEventsPanel {...events} />);
+    renderWithKibanaRenderContext(<SyncJobEventsPanel {...events} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Sync requested manually')).toBeInTheDocument();
+    expect(screen.getByText('Sync started')).toBeInTheDocument();
+    expect(screen.getByText('Last updated')).toBeInTheDocument();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(screen.getByText('Cancelation requested')).toBeInTheDocument();
+    expect(screen.getByText('Canceled')).toBeInTheDocument();
   });
+
   it('renders with some values missing', () => {
-    const wrapper = shallow(
+    renderWithKibanaRenderContext(
       <SyncJobEventsPanel
         {...events}
         cancelationRequestedAt=""
@@ -40,6 +47,8 @@ describe('EventsPanel', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.queryByText('Cancelation requested')).not.toBeInTheDocument();
+    expect(screen.getByText('Canceled')).toBeInTheDocument();
+    expect(screen.getByText('Sync requested manually')).toBeInTheDocument();
   });
 });

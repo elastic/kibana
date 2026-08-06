@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
@@ -34,6 +33,10 @@ import {
   type AttachmentFiltersState,
 } from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
+
+const flyoutTitleLabel = i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
+  defaultMessage: 'Add attachments',
+});
 
 export function AddAttachmentFlyout({
   entityId,
@@ -91,23 +94,15 @@ export function AddAttachmentFlyout({
     [streamsRepositoryClient, entityId, filters.debouncedQuery, filters.types, filters.tags]
   );
 
-  const flyoutTitleId = useGeneratedHtmlId({
-    prefix: 'addAttachmentFlyoutTitle',
-  });
-
   const allAttachments = useMemo(() => {
     return attachmentSuggestionsFetch.value?.attachments || [];
   }, [attachmentSuggestionsFetch.value]);
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout onClose={onClose} aria-label={flyoutTitleLabel}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={flyoutTitleId}>
-            {i18n.translate('xpack.streams.addAttachmentFlyout.flyoutHeaderLabel', {
-              defaultMessage: 'Add attachments',
-            })}
-          </h2>
+          <h2>{flyoutTitleLabel}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

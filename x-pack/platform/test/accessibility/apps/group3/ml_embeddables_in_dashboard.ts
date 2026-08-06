@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-expect-error not full interface
@@ -91,6 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
+          // Exit the dashboard's edit mode so the unsaved-changes `beforeunload`
+          // handler doesn't block the next suite's navigation in the shared session.
+          await PageObjects.dashboard.clickCancelOutOfEditMode();
           await ml.api.cleanMlIndices();
         });
 

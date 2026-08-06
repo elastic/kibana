@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { FleetFileNotFound } from '@kbn/fleet-plugin/server/errors';
+import { stringify } from '../utils/stringify';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
 import { EndpointAuthorizationError, EndpointHttpError, NotFoundError } from '../errors';
 import { EndpointHostUnEnrolledError, EndpointHostNotFoundError } from '../services/metadata';
@@ -27,9 +28,9 @@ export const errorHandler = <E extends Error>(
   };
 
   if (shouldLogToDebug()) {
-    logger.debug(error.message);
+    logger.debug(() => stringify(error, 20), { error });
   } else {
-    logger.error(error);
+    logger.error(stringify(error, 20), { error });
   }
 
   if (error instanceof CustomHttpRequestError || error instanceof EndpointHttpError) {

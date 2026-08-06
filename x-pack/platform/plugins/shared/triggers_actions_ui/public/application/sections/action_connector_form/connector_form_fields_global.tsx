@@ -20,7 +20,8 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { toSlugIdentifier, isValidSlugIdentifier } from '@kbn/std';
+import { toSlugIdentifier } from '@kbn/std';
+import { isValidId } from '@kbn/human-readable-id';
 import { useKibana } from '../../../common/lib/kibana';
 import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 
@@ -150,7 +151,7 @@ const createIdConfig = (
     {
       validator: ({ value }) => {
         if (!value || typeof value !== 'string') return;
-        if (!isValidSlugIdentifier(value)) {
+        if (!isValidId(value, CONNECTOR_ID_MAX_LENGTH, 1)) {
           return {
             message: i18n.translate(
               'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidIdFormat',

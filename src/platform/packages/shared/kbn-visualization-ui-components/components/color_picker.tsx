@@ -121,7 +121,6 @@ export const ColorPicker = ({
       fullWidth
       label={
         <TooltipWrapper
-          delay="long"
           position="top"
           tooltipContent={
             isCustomColor && !isDisabled ? tooltipContent.custom : tooltipContent.auto
@@ -146,12 +145,7 @@ export const ColorPicker = ({
       }
     >
       {isDisabled ? (
-        <EuiToolTip
-          position="top"
-          content={disabledMessage}
-          delay="long"
-          anchorClassName="eui-displayBlock"
-        >
+        <EuiToolTip position="top" content={disabledMessage} anchorClassName="eui-displayBlock">
           {colorPicker}
         </EuiToolTip>
       ) : (

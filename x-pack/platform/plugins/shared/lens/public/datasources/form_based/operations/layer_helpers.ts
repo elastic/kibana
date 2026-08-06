@@ -12,6 +12,7 @@ import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type {
+  BuildColumnBaseOptions,
   TimeScaleUnit,
   ReferenceBasedIndexPatternColumn,
   DateRange,
@@ -19,8 +20,6 @@ import type {
   GenericIndexPatternColumn,
   FormBasedPrivateState,
   TermsIndexPatternColumn,
-} from '@kbn/lens-common';
-import type {
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
@@ -351,10 +350,9 @@ export function insertNewColumn({
     throw new Error(`Can't insert a column with an ID that is already in use`);
   }
 
-  const baseOptions = {
+  const baseOptions: BuildColumnBaseOptions = {
     indexPattern,
-    // @ts-expect-error upgrade typescript v5.9.3
-    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
+    previousColumn: { ...incompleteParams, ...initialParams },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -368,9 +366,7 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
-    const buildColumnFn = columnParams
-      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
-      : operationDefinition.buildColumn({ ...baseOptions, layer });
+    const buildColumnFn = operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams);
 
     return updateDefaultLabels(
       addOperationFn(
@@ -588,6 +584,7 @@ export function replaceColumn({
   initialParams,
   shouldResetLabel,
   shouldCombineField,
+  columnParams,
 }: ColumnChange): FormBasedLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -740,7 +737,10 @@ export function replaceColumn({
     }
 
     if (operationDefinition.input === 'none') {
-      let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
+      let newColumn = operationDefinition.buildColumn(
+        { ...baseOptions, layer: tempLayer },
+        columnParams
+      );
       newColumn = copyCustomLabel(newColumn, previousColumn);
       tempLayer = removeOrphanedColumns(
         previousDefinition,
@@ -806,7 +806,10 @@ export function replaceColumn({
 
     tempLayer = removeOrphanedColumns(previousDefinition, previousColumn, tempLayer, indexPattern);
 
-    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    let newColumn = operationDefinition.buildColumn(
+      { ...baseOptions, layer: tempLayer, field },
+      columnParams
+    );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }

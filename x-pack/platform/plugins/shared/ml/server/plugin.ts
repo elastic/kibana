@@ -26,8 +26,9 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import { type MlCapabilities, alertingFeatures } from '@kbn/ml-common-types/capabilities';
+import { getPluginPrivileges } from '@kbn/ml-common-types/capabilities';
 import type { PluginsSetup, PluginsStart, RouteInitialization, ServerlessInfo } from './types';
-import { type MlCapabilities, alertingFeatures } from '../common/types/capabilities';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -56,7 +57,6 @@ import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import type { SharedServices } from './shared_services';
 import { createSharedServices } from './shared_services';
-import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
@@ -73,6 +73,8 @@ import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 import { inferenceModelRoutes } from './routes/inference_models';
+import { registerAnomalyDetectionAgentBuilder } from './agent_builder/register_anomaly_detection';
+import { registerEmbeddables } from './lib/register_embeddables';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -103,7 +105,6 @@ export class MlServerPlugin
   };
   private compatibleModuleType: CompatibleModule | null = null;
   private serverless: ServerlessInfo;
-
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
@@ -143,7 +144,7 @@ export class MlServerPlugin
           'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved Discover sessions and visualizations as well as machine learning job, trained model and module saved objects.',
       }),
       management: {
-        insightsAndAlerting: ['jobsListLink', 'triggersActions'],
+        insightsAndAlerting: ['jobsListLink', 'triggersActionsRules', 'triggersActionsAlerts'],
       },
       alerting: alertingFeatures,
       privileges: {
@@ -305,12 +306,24 @@ export class MlServerPlugin
 
     registerKibanaSettings(coreSetup);
 
+    registerEmbeddables(plugins.embeddable, this.enabledFeatures);
+
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
         coreSetup
           .getStartServices()
           .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
       registerCollector(plugins.usageCollection, getIndexForType);
+    }
+
+    if (plugins.agentBuilder && this.enabledFeatures.ad) {
+      registerAnomalyDetectionAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        resolveMlCapabilities,
+        authorization: plugins.security?.authz,
+        mlLicense: this.mlLicense,
+        enabledFeatures: this.enabledFeatures,
+      });
     }
 
     return { ...sharedServicesProviders };

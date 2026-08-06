@@ -6,12 +6,19 @@
  */
 
 import { entries, findLastIndex, isNil } from 'lodash';
-import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
+import type {
+  ParseAggregationResultsOpts,
+  ParsedAggregationBucket,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption, ESQLAstCommand } from '@elastic/esql/types';
-import { Parser, isOptionNode, isColumn, isFunctionExpression } from '@elastic/esql';
+import { Parser, isOptionNode, isColumn, isFunctionExpression, isAssignment } from '@elastic/esql';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlEsqlShardFailure,
+  EsqlQueryResponse,
+  FieldValue,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -57,16 +64,21 @@ export interface EsqlTable {
 export const ALERT_ID_COLUMN = 'Alert ID';
 export const ALERT_ID_SUGGESTED_MAX = 10;
 
-export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
+export const rowToDocument = (
+  columns: EsqlQueryResponse['columns'],
+  row: FieldValue[]
+): EsqlDocument => {
   const doc: EsqlDocument = {};
   for (let i = 0; i < columns.length; ++i) {
-    doc[columns[i].name] = row[i];
+    doc[columns[i].name] = row[i]?.toString() || null;
   }
   return doc;
 };
 
+// The union type "EsqlTable | EsqlQueryResponse" is needed in this file to support both the UI test query funtionality and the server side execution of the rule.
+// The UI uses the data plugin to fetch results and while the server side execution calls the esClient directly.
 export const getEsqlQueryHits = async (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   query: string,
   isGroupAgg: boolean,
   isPreview: boolean = false
@@ -79,7 +91,7 @@ export const getEsqlQueryHits = async (
 };
 
 export const toEsqlQueryHits = async (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   isPreview: boolean = false,
   chunkSize: number = CHUNK_SIZE
 ): Promise<EsqlQueryHits> => {
@@ -124,7 +136,7 @@ export const toEsqlQueryHits = async (
 };
 
 export const toGroupedEsqlQueryHits = async (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   alertIdFields: string[],
   isPreview: boolean = false,
   chunkSize: number = CHUNK_SIZE
@@ -132,12 +144,22 @@ export const toGroupedEsqlQueryHits = async (
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
-  const mappedAlertIds: Record<string, Array<string | null>> = {};
+  const mappedAlertIds: Record<string, string[]> = {};
+  const mappedAlertIdFields: Record<string, string[]> = {};
   const groupedHits: Record<string, EsqlHit[]> = {};
   for (let r = 0; r < table.values.length; r++) {
     const row = table.values[r];
     const document = rowToDocument(table.columns, row);
-    const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
+    // Single pass keeps fields/values index-aligned (bucket keyFields/key) and narrows out nulls.
+    const filteredAlertIdFields: string[] = [];
+    const mappedAlertId: string[] = [];
+    for (const field of alertIdFields) {
+      const value = document[field];
+      if (!isNil(value)) {
+        filteredAlertIdFields.push(field);
+        mappedAlertId.push(value);
+      }
+    }
     if (mappedAlertId.length > 0) {
       const alertId = mappedAlertId.join(',');
       const hit = {
@@ -151,6 +173,7 @@ export const toGroupedEsqlQueryHits = async (
       } else {
         groupedHits[alertId] = [hit];
         mappedAlertIds[alertId] = mappedAlertId;
+        mappedAlertIdFields[alertId] = filteredAlertIdFields;
       }
 
       if (isPreview) {
@@ -167,11 +190,12 @@ export const toGroupedEsqlQueryHits = async (
     }
   }
 
-  const aggregations = {
+  const aggregations: { groupAgg: { buckets: ParsedAggregationBucket[] } } = {
     groupAgg: {
       buckets: entries(groupedHits).map(([key, value]) => {
         return {
           key: mappedAlertIds[key],
+          keyFields: mappedAlertIdFields[key],
           doc_count: value.length,
           topHitsAgg: {
             hits: {
@@ -223,7 +247,7 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
     // Check for BY option and get fields
     const byOption = getByOption(statsCommand);
     if (byOption) {
-      let fields = getFields(byOption);
+      let fields = getFields(byOption, query);
 
       // Check if any STATS fields were renamed
       const renameCommands = getRenameCommands(commands.slice(statsCommandIndex));
@@ -255,7 +279,7 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
 };
 
 const getLastStatsCommandIndex = (commands: ESQLAstCommand[]): number =>
-  findLastIndex(commands, (c) => c.name === 'stats');
+  findLastIndex(commands, (c) => c.name === 'stats' || c.name === 'inline stats');
 
 const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined => {
   for (const statsArg of astCommand.args) {
@@ -265,11 +289,20 @@ const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined 
   }
 };
 
-const getFields = (option: ESQLCommandOption): string[] => {
+const getFields = (option: ESQLCommandOption, query: string): string[] => {
   const fields: string[] = [];
   for (const arg of option.args) {
     if (isColumn(arg)) {
       fields.push(arg.name);
+      // Handle columns renamed inline in the BY clause
+    } else if (isAssignment(arg)) {
+      const { renamed } = getArgsFromRenameFunction(arg);
+      if (isColumn(renamed)) {
+        fields.push(renamed.name);
+      }
+      // Handle unnamed grouping expressions in the BY clause
+    } else if (!Array.isArray(arg) && arg.location) {
+      fields.push(query.substring(arg.location.min, arg.location.max + 1));
     }
   }
   return fields;

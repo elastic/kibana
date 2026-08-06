@@ -14,17 +14,24 @@ import { syntheticsInspectTLSRuleRoute } from './rules/inspect_tls_rule';
 import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
+import { updateSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/update_monitor_bulk';
 import {
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
 } from './settings/dynamic_settings';
+import {
+  createGetMultiSpaceSettingsRoute,
+  createPutMultiSpaceSettingsRoute,
+} from './settings/multi_space_settings';
 import { getSyntheticsParamsRoute } from './settings/params/params';
 import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
+import { getSyntheticsCertsFacetsRoute } from './certs/get_certificates_facets';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
+import { getSyntheticsFieldSuggestionsRoute } from './suggestions/field_suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
@@ -54,7 +61,10 @@ import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/project_monitor/add_monitor_project';
 import { syntheticsGetPingsRoute, syntheticsGetPingHeatmapRoute } from './pings';
-import { createGetCurrentStatusRoute } from './overview_status/overview_status';
+import {
+  createGetCurrentStatusRoute,
+  createGetStaleStatusRoute,
+} from './overview_status/overview_status';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
@@ -71,6 +81,11 @@ import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
 import { getMonitorsHealthRoute } from './monitor_health/get_monitor_health';
 import { getMonitorHealthRoute } from './monitor_health/get_monitor_health_single';
+import { getErrorGroupsRoute } from './errors/get_error_groups';
+import { getErrorStatsRoute } from './errors/get_error_stats';
+import { getMonitorSummaryStatsRoute } from './monitor_cruds/get_monitor_summary_stats';
+import { getSyntheticsDiagnosticsRoute } from './diagnostics/get_synthetics_diagnostics';
+import { getMaintenanceWindowsRoute } from './maintenance_windows/get_maintenance_windows';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -86,6 +101,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syntheticsGetPingsRoute,
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
+  createGetStaleStatusRoute,
   getIndexSizesRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
@@ -101,11 +117,15 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
   getSyntheticsCertsRoute,
+  getSyntheticsCertsFacetsRoute,
   getSyntheticsSuggestionsRoute,
+  getSyntheticsFieldSuggestionsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
+  createGetMultiSpaceSettingsRoute,
+  createPutMultiSpaceSettingsRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
   syntheticsInspectStatusRuleRoute,
@@ -118,6 +138,11 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,
   getMonitorHealthRoute,
+  getErrorGroupsRoute,
+  getErrorStatsRoute,
+  getMonitorSummaryStatsRoute,
+  getSyntheticsDiagnosticsRoute,
+  getMaintenanceWindowsRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
@@ -135,6 +160,7 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
+  updateSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
   syntheticsGetLatestTestRunRoute,
   testNowMonitorRoute,

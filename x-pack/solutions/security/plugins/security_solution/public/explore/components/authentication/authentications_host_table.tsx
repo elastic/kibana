@@ -8,8 +8,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
@@ -43,36 +46,52 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
   deleteQuery,
 }) => {
   const dispatch = useDispatch();
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout, openHostFlyout } = useFlyoutApi();
 
-  const openUserFlyout = useCallback(
+  const openUserDetails = useCallback(
     (userName: string) => {
-      openRightPanel({
-        id: UserPanelKey,
-        params: {
+      if (enableNewFlyout) {
+        openUserFlyout({
           userName,
           contextID: 'authentications',
           scopeId: 'authentications',
-          isPreviewMode: false,
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: { userName, contextID: 'authentications', scopeId: 'authentications' },
         },
       });
     },
-    [openRightPanel]
+    [enableNewFlyout, openFlyout, openUserFlyout]
   );
 
-  const openHostFlyout = useCallback(
+  const openHostDetails = useCallback(
     (hostName: string) => {
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
+      if (enableNewFlyout) {
+        openHostFlyout({
           hostName,
           contextID: 'authentications',
           scopeId: 'authentications',
-          isPreviewMode: false,
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: { hostName, contextID: 'authentications', scopeId: 'authentications' },
         },
       });
     },
-    [openRightPanel]
+    [enableNewFlyout, openFlyout, openHostFlyout]
   );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -101,8 +120,8 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
 
   const columns =
     type === hostsModel.HostsType.details
-      ? getHostDetailsAuthenticationColumns(openUserFlyout)
-      : getHostsPageAuthenticationColumns(openUserFlyout, openHostFlyout);
+      ? getHostDetailsAuthenticationColumns(openUserDetails)
+      : getHostsPageAuthenticationColumns(openUserDetails, openHostDetails);
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>

@@ -307,11 +307,13 @@ describe('MarkdownEmbeddable', () => {
 
   describe('unsaved chnages', () => {
     it('should have unsaved changes when content has changed', async () => {
-      const lastSavedState = markdownEmbeddableSchema.validate({
+      const lastSavedState = markdownEmbeddableSchema.parse({
         content: 'hello',
+        settings: {},
       });
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         content: 'goodbye',
+        settings: {},
       });
       const { embeddable } = await renderEmbeddable(initialState, lastSavedState);
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
@@ -319,8 +321,9 @@ describe('MarkdownEmbeddable', () => {
     });
 
     it('should not have unsaved changes for by value state when there are no changes', async () => {
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         content: 'hello',
+        settings: {},
       });
       const { embeddable } = await renderEmbeddable(initialState);
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
@@ -328,12 +331,45 @@ describe('MarkdownEmbeddable', () => {
     });
 
     it('should not have unsaved changes for by reference state when there are no changes', async () => {
-      const initialState = markdownEmbeddableSchema.validate({
+      const initialState = markdownEmbeddableSchema.parse({
         ref_id: '1234',
       });
       const { embeddable } = await renderEmbeddable(initialState);
       const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
       expect(hasUnsavedChanges).toBe(false);
+    });
+  });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: MarkdownEditorApi;
+    beforeEach((done) => {
+      renderEmbeddable(
+        markdownEmbeddableSchema.parse({
+          content: 'hello',
+          settings: {},
+        })
+      )
+        .then(({ embeddable }) => {
+          embeddableApi = embeddable.api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
     });
   });
 });

@@ -36,7 +36,8 @@ const nerRuleSchema = schema.allOf([
           schema.literal('ORG'),
           schema.literal('LOC'),
           schema.literal('MISC'),
-        ])
+        ]),
+        { maxSize: 4 }
       )
     ),
     timeoutSeconds: schema.maybe(schema.number({ min: 1 })),
@@ -89,7 +90,7 @@ export function getUiSettings(): Record<string, UiSettingsParams> {
         },
       }),
       schema: schema.object({
-        rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
+        rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema]), { maxSize: 100 }),
       }),
       type: 'json',
       requiresPageReload: true,

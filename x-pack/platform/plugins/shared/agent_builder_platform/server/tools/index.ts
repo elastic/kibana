@@ -14,7 +14,6 @@ import type {
   PluginSetupDependencies,
   PluginStartDependencies,
 } from '../types';
-import { casesTool } from './cases/cases';
 import { getDocumentByIdTool } from './get_document_by_id';
 import { getIndexMappingsTool } from './get_index_mapping';
 import { listIndicesTool } from './list_indices';
@@ -22,9 +21,6 @@ import { indexExplorerTool } from './index_explorer';
 import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
-import { createVisualizationTool } from './create_visualization';
-import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
-import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 export const registerTools = ({
   coreSetup,
@@ -43,18 +39,9 @@ export const registerTools = ({
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
-    createVisualizationTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
-    casesTool(coreSetup),
   ];
-
-  if (setupDeps.workflowsManagement) {
-    tools.push(
-      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement }),
-      resumeWorkflowExecutionTool({ workflowsManagement: setupDeps.workflowsManagement })
-    );
-  }
 
   tools.forEach((tool) => {
     agentBuilder.tools.register(tool);

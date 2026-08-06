@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -35,6 +35,9 @@ import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { HostPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
 const tableType = hostsModel.HostsTableType.hosts;
@@ -90,7 +93,9 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { navigateTo } = useNavigateTo();
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { openHostFlyout } = useFlyoutApi();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
@@ -143,20 +148,27 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
-  const openHostFlyout = useCallback(
+  const openHostDetails = useCallback(
     (hostName: string, entityId: string) => {
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
+      if (enableNewFlyout) {
+        openHostFlyout({
           hostName,
           entityId,
           contextID: tableType,
           scopeId: tableType,
-          isPreviewMode: false,
+          origin: FLYOUT_ORIGIN.HOSTS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: { hostName, entityId, contextID: tableType, scopeId: tableType },
         },
       });
     },
-    [openRightPanel]
+    [enableNewFlyout, openFlyout, openHostFlyout]
   );
 
   const dispatchSeverityUpdate = useCallback(
@@ -180,9 +192,14 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       getHostsColumns(
         isPlatinumOrTrialLicense && hasEntityAnalyticsCapability,
         dispatchSeverityUpdate,
-        openHostFlyout
+        openHostDetails
       ),
-    [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability, openHostFlyout]
+    [
+      dispatchSeverityUpdate,
+      isPlatinumOrTrialLicense,
+      hasEntityAnalyticsCapability,
+      openHostDetails,
+    ]
   );
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 

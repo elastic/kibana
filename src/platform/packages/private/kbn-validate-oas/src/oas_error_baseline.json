@@ -1,4 +1,10 @@
 {
-  "./oas_docs/output/kibana.yaml": 448,
-  "./oas_docs/output/kibana.serverless.yaml": 441
+  "./oas_docs/output/kibana.yaml": {
+    "errors": 16,
+    "warnings": 0
+  },
+  "./oas_docs/output/kibana.serverless.yaml": {
+    "errors": 13,
+    "warnings": 0
+  }
 }

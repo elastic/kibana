@@ -20,19 +20,19 @@ export const registerUpdateRoute = ({
   license,
   lib: { handleEsError },
 }: RouteDependencies) => {
-  const paramsSchema = schema.object({ id: schema.string() });
+  const paramsSchema = schema.object({ id: schema.string({ maxLength: 1000 }) });
 
   const bodySchema = schema.object({
     maxReadRequestOperationCount: schema.maybe(schema.number()),
     maxOutstandingReadRequests: schema.maybe(schema.number()),
-    maxReadRequestSize: schema.maybe(schema.string()), // byte value
+    maxReadRequestSize: schema.maybe(schema.string({ maxLength: 64 })), // byte value
     maxWriteRequestOperationCount: schema.maybe(schema.number()),
-    maxWriteRequestSize: schema.maybe(schema.string()), // byte value
+    maxWriteRequestSize: schema.maybe(schema.string({ maxLength: 64 })), // byte value
     maxOutstandingWriteRequests: schema.maybe(schema.number()),
     maxWriteBufferCount: schema.maybe(schema.number()),
-    maxWriteBufferSize: schema.maybe(schema.string()), // byte value
-    maxRetryDelay: schema.maybe(schema.string()), // time value
-    readPollTimeout: schema.maybe(schema.string()), // time value
+    maxWriteBufferSize: schema.maybe(schema.string({ maxLength: 64 })), // byte value
+    maxRetryDelay: schema.maybe(schema.string({ maxLength: 64 })), // time value
+    readPollTimeout: schema.maybe(schema.string({ maxLength: 64 })), // time value
   });
 
   router.put(
@@ -74,13 +74,13 @@ export const registerUpdateRoute = ({
         }
 
         // Resume follower
-        const body = removeEmptyFields(
+        const resumeParams = removeEmptyFields(
           serializeAdvancedSettings(request.body as FollowerIndexAdvancedSettings)
         );
 
         const responseBody = await client.asCurrentUser.ccr.resumeFollow({
           index: id,
-          body,
+          ...resumeParams,
         });
 
         return response.ok({

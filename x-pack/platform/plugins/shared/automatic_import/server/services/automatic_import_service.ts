@@ -53,6 +53,7 @@ import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
  * Derives the integration status from its data streams.
+ * - 'failed' if integration previously had data streams but all were deleted
  * - 'approved' if all data streams are completed and there is at least one
  * - 'completed' if all data streams are completed
  * - 'failed' if any data stream has failed
@@ -64,7 +65,7 @@ function deriveIntegrationStatus(
   dataStreams: DataStreamAttributes[]
 ): TaskStatus {
   if (dataStreams.length === 0) {
-    return 'pending' as TaskStatus;
+    return 'failed' as TaskStatus;
   }
 
   const statuses = dataStreams.map((ds) => ds.job_info?.status);
@@ -82,6 +83,17 @@ function deriveIntegrationStatus(
     return 'completed' as TaskStatus;
   }
   return 'pending' as TaskStatus;
+}
+
+/**
+ * The job phase is only meaningful while a data stream is still being generated. For terminal
+ * statuses (completed, failed, cancelled) the stored phase is stale, so we filter it out here in
+ * code rather than mutating the saved object to clear it.
+ */
+function getInProgressPhase(jobInfo: DataStreamAttributes['job_info']): string | undefined {
+  const isInProgress =
+    jobInfo.status === TASK_STATUSES.pending || jobInfo.status === TASK_STATUSES.processing;
+  return isInProgress ? jobInfo.phase : undefined;
 }
 
 interface ElasticsearchErrorDetails {
@@ -226,13 +238,17 @@ export class AutomaticImportService {
       integrationId
     );
 
-    const dataStreamsResponses: DataStreamResponse[] = dataStreamsSO.map((dataStream) => ({
-      dataStreamId: dataStream.data_stream_id,
-      title: dataStream.title,
-      description: dataStream.description,
-      inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
-      status: dataStream.job_info.status as TaskStatus,
-    }));
+    const dataStreamsResponses: DataStreamResponse[] = dataStreamsSO.map((dataStream) => {
+      const phase = getInProgressPhase(dataStream.job_info);
+      return {
+        dataStreamId: dataStream.data_stream_id,
+        title: dataStream.title,
+        description: dataStream.description,
+        inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+        status: dataStream.job_info.status as TaskStatus,
+        ...(phase ? { phase } : {}),
+      };
+    });
 
     const integrationResponse: IntegrationResponse = {
       integrationId: integrationSO.integration_id,
@@ -245,6 +261,7 @@ export class AutomaticImportService {
       createdByProfileUid: integrationSO.created_by_profile_uid,
       status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
       dataStreams: dataStreamsResponses,
+      categories: integrationSO.metadata.categories,
     };
     return integrationResponse;
   }
@@ -258,13 +275,17 @@ export class AutomaticImportService {
     return Promise.all(
       integrations.map(async (integration) => {
         const dataStreams = await savedObjectService.getAllDataStreams(integration.integration_id);
-        const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => ({
-          dataStreamId: dataStream.data_stream_id,
-          title: dataStream.title,
-          description: dataStream.description,
-          inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
-          status: dataStream.job_info.status as TaskStatus,
-        }));
+        const dataStreamsResponses: DataStreamResponse[] = dataStreams.map((dataStream) => {
+          const phase = getInProgressPhase(dataStream.job_info);
+          return {
+            dataStreamId: dataStream.data_stream_id,
+            title: dataStream.title,
+            description: dataStream.description,
+            inputTypes: dataStream.input_types.map((type) => ({ name: type })) as InputType[],
+            status: dataStream.job_info.status as TaskStatus,
+            ...(phase ? { phase } : {}),
+          };
+        });
         return {
           integrationId: integration.integration_id,
           title: integration.metadata.title,

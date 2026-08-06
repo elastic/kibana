@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
+import {
+  getAlertUrlErrorCount,
+  getAlertUrlTransaction,
+} from '../../../../common/utils/formatters/alert_url';
 import {
   anomalyMessage,
   anomalyRecoveryMessage,
@@ -24,6 +27,7 @@ import type { AlertParams } from './anomaly_rule_type';
 import { getDescriptionFields } from './get_description_fields';
 import {
   createLazyApmComponentWithContext,
+  type ApmAlertingSetupDeps,
   type ApmCoreSetup,
 } from '../utils/create_lazy_component_with_context';
 
@@ -34,8 +38,15 @@ const TRANSACTION_TYPE = 'transaction.type';
 
 export function registerApmRuleTypes(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  coreSetup: ApmCoreSetup
+  coreSetup: ApmCoreSetup,
+  setupDeps?: ApmAlertingSetupDeps
 ) {
+  const alertDetailsAppSection = createLazyApmComponentWithContext(
+    coreSetup,
+    () => import('../ui_components/alert_details_app_section'),
+    setupDeps
+  );
+
   observabilityRuleTypeRegistry.register({
     id: ApmRuleType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
@@ -59,6 +70,7 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
     defaultRecoveryMessage: errorCountRecoveryMessage,
@@ -91,10 +103,7 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: createLazyApmComponentWithContext(
-      coreSetup,
-      () => import('../ui_components/alert_details_app_section')
-    ),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     defaultRecoveryMessage: transactionDurationRecoveryMessage,
@@ -125,10 +134,7 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: createLazyApmComponentWithContext(
-      coreSetup,
-      () => import('../ui_components/alert_details_app_section')
-    ),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
     defaultRecoveryMessage: transactionErrorRateRecoveryMessage,
@@ -157,10 +163,7 @@ export function registerApmRuleTypes(
     },
     ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
     validate: validateAnomalyRule,
-    alertDetailsAppSection: createLazyApmComponentWithContext(
-      coreSetup,
-      () => import('../ui_components/alert_details_app_section')
-    ),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
     defaultRecoveryMessage: anomalyRecoveryMessage,

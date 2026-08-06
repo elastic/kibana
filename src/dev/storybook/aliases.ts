@@ -8,6 +8,7 @@
  */
 
 export const storybookAliases = {
+  agent_builder: 'x-pack/platform/plugins/shared/agent_builder/.storybook',
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   alerting_v2: 'x-pack/platform/plugins/shared/alerting_v2/.storybook',
   alerting_v2_rule_form:
@@ -17,13 +18,17 @@ export const storybookAliases = {
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   chart_icons: 'src/platform/packages/shared/kbn-chart-icons/.storybook',
+  change_history_ui: 'x-pack/platform/packages/shared/kbn-change-history-ui/.storybook',
   cloud_security_posture_graph:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
   coloring: 'src/platform/packages/shared/kbn-coloring/.storybook',
   content_management:
     'src/platform/packages/shared/content-management/kbn-content-management-storybook',
+  context_switcher_components:
+    'src/platform/packages/shared/context-switcher-components/.storybook',
   classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
+  data_lifecycle_phases: 'x-pack/platform/packages/shared/kbn-data-lifecycle-phases/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
   data: 'src/platform/plugins/shared/data/.storybook',
@@ -47,6 +52,7 @@ export const storybookAliases = {
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
   kbn_split_button: 'src/platform/packages/private/kbn-split-button/.storybook',
+  kbn_ui: 'src/platform/kbn-ui/storybook-config',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
@@ -58,6 +64,7 @@ export const storybookAliases = {
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
+  nightshift: 'x-pack/solutions/observability/plugins/nightshift/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',

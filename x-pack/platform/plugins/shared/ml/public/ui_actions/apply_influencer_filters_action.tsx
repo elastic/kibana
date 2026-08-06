@@ -9,14 +9,16 @@ import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
+import { VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import type { SwimLaneDrilldownContext } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 
@@ -75,6 +77,7 @@ export function createApplyInfluencerFiltersAction(
       );
     },
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
 

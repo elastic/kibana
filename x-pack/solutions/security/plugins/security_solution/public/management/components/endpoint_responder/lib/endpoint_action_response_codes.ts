@@ -85,6 +85,19 @@ const CODES = Object.freeze({
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
+  'ra_suspend-process_success_no-action': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.successNoAction',
+    {
+      defaultMessage:
+        'Action completed. The provided process was not found or was already suspended',
+    }
+  ),
+
+  'ra_suspend-process_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.successDone',
+    { defaultMessage: 'Action completed. The provided process was suspended' }
+  ),
+
   /**
    * Code will be used whenever you provide an entity_id or pid that isn't found.
    * suspend_process will always be an error because the process was not found to be suspended
@@ -103,9 +116,29 @@ const CODES = Object.freeze({
     { defaultMessage: 'The provided process cannot be suspended' }
   ),
 
+  'ra_suspend-process_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.notSupported',
+    { defaultMessage: 'Suspend process is not supported for the provided process' }
+  ),
+
+  'ra_suspend-process_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.failure',
+    { defaultMessage: 'Failed to suspend the process' }
+  ),
+
+  'ra_suspend-process_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.suspendProcess.invalidInput',
+    { defaultMessage: 'Invalid input provided' }
+  ),
+
   // -----------------------------------------------------------------
   // KILL-PROCESS CODES
   // -----------------------------------------------------------------
+  'ra_kill-process_success_done': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.successDone',
+    { defaultMessage: 'Action completed successfully' }
+  ),
+
   /**
    * Code will be used whenever you provide an entity_id that isn't found. Since entity_id is
    * unique, we can guarantee that it was legitimately not found and not just that the process
@@ -133,6 +166,21 @@ const CODES = Object.freeze({
   'ra_kill-process_error_not-permitted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.notPermittedSuccess',
     { defaultMessage: 'The provided process cannot be killed' }
+  ),
+
+  'ra_kill-process_error_not-supported': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.notSupported',
+    { defaultMessage: 'Kill process is not supported for the provided process' }
+  ),
+
+  'ra_kill-process_error_invalid-input': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.invalidInput',
+    { defaultMessage: 'Invalid input provided' }
+  ),
+
+  'ra_kill-process_error_failure': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.failure',
+    { defaultMessage: 'Failed to kill the process' }
   ),
 
   // -----------------------------------------------------------------
@@ -495,6 +543,29 @@ const CODES = Object.freeze({
   'ra_runscript_error_disk-quota': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.runscript.diskQuota',
     { defaultMessage: 'Too many actions' }
+  ),
+
+  // -----------------------------------------------------------------
+  // CANCEL CODES
+  // -----------------------------------------------------------------
+  ra_cancel_success_done: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.success',
+    { defaultMessage: 'Action was successfully canceled' }
+  ),
+  ra_cancel_success_forced: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.forcedSuccess',
+    { defaultMessage: 'Action was successfully canceled' }
+  ),
+  'ra_cancel_error_not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.notFound',
+    { defaultMessage: 'Action to be canceled was not found (it may no longer be pending)' }
+  ),
+  ra_cancel_success_canceling: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.cancel.canceling',
+    {
+      defaultMessage:
+        "The action is being cancelled - the remaining processing will terminate at the next safe point. Use '--force' to terminate it abruptly.",
+    }
   ),
 });
 

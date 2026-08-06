@@ -16,10 +16,14 @@ export class FeatureSettingsPage {
   // Content
   readonly content: Locator;
 
-  // Default Model Section
+  // Top settings card rows
   readonly defaultModelSection: Locator;
-  readonly defaultModelComboBox: Locator;
-  readonly disallowOtherModelsCheckbox: Locator;
+  readonly aiCapabilitiesRow: Locator;
+  readonly enableAiSwitch: Locator;
+  readonly globalModelRow: Locator;
+  readonly globalModelComboBox: Locator;
+  readonly featureSpecificModelsRow: Locator;
+  readonly featureSpecificModelsSwitch: Locator;
 
   // Feature Sections
   readonly allFeatureSections: Locator;
@@ -36,13 +40,19 @@ export class FeatureSettingsPage {
   readonly copyToModalApply: Locator;
   readonly copyToModalCancel: Locator;
 
-  // Reset Defaults Modal
+  // Per-sub-feature confirmation modals
+  readonly disableRecommendedModelsModal: Locator;
+  readonly disableRecommendedModelsConfirm: Locator;
   readonly resetDefaultsModal: Locator;
-  readonly resetDefaultsCancelButton: Locator;
+  readonly resetDefaultsConfirm: Locator;
 
   // Empty State
   readonly noModelsEmptyPrompt: Locator;
   readonly addModelsButton: Locator;
+
+  // Deprecation / EOL callouts
+  readonly deprecatedModelsCallout: Locator;
+  readonly eolModelsCallout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     // Header
@@ -53,10 +63,14 @@ export class FeatureSettingsPage {
     // Content
     this.content = this.page.testSubj.locator('modelSettingsContent');
 
-    // Default Model Section
+    // Top settings card
     this.defaultModelSection = this.page.testSubj.locator('defaultModelSection');
-    this.defaultModelComboBox = this.page.testSubj.locator('defaultModelComboBox');
-    this.disallowOtherModelsCheckbox = this.page.testSubj.locator('disallowOtherModelsCheckbox');
+    this.aiCapabilitiesRow = this.page.testSubj.locator('aiCapabilitiesRow');
+    this.enableAiSwitch = this.page.testSubj.locator('enableAiSwitch');
+    this.globalModelRow = this.page.testSubj.locator('globalModelRow');
+    this.globalModelComboBox = this.page.testSubj.locator('globalModelComboBox');
+    this.featureSpecificModelsRow = this.page.testSubj.locator('featureSpecificModelsRow');
+    this.featureSpecificModelsSwitch = this.page.testSubj.locator('featureSpecificModelsSwitch');
 
     // Feature Sections
     this.allFeatureSections = this.content.locator('[data-test-subj^="featureSection-"]');
@@ -73,15 +87,25 @@ export class FeatureSettingsPage {
     this.copyToModalApply = this.page.testSubj.locator('copy-to-modal-apply');
     this.copyToModalCancel = this.page.testSubj.locator('copy-to-modal-cancel');
 
-    // Reset Defaults Modal
-    this.resetDefaultsModal = this.page.testSubj.locator('resetDefaultsModal');
-    this.resetDefaultsCancelButton = this.resetDefaultsModal.locator(
-      '[data-test-subj="confirmModalCancelButton"]'
+    // Per-sub-feature confirmation modals
+    this.disableRecommendedModelsModal = this.page.testSubj.locator(
+      'disableRecommendedModelsModal'
     );
+    this.disableRecommendedModelsConfirm = this.disableRecommendedModelsModal.getByRole('button', {
+      name: /turn off recommended defaults/i,
+    });
+    this.resetDefaultsModal = this.page.testSubj.locator('resetDefaultsModal');
+    this.resetDefaultsConfirm = this.resetDefaultsModal.getByRole('button', {
+      name: /reset to default/i,
+    });
 
     // Empty State
     this.noModelsEmptyPrompt = this.page.testSubj.locator('settings-no-models');
     this.addModelsButton = this.page.testSubj.locator('settings-no-models-add-models');
+
+    // Deprecation / EOL callouts
+    this.deprecatedModelsCallout = this.page.testSubj.locator('deprecatedModelsCallout');
+    this.eolModelsCallout = this.page.testSubj.locator('eolModelsCallout');
   }
 
   // --- Navigation ---
@@ -102,6 +126,14 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator(`subFeatureCard-${featureId}`);
   }
 
+  public useRecommendedDefaultsToggle(featureId: string): Locator {
+    return this.page.testSubj.locator(`useRecommendedDefaultsToggle-${featureId}`);
+  }
+
+  public copyToButton(featureId: string): Locator {
+    return this.page.testSubj.locator(`copy-to-${featureId}`);
+  }
+
   public endpointRowsFor(featureId: string): Locator {
     return this.subFeatureCard(featureId).locator('[data-test-subj^="endpoint-row-"]');
   }
@@ -118,15 +150,62 @@ export class FeatureSettingsPage {
     return this.page.testSubj.locator('add-model-selectable').getByRole('option', { name });
   }
 
-  public copyToButton(featureId: string): Locator {
-    return this.page.testSubj.locator(`copy-to-${featureId}`);
-  }
-
   public copyToModalCheckbox(featureId: string): Locator {
     return this.page.locator(`#copy-target-${featureId}`);
   }
 
-  public resetLink(parentName: string): Locator {
-    return this.page.testSubj.locator(`reset-${parentName}`);
+  public modelStatusBadge(id: string, kind: 'preview' | 'deprecated' | 'eol'): Locator {
+    let prefix: string;
+    switch (kind) {
+      case 'preview':
+        prefix = 'modelPreviewBadge';
+        break;
+      case 'deprecated':
+        prefix = 'modelDeprecatedBadge';
+        break;
+      case 'eol':
+        prefix = 'modelEolBadge';
+        break;
+    }
+    return this.page.testSubj.locator(`${prefix}-${id}`);
+  }
+
+  public globalDefaultLockedRow(featureId: string): Locator {
+    return this.page.testSubj.locator(`global-default-row-${featureId}`);
+  }
+
+  // --- Composite actions ---
+
+  /**
+   * Switches a sub-feature into custom mode by toggling "Use recommended defaults" off and
+   * confirming the disable modal. Waits for the editable list to render before returning.
+   */
+  public async disableRecommendedDefaults(featureId: string): Promise<void> {
+    await this.useRecommendedDefaultsToggle(featureId).click();
+    await this.disableRecommendedModelsConfirm.click();
+    await this.disableRecommendedModelsModal.waitFor({ state: 'hidden' });
+    await this.addModelButton(featureId).waitFor({ state: 'visible' });
+  }
+
+  /** Picks a connector by visible name in the Global model combobox. */
+  public async selectGlobalModel(name: string): Promise<void> {
+    await this.page.components.comboBox('globalModelComboBox').setSelectedOptions([name]);
+  }
+
+  /**
+   * Picks a model in the Global model combobox without asserting it becomes the
+   * confirmed selection. Selecting an End-of-Life model intentionally flags the
+   * combobox invalid (which drives the EOL danger callout), and an invalid
+   * combobox reports no confirmed selection — so {@link selectGlobalModel},
+   * which verifies the value reads back as selected, can't be used here.
+   */
+  public async selectGlobalModelExpectingInvalid(name: string): Promise<void> {
+    await this.globalModelComboBox.locator('[data-test-subj="comboBoxInput"]').click();
+    // EUI stamps the options list with `${testSubj}-optionsList` as one of several
+    // space-separated test-subj tokens, so match it with `~=` (token match).
+    await this.page
+      .locator('[data-test-subj~="globalModelComboBox-optionsList"]')
+      .getByRole('option', { name })
+      .click();
   }
 }

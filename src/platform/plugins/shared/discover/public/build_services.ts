@@ -26,6 +26,7 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type {
   FilterManager,
   TimefilterContract,
@@ -65,11 +66,12 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
+import type { ProfileStateRegistry } from '../common/context_awareness';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
@@ -78,6 +80,7 @@ import {
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
+import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
 
 /**
  * Location state of internal Discover history instance
@@ -117,6 +120,7 @@ export interface DiscoverServices {
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
+  initialTabStateService: InitialTabStateService;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
@@ -124,7 +128,7 @@ export interface DiscoverServices {
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
   inspector: InspectorPublicPluginStart;
-  metadata: { branch: string };
+  metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
@@ -157,11 +161,13 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
+  logger: Logger;
 }
 
 export const buildServices = ({
@@ -175,6 +181,7 @@ export const buildServices = ({
   scopedHistory,
   urlTracker,
   profilesManager,
+  profileStateRegistry,
   ebtManager,
   setHeaderActionMenu = noop,
 }: {
@@ -188,6 +195,7 @@ export const buildServices = ({
   scopedHistory?: ScopedHistory;
   urlTracker: UrlTracker;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
@@ -225,11 +233,13 @@ export const buildServices = ({
     filterManager: plugins.data.query.filterManager,
     history,
     getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
+    initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
+      version: context.env.packageInfo.version,
     },
     navigation: plugins.navigation,
     share: plugins.share,
@@ -262,6 +272,7 @@ export const buildServices = ({
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
+    profileStateRegistry,
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
@@ -270,5 +281,6 @@ export const buildServices = ({
       plugins.embeddable.getStateTransfer(),
       core.application
     ),
+    logger: context.logger.get(),
   };
 };

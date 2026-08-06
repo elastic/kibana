@@ -26,20 +26,20 @@ Then you can run the parallel tests in another terminal:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --project local --config x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel.playwright.config.ts --grep serverless-observability_complete
+node scripts/playwright test --project local --config x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel.playwright.config.ts --grep serverless-observability_complete
 ```
 
 Alternatively, you can run sequential tests by passing in the proper playwright config:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/infra/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/infra/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --project local --config x-pack/solutions/observability/plugins/infra/test/scout/ui/playwright.config.ts --grep serverless-observability_complete
+node scripts/playwright test --project local --config x-pack/solutions/observability/plugins/infra/test/scout/ui/playwright.config.ts --grep serverless-observability_complete
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/infra/test/scout/ui/output`

@@ -8,7 +8,12 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod/v4';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type {
+  ToolCallWithResult,
+  ToolDefinition,
+  ToolType,
+  ToolConfirmationPolicy,
+} from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
@@ -70,27 +75,11 @@ export interface ToolAvailabilityConfig {
   cacheTtl?: number;
 }
 
-/**
- * Controls how often the user is prompted for confirmation when the agent calls a tool.
- *
- * - once:   prompt once per tool type for the entire conversation. After the user
- *           accepts (or rejects), all subsequent calls to the same tool reuse that
- *           response — including retries after failures.
- * - always: prompt on every individual tool call. Each invocation gets its own
- *           confirmation, even if it targets the same tool type.
- * - never:  skip confirmation entirely.
- */
-export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
-
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
-export interface ToolConfirmationPolicy<
+export interface BuiltInToolConfirmationPolicy<
   TParams extends Record<string, unknown> = Record<string, unknown>
-> {
-  /**
-   * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
-   */
-  askUser?: ToolConfirmationPolicyMode;
+> extends ToolConfirmationPolicy {
   /**
    * If set, will be used to get the confirmation
    */
@@ -108,9 +97,14 @@ export interface BuiltInToolSpecificConfig<
    */
   availability?: ToolAvailabilityConfig;
   /**
+   * When true, this tool is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
+  /**
    * Optional tool call policy to control tool call confirmation behavior
    */
-  confirmation?: ToolConfirmationPolicy<TParams>;
+  confirmation?: BuiltInToolConfirmationPolicy<TParams>;
   /**
    * Optional function to summarize a tool return for conversation history.
    * When provided, this function will be called when processing conversation history
@@ -118,6 +112,12 @@ export interface BuiltInToolSpecificConfig<
    * This helps prevent context bloat in long conversations.
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**
+   * Per-tool override of the tool-result length guardrail's token budget.
+   * When set, replaces the ToolManager-wide default for this tool specifically.
+   * Set to `Infinity` to fully exempt this tool's results from truncation.
+   */
+  maxResultTokens?: number;
 }
 
 /**
@@ -141,7 +141,10 @@ export type ToolReturnSummarizerFn = (
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   TResult extends ToolResult = ToolResult
-> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
+> extends Omit<
+      ToolDefinition,
+      'type' | 'readonly' | 'configuration' | 'experimental' | 'confirmation'
+    >,
     BuiltInToolSpecificConfig<z.infer<RunInput>> {
   /**
    * built-in tool types
@@ -162,7 +165,7 @@ export interface BuiltinToolDefinition<
   availability?: ToolAvailabilityConfig;
 }
 
-type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> &
+type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
   BuiltInToolSpecificConfig;
 
 export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;

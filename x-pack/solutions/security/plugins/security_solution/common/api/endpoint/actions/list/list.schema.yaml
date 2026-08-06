@@ -14,51 +14,61 @@ paths:
         - name: page
           in: query
           required: false
+          description: The page number to return.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/Page'
         - name: pageSize
           in: query
           required: false
+          description: The number of response actions to return per page.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/PageSize'
         - name: commands
           in: query
           required: false
+          description: A list of response action command names to filter by.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/Commands'
         - name: agentIds
           in: query
           required: false
+          description: A list of Elastic Agent IDs to filter the response actions by.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentIds'
         - name: userIds
           in: query
           required: false
+          description: A list of user IDs that submitted the response actions.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/UserIds'
         - name: startDate
           in: query
           required: false
+          description: A start date in ISO 8601 format or Date Math format (for example, `now-24h`).
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/StartDate'
         - name: endDate
           in: query
           required: false
+          description: An end date in ISO 8601 format or Date Math format (for example, `now`).
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/EndDate'
         - name: agentTypes
           in: query
           required: false
+          description: The agent type to filter response actions by. Defaults to `endpoint`.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentTypes'
         - name: withOutputs
           in: query
           required: false
+          description: A list of response action IDs whose outputs should be included in the response.
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/WithOutputs'
         - name: types
           in: query
           required: false
+          description: A list of response action types to filter by (`automated`, `manual`).
           schema:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/Types'
       responses:
@@ -68,6 +78,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetEndpointActionListResponse'
+              examples:
+                actionsList:
+                  summary: A list of response actions
+                  value:
+                    page: 1
+                    pageSize: 10
+                    total: 2
+                    startDate: 'now-24h/h'
+                    endDate: 'now'
+                    elasticAgentIds:
+                      - 'afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0'
+                    data:
+                      - id: 'b3d6de74-36b0-4fa8-be46-c375bf1771bf'
+                        agents:
+                          - 'afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0'
+                        command: 'running-processes'
+                        agentType: 'endpoint'
+                        startedAt: '2022-08-08T15:24:57.402Z'
+                        isCompleted: true
+                        completedAt: '2022-08-08T09:50:47.672Z'
+                        wasSuccessful: true
+                        isExpired: false
+                        createdBy: 'elastic'
+                      - id: '43b4098b-8752-4fbb-a7a7-6df7c74d0ee3'
+                        agents:
+                          - 'afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0'
+                        command: 'isolate'
+                        agentType: 'endpoint'
+                        startedAt: '2022-08-08T15:23:37.359Z'
+                        isCompleted: true
+                        completedAt: '2022-08-08T10:41:57.352Z'
+                        wasSuccessful: true
+                        isExpired: false
+                        createdBy: 'elastic'
 components:
   schemas:
     GetEndpointActionListResponse:

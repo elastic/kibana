@@ -25,10 +25,58 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.activeTab).toBe('workflow');
+    expect(result.current.editorView).toBe('yaml');
+    expect(result.current.graphDirection).toBe('TB');
     expect(result.current.selectedExecutionId).toBeUndefined();
     expect(result.current.selectedStepExecutionId).toBeUndefined();
     expect(result.current.selectedStepId).toBeUndefined();
     expect(result.current.shouldAutoResume).toBe(false);
+  });
+
+  it('should parse view=graph and direction=LR from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=graph&direction=LR']),
+    });
+
+    expect(result.current.editorView).toBe('graph');
+    expect(result.current.graphDirection).toBe('LR');
+  });
+
+  it('should update URL when setEditorView is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?stepId=my-step']),
+    });
+
+    act(() => {
+      result.current.setEditorView('graph');
+    });
+
+    expect(result.current.editorView).toBe('graph');
+    expect(result.current.selectedStepId).toBeUndefined();
+  });
+
+  it('should update URL when setGraphDirection is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=graph']),
+    });
+
+    act(() => {
+      result.current.setGraphDirection('LR');
+    });
+
+    expect(result.current.graphDirection).toBe('LR');
+  });
+
+  it('should omit direction from URL when setGraphDirection is TB', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?direction=LR']),
+    });
+
+    act(() => {
+      result.current.setGraphDirection('TB');
+    });
+
+    expect(result.current.graphDirection).toBe('TB');
   });
 
   it('should parse tab from URL', () => {
@@ -70,6 +118,14 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.shouldAutoResume).toBe(false);
+  });
+
+  it('should parse replayExecutionId from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+    });
+
+    expect(result.current.replayExecutionId).toBe('exec-1');
   });
 
   it('should update URL when setActiveTab is called', () => {
@@ -150,6 +206,18 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.shouldAutoResume).toBe(false);
+  });
+
+  it('should clear replayExecutionId when clearReplayExecutionId is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+    });
+
+    act(() => {
+      result.current.clearReplayExecutionId();
+    });
+
+    expect(result.current.replayExecutionId).toBeUndefined();
   });
 
   it('should support updateUrlState for arbitrary updates', () => {

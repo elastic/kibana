@@ -18,12 +18,22 @@ project:
   sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client
 dependsOn:
   - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/management-settings-ids'
   - '@kbn/content-management-favorites-public'
   - '@kbn/content-management-tags'
   - '@kbn/content-management-content-editor'
+  - '@kbn/content-management-content-insights-public'
+  - '@kbn/ebt-tools'
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/logging'
+  - '@kbn/user-profile-components'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/usage-collection-plugin'
 tags:
   - shared-browser
   - package

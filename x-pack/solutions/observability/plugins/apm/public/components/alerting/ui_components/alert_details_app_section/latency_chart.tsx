@@ -9,7 +9,7 @@ import type { Theme } from '@elastic/charts';
 import type { RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
@@ -28,12 +28,16 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { getAggsTypeFromRule } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { AnomalyChartPanel } from './anomaly_chart_panel';
+import { AnomalySeverityBadge, type AnomalyChartInfo } from './anomaly_severity_badge';
 
 export function LatencyChart({
   alert,
@@ -44,7 +48,8 @@ export function LatencyChart({
   environment,
   start,
   end,
-  latencyAggregationType,
+  ruleAggregationType,
+  latencyAggregationType: latencyAggregationTypeProp,
   setLatencyAggregationType,
   setTransactionType,
   comparisonChartTheme,
@@ -55,10 +60,13 @@ export function LatencyChart({
   kuery = '',
   filters,
   threshold,
+  anomaly,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   transactionName?: string;
   serviceName: string;
@@ -66,7 +74,8 @@ export function LatencyChart({
   start: string;
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
-  latencyAggregationType: LatencyAggregationType;
+  ruleAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   setLatencyAggregationType?: (value: LatencyAggregationType) => void;
   setTransactionType?: (value: string) => void;
   comparisonEnabled: boolean;
@@ -74,9 +83,14 @@ export function LatencyChart({
   timeZone: string;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
+  anomaly?: AnomalyChartInfo;
   kuery?: string;
   filters?: BoolQuery;
   ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -92,9 +106,12 @@ export function LatencyChart({
       : ApmDocumentType.ServiceTransactionMetric,
   });
 
+  const latencyAggregationType =
+    latencyAggregationTypeProp ?? getAggsTypeFromRule(ruleAggregationType ?? 'avg');
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
+      if (serviceName && start && end && latencyAggregationType && preferred) {
         return callApmApi(`GET /internal/apm/services/{serviceName}/transactions/charts/latency`, {
           params: {
             path: { serviceName },
@@ -137,7 +154,8 @@ export function LatencyChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     customAlertEvaluationThreshold,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     dateFormat,
   });
 
@@ -160,11 +178,11 @@ export function LatencyChart({
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
-  const showTransactionTypeSelect = transactionTypes && setTransactionType;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasBorder={true}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -175,6 +193,11 @@ export function LatencyChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {anomaly && (
+            <EuiFlexItem grow={false}>
+              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+            </EuiFlexItem>
+          )}
           {setLatencyAggregationType && (
             <EuiFlexItem grow={false}>
               <LatencyAggregationTypeSelect
@@ -205,18 +228,20 @@ export function LatencyChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={APM_CHART_EBT_ELEMENTS.LATENCY}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="latencyChart"
               annotations={alertAnnotations}
@@ -232,7 +257,7 @@ export function LatencyChart({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </AnomalyChartPanel>
     </EuiFlexItem>
   );
 }

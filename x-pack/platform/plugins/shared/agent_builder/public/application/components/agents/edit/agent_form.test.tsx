@@ -10,7 +10,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { AgentForm } from './agent_form';
 import type { AgentEditState } from '../../../hooks/agents/use_agent_edit';
 
@@ -20,7 +20,7 @@ const editModeState: AgentEditState = {
   id: 'test-agent-id',
   name: 'Test Agent',
   description: 'Test description',
-  visibility: AgentVisibility.Public,
+  access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -174,5 +174,41 @@ describe('AgentForm', () => {
     renderWithIntl(<AgentForm />);
 
     expect(screen.queryByTestId('agentFormOwnerLabel')).not.toBeInTheDocument();
+  });
+
+  it('displays the Managed badge in edit mode when the agent has a non-chat type', () => {
+    (useAgentEdit as jest.Mock).mockReturnValue({
+      state: editModeState,
+      agentType: 'platform.sig_events.investigation-type',
+      isLoading: false,
+      isSubmitting: false,
+      submit: mockSubmit,
+      tools: [],
+      skills: [],
+      plugins: [],
+      error: undefined,
+    });
+
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+    expect(screen.getByTestId('agentBuilderAgentPreconfiguredTypeBadge')).toBeInTheDocument();
+  });
+
+  it('does not display the Managed badge for a chat-type agent', () => {
+    (useAgentEdit as jest.Mock).mockReturnValue({
+      state: editModeState,
+      agentType: 'chat',
+      isLoading: false,
+      isSubmitting: false,
+      submit: mockSubmit,
+      tools: [],
+      skills: [],
+      plugins: [],
+      error: undefined,
+    });
+
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+    expect(screen.queryByTestId('agentBuilderAgentPreconfiguredTypeBadge')).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,109 @@
+{
+  "sha1": "369b0cb8363b3ae5ec77ca518d2025f4e80412b8",
+  "tests": [
+    {
+      "id": "a63936a2bb86807-5f465142721259b",
+      "title": "Canvas PDF report generation accepts Canvas jobParams and enqueues a report job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts",
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "a63936a2bb86807-2210ce1c3203efd",
+      "title": "Canvas PDF report generation denies report generation without the generate_report privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts",
+        "line": 97,
+        "column": 10
+      }
+    },
+    {
+      "id": "be5a893936592e4-c99be1c84500192",
+      "title": "Canvas feature controls — canvas disabled in space canvas:all user has canvas hidden when canvas is disabled in the space (navlink + create)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/canvas_disabled_space.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "be5a893936592e4-02a47f771fda74e",
+      "title": "Canvas feature controls — canvas disabled in space canvas:all user cannot edit workpads when canvas is disabled in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/canvas_disabled_space.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "afd0b20c17fe502-ce541360e749a1e",
+      "title": "Canvas feature controls — no canvas privileges user without canvas privileges has canvas capabilities zeroed out (hidden navlink)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/no_canvas_privileges.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "afd0b20c17fe502-73b5ad9ef2cf88b",
+      "title": "Canvas feature controls — no canvas privileges user without canvas privileges cannot create workpads (canvas capabilities absent)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/feature_controls/no_canvas_privileges.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "b9e7e236c2269bb-10698e507b8b993",
+      "title": "Canvas workpad migrations — SO _import smoke test imports an 8.2 workpad without migration errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/workpad_migrations.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "b9e7e236c2269bb-dd1a92a9f9b7e7a",
+      "title": "Canvas workpad migrations — SO _import smoke test migrates a workpad from 8.1 without errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/canvas/test/scout/api/tests/workpad_migrations.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    }
+  ]
+}

@@ -188,7 +188,6 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
             defaultMessage: 'Find in table',
           })}
-          delay="long"
         >
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}

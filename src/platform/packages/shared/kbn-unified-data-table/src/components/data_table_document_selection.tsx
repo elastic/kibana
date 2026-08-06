@@ -157,6 +157,7 @@ export function DataTableDocumentToolbarBtn({
   toastNotifications,
   columns,
   customBulkActions,
+  hideDefaultBulkActions,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
@@ -171,6 +172,8 @@ export function DataTableDocumentToolbarBtn({
   toastNotifications: ToastsStart;
   columns: string[];
   customBulkActions?: CustomBulkActions;
+  /** When true, hides the built-in copy and show-selected bulk actions. */
+  hideDefaultBulkActions?: boolean;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
@@ -192,21 +195,26 @@ export function DataTableDocumentToolbarBtn({
     return [
       // Custom bulk actions
       ...(customBulkActions
-        ? customBulkActions.map((bulkAction) => {
-            return (
-              <EuiContextMenuItem
-                data-test-subj={bulkAction['data-test-subj']}
-                key={bulkAction.key}
-                icon={bulkAction.icon}
-                onClick={() => {
-                  closePopover();
-                  bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
-                }}
-              >
-                {bulkAction.label}
-              </EuiContextMenuItem>
-            );
-          })
+        ? customBulkActions
+            .filter(
+              (bulkAction) =>
+                bulkAction.isAvailable?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
+            )
+            .map((bulkAction) => {
+              return (
+                <EuiContextMenuItem
+                  data-test-subj={bulkAction['data-test-subj']}
+                  key={bulkAction.key}
+                  icon={bulkAction.icon}
+                  onClick={() => {
+                    closePopover();
+                    bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
+                  }}
+                >
+                  {bulkAction.label}
+                </EuiContextMenuItem>
+              );
+            })
         : []),
       // Compare selected documents
       ...(enableComparisonMode && selectedDocsCount > 1
@@ -218,78 +226,82 @@ export function DataTableDocumentToolbarBtn({
             />,
           ]
         : []),
-      // Copy results to clipboard as text
-      <DataTableCopyRowsAsText
-        key="copyRowsAsText"
-        format={CopyAsTextFormat.tabular}
-        rows={rows}
-        toastNotifications={toastNotifications}
-        columns={columns}
-        onCompleted={closePopover}
-      />,
-      // Copy results to clipboard as markdown
-      <DataTableCopyRowsAsText
-        key="copyRowsAsMarkdown"
-        format={CopyAsTextFormat.markdown}
-        rows={rows}
-        toastNotifications={toastNotifications}
-        columns={columns}
-        onCompleted={closePopover}
-      />,
-      // Copy results to clipboard as JSON
-      <DataTableCopyRowsAsJson
-        key="copyRowsAsJson"
-        rows={rows}
-        toastNotifications={toastNotifications}
-        onCompleted={closePopover}
-      />,
-      isFilterActive ? (
-        // Show all documents
-        <EuiContextMenuItem
-          data-test-subj="dscGridShowAllDocuments"
-          key="showAllDocuments"
-          icon="eye"
-          onClick={() => {
-            closePopover();
-            setIsFilterActive(false);
-          }}
-        >
-          {isPlainRecord ? (
-            <FormattedMessage
-              id="unifiedDataTable.showAllResults"
-              defaultMessage="Show all results"
-            />
-          ) : (
-            <FormattedMessage
-              id="unifiedDataTable.showAllDocuments"
-              defaultMessage="Show all documents"
-            />
-          )}
-        </EuiContextMenuItem>
-      ) : (
-        // Show selected documents only
-        <EuiContextMenuItem
-          data-test-subj="dscGridShowSelectedDocuments"
-          key="showSelectedDocuments"
-          icon="eye"
-          onClick={() => {
-            closePopover();
-            setIsFilterActive(true);
-          }}
-        >
-          {isPlainRecord ? (
-            <FormattedMessage
-              id="unifiedDataTable.showSelectedResultsOnly"
-              defaultMessage="Show selected results only"
-            />
-          ) : (
-            <FormattedMessage
-              id="unifiedDataTable.showSelectedDocumentsOnly"
-              defaultMessage="Show selected documents only"
-            />
-          )}
-        </EuiContextMenuItem>
-      ),
+      ...(!hideDefaultBulkActions
+        ? [
+            // Copy results to clipboard as text
+            <DataTableCopyRowsAsText
+              key="copyRowsAsText"
+              format={CopyAsTextFormat.tabular}
+              rows={rows}
+              toastNotifications={toastNotifications}
+              columns={columns}
+              onCompleted={closePopover}
+            />,
+            // Copy results to clipboard as markdown
+            <DataTableCopyRowsAsText
+              key="copyRowsAsMarkdown"
+              format={CopyAsTextFormat.markdown}
+              rows={rows}
+              toastNotifications={toastNotifications}
+              columns={columns}
+              onCompleted={closePopover}
+            />,
+            // Copy results to clipboard as JSON
+            <DataTableCopyRowsAsJson
+              key="copyRowsAsJson"
+              rows={rows}
+              toastNotifications={toastNotifications}
+              onCompleted={closePopover}
+            />,
+            isFilterActive ? (
+              // Show all documents
+              <EuiContextMenuItem
+                data-test-subj="dscGridShowAllDocuments"
+                key="showAllDocuments"
+                icon="eye"
+                onClick={() => {
+                  closePopover();
+                  setIsFilterActive(false);
+                }}
+              >
+                {isPlainRecord ? (
+                  <FormattedMessage
+                    id="unifiedDataTable.showAllResults"
+                    defaultMessage="Show all results"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="unifiedDataTable.showAllDocuments"
+                    defaultMessage="Show all documents"
+                  />
+                )}
+              </EuiContextMenuItem>
+            ) : (
+              // Show selected documents only
+              <EuiContextMenuItem
+                data-test-subj="dscGridShowSelectedDocuments"
+                key="showSelectedDocuments"
+                icon="eye"
+                onClick={() => {
+                  closePopover();
+                  setIsFilterActive(true);
+                }}
+              >
+                {isPlainRecord ? (
+                  <FormattedMessage
+                    id="unifiedDataTable.showSelectedResultsOnly"
+                    defaultMessage="Show selected results only"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="unifiedDataTable.showSelectedDocumentsOnly"
+                    defaultMessage="Show selected documents only"
+                  />
+                )}
+              </EuiContextMenuItem>
+            ),
+          ]
+        : []),
       // Clear selection
       <EuiContextMenuItem
         data-test-subj="dscGridClearSelectedDocuments"
@@ -318,6 +330,7 @@ export function DataTableDocumentToolbarBtn({
     setIsFilterActive,
     clearAllSelectedDocs,
     customBulkActions,
+    hideDefaultBulkActions,
   ]);
 
   const toggleSelectionToolbar = useCallback(
@@ -327,6 +340,9 @@ export function DataTableDocumentToolbarBtn({
 
   const selectedRowsMenuButton = (
     <EuiPopover
+      aria-label={i18n.translate('unifiedDataTable.selectedRowsPopover', {
+        defaultMessage: 'Selected rows',
+      })}
       closePopover={() => setIsSelectionPopoverOpen(false)}
       isOpen={isSelectionPopoverOpen}
       panelPaddingSize="none"
@@ -340,7 +356,7 @@ export function DataTableDocumentToolbarBtn({
           isSelected={isFilterActive}
           badgeContent={fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convert(selectedDocsCount)}
+            .convertToText(selectedDocsCount)}
           css={css`
             .euiButtonEmpty__content {
               flex-direction: row-reverse;
@@ -406,7 +422,7 @@ export function DataTableDocumentToolbarBtn({
               values={{
                 rowsCount: fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(rows.length),
+                  .convertToText(rows.length),
               }}
             />
           </EuiDataGridToolbarControl>

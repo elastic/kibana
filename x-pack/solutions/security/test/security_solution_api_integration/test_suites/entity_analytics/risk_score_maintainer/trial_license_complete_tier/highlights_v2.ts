@@ -10,22 +10,28 @@ import { v4 as uuidv4 } from 'uuid';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EntityStoreUtils, cleanUpRiskScoreMaintainer } from '../../utils';
+import {
+  EntityStoreUtils,
+  cleanUpRiskScoreMaintainer,
+  entityMaintainerRouteHelpersFactory,
+} from '../../utils';
 import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
 const VULNERABILITIES_INDEX_TEMPLATE_NAME = 'test-highlights-v2-vulnerabilities-template';
-const ML_JOB_ID = 'test-highlights-v2-security-job';
-const ML_ANOMALY_INDEX = `.ml-anomalies-custom-${ML_JOB_ID}`;
+const ML_JOB_ID = 'high_count_events_for_a_host_name_ea';
+const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
+const ML_ANOMALY_RECORD_ID = 'test-highlights-v2-anomaly-record';
 
 export default ({ getService }: FtrProviderContext): void => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
+  const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
   const entityStoreUtils = EntityStoreUtils(getService);
+  const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
 
   const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
   const RISK_SCORE_DATA_STREAM = 'risk-score.risk-score-default';
@@ -34,6 +40,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const hostEuid = `host:${hostName}`;
   const userName = 'highlights-v2-user';
   const userEuid = `user:${userName}`;
+  const unassignedHostName = 'highlights-v2-unassigned-host.example.com';
+  const unassignedHostEuid = `host:${unassignedHostName}`;
+  const explicitUnassignedHostName = 'highlights-v2-explicit-unassigned-host.example.com';
+  const explicitUnassignedHostEuid = `host:${explicitUnassignedHostName}`;
 
   const hostAlertId = uuidv4();
   const userAlertId = uuidv4();
@@ -71,27 +81,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .delete({ index: RISK_SCORE_DATA_STREAM, ignore_unavailable: true })
         .catch(() => {});
 
-      // Install the entity store and risk score maintainer, which creates the data stream and index template
+      // Install the entity store. installEntityStoreV2 stops the maintainer
+      // after install, so the data stream is not yet created. A single
+      // synchronous maintainer run creates risk score resources before we
+      // index direct test fixtures.
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['host', 'user'],
         waitForEntities: false,
-        maintainerAutoStart: true,
       });
-
-      // Wait for the risk score data stream to be fully created before indexing into it.
-      // Task Manager scheduling is non-deterministic under CI load; 120 s gives enough headroom.
-      await retry.waitForWithTimeout('risk score data stream to exist', 120_000, async () => {
-        try {
-          const response = await es.indices.getDataStream({ name: RISK_SCORE_DATA_STREAM });
-          return response.data_streams.length > 0;
-        } catch {
-          return false;
-        }
-      });
-
-      // Additional wait to ensure the risk score maintainer has completed its first run
-      // otherwise it will overwrite the test risk scores we're directly indexing
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      await maintainerRoutes.runMaintainerSync('risk-score');
 
       // Index host and user entities directly into the entity store latest index
       const entityOperations = [
@@ -125,6 +123,37 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           asset: {
             criticality: 'medium_impact',
+          },
+        },
+        // Unassigned criticality: field omitted (UI shows Unassigned)
+        {
+          index: { _index: LATEST_ALIAS, _id: hashEuid(unassignedHostEuid) },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          entity: {
+            id: unassignedHostEuid,
+            EngineMetadata: { Type: 'host' },
+          },
+          host: {
+            name: unassignedHostName,
+          },
+        },
+        // Unassigned criticality: field present as unassigned
+        {
+          index: { _index: LATEST_ALIAS, _id: hashEuid(explicitUnassignedHostEuid) },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          entity: {
+            id: explicitUnassignedHostEuid,
+            EngineMetadata: { Type: 'host' },
+          },
+          host: {
+            name: explicitUnassignedHostName,
+          },
+          asset: {
+            criticality: 'unassigned',
           },
         },
       ];
@@ -265,32 +294,17 @@ export default ({ getService }: FtrProviderContext): void => {
         refresh: true,
       });
 
-      // Create a minimal ML anomaly detection job with groups:['security'] so
-      // isSecurityJob() recognises it and jobsSummary() returns it to the service.
-      await es.ml.putJob({
-        job_id: ML_JOB_ID,
-        description: 'Test security job for entity highlights v2',
-        groups: ['security'],
-        custom_settings: { security_app_display_name: 'Test Highlights Security Job' },
-        analysis_config: {
-          bucket_span: '15m',
-          detectors: [{ function: 'count' }],
-          influencers: ['host.name'],
-        },
-        data_description: { time_field: '@timestamp' },
-      });
-
-      // Index anomaly records directly into the ML results index for this job.
-      // ML registers an index template for .ml-anomalies-* on startup, so the
-      // backing index gets proper keyword/numeric mappings automatically.
+      // Index an anomaly record directly into the shared ML results index, using a
+      // job_id from a bundled Security ML module manifest (no real ML job needs to
+      // exist for getSecurityMlJobIds()/searchEntityAnomalies() to pick it up).
       await es.bulk({
         operations: [
-          { index: { _index: ML_ANOMALY_INDEX } },
+          { index: { _index: ML_ANOMALIES_SHARED_INDEX, _id: ML_ANOMALY_RECORD_ID } },
           {
             job_id: ML_JOB_ID,
             result_type: 'record',
             timestamp: Date.now() - 60 * 60 * 1000, // 1 hour ago, within the test time range
-            bucket_span: 900,
+            bucket_span: 3600,
             detector_index: 0,
             is_interim: false,
             record_score: 85.0,
@@ -298,8 +312,10 @@ export default ({ getService }: FtrProviderContext): void => {
             probability: 0.000001,
             typical: [1.0],
             actual: [100.0],
-            function: 'count',
-            function_description: 'count',
+            function: 'high_count',
+            function_description: 'high_count',
+            partition_field_name: 'host.name',
+            partition_field_value: hostName,
             host: { name: hostName },
             influencers: [
               { influencer_field_name: 'host.name', influencer_field_values: [hostName] },
@@ -317,9 +333,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await es.indices
         .deleteIndexTemplate({ name: VULNERABILITIES_INDEX_TEMPLATE_NAME })
         .catch(() => {});
-      await es.ml.deleteJob({ job_id: ML_JOB_ID, force: true }).catch(() => {});
-      await es.indices
-        .delete({ index: ML_ANOMALY_INDEX, ignore_unavailable: true })
+      await es
+        .deleteByQuery({
+          index: ML_ANOMALIES_SHARED_INDEX,
+          query: { ids: { values: [ML_ANOMALY_RECORD_ID] } },
+          refresh: true,
+        })
         .catch(() => {});
       await kibanaServer.uiSettings.update({ 'securitySolution:defaultAnomalyScore': 50 });
     });
@@ -340,21 +359,21 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.riskScore).toHaveLength(1);
       expect(body.summary.riskScore[0]).toMatchObject({
         id_field: ['entity.id'],
-        score: [75],
-        asset_criticality_contribution_score: '10',
+        score: ['75.00'],
+        asset_criticality_contribution_score: '10.00',
         alert_inputs: [
           expect.objectContaining({
-            risk_score: ['50'],
-            contribution_score: ['75'],
+            risk_score: ['50.00'],
+            contribution_score: ['75.00'],
           }),
         ],
       });
 
-      // Asset criticality sourced from entity store
+      // Asset criticality sourced from entity store — assigned criticality only
       expect(body.summary.assetCriticality).toBeDefined();
       expect(body.summary.assetCriticality).toHaveLength(1);
-      expect(body.summary.assetCriticality[0]).toMatchObject({
-        'asset.criticality': ['high_impact'],
+      expect(body.summary.assetCriticality[0]).toEqual({
+        'asset.criticality': ['High Impact'],
       });
 
       // Vulnerabilities
@@ -373,13 +392,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.anomalies).toHaveLength(1);
       expect(body.summary.anomalies[0]).toMatchObject({
         score: 85,
-        id: 'test-highlights-v2-security-job',
+        id: ML_JOB_ID,
       });
 
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
@@ -398,32 +417,26 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.riskScore).toHaveLength(1);
       expect(body.summary.riskScore[0]).toMatchObject({
         id_field: ['entity.id'],
-        score: [45],
-        asset_criticality_contribution_score: '0',
+        score: ['45.00'],
+        asset_criticality_contribution_score: '0.00',
         alert_inputs: [
           expect.objectContaining({
-            risk_score: ['30'],
-            contribution_score: ['45'],
+            risk_score: ['30.00'],
+            contribution_score: ['45.00'],
           }),
         ],
       });
 
       expect(body.summary.assetCriticality).toBeDefined();
       expect(body.summary.assetCriticality).toHaveLength(1);
-      expect(body.summary.assetCriticality[0]).toMatchObject({
-        'asset.criticality': ['medium_impact'],
+      expect(body.summary.assetCriticality[0]).toEqual({
+        'asset.criticality': ['Medium Impact'],
       });
 
-      // Vulnerabilities
-      expect(body.summary.vulnerabilities).toBeDefined();
-      expect(body.summary.vulnerabilities).toHaveLength(0);
-      expect(body.summary.vulnerabilitiesTotal).toMatchObject({
-        HIGH: 0,
-        CRITICAL: 0,
-        MEDIUM: 0,
-        LOW: 0,
-        NONE: 0,
-      });
+      // Vulnerabilities only apply to hosts — omitted for users so the LLM
+      // does not render a zeroed-out Vulnerabilities section
+      expect(body.summary.vulnerabilities).toBeUndefined();
+      expect(body.summary.vulnerabilitiesTotal).toBeUndefined();
 
       // Anomalies
       expect(body.summary.anomalies).toBeDefined();
@@ -432,8 +445,36 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
+    });
+
+    it('should return empty assetCriticality when criticality is unassigned', async () => {
+      const { body: missingCriticalityBody } = await entityAnalyticsApi
+        .entityDetailsHighlights({
+          body: {
+            ...baseRequestBody,
+            entityType: 'host' as const,
+            entityIdentifier: unassignedHostEuid,
+          },
+        })
+        .expect(200);
+
+      // Entity exists but has no asset.criticality field
+      expect(missingCriticalityBody.summary.assetCriticality).toEqual([]);
+
+      const { body: explicitUnassignedBody } = await entityAnalyticsApi
+        .entityDetailsHighlights({
+          body: {
+            ...baseRequestBody,
+            entityType: 'host' as const,
+            entityIdentifier: explicitUnassignedHostEuid,
+          },
+        })
+        .expect(200);
+
+      // Explicit unassigned value must also yield an empty array.
+      expect(explicitUnassignedBody.summary.assetCriticality).toEqual([]);
     });
 
     it('should return empty highlights for non-existent entity', async () => {
@@ -449,10 +490,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.summary.riskScore).toEqual([]);
       expect(body.summary.assetCriticality).toEqual([]);
-      expect(body.summary.vulnerabilities).toEqual([]);
+      expect(body.summary.vulnerabilities).toBeUndefined();
+      expect(body.summary.vulnerabilitiesTotal).toBeUndefined();
       expect(body.summary.anomalies).toEqual([]);
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 

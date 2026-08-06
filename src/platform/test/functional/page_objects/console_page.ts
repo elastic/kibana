@@ -247,6 +247,36 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickPlayAndWaitForResults() {
+    // Retry the Play click until the request starts. A single click can be a no-op if the editor
+    // hasn't finished registering the current request (see #240147).
+    await this.retry.try(async () => {
+      await this.clickPlay();
+      const started =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge')) ||
+        (await this.testSubjects.exists('consoleMonacoOutput'));
+      if (!started) throw new Error('Console request did not start after clicking Play');
+    });
+
+    // Wait for loading indicators to clear and output to be present.
+    await this.waitForRequestToComplete();
+  }
+
+  public async waitForRequestToComplete() {
+    await this.retry.try(async () => {
+      const inProgress =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const outputReady = await this.testSubjects.exists('consoleMonacoOutput');
+      const statusReady = await this.testSubjects.exists('consoleResponseStatusBadge');
+
+      if (inProgress || !outputReady || !statusReady) {
+        throw new Error('Expected console request to finish and render output');
+      }
+    });
+  }
+
   public async isPlayButtonVisible() {
     return await this.testSubjects.exists('sendRequestButton');
   }
@@ -374,6 +404,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {
@@ -452,12 +487,10 @@ export class ConsolePageObject extends FtrService {
   }
 
   async skipTourIfExists() {
-    await this.retry.try(async () => {
-      const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
-      if (tourShown) {
-        await this.clickSkipTour();
-      }
-    });
+    const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+    if (tourShown) {
+      await this.clickSkipTour();
+    }
   }
 
   public async clickContextMenu() {
@@ -594,5 +627,35 @@ export class ConsolePageObject extends FtrService {
 
   public async isOutputPanelEmptyStateVisible() {
     return await this.testSubjects.exists('consoleOutputPanelEmptyState');
+  }
+
+  public async clickOutputFilterButton() {
+    await this.testSubjects.click('consoleOutputFilterButton');
+  }
+
+  public async isOutputFilterRowVisible() {
+    return (
+      (await this.testSubjects.exists('filterJq')) ||
+      (await this.testSubjects.exists('filterRegex'))
+    );
+  }
+
+  public async typeInFilterInput(text: string) {
+    const testSubj = (await this.testSubjects.exists('filterJq')) ? 'filterJq' : 'filterRegex';
+    const input = await this.testSubjects.find(testSubj);
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+  }
+
+  public async submitFilter() {
+    await this.testSubjects.click('consoleOutputFilterApply');
+  }
+
+  public async isOutputFilterButtonActive() {
+    const button = await this.testSubjects.find('consoleOutputFilterButton');
+    const wrapper = await button.findByXpath('..');
+    // The dot indicator is a sibling span inside the wrapper div
+    const children = await wrapper.findAllByCssSelector('span[style*="border-radius"]');
+    return children.length > 0;
   }
 }

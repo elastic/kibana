@@ -6,7 +6,14 @@
  */
 
 export {
+  ConversationAccessControlMode,
+  getDefaultConversationAccessControl,
+  type ConversationAccessControl,
+} from './access_control';
+export {
   ConversationRoundStatus,
+  ConversationDisplayStatus,
+  ConversationOriginType,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -14,11 +21,21 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationOrigin,
+  type ConversationRoundAuthor,
+  type ConversationRoundOrigin,
   type ConversationInternalState,
+  type TodoItem,
+  type TodoStatus,
   type BackgroundExecutionState,
   type BackgroundExecutionCompletedAt,
   type BackgroundAgentCompleteStep,
   isBackgroundAgentCompleteStep,
+  type TodosStep,
+  type TodosStepData,
+  isTodosStep,
+  findTodosStep,
+  carriedOverTodos,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,
@@ -37,6 +54,15 @@ export {
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
+  type RelevantSkill,
+  type RelevantSkillsStep,
+  type RelevantSkillsStepData,
+  createRelevantSkillsStep,
+  isRelevantSkillsStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -94,5 +120,17 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
+export type { ConversationListOptions } from './conversation_list';

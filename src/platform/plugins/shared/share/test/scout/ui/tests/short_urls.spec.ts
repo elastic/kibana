@@ -12,10 +12,19 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Short URLs', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      defaultRoute: '/app/home#/',
+    });
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.unset('defaultRoute');
+  });
+
   test('shows Page for missing short URL', async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');
-
     // Navigate to a non-existent short URL
     await pageObjects.share.gotoNonExistentShortUrl('foofoo');
 

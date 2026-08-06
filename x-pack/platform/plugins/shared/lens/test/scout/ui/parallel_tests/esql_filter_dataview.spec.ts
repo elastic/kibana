@@ -60,7 +60,7 @@ spaceTest.describe.skip(
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
-          await dashboard.addNewPanel('ES|QL');
+          await dashboard.addNewESQLPanel();
 
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
         });
@@ -78,7 +78,7 @@ spaceTest.describe.skip(
         });
 
         await spaceTest.step('add a Lens chart panel using flights data view', async () => {
-          await dashboard.openNewLensPanel();
+          await dashboard.addNewLensPanel();
           await expect(page.testSubj.locator('lnsApp')).toBeVisible();
 
           await page.testSubj.click('lns-dataView-switch-link');
@@ -89,7 +89,7 @@ spaceTest.describe.skip(
             )
             .click();
 
-          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 30_000 });
+          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 10_000 });
           await page.testSubj.click('fieldToggle-AvgTicketPrice');
           await pageObjects.lens.saveAndReturn();
           await dashboard.waitForRenderComplete();
@@ -115,17 +115,15 @@ spaceTest.describe.skip(
         });
 
         await spaceTest.step('verify data view selector has no duplicate names', async () => {
-          const dataViewCombo = page.testSubj.locator('filterIndexPatternsSelect');
-          await expect(dataViewCombo).toBeVisible({ timeout: 5_000 });
+          await expect(page.testSubj.locator('filterIndexPatternsSelect')).toBeVisible({
+            timeout: 5_000,
+          });
 
-          await dataViewCombo.locator('[data-test-subj="comboBoxInput"]').click();
-
-          const optionsList = page.locator('.euiFilterSelectItem');
-          await expect.poll(() => optionsList.count(), { timeout: 5_000 }).toBeGreaterThan(0);
-
-          const allOptionTexts = await optionsList.allInnerTexts();
-          const uniqueTexts = [...new Set(allOptionTexts)];
-          expect(allOptionTexts).toHaveLength(uniqueTexts.length);
+          const allOptionTexts = await page.components
+            .comboBox('filterIndexPatternsSelect')
+            .getAllVisibleOptions();
+          expect(allOptionTexts.length).toBeGreaterThan(0);
+          expect(allOptionTexts).toHaveLength(new Set(allOptionTexts).size);
         });
       }
     );
@@ -137,7 +135,7 @@ spaceTest.describe.skip(
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
-          await dashboard.addNewPanel('ES|QL');
+          await dashboard.addNewESQLPanel();
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
         });
 
@@ -172,9 +170,10 @@ spaceTest.describe.skip(
           await page.testSubj.click('addFilter');
           await expect(page.testSubj.locator('addFilterPopover')).toBeVisible();
 
-          await page.testSubj.click('filterFieldSuggestionList > comboBoxInput');
-          const fieldOptions = page.locator('.euiFilterSelectItem');
-          await expect.poll(() => fieldOptions.count(), { timeout: 10_000 }).toBeGreaterThan(0);
+          const fieldOptions = await page.components
+            .comboBox('filterFieldSuggestionList')
+            .getAllVisibleOptions();
+          expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }
     );

@@ -25,7 +25,23 @@ export const ON_OPEN_PANEL_MENU = 'on_open_panel_menu';
  * These triggers have not yet been updated, and may be removed or consolidated later.
  */
 
+/**
+ * Actions attached to ADD_PANEL_TRIGGER trigger
+ * are displayed in dashboards' add panel menu
+ *
+ * Please consult with @elastic/kibana-presentation before attaching
+ * new actions to this trigger.
+ */
 export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
+/**
+ * Actions attached to FEATURED_ADD_PANEL_TRIGGER trigger
+ * are displayed at top of dashboards' add panel menu with distinct UI
+ *
+ * Please consult with @elastic/kibana-presentation before attaching
+ * new actions to this trigger.
+ */
+export const FEATURED_ADD_PANEL_TRIGGER = 'FEATURED_ADD_PANEL_TRIGGER';
+
 export const ALERT_RULE_TRIGGER = 'alertRule';
 export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
 export const VISUALIZE_GEO_FIELD_TRIGGER = 'VISUALIZE_GEO_FIELD_TRIGGER';
@@ -40,7 +56,6 @@ export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID =
 export const DISCOVER_CELL_ACTIONS_TRIGGER_ID = 'DISCOVER_CELL_ACTIONS_TRIGGER_ID';
 
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
 export const MULTI_VALUE_CLICK_TRIGGER = 'MULTI_VALUE_CLICK_TRIGGER';
 export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
 

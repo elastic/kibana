@@ -25,7 +25,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
         oauth2: {
           metadata: {
             authorization_servers: ['https://auth.example.com'],
-            resource: 'https://kibana.example.com',
+            resource: 'https://kibana.example.com/api/agent_builder/mcp',
           },
         },
       },
@@ -74,7 +74,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
-        resource: 'https://kibana.example.com',
+        resource: 'https://kibana.example.com/api/agent_builder/mcp',
       });
     });
 
@@ -92,7 +92,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
-        resource: 'https://kibana.example.com',
+        resource: 'https://kibana.example.com/api/agent_builder/mcp',
       });
     });
 
@@ -102,7 +102,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
           oauth2: {
             metadata: {
               authorization_servers: ['https://auth1.example.com', 'https://auth2.example.com'],
-              resource: 'https://kibana.example.com',
+              resource: 'https://kibana.example.com/api/agent_builder/mcp',
               bearer_methods_supported: ['header'] as const,
               scopes_supported: ['read', 'write'],
               resource_documentation: 'https://docs.example.com',
@@ -124,7 +124,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth1.example.com', 'https://auth2.example.com'],
-        resource: 'https://kibana.example.com',
+        resource: 'https://kibana.example.com/api/agent_builder/mcp',
         bearer_methods_supported: ['header'],
         scopes_supported: ['read', 'write'],
         resource_documentation: 'https://docs.example.com',

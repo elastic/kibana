@@ -16,6 +16,7 @@ import {
   builtInComparators,
   getTimeUnitLabel,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { DEFAULT_VALUES } from '../constants';
 import type { CommonEsQueryRuleParams } from '../types';
 
@@ -277,5 +278,19 @@ describe('RuleCommonExpressions', () => {
     setup({ ruleParams: getCommonParams(), hasValidationErrors: true });
     expect(screen.getByTestId('testQuery')).toBeInTheDocument();
     expect(screen.getByTestId('testQuery')).toBeDisabled();
+  });
+
+  test('should not include inclusive range comparators in threshold options', async () => {
+    setup({ ruleParams: getCommonParams() });
+
+    await userEvent.click(screen.getByTestId('thresholdPopover'));
+
+    const comboBox = await screen.findByTestId('comparatorOptionsComboBox');
+    const comparatorOptionValues = Array.from(comboBox.querySelectorAll('option')).map((option) =>
+      option.getAttribute('value')
+    );
+
+    expect(comparatorOptionValues).not.toContain(COMPARATORS.BETWEEN_INCLUSIVE);
+    expect(comparatorOptionValues).not.toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
   });
 });

@@ -19,7 +19,7 @@ export const getBackgroundSearchFlyout = ({
   return {
     id: AppMenuActionId.backgroundsearch,
     order: 6,
-    label: i18n.translate('discover.localMenu.localMenu.openBackgroundSearchFlyoutTitle', {
+    label: i18n.translate('discover.localMenu.openBackgroundSearchFlyoutTitle', {
       defaultMessage: 'Background searches',
     }),
     iconType: 'backgroundTask',

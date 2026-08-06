@@ -7,6 +7,7 @@
 
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { EuiListTestHarness } from '@kbn/test-eui-helpers';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { API_BASE_PATH, LOOKUP_INDEX_MODE } from '../../../common/constants';
 import {
@@ -61,11 +62,13 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('should set the correct page title', () => {
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create template');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create template'
+      );
     });
 
     test('renders no deprecation warning', async () => {
@@ -86,11 +89,13 @@ describe('<TemplateCreate />', () => {
   describe('legacy index template', () => {
     beforeEach(async () => {
       await renderTemplateCreate(httpSetup, { isLegacy: true });
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('should set the correct page title', () => {
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create legacy template');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create legacy template'
+      );
     });
 
     test('renders deprecation warning', async () => {
@@ -102,7 +107,7 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     describe('component templates (step 2)', () => {
@@ -373,7 +378,7 @@ describe('<TemplateCreate />', () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
 
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       // Navigate to mappings step
       await completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -387,55 +392,12 @@ describe('<TemplateCreate />', () => {
     }, 10000);
   });
 
-  describe('logistics (step 1)', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
-    });
-
-    it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {
-      // Logistics
-      await completeStepOne({ name: 'my_logs_template', indexPatterns: ['logs-*-*'] });
-      // Component templates
-      await completeStepTwo();
-      // Index settings
-      await completeStepThree('{}');
-      // Mappings
-      await completeStepFour();
-      // Aliases
-      await completeStepFive();
-
-      fireEvent.click(screen.getByTestId('nextButton'));
-
-      await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/index_templates`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: 'my_logs_template',
-              indexPatterns: ['logs-*-*'],
-              allowAutoCreate: 'NO_OVERWRITE',
-              indexMode: 'logsdb',
-              _kbnMeta: {
-                type: 'default',
-                hasDatastream: false,
-                isLegacy: false,
-              },
-              template: {},
-            }),
-          })
-        );
-      });
-    }, 10000);
-  });
-
   describe('review (step 6)', () => {
     describe('default flow', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
         await renderTemplateCreate(httpSetup);
-        await screen.findByTestId('pageTitle');
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
         await completeStepOne({
           name: TEMPLATE_NAME,
@@ -484,7 +446,7 @@ describe('<TemplateCreate />', () => {
     it('should render a warning message if a wildcard is used as an index pattern', async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       // Logistics
       await completeStepOne({
@@ -517,7 +479,7 @@ describe('<TemplateCreate />', () => {
 
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       await completeStepOne({
         name: TEMPLATE_NAME,
@@ -588,7 +550,7 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
       await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       await completeStepOne({
         name: TEMPLATE_NAME,

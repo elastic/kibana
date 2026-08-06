@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ALLOWED_MAX_ALERTS,
@@ -170,13 +172,9 @@ export const snoozedInstanceConditionSchema = schema.oneOf([
   }),
   schema.object({
     type: schema.literal('severity_equals'),
-    value: schema.oneOf([
-      schema.literal('critical'),
-      schema.literal('high'),
-      schema.literal('medium'),
-      schema.literal('low'),
-      schema.literal('info'),
-    ]),
+    value: schema.oneOf(
+      ALERT_SEVERITY_VALUES.map((severity) => schema.literal(severity)) as [Type<AlertSeverity>]
+    ),
   }),
 ]);
 

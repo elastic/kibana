@@ -9,6 +9,7 @@ import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsear
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
@@ -182,7 +183,7 @@ export const getData = async (
             value,
             bucketKey: bucket.key,
             container: containerList,
-            ...additionalContextSource,
+            ...(additionalContextSource ? unflattenObject(additionalContextSource) : {}),
           };
         }
       }
@@ -304,4 +305,8 @@ const comparatorMap = {
   [COMPARATORS.NOT_BETWEEN]: (value: number, [a, b]: number[]) => value < a || value > b,
   [COMPARATORS.GREATER_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a >= b,
   [COMPARATORS.LESS_THAN_OR_EQUALS]: (a: number, [b]: number[]) => a <= b,
+  [COMPARATORS.BETWEEN_INCLUSIVE]: (value: number, [a, b]: number[]) =>
+    value >= Math.min(a, b) && value <= Math.max(a, b),
+  [COMPARATORS.NOT_BETWEEN_INCLUSIVE]: (value: number, [a, b]: number[]) =>
+    value < Math.min(a, b) || value > Math.max(a, b),
 };

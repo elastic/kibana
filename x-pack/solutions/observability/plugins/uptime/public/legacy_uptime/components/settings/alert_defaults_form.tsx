@@ -16,7 +16,7 @@ import {
   EuiComboBox,
   EuiIcon,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -108,7 +108,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
     const { actionTypeId: type } = data?.find((dt) => dt.id === value) ?? {};
     return (
       <ConnectorSpan>
-        <EuiIcon type={actionTypeRegistry.get(type as string).iconClass} />
+        <EuiIcon type={actionTypeRegistry.get(type as string).iconClass} aria-hidden={true} />
         <span>{label}</span>
       </ConnectorSpan>
     );
@@ -173,6 +173,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           }
         >
           <EuiComboBox
+            aria-label={alertFormI18n.defaultConnectorsLabel}
             placeholder={alertFormI18n.inputPlaceHolder}
             options={options}
             selectedOptions={options.filter((opt) =>

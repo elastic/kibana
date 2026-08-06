@@ -13,16 +13,17 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { getLastNotifiedTimestampsQuery } from '../queries';
+import { getLastNotifiedTimestampsQueries } from '../queries';
 import type {
+  ActionGroup,
+  ActionGroupId,
+  ActionPolicy,
+  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   LastNotifiedInfo,
   LastNotifiedRecord,
-  NotificationGroup,
-  NotificationGroupId,
-  NotificationPolicy,
 } from '../types';
 
 @injectable()
@@ -35,7 +36,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { groups = [], policies = new Map(), input } = state;
+    const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
 
     if (groups.length === 0) {
       return { type: 'continue', data: { dispatch: [], throttled: [] } };
@@ -59,15 +60,19 @@ export class ApplyThrottlingStep implements DispatcherStep {
   }
 
   private async fetchLastNotifiedTimestamps(
-    notificationGroupIds: NotificationGroupId[]
-  ): Promise<Map<NotificationGroupId, LastNotifiedInfo>> {
-    const records = await this.queryService.executeQueryRows<LastNotifiedRecord>({
-      query: getLastNotifiedTimestampsQuery(notificationGroupIds).query,
-    });
+    actionGroupIds: ActionGroupId[]
+  ): Promise<Map<ActionGroupId, LastNotifiedInfo>> {
+    const queries = getLastNotifiedTimestampsQueries(actionGroupIds);
+    const responses = await Promise.all(
+      queries.map((request) =>
+        this.queryService.executeQueryRows<LastNotifiedRecord>({ query: request.query })
+      )
+    );
+    const records = responses.flat();
 
-    return new Map<NotificationGroupId, LastNotifiedInfo>(
+    return new Map<ActionGroupId, LastNotifiedInfo>(
       records.map((record) => [
-        record.notification_group_id,
+        record.action_group_id,
         {
           lastNotified: new Date(record.last_notified),
           episodeStatus: record.episode_status,
@@ -78,13 +83,13 @@ export class ApplyThrottlingStep implements DispatcherStep {
 }
 
 export function applyThrottling(
-  groups: readonly NotificationGroup[],
-  policies: ReadonlyMap<string, NotificationPolicy>,
-  lastNotifiedMap: ReadonlyMap<NotificationGroupId, LastNotifiedInfo>,
+  groups: readonly ActionGroup[],
+  policies: ReadonlyMap<string, ActionPolicy>,
+  lastNotifiedMap: ReadonlyMap<ActionGroupId, LastNotifiedInfo>,
   now: Date
-): { dispatch: NotificationGroup[]; throttled: NotificationGroup[] } {
-  const dispatch: NotificationGroup[] = [];
-  const throttled: NotificationGroup[] = [];
+): { dispatch: ActionGroup[]; throttled: ActionGroup[] } {
+  const dispatch: ActionGroup[] = [];
+  const throttled: ActionGroup[] = [];
 
   for (const group of groups) {
     const policy = policies.get(group.policyId)!;
@@ -98,8 +103,8 @@ export function applyThrottling(
 }
 
 function shouldDispatch(
-  group: NotificationGroup,
-  policy: NotificationPolicy,
+  group: ActionGroup,
+  policy: ActionPolicy,
   lastRecord: LastNotifiedInfo | undefined,
   now: Date
 ): boolean {

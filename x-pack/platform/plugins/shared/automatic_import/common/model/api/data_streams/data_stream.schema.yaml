@@ -147,6 +147,7 @@ paths:
                     Log lines to upload when the source is a file (omit when using sourceIndex).
                   items:
                     type: string
+                    maxLength: 100000
                 sourceIndex:
                   type: string
                   minLength: 1
@@ -238,8 +239,8 @@ paths:
                   - results
                 properties:
                   ingest_pipeline:
-                    description: The ingest pipeline as a JSON string.
-                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                    description: The ingest pipeline as a JSON string up to 10MiB.
+                    $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyIngestPipeline"
                   results:
                     description: Results array as JSON objects.
                     type: array

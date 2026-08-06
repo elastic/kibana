@@ -10,11 +10,14 @@ import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
+const GO_SERVICE_GROUP_NAME = 'go services';
+
 test.describe(
   'Service Groups',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects: { serviceGroupsPage } }) => {
+      await apiServices.apm.serviceGroups.deleteByName(GO_SERVICE_GROUP_NAME);
       await browserAuth.loginAsPrivilegedUser();
       await serviceGroupsPage.gotoServiceGroupsPageWithDateSelected(
         testData.START_DATE,
@@ -26,8 +29,6 @@ test.describe(
       page,
       pageObjects: { serviceGroupsPage },
     }) => {
-      const GO_SERVICE_GROUP_NAME = 'go services';
-
       await test.step('shows no service groups initially', async () => {
         // If there are no service groups, the page shows this heading
         await expect(
@@ -51,9 +52,11 @@ test.describe(
         await page.getByText('Save group').click();
 
         // Make sure the toast is visible and contains the correct text and then close it
-        await expect(page.getByTestId('euiToastHeader')).toBeVisible();
+        await expect(page.getByTestId('euiToastHeader__title')).toBeVisible();
         await expect(
-          page.getByTestId('euiToastHeader').getByText(`Created "${GO_SERVICE_GROUP_NAME}" group`)
+          page
+            .getByTestId('euiToastHeader__title')
+            .getByText(`Created "${GO_SERVICE_GROUP_NAME}" group`)
         ).toBeVisible();
         await page.getByTestId('toastCloseButton').click();
 

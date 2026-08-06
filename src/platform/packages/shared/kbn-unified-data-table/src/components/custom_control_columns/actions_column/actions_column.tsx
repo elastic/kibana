@@ -28,10 +28,12 @@ export const getActionsColumn = ({
   baseColumns,
   externalControlColumns,
   rowAdditionalLeadingControls,
+  visibleRowLeadingControls,
 }: {
   baseColumns: RenderCellValue[];
   rowAdditionalLeadingControls?: RowControlColumn[];
   externalControlColumns?: EuiDataGridControlColumn[];
+  visibleRowLeadingControls?: number;
 }) => {
   if (
     !baseColumns.length &&
@@ -54,7 +56,8 @@ export const getActionsColumn = ({
   }
   if (rowAdditionalLeadingControls?.length) {
     const { columns: additionalRowControlColumns, totalWidth } = getAdditionalRowControlColumns(
-      rowAdditionalLeadingControls
+      rowAdditionalLeadingControls,
+      visibleRowLeadingControls
     );
     actions.push(...additionalRowControlColumns);
     columnWidth += totalWidth;

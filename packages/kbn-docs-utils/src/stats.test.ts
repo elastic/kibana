@@ -932,6 +932,262 @@ describe('collectApiStatsForPlugin', () => {
     });
   });
 
+  describe('typed parameter relaxation', () => {
+    it('does not flag paramDocMismatches when destructured param has a named interface type', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'content-list-toolbar-props',
+            label: 'ContentListToolbarProps',
+            type: TypeKind.InterfaceKind,
+            description: ['Documented elsewhere.'],
+          }),
+          createMockApiDeclaration({
+            id: 'fn-with-interface-param',
+            label: 'ContentListToolbar',
+            type: TypeKind.FunctionKind,
+            description: ['Toolbar component for content list pages.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-with-interface-param.$1',
+                label: 'props',
+                type: TypeKind.InterfaceKind,
+                docsReferencedTypeName: 'ContentListToolbarProps',
+                // No description — the docs live on the ContentListToolbarProps interface.
+                description: undefined,
+                children: [
+                  createMockApiDeclaration({
+                    id: 'fn-with-interface-param.$1.title',
+                    label: 'title',
+                    type: TypeKind.StringKind,
+                    description: undefined,
+                  }),
+                  createMockApiDeclaration({
+                    id: 'fn-with-interface-param.$1.children',
+                    label: 'children',
+                    type: TypeKind.Uncategorized,
+                    description: undefined,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.paramDocMismatches).toHaveLength(0);
+    });
+
+    it('still flags paramDocMismatches for inline object params without separate docs', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'fn-with-object-param',
+            label: 'myFunction',
+            type: TypeKind.FunctionKind,
+            description: ['A function.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-with-object-param.$1',
+                label: 'options',
+                type: TypeKind.ObjectKind,
+                description: undefined,
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.paramDocMismatches).toHaveLength(1);
+    });
+
+    it('does not flag paramDocMismatches when param references a documented type alias', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'content-list-config',
+            label: 'ContentListConfig',
+            type: TypeKind.TypeKind,
+            description: ['Documented elsewhere.'],
+          }),
+          createMockApiDeclaration({
+            id: 'fn-with-type-param',
+            label: 'myFunction',
+            type: TypeKind.FunctionKind,
+            description: ['A function.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-with-type-param.$1',
+                label: 'config',
+                type: TypeKind.TypeKind,
+                docsReferencedTypeName: 'ContentListConfig',
+                description: undefined,
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.paramDocMismatches).toHaveLength(0);
+    });
+
+    it('still flags paramDocMismatches when the referenced type is not documented in this plugin', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'fn-with-external-param',
+            label: 'myFunction',
+            type: TypeKind.FunctionKind,
+            description: ['A function.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-with-external-param.$1',
+                label: 'config',
+                type: TypeKind.TypeKind,
+                docsReferencedTypeName: 'ExternalConfig',
+                description: undefined,
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.paramDocMismatches).toHaveLength(1);
+    });
+
+    it('still flags paramDocMismatches for primitive-typed params without docs', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'fn-with-primitive-param',
+            label: 'myFunction',
+            type: TypeKind.FunctionKind,
+            description: ['A function.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-with-primitive-param.$1',
+                label: 'name',
+                type: TypeKind.StringKind,
+                description: undefined,
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.paramDocMismatches).toHaveLength(1);
+    });
+
+    it('suppresses missingComments for typed parameter nodes and their children', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'content-list-toolbar-props',
+            label: 'ContentListToolbarProps',
+            type: TypeKind.InterfaceKind,
+            description: ['Documented elsewhere.'],
+          }),
+          createMockApiDeclaration({
+            id: 'fn-component',
+            label: 'ContentListToolbar',
+            type: TypeKind.FunctionKind,
+            description: ['Toolbar component.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-component.$1',
+                label: 'props',
+                type: TypeKind.InterfaceKind,
+                docsReferencedTypeName: 'ContentListToolbarProps',
+                description: undefined, // No description — docs are on the interface.
+                children: [
+                  createMockApiDeclaration({
+                    id: 'fn-component.$1.title',
+                    label: 'title',
+                    type: TypeKind.StringKind,
+                    description: undefined, // No description — docs are on the interface member.
+                  }),
+                  createMockApiDeclaration({
+                    id: 'fn-component.$1.children',
+                    label: 'children',
+                    type: TypeKind.Uncategorized,
+                    description: undefined,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      // Neither the .$1 param node nor its children should be flagged — the docs
+      // live on the referenced interface, which is rendered in its own section.
+      expect(stats.missingComments).toHaveLength(0);
+    });
+
+    it('still flags missingComments for inline object parameter children', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'fn-component',
+            label: 'InlineToolbar',
+            type: TypeKind.FunctionKind,
+            description: ['Toolbar component.'],
+            children: [
+              createMockApiDeclaration({
+                id: 'fn-component.$1',
+                label: 'props',
+                type: TypeKind.ObjectKind,
+                description: undefined,
+                children: [
+                  createMockApiDeclaration({
+                    id: 'fn-component.$1.title',
+                    label: 'title',
+                    type: TypeKind.StringKind,
+                    description: undefined,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.missingComments.map((item) => item.id)).toContain('fn-component.$1.title');
+    });
+
+    it('still flags missingComments for non-parameter nodes', () => {
+      const pluginApi = createMockPluginApi({
+        client: [
+          createMockApiDeclaration({
+            id: 'interface-undocumented',
+            label: 'SomeInterface',
+            type: TypeKind.InterfaceKind,
+            description: undefined,
+          }),
+        ],
+      });
+
+      const stats = collectApiStatsForPlugin(pluginApi, createEmptyIssues());
+
+      expect(stats.missingComments).toHaveLength(1);
+      expect(stats.missingComments[0].id).toBe('interface-undocumented');
+    });
+  });
+
   describe('combined scenarios', () => {
     it('handles complex plugin API with multiple issues', () => {
       const pluginApi = createMockPluginApi({

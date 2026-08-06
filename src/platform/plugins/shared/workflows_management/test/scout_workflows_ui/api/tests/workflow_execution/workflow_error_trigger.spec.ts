@@ -23,10 +23,10 @@ triggers:
   - type: manual
 steps:
   - name: fail_step
-    type: http
+    type: slack
+    connector-id: "non-existing-slack-connector-error-trigger"
     with:
-      url: "https://httpstat.us/500"
-      method: GET
+      message: "intentional failure for workflows.failed test"
 `;
 
 const ERROR_HANDLER_WORKFLOW_YAML = `
@@ -53,10 +53,10 @@ triggers:
   - type: manual
 steps:
   - name: fail_step
-    type: http
+    type: slack
+    connector-id: "non-existing-slack-connector-error-trigger-other"
     with:
-      url: "https://httpstat.us/500"
-      method: GET
+      message: "intentional failure for workflows.failed test"
 `;
 
 /** Error handler that runs only when event.workflow.name matches Scout* (wildcard). */
@@ -91,6 +91,35 @@ steps:
       message: "StepId filter handler ran for step {{ event.error.stepId }}"
 `;
 
+/** Child workflow that fails when dispatched async by a parent. */
+const ASYNC_FAILING_CHILD_YAML = `
+name: Scout Error Trigger - Async Failing Child
+enabled: true
+description: Child workflow dispatched async; fails on a non-existent connector
+triggers:
+  - type: manual
+steps:
+  - name: fail_step
+    type: slack
+    connector-id: "non-existing-slack-connector-async-child"
+    with:
+      message: "intentional async-child failure"
+`;
+
+/** Parent workflow that dispatches the failing child via workflow.executeAsync. */
+const getAsyncParentYaml = (childWorkflowId: string) => `
+name: Scout Error Trigger - Async Failing Parent
+enabled: true
+description: Dispatches a failing child async; parent should COMPLETE while child FAILS
+triggers:
+  - type: manual
+steps:
+  - name: dispatch_failing_child
+    type: workflow.executeAsync
+    with:
+      workflow-id: ${childWorkflowId}
+`;
+
 async function waitForExecution(
   workflowsApi: WorkflowsApiService,
   executionId: string,
@@ -106,8 +135,7 @@ async function waitForExecution(
   });
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/261498
-spaceTest.describe.skip(
+spaceTest.describe(
   'Workflow error trigger (workflows.failed)',
   { tag: tags.deploymentAgnostic },
   () => {
@@ -117,6 +145,8 @@ spaceTest.describe.skip(
     let failingOtherWorkflowId: string;
     let handlerNameFilterId: string;
     let handlerStepFilterId: string;
+    let asyncFailingChildId: string;
+    let asyncParentId: string;
 
     spaceTest.beforeAll(async ({ apiServices }) => {
       spaceTest.setTimeout(90_000);
@@ -136,6 +166,12 @@ spaceTest.describe.skip(
 
       const handlerStepFilter = await workflowsApi.create(ERROR_HANDLER_STEP_ID_FILTER_YAML);
       handlerStepFilterId = handlerStepFilter.id;
+
+      const asyncFailingChild = await workflowsApi.create(ASYNC_FAILING_CHILD_YAML);
+      asyncFailingChildId = asyncFailingChild.id;
+
+      const asyncParent = await workflowsApi.create(getAsyncParentYaml(asyncFailingChildId));
+      asyncParentId = asyncParent.id;
     });
 
     spaceTest.afterAll(async () => {
@@ -249,6 +285,53 @@ spaceTest.describe.skip(
         const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
         expect(handlerExecution?.triggeredBy).toBe('workflows.failed');
         expect(handlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
+      }
+    );
+
+    spaceTest(
+      'async: parent completes immediately while async child fails and emits workflows.failed',
+      async () => {
+        const { results: initialHandlerResults } = await workflowsApi.getExecutions(
+          errorHandlerWorkflowId
+        );
+        const initialHandlerCount = initialHandlerResults.length;
+
+        const { workflowExecutionId: parentExecutionId } = await workflowsApi.run(
+          asyncParentId,
+          {}
+        );
+        const parentExecution = await waitForExecution(workflowsApi, parentExecutionId);
+        expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+        const { results: childExecutions } = await waitForConditionOrThrow({
+          action: () => workflowsApi.getExecutions(asyncFailingChildId),
+          condition: ({ results: r }) =>
+            r.length >= 1 && r.some((e) => isTerminalStatus(e.status ?? '')),
+          interval: 2000,
+          timeout: 25_000,
+          errorMessage: ({ results: r }) =>
+            `Async failing child should reach a terminal status, got ${
+              r.length
+            } executions (statuses: ${r.map((e) => e.status).join(',')})`,
+        });
+        const failedChild = childExecutions.find((e) => isTerminalStatus(e.status ?? ''));
+        expect(failedChild?.status).toBe(ExecutionStatus.FAILED);
+
+        const { results: handlerExecutions } = await waitForConditionOrThrow({
+          action: () => workflowsApi.getExecutions(errorHandlerWorkflowId),
+          condition: ({ results: r }) => r.length >= initialHandlerCount + 1,
+          interval: 2000,
+          timeout: 25_000,
+          errorMessage: ({ results: r }) =>
+            `Error handler should run for async child failure, got ${r.length} (was ${initialHandlerCount})`,
+        });
+        const newestHandlerExecution = handlerExecutions[0];
+        const verifiedHandlerExecution = await waitForExecution(
+          workflowsApi,
+          newestHandlerExecution.id
+        );
+        expect(verifiedHandlerExecution?.triggeredBy).toBe('workflows.failed');
+        expect(verifiedHandlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
       }
     );
   }

@@ -9,7 +9,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -17,10 +17,10 @@ import type { Theme } from '@elastic/charts';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';
@@ -28,7 +28,10 @@ import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { AnomalyChartPanel } from './anomaly_chart_panel';
+import { AnomalySeverityBadge, type AnomalyChartInfo } from './anomaly_severity_badge';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -62,10 +65,13 @@ export function FailedTransactionChart({
   filters,
   customAlertEvaluationThreshold,
   threshold,
+  anomaly,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
@@ -81,7 +87,12 @@ export function FailedTransactionChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
+  anomaly?: AnomalyChartInfo;
   ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -146,7 +157,8 @@ export function FailedTransactionChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     customAlertEvaluationThreshold,
     normalizeThreshold: (value) => value / 100,
   });
@@ -162,11 +174,11 @@ export function FailedTransactionChart({
     },
   ];
 
-  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasBorder={true}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -177,6 +189,11 @@ export function FailedTransactionChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {anomaly && (
+            <EuiFlexItem grow={false}>
+              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiIconTip content={errorRateI18n} position="right" />
           </EuiFlexItem>
@@ -202,18 +219,20 @@ export function FailedTransactionChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="errorRate"
               height={200}
@@ -231,7 +250,7 @@ export function FailedTransactionChart({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </AnomalyChartPanel>
     </EuiFlexItem>
   );
 }

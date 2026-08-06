@@ -77,13 +77,15 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
+import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
@@ -141,6 +143,7 @@ export interface ObservabilityPublicPluginsSetup {
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -216,7 +219,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -246,17 +249,18 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
           },
         })
       );
+      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
@@ -347,8 +351,8 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        ? ['projectSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);
@@ -533,7 +537,6 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
-
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,

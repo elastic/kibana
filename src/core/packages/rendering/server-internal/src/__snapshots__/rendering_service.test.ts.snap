@@ -17,6 +17,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -46,7 +47,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -69,6 +76,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -85,6 +93,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -106,6 +117,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -135,7 +147,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -154,6 +172,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -170,6 +189,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -191,6 +213,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -220,7 +243,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -243,6 +272,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -259,6 +289,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -280,6 +313,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -309,7 +343,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -328,6 +368,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -344,11 +385,16 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
 
-exports[`RenderingService preboot() render() renders "core" page for unauthenticated requests 1`] = `
+exports[
+  `RenderingService preboot() render() renders "core" page for unauthenticated requests 1`
+] = `
 Object {
   "anonymousStatusPage": false,
   "apmConfig": Object {
@@ -365,6 +411,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -394,7 +441,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -413,6 +466,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -429,6 +483,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -450,6 +507,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -479,7 +537,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -502,6 +566,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -518,11 +583,16 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
 
-exports[`RenderingService preboot() render() renders "core" with excluded global user settings 1`] = `
+exports[
+  `RenderingService preboot() render() renders "core" with excluded global user settings 1`
+] = `
 Object {
   "anonymousStatusPage": false,
   "apmConfig": Object {
@@ -539,6 +609,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -568,7 +639,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -587,6 +664,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -603,6 +681,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -624,6 +705,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -653,7 +735,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -672,6 +760,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -688,6 +777,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -709,6 +801,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -738,7 +831,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -757,6 +856,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -773,6 +873,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -794,6 +897,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -823,7 +927,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -842,6 +952,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -858,6 +969,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -884,6 +998,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -913,7 +1028,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -936,6 +1057,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -952,6 +1074,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -973,6 +1098,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1004,7 +1130,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1023,6 +1155,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1039,6 +1172,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1065,6 +1201,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1094,7 +1231,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1117,6 +1260,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1133,6 +1277,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1159,6 +1306,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1188,7 +1336,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1207,6 +1361,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1223,6 +1378,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1244,6 +1402,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1273,7 +1432,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1292,6 +1457,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1308,6 +1474,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1334,6 +1503,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1363,7 +1533,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1386,6 +1562,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1402,6 +1579,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1428,6 +1608,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1457,7 +1638,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1476,6 +1663,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1492,6 +1680,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1518,6 +1709,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1547,7 +1739,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1566,6 +1764,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1582,6 +1781,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1608,6 +1810,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1639,7 +1842,13 @@ Object {
     },
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1658,6 +1867,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1674,6 +1884,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1700,6 +1913,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1731,7 +1945,13 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1750,6 +1970,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1766,6 +1987,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;

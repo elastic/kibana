@@ -145,6 +145,48 @@ describe('action params validation', () => {
     });
   });
 
+  test('action params validation fails when all recipient fields are empty', async () => {
+    const actionParams = {
+      to: [],
+      cc: [],
+      bcc: [],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: ['At least one recipient is required.'],
+        cc: ['At least one recipient is required.'],
+        bcc: ['At least one recipient is required.'],
+        replyTo: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
+  test('action params validation fails when all recipients are empty strings', async () => {
+    const actionParams = {
+      to: ['', ' '],
+      cc: [''],
+      bcc: [],
+      message: 'message',
+      subject: 'test',
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        to: ['At least one recipient is required.'],
+        cc: ['At least one recipient is required.'],
+        bcc: ['At least one recipient is required.'],
+        replyTo: [],
+        message: [],
+        subject: [],
+      },
+    });
+  });
+
   test('action params validation fails when action params is not valid', async () => {
     const actionParams = {
       to: ['invalid.com'],

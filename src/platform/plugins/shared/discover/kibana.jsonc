@@ -58,7 +58,6 @@
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "presentationPanel",
       "presentationUtil",
       "esql"
     ],

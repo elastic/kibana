@@ -10,23 +10,24 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiButtonIcon,
+  EuiFlyout,
   EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
-  EuiFilePicker,
-  EuiSpacer,
-  EuiPanel,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFormRow,
-  EuiFieldText,
-  EuiCallOut,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { type ErrorType, extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { JobType } from '../../../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { useMlKibana } from '../../../contexts/kibana';
 import { CannotImportJobsCallout } from './cannot_import_jobs_callout';
 import { CannotReadFileCallout } from './cannot_read_file_callout';
@@ -47,9 +48,11 @@ import { useEnabledFeatures } from '../../../contexts/ml';
 export interface Props {
   isDisabled: boolean;
   onImportComplete: (() => void) | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
+export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOpen, onClose }) => {
   const {
     services: {
       notifications: { toasts },
@@ -71,7 +74,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
     [esSearch, validateDatafeedPreview, getFilters]
   );
 
-  const [showFlyout, setShowFlyout] = useState(false);
+  const [internalShowFlyout, setInternalShowFlyout] = useState(false);
+  const isControlled = isOpen !== undefined;
+  const showFlyout = isControlled ? isOpen : internalShowFlyout;
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
   const [dfaJobs, setDfaJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [jobIdObjects, setJobIdObjects] = useState<JobIdObject[]>([]);
@@ -120,7 +125,19 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
   );
 
   function toggleFlyout() {
-    setShowFlyout(!showFlyout);
+    if (isControlled) {
+      onClose?.();
+      return;
+    }
+    setInternalShowFlyout(!internalShowFlyout);
+  }
+
+  function closeFlyout() {
+    if (isControlled) {
+      onClose?.();
+      return;
+    }
+    setInternalShowFlyout(false);
   }
 
   const onFilePickerChange = useCallback(async (files: any) => {
@@ -211,7 +228,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
     }
 
     setImporting(false);
-    setShowFlyout(false);
+    closeFlyout();
     if (typeof onImportComplete === 'function') {
       onImportComplete();
     }
@@ -357,15 +374,22 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
   );
 
   const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
-    <EuiButtonIcon
-      iconType="trash"
-      aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
+    <EuiToolTip
+      content={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
         defaultMessage: 'Delete',
       })}
-      color={deleteDisabled ? 'text' : 'danger'}
-      disabled={deleteDisabled}
-      onClick={() => deleteJob(index)}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="trash"
+        aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
+          defaultMessage: 'Delete',
+        })}
+        color={deleteDisabled ? 'text' : 'danger'}
+        disabled={deleteDisabled}
+        onClick={() => deleteJob(index)}
+      />
+    </EuiToolTip>
   );
 
   if (isADEnabled === false && isDFAEnabled === false) {
@@ -374,11 +398,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
 
   return (
     <>
-      <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
+      {!isControlled ? <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} /> : null}
 
       {showFlyout === true && isDisabled === false && (
         <EuiFlyout
-          onClose={setShowFlyout.bind(null, false)}
+          onClose={closeFlyout}
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
@@ -548,11 +572,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={setShowFlyout.bind(null, false)}
-                  flush="left"
-                >
+                <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.closeButton"
                     defaultMessage="Close"

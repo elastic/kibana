@@ -68,6 +68,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                getAllDataViewsBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/data_view:
     post:
       summary: Create a data view
@@ -107,12 +110,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/data_view_response_object'
+              examples:
+                createDataViewResponse:
+                  $ref: '#/components/examples/create_data_view_response'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                createDataViewBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/data_view/{viewId}:
     get:
       summary: Get a data view
@@ -148,6 +157,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                getDataViewNotFound:
+                  $ref: '#/components/examples/error_404_response'
     delete:
       summary: Delete a data view
       operationId: deleteDataViewDefault
@@ -177,6 +189,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                deleteDataViewNotFound:
+                  $ref: '#/components/examples/error_404_response'
     post:
       summary: Update a data view
       operationId: updateDataViewDefault
@@ -216,12 +231,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/data_view_response_object'
+              examples:
+                updateDataViewResponse:
+                  $ref: '#/components/examples/get_data_view_response'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                updateDataViewBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/data_view/{viewId}/fields:
     post:
       summary: Update field metadata
@@ -271,12 +292,18 @@ paths:
                 properties:
                   acknowledged:
                     type: boolean
+              examples:
+                updateFieldsMetadataResponse:
+                  $ref: '#/components/examples/update_field_metadata_response'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                updateFieldsMetadataBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
       summary: Create a runtime field
@@ -329,6 +356,9 @@ paths:
             application/json:
               schema:
                 type: object
+              examples:
+                createRuntimeFieldResponse:
+                  $ref: '#/components/examples/create_runtime_field_response'
     put:
       summary: Create or update a runtime field
       operationId: createUpdateRuntimeFieldDefault
@@ -393,12 +423,18 @@ paths:
                     type: array
                     items:
                       type: object
+              examples:
+                createUpdateRuntimeFieldResponse:
+                  $ref: '#/components/examples/create_runtime_field_response'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                createUpdateRuntimeFieldBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     get:
       summary: Get a runtime field
@@ -442,6 +478,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                getRuntimeFieldNotFound:
+                  $ref: '#/components/examples/error_404_response'
     delete:
       summary: Delete a runtime field
       operationId: deleteRuntimeFieldDefault
@@ -471,6 +510,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                deleteRuntimeFieldNotFound:
+                  $ref: '#/components/examples/error_404_response'
     post:
       summary: Update a runtime field
       operationId: updateRuntimeFieldDefault
@@ -524,6 +566,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                updateRuntimeFieldBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/default:
     get:
       summary: Get the default data view
@@ -560,6 +605,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                getDefaultDataViewBadRequest:
+                  $ref: '#/components/examples/error_400_response'
     post:
       summary: Set the default data view
       operationId: setDefaultDatailViewDefault
@@ -613,12 +661,18 @@ paths:
                 properties:
                   acknowledged:
                     type: boolean
+              examples:
+                setDefaultDataViewResponse:
+                  $ref: '#/components/examples/set_default_data_view_response'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                setDefaultDataViewBadRequest:
+                  $ref: '#/components/examples/error_400_response'
   /api/data_views/swap_references:
     post:
       summary: Swap saved object references
@@ -677,6 +731,9 @@ paths:
                         type:
                           type: string
                           description: The saved object type.
+              examples:
+                swapDataViewResponse:
+                  $ref: '#/components/examples/swap_data_view_response'
   /api/data_views/swap_references/_preview:
     post:
       summary: Preview swap references
@@ -728,6 +785,9 @@ paths:
                         type:
                           type: string
                           description: The saved object type.
+              examples:
+                previewSwapDataViewResponse:
+                  $ref: '#/components/examples/preview_swap_data_view_response'
 components:
   examples:
     get_data_views_response:
@@ -751,6 +811,13 @@ components:
               - default
             title: kibana_sample_data_logs
             name: Kibana Sample Data Logs
+    error_400_response:
+      summary: A bad request response.
+      description: The request was rejected because the payload or query parameters are missing required fields or contain invalid values.
+      value:
+        statusCode: 400
+        error: Bad Request
+        message: '[request body.data_view.title]: expected value of type [string] but got [undefined]'
     create_data_view_request:
       summary: Create a data view with runtime fields.
       description: Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.
@@ -763,6 +830,45 @@ components:
               type: keyword
               script:
                 source: emit(doc['shape_name'].value)
+    create_data_view_response:
+      summary: The create data view API returns a JSON object that contains details about the new data view.
+      description: The response includes the full data view specification, including auto-generated fields such as the unique identifier and version.
+      value:
+        data_view:
+          id: b561acfb-0181-455e-84a3-ce8980b2272f
+          version: WzQ5LDJd
+          title: logstash-*
+          sourceFilters: []
+          fields:
+            runtime_shape_name:
+              count: 0
+              name: runtime_shape_name
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              runtimeField:
+                type: keyword
+                script:
+                  source: emit(doc['shape_name'].value)
+          typeMeta: {}
+          fieldFormats: {}
+          runtimeFieldMap:
+            runtime_shape_name:
+              type: keyword
+              script:
+                source: emit(doc['shape_name'].value)
+          fieldAttrs: {}
+          allowNoIndex: false
+          name: My Logstash data view
+          namespaces:
+            - default
     get_data_view_response:
       summary: The get data view API returns a JSON object that contains information about the data view.
       description: A complete data view object including all fields, runtime fields, and metadata.
@@ -1691,6 +1797,13 @@ components:
           name: Kibana Sample Data eCommerce
           namespaces:
             - default
+    error_404_response:
+      summary: A not found response.
+      description: The requested data view or runtime field was not found in the current Kibana space.
+      value:
+        statusCode: 404
+        error: Not Found
+        message: Saved object [index-pattern/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
     update_data_view_request:
       summary: Update some properties for a data view.
       description: Update the title, time field, and other properties of an existing data view.
@@ -1712,6 +1825,11 @@ components:
           field2:
             customLabel: Field 2 label
             customDescription: Field 2 description
+    update_field_metadata_response:
+      summary: Field metadata was updated successfully.
+      description: The acknowledged flag confirms that the field metadata changes were applied to the data view.
+      value:
+        acknowledged: true
     create_runtime_field_request:
       summary: Create a runtime field.
       description: Create a long-type runtime field that emits a value derived from the foo source field.
@@ -1721,6 +1839,14 @@ components:
           type: long
           script:
             source: emit(doc["foo"].value)
+    create_runtime_field_response:
+      summary: The API returns created runtime field object array and updated data view object.
+      description: The response includes the newly created runtime field as an array and the full updated data view object.
+      value:
+        data_view:
+          ...: null
+        fields:
+          - ...
     get_runtime_field_response:
       summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
       description: The runtime field definition along with the parent data view.
@@ -2239,6 +2365,11 @@ components:
       value:
         data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         force: true
+    set_default_data_view_response:
+      summary: The default data view was set successfully.
+      description: The acknowledged flag confirms that the default data view for the current Kibana space was updated.
+      value:
+        acknowledged: true
     swap_data_view_request:
       summary: Swap references from data view ID "abcd-efg" to "xyz-123" and remove the data view that is no longer referenced.
       description: Swap all saved object references from one data view to another and delete the source data view afterward.
@@ -2246,12 +2377,31 @@ components:
         fromId: abcd-efg
         toId: xyz-123
         delete: true
+    swap_data_view_response:
+      summary: The swap references API returns a list of the affected saved objects.
+      description: The list of saved objects whose references were updated, along with the delete status of the source.
+      value:
+        result:
+          - id: '123'
+            type: visualization
+        deleteStatus:
+          remainingRefs: 0
+          deletePerformed: true
     preview_swap_data_view_request:
       summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
       description: Preview the saved objects that would be affected by swapping references from one data view to another.
       value:
         fromId: abcd-efg
         toId: xyz-123
+    preview_swap_data_view_response:
+      summary: A preview of saved objects that would be affected by a data view swap.
+      description: The result array lists every saved object that references the source data view. No saved objects are modified by the preview endpoint.
+      value:
+        result:
+          - id: 8963ca30-bca7-11e8-aa00-0123456789ab
+            type: visualization
+          - id: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+            type: dashboard
   schemas:
     400_response:
       title: Bad request

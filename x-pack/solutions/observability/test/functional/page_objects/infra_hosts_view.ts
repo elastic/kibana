@@ -9,6 +9,14 @@ import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const HOSTS_VIEW_KPI_TILE_SUBJECTS = [
+  'hostsViewKPI-hostsCount',
+  'hostsViewKPI-cpuUsage',
+  'hostsViewKPI-normalizedLoad1m',
+  'hostsViewKPI-memoryUsage',
+  'hostsViewKPI-diskUsage',
+] as const;
+
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -151,9 +159,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // KPIs
     async isKPIChartsLoaded() {
-      return !(await testSubjects.exists(
-        '[data-test-subj=hostsView-metricsTrend] .echChartStatus[data-ech-render-complete=true]'
-      ));
+      const loadedKpiTiles = await Promise.all(
+        HOSTS_VIEW_KPI_TILE_SUBJECTS.map((testSubject) => testSubjects.exists(testSubject))
+      );
+      return loadedKpiTiles.every(Boolean);
     },
 
     async getAllKPITiles() {
@@ -212,7 +221,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await browser.execute('arguments[0].click();', alertsTab);
     },
 
-    setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
+    async setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
       const buttons: Record<PublicAlertStatus | 'all', string> = {
         active: 'hostsView-alert-status-filter-active-button',
         recovered: 'hostsView-alert-status-filter-recovered-button',
@@ -222,7 +231,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
       const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
 
-      return testSubjects.click(buttonSubject);
+      // Use a scrollIntoView + JS click to bypass overlap detection: the alerts
+      // tab renders the filter button group above an async AlertSummaryWidget,
+      // and the sticky hosts filter header can also sit above the button once
+      // scrolled into view. Mirrors the pattern used by `visitAlertTab`.
+      const button = await testSubjects.find(buttonSubject);
+      await button.scrollIntoViewIfNecessary();
+      await browser.execute('arguments[0].click();', button);
     },
 
     // Query Bar

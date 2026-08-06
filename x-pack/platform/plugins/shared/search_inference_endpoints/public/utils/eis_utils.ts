@@ -7,21 +7,30 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
+import { REGION_DISPLAY_NAMES } from '../../common/constants';
+import { EisModelStatus } from '../../common/types';
+import type { PolicyMode } from '../types';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isCspRegion,
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
+import { GEO_ORDER } from '../types';
+import type { RegionZoneCount } from '../types';
 
-export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
-  service: 'elastic';
-  service_settings: { model_id: string };
-};
+// Inference ID prefixes for internal Elastic endpoints kept for backwards
+// compatibility that must not be surfaced in the UI.
+const HIDDEN_EIS_INFERENCE_ID_PREFIXES = ['.gp-llm-v2', '.rainbow-sprinkles'];
 
-export const isEisEndpoint = (ep: InferenceAPIConfigResponse): ep is EisInferenceEndpoint =>
-  ep.service === 'elastic';
+export const isHiddenEisEndpoint = (ep: InferenceAPIConfigResponse): boolean =>
+  HIDDEN_EIS_INFERENCE_ID_PREFIXES.some((prefix) => ep.inference_id.startsWith(prefix));
 
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
@@ -51,15 +60,20 @@ export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
   rerank: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.rerank', {
     defaultMessage: 'rerank',
   }),
+  embedding: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.embedding', {
+    defaultMessage: 'embedding',
+  }),
 };
 
 export interface GroupedModel {
   service: 'elastic';
   modelName: string;
   modelCreator: string;
+  modelStatus: EisModelStatus;
   taskTypes: InferenceTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
+  modelMetadata?: EisInferenceEndpointMetadata;
 }
 
 export const getModelName = (endpoint: EisInferenceEndpoint): string => {
@@ -75,6 +89,30 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
     return endpoint.metadata.display.model_creator;
   }
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
+};
+
+export const getModelMetadata = (
+  endpoint: EisInferenceEndpoint
+): EisInferenceEndpointMetadata | undefined => {
+  if (isInferenceEndpointWithMetadata(endpoint)) return endpoint.metadata;
+  return undefined;
+};
+
+export const getModelStatus = (
+  metadata: EisInferenceEndpointMetadata | undefined
+): EisModelStatus => {
+  if (!metadata) return EisModelStatus.Unknown;
+  if (isModelEndOfLifeReached(metadata)) return EisModelStatus.DeprecatedEOL;
+  // use helper function to catch eol dates within the next month regardless of status value
+  if (isModelDeprecated(metadata)) return EisModelStatus.Deprecated;
+  switch (metadata.heuristics?.status?.toLowerCase()) {
+    case EisModelStatus.GA:
+      return EisModelStatus.GA;
+    case EisModelStatus.Preview:
+      return EisModelStatus.Preview;
+    default:
+      return EisModelStatus.Unknown;
+  }
 };
 
 const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
@@ -116,15 +154,22 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
+      if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
+        existing.modelMetadata = ep.metadata;
+        existing.modelStatus = getModelStatus(ep.metadata);
+      }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
+      const modelMetadata = getModelMetadata(ep);
       groups.set(key, {
         service: ep.service,
         modelName: getModelName(ep),
         modelCreator: getModelCreator(ep),
+        modelStatus: getModelStatus(modelMetadata),
         taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],
         endpoints: [ep],
+        modelMetadata,
       });
     }
   }
@@ -191,4 +236,265 @@ export const filterGroupedModels = (
       return true;
     })
     .sort((a, b) => a.modelName.localeCompare(b.modelName));
+};
+
+const MODEL_DEPRECATED_EOL_TIME_DURATION = 'now+30d';
+export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return false;
+  const eolDate = getModelEOLDate(metadata);
+  if (eolDate && dateMath.parse(MODEL_DEPRECATED_EOL_TIME_DURATION)?.isSameOrAfter(eolDate)) {
+    // if the EOL date is within the next 30 days, treat is as deprecated.
+    return true;
+  }
+  if (metadata.heuristics?.status?.toLowerCase() === EisModelStatus.Deprecated) return true;
+  return false;
+}
+
+export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata | undefined) {
+  const eolDate = getModelEOLDate(metadata);
+  if (!eolDate) return false;
+  return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
+}
+
+export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return undefined;
+  if (!metadata.heuristics?.release_date) return undefined;
+  const releaseMoment = dateMath.parse(metadata.heuristics.release_date);
+  if (releaseMoment?.isValid()) {
+    return releaseMoment;
+  }
+  return undefined;
+}
+
+export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return undefined;
+  if (!metadata.heuristics?.end_of_life_date) return undefined;
+  const eolMoment = dateMath.parse(metadata.heuristics.end_of_life_date);
+  if (eolMoment?.isValid()) {
+    return eolMoment;
+  }
+  return undefined;
+}
+
+export function getModelEOLMessage(eolFormattedDate: string | null) {
+  return eolFormattedDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
+        {
+          defaultMessage:
+            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          values: { eolFormattedDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
+        {
+          defaultMessage: 'This model has reached end of life and is no longer available.',
+        }
+      );
+}
+
+export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null) {
+  return deprecatedFormattedDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
+        {
+          defaultMessage:
+            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
+          values: { deprecatedFormattedDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
+        {
+          defaultMessage:
+            'This model is deprecated. We recommend a newer model for optimal results.',
+        }
+      );
+}
+
+const GEO_DISPLAY_NAMES: Record<string, string> = {
+  apac: i18n.translate('xpack.searchInferenceEndpoints.geo.asiaPacific', {
+    defaultMessage: 'Asia Pacific',
+  }),
+  eu: i18n.translate('xpack.searchInferenceEndpoints.geo.europe', {
+    defaultMessage: 'Europe',
+  }),
+  us: i18n.translate('xpack.searchInferenceEndpoints.geo.northAmerica', {
+    defaultMessage: 'North America',
+  }),
+  other: i18n.translate('xpack.searchInferenceEndpoints.geo.other', {
+    defaultMessage: 'Other',
+  }),
+};
+
+/**
+ * Returns the i18n display name for an EIS `geo` code.
+ * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to the raw code.
+ */
+export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
+
+/**
+ * Returns the display label for a CSP region, e.g. "US East (N. Virginia) - AWS".
+ * Falls back to the raw region code when no display name is registered.
+ */
+export const getRegionDisplayName = (r: CspRegion): string => {
+  const key = regionKey(r);
+  return `${REGION_DISPLAY_NAMES[key] ?? r.region} - ${r.csp.toUpperCase()}`;
+};
+
+const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
+  const byGeo = new Map<string, Map<string, CspRegion>>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!isCspRegion(region)) continue;
+      const geo = region.geo ?? 'other';
+      const geoMap = byGeo.get(geo) ?? new Map<string, CspRegion>();
+      geoMap.set(regionKey(region), region);
+      byGeo.set(geo, geoMap);
+    }
+  }
+
+  return new Map([...byGeo.entries()].map(([geo, geoMap]) => [geo, [...geoMap.values()]]));
+};
+
+/**
+ * Collects geo codes that appear only as geo-only entries (no csp+region) across the given endpoints.
+ * These indicate zone-level availability without specific region data.
+ */
+const collectGeoOnlyZones = (endpoints: EisInferenceEndpoint[]): Set<string> => {
+  const geoOnly = new Set<string>();
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+    for (const region of regions) {
+      if (isCspRegion(region)) continue;
+      if (region && typeof region === 'object' && typeof region.geo === 'string') {
+        geoOnly.add(region.geo);
+      }
+    }
+  }
+  return geoOnly;
+};
+
+/**
+ * Computes per-zone region availability counts for a specific model relative to
+ * all EIS models, for use in the model detail flyout region badges.
+ *
+ */
+export const getRegionZoneCounts = (
+  modelEndpoints: EisInferenceEndpoint[],
+  allEisEndpoints: EisInferenceEndpoint[]
+): RegionZoneCount[] => {
+  const modelByGeo = collectRegionsPerGeo(modelEndpoints);
+  const allByGeo = collectRegionsPerGeo(allEisEndpoints);
+  const modelGeoOnly = collectGeoOnlyZones(modelEndpoints);
+
+  return GEO_ORDER.flatMap((geo) => {
+    const modelRegions = modelByGeo.get(geo) ?? [];
+    const modelCount = modelRegions.length;
+    const isGeoOnly = modelCount === 0 && modelGeoOnly.has(geo);
+
+    if (modelCount === 0 && !isGeoOnly) return [];
+
+    return [
+      {
+        geo,
+        modelRegions,
+        modelCount,
+        totalCount: allByGeo.get(geo)?.length ?? 0,
+        geoOnly: isGeoOnly,
+      },
+    ];
+  });
+};
+
+/**
+ * Aggregates all unique CSP regions from EIS endpoint `regions` metadata.
+ * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
+ */
+export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegion[] => {
+  const seen = new Map<string, CspRegion>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!isCspRegion(region)) continue;
+      const key = regionKey(region);
+      if (!seen.has(key)) seen.set(key, region);
+    }
+  }
+
+  return [...seen.values()].sort((a, b) => {
+    const cspCmp = a.csp.localeCompare(b.csp);
+    return cspCmp !== 0 ? cspCmp : a.region.localeCompare(b.region);
+  });
+};
+
+export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
+
+export interface ZoneGroup {
+  geo: string;
+  displayName: string;
+  regions: CspRegion[];
+}
+
+/**
+ * Groups available regions by geo zone, ordered by GEO_ORDER for known geos
+ * and alphabetically for any unknown ones.
+ */
+export const getZoneGroups = (availableRegions: CspRegion[]): ZoneGroup[] => {
+  const regionsByGeo: Record<string, CspRegion[]> = {};
+  for (const region of availableRegions) {
+    (regionsByGeo[region.geo ?? 'other'] ??= []).push(region);
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownGeos = geoOrderList.filter((geo) => geo in regionsByGeo);
+  const unknownGeos = Object.keys(regionsByGeo)
+    .filter((geo) => !geoOrderList.includes(geo))
+    .sort();
+
+  return [...knownGeos, ...unknownGeos].map((geo) => ({
+    geo,
+    displayName: getGeoDisplayName(geo),
+    regions: regionsByGeo[geo],
+  }));
+};
+
+export const isPolicyMode = (id: string): id is PolicyMode => id === 'geo' || id === 'regions';
+
+/**
+ * Returns all unique geo codes present in EIS endpoint metadata, ordered by `GEO_ORDER`
+ * with any unknown codes appended alphabetically. Handles future geo codes gracefully.
+ */
+export const getAvailableGeos = (endpoints: EisInferenceEndpoint[]): string[] => {
+  const seen = new Set<string>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!region || typeof region !== 'object') continue;
+      if (typeof region.geo === 'string' && region.geo.length > 0) {
+        seen.add(region.geo);
+      }
+    }
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownOrdered = geoOrderList.filter((g) => seen.has(g));
+  const unknownSorted = [...seen].filter((g) => !geoOrderList.includes(g)).sort();
+  return [...knownOrdered, ...unknownSorted];
 };

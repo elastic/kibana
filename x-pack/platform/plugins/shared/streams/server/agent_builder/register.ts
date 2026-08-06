@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import { MemoryServiceImpl } from '../lib/memory';
+
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const registerStreamsAgentBuilder = async ({
@@ -21,46 +20,15 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
-  isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  isMemoryEnabled: () => Promise<boolean>;
-}) => {
+}): Promise<void> => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder });
-
-  const getMemoryService = () =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient: server.core.elasticsearch.client.asInternalUser,
-    });
-
-  // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
-  // This avoids exposing the skill to the agent when memory is not configured.
-  // Call ensureMemorySkillRegistered() after enabling observability:streamsEnableMemory.
-  let memorySkillRegistered = false;
-
-  const ensureMemorySkillRegistered = () => {
-    if (memorySkillRegistered) {
-      return;
-    }
-    memorySkillRegistered = true;
-    agentBuilder.skills.register(
-      createSigEventsMemorySkill({
-        getMemoryService,
-        getSecurity: () => server.core.security,
-      })
-    );
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
-  };
-
-  if (await isMemoryEnabled()) {
-    ensureMemorySkillRegistered();
-  }
-
-  return { ensureMemorySkillRegistered };
+  registerAgentBuilderSkills({
+    agentBuilder,
+  });
 };

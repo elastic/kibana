@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import thunk from 'redux-thunk';
+import thunk from 'redux-thunk-v2';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
-} from 'redux';
-import { applyMiddleware, createStore as createReduxStore } from 'redux';
+  Store,
+} from 'redux-v4';
+import { applyMiddleware, createStore as createReduxStore } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -40,7 +40,6 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
-import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
@@ -58,8 +57,7 @@ export const createStoreFactory = async (
   const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
     application: coreStart.application,
     http: coreStart.http,
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    skip: enableExperimental.newDataViewPickerEnabled,
+    skip: true,
   });
 
   const timelineInitialState = {
@@ -149,18 +147,7 @@ const timelineActionsWithNonserializablePayloads = [
 ];
 
 const actionSanitizer = (action: AnyAction) => {
-  if (action.type === sourcererActions.setDataView.type) {
-    return {
-      ...action,
-      payload: {
-        ...action.payload,
-        dataView: 'dataView',
-        browserFields: 'browserFields',
-        indexFields: 'indexFields',
-        fields: 'fields',
-      },
-    };
-  } else if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
+  if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
     const { type, payload } = action;
     if (type === timelineActions.addTimeline.type || type === timelineActions.updateTimeline.type) {
       return {

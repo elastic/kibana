@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { WorkflowsSearchParams } from '@kbn/workflows';
+import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
+
 export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
@@ -18,7 +22,7 @@ export const ruleKeys = {
   }) => [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
-  tags: () => [...ruleKeys.all, 'tags'] as const,
+  tags: (filter?: string) => [...ruleKeys.all, 'tags', { filter }] as const,
 };
 
 export const workflowKeys = {
@@ -26,18 +30,20 @@ export const workflowKeys = {
   details: () => [...workflowKeys.all, 'details'] as const,
   detail: (id: string) => [...workflowKeys.details(), id] as const,
   searches: () => [...workflowKeys.all, 'search'] as const,
-  search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
+  search: (params: Pick<WorkflowsSearchParams, 'query' | 'tags'>) =>
+    [...workflowKeys.searches(), params] as const,
 };
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
+  ruleEventFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'ruleEventFields', { matcher: matcher || undefined }] as const,
 };
 
-export const notificationPolicyKeys = {
-  all: ['notificationPolicy'] as const,
-  detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
-  lists: () => [...notificationPolicyKeys.all, 'list'] as const,
+export const actionPolicyKeys = {
+  all: ['actionPolicy'] as const,
+  detail: (id: string) => [...actionPolicyKeys.all, 'detail', id] as const,
+  lists: () => [...actionPolicyKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
     perPage: number;
@@ -46,7 +52,41 @@ export const notificationPolicyKeys = {
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }) => [...notificationPolicyKeys.lists(), filters] as const,
-  allTags: () => [...notificationPolicyKeys.all, 'tags'] as const,
-  tags: (search?: string) => [...notificationPolicyKeys.allTags(), { search }] as const,
+  }) => [...actionPolicyKeys.lists(), filters] as const,
+  allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+  linkedForRule: (ruleId: string) =>
+    [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
+};
+
+export const executionHistoryKeys = {
+  all: ['executionHistory'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    ruleIds?: string[];
+    outcome?: PolicyExecutionOutcomeFilter;
+    episodeIds?: string[];
+    startDate?: string;
+  }) => [...executionHistoryKeys.all, 'list', filters] as const,
+  newEventsSince: (
+    since: string,
+    filters: {
+      search?: string;
+      ruleIds?: string[];
+      outcome?: PolicyExecutionOutcomeFilter;
+    } = {}
+  ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
+};
+
+export const ruleExecutionKeys = {
+  all: ['ruleExecution'] as const,
+  list: (filters: ListRuleExecutionsUiParams) =>
+    [...ruleExecutionKeys.all, 'list', filters] as const,
+};
+
+export const userProfileKeys = {
+  all: ['userProfile'] as const,
+  bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
 };

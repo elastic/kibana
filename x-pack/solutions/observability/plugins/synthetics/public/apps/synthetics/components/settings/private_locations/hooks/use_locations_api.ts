@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { EditPrivateLocationAttributes } from '../../../../../../../server/routes/settings/private_locations/edit_private_location';
 import type { NewLocation } from '../add_or_edit_location_flyout';
 import {

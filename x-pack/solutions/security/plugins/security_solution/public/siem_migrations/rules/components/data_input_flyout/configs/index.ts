@@ -7,10 +7,12 @@
 
 import { SPLUNK_MIGRATION_STEPS } from './splunk';
 import { QRADAR_MIGRATION_STEPS } from './qradar';
+import { SENTINEL_MIGRATION_STEPS } from './sentinel';
 import type { Steps } from '../../../../common/types';
 import { MigrationSource } from '../../../../common/types';
 
 export const STEP_COMPONENTS: Record<MigrationSource, Steps> = {
   [MigrationSource.SPLUNK]: SPLUNK_MIGRATION_STEPS,
   [MigrationSource.QRADAR]: QRADAR_MIGRATION_STEPS,
+  [MigrationSource.SENTINEL]: SENTINEL_MIGRATION_STEPS,
 };

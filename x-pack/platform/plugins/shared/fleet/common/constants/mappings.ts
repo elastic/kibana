@@ -106,9 +106,6 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
-    default_api_key: {
-      type: 'keyword',
-    },
     default_api_key_id: {
       type: 'keyword',
     },
@@ -279,6 +276,9 @@ export const AGENT_MAPPINGS = {
       type: 'integer',
     },
     policy_id: {
+      type: 'keyword',
+    },
+    policy_base_id: {
       type: 'keyword',
     },
     policy_revision_idx: {
@@ -466,6 +466,9 @@ export const AGENT_MAPPINGS = {
             description: {
               type: 'keyword',
             },
+            name: {
+              type: 'keyword',
+            },
           },
         },
         deployment: {
@@ -525,6 +528,9 @@ export const AGENT_MAPPINGS = {
     config: {
       properties: {
         description: {
+          type: 'keyword',
+        },
+        name: {
           type: 'keyword',
         },
       },

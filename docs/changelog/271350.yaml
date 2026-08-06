@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/271350
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Fix trace change point aggregation by enforcing a minimum time window

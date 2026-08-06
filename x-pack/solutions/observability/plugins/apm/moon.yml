@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,9 +14,10 @@ project:
   title: '@kbn/apm-plugin'
   description: Moon project for @kbn/apm-plugin
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
+  - '@kbn/synthtrace'
   - '@kbn/apm-embeddable-common'
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -40,15 +41,16 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/fleet-plugin'
-  - '@kbn/io-ts-utils'
   - '@kbn/i18n'
   - '@kbn/es-query'
+  - '@kbn/ui-callout'
   - '@kbn/ui-theme'
   - '@kbn/synthtrace-client'
   - '@kbn/lens-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/share-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/data-views-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/field-formats-plugin'
@@ -71,7 +73,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/field-types'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/safer-lodash-set'
   - '@kbn/shared-ux-router'
@@ -97,7 +99,6 @@ dependsOn:
   - '@kbn/metrics-data-access-plugin'
   - '@kbn/profiling-data-access-plugin'
   - '@kbn/profiling-utils'
-  - '@kbn/monaco'
   - '@kbn/deeplinks-observability'
   - '@kbn/custom-icons'
   - '@kbn/elastic-agent-utils'
@@ -125,7 +126,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/serverless'
   - '@kbn/aiops-log-rate-analysis'
-  - '@kbn/router-utils'
   - '@kbn/alerting-comparators'
   - '@kbn/saved-search-component'
   - '@kbn/saved-search-plugin'
@@ -143,13 +143,16 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/react-hooks'
   - '@kbn/react-kibana-mount'
   - '@kbn/licensing-types'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/controls-constants'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/control-group-renderer'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
   - '@kbn/slo-plugin'
@@ -158,10 +161,21 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/presentation-util'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/apm-api-shared'
+  - '@kbn/apm-common'
+  - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/ebt-click'
+  - '@kbn/apm-types-shared'
+  - '@kbn/apm-common'
+  - '@kbn/storybook'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/apm-shared'
 tags:
   - plugin
   - prod
@@ -170,6 +184,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - .storybook/**/*
     - common/**/*
     - public/**/*
     - scripts/**/*
@@ -177,6 +192,7 @@ fileGroups:
     - jest.config.js
     - public/**/*.json
     - server/**/*.json
+    - test/scenarios/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

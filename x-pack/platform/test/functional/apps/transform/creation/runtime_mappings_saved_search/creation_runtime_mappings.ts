@@ -14,7 +14,6 @@ import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } fr
 import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   const runtimeMappings = {
@@ -30,7 +29,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('creation with runtime mappings', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
@@ -259,8 +257,8 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays the stats bar');
           await transform.management.assertTransformStatsBarExists();
 
-          await transform.testExecution.logTestStep('loads the source selection modal');
-          await transform.management.startTransformCreation();
+          await transform.testExecution.logTestStep('loads the transform creation wizard');
+          await transform.management.startTransformCreation(testData.type);
 
           await transform.testExecution.logTestStep('selects the source data');
           await transform.sourceSelection.selectSource(testData.source);
@@ -271,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
 
           await transform.testExecution.logTestStep('has correct transform function selected');
-          await transform.wizard.assertSelectedTransformFunction('pivot');
+          await transform.wizard.assertSelectedTransformFunction(testData.type);
 
           await transform.testExecution.logTestStep(
             `sets the date picker to the default '15 minutes ago'`
@@ -354,8 +352,6 @@ export default function ({ getService }: FtrProviderContext) {
           }
 
           if (isLatestTransformTestData(testData)) {
-            await transform.testExecution.logTestStep('sets latest transform method');
-            await transform.wizard.selectTransformFunction('latest');
             await transform.testExecution.logTestStep('adds unique keys');
             for (const { identifier, label } of testData.uniqueKeys) {
               await transform.wizard.assertUniqueKeysInputExists();

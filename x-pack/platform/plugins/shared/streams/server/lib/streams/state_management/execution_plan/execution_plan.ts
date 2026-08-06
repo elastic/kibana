@@ -29,6 +29,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { ATTACHMENT_TYPES } from '../../attachments/types';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { retryTransientEsErrors } from '../../helpers/retry';
@@ -278,12 +279,17 @@ export class ExecutionPlan {
       return;
     }
 
-    const { getQueryClient } = this.dependencies;
-    if (!getQueryClient) {
-      throw new Error('queryClient is required for deleteQueries but was not provided');
+    const { getKnowledgeIndicatorClient, logger } = this.dependencies;
+    if (!getKnowledgeIndicatorClient) {
+      logger.debug(
+        'Skipping deleteQueries: Knowledge Indicator client is not available (significant events disabled)'
+      );
+      return;
     }
-    const queryClient = await getQueryClient();
-    return Promise.all(actions.map((action) => queryClient.deleteAll(action.request.definition)));
+    const kiClient = await getKnowledgeIndicatorClient();
+    return Promise.all(
+      actions.map((action) => kiClient.deleteAllQueries(action.request.definition.name))
+    );
   }
 
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
@@ -291,11 +297,13 @@ export class ExecutionPlan {
       return;
     }
 
-    return Promise.all(
-      actions.flatMap((action) => [
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
-        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
-      ])
+    // syncAttachmentList with an empty list clears all attachments of that type for the stream.
+    await Promise.all(
+      actions.flatMap((action) =>
+        ATTACHMENT_TYPES.map((type) =>
+          this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], type)
+        )
+      )
     );
   }
 
@@ -309,12 +317,20 @@ export class ExecutionPlan {
       return;
     }
 
-    const { getFeatureClient } = this.dependencies;
-    if (!getFeatureClient) {
-      throw new Error('featureClient is required for unlinkFeatures but was not provided');
+    const { getKnowledgeIndicatorClient, logger } = this.dependencies;
+    if (!getKnowledgeIndicatorClient) {
+      logger.debug(
+        'Skipping unlinkFeatures: Knowledge Indicator client is not available (significant events disabled)'
+      );
+      return;
     }
-    const featureClient = await getFeatureClient();
-    return Promise.all(actions.map((action) => featureClient.deleteFeatures(action.request.name)));
+    const kiClient = await getKnowledgeIndicatorClient();
+    return Promise.all(
+      actions.map(async (action) => {
+        await kiClient.deleteAllQueries(action.request.name);
+        await kiClient.deleteIndicators(action.request.name);
+      })
+    );
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {

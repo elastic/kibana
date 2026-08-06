@@ -6,16 +6,6 @@
  */
 
 import React from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { RuleConditions } from './rule_conditions';
-import { RuleMetadata } from './rule_metadata';
 
-export const RuleSidebarConditionsTab: React.FC = () => {
-  return (
-    <>
-      <RuleConditions />
-      <EuiHorizontalRule margin="l" />
-      <RuleMetadata />
-    </>
-  );
-};
+export const RuleSidebarConditionsTab: React.FC = () => <RuleConditions />;

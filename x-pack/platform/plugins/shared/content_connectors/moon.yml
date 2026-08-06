@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/index-management-shared-types'
   - '@kbn/core-chrome-browser'
   - '@kbn/es-errors'
+  - '@kbn/es-query'
   - '@kbn/ml-plugin'
   - '@kbn/data-plugin'
   - '@kbn/features-plugin'
@@ -61,6 +62,7 @@ dependsOn:
   - '@kbn/home-plugin'
   - '@kbn/logging'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-management'
 tags:
   - plugin
   - prod

@@ -14,7 +14,7 @@ import { usersModel } from '../../store';
 import { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';
 import { fireEvent, render } from '@testing-library/react';
-import { UserPanelKey } from '../../../../flyout/entity_details/shared/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const mockUseMlCapabilities = jest.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
@@ -22,23 +22,36 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => mockUseMlCapabilities(),
 }));
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenUserFlyout = jest.fn();
+const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openRightPanel: mockOpenRightPanel })),
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => true,
+}));
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openUserFlyout: mockOpenUserFlyout,
+    openHostFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
 }));
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
 
   beforeEach(() => {
-    mockOpenRightPanel.mockClear();
+    mockOpenUserFlyout.mockClear();
+    mockOpenFlyout.mockClear();
   });
 
   describe('rendering', () => {
     test('it renders the users table', () => {
       const userName = 'testUser';
-      const { getByTestId, getAllByRole, getByText } = render(
+      const { getByTestId, getAllByTestId, getByText } = render(
         <TestProviders>
           <UsersTable
             users={[
@@ -61,7 +74,7 @@ describe('Users Table Component', () => {
       );
 
       expect(getByTestId('table-allUsers-loading-false')).toBeInTheDocument();
-      expect(getAllByRole('columnheader').length).toBe(4);
+      expect(getAllByTestId(/tableHeaderCell_/).length).toBe(4);
       expect(getByText(userName)).toBeInTheDocument();
     });
 
@@ -92,7 +105,7 @@ describe('Users Table Component', () => {
     test('it renders "Host Risk classification" column when "isPlatinumOrTrialLicense" is truthy', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
 
-      const { getAllByRole, getByText } = render(
+      const { getAllByTestId, getByText } = render(
         <TestProviders>
           <UsersTable
             users={[
@@ -119,14 +132,14 @@ describe('Users Table Component', () => {
         </TestProviders>
       );
 
-      expect(getAllByRole('columnheader').length).toBe(5);
+      expect(getAllByTestId(/tableHeaderCell_/).length).toBe(5);
       expect(getByText('Critical')).toBeInTheDocument();
     });
 
     test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
 
-      const { getAllByRole, queryByText } = render(
+      const { getAllByTestId, queryByText } = render(
         <TestProviders>
           <UsersTable
             users={[
@@ -153,7 +166,7 @@ describe('Users Table Component', () => {
         </TestProviders>
       );
 
-      expect(getAllByRole('columnheader').length).toBe(4);
+      expect(getAllByTestId(/tableHeaderCell_/).length).toBe(4);
       expect(queryByText('Critical')).not.toBeInTheDocument();
     });
 
@@ -190,15 +203,12 @@ describe('Users Table Component', () => {
 
       fireEvent.click(getByTestId('users-link-anchor'));
 
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: UserPanelKey,
-        params: {
-          userName,
-          entityId,
-          contextID: 'allUsers',
-          scopeId: 'allUsers',
-          isPreviewMode: false,
-        },
+      expect(mockOpenUserFlyout).toHaveBeenCalledWith({
+        userName,
+        entityId,
+        contextID: 'allUsers',
+        scopeId: 'allUsers',
+        origin: FLYOUT_ORIGIN.USERS_TABLE,
       });
     });
 
@@ -231,7 +241,8 @@ describe('Users Table Component', () => {
 
       fireEvent.click(getByTestId('users-link-anchor'));
 
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenUserFlyout).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 });

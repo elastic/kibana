@@ -21,7 +21,8 @@ import {
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/276803
+describe.skip(
   'Unified Timeline table Row Actions',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

@@ -100,8 +100,9 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={MORE_ACTIONS_BUTTON_LABEL}
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

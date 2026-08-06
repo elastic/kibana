@@ -7,40 +7,9 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
+import { isIndexNotFoundError } from '../utils/is_index_not_found_error';
 import { skillIndexName } from '../services/skills/persisted/client/storage';
 import { pluginIndexName } from '../services/plugins/client/storage';
-
-export const isIndexNotFoundError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') {
-    return false;
-  }
-
-  const castError = error as {
-    attributes?: {
-      caused_by?: { type?: string };
-      error?: { caused_by?: { type?: string } };
-    };
-    message?: string;
-    meta?: {
-      body?: {
-        error?: {
-          type?: string;
-          caused_by?: { type?: string };
-        };
-      };
-    };
-  };
-
-  // Check various error structure formats from Elasticsearch client
-  return (
-    castError.attributes?.caused_by?.type === 'index_not_found_exception' ||
-    castError.attributes?.error?.caused_by?.type === 'index_not_found_exception' ||
-    castError.meta?.body?.error?.type === 'index_not_found_exception' ||
-    castError.meta?.body?.error?.caused_by?.type === 'index_not_found_exception' ||
-    (typeof castError.message === 'string' &&
-      castError.message.includes('index_not_found_exception'))
-  );
-};
 
 /**
  * Usage counter data from saved objects

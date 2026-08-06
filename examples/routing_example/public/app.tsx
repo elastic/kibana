@@ -52,21 +52,18 @@ function RoutingExplorer({
                     href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-server#:~:text=IRouter',
                     iconType: 'logoGithub',
                     target: '_blank',
-                    size: 's',
                   },
                   {
                     label: 'HttpHandler (core.http.fetch) API docs',
                     href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-browser#:~:text=HttpHandler',
                     iconType: 'logoGithub',
                     target: '_blank',
-                    size: 's',
                   },
                   {
                     label: 'Conventions',
                     href: 'https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#api-endpoints',
                     iconType: 'logoGithub',
                     target: '_blank',
-                    size: 's',
                   },
                 ]}
               />

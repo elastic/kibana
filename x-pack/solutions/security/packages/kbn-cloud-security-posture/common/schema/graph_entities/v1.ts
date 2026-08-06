@@ -6,7 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INDEX_PATTERN_REGEX } from '../graph/v1';
+import {
+  COUNTRY_CODES_MAX_SIZE,
+  DETAIL_PAGE_SIZE_MAX,
+  ENTITY_EUID_MAX_LENGTH,
+  ENTITY_IDS_MAX_SIZE,
+  INDEX_PATTERN_MAX_LENGTH,
+  INDEX_PATTERN_REGEX,
+  INDEX_PATTERNS_MAX_SIZE,
+  IPS_MAX_SIZE,
+  TIMESTAMP_STRING_MAX_LENGTH,
+} from '../graph/v1';
 
 // ============================================
 // ENTITIES ENDPOINT: /internal/cloud_security_posture/graph/entities
@@ -28,30 +38,37 @@ export const entityItemSchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
-  ips: schema.maybe(schema.arrayOf(schema.string())),
-  countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+  ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
+  countryCodes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })),
 });
 
 export const entitiesRequestSchema = schema.object({
   page: schema.object({
     index: schema.number({ min: 0 }),
-    size: schema.number({ min: 1, max: 100 }),
+    size: schema.number({ min: 1, max: DETAIL_PAGE_SIZE_MAX }),
   }),
   query: schema.object({
-    entityIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 5000 }),
-    start: schema.oneOf([schema.number(), schema.string()]),
-    end: schema.oneOf([schema.number(), schema.string()]),
+    entityIds: schema.arrayOf(schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }), {
+      minSize: 1,
+      maxSize: ENTITY_IDS_MAX_SIZE,
+    }),
+    start: schema.oneOf([
+      schema.number(),
+      schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH }),
+    ]),
+    end: schema.oneOf([schema.number(), schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })]),
     indexPatterns: schema.maybe(
       schema.arrayOf(
         schema.string({
           minLength: 1,
+          maxLength: INDEX_PATTERN_MAX_LENGTH,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;
             }
           },
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: INDEX_PATTERNS_MAX_SIZE }
       )
     ),
   }),
@@ -59,6 +76,6 @@ export const entitiesRequestSchema = schema.object({
 
 export const entitiesResponseSchema = () =>
   schema.object({
-    entities: schema.arrayOf(entityItemSchema),
+    entities: schema.arrayOf(entityItemSchema, { maxSize: DETAIL_PAGE_SIZE_MAX }),
     totalRecords: schema.number(),
   });

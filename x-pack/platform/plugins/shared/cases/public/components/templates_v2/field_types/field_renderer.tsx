@@ -6,65 +6,136 @@
  */
 
 import type { FC } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo } from 'react';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  FormProvider,
-  useForm,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
+import { useEuiTheme } from '@elastic/eui';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { controlRegistry } from './field_types_registry';
 import { evaluateCondition } from '../../../../common/types/domain/template/evaluate_conditions';
 import { useYamlFormSync } from './hooks/use_yaml_form_sync';
 import { getFieldSnakeKey } from '../../../../common/utils';
 import { getYamlDefaultAsString } from '../utils';
+import { useResolvedFields } from '../../field_library/hooks/use_resolved_fields';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 export interface TemplateFieldRendererProps {
   parsedTemplate: ParsedTemplateDefinition;
+  owner?: string;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
 }
 
+interface TemplateFieldRowProps {
+  field: InlineField;
+  Control: FC<Record<string, unknown>>;
+  value: unknown;
+  isRequired: boolean;
+  isRequiredOnClose: boolean;
+  onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  isSaving: boolean;
+  isSaveDisabled: boolean;
+  marginBottom: string;
+}
+
+/**
+ * Builds the initial `extended_fields` form defaults from resolved fields. Display-only fields
+ * (e.g. MARKDOWN) hold no form value and are excluded, so they never seed an `extended_fields` key.
+ */
+export const buildInitialDefaultValues = (
+  resolvedFields: InlineField[]
+): Record<string, Record<string, string>> => {
+  const defaults: Record<string, Record<string, string>> = {
+    [CASE_EXTENDED_FIELDS]: {},
+  };
+  for (const field of resolvedFields) {
+    if (!isDisplayOnlyField(field)) {
+      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const fieldKey = getFieldSnakeKey(field.name, field.type);
+      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+    }
+  }
+  return defaults;
+};
+
+/** Prevents a field value change from re-rendering sibling controls. */
+const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
+  ({
+    field,
+    Control,
+    value,
+    isRequired,
+    isRequiredOnClose,
+    onFieldConfirm,
+    isSaving,
+    isSaveDisabled,
+    marginBottom,
+  }) => {
+    const handleConfirm = useCallback(() => {
+      onFieldConfirm?.(field.name, field.type);
+    }, [onFieldConfirm, field.name, field.type]);
+
+    const controlProps = {
+      ...field,
+      label: field.label ?? field.name,
+      value,
+      isRequired,
+      isRequiredOnClose,
+      patternValidation: field.validation?.pattern,
+      min: field.validation?.min,
+      max: field.validation?.max,
+      minLength: field.validation?.min_length,
+      maxLength: field.validation?.max_length,
+      onConfirm: onFieldConfirm ? handleConfirm : undefined,
+      isSaving,
+      isSaveDisabled,
+    };
+
+    return (
+      <div data-test-subj={`template-field-${field.name}`} css={{ marginBottom }}>
+        <Control {...controlProps} />
+      </div>
+    );
+  }
+);
+TemplateFieldRow.displayName = 'TemplateFieldRow';
+
 export const FieldsRenderer: FC<{
-  parsedTemplate: ParsedTemplateDefinition;
-  form: FormHook<{}>;
-}> = ({ parsedTemplate, form }) => {
+  resolvedFields: InlineField[];
+  onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  savingFieldKey?: string;
+}> = ({ resolvedFields, onFieldConfirm, savingFieldKey }) => {
+  const { euiTheme } = useEuiTheme();
+  const { control } = useFormContext();
+
   const fieldTypeMap = useMemo(
-    () => Object.fromEntries(parsedTemplate.fields.map((f) => [f.name, f.type])),
-    [parsedTemplate.fields]
+    () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.type])),
+    [resolvedFields]
   );
 
   const fieldControlMap = useMemo(
-    () => Object.fromEntries(parsedTemplate.fields.map((f) => [f.name, f.control])),
-    [parsedTemplate.fields]
+    () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.control])),
+    [resolvedFields]
   );
 
   const allFieldPaths = useMemo(
-    () =>
-      parsedTemplate.fields.map(
-        (f) => `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(f.name, f.type)}`
-      ),
-    [parsedTemplate.fields]
+    () => resolvedFields.map((f) => `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(f.name, f.type)}`),
+    [resolvedFields]
   );
 
-  const [formData] = useFormData({ form, watch: allFieldPaths });
+  const watchedValues = useWatch({ control, name: allFieldPaths });
 
   const fieldValues = useMemo(() => {
-    const extendedFields =
-      (formData as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS] ?? {};
-    return Object.fromEntries(
-      parsedTemplate.fields.map((f) => [f.name, extendedFields[getFieldSnakeKey(f.name, f.type)]])
-    );
-  }, [formData, parsedTemplate.fields]);
+    return Object.fromEntries(resolvedFields.map((f, i) => [f.name, watchedValues?.[i]]));
+  }, [watchedValues, resolvedFields]);
 
   return (
     <>
-      {parsedTemplate.fields.map((field) => {
-        // Evaluate display condition — skip rendering if false
+      {resolvedFields.map((field) => {
         if (field.display?.show_when) {
           const shouldShow = evaluateCondition(
             field.display.show_when,
@@ -75,7 +146,6 @@ export const FieldsRenderer: FC<{
           if (!shouldShow) return null;
         }
 
-        // Compute isRequired from static flag or conditional
         const isRequired =
           field.validation?.required === true ||
           (field.validation?.required_when
@@ -87,25 +157,26 @@ export const FieldsRenderer: FC<{
               )
             : false);
 
+        // Required-on-close is not required *now* (so the field stays fillable), but the label must
+        // say so rather than "Optional". Only surfaced when the field isn't already required.
+        const isRequiredOnClose = !isRequired && field.validation?.required_on_close === true;
+
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         if (!Control) return null;
 
-        const controlProps = {
-          ...field,
-          label: field.label ?? field.name,
-          value: fieldValues[field.name],
-          isRequired,
-          patternValidation: field.validation?.pattern,
-          min: field.validation?.min,
-          max: field.validation?.max,
-          minLength: field.validation?.min_length,
-          maxLength: field.validation?.max_length,
-        };
-
         return (
-          <div key={field.name} data-test-subj={`template-field-${field.name}`}>
-            <Control {...controlProps} />
-          </div>
+          <TemplateFieldRow
+            key={field.name}
+            field={field}
+            Control={Control}
+            value={fieldValues[field.name]}
+            isRequired={isRequired}
+            isRequiredOnClose={isRequiredOnClose}
+            onFieldConfirm={onFieldConfirm}
+            isSaving={savingFieldKey === getFieldSnakeKey(field.name, field.type)}
+            isSaveDisabled={savingFieldKey != null}
+            marginBottom={euiTheme.size.m}
+          />
         );
       })}
     </>
@@ -114,54 +185,88 @@ export const FieldsRenderer: FC<{
 
 FieldsRenderer.displayName = 'FieldsRenderer';
 
+const TemplateFieldRendererInner: FC<{
+  resolvedFields: InlineField[];
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+}> = ({ resolvedFields, onFieldDefaultChange }) => {
+  const initialDefaultValues = React.useMemo(
+    () => buildInitialDefaultValues(resolvedFields),
+    [resolvedFields]
+  );
+
+  const form = useForm({
+    defaultValues: initialDefaultValues,
+  });
+
+  useYamlFormSync(form, resolvedFields, onFieldDefaultChange);
+
+  return (
+    <FormProvider {...form}>
+      <FieldsRenderer resolvedFields={resolvedFields} />
+    </FormProvider>
+  );
+};
+
+TemplateFieldRendererInner.displayName = 'TemplateFieldRendererInner';
+
 /**
- * WARN: this component uses shared-form renderer for Case form compatiblity.
- * Dont change this until we migrate everything to react hook form.
+ * Renders extended fields inside the template YAML editor preview. Owns its
+ * own RHF form and bidirectionally syncs with the YAML defaults via
+ * useYamlFormSync.
  */
 export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   parsedTemplate,
+  owner,
   onFieldDefaultChange,
 }) => {
-  // Derive a stable content key from field definitions. JSON.stringify covers all
-  // field properties (default, display, validation, etc.), so this string only changes
-  // when YAML content actually changes — not on every re-parse that produces a new
-  // array object with identical values.
-  const fieldsKey = parsedTemplate.fields.map((f) => JSON.stringify(f)).join('|');
+  const { owner: contextOwner } = useCasesContext();
+  const resolvedOwner = owner ?? contextOwner[0];
+  const { resolvedFields, isLoading } = useResolvedFields(parsedTemplate.fields, resolvedOwner);
 
-  // Stabilize the fields reference so useYamlFormSync's effect only fires when
-  // field definitions actually change (content-based equality), not on every
-  // re-parse of the same YAML which produces a new array object each time.
-  const stableFieldsRef = React.useRef(parsedTemplate.fields);
-  const prevKeyRef = React.useRef(fieldsKey);
-  if (prevKeyRef.current !== fieldsKey) {
-    prevKeyRef.current = fieldsKey;
-    stableFieldsRef.current = parsedTemplate.fields;
+  // Full-content signature — changes whenever the resolved fields actually change, INCLUDING a
+  // default value. Drives the stable-reference update below so external default edits (typed in the
+  // YAML editor) flow into the live inner form via useYamlFormSync.
+  const contentKey = useMemo(
+    () => resolvedFields.map((f) => JSON.stringify(f)).join('|'),
+    [resolvedFields]
+  );
+
+  // Structural signature — deliberately EXCLUDES metadata.default (the two-way-bound value the user
+  // edits in the preview). Only this gates the remount `key` below: keying on the default would
+  // remount the inner form on every keystroke / date click once the debounced YAML round-trip lands,
+  // stealing input focus and closing the date-picker popover. Structural changes (fields
+  // added/removed/renamed, control/type/options/validation/display) still change it and correctly
+  // rebuild the form. useYamlFormSync already syncs default changes into the mounted form.
+  const structuralKey = useMemo(
+    () =>
+      resolvedFields
+        .map((field) => {
+          const metadataWithoutDefault: Record<string, unknown> = { ...(field.metadata ?? {}) };
+          delete metadataWithoutDefault.default;
+          return JSON.stringify({ ...field, metadata: metadataWithoutDefault });
+        })
+        .join('|'),
+    [resolvedFields]
+  );
+
+  // Stabilize the resolvedFields reference — only update when content actually changes (contentKey),
+  // not on every identical re-parse. This keeps useYamlFormSync effects from re-running needlessly
+  // while still handing the inner form fresh defaults when they genuinely change.
+  const stableResolvedFieldsRef = useRef(resolvedFields);
+  const prevContentKeyRef = useRef(contentKey);
+  if (prevContentKeyRef.current !== contentKey) {
+    prevContentKeyRef.current = contentKey;
+    stableResolvedFieldsRef.current = resolvedFields;
   }
-  const stableFields = stableFieldsRef.current;
 
-  const initialDefaultValues = React.useMemo(() => {
-    const defaults: Record<string, Record<string, string>> = {
-      [CASE_EXTENDED_FIELDS]: {},
-    };
-    for (const field of stableFields) {
-      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
-      const fieldKey = getFieldSnakeKey(field.name, field.type);
-      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
-    }
-    return defaults;
-  }, [stableFields]);
-
-  const { form } = useForm<{}>({
-    defaultValue: initialDefaultValues,
-    options: { stripEmptyFields: false },
-  });
-
-  useYamlFormSync(form, stableFields, onFieldDefaultChange);
+  if (isLoading) return null;
 
   return (
-    <FormProvider key={parsedTemplate.name} form={form}>
-      <FieldsRenderer parsedTemplate={parsedTemplate} form={form} />
-    </FormProvider>
+    <TemplateFieldRendererInner
+      key={structuralKey}
+      resolvedFields={stableResolvedFieldsRef.current}
+      onFieldDefaultChange={onFieldDefaultChange}
+    />
   );
 };
 

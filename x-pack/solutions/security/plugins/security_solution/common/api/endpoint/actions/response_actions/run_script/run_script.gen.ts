@@ -21,16 +21,33 @@ import {
   BaseActionSchema,
 } from '../../../model/schema/common.gen';
 
+/**
+ * Parameters for Run Script response action against Elastic Defend agent type.
+ */
+export const EndpointRunScriptParameters = lazySchema(() =>
+  z.object({
+    /**
+     * The script ID from the scripts library that will be executed.
+     */
+    scriptId: z.string().min(1).max(256),
+    /**
+     * The input parameter arguments (if any) for the script that will be executed.
+     */
+    scriptInput: z.string().min(1).max(8192).optional(),
+  })
+);
+export type EndpointRunScriptParameters = z.infer<typeof EndpointRunScriptParameters>;
+
 export const RawScriptParameters = lazySchema(() =>
   z.object({
     /**
      * Raw script content.
      */
-    raw: z.string().min(1),
+    raw: z.string().min(1).max(65536),
     /**
      * Command line arguments.
      */
-    commandLine: z.string().min(1).optional(),
+    commandLine: z.string().min(1).max(8192).optional(),
     /**
      * Timeout in seconds.
      */
@@ -44,11 +61,11 @@ export const HostPathScriptParameters = lazySchema(() =>
     /**
      * Absolute or relative path of script on host machine.
      */
-    hostPath: z.string().min(1),
+    hostPath: z.string().min(1).max(4096),
     /**
      * Command line arguments.
      */
-    commandLine: z.string().min(1).optional(),
+    commandLine: z.string().min(1).max(8192).optional(),
     /**
      * Timeout in seconds.
      */
@@ -62,11 +79,11 @@ export const CloudFileScriptParameters = lazySchema(() =>
     /**
      * Script name in cloud storage.
      */
-    cloudFile: z.string().min(1),
+    cloudFile: z.string().min(1).max(4096),
     /**
      * Command line arguments.
      */
-    commandLine: z.string().min(1).optional(),
+    commandLine: z.string().min(1).max(8192).optional(),
     /**
      * Timeout in seconds.
      */
@@ -83,11 +100,11 @@ export const SentinelOneRunScriptParameters = lazySchema(() =>
     /**
      * The script ID from SentinelOne scripts library that will be executed.
      */
-    scriptId: z.string().min(1),
+    scriptId: z.string().min(1).max(256),
     /**
      * The input parameter arguments for the script that was selected.
      */
-    scriptInput: z.string().min(1).optional(),
+    scriptInput: z.string().min(1).max(8192).optional(),
   })
 );
 export type SentinelOneRunScriptParameters = z.infer<typeof SentinelOneRunScriptParameters>;
@@ -100,11 +117,11 @@ export const MDERunScriptParameters = lazySchema(() =>
     /**
      * The name of the script to execute from the cloud storage.
      */
-    scriptName: z.string().min(1),
+    scriptName: z.string().min(1).max(256),
     /**
      * Optional command line arguments for the script.
      */
-    args: z.string().min(1).optional(),
+    args: z.string().min(1).max(8192).optional(),
   })
 );
 export type MDERunScriptParameters = z.infer<typeof MDERunScriptParameters>;
@@ -113,10 +130,11 @@ export const RunScriptRouteRequestBody = lazySchema(() =>
   BaseActionSchema.merge(
     z.object({
       /**
-      * One of the following set of parameters must be provided
+      * One of the following set of parameters must be provided for the `agentType` that is specified.
 
       */
       parameters: z.union([
+        EndpointRunScriptParameters,
         RawScriptParameters,
         HostPathScriptParameters,
         CloudFileScriptParameters,

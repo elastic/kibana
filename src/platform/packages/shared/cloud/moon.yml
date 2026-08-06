@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/share-plugin'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/shared-ux-utility'
 tags:
   - shared-common
   - package

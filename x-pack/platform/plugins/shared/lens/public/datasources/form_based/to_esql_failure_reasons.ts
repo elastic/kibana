@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
  */
 export type EsqlConversionFailureReason =
   | 'multi_layer_not_supported'
-  | 'trend_line_not_supported'
   | 'formula_not_supported'
   | 'time_shift_not_supported'
   | 'runtime_field_not_supported'
@@ -23,6 +22,7 @@ export type EsqlConversionFailureReason =
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
   | 'saved_to_library_not_supported'
+  | 'trendline_not_supported'
   | 'unsupported_settings'
   | 'unknown';
 
@@ -32,13 +32,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: Multi-layer visualizations will be supported in an upcoming update.',
-    }
-  ),
-  trend_line_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTrendLineTooltip',
-    {
-      defaultMessage:
-        'Cannot convert to ES|QL: Metric visualizations with trend lines will be supported in an upcoming update.',
     }
   ),
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
@@ -95,6 +88,10 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
         'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
     }
   ),
+  trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {
+    defaultMessage:
+      'Cannot convert to ES|QL: The trendline layer uses a configuration that is not yet supported for conversion.',
+  }),
   unsupported_settings: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip',
     {

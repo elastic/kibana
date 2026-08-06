@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -22,21 +23,25 @@ import { FullScreenWaterfall, type FullScreenWaterfallProps } from '../full_scre
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
-import { spanFlyoutId } from '../full_screen_waterfall/waterfall_flyout/span_flyout';
-import { logsFlyoutId } from '../full_screen_waterfall/waterfall_flyout/logs_flyout';
-import type { DocumentType } from '../full_screen_waterfall/waterfall_flyout/document_detail_flyout';
+import type { TraceDocFlyoutType } from '../../common/types';
+import {
+  TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS,
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
+} from '../../ebt_constants';
 
 interface Props {
   traceId: string;
   docId?: string;
   serviceName?: string;
   dataView: DocViewRenderProps['dataView'];
+  ebtDetail?: 'spanDoc' | 'logDoc';
 }
 
 export interface TraceWaterfallRestorableState {
   restoredTraceId: string | null;
   showFullScreenWaterfall: boolean;
-  activeFlyoutType: DocumentType | null;
+  activeFlyoutType: TraceDocFlyoutType | null;
   activeSection: 'errors-table' | undefined;
   activeDocId: string | null;
   activeDocIndex: string | undefined;
@@ -59,8 +64,18 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
   defaultMessage: 'Trace summary',
 });
 
-function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
-  const { data, discoverShared } = getUnifiedDocViewerServices();
+function InternalTraceWaterfall({
+  traceId,
+  docId,
+  serviceName,
+  dataView,
+  ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+}: Props) {
+  const { data, apmShared } = getUnifiedDocViewerServices();
+  const FocusedTraceWaterfallWithFetching = useMemo(
+    () => apmShared.FocusedTraceWaterfallWithFetching,
+    [apmShared.FocusedTraceWaterfallWithFetching]
+  );
   const { indexes } = useDataSourcesContext();
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
@@ -112,10 +127,6 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
-  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-focused-trace-waterfall'
-  )?.render;
-
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
     whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
@@ -126,6 +137,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+    ebt: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY, detail: ebtDetail },
   });
 
   const actionId = 'traceWaterfallFullScreenAction';
@@ -142,7 +154,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
       setActiveSection(undefined);
       setActiveDocId(nodeSpanId);
       setActiveDocIndex(undefined);
-      setActiveFlyoutType(spanFlyoutId);
+      setActiveFlyoutType('span');
     },
     [setActiveSection, setActiveDocId, setActiveDocIndex, setActiveFlyoutType]
   );
@@ -150,12 +162,12 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const onErrorClick = useCallback<FullScreenWaterfallProps['onErrorClick']>(
     (params) => {
       if (params.errorCount > 1) {
-        setActiveFlyoutType(spanFlyoutId);
+        setActiveFlyoutType('span');
         setActiveSection('errors-table');
         setActiveDocId(params.docId);
         setActiveDocIndex(undefined);
       } else if (params.errorDocId) {
-        setActiveFlyoutType(logsFlyoutId);
+        setActiveFlyoutType('log');
         setActiveSection(undefined);
         setActiveDocId(params.errorDocId);
         setActiveDocIndex(params.docIndex);
@@ -229,13 +241,16 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         ariaLabel: fullScreenButtonLabel,
         id: actionId,
         dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+        ebt: {
+          action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.EXPAND_TRACE,
+          element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY_EXPAND_BUTTON,
+          detail: ebtDetail,
+        },
       },
       ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
     ],
-    [openInDiscoverSectionAction, setShowFullScreenWaterfall]
+    [ebtDetail, openInDiscoverSectionAction, setShowFullScreenWaterfall]
   );
-
-  if (!FocusedTraceWaterfall) return null;
 
   return (
     <>
@@ -269,6 +284,11 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
       >
         <div
           data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
+          {...getEbtProps({
+            action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.EXPAND_TRACE,
+            element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TRACE_SUMMARY_WATERFALL_AREA,
+            detail: ebtDetail,
+          })}
           aria-label={fullScreenButtonLabel}
           tabIndex={0}
           onClick={() => setShowFullScreenWaterfall(true)}
@@ -285,7 +305,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
             }
           `}
         >
-          <FocusedTraceWaterfall
+          <FocusedTraceWaterfallWithFetching
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

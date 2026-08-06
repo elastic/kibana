@@ -11,7 +11,9 @@ import type { SolutionView } from '../../../common';
 
 const getFeatureIdsForCategories = (
   features: KibanaFeature[],
-  categories: Array<'observability' | 'enterpriseSearch' | 'securitySolution' | 'workplaceai'>
+  categories: Array<
+    'observability' | 'enterpriseSearch' | 'securitySolution' | 'workplaceai' | 'vectordb'
+  >
 ) => {
   return features
     .filter((feature) =>
@@ -23,6 +25,7 @@ const getFeatureIdsForCategories = (
               | 'enterpriseSearch'
               | 'securitySolution'
               | 'workplaceai'
+              | 'vectordb'
           )
         : false
     )
@@ -38,6 +41,7 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   oblt: [],
   security: [],
   workplaceai: [],
+  vectordb: [],
 };
 
 /**
@@ -84,6 +88,12 @@ export function withSpaceSolutionDisabledFeatures(
       'securitySolution',
       'enterpriseSearch',
     ]).filter((featureId) => !enabledFeaturesPerSolution.workplaceai.includes(featureId));
+  } else if (spaceSolution === 'vectordb') {
+    disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
+      'observability',
+      'securitySolution',
+      'workplaceai',
+    ]).filter((featureId) => !enabledFeaturesPerSolution.vectordb.includes(featureId));
   }
 
   return Array.from(new Set([...disabledFeatureKeysFromSolution]));

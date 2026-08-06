@@ -9,7 +9,7 @@ import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
 
 /**
  * Elasticsearch mappings for change history documents.
- * Uses unmapped fields for variable structures (`object.snapshot`, `object.diff.before`)
+ * Uses unmapped fields for variable structures (`object.snapshot`: full object after each change)
  * and flattened type for `metadata`.
  * Do not map `kibana.space_ids` here — `@kbn/data-streams` injects reserved `kibana` mappings for all data streams.
  * For field reference @see [README.md]
@@ -19,12 +19,6 @@ export const changeHistoryMappings = {
     dynamic: false,
     properties: {
       '@timestamp': mappings.date(),
-
-      ecs: mappings.object({
-        properties: {
-          version: mappings.keyword(),
-        },
-      }),
 
       user: mappings.object({
         properties: {
@@ -40,12 +34,10 @@ export const changeHistoryMappings = {
           dataset: mappings.keyword(),
           action: mappings.keyword(),
           type: mappings.keyword(),
-          reason: mappings.text(),
-          created: mappings.date(),
         },
       }),
 
-      transaction: mappings.object({
+      span: mappings.object({
         properties: {
           id: mappings.keyword(),
         },
@@ -55,21 +47,7 @@ export const changeHistoryMappings = {
         properties: {
           id: mappings.keyword(),
           type: mappings.keyword(),
-          index: mappings.keyword(),
-          hash: mappings.keyword(),
-          sequence: mappings.integer(),
-          diff: mappings.object({
-            properties: {
-              type: mappings.keyword(),
-              fields: mappings.keyword(),
-              // before: mappings.object(), // <- unmapped field, please keep me commented out.
-            },
-          }),
-          fields: mappings.object({
-            properties: {
-              hashed: mappings.keyword(),
-            },
-          }),
+          sequence: mappings.long(),
           // snapshot: mappings.object(), // <- unmapped field, please keep me commented out.
         },
       }),
@@ -87,7 +65,6 @@ export const changeHistoryMappings = {
 
       service: mappings.object({
         properties: {
-          type: mappings.keyword(),
           version: mappings.keyword(),
         },
       }),

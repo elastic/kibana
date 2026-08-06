@@ -183,3 +183,4 @@ export const normalizeRiskLevel = (level: string | undefined): RiskSeverity | nu
 };
 
 export { ecsSliceToFlattenedDocument } from './utils/ecs_slice_to_flattened_document';
+export { createGetFieldsDataFromAlertSource } from './utils/get_fields_data_from_alert_source';

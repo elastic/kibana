@@ -1,16 +1,62 @@
 {
   "suites": [
     {
+      "id": "smoke-tests",
+      "name": "@kbn/evals Smoke Tests",
+      "slackChannel": "#obs-ai-assistant-alerts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/playwright.config.ts",
+      "tags": [
+        "platform",
+        "smoke"
+      ],
+      "ciLabels": [
+        "evals:smoke-tests"
+      ],
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.5-haiku"
+      ]
+    },
+    {
       "id": "agent-builder",
       "name": "Agent Builder",
       "slackChannel": "#agent-builder-alerts",
       "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
       "tags": [
         "platform",
         "agent-builder"
       ],
       "ciLabels": [
         "evals:agent-builder"
+      ]
+    },
+    {
+      "id": "ml",
+      "name": "ML Agent Builder Skills",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "ml",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:ml"
+      ]
+    },
+    {
+      "id": "alerting-v2",
+      "name": "Alerting V2",
+      "slackChannel": "#rna-program-notify",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2/playwright.config.ts",
+      "serverConfigSet": "evals_alerting_v2",
+      "tags": [
+        "platform",
+        "alerting-v2"
+      ],
+      "ciLabels": [
+        "evals:alerting-v2"
       ]
     },
     {
@@ -54,12 +100,17 @@
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-4.6-sonnet",
         "eis/anthropic-claude-4.6-opus",
+        "eis/anthropic-claude-4.7-opus",
+        "eis/anthropic-claude-4.8-opus",
         "eis/google-gemini-3.0-flash",
-        "eis/google-gemini-3.1-pro",
+        "eis/google-gemini-3.1-flash-lite",
+        "eis/google-gemini-3.5-flash",
         "eis/openai-gpt-5.2",
         "eis/openai-gpt-5.4",
         "eis/openai-gpt-5.4-mini",
         "eis/openai-gpt-5.4-nano",
+        "eis/openai-gpt-5.6-luna",
+        "eis/openai-gpt-5.6-terra",
         "eis/openai-gpt-oss-120b"
       ]
     },
@@ -106,8 +157,13 @@
       "name": "Security AI Rules",
       "slackChannel": "#security-detection-engine-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
-      "tags": ["security", "ai-rules"],
-      "ciLabels": ["evals:security-ai-rules"]
+      "tags": [
+        "security",
+        "ai-rules"
+      ],
+      "ciLabels": [
+        "evals:security-ai-rules"
+      ]
     },
     {
       "id": "endpoint",
@@ -163,12 +219,158 @@
       ]
     },
     {
+      "id": "lead-generation",
+      "name": "Lead Generation",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-lead-generation/playwright.config.ts",
+      "tags": [
+        "security",
+        "lead-generation",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:lead-generation"
+      ],
+      "serverConfigSet": "evals_lead_generation"
+    },
+    {
       "id": "workflows",
       "name": "Workflows Authoring",
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
-      "tags": ["platform", "workflows"],
-      "ciLabels": ["evals:workflows"],
+      "tags": [
+        "platform",
+        "workflows"
+      ],
+      "ciLabels": [
+        "evals:workflows"
+      ],
       "serverConfigSet": "evals_workflows"
+    },
+    {
+      "id": "pci-compliance",
+      "name": "PCI DSS v4.0.1 Compliance",
+      "slackChannel": "#compliance-agent-skill",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/playwright.config.ts",
+      "tags": [
+        "security",
+        "pci-compliance"
+      ],
+      "ciLabels": [
+        "evals:pci-compliance"
+      ],
+      "serverConfigSet": "evals_pci_compliance"
+    },
+    {
+      "id": "security-automatic-migrations",
+      "name": "Security Automatic Migrations",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/playwright.config.ts",
+      "tags": [
+        "security",
+        "migrations"
+      ],
+      "ciLabels": [
+        "evals:security-automatic-migrations"
+      ]
+    },
+    {
+      "id": "security-alerts-rag-regression",
+      "name": "Security Alerts RAG Regression",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/playwright.config.ts",
+      "tags": [
+        "security",
+        "alerts-rag"
+      ],
+      "ciLabels": [
+        "evals:security-alerts-rag-regression"
+      ]
+    },
+    {
+      "id": "security-esql-generation-regression",
+      "name": "Security ES|QL Generation Regression",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
+      "tags": [
+        "security",
+        "esql-generation"
+      ],
+      "ciLabels": [
+        "evals:security-esql-generation-regression"
+      ]
+    },
+    {
+      "id": "agent-builder-dashboards",
+      "name": "Agent Builder Dashboards",
+      "slackChannel": "#kibana-presentation-reminders",
+      "configPath": "x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder-dashboards"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-dashboards"
+      ],
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.6-opus",
+        "eis/openai-gpt-5.2",
+        "eis/openai-gpt-5.4"
+      ]
+    },
+    {
+      "id": "security-alert-triage",
+      "name": "Security Alert Triage",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
+      "tags": [
+        "security",
+        "alert-triage"
+      ],
+      "ciLabels": [
+        "evals:security-alert-triage"
+      ]
+    },
+    {
+      "id": "security-alert-analysis-workflow",
+      "name": "Alert Analysis Workflow",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow"
+      ]
+    },
+    {
+      "id": "skill-selection-benchmark",
+      "name": "Skill Selection Benchmark",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/skill_selection.playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder",
+        "skill-selection"
+      ],
+      "ciLabels": [
+        "evals:skill-selection-benchmark"
+      ],
+      "serverConfigSet": "evals_skill_selection"
+    },
+    {
+      "id": "siem-readiness",
+      "name": "SIEM Readiness",
+      "slackChannel": "#siem-readiness",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/playwright.config.ts",
+      "tags": [
+        "security",
+        "siem-readiness"
+      ],
+      "ciLabels": [
+        "evals:siem-readiness"
+      ],
+      "serverConfigSet": "evals_tracing"
     }
   ]
 }

@@ -153,6 +153,45 @@ If a connector is missing sensitive information after the import, a **Fix** butt
 :::
 
 
+## Correlate connector traffic with a deployment or project [connector-user-agent-cloud]
+
+```{applies_to}
+stack: ga 9.5+
+serverless: ga
+deployment:
+  ess: ga
+  self: unavailable
+```
+
+:::{important}
+When cloud deployment or project metadata is available, outbound connector HTTP requests include a deployment or project identifier in the `User-Agent` header. When that metadata is not available, connector requests **do not** add this fragment. The `User-Agent` stays at the default HTTP client value (for example, `axios/1.7.2`).
+:::
+
+IT and information security teams can match outbound connector traffic in third-party audit or access logs to the originating deployment or project—for example, during incident response or when a vendor contacts Elastic about suspicious activity.
+
+For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes an identifier for the deployment or project that originated the traffic. This is automatic and does not require connector configuration, networking settings, or other administrator actions.
+
+### Header format
+
+The header starts with the underlying HTTP client name and version (for example, `axios/1.7.2`). When cloud metadata is available, an additional Elastic fragment is appended.
+
+| Environment | Example suffix in `User-Agent` | Meaning |
+| --- | --- | --- |
+| {{ech}} | `elastic (deployment:<deployment_id>)` | `<deployment_id>` is the deployment ID. |
+| Elastic Cloud Serverless | `elastic (project:<project_id>)` | `<project_id>` is the serverless project ID. |
+
+
+### Look up the deployment or project from an identifier
+
+{{ecloud}} organization administrators can look up deployment and {{serverless-full}} project identifiers across their organization. Users with other roles can look them up only for deployments and projects they have access to. 
+
+{{kib}} does not provide a UI or API to resolve the deployment or project values shown in connector `User-Agent` headers. Use the following steps instead:
+
+1. Copy the identifier from the header. The identifier is the substring after `deployment:` or `project:`.
+2. Open the [{{ecloud}} console](https://cloud.elastic.co) and sign in.
+3. Go to the **Hosted** (for {{ech}} deployments) or **Serverless** (for Serverless projects) page, and enter the ID in the search field to find the matching deployment or project.
+
+
 ## Monitoring connectors [monitoring-connectors]
 
 The [Task Manager health API](docs-content://deploy-manage/monitor/kibana-task-manager-health-monitoring.md) helps you understand the performance of all tasks in your environment. However, if connectors fail to run, they will report as successful to Task Manager. The failure stats will not accurately depict the performance of connectors.

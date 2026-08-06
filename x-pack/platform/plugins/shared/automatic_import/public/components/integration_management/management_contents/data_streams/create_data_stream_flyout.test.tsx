@@ -46,13 +46,13 @@ jest.mock('../../../../common', () => ({
     },
   })),
 }));
+const mockGetInstalledPackages = jest.fn(
+  (): Promise<{ items: Array<{ id: string; type: string }> }> => Promise.resolve({ items: [] })
+);
+const mockGetAllIntegrations = jest.fn((): Promise<unknown[]> => Promise.resolve([]));
 jest.mock('../../../../common/lib/api', () => ({
-  getInstalledPackages: jest.fn(() =>
-    Promise.resolve({
-      items: [],
-    })
-  ),
-  getAllIntegrations: jest.fn(() => Promise.resolve([])),
+  getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
+  getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
 }));
 
 const mockReportAnalyzeLogsTriggered = jest.fn();
@@ -548,6 +548,29 @@ describe('CreateDataStreamFlyout', () => {
 
       const titleInput = getByTestId('dataStreamTitleInputV2');
       expect(titleInput.getAttribute('aria-invalid')).not.toBe('true');
+    });
+  });
+
+  describe('duplicate integration name validation', () => {
+    it('should disable analyze button when integration name already exists', async () => {
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [{ id: 'existing_integration', type: 'integration' }],
+      });
+
+      const Wrapper = createWrapper({
+        title: 'Existing Integration',
+        description: 'Some description',
+        connectorId: 'test-connector',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      });
     });
   });
 

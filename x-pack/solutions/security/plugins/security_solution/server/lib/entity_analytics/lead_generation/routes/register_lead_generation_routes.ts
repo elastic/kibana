@@ -13,17 +13,20 @@ import { dismissLeadRoute } from './dismiss_lead';
 import { bulkUpdateLeadsRoute } from './bulk_update_leads';
 import { enableLeadGenerationRoute } from './enable_lead_generation';
 import { disableLeadGenerationRoute } from './disable_lead_generation';
+import { getLeadGenerationPrivilegesRoute } from './get_lead_generation_privileges';
 
 export const registerLeadGenerationRoutes = ({
   router,
   logger,
   getStartServices,
+  ml,
 }: EntityAnalyticsRoutesDeps) => {
-  generateLeadsRoute(router, logger, getStartServices);
+  generateLeadsRoute(router, logger, getStartServices, ml);
   getLeadsRoute(router, logger);
   getLeadGenerationStatusRoute(router, logger, getStartServices);
   dismissLeadRoute(router, logger);
   bulkUpdateLeadsRoute(router, logger);
   enableLeadGenerationRoute(router, logger, getStartServices);
   disableLeadGenerationRoute(router, logger, getStartServices);
+  getLeadGenerationPrivilegesRoute(router, logger, getStartServices);
 };

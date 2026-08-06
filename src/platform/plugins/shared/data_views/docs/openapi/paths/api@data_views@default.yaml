@@ -33,6 +33,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            getDefaultDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'
 post:
   summary: Set the default data view
   operationId: setDefaultDatailViewDefault
@@ -89,9 +92,15 @@ post:
             properties:
               acknowledged:
                 type: boolean
+          examples:
+            setDefaultDataViewResponse:
+              $ref: '../components/examples/set_default_data_view_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            setDefaultDataViewBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

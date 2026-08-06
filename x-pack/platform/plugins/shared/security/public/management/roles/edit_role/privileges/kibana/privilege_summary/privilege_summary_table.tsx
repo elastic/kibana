@@ -16,6 +16,7 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
 
@@ -29,17 +30,18 @@ import {
   type SecuredFeature,
 } from '@kbn/security-role-management-model';
 import { FeatureTableCell } from '@kbn/security-ui-components';
-import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
 import { SpaceColumnHeader } from './space_column_header';
-import { ALL_SPACES_ID } from '../../../../../../../common/constants';
+import type { DisplaySpace } from '../display_space';
+import { isAllSpacesEntry } from '../display_space';
 
 export interface PrivilegeSummaryTableProps {
   role: Role;
-  spaces: Space[];
+  spaces: DisplaySpace[];
   kibanaPrivileges: KibanaPrivileges;
   canCustomizeSubFeaturePrivileges: boolean;
   spacesApiUi: SpacesApiUi;
@@ -126,12 +128,19 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
         return null;
       }
       return (
-        <EuiButtonIcon
-          onClick={() => toggleExpandedFeature(featureId)}
-          data-test-subj={`expandPrivilegeSummaryRow`}
-          aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-          iconType={expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'}
-        />
+        <EuiToolTip
+          content={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleExpandedFeature(featureId)}
+            data-test-subj={`expandPrivilegeSummaryRow`}
+            aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+            iconType={
+              expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'
+            }
+          />
+        </EuiToolTip>
       );
     },
   };
@@ -180,7 +189,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
             />
           );
         } else {
-          iconTip = <EuiIcon size="s" type="empty" />;
+          iconTip = <EuiIcon size="s" type="empty" aria-hidden={true} />;
         }
         return (
           <span
@@ -189,7 +198,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
             }`}
           >
             {showPrivilege({
-              allSpacesSelected: props.spaces.some((space) => space.id === ALL_SPACES_ID),
+              allSpacesSelected: props.spaces.some(isAllSpacesEntry),
               primaryFeature: primary,
               globalPrimaryFeature: globalPrivilege?.[record.featureId]?.primary,
             })}{' '}
@@ -229,7 +238,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       >
         {category.euiIconType ? (
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type={category.euiIconType} />
+            <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={1}>

@@ -50,7 +50,7 @@ groups:
         description: |
           Maximum number of unique transaction combinations sampled for generating the global service map.
         datatype: int
-        default: 100
+        default: 1000
         applies_to:
           stack: ga
           ech: ga
@@ -138,9 +138,9 @@ groups:
 
       - setting: xpack.apm.agent.migrations.enabled
         description: |
-          Set to `false` to disable cloud APM migrations.
+          Set to `true` to enable cloud APM migrations.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           stack: ga
           ech: ga
@@ -150,7 +150,7 @@ groups:
         description: |
           Matcher for all error indices.
         datatype: string
-        default: 'logs-apm*,apm-*,traces-*.otel-*'
+        default: 'logs-apm*,apm-*,logs-*.otel-*'
         applies_to:
           stack: ga
           ech: ga
@@ -216,6 +216,20 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.apm.searchAggregatedTransactions
+        description: |
+          Controls the search strategy used for transactions. When set to `auto`, Kibana uses aggregated transactions if available and falls back to individual transactions. Set to `always` to force the use of aggregated transactions, or `never` to always query individual transactions.
+        datatype: enum
+        default: 'auto'
+        options:
+          - option: auto
+          - option: always
+          - option: never
+        applies_to:
+          stack: ga 7.10
+          ech: ga
+          self: ga
+
       - setting: xpack.apm.latestAgentVersionsUrl
         description: |
           Specifies the URL of a self hosted file that contains latest agent versions. Set to `''` to disable requesting latest agent versions.
@@ -223,5 +237,5 @@ groups:
         default: 'https://apm-agent-versions.elastic.co/versions.json'
         applies_to:
           stack: ga
-          ech: ga
+          ech: unavailable
           self: ga

@@ -93,6 +93,7 @@ import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
@@ -119,6 +120,7 @@ import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
+import { RelayClient, type RelayClientContract } from './lib/relay';
 
 export interface PluginSetupContract {
   registerType<
@@ -150,6 +152,7 @@ export interface PluginSetupContract {
   >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  getRelayClient: () => RelayClientContract | undefined;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
@@ -214,6 +217,7 @@ export interface PluginStartContract {
    * @returns boolean indicating whether the connector was removed or not
    */
   unregisterDynamicConnector: (connectorId: string) => boolean;
+  getRelayClient: () => RelayClientContract | undefined;
 }
 
 export interface ActionsPluginsSetup {
@@ -271,6 +275,7 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
+  private relayClient?: RelayClientContract;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -312,6 +317,13 @@ export class ActionsPlugin
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
+    this.relayClient = this.actionsConfig.relay
+      ? new RelayClient({
+          baseUrl: this.actionsConfig.relay.url,
+          configurationUtilities: actionsConfigUtils,
+          logger: this.logger.get('relay-client'),
+        })
+      : undefined;
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       this.inMemoryConnectors.push(getAlertHistoryEsIndex());
@@ -477,7 +489,10 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
-      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(
+        actionsConfigUtils,
+        plugins.cloud
+      ),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -492,6 +507,7 @@ export class ActionsPlugin
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
+      getRelayClient: () => this.relayClient,
       setEnabledConnectorTypes: (connectorTypes) => {
         if (
           !!plugins.serverless &&
@@ -585,6 +601,7 @@ export class ActionsPlugin
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
           logger,
+          configurationUtilities: actionsConfigUtils,
         }),
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
@@ -594,7 +611,7 @@ export class ActionsPlugin
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
         connectorLifecycleListeners: this.connectorLifecycleListeners,
-        getCurrentUserProfileIdFromAPIKey,
+        getCurrentUserProfileId,
       });
     };
 
@@ -675,13 +692,19 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
-    const getCurrentUserProfileIdFromAPIKey = async (
+    /**
+     * Resolves profile UID from the `Authorization` API-key header for callers that run under a
+     * `FakeRequest` (action executor / background execution), where there is no browser session
+     * and `userProfiles.getCurrent` cannot run. For real `KibanaRequest` traffic, use
+     * `getCurrentUserProfileIdFromRequest` instead.
+     */
+    async function getCurrentUserProfileIdFromAPIKey(
       request: KibanaRequest
-    ): Promise<string | undefined> => {
+    ): Promise<string | undefined> {
       try {
         const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
         if (!id) {
-          this.logger.debug(`Failed to decode API key ID from Authorization header.`);
+          logger.debug(`Failed to decode API key ID from Authorization header.`);
           return undefined;
         }
 
@@ -707,7 +730,10 @@ export class ActionsPlugin
         );
       }
       return undefined;
-    };
+    }
+
+    const getCurrentUserProfileId = (requestWithAuth: KibanaRequest) =>
+      getCurrentUserProfileIdFromRequest(requestWithAuth, plugins.security, logger);
 
     actionExecutor!.initialize({
       logger,
@@ -718,13 +744,15 @@ export class ActionsPlugin
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
-        (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request)
+        (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+        actionsConfigUtils
       ),
       getUnsecuredServices: this.getUnsecuredServicesFactory(
         getInternalSavedObjectsRepositoryWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
-        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
+        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects),
+        actionsConfigUtils
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -740,7 +768,6 @@ export class ActionsPlugin
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
-      basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       savedObjectsRepository: core.savedObjects.createInternalRepository([
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -800,6 +827,7 @@ export class ActionsPlugin
         this.registerDynamicConnector(connector),
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
+      getRelayClient: () => this.relayClient,
     };
   }
 
@@ -841,7 +869,8 @@ export class ActionsPlugin
     getScopedClient: (request: KibanaRequest) => SavedObjectsClientContract,
     elasticsearch: ElasticsearchServiceStart,
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    unsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract
+    unsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract,
+    configurationUtilities: ActionsConfigurationUtilities
   ): (request: KibanaRequest) => Services {
     return (request) => {
       return {
@@ -851,6 +880,7 @@ export class ActionsPlugin
           unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
           encryptedSavedObjectsClient,
           logger: this.logger,
+          configurationUtilities,
         }),
       };
     };
@@ -860,7 +890,8 @@ export class ActionsPlugin
     getSavedObjectRepository: () => ISavedObjectsRepository,
     elasticsearch: ElasticsearchServiceStart,
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    unsecuredSavedObjectsRepository: () => SavedObjectsClientContract
+    unsecuredSavedObjectsRepository: () => SavedObjectsClientContract,
+    configurationUtilities: ActionsConfigurationUtilities
   ): () => UnsecuredServices {
     return () => {
       return {
@@ -870,6 +901,7 @@ export class ActionsPlugin
           unsecuredSavedObjectsClient: unsecuredSavedObjectsRepository(),
           encryptedSavedObjectsClient,
           logger: this.logger,
+          configurationUtilities,
         }),
       };
     };
@@ -963,8 +995,9 @@ export class ActionsPlugin
     const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
-        await core.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
+      const { savedObjects } = coreStart;
 
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
@@ -1009,6 +1042,7 @@ export class ActionsPlugin
               unsecuredSavedObjectsClient,
               encryptedSavedObjectsClient,
               logger,
+              configurationUtilities: actionsConfigUtils,
             }),
             async getEventLogClient() {
               return eventLog.getClient(request);
@@ -1018,6 +1052,8 @@ export class ActionsPlugin
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
             connectorLifecycleListeners,
+            getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
+              getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
           });
         },
         listTypes: (featureId?: string) => {
@@ -1041,9 +1077,13 @@ export class ActionsPlugin
     }
   };
 
-  private getAxiosInstanceWithAuthHelper = (actionsConfigUtils: ActionsConfigurationUtilities) => {
+  private getAxiosInstanceWithAuthHelper = (
+    actionsConfigUtils: ActionsConfigurationUtilities,
+    cloud?: CloudSetup
+  ) => {
     const getAxiosInstanceFn = getAxiosInstanceWithAuth({
       authTypeRegistry: this.authTypeRegistry!,
+      cloud,
       configurationUtilities: actionsConfigUtils,
       logger: this.logger,
     });

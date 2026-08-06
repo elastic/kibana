@@ -22,13 +22,13 @@ export interface ModelSettingsForm {
   isSaving: boolean;
   isDirty: boolean;
   assignments: Assignments;
+  effectiveRecommendedEndpoints: Record<string, string[]>;
   sections: FeatureSection[];
   invalidEndpointIds: Set<string>;
   hasSavedObject: Record<string, boolean>;
   dirtyFeatureIds: ReadonlySet<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
-  save: () => void;
-  resetSection: (sectionId: string) => void;
+  save: () => Promise<void>;
 }
 
 const getEffectiveEndpoints = (
@@ -56,11 +56,8 @@ const toApiFormat = (assignments: Assignments) =>
 const arraysEqual = (a: string[], b: string[]) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
 
-/**
- * Returns only the assignments that differ from the recommended defaults.
- * Features whose endpoints match the defaults are omitted so the server-side
- * fallback chain (recommendedEndpoints → parent) stays in effect.
- */
+// Returns only the assignments that differ from recommended, so the server-side fallback
+// chain (recommendedEndpoints → parent) stays in effect for unchanged features.
 const getChangedAssignments = (
   assignments: Assignments,
   registeredFeatures: InferenceFeatureResponse[],
@@ -80,7 +77,7 @@ const getChangedAssignments = (
 export const useModelSettingsForm = (): ModelSettingsForm => {
   const { features: registeredFeatures, isLoading: isFeaturesLoading } = useRegisteredFeatures();
   const { data: settingsData, isLoading: isSettingsLoading } = useInferenceSettings();
-  const { mutate: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
+  const { mutateAsync: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
 
   const isLoading = isFeaturesLoading || isSettingsLoading;
 
@@ -113,6 +110,19 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
   const recommendedEndpointsById = useMemo(
     () => new Map(registeredFeatures.map((f) => [f.featureId, f.recommendedEndpoints])),
     [registeredFeatures]
+  );
+
+  const effectiveRecommendedEndpoints = useMemo<Record<string, string[]>>(
+    () =>
+      Object.fromEntries(
+        sections.flatMap(({ children }) =>
+          children.map((f): [string, string[]] => [
+            f.featureId,
+            [...getEffectiveEndpoints(f, recommendedEndpointsById)],
+          ])
+        )
+      ),
+    [sections, recommendedEndpointsById]
   );
 
   const savedMap = useMemo(
@@ -157,11 +167,11 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [settingsData]
   );
 
-  const dirtyFeatureIds = useMemo(() => {
+  const dirtyFeatureIds = useMemo<ReadonlySet<string>>(() => {
     const ids = new Set<string>();
-    for (const [featureId, ids$] of Object.entries(assignments)) {
+    for (const [featureId, currentIds] of Object.entries(assignments)) {
       const defaults = defaultAssignments[featureId];
-      if (!defaults || !arraysEqual(ids$, defaults)) {
+      if (!defaults || !arraysEqual(currentIds, defaults)) {
         ids.add(featureId);
       }
     }
@@ -174,45 +184,26 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
   }, []);
 
-  const save = useCallback(() => {
+  const save = useCallback(async () => {
     const changed = getChangedAssignments(
       assignments,
       registeredFeatures,
       recommendedEndpointsById
     );
-    saveSettings({ features: toApiFormat(changed) });
+    await saveSettings({ features: toApiFormat(changed) });
   }, [saveSettings, assignments, registeredFeatures, recommendedEndpointsById]);
-
-  const resetSection = useCallback(
-    (sectionId: string) => {
-      const section = sections.find((s) => s.featureId === sectionId);
-      if (!section) return;
-
-      const resetEntries = Object.fromEntries(
-        section.children.map((f) => [
-          f.featureId,
-          [...getEffectiveEndpoints(f, recommendedEndpointsById)],
-        ])
-      );
-      const updated = { ...assignments, ...resetEntries };
-      setAssignments(updated);
-      const changed = getChangedAssignments(updated, registeredFeatures, recommendedEndpointsById);
-      saveSettings({ features: toApiFormat(changed) });
-    },
-    [assignments, sections, saveSettings, recommendedEndpointsById, registeredFeatures]
-  );
 
   return {
     isLoading,
     isSaving,
     isDirty,
     assignments,
+    effectiveRecommendedEndpoints,
     sections,
     invalidEndpointIds,
     hasSavedObject,
     dirtyFeatureIds,
     updateEndpoints,
     save,
-    resetSection,
   };
 };

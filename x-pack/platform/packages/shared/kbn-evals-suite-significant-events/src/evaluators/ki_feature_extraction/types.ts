@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { type BaseFeature } from '@kbn/streams-schema';
+import { type BaseFeature } from '@kbn/significant-events-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 export const VALID_KI_FEATURE_TYPES = [
@@ -21,8 +22,8 @@ export type ValidKIFeatureType = (typeof VALID_KI_FEATURE_TYPES)[number];
 
 export interface KIFeatureExtractionEvaluationExample {
   input: {
-    sample_documents: Array<SearchHit<Record<string, unknown>>>;
-  };
+    sample_documents?: Array<SearchHit<Record<string, unknown>>>;
+  } & Record<string, unknown>;
   output: {
     criteria: EvaluationCriterion[];
     weight?: number;
@@ -46,6 +47,13 @@ export interface KIFeatureExtractionEvaluationDataset {
 interface KIFeatureExtractionTaskOutput {
   features: BaseFeature[];
   traceId?: string | null;
+  sample_documents?: Array<SearchHit<Record<string, unknown>>>;
+  /**
+   * Token counts as reported by the inference provider, summed over the whole
+   * reasoning loop. Recorded alongside the trace-derived token metrics so the
+   * two can be reconciled — they are collected through independent paths.
+   */
+  tokens_used?: ChatCompletionTokenCount;
 }
 
 export type KIFeatureExtractionOutput = BaseFeature[] | KIFeatureExtractionTaskOutput;

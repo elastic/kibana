@@ -11,9 +11,9 @@ import {
   INTERNAL_API_ACCESS,
   UpdateEvaluationDatasetRequestBody,
   UpdateEvaluationDatasetRequestParams,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
@@ -33,7 +33,7 @@ export const registerUpdateDatasetRoute = ({
       path: EVALS_DATASET_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Update evaluation dataset',
     })
@@ -80,13 +80,13 @@ export const registerUpdateDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
-          const { description } = request.body;
-          const coreContext = await context.core;
+          const { description, tags, maturity } = request.body;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const updatedDataset = await datasetClient.update(datasetId, {
             description,
+            tags,
+            maturity,
           });
 
           if (!updatedDataset) {
@@ -100,6 +100,8 @@ export const registerUpdateDatasetRoute = ({
               id: updatedDataset.id,
               name: updatedDataset.name,
               description: updatedDataset.description,
+              tags: updatedDataset.tags,
+              maturity: updatedDataset.maturity,
               created_at: updatedDataset.created_at,
               updated_at: updatedDataset.updated_at,
             },
@@ -113,7 +115,8 @@ export const registerUpdateDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to update evaluation dataset: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to update evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to update evaluation dataset' },

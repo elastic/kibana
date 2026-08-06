@@ -10,22 +10,24 @@ import { buildGroupActionsQuery, type GroupActionRow } from '../queries/group_ac
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchGroupActionsOptions {
+  spaceId: string;
   groupHashes: string[];
   abortSignal?: AbortSignal;
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
 /**
  * Executes an ES|QL query to fetch deactivate/snooze/tag actions for the given group hashes.
  */
 export const fetchGroupActions = ({
+  spaceId,
   groupHashes,
   abortSignal,
-  services: { expressions },
+  expressions,
 }: FetchGroupActionsOptions): Promise<GroupActionRow[]> => {
   return executeEsqlQuery<GroupActionRow>({
     expressions,
-    query: buildGroupActionsQuery(groupHashes).print('basic'),
+    query: buildGroupActionsQuery(spaceId, groupHashes).print('basic'),
     input: null,
     abortSignal,
     noCache: true,

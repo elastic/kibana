@@ -1,13 +1,13 @@
 ---
 navigation_title: "VirusTotal"
 applies_to:
-  stack: preview 9.3
+  stack: preview 9.4
   serverless: preview
 ---
 
 # VirusTotal connector [virustotal-action-type]
 
-The VirusTotal connector communicates with the VirusTotal API for file scanning, URL analysis, and threat intelligence lookups.
+The VirusTotal connector communicates with the VirusTotal API for file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.
 
 ## Create connectors in {{kib}} [define-virustotal-ui]
 
@@ -27,21 +27,68 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The VirusTotal connector has the following actions:
 
 Scan File Hash
-:   Look up a file hash (MD5, SHA-1, or SHA-256) to get scan results.  
-    - **Hash** (required): File hash (minimum 32 characters).  
+:   Look up a file hash (MD5, SHA-1, or SHA-256) to get scan results.
+    - **Hash** (required): File hash (minimum 32 characters).
 
 Scan URL
-:   Submit a URL for analysis and get scan results.  
-    - **URL** (required): URL to scan.  
+:   Submit a URL for analysis and get scan results, or look up a bare domain report.
+    - **URL** (required): Absolute URL to scan, or bare domain to look up. For example, `https://example.com/path` or `example.com`.
+
+Get analysis results
+:   Retrieve VirusTotal analysis results or reports without using a generic HTTP connector.
+    - **ID** (required): VirusTotal analysis ID, URL, domain, IP address, or file hash.
+    - **Resource type** (optional): One of `analysis`, `url`, `domain`, `ip`, or `file`. Defaults to `analysis`.
 
 Submit File
-:   Submit a file for analysis.  
-    - **File** (required): Base64-encoded file content.  
+:   Submit a file for analysis.
+    - **File** (required): Base64-encoded file content.
     - **Filename** (optional): Original filename.
 
 Get IP Report
-:   Get reputation and details about an IP address.  
-    - **IP** (required): IPv4 address.  
+:   Get reputation and details about an IP address.
+    - **IP** (required): IPv4 address.
+
+## Workflow examples [virustotal-workflow-examples]
+
+Submit a URL, wait for analysis to complete, and retrieve the analysis results:
+
+```yaml
+steps:
+  - name: scan_url
+    type: virustotal.scanUrl
+    connector-id: <connector-id>
+    with:
+      url: https://suspicious.example.com
+
+  - name: wait_for_analysis
+    type: wait
+    with:
+      duration: 30s
+
+  - name: get_analysis_results
+    type: virustotal.getAnalysisResults
+    connector-id: <connector-id>
+    with:
+      id: '{{ steps.scan_url.output.id }}'
+```
+
+Look up a bare domain without adding API keys or VirusTotal URLs to the workflow:
+
+```yaml
+steps:
+  - name: scan_domain
+    type: virustotal.scanUrl
+    connector-id: <connector-id>
+    with:
+      url: acme.example
+
+  - name: get_domain_results
+    type: virustotal.getAnalysisResults
+    connector-id: <connector-id>
+    with:
+      id: acme.example
+      resourceType: domain
+```
 
 ## Connector networking configuration [virustotal-connector-networking-configuration]
 

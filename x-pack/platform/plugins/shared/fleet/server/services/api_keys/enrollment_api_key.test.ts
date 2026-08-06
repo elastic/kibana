@@ -18,7 +18,7 @@ import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
 
 import {
-  deleteEnrollmentApiKey,
+  deleteEnrollmentApiKeys,
   generateEnrollmentAPIKey,
   getEnrollmentAPIKey,
 } from './enrollment_api_key';
@@ -151,25 +151,113 @@ describe('enrollment api keys', () => {
         })
       );
     });
-  });
 
-  describe('deleteEnrollmentApiKey', () => {
-    it('should call audit logger', async () => {
+    it('should pass expiration to the Security API and persist expire_at when expiration is provided', async () => {
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      esClient.update.mockResolvedValue({} as any);
+      // The Security API returns expiration as epoch-ms
+      const expirationEpochMs = new Date('2030-01-01T00:00:00.000Z').getTime();
 
-      esClient.get.mockResolvedValue({
-        _id: 'test-id',
-        _index: ENROLLMENT_API_KEYS_INDEX,
-        _source: {
-          active: true,
-          created_at: new Date().toISOString(),
-          api_key_id: 'test-enrollment-api-key-id',
-        },
-        found: true,
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+        expiration: expirationEpochMs,
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+      } as any);
+
+      const result = await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        expiration: '7d',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
       });
 
+      expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({ expiration: '7d' })
+      );
+
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            expire_at: new Date(expirationEpochMs).toISOString(),
+          }),
+        })
+      );
+
+      expect(result.expire_at).toBe(new Date(expirationEpochMs).toISOString());
+    });
+
+    it('should not pass expiration to the Security API when expiration is not provided', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.create.mockResolvedValue({
+        _id: 'test-enrollment-api-key-id',
+      } as any);
+
+      esClient.security.createApiKey.mockResolvedValue({
+        api_key: 'test-api-key-value',
+        id: 'test-api-key-id',
+      } as any);
+
+      mockedAgentPolicyService.get.mockResolvedValue({
+        id: 'test-agent-policy',
+      } as any);
+
+      const result = await generateEnrollmentAPIKey(soClient, esClient, {
+        name: 'test-api-key',
+        agentPolicyId: 'test-agent-policy',
+        forceRecreate: true,
+      });
+
+      expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+        expect.not.objectContaining({ expiration: expect.anything() })
+      );
+
+      expect(result.expire_at).toBeUndefined();
+    });
+
+    it('should throw FleetError for an invalid expiration format', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        generateEnrollmentAPIKey(soClient, esClient, {
+          name: 'test-api-key',
+          agentPolicyId: 'test-agent-policy',
+          expiration: 'notaduration',
+        })
+      ).rejects.toThrow(
+        'Invalid expiration value "notaduration". Must be a positive duration (for example'
+      );
+    });
+
+    it('should throw FleetError for an expiration value exceeding the ES maximum', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        generateEnrollmentAPIKey(soClient, esClient, {
+          name: 'test-api-key',
+          agentPolicyId: 'test-agent-policy',
+          expiration: '106752d',
+        })
+      ).rejects.toThrow('Invalid expiration value "106752d"');
+    });
+  });
+
+  describe('deleteEnrollmentApiKeys', () => {
+    const setupMocks = (esClient: any, docs: any[]) => {
+      esClient.bulk.mockResolvedValue({} as any);
+      esClient.mget.mockResolvedValue({ docs });
       mockedAppContextService.getSecurity.mockReturnValue({
         authc: {
           apiKeys: {
@@ -177,12 +265,90 @@ describe('enrollment api keys', () => {
           },
         },
       } as any);
+    };
 
-      await deleteEnrollmentApiKey(esClient, 'test-enrollment-api-key-id');
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      setupMocks(esClient, [
+        {
+          _id: 'test-id',
+          _index: ENROLLMENT_API_KEYS_INDEX,
+          _source: {
+            active: true,
+            created_at: new Date().toISOString(),
+            api_key_id: 'test-enrollment-api-key-id',
+          },
+          found: true,
+        },
+      ]);
+
+      await deleteEnrollmentApiKeys(esClient, ['test-enrollment-api-key-id']);
 
       expect(auditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message:
-          'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id]',
+          'User deleting enrollment API key [id=test-id] [api_key_id=test-enrollment-api-key-id] [forceDelete=false]',
+      });
+    });
+
+    it('should skip hidden keys by default', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      setupMocks(esClient, [
+        {
+          _id: 'hidden-key',
+          _index: ENROLLMENT_API_KEYS_INDEX,
+          _source: {
+            active: true,
+            created_at: new Date().toISOString(),
+            api_key_id: 'hidden-api-key-id',
+            hidden: true,
+          },
+          found: true,
+        },
+      ]);
+
+      const result = await deleteEnrollmentApiKeys(esClient, ['hidden-key']);
+
+      expect(result).toEqual({ successCount: 0, errorCount: 0 });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should delete hidden keys when includeHidden is true', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      setupMocks(esClient, [
+        {
+          _id: 'hidden-key',
+          _index: ENROLLMENT_API_KEYS_INDEX,
+          _source: {
+            active: true,
+            created_at: new Date().toISOString(),
+            api_key_id: 'hidden-api-key-id',
+            hidden: true,
+          },
+          found: true,
+        },
+      ]);
+
+      mockedAppContextService.getSecurity.mockReturnValue({
+        authc: {
+          apiKeys: {
+            invalidateAsInternalUser: jest.fn().mockResolvedValue({
+              invalidated_api_keys: ['hidden-api-key-id'],
+              previously_invalidated_api_keys: [],
+              error_count: 0,
+            }),
+          },
+        },
+      } as any);
+
+      await deleteEnrollmentApiKeys(esClient, ['hidden-key'], false, undefined, true);
+
+      expect(esClient.bulk).toHaveBeenCalled();
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message:
+          'User deleting enrollment API key [id=hidden-key] [api_key_id=hidden-api-key-id] [forceDelete=false]',
       });
     });
   });

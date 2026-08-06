@@ -11,6 +11,8 @@ import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
+  assertImmutableUnchanged,
+  pickImmutable,
 } from './utils';
 
 const serverFields = {
@@ -19,6 +21,7 @@ const serverFields = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
+  version: 1,
 };
 
 const baseCreateData: CreateRuleData = {
@@ -26,7 +29,7 @@ const baseCreateData: CreateRuleData = {
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 describe('utils', () => {
@@ -47,6 +50,23 @@ describe('utils', () => {
 
       expect(result.metadata.description).toBeUndefined();
     });
+
+    it('passes metadata.builder_type through to SO attributes', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('sets metadata.builder_type to undefined when not provided', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
   });
 
   describe('buildUpdateRuleAttributes', () => {
@@ -59,6 +79,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('original');
@@ -76,6 +97,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('renamed');
@@ -93,6 +115,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toBeNull();
@@ -107,6 +130,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 3 });
@@ -121,9 +145,97 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 5 });
+    });
+
+    it('preserves metadata.builder_type when query is not changed', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('auto-clears metadata.builder_type when query is changed without explicit builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('keeps metadata.builder_type when query is changed with explicit builder_type', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
+        metadata: { builder_type: 'threshold' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('clears metadata.builder_type when explicitly set to null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+      const updateData: UpdateRuleData = {
+        metadata: { builder_type: null },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('does not auto-clear metadata.builder_type when same query is sent', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
     });
   });
 
@@ -156,6 +268,110 @@ describe('utils', () => {
       const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-1', soAttrs);
 
       expect(response.metadata.description).toBe('Round-trip desc');
+    });
+
+    it('includes metadata.builder_type in API response', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.builder_type).toBe('threshold');
+    });
+
+    it('sets metadata.builder_type to undefined when absent from SO attributes', () => {
+      const attrs = createRuleSoAttributes({});
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.builder_type).toBeUndefined();
+    });
+
+    it('includes the version when provided', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs, 'WzNEW=');
+      expect(result.version).toBe('WzNEW=');
+    });
+
+    it('omits the version when not provided', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.version).toBeUndefined();
+    });
+
+    it('exposes the persisted version as metadata.version on the API response', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: 7 } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(7);
+    });
+
+    it('falls back to the baseline version when the rule has no version yet', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: undefined } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(1);
+    });
+  });
+
+  describe('assertImmutableUnchanged', () => {
+    it('does not throw when all immutable fields match the existing rule', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'alert' }, existing)
+      ).not.toThrow();
+    });
+
+    it('throws Boom.conflict (409) when an immutable field differs', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'signal' }, existing)
+      ).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 409 }),
+          message: 'Some fields cannot be changed after creation: kind.',
+        })
+      );
+    });
+
+    it('attaches IMMUTABLE_FIELDS_CHANGED code and the changed fields in details', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'signal' }, existing)
+      ).toThrow(
+        expect.objectContaining({
+          data: {
+            code: 'IMMUTABLE_FIELDS_CHANGED',
+            details: { fields: ['kind'] },
+          },
+        })
+      );
+    });
+  });
+
+  describe('pickImmutable', () => {
+    it('returns only the fields declared in IMMUTABLE_RULE_FIELDS', () => {
+      const existing = createRuleSoAttributes({ kind: 'signal' });
+
+      expect(pickImmutable(existing)).toEqual({ kind: 'signal' });
+    });
+
+    it('preserves immutable fields when spread last over a mutated copy', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+      // Simulate an earlier step in a builder that incorrectly mutates an
+      // immutable field. `pickImmutable(existing)` spread last must restore it.
+      const buggyIntermediate = { ...existing, kind: 'signal' as const };
+
+      const next = { ...buggyIntermediate, ...pickImmutable(existing) };
+
+      expect(next.kind).toBe('alert');
     });
   });
 });

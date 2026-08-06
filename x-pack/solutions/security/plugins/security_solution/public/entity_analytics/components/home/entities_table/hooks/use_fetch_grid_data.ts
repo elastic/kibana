@@ -29,7 +29,6 @@ import { DataViewContext } from '..';
 interface UseEntitiesOptions extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
-  pageSize: number;
 }
 
 const ENTITY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
@@ -37,7 +36,7 @@ const ENTITY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
   ENTITY_FIELDS.ENTITY_NAME,
 ];
 
-const getEntitiesQuery = (
+export const getEntitiesQuery = (
   { query, sort }: UseEntitiesOptions,
   pageParam: unknown,
   indexPattern?: string
@@ -48,6 +47,7 @@ const getEntitiesQuery = (
 
   return {
     index: [indexPattern],
+    project_routing: '_alias:_origin',
     sort: getMultiFieldsSort(sort),
     runtime_mappings: getRuntimeMappingsFromSort(ENTITY_TABLE_RUNTIME_MAPPING_FIELDS, sort),
     size: MAX_ENTITIES_TO_LOAD,
@@ -73,6 +73,24 @@ interface Entity {
 
 type LatestEntitiesRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type LatestEntitiesResponse = IKibanaSearchResponse<estypes.SearchResponse<Entity, never>>;
+
+// Each ES request fetches MAX_ENTITIES_TO_LOAD (500) records. We stop when the
+// last page returns fewer than that (end of data), and advance the next `from`
+// offset by 500 per page so pages don't overlap.
+export const getEntitiesNextPageParam = (
+  lastPage: { page: unknown[] },
+  allPages: unknown[]
+): number | undefined => {
+  if (lastPage.page.length < MAX_ENTITIES_TO_LOAD) {
+    return undefined;
+  }
+  return allPages.length * MAX_ENTITIES_TO_LOAD;
+};
+
+export const buildInspectData = (queryParams: object, rawResponse: object) => ({
+  dsl: [JSON.stringify(queryParams)],
+  response: [JSON.stringify(rawResponse, null, 2)],
+});
 
 export function useFetchGridData(options: UseEntitiesOptions) {
   const {
@@ -102,22 +120,14 @@ export function useFetchGridData(options: UseEntitiesOptions) {
       return {
         page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
-        inspect: {
-          dsl: [JSON.stringify(queryParams)],
-          response: [JSON.stringify(rawResponse)],
-        },
+        inspect: buildInspectData(queryParams, rawResponse),
       };
     },
     {
       enabled: options.enabled && !!dataViewIndexPattern,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.page.length < options.pageSize) {
-          return undefined;
-        }
-        return allPages.length * options.pageSize;
-      },
+      getNextPageParam: getEntitiesNextPageParam,
     }
   );
 }

@@ -16,8 +16,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
   EuiSkeletonText,
@@ -35,7 +33,8 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { ML_ANOMALY_EXPLORER_PANELS } from '@kbn/ml-common-types/storage';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -75,7 +74,6 @@ import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
 import { useJobSelection } from './hooks/use_job_selection';
@@ -109,25 +107,21 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
   updateLanguage,
 }) => (
   <>
-    <EuiPageHeader>
-      <EuiPageHeaderSection css={{ width: '100%' }}>
-        <JobSelector {...jobSelectorProps} />
+    <JobSelector {...jobSelectorProps} />
 
-        {dataViews && dataViews.length > 0 && updateLanguage ? (
-          <>
-            <ExplorerQueryBar
-              filterActive={!!filterActive}
-              indexPattern={dataViews[0]}
-              dataViews={dataViews}
-              queryString={queryString}
-              updateLanguage={updateLanguage}
-            />
-            <EuiSpacer size="m" />
-            <EuiHorizontalRule margin="none" />
-          </>
-        ) : null}
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
+    {dataViews && dataViews.length > 0 && updateLanguage ? (
+      <>
+        <ExplorerQueryBar
+          filterActive={!!filterActive}
+          indexPattern={dataViews[0]}
+          dataViews={dataViews}
+          queryString={queryString}
+          updateLanguage={updateLanguage}
+        />
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="none" />
+      </>
+    ) : null}
     {children}
   </>
 );

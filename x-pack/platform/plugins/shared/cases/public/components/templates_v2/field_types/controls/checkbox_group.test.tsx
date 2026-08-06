@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { CheckboxGroup } from './checkbox_group';
 
@@ -17,26 +17,37 @@ const OPTIONS = ['frontend', 'backend', 'database'];
 interface FormWrapperProps {
   isRequired?: boolean;
   initialValue?: string[];
+  onConfirm?: () => void;
+  isSaving?: boolean;
   onSubmitResult: (result: { isValid: boolean; data: Record<string, unknown> }) => void;
 }
 
-const FormWrapper: React.FC<FormWrapperProps> = ({ isRequired, initialValue, onSubmitResult }) => {
-  const { form } = useForm<{}>({
-    defaultValue: {
+const FormWrapper: React.FC<FormWrapperProps> = ({
+  isRequired,
+  initialValue,
+  onConfirm,
+  isSaving,
+  onSubmitResult,
+}) => {
+  const form = useForm({
+    defaultValues: {
       [CASE_EXTENDED_FIELDS]: initialValue
         ? { affected_systems_as_keyword: JSON.stringify(initialValue) }
         : {},
     },
-    options: { stripEmptyFields: false },
   });
 
-  const handleSubmit = async () => {
-    const { isValid, data } = await form.submit();
-    onSubmitResult({ isValid: isValid ?? false, data: data as Record<string, unknown> });
-  };
+  const handleSubmit = form.handleSubmit(
+    (data) => onSubmitResult({ isValid: true, data: data as Record<string, unknown> }),
+    (_errors) =>
+      onSubmitResult({
+        isValid: false,
+        data: form.getValues() as Record<string, unknown>,
+      })
+  );
 
   return (
-    <FormProvider form={form}>
+    <FormProvider {...form}>
       <CheckboxGroup
         name="affected_systems"
         control="CHECKBOX_GROUP"
@@ -44,6 +55,8 @@ const FormWrapper: React.FC<FormWrapperProps> = ({ isRequired, initialValue, onS
         label="Affected systems"
         isRequired={isRequired}
         metadata={{ options: OPTIONS }}
+        onConfirm={onConfirm}
+        isSaving={isSaving}
       />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
@@ -63,6 +76,14 @@ describe('CheckboxGroup', () => {
       render(<FormWrapper onSubmitResult={jest.fn()} />);
       for (const option of OPTIONS) {
         expect(screen.getByLabelText(option)).toBeInTheDocument();
+      }
+    });
+
+    it('disables every option while saving', () => {
+      render(<FormWrapper isSaving onSubmitResult={jest.fn()} />);
+
+      for (const option of OPTIONS) {
+        expect(screen.getByLabelText(option)).toBeDisabled();
       }
     });
 
@@ -92,6 +113,16 @@ describe('CheckboxGroup', () => {
       expect(screen.getByLabelText('backend')).not.toBeChecked();
       expect(screen.getByLabelText('database')).not.toBeChecked();
     });
+
+    it('shows Optional label when isRequired is false', () => {
+      render(<FormWrapper isRequired={false} onSubmitResult={jest.fn()} />);
+      expect(screen.getByText('Optional')).toBeInTheDocument();
+    });
+
+    it('does not show Optional label when isRequired is true', () => {
+      render(<FormWrapper isRequired onSubmitResult={jest.fn()} />);
+      expect(screen.queryByText('Optional')).not.toBeInTheDocument();
+    });
   });
 
   describe('interaction', () => {
@@ -114,6 +145,44 @@ describe('CheckboxGroup', () => {
       expect(screen.getByLabelText('frontend')).toBeChecked();
       expect(screen.getByLabelText('backend')).not.toBeChecked();
       expect(screen.getByLabelText('database')).toBeChecked();
+    });
+
+    it('shows actions only while the field is dirty', async () => {
+      render(<FormWrapper onConfirm={jest.fn()} onSubmitResult={jest.fn()} />);
+
+      expect(
+        screen.queryByTestId('template-field-confirm-affected_systems')
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText('backend'));
+
+      expect(screen.getByTestId('template-field-confirm-affected_systems')).toBeInTheDocument();
+      expect(screen.getByTestId('template-field-cancel-affected_systems')).toBeInTheDocument();
+    });
+
+    it('confirms the pending value', async () => {
+      const onConfirm = jest.fn();
+      render(<FormWrapper onConfirm={onConfirm} onSubmitResult={jest.fn()} />);
+
+      await userEvent.click(screen.getByLabelText('backend'));
+      await userEvent.click(screen.getByTestId('template-field-confirm-affected_systems'));
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it('cancels the pending value and hides the actions', async () => {
+      render(
+        <FormWrapper initialValue={['frontend']} onConfirm={jest.fn()} onSubmitResult={jest.fn()} />
+      );
+
+      await userEvent.click(screen.getByLabelText('backend'));
+      await userEvent.click(screen.getByTestId('template-field-cancel-affected_systems'));
+
+      expect(screen.getByLabelText('frontend')).toBeChecked();
+      expect(screen.getByLabelText('backend')).not.toBeChecked();
+      expect(
+        screen.queryByTestId('template-field-confirm-affected_systems')
+      ).not.toBeInTheDocument();
     });
   });
 

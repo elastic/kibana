@@ -27,9 +27,14 @@ import {
   getUpdatesEntityDefinitionComponentTemplate,
 } from './component_templates';
 import { getHistorySnapshotIndexTemplateConfig } from './history_snapshot_index_template';
+import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
 import { getUpdatesEntityIndexTemplateConfig } from './updates_index_template';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
+import { getMetadataComponentTemplate } from './metadata_component_templates';
+import { getMetadataEntityIndexTemplateConfig } from './metadata_index_template';
+import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 
 interface SharedElasticsearchAssetOptions {
   esClient: ElasticsearchClient;
@@ -38,8 +43,9 @@ interface SharedElasticsearchAssetOptions {
 }
 
 /**
- * Installs all shared Elasticsearch assets that must exist before any index is created:
- * ingest pipeline, component templates (for ALL entity types), and index templates.
+ * Installs all shared Elasticsearch assets and storage that must exist before per-entity
+ * initialization begins: ingest pipeline, component templates (for ALL entity types),
+ * index templates, the latest index, and the updates data stream.
  */
 export async function installSharedElasticsearchAssets({
   esClient,
@@ -48,8 +54,10 @@ export async function installSharedElasticsearchAssets({
 }: SharedElasticsearchAssetOptions): Promise<void> {
   try {
     await installLatestIndexIngestPipeline(esClient, namespace, logger);
+    await installMetadataIndexIngestPipeline(esClient, namespace, logger);
     await installAllComponentTemplates(esClient, namespace, logger);
     await installIndexTemplates(esClient, namespace, logger);
+    await installIndicesAndDataStreams(esClient, namespace, logger);
   } catch (error) {
     logger.error(`error installing shared assets in ${namespace}: ${error}`);
     throw error;
@@ -57,8 +65,7 @@ export async function installSharedElasticsearchAssets({
 }
 
 /**
- * Creates the latest index and updates data stream.
- * Must be called AFTER installSharedElasticsearchAssets to avoid partial mappings.
+ * Creates the latest index and updates data stream after the required templates are installed.
  */
 export async function installIndicesAndDataStreams(
   esClient: ElasticsearchClient,
@@ -79,6 +86,13 @@ export async function installIndicesAndDataStreams(
         throwIfExists: false,
       });
       logger.debug(`created updates entity data stream in ${namespace}`);
+    })(),
+
+    (async () => {
+      await createDataStream(esClient, getMetadataEntitiesDataStreamName(namespace), {
+        throwIfExists: false,
+      });
+      logger.debug(`created metadata entity data stream in ${namespace}`);
     })(),
   ]);
 }
@@ -103,6 +117,11 @@ async function installIndexTemplates(
       await putIndexTemplate(esClient, getHistorySnapshotIndexTemplateConfig(namespace));
       logger.debug(`installed history snapshot index template in ${namespace}`);
     })(),
+
+    (async () => {
+      await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
+      logger.debug(`installed metadata index template in ${namespace}`);
+    })(),
   ]);
 }
 
@@ -112,8 +131,8 @@ async function installAllComponentTemplates(
   logger: Logger
 ) {
   const definitions = ALL_ENTITY_TYPES.map((type) => getEntityDefinition(type, namespace));
-  await Promise.all(
-    definitions.flatMap((definition) => [
+  await Promise.all([
+    ...definitions.flatMap((definition) => [
       (async () => {
         await putComponentTemplate(
           esClient,
@@ -130,8 +149,12 @@ async function installAllComponentTemplates(
           `installed updates component template for: ${definition.type} in ${namespace}`
         );
       })(),
-    ])
-  );
+    ]),
+    (async () => {
+      await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
+      logger.debug(`installed metadata component template in ${namespace}`);
+    })(),
+  ]);
 }
 
 // TODO: add retry
@@ -163,8 +186,35 @@ async function uninstallIndicesAndDataStreams(
       logger.debug(`deleted entity index`);
     })(),
     (async () => {
+      // Resolve wildcards to concrete names first: ES rejects wildcard deletes when
+      // `action.destructive_requires_name=true` (default in Kibana test clusters).
+      await deleteHistorySnapshotIndices(esClient, namespace, logger);
+    })(),
+    (async () => {
       await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));
       logger.debug(`deleted entity updates data stream`);
     })(),
+    (async () => {
+      await deleteDataStream(esClient, getMetadataEntitiesDataStreamName(namespace));
+      logger.debug(`deleted entity metadata data stream`);
+    })(),
   ]);
+}
+
+async function deleteHistorySnapshotIndices(
+  esClient: ElasticsearchClient,
+  namespace: string,
+  logger: Logger
+): Promise<void> {
+  const pattern = getHistorySnapshotIndexPattern(namespace);
+  const resolved = await esClient.indices.resolveIndex({ name: pattern });
+
+  const historyIndices = resolved.indices.map((index) => index.name);
+  if (historyIndices.length === 0) {
+    logger.debug(`no history snapshot indices to delete for pattern ${pattern}`);
+    return;
+  }
+
+  await Promise.all(historyIndices.map((index) => deleteIndex(esClient, index)));
+  logger.debug(`deleted entity history snapshot indices: ${historyIndices.join(', ')}`);
 }

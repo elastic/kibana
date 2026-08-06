@@ -15,12 +15,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
 import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 import { ToolReadOnlyFlyout } from '../tools/tool_readonly_flyout';
 import { SkillTools } from './skill_tools';
+import { SkillReferencedFiles } from './skill_referenced_files';
 
 interface SkillDetailPanelProps {
   skillId: string;
@@ -28,6 +31,7 @@ interface SkillDetailPanelProps {
   onRemove: () => void;
   isAutoIncluded: boolean;
   canEditAgent: boolean;
+  canManageSkills: boolean;
 }
 
 export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
@@ -36,6 +40,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   onRemove,
   isAutoIncluded = false,
   canEditAgent,
+  canManageSkills,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { skill, isLoading } = useSkill({ skillId });
@@ -49,32 +54,22 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         title={skill?.name ?? skillId}
         isReadOnly={skill?.readonly ?? false}
         headerContent={
-          <>
-            <EuiText
-              size="s"
-              color="subdued"
-              css={css`
-                margin-top: ${euiTheme.size.s};
-              `}
-            >
-              {skill?.id}
-            </EuiText>
-            <EuiText
-              size="s"
-              color="subdued"
-              css={css`
-                margin-top: ${euiTheme.size.l};
-              `}
-            >
-              {skill?.description}
-            </EuiText>
-          </>
+          <EuiText
+            size="s"
+            color="subdued"
+            css={css`
+              margin-top: ${euiTheme.size.l};
+            `}
+          >
+            {skill?.description}
+          </EuiText>
         }
         headerActions={(openConfirmRemove) => (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <SkillHeaderActions
               openConfirmRemove={openConfirmRemove}
               canEditAgent={canEditAgent}
+              canManageSkills={canManageSkills}
               isAutoIncluded={isAutoIncluded}
               isReadOnly={skill?.readonly ?? false}
               onEdit={onEdit}
@@ -94,6 +89,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
           content={skill?.content ?? ''}
         />
         <SkillTools skillToolIds={skill?.tool_ids ?? []} onToolClick={setSelectedToolId} />
+        <SkillReferencedFiles items={skill?.referenced_content ?? []} />
       </DetailPanelLayout>
       {selectedToolId && (
         <ToolReadOnlyFlyout toolId={selectedToolId} onClose={() => setSelectedToolId(null)} />
@@ -105,12 +101,14 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
 const SkillHeaderActions = ({
   openConfirmRemove,
   canEditAgent,
+  canManageSkills,
   isAutoIncluded,
   isReadOnly,
   onEdit,
 }: {
   openConfirmRemove: () => void;
   canEditAgent: boolean;
+  canManageSkills: boolean;
   isAutoIncluded: boolean;
   isReadOnly: boolean;
   onEdit: () => void;
@@ -128,9 +126,18 @@ const SkillHeaderActions = ({
 
   return (
     <>
-      {!isReadOnly && (
+      {!isReadOnly && canManageSkills && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
+          <EuiButtonEmpty
+            iconType="pencil"
+            size="xs"
+            onClick={onEdit}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_EDIT_FROM_AGENT,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+            })}
+          >
             {labels.skills.editSkillButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>

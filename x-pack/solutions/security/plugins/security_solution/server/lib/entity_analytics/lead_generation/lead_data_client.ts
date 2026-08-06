@@ -65,6 +65,18 @@ export interface LeadDataClient {
 }
 
 // ---------------------------------------------------------------------------
+// ES error classification helpers
+// ---------------------------------------------------------------------------
+
+const getEsErrorType = (e: unknown): string | undefined =>
+  (e as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type;
+
+const isEsSecurityException = (e: unknown): boolean => getEsErrorType(e) === 'security_exception';
+
+const isEsIndexNotFoundException = (e: unknown): boolean =>
+  getEsErrorType(e) === 'index_not_found_exception';
+
+// ---------------------------------------------------------------------------
 // Staleness computation (timestamp-based, computed at read time)
 // ---------------------------------------------------------------------------
 
@@ -103,7 +115,7 @@ interface EsLeadDoc {
   title: string;
   byline: string;
   description: string;
-  entities: Array<{ type: string; name: string }>;
+  entities: Array<{ type: string; name: string; id?: string }>;
   tags: string[];
   priority: number;
   chat_recommendations: string[];
@@ -124,7 +136,7 @@ const leadToEsDoc = (
   title: lead.title,
   byline: lead.byline,
   description: lead.description,
-  entities: lead.entities.map(({ type, name }) => ({ type, name })),
+  entities: lead.entities.map(({ type, name, id }) => ({ type, name, id })),
   tags: lead.tags,
   priority: lead.priority,
   chat_recommendations: lead.chatRecommendations,
@@ -154,7 +166,7 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     title: doc.title as string,
     byline: (doc.byline as string) ?? '',
     description: (doc.description as string) ?? '',
-    entities: (doc.entities as Array<{ type: string; name: string }>) ?? [],
+    entities: (doc.entities as Array<{ type: string; name: string; id?: string }>) ?? [],
     tags: (doc.tags as string[]) ?? [],
     priority: (doc.priority as number) ?? 1,
     chatRecommendations: (doc.chat_recommendations as string[]) ?? [],
@@ -231,6 +243,9 @@ export const createLeadDataClient = ({
         ignore_unavailable: true,
       });
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.warn(`[LeadGeneration] Failed to persist leads to "${indexName}": ${e}`);
     }
   };
@@ -277,11 +292,11 @@ export const createLeadDataClient = ({
 
       return { leads, total, page, perPage };
     } catch (e) {
-      const isIndexNotFound =
-        (e as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
-        'index_not_found_exception';
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       const errorMessage = e instanceof Error ? e.message : String(e);
-      if (isIndexNotFound) {
+      if (isEsIndexNotFoundException(e)) {
         logger.debug(`[LeadGeneration] Leads indices not available yet: ${errorMessage}`);
       } else {
         logger.error(`[LeadGeneration] Unable to find leads due to error: ${errorMessage}`);
@@ -303,7 +318,7 @@ export const createLeadDataClient = ({
     try {
       const resp = await esClient.updateByQuery({
         index: allIndices,
-        query: { term: { id } },
+        query: { ids: { values: [id] } },
         script: {
           source: `ctx._source['status'] = params.status`,
           lang: 'painless',
@@ -338,7 +353,7 @@ export const createLeadDataClient = ({
 
     const resp = await esClient.updateByQuery({
       index: allIndices,
-      query: { terms: { id: [...ids] } },
+      query: { ids: { values: [...ids] } },
       script: {
         source: `ctx._source['status'] = params.status`,
         lang: 'painless',
@@ -387,6 +402,9 @@ export const createLeadDataClient = ({
         lastRun = (latestHit._source as Record<string, unknown>).timestamp as string;
       }
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.debug(`[LeadGeneration] Status check — indices not available: ${e}`);
     }
 
@@ -408,6 +426,9 @@ export const createLeadDataClient = ({
       });
       logger.info(`[LeadGeneration] Deleted all leads from space "${spaceId}"`);
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.warn(`[LeadGeneration] Failed to delete all leads: ${e}`);
     }
   };

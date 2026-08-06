@@ -118,6 +118,12 @@ interface MapPopoverProps {
   onClose: () => void;
   /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Focus button always navigates, even for the currently focused service (default re-centers). */
+  alwaysNavigateOnFocus?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnNavigation?: boolean;
 }
 
 export function MapPopover({
@@ -130,6 +136,9 @@ export function MapPopover({
   end,
   onClose,
   isEmbedded,
+  showFocusMap,
+  alwaysNavigateOnFocus,
+  clearKueryOnNavigation,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -183,9 +192,10 @@ export function MapPopover({
 
   const isAlreadyFocused = focusedServiceName === selectedNodeId;
 
-  const onFocusClick = isAlreadyFocused
-    ? centerSelectedNode
-    : (_event: MouseEvent<HTMLAnchorElement>) => onClose();
+  const onFocusClick =
+    isAlreadyFocused && !alwaysNavigateOnFocus
+      ? centerSelectedNode
+      : (_event: MouseEvent<HTMLAnchorElement>) => onClose();
 
   const isOpen = !!selectedNode || !!selectedEdge;
 
@@ -239,6 +249,8 @@ export function MapPopover({
           onFocusClick={onFocusClick}
           onOpenDiagnostic={handleOpenDiagnostic}
           isEmbedded={isEmbedded}
+          showFocusMap={showFocusMap}
+          clearKueryOnNavigation={clearKueryOnNavigation}
         />
       </EuiPopover>
       {diagnosticFlyoutSelection && (

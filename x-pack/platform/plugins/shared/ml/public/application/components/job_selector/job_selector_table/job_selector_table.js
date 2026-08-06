@@ -25,7 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { MlNodeAvailableWarningShared } from '../../node_available_warning';
 
@@ -180,6 +180,9 @@ export function JobSelectorTable({
 
     return (
       <CustomSelectionTable
+        aria-label={i18n.translate('xpack.ml.jobSelector.jobsTable.ariaLabel', {
+          defaultMessage: 'Jobs',
+        })}
         columns={columns}
         filters={filters}
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
@@ -233,6 +236,9 @@ export function JobSelectorTable({
 
     return (
       <CustomSelectionTable
+        aria-label={i18n.translate('xpack.ml.jobSelector.groupsTable.ariaLabel', {
+          defaultMessage: 'Groups',
+        })}
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}

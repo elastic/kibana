@@ -15,11 +15,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const toasts = getService('toasts');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const PageObjects = getPageObjects(['common', 'console']);
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/246353
-  describe.skip('console output panel', function describeIndexTests() {
+  describe('console output panel', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -32,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const sendRequest = async (request: string) => {
       await PageObjects.console.enterText(request);
-      await PageObjects.console.clickPlay();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.console.clickPlayAndWaitForResults();
     };
 
     const sendMultipleRequests = async (requests: string[]) => {
@@ -41,8 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(request);
       });
       await PageObjects.console.selectAllRequests();
-      await PageObjects.console.clickPlay();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.console.clickPlayAndWaitForResults();
     };
 
     it('should be able to copy the response of a request', async () => {
@@ -53,8 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.selectAllOutputText();
       await PageObjects.console.clickCopyOutput();
 
-      const resultToast = await toasts.getElementByIndex(1);
-      const toastText = await resultToast.getVisibleText();
+      const toastText = await toasts.getTitleAndDismiss();
 
       expect(toastText).to.be('Selected output copied to clipboard');
 

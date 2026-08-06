@@ -6,10 +6,9 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import { AxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Space } from '@kbn/spaces-plugin/common';
-import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { memoize } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
@@ -38,7 +37,7 @@ export const ensureSpaceIdExists = async (
       return true;
     })
     .catch((err) => {
-      if (err instanceof AxiosError && (err.response?.status ?? err.status) === 404) {
+      if (err.status === 404) {
         return false;
       }
 

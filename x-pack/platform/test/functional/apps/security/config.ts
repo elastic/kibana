@@ -16,5 +16,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
     },
+    security: {
+      ...functionalConfig.get('security'),
+      cookieLogin: false, // these tests verify the login form itself
+    },
   };
 }

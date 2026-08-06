@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { alertDeleteCategoryIds } from '../../../constants';
+import { MAX_SPACE_IDS, MAX_ID_LENGTH } from '../../../constants';
 
 const MAX_ALERT_DELETE_THRESHOLD_DAYS = 3 * 365; // 3 years
 const MIN_ALERT_DELETE_THRESHOLD_DAYS = 1;
@@ -57,22 +58,32 @@ const alertDeleteSettingsSchema = {
 
 export const alertDeletePreviewQuerySchema = schema.object(alertDeleteSettingsSchema);
 
-export const alertDeletePreviewResponseSchema = schema.object({
-  affected_alert_count: schema.number(),
-});
+export const alertDeletePreviewResponseSchema = schema.object(
+  {
+    affected_alert_count: schema.number(),
+  },
+  { meta: { id: 'alert_delete_preview_response' } }
+);
 
-export const alertDeleteScheduleQuerySchema = schema.object({
-  ...alertDeleteSettingsSchema,
-  space_ids: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      minSize: 1,
-      meta: {
-        description: 'Kibana space IDs to delete alerts from',
-      },
-    })
-  ),
-});
+export const alertDeleteScheduleQuerySchema = schema.object(
+  {
+    ...alertDeleteSettingsSchema,
+    space_ids: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+        minSize: 1,
+        maxSize: MAX_SPACE_IDS,
+        meta: {
+          description: 'Kibana space IDs to delete alerts from',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'alert_delete_schedule_request' } }
+);
 
-export const alertDeleteLastRunResponseSchema = schema.object({
-  last_run: schema.maybe(schema.string()),
-});
+export const alertDeleteLastRunResponseSchema = schema.object(
+  {
+    last_run: schema.maybe(schema.string()),
+  },
+  { meta: { id: 'alert_delete_last_run_response' } }
+);

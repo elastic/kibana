@@ -25,16 +25,15 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/i18n'
   - '@kbn/inference-plugin'
-  - '@kbn/inference-common'
   - '@kbn/actions-plugin'
   - '@kbn/utility-types'
   - '@kbn/spaces-plugin'
   - '@kbn/eval-kql'
   - '@kbn/es-query'
   - '@kbn/std'
-  - '@kbn/core-http-common'
   - '@kbn/logging-mocks'
   - '@kbn/logging'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod

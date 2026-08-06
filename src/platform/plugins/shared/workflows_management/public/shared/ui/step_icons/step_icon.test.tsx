@@ -15,6 +15,9 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 // Activates the __mocks__/use_kibana.ts auto-mock which uses createStartServicesMock()
 jest.mock('../../../hooks/use_kibana');
+jest.mock('@kbn/connector-specs/icons', () => ({
+  ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
+}));
 
 // Capture the services before any test resets mocks
 const mockServices = jest.mocked(useKibana)().services;
@@ -123,6 +126,22 @@ describe('StepIcon', () => {
       );
       expect(container.querySelector('[data-euiicon-type="plugs"]')).toBeInTheDocument();
     });
+
+    it('renders connector spec icons for v2 action type ids', () => {
+      const { container } = render(
+        <StepIcon stepType=".sharepoint-online" executionStatus={undefined} />
+      );
+
+      expect(container.querySelector('[data-euiicon-type="logoKibana"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
+
+    it('falls back to hardcoded icons for legacy action type ids', () => {
+      const { container } = render(<StepIcon stepType=".slack" executionStatus={undefined} />);
+
+      expect(container.querySelector('[data-euiicon-type="logoSlack"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
   });
 
   describe('execution status overrides', () => {
@@ -167,6 +186,50 @@ describe('StepIcon', () => {
       const { container } = render(<StepIcon stepType="cases" executionStatus={undefined} />);
       expect(container.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
+
+    it('skips a family sibling without an icon and uses one that has an icon', () => {
+      // Some family members (e.g. `cases.noop`) can be registered without an icon. Aggregating
+      // by the base type must not latch onto the first (iconless) sibling and fall through to
+      // the plugs fallback — pick a sibling that has an icon.
+      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+        { id: 'cases.noop' },
+        { id: 'cases.createCase', icon: 'briefcase' },
+      ]);
+
+      const { container } = render(<StepIcon stepType="cases" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('base type aggregation icons', () => {
+    it('uses the productAgent robot icon for the "ai" base type, regardless of sibling icons', () => {
+      // The `ai.*` family spans multiple themes (prompt, summarize, classify, agent), so the
+      // list's aggregate marker should be the AI category icon — not whichever sibling happens
+      // to be registered first.
+      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+        { id: 'ai.prompt', icon: 'sparkles' },
+        { id: 'ai.summarize', icon: 'sparkles' },
+      ]);
+
+      const { container } = render(<StepIcon stepType="ai" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="productAgent"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="sparkles"]')).not.toBeInTheDocument();
+    });
+
+    it('renders the workflow.execute glyph for the bare "workflow" base type', () => {
+      // `workflow.*` step defs are built-in (not registered via workflowsExtensions), so the
+      // list aggregation for these steps lands on the bare `workflow` base type.
+      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([]);
+
+      const { container } = render(<StepIcon stepType="workflow" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+      // The glyph icon is a data URL SVG rendered inline via a masked span, not an EuiIcon.
+      expect(container.querySelector('span[aria-hidden="true"]')).toBeInTheDocument();
     });
   });
 

@@ -9,7 +9,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { basename, join } from 'path';
-import { minimatch } from 'minimatch';
+import picomatch from 'picomatch';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -97,7 +97,7 @@ export async function checkFileCasing(log, paths, getExpectedCasing, options = {
   } = options;
 
   const violations = [];
-  const isIgnoredPath = (path) => ignorePatterns.some((pattern) => minimatch(path, pattern));
+  const isIgnoredPath = ignorePatterns.length > 0 ? picomatch(ignorePatterns) : () => false;
 
   const pathsToValidate = uniq(
     paths

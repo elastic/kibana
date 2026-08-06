@@ -72,6 +72,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         <EuiFlexItem
           css={css`
             overflow: auto;
+            align-self: center;
           `}
           grow
         >
@@ -130,7 +131,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
       }
       return {
         _append,
-        _prepend: <EuiIcon size="l" type={connector.iconPath} />,
+        _prepend: <EuiIcon size="l" type={connector.iconPath} aria-hidden />,
         'aria-label': connector.name + _ariaLabelAppend,
         key: key.toString(),
         label: connector.name,

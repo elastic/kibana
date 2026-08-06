@@ -11,7 +11,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, SOLUTION_BUILDS, createRunner } from './lib';
+import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -87,7 +87,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.ReplaceFavicon);
-    await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
+    // When legacy is removed, keep only Tasks.BuildRspackBundles.
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+      await globalRun(Tasks.BuildRspackBundles);
+    } else {
+      await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    }
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
@@ -182,10 +188,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --docker-images and --skip-docker-serverless
     artifactTasks.push(Tasks.CreateDockerServerless('x64'));
     artifactTasks.push(Tasks.CreateDockerServerless('aarch64'));
-    SOLUTION_BUILDS.forEach((solution) => {
-      artifactTasks.push(Tasks.CreateDockerServerless('x64', solution));
-      artifactTasks.push(Tasks.CreateDockerServerless('aarch64', solution));
-    });
   }
 
   if (options.createDockerFIPS) {

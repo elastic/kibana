@@ -112,6 +112,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy: () => void) => (
+                    /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                     <EuiButtonIcon
                       onClick={copy}
                       iconType="copy"

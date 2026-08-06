@@ -1,0 +1,24 @@
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          getRuleQueryInspectorResponse:
+            summary: A query inspector response for a custom threshold rule
+            value:
+              queries:
+                - index: metrics-*
+                  request:
+                    size: 0
+                    query:
+                      bool:
+                        filter:
+                          - range:
+                              '@timestamp':
+                                gte: '2026-01-01T00:00:00.000Z'
+                                lte: '2026-01-01T00:05:00.000Z'
+                    aggs:
+                      groupings:
+                        composite:
+                          size: 500
+                          sources: []

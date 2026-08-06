@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isSavedObjectErrorResult } from '@kbn/core/server';
+import type { SavedObjectErrorResult } from '@kbn/core/server';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   UiamApiKeyProvisioningStatus,
@@ -36,7 +38,8 @@ export const createSkippedRuleStatus = (
  */
 export const createFailedConversionStatus = (
   ruleId: string,
-  message: string
+  message: string,
+  errorCode?: string
 ): ProvisioningStatusDocs => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
   id: ruleId,
@@ -46,6 +49,7 @@ export const createFailedConversionStatus = (
     entityType: UiamApiKeyProvisioningEntityType.RULE,
     status: UiamApiKeyProvisioningStatus.FAILED,
     message,
+    ...(errorCode ? { errorCode } : {}),
   },
 });
 
@@ -54,7 +58,7 @@ export const createFailedConversionStatus = (
  */
 export interface BulkUpdateResultItem {
   id: string;
-  error?: { message?: string };
+  error?: SavedObjectErrorResult['error'];
 }
 
 export interface ProvisioningStatusWritePayload {
@@ -132,7 +136,7 @@ export const statusDocsAndOrphanedKeysFromBulkUpdate = (
   const orphanedUiamApiKeys: string[] = [];
   for (const so of savedObjects) {
     const statusDoc = createStatusFromBulkUpdateResult(so);
-    if (so.error) {
+    if (isSavedObjectErrorResult(so)) {
       provisioningStatusForFailedRules.push(statusDoc);
       const uiamApiKey = rulesWithUiamApiKeys.get(so.id)?.uiamApiKey;
       if (uiamApiKey) {

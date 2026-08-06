@@ -37,6 +37,7 @@ function processQuery(query: string): string {
     .replace(/\/\/.*$/gm, '') // Remove line comments (//)
     .replace(/[\n\r]/g, ' ') // Remove newlines
     .replace(/\s*\|\s*/g, ' | ') // Normalize pipe spacing
+    .replace(/\s{2,}/g, ' ') // Collapse multiple spaces (e.g. from multiline pretty-printer indentation)
     .trim();
 }
 
@@ -236,6 +237,20 @@ export async function inlineSuggest(
   try {
     const trimmedText = processQuery(textBeforeCursor).toLowerCase();
     const trimmedFullText = processQuery(fullText).toLowerCase();
+
+    // If the full text is empty, don't show any suggestions
+    if (!trimmedFullText) {
+      return { items: [] };
+    }
+
+    const lastLine = textBeforeCursor.split('\n').pop() ?? '';
+    if (!lastLine.trim()) {
+      return { items: [] };
+    }
+
+    if (lastLine.trim().startsWith('//')) {
+      return { items: [] };
+    }
 
     if (trimmedText !== trimmedFullText) {
       // Don't show suggestions if cursor is not at the end of the query

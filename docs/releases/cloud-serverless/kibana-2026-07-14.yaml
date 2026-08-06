@@ -1,0 +1,443 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-14
+entries:
+- file:
+    name: 276284.yaml
+    checksum: 25af96da3bb118ddd60252572755a45f90d91b97
+  type: bug-fix
+  title: Fix Kibana startup crash when upgrading with preserved `node.options`
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Upgrading Kibana with a preserved `node.options` file from a previous version no longer crashes at startup. Server-side code no longer imports the browser-only `@elastic/charts` library, which could load an ESM-only dependency incompatible with Node.js `require()`.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/276284
+  issues:
+  - https://github.com/elastic/kibana/issues/276273
+- file:
+    name: 275650.yaml
+    checksum: d09826eac31125c52d04ec9217a6b3c8f165e05d
+  type: bug-fix
+  title: Fix Kibana page-load metrics creating a separate transaction for every URL
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Kibana page-load performance transactions are now named by application (for example, `/app/discover`) instead of the full URL path, so aggregated metrics stay usable and don't grow with every unique page visited.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/275650
+  issues:
+  - https://github.com/elastic/kibana/issues/256044
+- file:
+    name: 276705.yaml
+    checksum: 3ad43a73df9267b6227d62764b657c2a6b1c4680
+  type: enhancement
+  title: Prefix email subjects for Elastic Cloud trial deployments
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Email subjects sent from Elastic Cloud trial deployments through the built-in Elastic email service are now prefixed with `[Elastic Cloud Trial]`.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/276705
+- file:
+    name: 268783.yaml
+    checksum: 8e85b8df6c4a55c87a0ca08c75a13bf231cb49ed
+  type: enhancement
+  title: Add public REST API for links panel management
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: You can now create, update, and manage by-reference links panels through the public `kbn:/api/links` REST API.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268783
+  issues:
+  - https://github.com/elastic/kibana/issues/219947
+- file:
+    name: 277362.yaml
+    checksum: d178726f6b30be730dc85fa778f504f1c39110f9
+  type: feature
+  title: Rename `cases` analytics fields to `case`
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/277362
+- file:
+    name: 276724.yaml
+    checksum: fc8862572d137b765b9a4c6d9bb0164d76847ee1
+  type: bug-fix
+  title: Fix flash-of-light on boot splash in system color mode
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/276724
+- file:
+    name: 275610.yaml
+    checksum: 944bd7fd2a1e96b27459141e51e3d9cab8054a8a
+  type: enhancement
+  title: Add certificate identity field to cross-cluster API keys
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Cross-cluster API keys can now be created and updated with a certificate identity (strong identity verification) in Kibana's API key management, restricting a key to connections authenticated by a specific TLS certificate.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/275610
+- file:
+    name: 276365.yaml
+    checksum: a49276648708eb546947f676414724455ec1e10d
+  type: bug-fix
+  title: Fix Dev Tools Console copy button silently failing to copy output
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: The Dev Tools Console copy button now copies response output reliably, including when the clipboard API is unavailable.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/276365
+  issues:
+  - https://github.com/elastic/kibana/issues/266698
+- file:
+    name: 276693.yaml
+    checksum: 56b023118ffbf1d574eb41d29c8cb533505b693c
+  type: bug-fix
+  title: Fix error saving text fields that contain JSON-like content
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Saving a text field whose value looks like a JSON object no longer fails because the value was incorrectly parsed as an object.
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/276693
+- file:
+    name: 277391.yaml
+    checksum: 11552975c3c6ceef567daf4b41c7367fb698c418
+  type: bug-fix
+  title: Fix `FormatDate` rejecting epoch-millisecond strings in alert templates
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: The `FormatDate` mustache template function now accepts epoch-millisecond strings (for example, `1669736864000`) so nested date formatting in connector actions works reliably.
+  prs:
+  - https://github.com/elastic/kibana/pull/277391
+- file:
+    name: 276742.yaml
+    checksum: ac79c341c93830ecf1a89fb6970f04c7ea49a574
+  type: bug-fix
+  title: Fix Fleet preconfigured policy reset aborting with 404 on legacy deployments
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: On deployments where space awareness is disabled, `POST /internal/fleet/reset_preconfigured_agent_policies/{id}` no longer aborts with a 404 before Fleet setup can rebuild the preconfigured policy.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/276742
+  issues:
+  - https://github.com/elastic/kibana/issues/273838
+- file:
+    name: 277543.yaml
+    checksum: 41b96e1bb9d9597d4502122f31672a1b8fa32471
+  type: feature
+  title: Add attachment reference IDs to cases activity analytics
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Cases activity analytics documents now include `action.attachment_reference_id` so an activity row can be correlated with the attachment it created or edited.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/277543
+- file:
+    name: 276283.yaml
+    checksum: fb03ab438d9683c922ed87496ac601ce6d98a721
+  type: feature
+  title: Add selectable aggregations for the Metrics Experience grid
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: The Metrics Experience grid in Discover now includes Grid Settings so you can choose the aggregation function for counter, gauge, and histogram metrics instead of using hardcoded defaults.
+  prs:
+  - https://github.com/elastic/kibana/pull/276283
+  issues:
+  - https://github.com/elastic/kibana/issues/272483
+- file:
+    name: 277083.yaml
+    checksum: 10bafad2c32a9a2b8c9154981abdfcecf03e0d05
+  type: bug-fix
+  title: Fix missing host entity and chevron display in the expandable flyout
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: In the new expandable flyout, the Entities tool no longer omits the host panel when host data is present, and chevron controls display correctly.
+  prs:
+  - https://github.com/elastic/kibana/pull/277083
+- file:
+    name: 277037.yaml
+    checksum: ac8dfe71132562dfa633c2a69f5c0afb2ab2032c
+  type: bug-fix
+  title: Fix cases attachment removal events always showing as "removed comment"
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/277037
+- file:
+    name: 276490.yaml
+    checksum: 5ea5f8f9c8f56324e702999c99d58de6387f1f76
+  type: bug-fix
+  title: Fix jobs and trained models becoming inaccessible when all spaces are removed
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: The Machine Learning APIs that update job and trained model spaces now reject requests that would remove a job or model from every space.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/276490
+  issues:
+  - https://github.com/elastic/kibana/issues/276473
+- file:
+    name: 276297.yaml
+    checksum: 57211cc9259c1701b5ae5daef5325cf8dea93dd3
+  type: enhancement
+  title: Allow per-page override of the AI sidebar greeting
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/276297
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/18059'
+- file:
+    name: 276782.yaml
+    checksum: 6f73fb93654168dee1753e332e0dbbec47f5f0a5
+  type: bug-fix
+  title: Fix unhelpful error messages for Task Manager and connector failures
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Task Manager and the Slack/Webhook connectors now log a meaningful error message when a task or connector fails with a non-`Error` value, instead of `[object Object]` or `undefined`.
+  areas:
+  - Kibana platform
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/276782
+  issues:
+  - https://github.com/elastic/kibana/issues/226285
+- file:
+    name: 276239.yaml
+    checksum: 0286430a09ce3db5daed6c5f8bf106f9bcf839be
+  type: bug-fix
+  title: Fix autocomplete matching incorrect endpoint for competing URL patterns
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Fixed a bug in Dev Tools Console where autocomplete could match an incorrect API endpoint when a URL matched both a literal endpoint and a parameterized one (for example `GET _connector/_sync_job`).
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/276239
+  issues:
+  - https://github.com/elastic/kibana/issues/182360
+- file:
+    name: 260816.yaml
+    checksum: 914fde778a234b842711564c1746ffc63b6dc2fa
+  type: enhancement
+  title: Enable Attack Discovery workflow scheduling through alerting
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Attack Discovery workflow-based generation can now be scheduled through the alerting framework when the Attack Discovery workflows feature is enabled.
+  prs:
+  - https://github.com/elastic/kibana/pull/260816
+- file:
+    name: 276242.yaml
+    checksum: e4f780cfc9ae856038d355c65055068cafddff8c
+  type: bug-fix
+  title: Fix copy in the automatic migration upload step for Microsoft Sentinel rules
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  prs:
+  - https://github.com/elastic/kibana/pull/276242
+- file:
+    name: 275469.yaml
+    checksum: 74ff9645e9d566b0e3a09d21d5740c05e2de3088
+  type: bug-fix
+  title: Fix reporting jobs showing Kibana version 7.14.0 when version is omitted
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: When a reporting job is created through the API without a `version` in its parameters, the report info flyout now shows the current Kibana version instead of a hardcoded 7.14.0 fallback.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/275469
+  issues:
+  - https://github.com/elastic/kibana/issues/272420
+- file:
+    name: 277268.yaml
+    checksum: 81fb3cd3d6c72b13929d7d77224272952829cdc7
+  type: bug-fix
+  title: Fix invalid workflows showing untitled workflow instead of the YAML name
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Workflows that fail schema validation now use the `name` from the workflow YAML as the title. Untitled workflow is used only when the YAML has no name.
+  prs:
+  - https://github.com/elastic/kibana/pull/277268
+- file:
+    name: 260811.yaml
+    checksum: d9c0c0ebd99c47123c965e50b90065a1cf8cdbd4
+  type: enhancement
+  title: Add Agent Builder skills for Attack Discovery workflow editing
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Agent Builder now includes skills for editing and troubleshooting Attack Discovery workflows when the Attack Discovery workflows feature is enabled.
+  prs:
+  - https://github.com/elastic/kibana/pull/260811
+- file:
+    name: 276117.yaml
+    checksum: 012ecbfdcb47e47dc6230eb95af5a4724511ee48
+  type: feature
+  title: Add cases attachments analytics index
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Cases analytics now includes a `.cases-attachments` index that stores comment and attachment data so you can join attachments to cases in Cases Analytics.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/276117
+- file:
+    name: 276475.yaml
+    checksum: a350328240573bb4dd64f9fddef4910030ff1fa1
+  type: bug-fix
+  title: Fix keyboard focus not returning when dashboard panel flyouts close
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Dashboard panel action flyouts (such as panel settings) now return keyboard focus to the triggering button when closed, improving keyboard and screen reader navigation.
+  areas:
+  - Alerting and reporting
+  - Kibana platform
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/276475
+  issues:
+  - https://github.com/elastic/kibana/issues/182764
+- file:
+    name: 276459.yaml
+    checksum: 26303cd45f840ecbd8a2dc82f3cd8494cdd3a5cd
+  type: bug-fix
+  title: Fix translated rule flyout layout squeezing the original rule column
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: In Automatic Migration, long ES|QL translations no longer collapse the original rule definition column in the translation tab.
+  prs:
+  - https://github.com/elastic/kibana/pull/276459
+- file:
+    name: 276419.yaml
+    checksum: 8cda0422afe14f59465b70c5239e01de33daf0d4
+  type: bug-fix
+  title: Fix clear audit messages API accepting non-notification indices
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: The clear audit messages API now verifies that requested indices are notification indices and that the user can access the specified job.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/276419
+- file:
+    name: 276788.yaml
+    checksum: 33df7c0e298161bd2130606a20e238d70036ef89
+  type: enhancement
+  title: Improve alert analysis workflow licensing, search, and auto-close controls
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Alert analysis is gated to Enterprise with an upsell for other licenses, rule-name search supports substrings, and auto-close confidence inputs are disabled when auto-close is off.
+  prs:
+  - https://github.com/elastic/kibana/pull/276788
+- file:
+    name: 276823.yaml
+    checksum: 459ab573879a80e4a490b18ae0e56282562954b7
+  type: bug-fix
+  title: Fix indicator match rule settings reset when saving in the UI
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: API-configured `concurrent_searches` and `items_per_search` values on indicator match (`threat_match`) rules are now preserved when you edit and save the rule in the UI.
+  prs:
+  - https://github.com/elastic/kibana/pull/276823
+  issues:
+  - https://github.com/elastic/kibana/issues/276203
+- file:
+    name: 272499.yaml
+    checksum: a909bc3dc04f7141217beb37a9f4d9603f2ffd3a
+  type: enhancement
+  title: Add background trendline charts for ES|QL metric visualizations
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: "Lens metric visualizations using ES|QL now support background trendline charts. Trendlines can be enabled via the \"Line\" background option in the metric chart editor and configured programmatically via the Lens as code API using `background_chart: { type: 'trend' }`."
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/272499
+- file:
+    name: 277269.yaml
+    checksum: 99be1ba4ea18bebac5565ab569f8700e7901db0c
+  type: feature
+  title: Add fields and configuration tabs to the cases templates editor
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: The cases templates v2 editor now uses separate fields and configuration tabs with consistent binding rules, including a zero-data-loss migration from v1 templates.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/277269
+- file:
+    name: 276643.yaml
+    checksum: b3c19eaf6dfc880160cc76b94f713333e53b203e
+  type: feature
+  title: Allow users to reinstall traces dashboard
+  products:
+  - product: cloud-serverless
+    target: 2026-07-14
+  description: Users can now install, view, or delete the Agent Builder traces dashboard directly from GenAI Settings. The dashboard is no longer auto-reinstalled on Kibana restart if previously deleted.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/276643
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/15105'

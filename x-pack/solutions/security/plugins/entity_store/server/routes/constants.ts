@@ -13,30 +13,41 @@ export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
 };
 
+// Matches the requiredPrivileges declared by the Security Solution asset criticality HTTP routes
+// (e.g. `.../asset_criticality/routes/upsert.ts`), so callers that bypass Kibana's route-level
+// authorization (a synthetic/fake request) can enforce the same Kibana feature privilege.
+export const ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES = [
+  'securitySolution',
+  'securitySolution-entity-analytics',
+];
+
 export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
-  requiredPrivileges: ['securitySolution', 'securitySolution-entity-analytics'],
+  requiredPrivileges: ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
 };
 
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded from LogExtractionBodyParams
 // TODO: add timeout once we have a way to set it as a task override param
 export const LogExtractionInstallParams = LogExtractionConfig.pick({
-  filter: true,
   fieldHistoryLength: true,
   additionalIndexPatterns: true,
+  excludedIndexPatterns: true,
   lookbackPeriod: true,
   frequency: true,
   delay: true,
   docsLimit: true,
   maxLogsPerPage: true,
+  maxTimeWindowSize: true,
+  maxLogsPerWindow: true,
+  maxLogsPerWindowCapBehavior: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
 
 export const LogExtractionUpdateParams = z.object({
-  filter: z.string().optional(),
   fieldHistoryLength: z.number().int().optional(),
   additionalIndexPatterns: z.array(z.string()).optional(),
+  excludedIndexPatterns: z.array(z.string()).optional(),
   lookbackPeriod: z
     .string()
     .regex(/[smdh]$/)
@@ -51,6 +62,12 @@ export const LogExtractionUpdateParams = z.object({
     .optional(),
   docsLimit: z.number().int().min(1).optional(),
   maxLogsPerPage: z.number().int().min(1).optional(),
+  maxTimeWindowSize: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
+  maxLogsPerWindow: z.number().int().min(0).optional(),
+  maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

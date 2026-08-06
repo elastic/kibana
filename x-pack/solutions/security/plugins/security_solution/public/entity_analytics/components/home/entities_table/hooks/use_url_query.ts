@@ -7,15 +7,28 @@
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
+import { parse } from 'query-string';
+import { encode } from '@kbn/rison';
 import { encodeQuery } from '@kbn/cloud-security-posture';
 import {
   QUERY_PARAM_KEY,
   FLYOUT_PARAM_KEY,
   decodeMultipleRisonParams,
-  encodeRisonParam,
 } from '@kbn/cloud-security-posture/src/utils/query_utils';
+import {
+  encodeQueryString,
+  getQueryStringFromLocation,
+} from '../../../../../common/utils/global_query_string/helpers';
 
 const URL_PARAM_KEYS = [QUERY_PARAM_KEY, FLYOUT_PARAM_KEY];
+
+const safeRisonEncode = (value: unknown): string | undefined => {
+  try {
+    return encode(value);
+  } catch {
+    return undefined;
+  }
+};
 
 export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: () => T) => {
   const { push, replace } = useHistory();
@@ -67,13 +80,44 @@ export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: 
 
       const { flyout, ...queryParams } = mergedQuery;
 
-      const queryParamsSearch = encodeQuery(queryParams);
-      const flyoutSearch = buildFlyoutSearchString(flyout);
+      // Read the live URL search rather than rebuilding it from scratch so that we
+      // preserve every param this hook does not own (e.g. `appQuery`, `filters`,
+      // `savedQuery`, `sourcerer`, `timerange`). Wiping them caused a tight
+      // feedback loop with `useSyncGlobalQueryString`, which would re-push the
+      // dropped params on every URL change.
+      const currentSearch = window.location.search;
+      const parsed = parse(currentSearch, { sort: false });
 
-      const finalSearch = combineSearchParts([queryParamsSearch, flyoutSearch]);
+      const cspqRison = safeRisonEncode(queryParams);
+      if (cspqRison) {
+        parsed[QUERY_PARAM_KEY] = cspqRison;
+      } else {
+        delete parsed[QUERY_PARAM_KEY];
+      }
+
+      if (flyout && Object.keys(flyout).length > 0) {
+        const flyoutRison = safeRisonEncode(flyout);
+        if (flyoutRison) {
+          parsed[FLYOUT_PARAM_KEY] = flyoutRison;
+        } else {
+          delete parsed[FLYOUT_PARAM_KEY];
+        }
+      } else {
+        delete parsed[FLYOUT_PARAM_KEY];
+      }
+
+      const nextSearch = encodeQueryString(parsed);
+
+      // String-equality short-circuit. Avoids pushing a duplicate history entry
+      // when an effect re-fires (e.g. because `setUrlQuery` got a new identity
+      // after an unrelated URL change) but the resulting search would be
+      // identical to what is already in the URL.
+      if (nextSearch === getQueryStringFromLocation(currentSearch)) {
+        return;
+      }
 
       push({
-        search: finalSearch,
+        search: nextSearch,
       });
     },
     [getDefaultQuery, urlQuery, push]
@@ -91,15 +135,3 @@ export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: 
     setUrlQuery,
   };
 };
-
-function buildFlyoutSearchString(flyoutParams: Record<string, unknown>): string {
-  if (Object.keys(flyoutParams).length === 0) {
-    return '';
-  }
-
-  return encodeRisonParam(FLYOUT_PARAM_KEY, flyoutParams) || '';
-}
-
-function combineSearchParts(searchParts: Array<string | undefined>): string {
-  return searchParts.filter(Boolean).join('&');
-}

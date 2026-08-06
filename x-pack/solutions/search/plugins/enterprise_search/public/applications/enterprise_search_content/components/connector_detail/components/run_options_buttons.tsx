@@ -50,7 +50,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
               label={
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoDocker" size="l" />
+                    <EuiIcon type="logoDocker" size="l" aria-hidden />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText>
@@ -77,7 +77,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
               label={
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoGithub" size="l" />
+                    <EuiIcon type="logoGithub" size="l" aria-hidden />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText>

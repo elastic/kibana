@@ -36,6 +36,15 @@ uiSettings.overrides:
   workflows:ui:enabled: false
 ```
 
+Experimental Workflows features are gated behind a separate Advanced Setting:
+
+```yml
+uiSettings.overrides:
+  workflows:experimentalFeatures: true
+  workflows:ui:executionGraph:enabled: true
+  workflows:ui:showExecutor:enabled: true
+```
+
 If running in Serverless or Cloud dev environments, you can disable it via API:
 
 ```bash
@@ -46,6 +55,19 @@ POST kbn://internal/kibana/settings
    }
 }
 ```
+
+### Workflow graph viewer
+
+The read-only graph viewer is disabled by default.
+
+Enable the Workflow Experimental flag in Advanced Settings, then enable in `kibana.yml` the following flag:
+
+```yml
+uiSettings.overrides:
+  workflows:ui:visualEditor:enabled: true
+```
+
+Restart Kibana after changing this value. In the workflow editor, open the actions menu (⌘K / Ctrl+K) and look under **Commands** for **Toggle graph editor** (or search for `graph`).
 
 ---
 
@@ -220,8 +242,11 @@ These routes use `access: internal` and are **not** included in the public OpenA
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
-| POST | `/internal/workflows/disable_all_workflows` | Disable all workflows (administrative). |
+| POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
 | POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
+| GET | `/internal/workflows/library/templates` | List Workflow Template Library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
+| GET | `/internal/workflows/library/templates/{slug}` | Get the parsed template body (metadata + workflow body + raw YAML) for a catalog slug. `404` when the slug is missing, `503` when the library is disabled. |
+| GET | `/internal/workflows/library/health` | Diagnostic — returns the cache's `sourceMode`, `lastRefreshAt`, and `lastError`. Not gated by the library toggle so admins can reach it while the feature is off. |
 
 ---
 
@@ -302,6 +327,15 @@ workflows_management/
 2. Start Elasticsearch: `yarn es snapshot`
 3. Start Kibana: `yarn start`
 4. Navigate to `/app/workflows`
+
+### Event-driven custom trigger `on` options
+
+Registered (non-built-in) triggers may set optional flags under `triggers[].on` in YAML:
+
+- **`workflowEvents`**: One of **`ignore`**, **`avoid-loop`**, or **`allow-all`** (string). Controls how the workflow is scheduled when the trigger event was emitted from a workflow-attributed chain:
+  - **`ignore`**: Do not schedule when the emit is workflow-attributed; user or domain-originated emits (no chain context) still run the workflow.
+  - **`avoid-loop`**: Schedule on workflow-attributed emits, but skip if this workflow id is already on the event chain (cycle guard). **Omitted defaults to `avoid-loop`** at runtime.
+  - **`allow-all`**: Schedule without the cycle guard; **`maxEventChainDepth`** from the execution engine config still applies.
 
 ### Testing
 

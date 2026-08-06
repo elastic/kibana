@@ -18,11 +18,9 @@ import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { CompatibleModule } from '../../../common/constants/app';
-import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
-import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
-import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import type { AnalysisLimits } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { RecognizeModuleResultDataView } from '@kbn/ml-common-types/modules';
+import { ML_MODULE_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import type {
   KibanaObjects,
   KibanaObjectConfig,
@@ -41,8 +39,12 @@ import type {
   GeneralDatafeedsOverride,
   JobSpecificOverride,
   RecognizeResult,
-} from '../../../common/types/modules';
-import { isGeneralJobOverride } from '../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
+import { isGeneralJobOverride } from '@kbn/ml-common-types/modules';
+import type { JobExistResult, JobStat } from '@kbn/ml-common-types/data_recognizer';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CompatibleModule } from '../../../common/constants/app';
+import type { MlClient } from '../../lib/ml_client';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,
@@ -53,8 +55,6 @@ import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_lim
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
-import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { MLSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';

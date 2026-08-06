@@ -34,6 +34,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   cascadedDocumentsState: {
     availableCascadeGroups: [],
     selectedCascadeGroups: [],
+    columnsMeta: {},
     cascadedDocumentsMap: {},
   },
   esqlVariables: [],
@@ -42,6 +43,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     fieldsToReset: 'none',
     snapshotsByProfileId: {},
   },
+  profileState: {},
   expandedDoc: undefined,
   expandedDocOwner: undefined,
   renderDocumentViewMeta: undefined,

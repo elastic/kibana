@@ -22,6 +22,7 @@ import { isNil, omitBy } from 'lodash';
 
 import type { RootSchema } from '@elastic/ebt/client';
 import type { Logger, LogMeta } from '@kbn/logging';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -156,6 +157,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const commonRouteDeps = {
       config: {
         allowAnonymous: statusConfig.allowAnonymous,
+        statusPageBypassMonitorPrivilege: statusConfig.statusPageBypassMonitorPrivilege,
         packageInfo: this.coreContext.env.packageInfo,
         serverName: http.getServerInfo().name,
         uuid: environment.instanceUuid,
@@ -170,9 +172,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       incrementUsageCounter: coreUsageData.incrementUsageCounter,
     };
 
-    const router = http.createRouter('');
+    const router = http.createRouter<RequestHandlerContext>('');
     registerStatusRoute({
       router,
+      logger: this.logger.get('routes', 'status'),
       ...commonRouteDeps,
     });
 

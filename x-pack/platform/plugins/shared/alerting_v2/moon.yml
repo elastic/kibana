@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-http-server'
   - '@kbn/logging'
-  - '@kbn/spaces-utils'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
@@ -51,8 +50,6 @@ dependsOn:
   - '@kbn/core-di-internal'
   - '@kbn/i18n'
   - '@kbn/zod-helpers'
-  - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/test'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/default-tracer'
@@ -66,7 +63,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-security-server'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows-extensions'
   - '@kbn/workflows'
   - '@kbn/core-http-server-utils'
   - '@kbn/eval-kql'
@@ -82,6 +81,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/object-utils'
   - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-common-queries'
+  - '@kbn/alerting-v2-utils'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/kibana-react-plugin'
   - '@kbn/kibana-utils-plugin'
@@ -91,7 +92,7 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
-  - '@kbn/user-profile-components'
+  - '@kbn/unified-histogram'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
@@ -100,7 +101,42 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/datemath'
+  - '@kbn/rison'
+  - '@kbn/maintenance-windows-plugin'
+  - '@kbn/esql-types'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-sml-plugin'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/workflows-ui'
+  - '@kbn/core-spaces-common'
+  - '@kbn/datemath'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/css-utils'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/es-types'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/change-history'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-toolbar'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
 tags:
   - plugin
   - prod
@@ -109,12 +145,15 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - .storybook/**/*
     - common/**/*
     - server/**/*
     - server/**/*.json
     - public/**/*
+    - test/scout/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
+    - '!.storybook/**/*.js'
   jest-config:
     - jest.config.js
 tasks: {}

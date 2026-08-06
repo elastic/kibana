@@ -14,10 +14,10 @@ import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { ExplorerJob } from '../../explorer/explorer_utils';
-import type { MlSummaryJob } from '../../../../common/types/anomaly_detection_jobs';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;

@@ -48,6 +48,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
+  isDeprecated: true,
   renderParameterTemplates,
 });
 

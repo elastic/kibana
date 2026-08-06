@@ -6,6 +6,7 @@
  */
 
 import type {
+  ActionPolicy,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatcherPipelineInput,
@@ -13,8 +14,7 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  NotificationGroup,
-  NotificationPolicy,
+  ActionGroup,
   Rule,
 } from '../types';
 
@@ -24,6 +24,7 @@ export function createDispatcherPipelineInput(
   return {
     startedAt: new Date('2026-01-22T08:00:00.000Z'),
     previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+    executionUuid: '00000000-0000-4000-8000-000000000000',
     ...overrides,
   };
 }
@@ -41,6 +42,8 @@ export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): Alert
   return {
     last_event_timestamp: '2026-01-22T07:10:00.000Z',
     rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     episode_status: 'active',
@@ -53,6 +56,8 @@ export function createAlertEpisodeSuppression(
 ): AlertEpisodeSuppression {
   return {
     rule_id: 'rule-1',
+    source: 'internal',
+    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     should_suppress: false,
@@ -65,18 +70,12 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     id: 'rule-1',
     spaceId: 'default',
     name: 'Test rule',
-    description: '',
     tags: [],
-    enabled: true,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
   };
 }
 
-export function createNotificationPolicy(
-  overrides: Partial<NotificationPolicy> = {}
-): NotificationPolicy {
+export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): ActionPolicy {
   return {
     id: 'policy-1',
     spaceId: 'default',
@@ -89,17 +88,26 @@ export function createNotificationPolicy(
   };
 }
 
+export function createRuleScopedActionPolicy(
+  ruleId: string,
+  overrides: Partial<ActionPolicy> = {}
+): ActionPolicy {
+  return createActionPolicy({
+    name: 'Test rule-scoped policy',
+    matcher: `rule.id: "${ruleId}"`,
+    ...overrides,
+  });
+}
+
 export function createMatchedPair(overrides: Partial<MatchedPair> = {}): MatchedPair {
   return {
     episode: createAlertEpisode(),
-    policy: createNotificationPolicy(),
+    policy: createActionPolicy(),
     ...overrides,
   };
 }
 
-export function createNotificationGroup(
-  overrides: Partial<NotificationGroup> = {}
-): NotificationGroup {
+export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionGroup {
   return {
     id: 'group-1',
     spaceId: 'default',
@@ -107,6 +115,7 @@ export function createNotificationGroup(
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
     episodes: [createAlertEpisode()],
+    rules: {},
     ...overrides,
   };
 }

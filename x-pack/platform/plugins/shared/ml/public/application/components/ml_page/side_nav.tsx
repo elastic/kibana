@@ -11,11 +11,11 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
-import type { MlLocatorParams } from '../../../../common/types/locator';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlLocator, useMlManagementLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
@@ -192,7 +192,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       items: [
         {
           id: 'logRateAnalysis',
-          pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT,
+          pathId: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS,
           name: i18n.translate('xpack.ml.navMenu.logRateAnalysisLinkText', {
             defaultMessage: 'Log rate analysis',
           }),
@@ -202,7 +202,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         },
         {
           id: 'logCategorization',
-          pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
+          pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION,
           name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
             defaultMessage: 'Log pattern analysis',
           }),
@@ -214,7 +214,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           ? [
               {
                 id: 'chartChangePoint',
-                pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT,
+                pathId: ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
                 name: i18n.translate('xpack.ml.navMenu.changePointDetectionLinkText', {
                   defaultMessage: 'Change point detection',
                 }),

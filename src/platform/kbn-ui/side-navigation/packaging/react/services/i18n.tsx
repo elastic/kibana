@@ -18,12 +18,21 @@ import React from 'react';
  * and will render their `defaultMessage` values through this stub.
  */
 
-/** No-op `i18n.translate` that returns `defaultMessage`. */
+/** No-op `i18n.translate` that returns `defaultMessage` with interpolated values. */
 export const translate = (
   _id: string,
   options?: { defaultMessage?: string; values?: Record<string, unknown> }
 ) => {
-  return options?.defaultMessage ?? _id;
+  const msg = options?.defaultMessage ?? _id;
+
+  if (options?.values) {
+    return Object.entries(options.values).reduce(
+      (result, [key, val]) => result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(val)),
+      msg
+    );
+  }
+
+  return msg;
 };
 
 /** No-op `FormattedMessage` component that renders `defaultMessage`. */

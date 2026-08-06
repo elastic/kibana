@@ -158,6 +158,9 @@ export const GroupedEndpointsTables = ({
                     direction: 'asc',
                   },
                 }}
+                rowProps={(item: InferenceAPIConfigResponse) => ({
+                  'data-test-subj': `endpointRow-${item.inference_id}`,
+                })}
                 tableCaption={i18n.translate(
                   'xpack.searchInferenceEndpoints.groupedEndpoints.tableCaption',
                   {

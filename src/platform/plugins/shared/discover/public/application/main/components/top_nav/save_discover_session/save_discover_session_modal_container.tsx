@@ -86,13 +86,11 @@ export const DiscoverSessionSaveModalContainer = ({
   }, []);
 
   const executeSave = async ({
-    isTitleDuplicateConfirmed,
     newCopyOnSave,
     newDescription,
     newTags,
     newTimeRestore,
     newTitle,
-    onTitleDuplicate,
   }: OnSaveProps & {
     newTags: string[];
     newTimeRestore: boolean;
@@ -110,8 +108,6 @@ export const DiscoverSessionSaveModalContainer = ({
         newCopyOnSave: effectiveCopyOnSave,
         newDescription,
         newTags,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
       })
     ).unwrap();
   };
@@ -122,6 +118,11 @@ export const DiscoverSessionSaveModalContainer = ({
 
       if (!response.discoverSession) return;
 
+      const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
+      const shouldNavigateToSavedSession =
+        (isEmbeddedEditor && userWantsCopy) ||
+        (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
+
       if (props.dashboardId) {
         scopedEbtManager.trackDiscoverToDashboardEvent({
           [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.savedSession,
@@ -131,6 +132,7 @@ export const DiscoverSessionSaveModalContainer = ({
         services.embeddableEditor.transferBackToEditor(TransferAction.SaveByReference, {
           app: 'dashboards',
           path: props.dashboardId === 'new' ? '#/create' : `#/view/${props.dashboardId}`,
+          newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
           },
@@ -149,11 +151,6 @@ export const DiscoverSessionSaveModalContainer = ({
       if (onSaveCb) {
         onSaveCb();
       } else {
-        const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
-        const shouldNavigateToSavedSession =
-          (isEmbeddedEditor && userWantsCopy) ||
-          (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
-
         if (shouldNavigateToSavedSession) {
           services.embeddableEditor.clearEditorState();
           services.locator.navigate({
@@ -180,6 +177,7 @@ export const DiscoverSessionSaveModalContainer = ({
   return (
     <DiscoverSessionSaveDashboardModal
       description={persistedDiscoverSession?.description}
+      hasLibraryItemWithTitle={services.savedSearch.hasLibraryItemWithTitle}
       hideDashboardOptions={!showDashboardOptions}
       initialTags={persistedDiscoverSession?.tags ?? []}
       initialTimeRestore={timeRestore}

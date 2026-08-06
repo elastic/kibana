@@ -7,6 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { HostsTableType } from '../../store/model';
 import type { HostsQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -43,16 +44,18 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
     indexNames: string[];
+    /**
+     * Filter for host identity (either generated from euidApi or fallback host.name filter)
+     */
     hostDetailsFilter: Filter[];
     /**
-     * Serialized ES query built with {@link HostDetailsTabsProps.hostDetailsFilter} (identity fields
-     * when Entity Store v2). Used for the Events histogram, Authentications tab, and Risk tab;
-     * other tabs use {@link HostDetailsTabsProps.filterQuery} only.
+     * Stringified filter query that includes the host identity filter
+     * (either generated from euidApi or fallback host.name filter) and any global filters applied on the page.
      */
-    hostDetailsIdentityFilterQuery?: string;
     filterQuery?: string;
     dataViewSpec?: DataViewSpec;
     type: hostsModel.HostsType;
     identityFields?: Record<string, string>;
     entityId?: string;
+    entityRecord?: EntityStoreRecord | null;
   };

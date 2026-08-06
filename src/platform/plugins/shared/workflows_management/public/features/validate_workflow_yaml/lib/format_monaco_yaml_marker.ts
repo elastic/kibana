@@ -10,9 +10,10 @@
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
+import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
+import { enrichErrorMessage } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
-import { getPathAtOffset } from '../../../../common/lib/yaml';
-import { enrichErrorMessage } from '../../../../common/lib/zod';
+import { connectorParamsSchemaResolver } from '../../../../common/lib/connector_params_schema_resolver';
 
 /**
  * Formats Monaco YAML validation markers with enriched error messages.
@@ -31,6 +32,13 @@ export function formatMonacoYamlMarker(
   // Update severity for yaml-schema errors to make them more visible
   if (marker.source?.startsWith('yaml-schema:')) {
     newMarker.severity = monaco.MarkerSeverity.Error;
+  }
+
+  if (marker.message === 'Property inputs is not allowed.' && marker.startColumn === 1) {
+    return {
+      ...newMarker,
+      message: 'The "inputs" must be defined under a manual trigger, not at the root level.',
+    };
   }
 
   // JSON Schema `pattern` errors lose the Zod error message during conversion.
@@ -68,6 +76,7 @@ export function formatMonacoYamlMarker(
       {
         schema: workflowYamlSchemaLoose,
         yamlDocument: yamlDocument ?? undefined,
+        connectorParamsSchemaResolver,
       }
     );
 

@@ -30,6 +30,13 @@ jest.mock('react-window', () => ({
       )}
     </div>
   ),
+  VariableSizeList: ({ children, itemCount, itemData }: any) => (
+    <div>
+      {Array.from({ length: itemCount }, (_, index) =>
+        children({ index, style: {}, data: itemData })
+      )}
+    </div>
+  ),
 }));
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),

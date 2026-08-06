@@ -8,7 +8,7 @@
 import { satisfies } from 'semver';
 import { installPackage } from '@kbn/fleet-plugin/server/services/epm/packages';
 import { pkgToPkgKey } from '@kbn/fleet-plugin/server/services/epm/registry';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Installation } from '@kbn/fleet-plugin/common';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';

@@ -19,6 +19,8 @@ export const POLICIES_URL = '/app/security/administration/policy';
 /** Any artifact tab lives under this path prefix (trusted apps, event filters, blocklist, etc.) */
 export const ADMINISTRATION_URL_PREFIX = '/app/security/administration';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
+export const TRUSTED_DEVICES_URL = '/app/security/administration/trusted_devices';
+export const ENDPOINT_EXCEPTIONS_URL = '/app/security/administration/endpoint_exceptions';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
 export const HOST_ISOLATION_EXCEPTIONS_URL = `app/security/administration/host_isolation_exceptions`;
@@ -82,6 +84,7 @@ export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP = 'app/ml/data_frame_anal
 
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
+export const ALERT_DETECTIONS_URL = '/app/security/alert_detections';
 export const ALERTS_URL = '/app/security/alerts';
 export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
@@ -113,7 +116,7 @@ export const ENTITY_ANALYTICS_HOME_PAGE_URL = '/app/security/entity_analytics_ho
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
 export const ASSET_INVENTORY_INTEGRATION_URL =
-  '/app/fleet/integrations/cloud_asset_inventory/add-integration';
+  '/app/integrations/detail/cloud_asset_inventory/add-integration';
 
 // Custom Role Creation
 export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
@@ -121,6 +124,10 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// Configurations
+export const CONFIGURATIONS_INTEGRATIONS_URL = '/app/security/configurations/integrations/browse';
+export const CONFIGURATIONS_BASIC_RULES_URL_FRAGMENT = '/configurations/basic_rules';
 
 // Launchpad
 export const GET_STARTED_URL = '/app/security/get_started';

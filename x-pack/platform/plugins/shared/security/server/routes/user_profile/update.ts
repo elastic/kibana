@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
+import type { DotKeysOf } from '@kbn/utility-types';
 
 import type { RouteDefinitionParams } from '..';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -15,13 +17,18 @@ import { flattenObject } from '../../lib';
 import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
+type UserProfileUpdatePayload = Pick<UserProfileData, 'userSettings'>;
+type UserProfileUpdatePaths = DotKeysOf<UserProfileUpdatePayload>;
+
 /** User profile data keys that are allowed to be updated by Cloud users */
 const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.darkMode',
   'userSettings.contrastMode',
   'userSettings.agentBuilderAnnouncementModalSeen',
   'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
-];
+  'userSettings.locale',
+  'userSettings.rememberSelectedSpace',
+] as const satisfies readonly UserProfileUpdatePaths[];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
 
@@ -55,6 +62,11 @@ const userProfileUpdateSchema = schema.object({
       agentBuilderAnnouncementModalSeenBySpaceJson: schema.maybe(
         schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
       ),
+      locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      rememberSelectedSpace: schema.maybe(schema.boolean()),
+      lastSelectedSpaceId: schema.maybe(
+        schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH }))
+      ),
     })
   ),
 });
@@ -65,6 +77,7 @@ export function defineUpdateUserProfileDataRoute({
   getUserProfileService,
   logger,
   getAuthenticationService,
+  i18n: i18nService,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -135,13 +148,25 @@ export function defineUpdateUserProfileDataRoute({
         }
       }
 
+      const requestedLocale = userProfileData.userSettings?.locale;
+      if (requestedLocale) {
+        const allowedLocales = i18nService.getLocales();
+        if (!allowedLocales.includes(requestedLocale)) {
+          return response.customError({
+            body: `Locale "${requestedLocale}" is not enabled for this deployment`,
+            statusCode: 400,
+          });
+        }
+      }
+
       const keysToUpdate = Object.keys(flattenObject(userProfileData));
 
       if (currentUser?.elastic_cloud_user) {
         // We only allow specific user profile data to be updated by Elastic Cloud SSO users.
         const isUpdateAllowed = keysToUpdate.every((key) =>
-          ALLOWED_KEYS_UPDATE_CLOUD.includes(key)
+          (ALLOWED_KEYS_UPDATE_CLOUD as readonly string[]).includes(key)
         );
+
         if (keysToUpdate.length === 0 || !isUpdateAllowed) {
           logger.warn(
             `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(

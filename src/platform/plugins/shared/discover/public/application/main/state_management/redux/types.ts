@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -30,11 +30,12 @@ import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-secti
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import type { SerializedError } from '@reduxjs/toolkit';
+import type { SerializedError } from 'redux-toolkit-v1';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
@@ -72,6 +73,10 @@ export interface DiscoverAppState {
    * Hide table
    */
   hideTable?: boolean;
+  /**
+   * Hide the field list sidebar (collapsed state)
+   */
+  hideSidebar?: boolean;
   /**
    * The current data source
    */
@@ -124,11 +129,18 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
+   * be reconsidered in a future version once the embedding story is clearer.
+   */
+  isApproximate?: boolean;
 }
 
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
+  columnsMeta: DataTableColumnsMeta;
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
@@ -147,6 +159,7 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'breakdownField',
   'hideChart',
   'hideTable',
+  'hideSidebar',
 ] as const;
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
@@ -203,6 +216,7 @@ export interface TabState extends TabItem {
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   defaultProfileState: DefaultProfileState;
+  profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;

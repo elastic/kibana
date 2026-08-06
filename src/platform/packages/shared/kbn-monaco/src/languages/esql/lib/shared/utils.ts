@@ -10,7 +10,7 @@
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
-import type { MonacoMessage } from '../../language';
+import type { MonacoMessage } from '../providers/types';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
@@ -32,7 +32,7 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
  *
  * IMPORTANT NOTE:
  * offset ranges are ZERO-based and NOT end-inclusive — [start, end)
- * monaco ranges are ONE-based and ARE end-inclusive — [start, end]
+ * monaco ranges are ONE-based and NOT end-inclusive — [start, end)
  */
 export const offsetRangeToMonacoRange = (
   expression: string,
@@ -45,26 +45,22 @@ export const offsetRangeToMonacoRange = (
       endLineNumber: number;
     }
   | undefined => {
-  if (range.start === range.end) {
-    return;
-  }
-
   let startColumn = NaN;
   let endColumn = 0;
   let startOfCurrentLine = 0;
   let currentLine = 1;
 
   // find the line and start column
-  for (let i = 0; i < expression.length; i++) {
-    if (expression[i] === '\n') {
-      currentLine++;
-      startOfCurrentLine = i + 1;
-    }
-
+  for (let i = 0; i <= expression.length; i++) {
     if (i === range.start) {
       startColumn = i + 1 - startOfCurrentLine;
-      endColumn = startColumn + range.end - range.start - 1;
+      endColumn = startColumn + range.end - range.start;
       break;
+    }
+
+    if (i < expression.length && expression[i] === '\n') {
+      currentLine++;
+      startOfCurrentLine = i + 1;
     }
   }
 

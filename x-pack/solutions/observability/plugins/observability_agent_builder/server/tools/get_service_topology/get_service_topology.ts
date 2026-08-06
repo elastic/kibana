@@ -19,6 +19,8 @@ import { getConnectionMetrics, finalizeConnections } from './get_connection_metr
 import { filterDownstreamConnections, filterUpstreamConnections } from './filter_connections';
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
 import { getImmediateDownstreamDependencies } from './get_immediate_downstream_dependencies';
+import { findMessagingDependencies } from './find_messaging_dependencies';
+import { expandMessagingConnections } from './expand_messaging_connections';
 
 interface TopologyResources {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -216,6 +218,10 @@ async function getUpstreamTopology({
  *
  * This avoids duplicate ES queries — getTraceSampleIds and fetchExitSpanSamplesFromTraceIds
  * would otherwise execute identical queries for both downstream and upstream.
+ *
+ * When messaging dependencies (Kafka, RabbitMQ, etc.) are found, automatically expands
+ * through them to discover services on the other side of the pipeline (e.g., producers
+ * when querying a consumer).
  */
 async function getBothTopology({
   resources,
@@ -230,12 +236,20 @@ async function getBothTopology({
   endMs: number;
   maxDepth?: number;
 }): Promise<ServiceTopologyResponse> {
-  const result = await resources.dataRegistry.getData('apmTraceSampleIds', {
-    request: resources.request,
-    serviceName,
-    start: startMs,
-    end: endMs,
-  });
+  const [result, { apmEventClient }] = await Promise.all([
+    resources.dataRegistry.getData('apmTraceSampleIds', {
+      request: resources.request,
+      serviceName,
+      start: startMs,
+      end: endMs,
+    }),
+    buildApmResources({
+      core: resources.core,
+      plugins: resources.plugins,
+      request: resources.request,
+      logger: resources.logger,
+    }),
+  ]);
 
   const traceIds = result?.traceIds ?? [];
 
@@ -245,13 +259,6 @@ async function getBothTopology({
     resources.logger.debug(
       `No transactions found for "${serviceName}", falling back to exit span search (external dependency)`
     );
-
-    const { apmEventClient } = await buildApmResources({
-      core: resources.core,
-      plugins: resources.plugins,
-      request: resources.request,
-      logger: resources.logger,
-    });
 
     const depTraceIds = await getTraceIdsFromExitSpansTargetingDependency({
       apmEventClient,
@@ -277,7 +284,6 @@ async function getBothTopology({
 
   resources.logger.debug(`Found ${traceIds.length} traces for both-direction topology`);
 
-  // Fetch exit spans once, build connection graph once
   const spans = await resources.dataRegistry.getData('apmExitSpanSamples', {
     request: resources.request,
     traceIds,
@@ -293,10 +299,23 @@ async function getBothTopology({
   const downFiltered = filterDownstreamConnections(allConnections, serviceName, maxDepth);
   const upFiltered = filterUpstreamConnections(allConnections, serviceName, maxDepth);
 
-  // Single metrics query with union of service names from both directions
+  const combinedConnections = [...downFiltered, ...upFiltered];
+
+  const messagingDeps = findMessagingDependencies(combinedConnections);
+  const messagingConnections = await expandMessagingConnections({
+    apmEventClient,
+    dataRegistry: resources.dataRegistry,
+    request: resources.request,
+    logger: resources.logger,
+    messagingDeps,
+    existingConnections: combinedConnections,
+    startMs,
+    endMs,
+  });
+
   const serviceNames = uniq([
-    ...downFiltered.map((c) => c._sourceName),
-    ...upFiltered.map((c) => c._sourceName),
+    ...combinedConnections.map((c) => c._sourceName),
+    ...messagingConnections.map((c) => c._sourceName),
   ]);
 
   const metricsMap = await getConnectionMetrics({
@@ -309,8 +328,8 @@ async function getBothTopology({
 
   return {
     connections: [
-      ...finalizeConnections(downFiltered, metricsMap),
-      ...finalizeConnections(upFiltered, metricsMap),
+      ...finalizeConnections(combinedConnections, metricsMap),
+      ...finalizeConnections(messagingConnections, metricsMap),
     ],
   };
 }

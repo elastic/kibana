@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useDispatch } from 'react-redux';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useDispatch } from 'react-redux-v7';
 
-import { SECURITY_FEATURE_ID } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -18,13 +16,9 @@ import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { Cases } from '.';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
-}));
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
 }));
 
 jest.mock('../../common/lib/kibana', () => ({
@@ -60,7 +54,6 @@ jest.mock('../../common/utils/route/spy_routes', () => ({
 describe('Cases page', () => {
   const mockGetCases = jest.fn();
   const mockCanUseCases = jest.fn();
-  const mockOpenFlyout = jest.fn();
   const mockReportEvent = jest.fn();
   const mockGetAppUrl = jest.fn();
   const mockNavigateTo = jest.fn();
@@ -70,7 +63,6 @@ describe('Cases page', () => {
     jest.clearAllMocks();
 
     (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: mockOpenFlyout });
     (useNavigation as jest.Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
       navigateTo: mockNavigateTo,
@@ -84,11 +76,6 @@ describe('Cases page', () => {
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        application: {
-          capabilities: {
-            [SECURITY_FEATURE_ID]: { configurations: false },
-          },
-        },
         cases: {
           ui: { getCases: mockGetCases },
           helpers: { canUseCases: mockCanUseCases },
@@ -103,43 +90,7 @@ describe('Cases page', () => {
     });
   });
 
-  it('passes ruleDetailsNavigation when rules are readable and EASE is disabled', () => {
-    render(<Cases />);
-
-    const getCasesArgs = mockGetCases.mock.calls[0][0];
-    expect(getCasesArgs.ruleDetailsNavigation).toEqual({
-      onClick: expect.any(Function),
-    });
-  });
-
-  it('does not pass ruleDetailsNavigation when EASE is enabled', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            [SECURITY_FEATURE_ID]: { configurations: true },
-          },
-        },
-        cases: {
-          ui: { getCases: mockGetCases },
-          helpers: { canUseCases: mockCanUseCases },
-        },
-        telemetry: { reportEvent: mockReportEvent },
-      },
-    });
-
-    render(<Cases />);
-
-    const getCasesArgs = mockGetCases.mock.calls[0][0];
-    expect(getCasesArgs.ruleDetailsNavigation).toBeUndefined();
-  });
-
-  it('does not pass ruleDetailsNavigation when rules are not readable', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      timelinePrivileges: { read: true },
-      rulesPrivileges: { rules: { read: false } },
-    });
-
+  it('does not pass ruleDetailsNavigation (removed in favor of in-row navigation)', () => {
     render(<Cases />);
 
     const getCasesArgs = mockGetCases.mock.calls[0][0];

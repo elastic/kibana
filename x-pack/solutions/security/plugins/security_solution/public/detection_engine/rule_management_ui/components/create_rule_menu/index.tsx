@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import type { EuiTourStepProps } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPopover,
-  useEuiPaddingSize,
   EuiContextMenuItem,
   useGeneratedHtmlId,
   EuiContextMenuPanel,
-  EuiText,
-  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +21,6 @@ import { SecuritySolutionLinkAnchor } from '../../../../common/components/links'
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 import {
-  NEW_FEATURES_TOUR_STORAGE_KEYS,
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../../../common/constants';
@@ -48,27 +42,6 @@ Desired behavior or activity to detect:
 ==== YOUR DESCRIPTION HERE====
 `;
 
-const AI_RULE_CREATION_MENU_TOUR_SUBTITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.subtitle',
-  {
-    defaultMessage: 'Security AI agent',
-  }
-);
-
-const AI_RULE_CREATION_MENU_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.title',
-  {
-    defaultMessage: 'ES|QL detection rules',
-  }
-);
-
-const AI_RULE_CREATION_MENU_TOUR_FINISH = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.finishButton',
-  {
-    defaultMessage: 'Got it',
-  }
-);
-
 const RULE_CREATION_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.ariaLabel',
   {
@@ -77,50 +50,14 @@ const RULE_CREATION_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
-const AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE = {
-  currentTourStep: 1,
-  isTourActive: true,
-  tourPopoverWidth: 400,
-  tourSubtitle: '',
-};
-
-type AiRuleCreationMenuTourState = typeof AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE;
-
 export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, isDisabled }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'createRuleContextMenuLinks',
   });
   const { services } = useKibana();
-  const { agentBuilder, storage, notifications, telemetry, aiRuleCreation } = services;
-  const isTourEnabled = notifications.tours.isEnabled();
+  const { agentBuilder, telemetry, aiRuleCreation } = services;
 
-  const [aiRuleCreationMenuTourState, setAiRuleCreationMenuTourState] =
-    useState<AiRuleCreationMenuTourState>(() => {
-      const stored = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.AI_RULE_CREATION_MENU) as
-        | Partial<AiRuleCreationMenuTourState>
-        | undefined;
-      return stored
-        ? { ...AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE, ...stored }
-        : AI_RULE_CREATION_MENU_TOUR_INITIAL_STATE;
-    });
-
-  useEffect(() => {
-    storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.AI_RULE_CREATION_MENU, aiRuleCreationMenuTourState);
-  }, [storage, aiRuleCreationMenuTourState]);
-
-  const dismissAiRuleCreationMenuTour = useCallback(() => {
-    setAiRuleCreationMenuTourState((prev: AiRuleCreationMenuTourState) => ({
-      ...prev,
-      isTourActive: false,
-    }));
-  }, []);
-
-  const shouldShowAiRuleCreationMenuTour =
-    isTourEnabled && aiRuleCreationMenuTourState.isTourActive && !isDisabled && !loading;
-
-  const m = useEuiPaddingSize('m');
-  const xl = useEuiPaddingSize('xl');
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -177,56 +114,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
 
   return (
     <>
-      {shouldShowAiRuleCreationMenuTour ? (
-        <EuiTourStep
-          anchor={`[data-test-subj=create-rule-button]`}
-          anchorPosition={'downCenter' as EuiTourStepProps['anchorPosition']}
-          content={
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.description"
-                  defaultMessage="Use {createRule} here to open the menu, then choose {aiRuleCreation} to start the security AI agent. A dedicated skill helps you create and edit ES|QL SIEM detection rules—including query logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings—and review everything before you enable the rule."
-                  values={{
-                    createRule: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.createRuleLabel"
-                          defaultMessage="Create a rule"
-                        />
-                      </strong>
-                    ),
-                    aiRuleCreation: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.aiRuleCreationLabel"
-                          defaultMessage="AI rule creation"
-                        />
-                      </strong>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          }
-          data-test-subj="ai-rule-creation-menu-tour"
-          isStepOpen={
-            aiRuleCreationMenuTourState.isTourActive &&
-            aiRuleCreationMenuTourState.currentTourStep === 1
-          }
-          minWidth={aiRuleCreationMenuTourState.tourPopoverWidth}
-          onFinish={dismissAiRuleCreationMenuTour}
-          step={1}
-          stepsTotal={1}
-          subtitle={AI_RULE_CREATION_MENU_TOUR_SUBTITLE}
-          title={AI_RULE_CREATION_MENU_TOUR_TITLE}
-          footerAction={
-            <EuiButton color="success" size="s" onClick={dismissAiRuleCreationMenuTour}>
-              {AI_RULE_CREATION_MENU_TOUR_FINISH}
-            </EuiButton>
-          }
-        />
-      ) : null}
       <EuiPopover
         id={contextMenuPopoverId}
         aria-label={RULE_CREATION_POPOVER_ARIA_LABEL}
@@ -240,7 +127,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
         <EuiContextMenuPanel>
           <EuiContextMenuItem
             key="ai-rule-creation"
-            style={{ padding: `${m} ${xl}` }}
             onClick={handleAiRuleCreation}
             data-test-subj="ai-rule-creation"
             icon="productAgent"
@@ -250,8 +136,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
               defaultMessage="AI rule creation"
             />
           </EuiContextMenuItem>
-          <EuiHorizontalRule key="separator" margin="none" />
-          <EuiContextMenuItem key="manual-rule-creation" style={{ padding: `${m} ${xl}` }}>
+          <EuiContextMenuItem key="manual-rule-creation">
             <SecuritySolutionLinkAnchor
               deepLinkId={SecurityPageName.rulesCreate}
               data-test-subj="manual-rule-creation"

@@ -11,10 +11,16 @@ import React, { useRef, type MouseEvent } from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
-import { getRouterLinkProps } from '@kbn/router-utils';
-import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import {
+  createReturnFocus,
+  getIsSelectedColor,
+  getLinkProps,
+  getTooltip,
+  isDisabled,
+} from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType } from '../types';
+import { getAppMenuItemTestSubj } from '../test_subjects';
 
 type AppMenuItemProps = AppMenuItemType & {
   isPopoverOpen: boolean;
@@ -33,6 +39,7 @@ export const AppMenuItem = ({
   href,
   target,
   isLoading,
+  isSelected,
   tooltipContent,
   tooltipTitle,
   items,
@@ -67,11 +74,13 @@ export const AppMenuItem = ({
     });
   };
 
-  const routerLinkProps =
-    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+  const linkProps =
+    href && run ? getLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+
+  const showAsSelected = hasItems ? isPopoverOpen : Boolean(isSelected);
 
   const buttonCss = css`
-    background-color: ${isPopoverOpen
+    background-color: ${showAsSelected
       ? getIsSelectedColor({
           color: 'text',
           euiTheme,
@@ -84,7 +93,7 @@ export const AppMenuItem = ({
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiHeaderLink
         id={htmlId}
-        data-test-subj={testId || `app-menu-item-${id}`}
+        data-test-subj={testId || getAppMenuItemTestSubj(id)}
         iconType={iconType}
         isDisabled={isDisabled(disableButton)}
         href={href}
@@ -95,9 +104,9 @@ export const AppMenuItem = ({
         iconSize="m"
         color="text"
         aria-haspopup={hasItems ? 'menu' : undefined}
-        isSelected={hasItems ? isPopoverOpen : undefined}
+        isSelected={showAsSelected}
         css={buttonCss}
-        {...routerLinkProps}
+        {...linkProps}
       >
         {itemText}
       </EuiHeaderLink>
@@ -111,7 +120,7 @@ export const AppMenuItem = ({
    */
   const button =
     showTooltip && !hasItems ? (
-      <EuiToolTip content={content} title={title} delay="long">
+      <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
     ) : (

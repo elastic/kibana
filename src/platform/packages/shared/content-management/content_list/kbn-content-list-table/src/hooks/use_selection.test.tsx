@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { ContentListProvider } from '@kbn/content-list-provider';
+import { ContentListProvider, type SelectionConfig } from '@kbn/content-list-provider';
 import type { FindItemsResult, FindItemsParams, ContentListItem } from '@kbn/content-list-provider';
 import { useSelection } from './use_selection';
 
@@ -26,8 +26,33 @@ describe('useSelection', () => {
     })
   );
 
-  const createWrapper = (options?: { selectionDisabled?: boolean; isReadOnly?: boolean }) => {
-    const { selectionDisabled, isReadOnly } = options ?? {};
+  const createWrapper = (options?: {
+    selection?: boolean | SelectionConfig;
+    isReadOnly?: boolean;
+    getDeleteRestriction?: (item: ContentListItem) => string | undefined;
+    withDeleteBulkAction?: boolean;
+  }) => {
+    const {
+      selection,
+      isReadOnly,
+      getDeleteRestriction,
+      withDeleteBulkAction = true,
+    } = options ?? {};
+    const item = getDeleteRestriction
+      ? {
+          actions: {
+            delete: withDeleteBulkAction
+              ? {
+                  onBulkAction: jest.fn(async () => {}),
+                  restriction: getDeleteRestriction,
+                }
+              : {
+                  onItemAction: jest.fn(),
+                  restriction: getDeleteRestriction,
+                },
+          },
+        }
+      : undefined;
 
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider
@@ -36,8 +61,9 @@ describe('useSelection', () => {
         dataSource={{ findItems: mockFindItems }}
         isReadOnly={isReadOnly}
         features={{
-          ...(selectionDisabled !== undefined && { selection: !selectionDisabled }),
+          ...(selection !== undefined && { selection }),
         }}
+        {...(item && { item })}
       >
         {children}
       </ContentListProvider>
@@ -83,7 +109,7 @@ describe('useSelection', () => {
   describe('when selection is disabled', () => {
     it('returns `undefined` when selection feature is disabled', () => {
       const { result } = renderHook(() => useSelection(), {
-        wrapper: createWrapper({ selectionDisabled: true }),
+        wrapper: createWrapper({ selection: false }),
       });
 
       expect(result.current.selection).toBeUndefined();
@@ -95,6 +121,147 @@ describe('useSelection', () => {
       });
 
       expect(result.current.selection).toBeUndefined();
+    });
+  });
+
+  describe('with a SelectionConfig', () => {
+    it('forwards the `selectable` predicate to EUI', () => {
+      const selectable = jest.fn((item: ContentListItem) => item.id !== '2');
+
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: { selectable } }),
+      });
+
+      const { selectable: forwardedSelectable } = result.current.selection!;
+      expect(forwardedSelectable!(mockItems[0])).toBe(true);
+      expect(forwardedSelectable!(mockItems[1])).toBe(false);
+      expect(selectable).toHaveBeenCalledWith(mockItems[0]);
+      expect(selectable).toHaveBeenCalledWith(mockItems[1]);
+    });
+
+    it('forwards the `selectableMessage` callback to EUI and coerces `undefined` to an empty string', () => {
+      const selectableMessage = jest.fn(
+        (selectable: boolean, item: ContentListItem): string | undefined =>
+          selectable ? undefined : `${item.title} cannot be selected`
+      );
+
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: { selectableMessage } }),
+      });
+
+      const forwarded = result.current.selection!.selectableMessage!;
+
+      // EUI only consults the message when `selectable` is `false`, but the
+      // adapter must still be called for both branches and `undefined` must be
+      // coerced to an empty string so the EUI signature is satisfied.
+      expect(forwarded(true, mockItems[0])).toBe('');
+      expect(forwarded(false, mockItems[1])).toBe('Dashboard B cannot be selected');
+    });
+
+    it('falls back to the default `selectable` when none is provided', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: {} }),
+      });
+
+      const { selectable } = result.current.selection!;
+      expect(selectable!(mockItems[0])).toBe(true);
+      expect(selectable!(mockItems[1])).toBe(true);
+    });
+
+    it('omits `selectableMessage` when no message source is configured', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: {} }),
+      });
+
+      expect(result.current.selection!).not.toHaveProperty('selectableMessage');
+    });
+  });
+
+  describe('with a delete restriction', () => {
+    const restrictedItems: ContentListItem[] = [
+      { id: '1', title: 'Free dashboard', managed: false },
+      { id: '2', title: 'Managed dashboard', managed: true },
+    ];
+
+    const restrictManaged = (item: ContentListItem) =>
+      item.managed ? 'Managed dashboards cannot be deleted.' : undefined;
+
+    it('auto-disables rows whose only bulk action (delete) is restricted', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      const { selectable } = result.current.selection!;
+      expect(selectable!(restrictedItems[0])).toBe(true);
+      expect(selectable!(restrictedItems[1])).toBe(false);
+    });
+
+    it('surfaces the restriction reason as `selectableMessage` for disabled rows', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ getDeleteRestriction: restrictManaged }),
+      });
+
+      const message = result.current.selection!.selectableMessage!;
+      expect(message(true, restrictedItems[0])).toBe('');
+      expect(message(false, restrictedItems[1])).toBe('Managed dashboards cannot be deleted.');
+    });
+
+    it('intersects with the consumer `selectable` predicate (consumer can only narrow)', () => {
+      // Consumer marks Free dashboard non-selectable. The auto-derivation
+      // would have allowed it; the composed verdict respects the consumer.
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({
+          selection: { selectable: (item) => item.id !== '1' },
+          getDeleteRestriction: restrictManaged,
+        }),
+      });
+
+      const { selectable } = result.current.selection!;
+      expect(selectable!(restrictedItems[0])).toBe(false);
+      expect(selectable!(restrictedItems[1])).toBe(false);
+    });
+
+    it("prefers the consumer's `selectableMessage` over the action restriction reason", () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({
+          selection: {
+            selectable: (item) => item.id !== '1',
+            selectableMessage: (selectable, item) =>
+              selectable ? undefined : `${item.title} is archived`,
+          },
+          getDeleteRestriction: restrictManaged,
+        }),
+      });
+
+      const message = result.current.selection!.selectableMessage!;
+      // Consumer's predicate wins for id=1, so its message is surfaced.
+      expect(message(false, restrictedItems[0])).toBe('Free dashboard is archived');
+      // For id=2 the consumer's `selectable` would allow the row, so the
+      // restriction reason wins for the message.
+      expect(message(false, restrictedItems[1])).toBe('Managed dashboards cannot be deleted.');
+    });
+
+    it('keeps every row selectable when the delete restriction returns `undefined`', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ getDeleteRestriction: () => undefined }),
+      });
+
+      const { selectable } = result.current.selection!;
+      expect(selectable!(restrictedItems[0])).toBe(true);
+      expect(selectable!(restrictedItems[1])).toBe(true);
+    });
+
+    it('ignores a delete restriction when delete has no bulk handler', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({
+          getDeleteRestriction: restrictManaged,
+          withDeleteBulkAction: false,
+        }),
+      });
+
+      const { selectable } = result.current.selection!;
+      expect(selectable!(restrictedItems[0])).toBe(true);
+      expect(selectable!(restrictedItems[1])).toBe(true);
     });
   });
 

@@ -7,7 +7,7 @@
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 import { useMlKibana } from '../contexts/kibana';
 

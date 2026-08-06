@@ -15,7 +15,10 @@ import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 
 import { useFetchIndex } from '../../../../../common/containers/source';
-import { useCreateArtifact } from '../../../../hooks/artifacts/use_create_artifact';
+import {
+  useCreateOrUpdateArtifact,
+  type CreateOrUpdateArtifactsFunction,
+} from '../../../../components/artifact_list_page/hooks/use_artifact_update_or_create';
 
 import { useToasts } from '../../../../../common/lib/kibana';
 import type { AddOrUpdateExceptionItemsFunc } from '../../../../../detection_engine/rule_exceptions/logic/use_close_alerts';
@@ -30,7 +33,7 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
-jest.mock('../../../../hooks/artifacts/use_create_artifact');
+jest.mock('../../../../components/artifact_list_page/hooks/use_artifact_update_or_create');
 jest.mock('../../../../../detection_engine/rule_exceptions/logic/use_close_alerts');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
@@ -48,7 +51,7 @@ describe('Endpoint exceptions flyout', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let mockOnCancel: jest.Mock;
   let mockOnConfirm: jest.Mock;
-  let mockMutateAsync: jest.Mock;
+  let mockCreateOrUpdateArtifact: jest.MockedFunction<CreateOrUpdateArtifactsFunction>;
   let mockCloseAlerts: jest.MockedFunction<AddOrUpdateExceptionItemsFunc>;
   let alertData: AlertData;
 
@@ -75,11 +78,11 @@ describe('Endpoint exceptions flyout', () => {
       remove: jest.fn(),
     });
 
-    mockMutateAsync = jest.fn().mockImplementation((exception) => exception);
-    (useCreateArtifact as jest.Mock).mockImplementation(() => {
+    mockCreateOrUpdateArtifact = jest.fn().mockImplementation((exception) => [exception]);
+    (useCreateOrUpdateArtifact as jest.Mock).mockImplementation(() => {
       return {
         isLoading: false,
-        mutateAsync: mockMutateAsync,
+        createOrUpdateArtifact: mockCreateOrUpdateArtifact,
       };
     });
 
@@ -267,7 +270,7 @@ describe('Endpoint exceptions flyout', () => {
     });
 
     it('should disable submit button while saving artifact', async () => {
-      (useCreateArtifact as jest.Mock).mockImplementation(() => {
+      (useCreateOrUpdateArtifact as jest.Mock).mockImplementation(() => {
         return { isLoading: true, mutateAsync: jest.fn() };
       });
 
@@ -290,7 +293,7 @@ describe('Endpoint exceptions flyout', () => {
       });
     });
 
-    it('should call submitData and onConfirm when exception is submitted successfully', async () => {
+    it('should call createOrUpdateArtifact and onConfirm when exception is submitted successfully', async () => {
       render({ alertData, isAlertDataLoading: false });
 
       const nameInput = renderResult.getByTestId('endpointExceptions-form-name-input');
@@ -301,7 +304,7 @@ describe('Endpoint exceptions flyout', () => {
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalled();
+        expect(mockCreateOrUpdateArtifact).toHaveBeenCalled();
         expect(useToasts().addSuccess).toHaveBeenCalled();
         expect(mockOnConfirm).toHaveBeenCalledWith(true, false, false);
       });
@@ -319,8 +322,9 @@ describe('Endpoint exceptions flyout', () => {
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       await userEvent.click(confirmButton);
 
-      expect(mockMutateAsync).toHaveBeenCalledWith(
-        expect.objectContaining({ os_types: ['macos'] })
+      expect(mockCreateOrUpdateArtifact).toHaveBeenCalledWith(
+        expect.objectContaining({ os_types: ['macos'] }),
+        undefined
       );
     });
 
@@ -336,14 +340,15 @@ describe('Endpoint exceptions flyout', () => {
       const confirmButton = renderResult.getByTestId('add-endpoint-exception-confirm-button');
       await userEvent.click(confirmButton);
 
-      expect(mockMutateAsync).toHaveBeenCalledWith(
-        expect.objectContaining({ os_types: ['windows', 'macos'] })
+      expect(mockCreateOrUpdateArtifact).toHaveBeenCalledWith(
+        expect.objectContaining({ os_types: ['windows', 'macos'] }),
+        undefined
       );
     });
 
     it('should show error toast when submission fails', async () => {
       const mockError = new Error('Submission failed');
-      mockMutateAsync.mockRejectedValue(mockError);
+      mockCreateOrUpdateArtifact.mockRejectedValue(mockError);
 
       render({ alertData, isAlertDataLoading: false });
 
@@ -355,7 +360,7 @@ describe('Endpoint exceptions flyout', () => {
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
-        expect(mockMutateAsync).toHaveBeenCalled();
+        expect(mockCreateOrUpdateArtifact).toHaveBeenCalled();
         expect(useToasts().addError).toHaveBeenCalledWith(mockError, expect.any(Object));
         expect(mockOnConfirm).not.toHaveBeenCalled();
       });
@@ -380,7 +385,7 @@ describe('Endpoint exceptions flyout', () => {
         await userEvent.click(confirmButton);
 
         await waitFor(() => {
-          expect(mockMutateAsync).toHaveBeenCalled();
+          expect(mockCreateOrUpdateArtifact).toHaveBeenCalled();
           expect(mockOnConfirm).toHaveBeenCalledWith(
             true, // didRuleChange
             false, // didCloseAlert
@@ -398,7 +403,7 @@ describe('Endpoint exceptions flyout', () => {
         await userEvent.click(confirmButton);
 
         await waitFor(() => {
-          expect(mockMutateAsync).toHaveBeenCalled();
+          expect(mockCreateOrUpdateArtifact).toHaveBeenCalled();
           expect(mockOnConfirm).toHaveBeenCalledWith(
             true, // didRuleChange
             true, // didCloseAlert
@@ -421,7 +426,7 @@ describe('Endpoint exceptions flyout', () => {
         await userEvent.click(confirmButton);
 
         await waitFor(() => {
-          expect(mockMutateAsync).toHaveBeenCalled();
+          expect(mockCreateOrUpdateArtifact).toHaveBeenCalled();
           expect(mockOnConfirm).toHaveBeenCalledWith(
             true, // didRuleChange
             false, // didCloseAlert
@@ -454,7 +459,7 @@ describe('Endpoint exceptions flyout', () => {
       await userEvent.click(confirmButton);
 
       expect(renderResult.getByTestId('endpointExceptionConfirmModal')).toBeInTheDocument();
-      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(mockCreateOrUpdateArtifact).not.toHaveBeenCalled();
       expect(mockOnConfirm).not.toHaveBeenCalled();
     });
 
@@ -468,7 +473,7 @@ describe('Endpoint exceptions flyout', () => {
       await userEvent.click(cancelButton);
 
       expect(renderResult.getByTestId('addEndpointExceptionFlyout')).toBeInTheDocument();
-      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(mockCreateOrUpdateArtifact).not.toHaveBeenCalled();
       expect(mockOnConfirm).not.toHaveBeenCalled();
     });
 
@@ -481,7 +486,7 @@ describe('Endpoint exceptions flyout', () => {
       const submitButton = renderResult.getByTestId('endpointExceptionConfirmModal-submitButton');
       await userEvent.click(submitButton);
 
-      expect(mockMutateAsync).toHaveBeenCalled();
+      expect(mockCreateOrUpdateArtifact).toHaveBeenCalled();
       expect(mockOnConfirm).toHaveBeenCalled();
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,6 +15,7 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -37,9 +38,18 @@ import {
   POPULATED_WITH_DEFAULT,
 } from '../translations';
 import { getNumberFieldConfig } from './config';
+import { InlineFieldActions } from '../../templates_v2/field_types/controls/inline_field_actions';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const isEmpty = (value: number | null | undefined) => {
   return value == null;
+};
+
+const normalizeNumber = (value: number | null | undefined) => {
+  if (value == null || (value as unknown) === '') {
+    return null;
+  }
+  return Number(value);
 };
 
 interface FormState {
@@ -51,6 +61,8 @@ interface FormState {
 interface FormWrapper {
   initialValue: number | null;
   isLoading: boolean;
+  canUpdate?: boolean;
+  showFormLabel?: boolean;
   customFieldConfiguration: CasesConfigurationUICustomField;
   onChange: (state: FormState) => void;
 }
@@ -59,14 +71,18 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
   initialValue,
   customFieldConfiguration,
   isLoading,
+  canUpdate = true,
+  showFormLabel = false,
   onChange,
 }) => {
+  const defaultValue =
+    customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
+      ? Number(customFieldConfiguration.defaultValue)
+      : initialValue;
+
   const { form } = useForm<{ value: number | null }>({
     defaultValue: {
-      value:
-        customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
-          ? Number(customFieldConfiguration.defaultValue)
-          : initialValue,
+      value: defaultValue,
     },
   });
 
@@ -93,11 +109,24 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
         path="value"
         config={formFieldConfig}
         component={NumericField}
+        label={showFormLabel ? customFieldConfiguration.label : undefined}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
+          labelAppend: showFormLabel ? (
+            !customFieldConfiguration.required || isLoading ? (
+              <>
+                {!customFieldConfiguration.required ? OptionalFieldLabel : null}
+                {isLoading ? (
+                  <EuiLoadingSpinner
+                    data-test-subj={`case-number-custom-field-loading-${customFieldConfiguration.key}`}
+                  />
+                ) : null}
+              </>
+            ) : undefined
+          ) : undefined,
           euiFieldProps: {
             fullWidth: true,
-            disabled: isLoading,
+            disabled: isLoading || (showFormLabel && !canUpdate),
             isLoading,
             'data-test-subj': `case-number-custom-field-form-field-${customFieldConfiguration.key}`,
           },
@@ -109,7 +138,7 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
+const ClassicEdit: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
   customField,
   customFieldConfiguration,
   onSubmit,
@@ -140,7 +169,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
         ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.NUMBER,
-        value: data.value ? Number(data.value) : null,
+        value: normalizeNumber(data.value),
       });
     }
     setIsEdit(false);
@@ -174,12 +203,14 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
         )}
         {!isLoading && canUpdate && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj={`case-number-custom-field-edit-button-${customFieldConfiguration.key}`}
-              aria-label={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)}
-              iconType={'pencil'}
-              onClick={onEdit}
-            />
+            <EuiToolTip content={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={`case-number-custom-field-edit-button-${customFieldConfiguration.key}`}
+                aria-label={EDIT_CUSTOM_FIELDS_ARIA_LABEL(title)}
+                iconType={'pencil'}
+                onClick={onEdit}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -239,6 +270,96 @@ const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
       </EuiFlexGroup>
     </>
   );
+};
+
+ClassicEdit.displayName = 'ClassicEdit';
+
+const InlineEdit: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
+  customField,
+  customFieldConfiguration,
+  onSubmit,
+  isLoading,
+  canUpdate,
+}) => {
+  const initialValue = customField?.value ?? null;
+  const defaultValueAsNumber =
+    customFieldConfiguration.defaultValue != null
+      ? Number(customFieldConfiguration.defaultValue)
+      : undefined;
+  const effectiveInitialValue =
+    isEmpty(initialValue) && defaultValueAsNumber != null ? defaultValueAsNumber : initialValue;
+  const [formResetKey, setFormResetKey] = useState(0);
+  const [formState, setFormState] = useState<FormState>({
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: { value: null } }),
+    value: effectiveInitialValue,
+  });
+
+  const onCancel = useCallback(() => {
+    setFormResetKey((key) => key + 1);
+  }, []);
+
+  const onSubmitCustomField = useCallback(async () => {
+    const { isValid, data } = await formState.submit();
+
+    if (isValid) {
+      onSubmit({
+        ...customField,
+        key: customField?.key ?? customFieldConfiguration.key,
+        type: CustomFieldTypes.NUMBER,
+        value: normalizeNumber(data.value),
+      });
+    }
+  }, [customField, customFieldConfiguration.key, formState, onSubmit]);
+
+  const hasPendingChange =
+    normalizeNumber(formState.value) !== normalizeNumber(effectiveInitialValue);
+
+  const isNumberFieldValid =
+    formState.isValid ||
+    (formState.value === customFieldConfiguration.defaultValue && isEmpty(initialValue));
+
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      data-test-subj={`case-number-custom-field-${customFieldConfiguration.key}`}
+      direction="column"
+    >
+      <EuiFlexItem>
+        <FormWrapperComponent
+          key={formResetKey}
+          initialValue={initialValue}
+          isLoading={isLoading}
+          canUpdate={canUpdate}
+          showFormLabel
+          onChange={setFormState}
+          customFieldConfiguration={customFieldConfiguration}
+        />
+      </EuiFlexItem>
+      {hasPendingChange && canUpdate && !isLoading && (
+        <InlineFieldActions
+          name={customFieldConfiguration.key}
+          onConfirm={onSubmitCustomField}
+          onCancel={onCancel}
+          isLoading={isLoading}
+          isDisabled={!isNumberFieldValid}
+        />
+      )}
+    </EuiFlexGroup>
+  );
+};
+
+InlineEdit.displayName = 'InlineEdit';
+
+const EditComponent: CustomFieldType<CaseCustomFieldNumber>['Edit'] = ({
+  editVariant = 'classic',
+  ...props
+}) => {
+  if (editVariant === 'inline') {
+    return <InlineEdit {...props} />;
+  }
+
+  return <ClassicEdit {...props} />;
 };
 
 EditComponent.displayName = 'Edit';

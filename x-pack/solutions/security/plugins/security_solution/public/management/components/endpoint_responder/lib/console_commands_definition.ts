@@ -15,7 +15,7 @@ import type { SupportedHostOsType } from '../../../../../common/endpoint/constan
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
-import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
+import { CancelablePendingActionsSelector } from '../../console_argument_selectors/cancelable_pending_actions_selector/cancelable_pending_actions_selector';
 import type {
   EndpointRunScriptActionParameters,
   SentinelOneRunScriptActionParameters,
@@ -200,8 +200,10 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
     responseActionsEndpointRunScript,
+    responseActionsEndpointKillProcessDescendants,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -231,6 +233,35 @@ export const getEndpointConsoleCommands = ({
   const canCancelForCurrentContext = () => {
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
+
+  // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
+  // a feature flag and requires that the host's Endpoint version supports it (reported via the
+  // `kill_process_descendents` capability).
+  const isKillDescendantsSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('kill_process_descendents');
+  const killDescendantsArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
+      ? {
+          'kill-descendants': {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about:
+              CONSOLE_COMMANDS.killProcess.args.killDescendants.about +
+              (isKillDescendantsSupportedByEndpoint
+                ? ''
+                : ` (${CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported})`),
+            validate: () => {
+              if (!isKillDescendantsSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported;
+              }
+
+              return true;
+            },
+          },
+        }
+      : {};
 
   let consoleCommands: CommandDefinition[] = [
     {
@@ -302,6 +333,7 @@ export const getEndpointConsoleCommands = ({
           about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
         },
+        ...killDescendantsArg,
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -503,7 +535,7 @@ export const getEndpointConsoleCommands = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
 
-    runscriptCommand.helpDisabled = false;
+    runscriptCommand.helpDisabled = !doesEndpointSupportCommand('runscript');
     runscriptCommand.mustHaveArgs = true;
     runscriptCommand.exampleUsage = (
       enteredCommand?: Command<
@@ -660,13 +692,14 @@ export const getEndpointConsoleCommands = ({
     }),
   });
 
-  if (microsoftDefenderEndpointCancelEnabled) {
+  if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
+
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported,
+        isSupported: isSupported && doesEndpointSupportCommand('cancel'),
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -677,33 +710,35 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        ...(isSupported
+        action: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage:
+                'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
+            }
+          ),
+          mustHaveValue: 'truthy',
+          SelectorComponent: CancelablePendingActionsSelector,
+        },
+        ...(agentType === 'endpoint'
           ? {
-              action: {
-                required: true,
+              force: {
+                required: false,
                 allowMultiples: false,
-                about: i18n.translate(
-                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
-                  {
-                    defaultMessage: 'The response action to cancel',
-                  }
-                ),
-                mustHaveValue: 'truthy',
-                SelectorComponent: PendingActionsSelector,
+                about: CONSOLE_COMMANDS.cancel.forceArgInfo,
+                mustHaveValue: false,
               },
             }
           : {}),
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !isSupported,
+      helpDisabled: !isSupported || !doesEndpointSupportCommand('cancel'),
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });

@@ -29,12 +29,8 @@ export interface BuildkiteClientConfig {
   exec?: ExecType;
 }
 
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
-}
-
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
@@ -54,6 +50,42 @@ export interface BuildkiteAgentTargetingRule {
   diskSizeGb?: number;
 }
 
+export type BuildkiteSignalReason =
+  | 'none'
+  | 'agent_stop'
+  | 'agent_refused'
+  | 'cancel'
+  | 'process_run_error'
+  | 'signature_rejected'
+  | '*';
+
+export interface BuildkiteAutomaticRetryRule {
+  exit_status?: string | number;
+  signal_reason?: BuildkiteSignalReason;
+  limit: number;
+}
+
+export interface BuildkiteRetry {
+  automatic: BuildkiteAutomaticRetryRule[];
+}
+
+// Retry on spot preemption / lost agent, never on timeouts
+export const retryOnPreemption = (limit: number): BuildkiteRetry => ({
+  automatic: [
+    { signal_reason: 'agent_stop', limit },
+    { exit_status: '-1', signal_reason: 'none', limit },
+  ],
+});
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: BuildkiteRetry;
+  env?: { [key: string]: string | number };
+}
+
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
@@ -65,12 +97,7 @@ export interface BuildkiteCommandStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
@@ -109,12 +136,7 @@ export interface BuildkiteInputStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  retry?: {
-    automatic: Array<{
-      exit_status: string;
-      limit: number;
-    }>;
-  };
+  retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }
 
@@ -431,7 +453,7 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
       input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],

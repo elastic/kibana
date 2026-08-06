@@ -8,13 +8,21 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutFooter } from '.';
 import type { StartServices } from '../../types';
 import { SECURITY_FEATURE_ID } from '../../../common/constants';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockDocumentFooter = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -27,8 +35,9 @@ const mockDocumentFooter = jest.fn((props: unknown) => {
 const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
+const mockReportEvent = jest.fn();
 
-jest.mock('../../flyout_v2/document/footer', () => ({
+jest.mock('../../flyout_v2/document/main/footer', () => ({
   Footer: (props: unknown) => mockDocumentFooter(props),
 }));
 jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
@@ -48,7 +57,10 @@ describe('AlertFlyoutFooter', () => {
   });
 
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    overlays: {
+      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+    },
+    telemetry: { reportEvent: mockReportEvent },
     core: { overlays: {} },
     uiActions: {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
@@ -161,6 +173,13 @@ describe('AlertFlyoutFooter', () => {
         historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: FLYOUT_TOOL.NOTES,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.FOOTER_TAKE_ACTION,
+    });
   });
 
   it('uses Security history key when opening notes in Security app', async () => {
@@ -186,7 +205,7 @@ describe('AlertFlyoutFooter', () => {
     expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        historyKey: alertFlyoutHistoryKey,
+        historyKey: documentFlyoutHistoryKey,
       })
     );
   });

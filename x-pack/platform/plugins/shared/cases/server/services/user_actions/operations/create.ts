@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { get, isEmpty, pickBy } from 'lodash';
 import type {
   CaseAssignees,
@@ -47,6 +48,7 @@ import type {
 import {
   isAssigneesArray,
   isCaseSettings,
+  isCaseTemplate,
   isCustomFieldsArray,
   isStringArray,
   isExtendedFields,
@@ -63,14 +65,16 @@ export class UserActionPersister {
   private readonly auditLogger: UserActionAuditLogger;
 
   constructor(private readonly context: ServiceContext) {
-    this.builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry: this.context.persistableStateAttachmentTypeRegistry,
-    });
+    this.builderFactory = new BuilderFactory();
 
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+  public buildUserActions({
+    updatedCases,
+    user,
+    templateNamesByKey,
+  }: BuildUserActionsDictParams): UserActionsDict {
     return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
       const originalCase = updatedCase.originalCase;
 
@@ -83,9 +87,22 @@ export class UserActionPersister {
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
+      // Templates v2 mirrors a customFields edit into extended_fields in the same patch (see
+      // replace_custom_field.ts / bulk_update.ts), so both keys land in `updatedAttributes`
+      // together. Surfacing two activity-log entries for what the user experiences as one edit is
+      // redundant — extended_fields is what templates v2 renders and what the mirror already
+      // captures the customFields value into, so it wins and the customFields entry is dropped.
+      // customFields-only updates (templates disabled, or a field with no migrated counterpart)
+      // are unaffected since extended_fields won't be present in that case.
+      const suppressCustomFieldsUserAction =
+        updatedFields.includes(UserActionTypes.customFields) &&
+        updatedFields.includes(UserActionTypes.extended_fields);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
+        .filter(
+          (field) => !(suppressCustomFieldsUserAction && field === UserActionTypes.customFields)
+        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction
@@ -112,6 +129,12 @@ export class UserActionPersister {
 
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
+          // For a newly-applied template, resolve its name so the user action records it. Keyed by
+          // "id@version" so the name matches the exact version applied, not the current latest.
+          const templateName =
+            field === UserActionTypes.template && isCaseTemplate(newValue)
+              ? templateNamesByKey?.get(`${newValue.id}@${newValue.version}`)
+              : undefined;
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -120,6 +143,7 @@ export class UserActionPersister {
               user,
               owner,
               caseId,
+              templateName,
             })
           );
         });
@@ -211,6 +235,22 @@ export class UserActionPersister {
       });
     } else if (field === UserActionTypes.extended_fields && isExtendedFields(newValue)) {
       return this.buildExtendedFieldsUserActions(params);
+    } else if (field === UserActionTypes.template && newValue !== undefined) {
+      // Enrich the applied-template payload with the resolved name (a point-in-time snapshot) so the
+      // activity log can render "applied <name> template" without a lookup.
+      const templateValue = newValue as { id: string; version: number } | null;
+      const payloadTemplate =
+        templateValue != null
+          ? { ...templateValue, ...(params.templateName ? { name: params.templateName } : {}) }
+          : null;
+      const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.template);
+      const fieldUserAction = userActionBuilder?.build({
+        caseId,
+        owner,
+        user,
+        payload: { template: payloadTemplate },
+      });
+      return fieldUserAction ? [fieldUserAction] : [];
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -444,6 +484,7 @@ export class UserActionPersister {
         user,
         owner: attachment.owner,
         savedObjectId: attachment.id,
+        savedObjectType: attachment.savedObjectType,
         payload: { attachment: attachment.attachment },
       });
 
@@ -488,20 +529,37 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to bulk create user actions`);
 
-      return await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
-        actions.map((action) => {
-          const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
-            action.parameters.attributes
-          );
+      const response =
+        await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
+          actions.map((action) => {
+            const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+              action.parameters.attributes
+            );
 
-          return {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            attributes: decodedAttributes,
-            references: action.parameters.references,
-          };
-        }),
-        { refresh }
-      );
+            return {
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+              attributes: decodedAttributes,
+              references: action.parameters.references,
+            };
+          }),
+          { refresh }
+        );
+
+      // analyticsV2 mirror to `.cases-activity`. Fire-and-forget — the
+      // SO write is the source of truth; the writer logs and lets
+      // reconciliation fix anything that fails. `bulkCreate` returns one
+      // entry per request entry (in the same order); a per-entry
+      // `error` field marks failures, which we skip so we don't mirror
+      // a doc that wasn't actually persisted.
+      const successes: Array<SavedObject<UserActionPersistedAttributes>> = [];
+      for (const so of response.saved_objects) {
+        if (!isSavedObjectErrorResult(so)) successes.push(so);
+      }
+      if (successes.length > 0) {
+        this.context.analyticsV2ActivityWriter.bulkUpsertActions(successes);
+      }
+
+      return response;
     } catch (error) {
       this.context.log.error(`Error on bulk creating user action: ${error}`);
       throw error;
@@ -512,7 +570,17 @@ export class UserActionPersister {
     userAction,
     refresh,
   }: CreateUserActionArgs<T>): Promise<void> {
-    const { action, type, caseId, user, owner, payload, connectorId, savedObjectId } = userAction;
+    const {
+      action,
+      type,
+      caseId,
+      user,
+      owner,
+      payload,
+      connectorId,
+      savedObjectId,
+      savedObjectType,
+    } = userAction;
 
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -525,6 +593,7 @@ export class UserActionPersister {
         owner,
         connectorId,
         savedObjectId,
+        savedObjectType,
         payload,
       });
 
@@ -549,24 +618,37 @@ export class UserActionPersister {
       }
 
       const userActionsPayload = userActions
-        .map(({ action, type, caseId, user, owner, payload, connectorId, savedObjectId }) => {
-          const userActionBuilder = this.builderFactory.getBuilder<T>(type);
-          const userAction = userActionBuilder?.build({
+        .map(
+          ({
             action,
+            type,
             caseId,
             user,
             owner,
+            payload,
             connectorId,
             savedObjectId,
-            payload,
-          });
+            savedObjectType,
+          }) => {
+            const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+            const userAction = userActionBuilder?.build({
+              action,
+              caseId,
+              user,
+              owner,
+              connectorId,
+              savedObjectId,
+              savedObjectType,
+              payload,
+            });
 
-          if (userAction == null) {
-            return null;
+            if (userAction == null) {
+              return null;
+            }
+
+            return userAction;
           }
-
-          return userAction;
-        })
+        )
         .filter(Boolean) as UserActionEvent[];
 
       await this.bulkCreateAndLog({ userActions: userActionsPayload, refresh });
@@ -605,6 +687,16 @@ export class UserActionPersister {
           refresh,
         }
       );
+
+      // analyticsV2 mirror to `.cases-activity`. Fire-and-forget — see
+      // `bulkCreate` above for the rationale. The cast lines up with the
+      // generic `T`: callers pass `UserActionPersistedAttributes`-shaped
+      // attributes; the Saved Objects API just forwards them through `T`
+      // for consumer convenience, so re-narrowing here is safe.
+      this.context.analyticsV2ActivityWriter.upsertAction(
+        res as unknown as SavedObject<UserActionPersistedAttributes>
+      );
+
       return res;
     } catch (error) {
       this.context.log.error(`Error on POST a new case user action: ${error}`);

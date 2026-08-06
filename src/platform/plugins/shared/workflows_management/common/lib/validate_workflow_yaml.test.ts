@@ -343,6 +343,90 @@ steps:
     });
   });
 
+  describe('graph build validation', () => {
+    it('rejects nested flow-control inside a parallel branch (nested parallel)', () => {
+      // The schema accepts this, but compiling to an execution graph fails because
+      // a parallel branch body must be straight-line. Without graph validation the
+      // workflow would pass as valid and crash the run task later.
+      const yaml = `
+version: '1'
+name: Nested Parallel
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: outer
+    type: parallel
+    foreach: "{{ [1,2] }}"
+    steps:
+      - name: inner
+        type: parallel
+        foreach: "{{ [3,4] }}"
+        steps:
+          - name: leaf
+            type: console
+            with:
+              message: leaf
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      const graphErrors = result.diagnostics.filter((d) => d.source === 'graph');
+      expect(graphErrors.length).toBeGreaterThan(0);
+      expect(graphErrors[0].message).toMatch(/parallel/i);
+    });
+
+    it('rejects an if inside a parallel branch body', () => {
+      const yaml = `
+version: '1'
+name: If In Branch
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: "{{ [1,2] }}"
+    steps:
+      - name: maybe
+        type: if
+        condition: "{{ true }}"
+        steps:
+          - name: yes_branch
+            type: console
+            with:
+              message: yes
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'graph')).toBe(true);
+    });
+
+    it('accepts a straight-line parallel branch body', () => {
+      const yaml = `
+version: '1'
+name: Valid Parallel
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: fan_out
+    type: parallel
+    foreach: "{{ [1,2] }}"
+    steps:
+      - name: work
+        type: console
+        with:
+          message: "item {{ foreach.item }}"
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter((d) => d.source === 'graph')).toHaveLength(0);
+    });
+  });
+
   describe('multiple error sources', () => {
     it('should collect diagnostics from multiple sources without short-circuiting', () => {
       const yaml = `

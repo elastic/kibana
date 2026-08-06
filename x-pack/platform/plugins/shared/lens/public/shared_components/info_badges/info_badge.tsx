@@ -50,6 +50,7 @@ export function InfoBadge({
             <EuiIcon
               color={hasSingleColor ? palette[0] : undefined}
               type={iconType}
+              aria-hidden={true}
               data-test-subj={`${dataTestSubjPrefix}-${index}-icon`}
             />
           </EuiFlexItem>

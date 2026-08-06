@@ -116,6 +116,55 @@ export const getActiveTools = <T extends ToolSelectionRelevantFields>(
 };
 
 /**
+ * Returns whether a skill is automatically included when Elastic capabilities are enabled.
+ */
+export const isSkillAutoIncluded = <
+  T extends { readonly: boolean; exclude_from_elastic_capabilities?: boolean }
+>(
+  skill: T,
+  enableElasticCapabilities: boolean
+): boolean =>
+  enableElasticCapabilities && skill.readonly && !skill.exclude_from_elastic_capabilities;
+
+/**
+ * Returns the list of active skills for an agent, combining explicitly selected skills
+ * with built-in (readonly) skills when elastic capabilities are enabled. Built-in skills
+ * that are already explicitly selected are not duplicated.
+ */
+export const getActiveSkills = <
+  T extends { id: string; readonly: boolean; exclude_from_elastic_capabilities?: boolean }
+>(
+  allSkills: T[],
+  agentSkillIds: string[] | undefined,
+  enableElasticCapabilities: boolean
+): T[] => {
+  const explicitIds = new Set(agentSkillIds ?? []);
+  const explicitSkills = allSkills.filter((s) => explicitIds.has(s.id));
+  if (!enableElasticCapabilities) return explicitSkills;
+  const builtinNotExplicit = allSkills.filter(
+    (skill) => isSkillAutoIncluded(skill, enableElasticCapabilities) && !explicitIds.has(skill.id)
+  );
+  return [...explicitSkills, ...builtinNotExplicit];
+};
+
+/**
+ * Returns the list of active plugins for an agent, combining explicitly selected plugins
+ * with built-in (readonly) plugins when elastic capabilities are enabled. Built-in plugins
+ * that are already explicitly selected are not duplicated.
+ */
+export const getActivePlugins = <T extends { id: string; readonly: boolean }>(
+  allPlugins: T[],
+  agentPluginIds: string[] | undefined,
+  enableElasticCapabilities: boolean
+): T[] => {
+  const explicitIds = new Set(agentPluginIds ?? []);
+  const explicitPlugins = allPlugins.filter((p) => explicitIds.has(p.id));
+  if (!enableElasticCapabilities) return explicitPlugins;
+  const builtinNotExplicit = allPlugins.filter((p) => p.readonly && !explicitIds.has(p.id));
+  return [...explicitPlugins, ...builtinNotExplicit];
+};
+
+/**
  * Removes invalid tool references from the agent configuration.
  * Filters out tool IDs that don't exist in the available tools list,
  * while preserving wildcard selections and removing empty selections.

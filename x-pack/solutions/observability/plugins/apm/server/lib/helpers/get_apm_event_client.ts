@@ -41,15 +41,11 @@ export async function getApmEventClient({
       core.start(),
     ]);
 
-    const headerProjectRouting = getProjectRoutingFromRequest(request);
-    const elasticsearchClusterClient = coreStart.elasticsearch.client;
-    // Rule UIs may omit `x-project-routing`; align with alerting by using the space NPRE when absent.
-    const scopedClusterClient = headerProjectRouting
-      ? elasticsearchClusterClient.asScoped(request)
-      : elasticsearchClusterClient.asScoped(request, { projectRouting: 'space' });
+    const projectRouting = getProjectRoutingFromRequest(request);
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
     return new APMEventClient({
-      esClient: scopedClusterClient.asCurrentUser,
+      esClient,
       debug: params.query._inspect,
       request,
       indices,
@@ -57,7 +53,7 @@ export async function getApmEventClient({
         includeFrozen: uiSettings.includeFrozen,
         excludedDataTiers: uiSettings.excludedDataTiers,
         inspectableEsQueriesMap,
-        projectRouting: headerProjectRouting,
+        projectRouting,
       },
     });
   });

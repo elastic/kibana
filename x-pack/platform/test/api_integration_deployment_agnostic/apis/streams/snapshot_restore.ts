@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type Streams } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
 import {
   disableStreams,
   enableStreams,
@@ -26,7 +26,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
-  const kibanaServer = getService('kibanaServer');
   let apiClient: StreamsSupertestRepositoryClient;
   let roleAuthc: Awaited<ReturnType<typeof samlAuth.createM2mApiKeyWithRoleScope>>;
 
@@ -41,16 +40,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
     });
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
     });
 
     describe('Full workflow with snapshot and restore', () => {
@@ -169,19 +162,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               failure_store: { inherit: {} },
             },
           },
-          // Add a significant event query that should survive snapshot/restore
-          queries: [
-            {
-              id: 'slow-requests',
-              type: 'match' as const,
-              title: 'Slow Requests',
-              description: '',
-              esql: {
-                query:
-                  'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
-              },
-            },
-          ],
         };
 
         const configResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
@@ -192,19 +172,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(configResponse.status).to.eql(200);
 
+        // Add a significant event query that should survive snapshot/restore
+        await bulkQueries(apiClient, 'logs.otel.web-app', [
+          {
+            index: {
+              id: 'slow-requests',
+              title: 'Slow Requests',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
+              },
+            },
+          },
+        ]);
+
         // Verify query was created
-        const streamWithQuery = await getStream(apiClient, 'logs.otel.web-app');
+        const streamWithQuery = await getQueries(apiClient, 'logs.otel.web-app');
         expect(streamWithQuery.queries).to.have.length(1);
         expect(streamWithQuery.queries[0].title).to.eql('Slow Requests');
 
         // Verify the underlying alerting rule was created
-        const rulesBeforeSnapshot = await alertingApi.searchRules(
-          roleAuthc,
-          'alert.attributes.name:"Slow Requests"'
+        const rulesBeforeSnapshot = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'Slow Requests',
+        });
+        expect(rulesBeforeSnapshot.body.items).to.have.length(1);
+        expect(rulesBeforeSnapshot.body.items[0].metadata.name).to.eql(
+          'Slow Requests (match count)'
         );
-        expect(rulesBeforeSnapshot.body.data).to.have.length(1);
-        expect(rulesBeforeSnapshot.body.data[0].name).to.eql('Slow Requests');
-        expect(rulesBeforeSnapshot.body.data[0].enabled).to.be(true);
+        expect(rulesBeforeSnapshot.body.items[0].enabled).to.be(true);
 
         // Step 4: Index documents to test processing and routing
         const parentDoc = {
@@ -291,7 +287,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -301,12 +297,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Disable streams to delete everything
         await disableStreams(apiClient);
 
+        // disableStreams does not remove the global significant-events data stream; delete it so
+        // the restore below can recreate it without an "index already exists" conflict.
+        await esClient.indices.deleteDataStream(
+          { name: '.significant_events*' },
+          { ignore: [404] }
+        );
+
         // Step 8: Restore from snapshot
         const restoreResponse = await esClient.snapshot.restore({
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -345,20 +348,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         // Verify significant event query survived the restore
-        expect(restoredWebAppDefinition.queries).to.have.length(1);
-        expect(restoredWebAppDefinition.queries[0].title).to.eql('Slow Requests');
-        expect(restoredWebAppDefinition.queries[0].esql.query).to.eql(
-          'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
+        const restoredQueries = await getQueries(apiClient, 'logs.otel.web-app');
+        expect(restoredQueries.queries).to.have.length(1);
+        expect(restoredQueries.queries[0].title).to.eql('Slow Requests');
+        expect(restoredQueries.queries[0].esql.query).to.eql(
+          'FROM logs.otel.web-app,logs.otel.web-app.* | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled
-        const rulesAfterRestore = await alertingApi.searchRules(
-          roleAuthc,
-          'alert.attributes.name:"Slow Requests"'
-        );
-        expect(rulesAfterRestore.body.data).to.have.length(1);
-        expect(rulesAfterRestore.body.data[0].name).to.eql('Slow Requests');
-        expect(rulesAfterRestore.body.data[0].enabled).to.be(true);
+        const rulesAfterRestore = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'Slow Requests',
+        });
+        expect(rulesAfterRestore.body.items).to.have.length(1);
+        expect(rulesAfterRestore.body.items[0].metadata.name).to.eql('Slow Requests (match count)');
+        expect(rulesAfterRestore.body.items[0].enabled).to.be(true);
 
         // Step 10: Verify processing still works after restore by indexing new documents
         const newParentDoc = {

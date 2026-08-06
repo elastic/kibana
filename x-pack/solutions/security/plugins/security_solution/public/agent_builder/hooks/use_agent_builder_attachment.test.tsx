@@ -10,7 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 
 const mockUseUiSetting = jest.fn().mockReturnValue(false);
@@ -96,6 +96,48 @@ describe('useAgentBuilderAttachment', () => {
       ],
       sessionTag: 'security',
     });
+  });
+
+  it('forwards attachmentDescription onto the attachment as description', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          attachmentDescription: 'Rule: My detection rule',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ description: 'Rule: My detection rule' })],
+      })
+    );
+  });
+
+  it('forwards origin onto the attachment', () => {
+    const { result } = renderHook(
+      () =>
+        useAgentBuilderAttachment({
+          ...defaultParams,
+          origin: 'rule-so-id',
+        }),
+      { wrapper: createWrapper(mockAgentBuilderService) }
+    );
+
+    act(() => {
+      result.current.openAgentBuilderFlyout();
+    });
+
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ origin: 'rule-so-id' })],
+      })
+    );
   });
 
   it('opens flyout with correct sessionTag', () => {

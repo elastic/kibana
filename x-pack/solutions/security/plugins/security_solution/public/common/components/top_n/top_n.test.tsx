@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { mockDataViewSpec, TestProviders } from '../../mock';
+import { TestProviders } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
 import type { Props as TopNProps } from './top_n';
@@ -107,7 +107,6 @@ describe('TopN', () => {
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
     dataView: createStubDataView({ spec: {} }),
-    dataViewSpec: mockDataViewSpec,
     options: defaultOptions,
     query,
     setAbsoluteRangeDatePickerTarget: InputsModelId.global,

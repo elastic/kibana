@@ -29,7 +29,8 @@ import {
   loadAlertArchive,
   dataViewRouteHelpersFactory,
   installCloudAssetInventoryPackage,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  waitForEntityStoreV2Running,
   waitForEntityDataIndexed,
 } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -1050,7 +1051,7 @@ export default function (providerContext: FtrProviderContext) {
         }).expect(result(200));
 
         // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 records
-        // These are grouped by MD5 hash into 2 entity nodes (one for actors, one for targets)
+        // These are grouped by hash into 2 entity nodes (one for actors, one for targets)
         // and 1 label node representing all 6 relationships
         expect(response.body).to.have.property('nodes');
         expect(response.body).to.have.property('edges');
@@ -1291,6 +1292,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
+          showUnknownTarget: false,
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
             originEventIds: [],
@@ -1654,8 +1656,9 @@ export default function (providerContext: FtrProviderContext) {
           expect(response.body).to.have.property('edges').length(2);
         });
 
-        // v2 index without lookup mode - verify graph API still works (no enrichment)
-        describe('v2 index without lookup mode (fallback to no enrichment)', () => {
+        // v2 index without lookup mode - enrichment now works via a follow-up ES|QL query
+        // against the entity store, so lookup mode is no longer required.
+        describe('v2 index without lookup mode (enrichment still applies)', () => {
           before(async () => {
             // Delete the v2 lookup index if it exists
             try {
@@ -1712,9 +1715,9 @@ export default function (providerContext: FtrProviderContext) {
             }
           });
 
-          it('should still return graph data without entity enrichment when v2 index is not in lookup mode', async () => {
-            // The graph API should work but without entity enrichment
-            // since the v2 index exists but is not in lookup mode
+          it('should still return enriched graph data when v2 index is not in lookup mode', async () => {
+            // The graph API enriches via a follow-up ES|QL query against the entity store
+            // (no LOOKUP JOIN), so lookup mode is not required for enrichment to apply.
             const response = await postGraph(supertest, {
               query: {
                 originEventIds: [],
@@ -1745,24 +1748,24 @@ export default function (providerContext: FtrProviderContext) {
             expect(response.body).to.have.property('edges').length(2);
             expect(response.body).not.to.have.property('messages');
 
-            // Find the actor node - it should NOT be enriched since v2 is not in lookup mode
+            // Find the actor node - enrichment applies even without lookup mode
             const actorNode = response.body.nodes.find(
               (node: EntityNodeDataModel) => node.id === 'user:admin@example.com@gcp'
             ) as EntityNodeDataModel;
 
             expect(actorNode).not.to.be(undefined);
-            // Without enrichment, the label should be the entity ID (not the enriched name)
-            expect(actorNode.label).to.equal('user:admin@example.com@gcp');
-            // Without enrichment, should have default icon/shape for unknown entity
-            expect(actorNode.icon).to.equal('magnifyExclamation');
-            // Entity should indicate it's NOT available in entity store
+            expect(actorNode.label).to.equal('AdminExample');
+            expect(actorNode.icon).to.equal('user');
             expect(actorNode.documentsData).to.have.length(1);
             expectExpect(actorNode.documentsData).toContainEqual(
               expectExpect.objectContaining({
                 id: 'user:admin@example.com@gcp',
                 type: 'entity',
                 entity: expectExpect.objectContaining({
-                  availableInEntityStore: false,
+                  availableInEntityStore: true,
+                  name: 'AdminExample',
+                  type: 'Identity',
+                  sub_type: 'GCP IAM User',
                   sourceFields: expectExpect.objectContaining({
                     'user.id': 'admin@example.com',
                   }),
@@ -1770,6 +1773,7 @@ export default function (providerContext: FtrProviderContext) {
               })
             );
 
+            // The customRole target is not in the entity store; it should remain unenriched.
             const targetNode = response.body.nodes.find(
               (node: EntityNodeDataModel) => node.id === 'projects/your-project-id/roles/customRole'
             ) as EntityNodeDataModel;
@@ -1940,7 +1944,8 @@ export default function (providerContext: FtrProviderContext) {
 
               // Find grouped target node by checking for count property
               const targetNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) => node.id === '9da97a47da11862817d60dcc1cfbaaef'
+                (node: EntityNodeDataModel) =>
+                  node.id === '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339'
               ) as EntityNodeDataModel;
 
               // Verify entity enrichment for grouped targets (2 hosts of same type/subtype)
@@ -2142,7 +2147,8 @@ export default function (providerContext: FtrProviderContext) {
 
               // Find grouped Storage target node (should have 3 buckets: target-bucket-a, target-bucket-b, target-bucket-c)
               const storageGroupNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) => node.id === '60829c004e98c57e5a2095bb4d6608bb'
+                (node: EntityNodeDataModel) =>
+                  node.id === '0b32687b565bbb4401472fad910ab3274f0cdf72ed77a785aed3b4a3712b5378'
               ) as EntityNodeDataModel;
               expect(storageGroupNode).not.to.be(undefined);
               expect(storageGroupNode.label).to.equal('GCP Storage Bucket'); // Shows sub_type for grouped entities
@@ -2342,10 +2348,270 @@ export default function (providerContext: FtrProviderContext) {
               expect(labelNode.color).to.equal('primary');
             });
           });
+
+          it('should return doc data when host ip is singular', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-single-ip', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-single-ip'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with single ip');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(1);
+            });
+          });
+
+          it('should return doc data when host ip is missing', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-no-ip', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-no-ip'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with no ip');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity).not.to.have.property('host');
+            });
+          });
+
+          it('should return doc data when host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with multiple ips');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data when relationship actor host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips-actor', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data when relationship target host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips-target', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data for event nodes when both actor and target host have multiple IPs', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [{ id: 'entities-host-multiple-ips-event-id', isAlert: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
         };
 
         before(async () => {
-          // delete v2 index manually since its not being deleted by the cleanupEntityStore function
+          // delete v2 index manually since it's not being deleted by the v2 install/uninstall cycle
           try {
             await es.indices.delete({
               index: getEntitiesLatestIndexName(entitiesSpaceId),
@@ -2374,12 +2640,14 @@ export default function (providerContext: FtrProviderContext) {
           entitiesSpaceDataView = dataViewRouteHelpersFactory(supertest, entitiesSpaceId);
           await entitiesSpaceDataView.create('security-solution');
 
-          // Initialize entity engine for 'generic' type in entities-space
-          await initEntityEnginesWithRetry({
+          // Install Entity Store V2 in entities-space (covers the generic engine
+          // the asset inventory tests need). v2 install always installs all
+          // entity types; per-type selection is no longer available.
+          await installEntityStoreV2({ supertest, logger, spaceId: entitiesSpaceId });
+          await waitForEntityStoreV2Running({
             supertest,
             retry,
             logger,
-            entityTypes: ['generic'],
             spaceId: entitiesSpaceId,
           });
 
@@ -2409,7 +2677,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 35,
+              expectedCount: 53,
             });
           });
 
@@ -2492,7 +2760,8 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipGroupedNodeTarget = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '5125dc59a9ba3a4a163e0629e0c46f92'
+                (node: NodeDataModel) =>
+                  node.id === 'df6a654e7a91b7a1abd7fa722d0558b81a3a109fe009bd5be8046ddb606125af'
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
@@ -2594,7 +2863,8 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipGroupedNodeTarget = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '5125dc59a9ba3a4a163e0629e0c46f92'
+                (node: NodeDataModel) =>
+                  node.id === 'df6a654e7a91b7a1abd7fa722d0558b81a3a109fe009bd5be8046ddb606125af'
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
@@ -2857,7 +3127,8 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipsTargetNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '06530c8b5bd27028c4f78cb987f08cc0'
+                (node: NodeDataModel) =>
+                  node.id === 'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932'
               ) as EntityNodeDataModel;
               expect(relationshipsTargetNode.label).to.equal('GCP Compute Instance');
               expect(relationshipsTargetNode.shape).to.equal('hexagon');
@@ -2892,6 +3163,77 @@ export default function (providerContext: FtrProviderContext) {
                   }),
                 })
               );
+            });
+
+            it('should not include unrelated relationships from intermediary nodes (issue #272043)', async () => {
+              // Scenario:
+              //   my-server-1  --resolution.resolved_to-->  my-server-2
+              //   my-server-3  --communicates_with-->        my-server-2   (✓ relevant)
+              //   my-server-3  --communicates_with-->        my-server-5   (✗ unrelated)
+              //   my-server-3  --resolution.resolved_to-->   my-server-4   (✗ unrelated)
+              //
+              // When expanding relationships for my-server-2, only the two edges that
+              // touch my-server-2 should appear. my-server-3's outbound edges to my-server-5
+              // and my-server-4 must be filtered out.
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:my-server-2', isOrigin: false }],
+                    start: 'now-30d',
+                    end: 'now',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              const allNodes: NodeDataModel[] = response.body.nodes;
+              const allEdges: EdgeDataModel[] = response.body.edges;
+
+              // --- Entity nodes ---
+              const entityNodes = allNodes.filter(
+                (n: NodeDataModel) =>
+                  n.shape === 'hexagon' || n.shape === 'ellipse' || n.shape === 'rectangle'
+              ) as EntityNodeDataModel[];
+
+              const entityIds = entityNodes.map((n) => n.id).sort();
+              expectExpect(entityIds).toEqual(
+                ['host:my-server-1', 'host:my-server-2', 'host:my-server-3'].sort()
+              );
+
+              // --- Relationship nodes ---
+              const relationshipNodes = allNodes.filter(
+                (n: NodeDataModel) => n.shape === 'relationship'
+              ) as RelationshipNodeDataModel[];
+
+              expect(relationshipNodes.length).to.equal(2);
+
+              const resolvedToNode = relationshipNodes.find(
+                (n) => n.id === 'rel(host:my-server-1-resolution.resolved_to)'
+              ) as RelationshipNodeDataModel;
+              expect(resolvedToNode).not.to.be(undefined);
+              expect(resolvedToNode.label).to.equal('Resolved to');
+
+              const communicatesWithNode = relationshipNodes.find(
+                (n) => n.id === 'rel(host:my-server-3-communicates_with)'
+              ) as RelationshipNodeDataModel;
+              expect(communicatesWithNode).not.to.be(undefined);
+              expect(communicatesWithNode.label).to.equal('Communicates with');
+
+              expect(allNodes.length).to.equal(5);
+              expect(allEdges.length).to.equal(4);
+
+              const expectedEdgeIds = [
+                'a(host:my-server-1)-b(rel(host:my-server-1-resolution.resolved_to))',
+                'a(rel(host:my-server-1-resolution.resolved_to))-b(host:my-server-2)',
+                'a(host:my-server-3)-b(rel(host:my-server-3-communicates_with))',
+                'a(rel(host:my-server-3-communicates_with))-b(host:my-server-2)',
+              ].sort();
+
+              const actualEdgeIds = allEdges.map((e: EdgeDataModel) => e.id).sort();
+              expectExpect(actualEdgeIds).toEqual(expectedEdgeIds);
             });
 
             it('should return hierarchical relationships with grouped targets and events', async () => {
@@ -3221,6 +3563,149 @@ export default function (providerContext: FtrProviderContext) {
                 expect(edge.type).equal('solid');
               });
             });
+
+            it('should isolate the pinned origin entity and produce correct grouping when showing relationships of a target', async () => {
+              // Scenario: user opens the entity flyout for origin-pinned-server (origin/pinned).
+              // Then clicks "show entity relationships" on relationship-target-server.
+              // The graph API receives:
+              //   entityIds: [origin-pinned-server (isOrigin:true), relationship-target-server (isOrigin:false)]
+              //   pinnedIds: ['host:origin-pinned-server']
+              //
+              // origin-pinned-server, grouped-actor-server-1, grouped-actor-server-2 share type "Linux Server" /
+              // sub_type "AWS EC2 Instance", all communicating with relationship-target-server.
+              // different-subtype-actor-server also communicates with relationship-target-server but has a different
+              // sub_type ("GCP Compute Instance").
+              //
+              // Expected nodes:
+              //   - origin-pinned-server: single entity node (pinned → never merged)
+              //   - grouped-actor-server-1 + grouped-actor-server-2: grouped entity node (count=2, same type/subtype)
+              //   - different-subtype-actor-server: single entity node (different subtype)
+              //   - relationship-target-server: single target entity node
+              //   - 3 relationship nodes (communicates_with):
+              //       one for origin-pinned-server alone (pinned),
+              //       one for the grouped-actor-server-1/2 merged group,
+              //       one for different-subtype-actor-server (different subtype)
+              await retry.tryForTime(enrichmentRetryTimeout, async () => {
+                const response = await postGraph(
+                  supertest,
+                  {
+                    query: {
+                      originEventIds: [],
+                      start: '2024-09-01T00:00:00Z',
+                      end: '2024-09-02T00:00:00Z',
+                      entityIds: [
+                        { id: 'host:origin-pinned-server', isOrigin: true },
+                        { id: 'host:relationship-target-server', isOrigin: false },
+                      ],
+                      pinnedIds: ['host:origin-pinned-server'],
+                    },
+                  },
+                  undefined,
+                  entitiesSpaceId
+                ).expect(result(200, logger));
+
+                const entityNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) =>
+                    node.shape === 'ellipse' ||
+                    node.shape === 'rectangle' ||
+                    node.shape === 'hexagon'
+                ) as EntityNodeDataModel[];
+
+                // 4 entity nodes total: origin-pinned-server (single), grouped-actor-server-1+3 (grouped),
+                // different-subtype-actor-server (single, different subtype), relationship-target-server (target)
+                expect(entityNodes.length).to.equal(4);
+
+                // origin-pinned-server must be a solo node (pinned → isolated from the merged group)
+                const pinnedOriginNode = entityNodes.find(
+                  (node) => node.id === 'host:origin-pinned-server'
+                ) as EntityNodeDataModel;
+                expect(pinnedOriginNode).not.to.be(undefined);
+                expect(pinnedOriginNode.count).to.be(undefined);
+
+                // grouped-actor-server-1 and grouped-actor-server-2 collapse into one grouped node (count=2)
+                const groupedActorNode = entityNodes.find(
+                  (node) => node.count === 2
+                ) as EntityNodeDataModel;
+                expect(groupedActorNode).not.to.be(undefined);
+                expect(groupedActorNode.tag).to.equal('Linux Server');
+                const groupedIds = (groupedActorNode.documentsData ?? [])
+                  .map((doc) => doc.id)
+                  .sort();
+                expect(groupedIds).to.eql(
+                  ['host:grouped-actor-server-1', 'host:grouped-actor-server-2'].sort()
+                );
+
+                // different-subtype-actor-server is a solo node (different sub_type → separate group)
+                const differentSubtypeNode = entityNodes.find(
+                  (node) => node.id === 'host:different-subtype-actor-server'
+                ) as EntityNodeDataModel;
+                expect(differentSubtypeNode).not.to.be(undefined);
+                expect(differentSubtypeNode.count).to.be(undefined);
+
+                // relationship-target-server is the single target
+                const targetNode = entityNodes.find(
+                  (node) => node.id === 'host:relationship-target-server'
+                ) as EntityNodeDataModel;
+                expect(targetNode).not.to.be(undefined);
+
+                // 3 relationship nodes: one per distinct actor group
+                const relationshipNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) => node.shape === 'relationship'
+                );
+                expect(relationshipNodes.length).to.equal(3);
+                relationshipNodes.forEach((node: RelationshipNodeDataModel) => {
+                  expect(node.label).to.equal('Communicates with');
+                });
+              });
+            });
+
+            it('should produce one relationship node when two actors of the same type share the same relationship', async () => {
+              await retry.tryForTime(enrichmentRetryTimeout, async () => {
+                const response = await postGraph(
+                  supertest,
+                  {
+                    query: {
+                      originEventIds: [],
+                      start: '2024-09-01T00:00:00Z',
+                      end: '2024-09-02T00:00:00Z',
+                      entityIds: [
+                        { id: 'host:over-split-actor-1', isOrigin: true },
+                        { id: 'host:over-split-actor-2', isOrigin: false },
+                      ],
+                    },
+                  },
+                  undefined,
+                  entitiesSpaceId
+                ).expect(result(200, logger));
+
+                // Both actors are "Host / Linux Host" with communicates_with → host:over-split-target.
+                // Before the fix: 2 relationship nodes. After the fix: 1 merged relationship node.
+                const relationshipNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) => node.shape === 'relationship'
+                );
+                expect(relationshipNodes.length).to.equal(1);
+                expect(relationshipNodes[0].label).to.equal('Communicates with');
+
+                // The merged actor node has count=2 (both actors collapsed)
+                const entityNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) =>
+                    node.shape === 'ellipse' ||
+                    node.shape === 'rectangle' ||
+                    node.shape === 'hexagon'
+                );
+                const actorNode = entityNodes.find(
+                  (node: EntityNodeDataModel) => node.count === 2
+                ) as EntityNodeDataModel;
+                expect(actorNode).not.to.be(undefined);
+                expect(actorNode.tag).to.equal('Host');
+
+                // Target node is a single entity (no merge needed)
+                const targetNode = entityNodes.find(
+                  (node: NodeDataModel) => node.id === 'host:over-split-target'
+                ) as EntityNodeDataModel;
+                expect(targetNode).not.to.be(undefined);
+              });
+            });
           });
         });
       });
@@ -3293,6 +3778,163 @@ export default function (providerContext: FtrProviderContext) {
             expect(edge.type).equal('solid');
           });
         });
+      });
+    });
+
+    describe('Field type mismatch resilience', () => {
+      // Exercises two failure modes that real integration indices trigger:
+      //
+      //   1. Wrong type — user.id mapped as long (PostgreSQL / AWS IAM pattern).
+      //      The aws_bedrock integration uses `TO_STRING(user.id) LIKE "arn:..."` and
+      //      fetch_events_graph.ts casts `| EVAL user.id = TO_STRING(user.id)` before
+      //      the enrichment query, so both the LIKE condition and the preserve branch
+      //      CASE return type are always keyword regardless of the underlying mapping.
+      //
+      //   2. Absent fields — dozens of integration-specific fields are not in this index.
+      //      Under SET unmapped_fields="NULLIFY" they become null-typed.  Null-typed
+      //      fields in CASE result positions are fine (polymorphic null).  However,
+      //      ES|QL validates ALL function-argument types at plan time regardless of
+      //      branch reachability — so null-typed fields passed to TO_STRING / TO_BOOLEAN /
+      //      TO_LOWER / STARTS_WITH / MV_FIRST / CONCAT etc. trigger errors.
+      //      Every field that appears as a function argument across all integration files
+      //      must have an explicit mapping with any valid non-null type.
+      //      CASE-result-only fields (host.id, service.id, entity.id, etc.) are left
+      //      unmapped since ES|QL accepts null-typed values in result positions.
+      //
+      //      NOTE: SET unmapped_fields="LOAD" is NOT used because ES|QL does not support
+      //      accessing subfields of flattened-type parents under LOAD mode
+      //      (e.g. m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
+      //      greenhouse.audit.event.meta.name, cisco_meraki.*.vap).  Under NULLIFY those
+      //      subfields are accessible as keyword (flattened maps all leaves to keyword in
+      //      ES|QL).  In production these fields exist in the real integration indices so
+      //      their types come from the merged mapping across all queried indices.
+      const testIndex = 'test-graph-type-mismatch';
+
+      before(async () => {
+        await es.indices.create({
+          index: testIndex,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              'event.id': { type: 'keyword' },
+              'event.action': { type: 'keyword' },
+              'event.dataset': { type: 'keyword' },
+              'event.kind': { type: 'keyword' },
+              'event.category': { type: 'keyword' },
+              'event.type': { type: 'keyword' },
+              'event.module': { type: 'keyword' },
+              'data_stream.dataset': { type: 'keyword' },
+              'user.name': { type: 'keyword' },
+              // Deliberately wrong type — user.id as long mimics PostgreSQL / AWS IAM.
+              // fetch_events_graph.ts casts it to keyword before enrichment runs.
+              'user.id': { type: 'long' },
+              'user.email': { type: 'keyword' },
+              'user.domain': { type: 'keyword' },
+              'user.target.id': { type: 'keyword' },
+              'user.target.name': { type: 'keyword' },
+              'user.target.email': { type: 'keyword' },
+              'user.target.domain': { type: 'keyword' },
+              'host.name': { type: 'keyword' },
+              'host.id': { type: 'keyword' },
+              'host.hostname': { type: 'keyword' },
+              'host.target.id': { type: 'keyword' },
+              'host.target.name': { type: 'keyword' },
+              'host.target.hostname': { type: 'keyword' },
+              'service.name': { type: 'keyword' },
+              'service.target.name': { type: 'keyword' },
+              'entity.id': { type: 'keyword' },
+              'entity.namespace': { type: 'keyword' },
+              'entity.target.id': { type: 'keyword' },
+              'cloud.provider': { type: 'keyword' },
+              // Integration CASE branch function arguments (TO_STRING, TO_BOOLEAN, TO_LOWER).
+              // All must have a non-null schema type; values are absent from the test document.
+              'source.ip': { type: 'ip' },
+              'destination.ip': { type: 'ip' },
+              'misp.event.orgc_id': { type: 'long' },
+              'greenhouse.audit.event.meta.name': { type: 'keyword' },
+              'gitlab.audit.target_id': { type: 'long' },
+              'jamf_pro.events.event.object_id': { type: 'long' },
+              'jamf_pro.events.event.policy_id': { type: 'long' },
+              'jamf_pro.events.event.jssid': { type: 'long' },
+              'jamf_pro.events.event.patch_policy_id': { type: 'long' },
+              'tanium.action_history.action.id': { type: 'long' },
+              'tanium.endpoint_config.item.id': { type: 'long' },
+              'citrix.cef_format': { type: 'boolean' },
+              'servicenow.event.applied.value': { type: 'boolean' },
+              'zscaler_zia.dns.request.action': { type: 'keyword' },
+              'zscaler_zia.tunnel.action.type': { type: 'keyword' },
+              'container.name': { type: 'keyword' },
+              'destination.domain': { type: 'keyword' },
+              'forgerock.objectId': { type: 'keyword' },
+              'forgerock.principal': { type: 'keyword' },
+              'infoblox_bloxone_ddi.dns_data.source': { type: 'keyword' },
+              'microsoft_intune.audit.properties.target_display_names': { type: 'keyword' },
+              'microsoft_intune.audit.properties.target_object_ids': { type: 'keyword' },
+              'url.domain': { type: 'keyword' },
+              'url.path': { type: 'keyword' },
+            },
+          },
+        });
+
+        await es.index({
+          index: testIndex,
+          id: 'type-mismatch-evt-1',
+          refresh: true,
+          document: {
+            '@timestamp': '2024-09-01T12:00:00.000Z',
+            'event.id': 'type-mismatch-evt-1',
+            'event.action': 'invoke',
+            'event.dataset': 'aws_bedrock.invocation',
+            'data_stream.dataset': 'aws_bedrock.invocation',
+            'user.name': 'test-user',
+            'user.id': 42, // long — exercises wrong-type + LIKE + CASE mismatch paths
+            'host.name': 'bedrock-host',
+            // All other fields absent from the document:
+            // - Function-argument fields (source.ip, etc.) are schema-typed above but
+            //   null-valued here — safe under NULLIFY.
+            // - CASE-result-only fields (host.id, service.id, etc.) are both
+            //   schema-absent and value-absent — null-typed, safe in result positions.
+          },
+        });
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: testIndex, ignore_unavailable: true });
+      });
+
+      it('returns 200 when user.id is mapped as long and many fields are unmapped', async () => {
+        // Without the fix this returns 500 with one of:
+        //   "LIKE does not support type [long]"    (user.id LIKE in aws_bedrock)
+        //   "argument of [CASE] must be [long]"    (preserve branch type mismatch)
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            indexPatterns: [testIndex],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+            esQuery: {
+              bool: {
+                filter: [{ match_phrase: { 'event.id': 'type-mismatch-evt-1' } }],
+              },
+            },
+          },
+        }).expect(result(200, logger));
+
+        expect(response.body).to.have.property('nodes');
+        expect(response.body.nodes.length).to.be.greaterThan(0);
+
+        // The user entity node must exist and carry user.id as a string (not a number),
+        // confirming that the | EVAL user.id = TO_STRING(user.id) pre-cast ran correctly.
+        const userNode = response.body.nodes.find((n: any) =>
+          n.documentsData?.some(
+            (d: any) => d.type === 'entity' && d.entity?.sourceFields?.['user.id'] !== undefined
+          )
+        );
+        expect(userNode).to.not.be(undefined);
+        const sourceFields = userNode.documentsData.find((d: any) => d.type === 'entity').entity
+          .sourceFields;
+        // user.id was indexed as long 42 but must surface as the string "42" after TO_STRING
+        expect(sourceFields['user.id']).to.equal('42');
       });
     });
   });

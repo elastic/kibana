@@ -42,10 +42,11 @@ export const FilterGroup = ({
   return (
     <EuiPopover
       id={filterGroupPopoverId}
+      aria-label={filterGroupButtonLabel}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable aria-label={filterGroupButtonLabel} options={items} onChange={onChange}>
         {(list) => (

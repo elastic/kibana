@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -19,12 +18,10 @@ import {
 } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { matchPath, useLocation } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { navCss } from './layouts/default';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { ManageIntegrationLink } from './manage_integration_link';
-import { useKibana } from '../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { getHistoryFilters } from '../actions/history_filter_storage';
 
@@ -43,9 +40,7 @@ const topBarCss = ({ euiTheme }: UseEuiTheme) => ({
 
 export const MainNavigation = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const { notifications } = useKibana().services;
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
-  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
   const location = useLocation();
   const section = useMemo(() => {
     const firstSegment = location.pathname.split('/')[1] ?? 'overview';
@@ -60,9 +55,6 @@ export const MainNavigation = () => {
       ),
     [location.pathname]
   );
-  const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
-    defaultMessage: 'Give feedback',
-  });
 
   const historySection = isHistoryEnabled ? Section.History : Section.LiveQueries;
   const persistedHistoryQs = isHistoryEnabled ? getHistoryFilters() : '';
@@ -83,21 +75,6 @@ export const MainNavigation = () => {
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
-              {isFeedbackEnabled && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    href="https://ela.st/osquery-feedback"
-                    target="_blank"
-                    aria-label={feedbackButtonLabel}
-                    iconType="external"
-                    iconSide="right"
-                    color="primary"
-                    size="s"
-                  >
-                    {feedbackButtonLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
               <ManageIntegrationLink />
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -184,20 +161,6 @@ export const MainNavigation = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" direction="row">
-            {isFeedbackEnabled && (
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  href="https://ela.st/osquery-feedback"
-                  target="_blank"
-                  aria-label={feedbackButtonLabel}
-                  iconType="external"
-                  iconSide="right"
-                  color="primary"
-                >
-                  {feedbackButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
             <ManageIntegrationLink />
           </EuiFlexGroup>
         </EuiFlexItem>

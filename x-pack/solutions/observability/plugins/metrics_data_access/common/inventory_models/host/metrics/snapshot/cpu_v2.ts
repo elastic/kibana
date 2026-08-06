@@ -25,7 +25,9 @@ export const cpuV2: SchemaBasedAggregations = {
       aggs: {
         avg: {
           avg: {
-            field: 'system.cpu.utilization',
+            // OTel lands this gauge under the `metrics.*` prefix; the unprefixed
+            // field returned null and coerced to `1 - 0 = 100%`.
+            field: 'metrics.system.cpu.utilization',
           },
         },
       },

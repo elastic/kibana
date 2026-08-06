@@ -14,25 +14,16 @@ import type {
   ShowSaveModalMinimalSaveModalProps,
 } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboardWithSaveResult,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
   getInspector,
-  getCoreOverlays,
   getSavedObjectsTagging,
 } from '../../kibana_services';
-import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import type { SavedMap } from './saved_map';
-import { checkForDuplicateTitle } from '../../content_management';
-
-const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
-  LazySavedObjectSaveModalDashboardWithSaveResult
-);
+import { hasLibraryItemWithTitle } from '../../content_management';
 
 export function getTopNavConfig({
   savedMap,
@@ -98,7 +89,9 @@ export function getTopNavConfig({
     }
   );
 
-  if (savedMap.hasOriginatingApp()) {
+  const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
+
+  if (hasSaveAndReturnConfig) {
     topNavConfigs.push({
       label: i18n.translate('xpack.maps.topNav.cancel', {
         defaultMessage: 'Cancel',
@@ -116,7 +109,6 @@ export function getTopNavConfig({
   }
 
   if (getMapsCapabilities().save) {
-    const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
     const mapDescription = savedMap.getAttributes().description
       ? savedMap.getAttributes().description!
       : '';
@@ -167,32 +159,14 @@ export function getTopNavConfig({
         ) : undefined;
 
         const saveModalProps = {
+          lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
+          hasLibraryItemWithTitle,
           onSave: async (
             props: OnSaveProps & {
               dashboardId?: string | null;
               addToLibrary: boolean;
             }
           ): Promise<SaveResult> => {
-            try {
-              await checkForDuplicateTitle(
-                {
-                  id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
-                  title: props.newTitle,
-                  copyOnSave: props.newCopyOnSave,
-                  lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
-                  isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-                  getDisplayName: () => MAP_EMBEDDABLE_NAME,
-                  onTitleDuplicate: props.onTitleDuplicate,
-                },
-                {
-                  overlays: getCoreOverlays(),
-                }
-              );
-            } catch (e) {
-              // ignore duplicate title failure, user notified in save modal
-              return {};
-            }
-
             await savedMap.save({
               ...props,
               tags,
@@ -215,7 +189,7 @@ export function getTopNavConfig({
 
         let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
-        if (savedMap.hasOriginatingApp()) {
+        if (hasSaveAndReturnConfig) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -237,7 +211,7 @@ export function getTopNavConfig({
           );
         } else {
           saveModal = (
-            <SavedObjectSaveModalDashboardWithSaveResult
+            <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
               mustCopyOnSaveMessage={
@@ -269,9 +243,7 @@ export function getTopNavConfig({
             newTitle: savedMap.getTitle(),
             newDescription: mapDescription,
             newCopyOnSave: false,
-            isTitleDuplicateConfirmed: false,
             returnToOrigin: true,
-            onTitleDuplicate: () => {},
             saveByReference: !savedMap.isByValue(),
             history,
           });

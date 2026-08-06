@@ -23,6 +23,7 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "inspector",
       "lens",
       "licensing",
       "observability",
@@ -42,6 +43,7 @@
     "optionalPlugins": [
       "cases",
       "cloud",
+      "cps",
       "discover",
       "observabilityAIAssistant",
       "security",

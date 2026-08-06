@@ -14,7 +14,13 @@ import {
   getAssetCriticalityEsqlTool,
   getAssetCriticalityInlineTool,
 } from './inline_tools';
-import { SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID } from '../../tools';
+import {
+  SECURITY_GET_ENTITY_TOOL_ID,
+  SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+  SECURITY_SEARCH_ENTITIES_TOOL_ID,
+  SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+} from '../../tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
 // if they use controlled queries that we author and maintain.
@@ -93,7 +99,7 @@ This rule takes **precedence** over the "do not use the dashboard for list / ran
 
 Rich attachments do **not** show the interactive pill, **Preview**, or **Canvas** unless you **embed** them in your **assistant markdown** in the **same turn**.
 
-\`security.get_entity\` and \`security.search_entities\` return an \`other\` result that contains a ready-made \`renderTag\` string, for example:
+\`security.get_entity\`, \`security.search_entities\`, and \`security.get_entity_graph\` return an \`other\` result that contains a ready-made \`renderTag\` string, for example:
 
 \`\`\`json
 { "attachmentId": "security.entity:user:<hex>", "version": 1, "renderTag": "<render_attachment id=\\"security.entity:user:<hex>\\" version=\\"1\\" />" }
@@ -107,7 +113,7 @@ For \`security.entity_analytics_dashboard\` the \`attachments.add\` tool returns
 
 Rules:
 - **Copy from the tool's own result.** If the tool's \`other\` result contains a \`renderTag\`, copy that string verbatim. If a dashboard \`attachments.add\` call succeeded, copy \`id\` and \`current_version\` verbatim into the template above. Never invent an id; never derive one from the user's prompt or any other field.
-- **No \`renderTag\`, no tag.** If the tool result did not include a \`renderTag\` (e.g. \`security.get_entity\` resolved multiple candidates and fell back to an RLIKE match — no single-entity attachment was stored), do NOT emit a \`<render_attachment>\` tag. Write prose only.
+- **No \`renderTag\`, no tag.** If the tool result did not include a \`renderTag\` (e.g. \`security.get_entity\` fell back to a multi-candidate RLIKE match, or \`security.get_entity_graph\` resolved multiple candidate entities), do NOT emit a \`<render_attachment>\` tag. Write prose only.
 - **One \`<render_attachment>\` per attachment.** If you emit an entity attachment AND add a dashboard attachment, output two tags (one per id/version pair).
 - **Without** these tags, the UI only shows subdued italic text like **Attachment added: …** — the user **cannot** open the Canvas. **That is incorrect** for these attachment types.
 - ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
@@ -132,6 +138,7 @@ Rules:
 Use this skill when:
 - The user **explicitly** asks to **show**, **open**, **view**, or **walk through** the **Entity Analytics** **home**, **overview**, **landing**, or **built-in Entity Analytics dashboard** (the **product page** / same IA as Security → Entity Analytics navigation) → \`security.entity_analytics_dashboard\` after gathering entity data.
 - They want **one entity's details / card / profile / flyout-style** view → \`security.get_entity\` (which emits the \`security.entity\` attachment as a single-entity card).
+- They want to **see the relationship graph** for an entity or **how an entity is connected** to other entities/events/alerts → \`security.get_entity_graph\` (which emits the \`security.entity_graph\` attachment as an inline graph preview that links out to the full graph investigation).
 - They want a **list / table / ranking** of entities (plural or set framing) → \`security.search_entities\` (which emits the \`security.entity\` attachment as an entities table when 2+ rows are returned).
 - One message names **several entity kinds** to compare or rank (e.g. **riskiest hosts and users**) → run \`security.search_entities\` per type (or with multiple \`entityTypes\`), and the tool will emit an aggregate \`security.entity\` attachment.
 - Investigating the current behavior of a specific entity using its ID (EUID).
@@ -140,6 +147,12 @@ Use this skill when:
 - Analyzing changes in an entity's risk score or behavior over time.
 - Discovering the riskiest entities in the environment based on risk scores and criticality levels.
 - Surfacing entities that require further investigation based on their attributes and behaviors.
+
+## Related Skills
+When asked to investigate unusual or anomalous behavior by entities, use:
+- '~/skills/security/ml/find-security-ml-jobs' to find the appropriate ML jobs that will answer the user's question.
+  - This skill returns the EUIDs (entity IDs) of entities exhibiting anomalous behavior that matches the user's query.
+    Use those EUIDs as input to the 'security.get_entity' tool to retrieve the profiles for those entities and include them in your analysis.
 
 ## Available Tools
 
@@ -164,6 +177,8 @@ Use this skill when:
     - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
     - profile_history - historical snapshot profiles for this entity over a specified time interval
+    - anomalies - unusual or anomalous behaviors detected for this entity, mapped to MITRE ATT&CK tactics and techniques.
+    - vulnerabilities - known vulnerabilities associated with this entity, including CVE identifiers, severity levels, and descriptions.
     This tool may return multiple results if an exact match for the entity ID is not found.
     If multiple results are returned:
       - Provide a summary of the FIRST result.
@@ -182,6 +197,25 @@ Rules:
 - ALWAYS insert a BLANK LINE between the \`<render_attachment>\` tag and any following prose. Without this blank line, the prose will be dropped by the markdown parser.
 - Render each \`security.entity\` attachment at most once per turn.
 - When \`security.get_entity\` resolves multiple candidates (fallback RLIKE match), no attachment is stored and the \`other\` result contains no \`renderTag\`. In that case, **do not emit a \`<render_attachment>\` tag** — write prose only.
+
+### Get Entity Graph Tool
+- \`security.get_entity_graph\` - Render the **relationship-graph preview** for a **single** security entity (host, user, service, generic). Use this when the user asks to **see the graph** for an entity or **how an entity is connected** to other entities, events, or alerts — for example: "show me the graph for this host", "how is this user connected?", "visualize the relationships for host:server1", "graph this entity". Read-only.
+    - Pass \`entityId\` (prefixed EUID, canonical name, or full name). When a \`security.entity\` attachment identifies the target, copy its prefixed entity id into \`entityId\`.
+    - The graph preview covers a fixed \`now-30d\` → \`now\` window (matching the entity flyout); it is not time-parameterized. For a different time window, direct the user to the full graph investigation via **Open full graph**.
+    - This tool renders a **compact preview**; the full interactive graph investigation stays in the Security UI and is reached from the preview's **Open full graph** affordance. Do NOT try to embed or describe the full investigation — render the preview.
+
+#### Inline rendering
+When \`security.get_entity_graph\` resolves exactly one entity, its \`other\` result includes a \`renderTag\` field — render it per the shared **Mandatory — \`<render_attachment>\`** contract above (copy verbatim, own line, blank line before prose, once per turn). Two graph-specific rules on top of that:
+- **Ambiguous match:** when the id/name resolves to **multiple candidates**, the \`other\` result has **no** \`renderTag\` (only a \`message\` and \`candidateEntityIds\`). Do NOT emit a tag — ask the user to pick the exact entity id (EUID) from the candidates and call the tool again.
+- **Prose:** the preview IS the visualization — do not restate its nodes/edges. Keep prose to 1–3 sentences on what the graph shows and what to investigate next.
+
+### List Watchlists Tool
+- \`security.list_watchlists\` - Discover the watchlists configured in this space. Returns each watchlist's \`id\`, \`name\`, \`description\`, \`riskModifier\`, \`managed\`, \`entitySourceIds\`, and timestamps. Pass an optional \`nameContains\` substring to narrow the result.
+    Use this tool when the user asks to enumerate or look up watchlists, for example: "what watchlists do we have", "list watchlists", "show me the watchlists", "is there a watchlist called X". The tool does not render a rich attachment — summarize the results in prose (small list) or a short markdown table (when 4+ watchlists are returned). Entity member counts are not included; use \`security.search_entities\` with \`watchlists: [<id>]\` to get the actual members.
+    **Resolving a watchlist name to its members (discover → filter chain).** When the user asks who is on a named watchlist ("who's on the Privileged Users watchlist", "list members of Compromised Accounts"):
+      1. Call \`security.list_watchlists\` (pass \`nameContains\` when the user spelled the name). Find the matching watchlist's \`id\`.
+      2. Call \`security.search_entities\` with \`watchlists: [<id>]\` to list the members; the aggregate \`security.entity\` attachment that tool emits is the user-facing answer.
+    **Do NOT** call \`security.list_watchlists\` to find out which watchlists a specific entity belongs to — that is already on the entity's profile from \`security.get_entity\` as \`entity.attributes.watchlists\`.
 
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.
@@ -231,6 +265,13 @@ When the user names a vendor or platform (AWS, Okta, Azure, Microsoft 365, Activ
 - **Jamf** → \`sources: ['jamf', 'jamf_protect']\` (no canonical namespace).
 
 For vendors not listed here, try \`namespaces: ['<event.module>']\` on user entities (pass-through) or \`sources: ['<lowercase vendor key>']\` — a single prefix key is enough thanks to exact-or-prefix matching.
+
+### Set Asset Criticality Tool
+- \`security.set_asset_criticality\` - Set or remove the asset criticality level for a single entity (host, user, service, or generic). Criticality influences risk scoring — higher-criticality entities carry more weight in risk calculations. Single-record only; bulk or CSV changes belong in the Entity Analytics management UI.
+  - Valid levels (lowest to highest): \`low_impact\` → \`medium_impact\` → \`high_impact\` → \`extreme_impact\`. Use \`"unassigned"\` to remove the existing value.
+  - **Required args:** \`entityId\` (full EUID, e.g. \`"host:server1"\`), \`entityType\` (\`host\`, \`user\`, \`service\`, or \`generic\`), \`criticality\`
+  - If the \`security.entity\` attachment identifies the target, read its \`identifierType\` as \`entityType\` and the prefixed entity id as \`entityId\`
+  - A confirmation prompt is always presented before the write executes; after the user accepts, optionally call \`security.get_entity\` to show the updated entity profile
 
 ## Entity Analysis Investigation Steps
 
@@ -284,8 +325,25 @@ Keep prose short and narrative-only:
 
 - For \`security.get_entity\` (single entity) results, write 1–3 sentences covering whether the entity is risky, what is driving the score, and what to investigate next. Do NOT produce an "Entity Overview" / field-by-field markdown block — those fields are already in the card.
   - When the result contains \`risk_score_inputs\`, one sentence on the top alert(s) contributing to the score is enough. Do NOT paste the full list of inputs as markdown.
+  - When the result contains \`anomalies\`, 1-2 bullets summarizing the anomalies with focus on the MITRE ATT&CK tactics is enough. Do NOT paste the full list of anomalies as markdown.
+  - When the result contains \`vulnerabilities\`, 1-2 bullets summarizing the vulnerabilities with focus on CVE identifiers and severity levels is enough. Do NOT paste the full list of vulnerabilities as markdown.
   - When the result contains \`profile_history\`, one sentence on the overall trend (increasing / decreasing / stable) is enough, plus a brief callout of any significant change in risk level, asset criticality, watchlist membership, or behaviors.
 - For \`security.search_entities\` (multi-entity) results, write 2–4 bullets with top-level takeaways: highest-risk row(s), biggest criticality gaps, outliers worth flagging, and recommended follow-ups. Do NOT re-list every row in markdown (columns like \`risk score\`, \`asset criticality\`, \`first_seen\`, \`last_seen\`) — the entities-table Canvas already shows those columns.
+
+#### Risk score grounding — caveat stale results
+
+\`security.get_entity\` and \`security.search_entities\` both append an \`other\` result with a \`riskScoreGrounding\` payload — the \`risk-score\` maintainer's status:
+
+\`\`\`json
+{ "riskScoreGrounding": { "status": "started" } }
+{ "riskScoreGrounding": { "status": "stopped", "lastScoreTimeAgo": "<relative time, e.g. '3 hours ago'> | absent" } }
+{ "riskScoreGrounding": { "status": "never_started" } }
+\`\`\`
+
+- **\`started\`** — scoring is current; say nothing about entity analytics status.
+- **\`stopped\`** — scoring was turned off. Caveat using \`lastScoreTimeAgo\` (the last time it successfully ran, or "no scores have been computed yet" if absent), and suggest turning entity analytics back on.
+- **\`never_started\`** — scoring has never run. Say risk data isn't available rather than "no risk data found," and suggest turning entity analytics on.
+- Grounding missing — don't guess a status; answer from the entity result as-is.
 
 ### 4. Provide recommendation
 - Recommend investigating external activities for user entities
@@ -392,10 +450,21 @@ Steps:
 3. Copy the \`renderTag\` string verbatim from \`get_entity\`'s \`other\` result onto its own line in your reply. Skip the render tag on the \`search_entities\` result — the follow-up \`get_entity\` bumps the same attachment pill with the richer card payload, so rendering both would duplicate the pill.
 4. Summarize in prose why this host is the riskiest among hosts in scope.
 
-### Example 7: "Details / profile" vs "List / compare" wording
+### Example 7: "Details / profile" vs "List / compare" vs "Graph / connected" wording
 
 - User: "**Details** on the riskiest host", "**more about** that host", "**profile** / **deep dive** for this user" → treat like Example 6: one winner, \`security.get_entity\` emits the single-entity card. Render the tag from \`get_entity\`.
 - User: "**List** the **five** riskiest hosts", "**compare** these hosts", "**who are** the riskiest users", "**show** risky **hosts**" → \`security.search_entities\` with matching \`maxResults\`; the tool emits the aggregate \`security.entity\` attachment (entities table) when 2+ rows are returned. Render the tag from \`search_entities\`.
+- User: "**graph** for that host", "how is this user **connected**", "show the **relationships** for host:server1" → \`security.get_entity_graph\` emits the \`security.entity_graph\` attachment (see Example 7c). Render the tag from \`get_entity_graph\`. This is distinct from "details / card": the ask is about **connections / relationships**, not the entity's profile fields — do NOT substitute \`security.get_entity\`.
+
+### Example 7c: Relationship graph for an entity
+
+User query: "Show me the graph for host web-01" / "How is user jdoe connected to other entities?"
+
+Steps:
+1. Call \`security.get_entity_graph\` with \`entityId\` for the host/user. If a \`security.entity\` attachment identifies the target, copy its prefixed entity id (EUID) into \`entityId\`.
+2. Copy the \`renderTag\` string verbatim from the tool's \`other\` result onto its own line — the renderer shows the compact graph preview inline.
+3. In 1–3 sentences of prose, describe what the graph shows and what to investigate next. Do NOT dump the raw nodes/edges as JSON or a table, and do NOT try to embed the full interactive investigation — the preview links out to it via **Open full graph**.
+4. If the id/name resolves to multiple candidates, the \`other\` result has no \`renderTag\` (only a \`message\` and \`candidateEntityIds\`). Do NOT emit a render tag — ask the user to pick the exact entity id (EUID) and call the tool again.
 
 ### Example 8: List question with only one matching entity
 
@@ -436,6 +505,42 @@ Steps:
 
 **Common mistake:** rendering only the \`security.entity\` entities table (titled e.g. "Top 10 Riskiest Users") and claiming in prose that it is the Entity Analytics dashboard. That is **wrong** — always render the \`security.entity_analytics_dashboard\` tag from \`attachments.add\` (and optionally the \`security.entity\` tag as a complement) when the user's prompt matches the "Dashboard trigger" phrases.
 
+### Example 12: Set asset criticality from chat
+
+User query: "Mark this host as high impact" (entity attachment present, or "mark host:server1 as high impact")
+
+Steps:
+1. Call \`security.set_asset_criticality\` with \`entityId: "host:server1"\`, \`entityType: "host"\`, \`criticality: "high_impact"\`.
+2. The tool presents a confirmation prompt — wait for the user to accept before calling follow-up tools.
+3. On success, briefly confirm the new criticality level. Optionally call \`security.get_entity\` to show the updated profile card.
+
+### Example 13: Clear asset criticality
+
+User query: "Remove the criticality for user:jsmith"
+
+Steps:
+1. Call \`security.set_asset_criticality\` with \`entityId: "user:jsmith"\`, \`entityType: "user"\`, \`criticality: "unassigned"\`.
+2. The tool presents a confirmation prompt — wait for the user to accept before calling follow-up tools.
+3. On success, inform the user the criticality has been cleared.
+
+### Example 13: List Watchlists
+
+User query: What watchlists do we have?
+
+Steps:
+1. Call \`security.list_watchlists\` (no arguments).
+2. Summarize the result in prose — name, risk modifier, and description per watchlist. Use a short markdown table when 4+ watchlists are returned. Do **not** emit a \`<render_attachment>\` tag; this tool does not produce a rich attachment.
+
+### Example 14: Members Of A Named Watchlist (discover → filter chain)
+
+User query: Who is on the Privileged Users watchlist?
+
+Steps:
+1. Call \`security.list_watchlists\` with \`nameContains: "Privileged Users"\` to resolve the name to a watchlist \`id\`. If multiple watchlists match, pick the one whose name best matches the user's phrasing and call out the ambiguity in prose. If no watchlists match, retry with a shorter distinctive token (e.g. \`nameContains: "privileged"\`).
+2. Call \`security.search_entities\` with \`watchlists: [<id from step 1>]\` (and any other filters the user gave) — the tool emits the aggregate \`security.entity\` attachment with the watchlist members.
+3. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line — the renderer shows the entities table Canvas with the members.
+4. Write 2–4 prose bullets calling out the riskiest members on the watchlist, biggest criticality gaps, and recommended follow-ups.
+
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
 - Provide the criticality level of the entity if available, otherwise report as "unknown"
@@ -462,6 +567,10 @@ Use this skill when:
 - A user asks to find the riskiest entities (hosts, users, services, generic) in their environment
 - A user wants to understand whether any entities have had a significant change in risk score
 - You want to look up the asset criticality level for an entity
+
+## Related Skills
+When asked to investigate unusual or anomalous behavior by entities, use:
+- '~/skills/security/ml/find-security-ml-jobs' to find the appropriate ML jobs that will answer the user's question
 
 ## Entity Analysis Process
 
@@ -552,7 +661,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, risk and criticality. ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
     content: `
@@ -568,6 +677,12 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
     getRegistryTools: () =>
       ctx.isEntityStoreV2Enabled
-        ? [SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
+        ? [
+            SECURITY_GET_ENTITY_TOOL_ID,
+            SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+            SECURITY_SEARCH_ENTITIES_TOOL_ID,
+            SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+          ]
         : [],
   });

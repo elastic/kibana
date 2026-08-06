@@ -32,7 +32,6 @@ import type {
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
-  AttachmentType,
   EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -71,6 +70,7 @@ import {
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
+import { parseUnifiedAttachmentWithSchema } from './attachments/validators';
 import type {
   AttachmentRequest,
   AttachmentRequestV2,
@@ -167,11 +167,8 @@ const decodeExternalReferenceAttachment = (
   }
 };
 
-/**
- * Decode and validate unified value attachment payload.
- * Validates the data structure using the schema validator from the registry.
- */
-const decodeUnifiedValueAttachment = (
+/** Validates a unified attachment via the registered `schema`. */
+const decodeUnifiedAttachment = (
   attachment: UnifiedAttachmentPayload,
   unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
@@ -182,39 +179,23 @@ const decodeUnifiedValueAttachment = (
   }
 
   const attachmentType = unifiedRegistry.get(attachment.type);
-  if (attachmentType.schemaValidator) {
-    attachmentType.schemaValidator(attachment.data);
-  }
-};
 
-/**
- * Decode and validate unified reference attachment payload.
- * Validates the metadata using the schema validator from the registry.
- */
-const decodeUnifiedReferenceAttachment = (
-  attachment: UnifiedAttachmentPayload,
-  unifiedRegistry: UnifiedAttachmentTypeRegistry
-) => {
-  if (!unifiedRegistry.has(attachment.type)) {
-    throw badRequest(
-      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
-    );
+  if (!attachmentType.schema) {
+    throw badRequest(`Attachment type '${attachment.type}' does not define a schema.`);
   }
 
-  const attachmentType = unifiedRegistry.get(attachment.type);
-  if (attachmentType.schemaValidator) {
-    attachmentType.schemaValidator(attachment.metadata ?? null);
-  }
+  parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
 };
 
 export const decodeUnifiedCommentRequest = (
   attachment: UnifiedAttachmentPayload,
   unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
-  if (isUnifiedValueAttachmentRequest(attachment)) {
-    decodeUnifiedValueAttachment(attachment, unifiedRegistry);
-  } else if (isUnifiedReferenceAttachmentRequest(attachment)) {
-    decodeUnifiedReferenceAttachment(attachment, unifiedRegistry);
+  if (
+    isUnifiedValueAttachmentRequest(attachment) ||
+    isUnifiedReferenceAttachmentRequest(attachment)
+  ) {
+    decodeUnifiedAttachment(attachment, unifiedRegistry);
   } else {
     assertUnreachable(attachment);
   }
@@ -810,16 +791,12 @@ export const buildAttachmentRequestFromFileJSON = ({
 }: {
   owner: string;
   fileMetadata: FileJSON;
-}): AttachmentRequest => ({
+}): AttachmentRequestV2 => ({
   owner,
-  type: AttachmentType.externalReference,
-  externalReferenceId: fileMetadata.id,
-  externalReferenceStorage: {
-    type: ExternalReferenceStorageType.savedObject,
+  type: FILE_ATTACHMENT_TYPE,
+  attachmentId: fileMetadata.id,
+  metadata: {
     soType: FILE_SO_TYPE,
-  },
-  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-  externalReferenceMetadata: {
     files: [
       {
         name: fileMetadata.name,

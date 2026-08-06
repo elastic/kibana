@@ -12,6 +12,8 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
@@ -101,9 +103,16 @@ describe('metric visualization', () => {
     primaryPosition: 'bottom',
     iconAlign: 'right',
     valueFontMode: 'default',
+    density: 'compact',
     secondaryTrend: { type: 'none' },
     secondaryLabelPosition: 'before',
     applyColorTo: 'background',
+  };
+
+  const getLegacyStateWithoutDensity = (): MetricVisualizationState => {
+    const legacyState: MetricVisualizationState = { ...fullState };
+    delete legacyState.density;
+    return legacyState;
   };
 
   const fullStateWTrend: Required<
@@ -123,11 +132,32 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
+        titlesTextAlign: 'left',
+        primaryPosition: 'bottom',
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
+        density: 'default',
       });
     });
 
     test('returns persisted state', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+
+    test('sets compact density for persisted state without density', () => {
+      expect(
+        visualization.initialize(() => fullState.layerId, getLegacyStateWithoutDensity())
+      ).toEqual(fullState);
+    });
+
+    test('preserves explicit persisted density', () => {
+      const stateWithDefaultDensity: MetricVisualizationState = {
+        ...fullState,
+        density: 'default',
+      };
+      expect(visualization.initialize(() => fullState.layerId, stateWithDefaultDensity)).toEqual(
+        stateWithDefaultDensity
+      );
     });
 
     test('removes legacy state property titleWeight', () => {
@@ -532,6 +562,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "density": Array [
+                  "compact",
+                ],
                 "iconAlign": Array [
                   "right",
                 ],
@@ -601,6 +634,21 @@ describe('metric visualization', () => {
       `);
     });
 
+    it('keeps legacy persisted metrics on compact density when building an expression', () => {
+      const initializedState = visualization.initialize(() => fullState.layerId, {
+        ...getLegacyStateWithoutDensity(),
+        breakdownByAccessor: undefined,
+        collapseFn: undefined,
+      });
+
+      const expression = visualization.toExpression(
+        initializedState,
+        datasourceLayers
+      ) as ExpressionAstExpression;
+
+      expect(expression.chain[0].arguments.density).toEqual(['compact']);
+    });
+
     it('builds breakdown by metric', () => {
       expect(visualization.toExpression({ ...fullState, collapseFn: undefined }, datasourceLayers))
         .toMatchInlineSnapshot(`
@@ -616,6 +664,9 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
+                ],
+                "density": Array [
+                  "compact",
                 ],
                 "iconAlign": Array [
                   "right",
@@ -957,6 +1008,9 @@ describe('metric visualization', () => {
               "color": Array [
                 "static-color",
               ],
+              "density": Array [
+                "compact",
+              ],
               "iconAlign": Array [
                 "right",
               ],
@@ -972,7 +1026,6 @@ describe('metric visualization', () => {
               "metric": Array [
                 "metric-col-id",
               ],
-              "palette": Array [],
               "primaryAlign": Array [
                 "right",
               ],
@@ -1052,6 +1105,7 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                applyColorTo: undefined,
                 showBar: true,
                 color: undefined,
               },
@@ -1226,6 +1280,7 @@ describe('metric visualization', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "applyColorTo": "background",
+        "density": "compact",
         "icon": "empty",
         "iconAlign": "right",
         "layerId": "first",

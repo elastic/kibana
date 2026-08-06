@@ -25,7 +25,7 @@ import {
   INVALIDATE_API_KEYS_TASK_REMOVAL_DELAY,
 } from './task_definition';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class ApiKeyInvalidationTaskRunner {
@@ -78,7 +78,7 @@ export class ApiKeyInvalidationTaskRunner {
       };
     } catch (e) {
       this.logger.error(
-        `Error executing notification policy apiKey invalidation task: ${(e as Error).message}`,
+        `Error executing action policy apiKey invalidation task: ${(e as Error).message}`,
         {
           error: { stack_trace: (e as Error).stack },
         }

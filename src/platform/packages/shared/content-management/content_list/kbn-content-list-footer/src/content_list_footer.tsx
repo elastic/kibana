@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { useContentListPagination } from '@kbn/content-list-provider';
+import { useContentListPagination, useContentListPhase } from '@kbn/content-list-provider';
 import { PaginationComponent } from './pagination_component';
+import { FooterSkeleton } from './skeleton/footer_skeleton';
 
 /**
  * Props for the {@link ContentListFooter} component.
@@ -38,6 +39,7 @@ export interface ContentListFooterProps {
 export const ContentListFooter = ({
   'data-test-subj': dataTestSubj = 'contentListFooter',
 }: ContentListFooterProps) => {
+  const phase = useContentListPhase();
   const {
     isSupported,
     pageIndex,
@@ -51,6 +53,27 @@ export const ContentListFooter = ({
   // Early exit if pagination is disabled. The `totalItems` guard is handled by
   // `PaginationComponent` itself, so we only check `isSupported` here.
   if (!isSupported) {
+    return null;
+  }
+
+  // Phase-aware rendering:
+  //   - 'initialLoad': a layout-matched skeleton so there's no vertical jump
+  //     when the real pagination row replaces it.
+  //   - 'filtered': pagination is meaningless when a filter returns zero
+  //     results — the table itself renders "no items match" and the footer
+  //     gets out of the way.
+  //   - Other phases ('filtering', 'populated'): render the real pagination.
+  //   - 'empty' never reaches this component — `<ContentList>` swaps the
+  //     whole region to its `emptyState` node.
+  if (phase === 'initialLoad') {
+    return (
+      <div data-test-subj={dataTestSubj}>
+        <FooterSkeleton data-test-subj={`${dataTestSubj}-skeleton`} />
+      </div>
+    );
+  }
+
+  if (phase === 'filtered') {
     return null;
   }
 

@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -32,6 +33,7 @@ export class EditJobDetailsTabUI extends Component {
       groups: [],
       selectedGroups: [],
       mml: '',
+      mmlEstimation: undefined,
       mmlValidationError: '',
       groupsValidationError: '',
       modelSnapshotRetentionDays: 1,
@@ -87,6 +89,7 @@ export class EditJobDetailsTabUI extends Component {
       description: props.jobDescription,
       selectedGroups,
       mml: props.jobModelMemoryLimit,
+      mmlEstimation: props.modelMemoryEstimation,
       mmlHelpText,
       mmlValidationError: props.jobModelMemoryLimitValidationError,
       groupsValidationError: props.jobGroupsValidationError,
@@ -101,6 +104,14 @@ export class EditJobDetailsTabUI extends Component {
 
   onMmlChange = (e) => {
     this.setJobDetails({ jobModelMemoryLimit: e.target.value });
+  };
+
+  onApplyMmlEstimation = () => {
+    const { mmlEstimation } = this.state;
+
+    if (mmlEstimation !== undefined && mmlEstimation !== '') {
+      this.setJobDetails({ jobModelMemoryLimit: mmlEstimation });
+    }
   };
 
   onModelSnapshotRetentionDaysChange = (e) => {
@@ -161,13 +172,50 @@ export class EditJobDetailsTabUI extends Component {
       mml,
       groups,
       mmlValidationError,
+      mmlEstimation,
       groupsValidationError,
       modelSnapshotRetentionDays,
       dailyModelSnapshotRetentionAfterDays,
       mmlHelpText,
     } = this.state;
 
-    const { datafeedRunning, jobClosed } = this.props;
+    const { datafeedRunning, jobClosed, hasDatafeed } = this.props;
+    const canApplyEstimatedMml =
+      mml?.toUpperCase() !== mmlEstimation?.toUpperCase() &&
+      mmlEstimation !== null &&
+      !datafeedRunning &&
+      jobClosed &&
+      hasDatafeed;
+
+    let mmlEstimationHelpText = null;
+    if (canApplyEstimatedMml) {
+      mmlEstimationHelpText =
+        mmlEstimation === undefined ? (
+          <FormattedMessage
+            id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitEstimatingLabel"
+            defaultMessage="Model memory limit is being estimated..."
+          />
+        ) : (
+          <span>
+            <FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitEstimatedLabel"
+              defaultMessage="Estimated model memory limit: {modelMemoryLimit} "
+              values={{ modelMemoryLimit: mmlEstimation }}
+            />
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              onClick={this.onApplyMmlEstimation}
+              css={{ verticalAlign: 'initial' }}
+            >
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.jobDetails.applyModelMemoryLimitEstimateLabel"
+                defaultMessage="Apply"
+              />
+            </EuiButtonEmpty>
+          </span>
+        );
+    }
 
     return (
       <React.Fragment>
@@ -216,7 +264,13 @@ export class EditJobDetailsTabUI extends Component {
                 defaultMessage="Model memory limit"
               />
             }
-            helpText={mmlHelpText}
+            helpText={
+              <React.Fragment>
+                {mmlHelpText}
+                {mmlHelpText !== null ? ' ' : null}
+                {mmlEstimationHelpText}
+              </React.Fragment>
+            }
             isInvalid={mmlValidationError !== ''}
             error={mmlValidationError}
           >
@@ -268,6 +322,7 @@ EditJobDetailsTabUI.propTypes = {
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,
+  modelMemoryEstimation: PropTypes.string,
   setJobDetails: PropTypes.func.isRequired,
 };
 

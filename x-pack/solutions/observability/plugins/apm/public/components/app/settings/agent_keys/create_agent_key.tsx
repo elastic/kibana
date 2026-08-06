@@ -163,7 +163,10 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             >
               <EuiCheckbox
                 id={htmlIdGenerator()()}
-                label="config_agent:read"
+                label={i18n.translate(
+                  'xpack.apm.createAgentKeyFlyout.euiCheckbox.configagentreadLabel',
+                  { defaultMessage: 'config_agent:read' }
+                )}
                 checked={agentConfig}
                 onChange={() =>
                   setAgentKeyBody((state) => ({
@@ -184,7 +187,10 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             >
               <EuiCheckbox
                 id={htmlIdGenerator()()}
-                label="event:write"
+                label={i18n.translate(
+                  'xpack.apm.createAgentKeyFlyout.euiCheckbox.eventwriteLabel',
+                  { defaultMessage: 'event:write' }
+                )}
                 checked={event}
                 onChange={() =>
                   setAgentKeyBody((state) => ({

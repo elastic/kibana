@@ -82,15 +82,45 @@ export type GetEndpointActionListResponse = z.infer<typeof GetEndpointActionList
 
 export const EndpointGetActionsListRequestQuery = lazySchema(() =>
   z.object({
+    /**
+     * The page number to return.
+     */
     page: Page.optional(),
+    /**
+     * The number of response actions to return per page.
+     */
     pageSize: PageSize.optional(),
+    /**
+     * A list of response action command names to filter by.
+     */
     commands: Commands.optional(),
+    /**
+     * A list of Elastic Agent IDs to filter the response actions by.
+     */
     agentIds: AgentIds.optional(),
+    /**
+     * A list of user IDs that submitted the response actions.
+     */
     userIds: UserIds.optional(),
+    /**
+     * A start date in ISO 8601 format or Date Math format (for example, `now-24h`).
+     */
     startDate: StartDate.optional(),
+    /**
+     * An end date in ISO 8601 format or Date Math format (for example, `now`).
+     */
     endDate: EndDate.optional(),
+    /**
+     * The agent type to filter response actions by. Defaults to `endpoint`.
+     */
     agentTypes: AgentTypes.optional(),
+    /**
+     * A list of response action IDs whose outputs should be included in the response.
+     */
     withOutputs: WithOutputs.optional(),
+    /**
+     * A list of response action types to filter by (`automated`, `manual`).
+     */
     types: Types.optional(),
   })
 );

@@ -24,6 +24,7 @@ import {
   useEuiTheme,
   EuiToolTip,
   copyToClipboard,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -115,31 +116,37 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
+  const popoverTitleId = useGeneratedHtmlId();
+  const metaDataLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+    { defaultMessage: 'Metadata for document: {id}', values: { id } }
+  );
 
   const metaDataIcon = (
-    <EuiButtonIcon
-      display="empty"
-      size="s"
-      iconType="info"
-      color="primary"
-      data-test-subj="documentMetadataButton"
-      onClick={(e: React.MouseEvent<HTMLElement>) => {
-        e.stopPropagation();
-        setPopoverIsOpen(!popoverIsOpen);
-      }}
-      aria-label={i18n.translate(
-        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-        {
-          defaultMessage: 'Metadata for document: {id}',
-          values: { id },
-        }
-      )}
-    />
+    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        display="empty"
+        size="s"
+        iconType="info"
+        color="primary"
+        data-test-subj="documentMetadataButton"
+        onClick={(e: React.MouseEvent<HTMLElement>) => {
+          e.stopPropagation();
+          setPopoverIsOpen(!popoverIsOpen);
+        }}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
         <FormattedMessage
           id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"
           defaultMessage="Document metadata"
@@ -229,7 +236,7 @@ const Score: React.FC<{ score: MetaDataProps['score'] }> = ({ score }) => {
         gutterSize="s"
       >
         <EuiFlexItem grow>
-          <EuiIcon type="chartGauge" size="m" />
+          <EuiIcon type="chartGauge" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiPanel

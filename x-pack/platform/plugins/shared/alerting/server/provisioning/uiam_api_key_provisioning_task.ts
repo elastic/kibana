@@ -7,6 +7,7 @@
 
 import { distinctUntilChanged, type Subscription } from 'rxjs';
 import type { AnalyticsServiceSetup, Logger, CoreSetup, CoreStart } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -59,6 +60,7 @@ export class UiamApiKeyProvisioningTask {
   private readonly isServerless: boolean;
   private readonly analytics: AnalyticsServiceSetup;
   private featureFlagSubscription: Subscription | undefined;
+  private appliedFlagValue: boolean | undefined;
 
   constructor({
     logger,
@@ -192,7 +194,14 @@ export class UiamApiKeyProvisioningTask {
     enabled: boolean,
     taskManager: TaskManagerStartContract
   ): Promise<void> => {
-    if (enabled) {
+    // Only react to real flag transitions. The initial subscription emission
+    // (previousValue === undefined) with `false` is treated as a no-op: there
+    // is nothing to unschedule, and attempting to remove a non-existent task
+    // can surface transient errors during startup.
+    const previousValue = this.appliedFlagValue;
+    this.appliedFlagValue = enabled;
+
+    if (enabled && previousValue !== true) {
       try {
         await this.scheduleProvisioningTask(taskManager);
       } catch (e) {
@@ -201,7 +210,10 @@ export class UiamApiKeyProvisioningTask {
           { tags: TAGS }
         );
       }
-    } else {
+      return;
+    }
+
+    if (!enabled && previousValue === true) {
       try {
         await this.unscheduleProvisioningTask(taskManager);
       } catch (e) {
@@ -358,7 +370,7 @@ export class UiamApiKeyProvisioningTask {
         await bulkMarkApiKeysForInvalidation(
           { apiKeys: orphanedUiamApiKeys },
           this.logger,
-          context.savedObjectsClient
+          context.unsafeSavedObjectsClient
         );
       }
 
@@ -387,7 +399,7 @@ export class UiamApiKeyProvisioningTask {
     try {
       const result = await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
       for (const so of result?.saved_objects ?? []) {
-        if (so.error) {
+        if (isSavedObjectErrorResult(so)) {
           // Per-item SOR failure: next run will re-attempt the same id via `overwrite: true`.
           // We surface it as a warn so operators can spot systematically broken docs instead
           // of the failure being silently swallowed inside the bulk response.

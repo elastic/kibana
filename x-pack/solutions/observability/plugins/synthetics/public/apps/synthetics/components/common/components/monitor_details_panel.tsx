@@ -16,7 +16,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
@@ -28,10 +28,12 @@ import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
+  SelectedSyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, isExternalSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
+import { MonitorMaintenanceWindows } from './monitor_maintenance_windows';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useGetUrlParams } from '../../../hooks';
 
@@ -39,7 +41,7 @@ export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
-  monitor: SyntheticsMonitorWithId | EncryptedSyntheticsSavedMonitor | null;
+  monitor: SyntheticsMonitorWithId | SelectedSyntheticsMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
   hasBorder?: boolean;
@@ -62,8 +64,21 @@ export const MonitorDetailsPanel = ({
     return <EuiSkeletonText lines={8} />;
   }
 
-  const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
-  const labels = monitor[ConfigKey.LABELS];
+  // External monitors (remote CCS + Heartbeat/Agent) are read-only projections
+  // with no saved object, so SO-only fields (labels/updated_at/project_id/
+  // enabled toggle) are unavailable and must be hidden from the panel.
+  const isExternal = isExternalSyntheticsMonitor(monitor as SelectedSyntheticsMonitor);
+  const savedMonitor = isExternal
+    ? null
+    : (monitor as EncryptedSyntheticsSavedMonitor | SyntheticsMonitorWithId);
+
+  const url = latestPing?.url?.full ?? (savedMonitor as unknown as MonitorFields)?.[ConfigKey.URLS];
+  const labels = savedMonitor?.[ConfigKey.LABELS];
+  const maintenanceWindows = savedMonitor?.[ConfigKey.MAINTENANCE_WINDOWS];
+  // External monitors have no SO schedule; Heartbeat encodes its run interval in
+  // each ping's `monitor.timespan`, so fall back to deriving it for display.
+  const schedule =
+    savedMonitor?.[ConfigKey.SCHEDULE] ?? getScheduleFromTimespan(latestPing?.monitor?.timespan);
 
   return (
     <PanelWithTitle
@@ -81,25 +96,23 @@ export const MonitorDetailsPanel = ({
         align="left"
         css={{ maxWidth: 550 }}
       >
-        {!hideEnabled && (
+        {!hideEnabled && savedMonitor && (
           <>
             <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {monitor && (
-                <MonitorEnabled
-                  initialLoading={loading}
-                  configId={configId}
-                  monitor={monitor}
-                  reloadPage={() => {
-                    dispatch(
-                      getMonitorAction.get({
-                        monitorId: configId,
-                        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-                      })
-                    );
-                  }}
-                />
-              )}
+              <MonitorEnabled
+                initialLoading={loading}
+                configId={configId}
+                monitor={savedMonitor}
+                reloadPage={() => {
+                  dispatch(
+                    getMonitorAction.get({
+                      monitorId: configId,
+                      ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+                    })
+                  );
+                }}
+              />
             </EuiDescriptionListDescription>
           </>
         )}
@@ -127,15 +140,19 @@ export const MonitorDetailsPanel = ({
             </EuiText>
           )}
         </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <Time timestamp={monitor.updated_at} />
-        </EuiDescriptionListDescription>
-        {monitor[ConfigKey.PROJECT_ID] && (
+        {savedMonitor && (
+          <>
+            <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <Time timestamp={savedMonitor.updated_at} />
+            </EuiDescriptionListDescription>
+          </>
+        )}
+        {savedMonitor?.[ConfigKey.PROJECT_ID] && (
           <>
             <EuiDescriptionListTitle>{PROJECT_ID_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {monitor[ConfigKey.PROJECT_ID]}
+              {savedMonitor[ConfigKey.PROJECT_ID]}
             </EuiDescriptionListDescription>
           </>
         )}
@@ -145,16 +162,22 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>
           <MonitorTypeBadge monitorType={monitor.type} />
         </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {frequencyStr(monitor[ConfigKey.SCHEDULE])}
-        </EuiDescriptionListDescription>
+        {schedule && (
+          <>
+            <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>{frequencyStr(schedule)}</EuiDescriptionListDescription>
+          </>
+        )}
 
         {!hideLocations && (
           <>
             <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+              <LocationsStatus
+                configId={configId}
+                monitorLocations={monitor.locations}
+                spaces={savedMonitor?.[ConfigKey.KIBANA_SPACES]}
+              />
             </EuiDescriptionListDescription>
           </>
         )}
@@ -163,6 +186,15 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>
           <TagsList tags={monitor[ConfigKey.TAGS]} />
         </EuiDescriptionListDescription>
+
+        {!isEmpty(maintenanceWindows) ? (
+          <>
+            <EuiDescriptionListTitle>{MAINTENANCE_WINDOWS_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <MonitorMaintenanceWindows monitorMWs={maintenanceWindows!} />
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
 
         {!isEmpty(labels) ? (
           <>
@@ -185,6 +217,36 @@ export function frequencyStr(frequency: { number: string; unit: string }) {
   return translateUnitMessage(
     `${frequency.number} ${unitToString(frequency.unit, parseInt(frequency.number, 10))}`
   );
+}
+
+/**
+ * Heartbeat doesn't ship a schedule field in pings, but `monitor.timespan`
+ * spans exactly one run period (gte = run start, lt = next scheduled run), so
+ * `lt - gte` approximates the configured frequency. Used only to display a
+ * read-only frequency for external monitors that have no saved object.
+ */
+export function getScheduleFromTimespan(
+  timespan?: Ping['monitor']['timespan']
+): { number: string; unit: string } | undefined {
+  if (!timespan?.gte || !timespan?.lt) {
+    return undefined;
+  }
+  const seconds = Math.round(
+    (new Date(timespan.lt).getTime() - new Date(timespan.gte).getTime()) / 1000
+  );
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return undefined;
+  }
+  if (seconds % 86400 === 0) {
+    return { number: String(seconds / 86400), unit: 'd' };
+  }
+  if (seconds % 3600 === 0) {
+    return { number: String(seconds / 3600), unit: 'h' };
+  }
+  if (seconds % 60 === 0) {
+    return { number: String(seconds / 60), unit: 'm' };
+  }
+  return { number: String(seconds), unit: 's' };
 }
 
 function unitToString(unit: string, n: number) {
@@ -259,6 +321,13 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags'
 const LABELS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.labels', {
   defaultMessage: 'Labels',
 });
+
+const MAINTENANCE_WINDOWS_LABEL = i18n.translate(
+  'xpack.synthetics.management.monitorList.maintenanceWindows',
+  {
+    defaultMessage: 'Maintenance windows',
+  }
+);
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
   defaultMessage: 'Enabled (all locations)',

@@ -59,6 +59,16 @@ export interface BurnRatesClient {
 
 type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 
+interface BatchItemMeta {
+  index: string;
+  slo: SLODefinition;
+  instanceId: string;
+  lookbackWindows: LookbackWindow[];
+  sortedLookbackWindows: LookbackWindow[];
+  longestDateRange: DateRange;
+  delayInSeconds: number;
+}
+
 export class DefaultBurnRatesClient implements BurnRatesClient {
   constructor(private esClient: ElasticsearchClient) {}
 
@@ -107,35 +117,133 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
       return [];
     }
 
-    const perItemMeta = params.map(({ slo, instanceId, lookbackWindows, remoteName }) => {
-      if (lookbackWindows.length === 0) {
-        throw new Error(`lookbackWindows must not be empty for SLO [${slo.id}]`);
-      }
-      const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
-        a.duration.isShorterThan(b.duration) ? 1 : -1
-      );
-      const longestLookbackWindow = sortedLookbackWindows[0];
-      const delayInSeconds = getDelayInSecondsFromSLO(slo);
-      const longestDateRange = getLookbackDateRange(
-        new Date(),
-        longestLookbackWindow.duration,
-        delayInSeconds
-      );
-      const index = remoteName
-        ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
-        : SLI_DESTINATION_INDEX_PATTERN;
+    const perItemMeta: BatchItemMeta[] = params.map(
+      ({ slo, instanceId, lookbackWindows, remoteName }) => {
+        if (lookbackWindows.length === 0) {
+          throw new Error(`lookbackWindows must not be empty for SLO [${slo.id}]`);
+        }
+        const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
+          a.duration.isShorterThan(b.duration) ? 1 : -1
+        );
+        const longestLookbackWindow = sortedLookbackWindows[0];
+        const delayInSeconds = getDelayInSecondsFromSLO(slo);
+        const longestDateRange = getLookbackDateRange(
+          new Date(),
+          longestLookbackWindow.duration,
+          delayInSeconds
+        );
+        const index = remoteName
+          ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+          : SLI_DESTINATION_INDEX_PATTERN;
 
-      return {
-        index,
-        slo,
-        instanceId,
-        lookbackWindows,
-        sortedLookbackWindows,
-        longestDateRange,
-        delayInSeconds,
+        return {
+          index,
+          slo,
+          instanceId,
+          lookbackWindows,
+          sortedLookbackWindows,
+          longestDateRange,
+          delayInSeconds,
+        };
+      }
+    );
+
+    const canUseNamedFilters =
+      perItemMeta.length > 1 && perItemMeta.every((m) => m.index === perItemMeta[0].index);
+
+    if (canUseNamedFilters) {
+      return this.calculateBatchWithNamedFilters(perItemMeta);
+    }
+    return this.calculateBatchWithMsearch(perItemMeta);
+  }
+
+  private async calculateBatchWithNamedFilters(
+    perItemMeta: BatchItemMeta[]
+  ): Promise<BurnRateResult[][]> {
+    const { index } = perItemMeta[0];
+
+    let widestFrom: Date = perItemMeta[0].longestDateRange.from;
+    let widestTo: Date = perItemMeta[0].longestDateRange.to;
+    for (const { longestDateRange } of perItemMeta) {
+      if (longestDateRange.from < widestFrom) widestFrom = longestDateRange.from;
+      if (longestDateRange.to > widestTo) widestTo = longestDateRange.to;
+    }
+
+    const uniqueSloIds = [...new Set(perItemMeta.map((m) => m.slo.id))];
+
+    const memberAggs: Record<string, AggregationsAggregationContainer> = {};
+    for (let i = 0; i < perItemMeta.length; i++) {
+      const { slo, instanceId, sortedLookbackWindows, longestDateRange, delayInSeconds } =
+        perItemMeta[i];
+
+      const filterClauses: QueryDslQueryContainer[] = [
+        { term: { 'slo.id': slo.id } },
+        { term: { 'slo.revision': slo.revision } },
+        {
+          range: {
+            '@timestamp': {
+              gte: longestDateRange.from.toISOString(),
+              lt: longestDateRange.to.toISOString(),
+            },
+          },
+        },
+      ];
+
+      if (instanceId !== ALL_VALUE) {
+        filterClauses.push({ term: { 'slo.instanceId': instanceId } });
+      }
+
+      memberAggs[`member_${i}`] = {
+        filter: { bool: { filter: filterClauses } },
+        aggs: occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+          ? toLookbackWindowsAggregationsQuery(
+              longestDateRange.to,
+              sortedLookbackWindows,
+              delayInSeconds
+            )
+          : toLookbackWindowsSlicedAggregationsQuery(
+              longestDateRange.to,
+              sortedLookbackWindows,
+              delayInSeconds
+            ),
       };
+    }
+
+    const result = await this.esClient.search({
+      index,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { 'slo.id': uniqueSloIds } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: widestFrom.toISOString(),
+                  lt: widestTo.toISOString(),
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: memberAggs,
     });
 
+    const aggregations = result.aggregations as Record<string, any> | undefined;
+
+    return perItemMeta.map(({ lookbackWindows, slo }, i) => {
+      const bucket = aggregations?.[`member_${i}`];
+      if (!bucket) {
+        throw new InternalQueryError('Invalid aggregation response');
+      }
+      return handleWindowedResult(bucket as EsAggregations, lookbackWindows, slo);
+    });
+  }
+
+  private async calculateBatchWithMsearch(
+    perItemMeta: BatchItemMeta[]
+  ): Promise<BurnRateResult[][]> {
     const searches = perItemMeta.flatMap(
       ({ index, slo, instanceId, sortedLookbackWindows, longestDateRange, delayInSeconds }) => [
         { index },

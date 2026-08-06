@@ -14,12 +14,14 @@ import { Streams } from '@kbn/streams-schema';
 import type { SearchRequest, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import {
   STREAMS_QUERY_DOCUMENTS_TOOL_ID as QUERY_DOCUMENTS,
-  STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
+  STREAMS_INSPECT_STREAMS_TOOL_ID as INSPECT_STREAMS,
+  STREAMS_DIAGNOSE_STREAM_TOOL_ID as DIAGNOSE_STREAM,
 } from '../tool_ids';
 import { translateNlToEsDsl } from './nl_to_es_dsl';
-import { classifyError } from '../error_utils';
+import { classifyError } from '../../utils/error_utils';
 
 const DEFAULT_SIZE = 10;
 const MAX_DOCUMENTS = 25;
@@ -37,7 +39,42 @@ const queryDocumentsSchema = z.object({
       - "errors from the last hour"
       - "average event.duration where http.response.status_code >= 500"`)
   ),
+  source: z
+    .enum(['data', 'failures'])
+    .optional()
+    .default('data')
+    .describe(
+      'Which store to query. "data" (default) queries successfully indexed documents. ' +
+        '"failures" queries the failure store — rejected documents wrapped with error metadata ' +
+        '(error.type, error.message, error.stack_trace, and the original document under document.source). ' +
+        'Use "failures" after diagnose_stream flags processing errors to see raw rejected documents.'
+    ),
 });
+
+const DISALLOWED_DSL_KEYS = new Set([
+  'script',
+  'script_score',
+  'script_fields',
+  'stored_fields',
+  'runtime_mappings',
+]);
+
+const containsDisallowedKeys = (obj: unknown): string | null => {
+  if (typeof obj !== 'object' || obj === null) return null;
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      const found = containsDisallowedKeys(item);
+      if (found) return found;
+    }
+    return null;
+  }
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (DISALLOWED_DSL_KEYS.has(key)) return key;
+    const found = containsDisallowedKeys(value);
+    if (found) return found;
+  }
+  return null;
+};
 
 export const createQueryDocumentsTool = ({
   getScopedClients,
@@ -47,37 +84,41 @@ export const createQueryDocumentsTool = ({
   id: QUERY_DOCUMENTS,
   type: ToolType.builtin,
   description: dedent(`
-    Queries or aggregates data from a stream using a natural language description. The tool translates the description into an Elasticsearch query internally. Returns documents in flat dot-notation format and/or aggregation results.
+    Queries or aggregates data from a stream using a natural language description. Supports querying both the primary data store and the failure store (rejected documents) via the \`source\` parameter. The tool translates the description into an Elasticsearch query internally. Returns documents in flat dot-notation format and/or aggregation results.
 
     **When to use:**
     - User asks to "show me recent documents" or "what does the data look like?"
     - User asks about specific field values or patterns in the data
     - User wants aggregated metrics (counts, top values, histograms, etc.)
-    - Any query or aggregation against stream data
+    - After ${DIAGNOSE_STREAM} flags processing errors — use source: "failures" to see raw rejected documents, run custom filters, or aggregate error patterns
 
     **When NOT to use:**
     - User wants pre-computed quality/lifecycle metrics — use the focused tool
-    - User wants field definitions — use ${GET_SCHEMA}
+    - User wants field definitions — use ${INSPECT_STREAMS} with aspects: ["schema"]
+    - First-pass failure diagnosis — use ${DIAGNOSE_STREAM} first for grouped error analysis with sample documents. Use source: "failures" here for follow-up queries when you need more samples or custom filters
 
     **Formatting documents:**
     - Full/raw documents: show each as a compact "field.name: value" block. Omit stream.name (already known).
     - Browsing/summarizing: show a table with @timestamp and 3-4 key fields (e.g. body.text, host.name, log.level). Mention how many fields were omitted.
+    - Failure store documents: show error.type and error.message first, then key fields from document.source.* that relate to the error.
     **Formatting aggregations:** Always include the metric value alongside each key (e.g. "host2 — 1,532 docs", "200 — 45.2%"). For terms aggregations, show the doc_count. For metric aggregations, show the computed value with units where known.
   `),
   tags: ['streams'],
   schema: queryDocumentsSchema,
-  handler: async ({ name, query: nlQuery }, { request, modelProvider }) => {
+  handler: async ({ name, query: nlQuery, source }, { request, modelProvider }) => {
     try {
       const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
       const esClient = scopedClusterClient.asCurrentUser;
+
+      const targetIndex = source === 'failures' ? `${name}${FAILURE_STORE_SELECTOR}` : name;
 
       const definition = await streamsClient.getStream(name);
       const definitionFieldTypes = getDefinitionFieldTypes(definition);
 
       const [fieldCapsResponse, sampleDocs, model] = await Promise.all([
-        esClient.fieldCaps({ index: name, fields: ['*'], ignore_unavailable: true }),
+        esClient.fieldCaps({ index: targetIndex, fields: ['*'], ignore_unavailable: true }),
         esClient.search({
-          index: name,
+          index: targetIndex,
           sort: [{ '@timestamp': { order: 'desc' as const } }],
           size: 50,
           ignore_unavailable: true,
@@ -99,10 +140,28 @@ export const createQueryDocumentsTool = ({
         availableFields,
       });
 
+      const disallowedKey = containsDisallowedKeys(translated);
+      if (disallowedKey) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `Query translation produced a disallowed construct: "${disallowedKey}". Only standard query, aggregation, and sort operations are supported.`,
+                stream: name,
+                operation: 'query_documents',
+                likely_cause:
+                  'The natural language query was translated into an unsupported Elasticsearch DSL construct. Try rephrasing the query.',
+              },
+            },
+          ],
+        };
+      }
+
       const { requestedSize, cappedSize } = computeSearchSize(translated);
 
       const searchParams: SearchRequest = {
-        index: name,
+        index: targetIndex,
         query: translated.query ?? { match_all: {} },
         sort: translated.sort ?? [{ '@timestamp': { order: 'desc' } }],
         size: cappedSize,
@@ -163,6 +222,24 @@ export const createQueryDocumentsTool = ({
         ],
       };
     } catch (err) {
+      if (source === 'failures' && isNotFoundError(err)) {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                stream: name,
+                source: 'failures',
+                documents: [],
+                returned_count: 0,
+                total_matching: 0,
+                note: 'No failure store exists for this stream, or it is empty. This typically means no documents have failed ingestion.',
+              },
+            },
+          ],
+        };
+      }
+
       const message = err instanceof Error ? err.message : String(err);
       return {
         results: [
@@ -308,6 +385,13 @@ export const computeTimestampRange = (
     }
   }
   return { oldest, newest };
+};
+
+export const isNotFoundError = (err: unknown): boolean => {
+  const statusCode = (err as { statusCode?: number }).statusCode;
+  if (statusCode === 404) return true;
+  const message = err instanceof Error ? err.message : String(err);
+  return message.includes('index_not_found_exception');
 };
 
 export const detectEmptyAggregations = (

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React, { Suspense } from 'react';
+import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, EVALS_UI_PRIVILEGES } from '../common';
 import type {
   AddToDatasetAction,
   AddToDatasetActionConfig,
@@ -19,6 +19,7 @@ import type {
   EvalsSetupDependencies,
   EvalsStartDependencies,
 } from './types';
+import { registerEvalsPublicWorkflowSteps } from './workflows';
 
 const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
 
@@ -26,14 +27,29 @@ const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAct
   defaultMessage: 'Add to dataset',
 });
 
+/** Browser-exposed subset of the evals config (see `exposeToBrowser` in `server/config.ts`). */
+interface EvalsPublicConfig {
+  enabled: boolean;
+}
+
 export class EvalsPublicPlugin
   implements
     Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
 {
+  private readonly config: EvalsPublicConfig;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<EvalsPublicConfig>();
+  }
+
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
-    { management }: EvalsSetupDependencies
+    { management, workflowsExtensions }: EvalsSetupDependencies
   ): EvalsPublicSetup {
+    if (this.config.enabled && workflowsExtensions) {
+      registerEvalsPublicWorkflowSteps(workflowsExtensions);
+    }
+
     if (management) {
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,
@@ -54,20 +70,14 @@ export class EvalsPublicPlugin
   }
 
   start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
-    const LazyTraceWaterfall = React.lazy(async () => {
-      const mod = await import('./components/trace_waterfall');
-      return { default: mod.TraceWaterfall };
-    });
-
-    const TraceWaterfall: EvalsPublicStart['TraceWaterfall'] = ({ traceId }) => {
-      return (
-        <Suspense fallback={null}>
-          <LazyTraceWaterfall traceId={traceId} />
-        </Suspense>
-      );
-    };
+    const canAddToDataset =
+      !!core.application.capabilities?.[PLUGIN_ID]?.[EVALS_UI_PRIVILEGES.manage];
 
     const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
+      if (!canAddToDataset) {
+        return;
+      }
+
       void (async () => {
         const { AddToDatasetFlyout } = await import('./components/add_to_dataset_flyout');
         const overlayRef = core.overlays.openFlyout(
@@ -90,7 +100,11 @@ export class EvalsPublicPlugin
       })();
     };
 
-    const getAddToDatasetAction = (config: AddToDatasetActionConfig): AddToDatasetAction => {
+    const getAddToDatasetAction = (config: AddToDatasetActionConfig): AddToDatasetAction | null => {
+      if (!canAddToDataset) {
+        return null;
+      }
+
       const {
         label = DEFAULT_ADD_TO_DATASET_LABEL,
         ariaLabel = label,
@@ -112,7 +126,7 @@ export class EvalsPublicPlugin
       };
     };
 
-    return { TraceWaterfall, openAddToDatasetFlyout, getAddToDatasetAction };
+    return { canAddToDataset, openAddToDatasetFlyout, getAddToDatasetAction };
   }
 
   stop() {}

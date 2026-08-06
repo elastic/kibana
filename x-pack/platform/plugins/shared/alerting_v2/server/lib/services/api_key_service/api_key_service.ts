@@ -6,6 +6,7 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -21,9 +22,16 @@ export interface ApiKeyAttributes {
   createdByUser: boolean;
 }
 
+/**
+ * Outcome of registering a single API key for invalidation. Returned instead
+ * of thrown so a caller invalidating a batch still learns about the keys that
+ * did register, and so best-effort callers can keep ignoring the result.
+ */
+export type ApiKeyInvalidationResult = { success: true } | { success: false; message: string };
+
 export interface ApiKeyServiceContract {
   create(name: string): Promise<ApiKeyAttributes>;
-  markApiKeysForInvalidation(apiKeys: string[]): Promise<void>;
+  markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]>;
 }
 
 const encodeApiKey = (id?: string, key?: string): string | null => {
@@ -45,7 +53,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const username = this.securityService.authc.getCurrentUser(this.request)?.username;
     if (!username) {
       throw new Error(
-        `Failed to create API key for notification policy: ${name} - unable to determine current user`
+        `Failed to create API key for action policy: ${name} - unable to determine current user`
       );
     }
 
@@ -58,35 +66,48 @@ export class ApiKeyService implements ApiKeyServiceContract {
     return this.grantAPIKeyAttributes(name, username);
   }
 
-  public async markApiKeysForInvalidation(apiKeys: string[]): Promise<void> {
+  public async markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]> {
     if (apiKeys.length === 0) {
-      return;
+      return [];
     }
-    const apiKeysToInvalidate = apiKeys.map((key) => {
-      const { apiKeyId, apiKeyValue } = this.decodeApiKey(key);
+    const decodedApiKeys = apiKeys.map((key) => this.decodeApiKey(key));
+    const apiKeysToInvalidate = decodedApiKeys.map(({ apiKeyId, apiKeyValue }) => ({
+      attributes: {
+        apiKeyId,
+        createdAt: new Date().toISOString(),
+        ...(apiKeyValue && isUiamCredential(apiKeyValue) ? { uiamApiKey: apiKeyValue } : {}),
+      },
+      type: API_KEY_PENDING_INVALIDATION_TYPE,
+    }));
 
-      return {
-        attributes: {
-          apiKeyId,
-          createdAt: new Date().toISOString(),
-          ...(apiKeyValue && isUiamCredential(apiKeyValue) ? { uiamApiKey: apiKeyValue } : {}),
-        },
-        type: API_KEY_PENDING_INVALIDATION_TYPE,
-      };
-    });
-
+    let response;
     try {
-      await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
+      response = await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
+      const message = (e as Error).message;
       this.logger.error(
         `Failed to bulk mark list of API keys [${apiKeys
           .map((key) => `"${key}"`)
-          .join(', ')}] for invalidation: ${(e as Error).message}`,
+          .join(', ')}] for invalidation: ${message}`,
         {
           error: { stack_trace: (e as Error).stack },
         }
       );
+      return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
     }
+
+    return decodedApiKeys.map(({ apiKeyId }, index): ApiKeyInvalidationResult => {
+      const created = response.saved_objects[index];
+      if (created && !isSavedObjectErrorResult(created)) {
+        return { success: true };
+      }
+
+      const message = created
+        ? created.error.message
+        : 'Saved object was not returned by bulkCreate';
+      this.logger.error(`Failed to mark API key "${apiKeyId}" for invalidation: ${message}`);
+      return { success: false, message };
+    });
   }
 
   private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {
@@ -103,7 +124,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
     if (!authorizationHeader?.credentials) {
       throw new Error(
-        `Failed to extract API key from authorization header for notification policy: ${name}`
+        `Failed to extract API key from authorization header for action policy: ${name}`
       );
     }
 
@@ -111,7 +132,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
 
     if (!apiKeyId || !apiKeyValue) {
       throw new Error(
-        `Failed to parse API key credentials from authorization header for notification policy: ${name}`
+        `Failed to parse API key credentials from authorization header for action policy: ${name}`
       );
     }
 
@@ -135,7 +156,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
       });
 
       if (!uiamResult) {
-        throw new Error(`Failed to create UIAM API key for notification policy: ${name}`);
+        throw new Error(`Failed to create UIAM API key for action policy: ${name}`);
       }
 
       return {
@@ -148,11 +169,11 @@ export class ApiKeyService implements ApiKeyServiceContract {
     const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
       name,
       role_descriptors: {},
-      metadata: { managed: true, kibana: { type: 'notification_policy' } },
+      metadata: { managed: true, kibana: { type: 'action_policy' } },
     });
 
     if (!esResult) {
-      throw new Error(`Failed to create ES API key for notification policy: ${name}`);
+      throw new Error(`Failed to create ES API key for action policy: ${name}`);
     }
 
     return {

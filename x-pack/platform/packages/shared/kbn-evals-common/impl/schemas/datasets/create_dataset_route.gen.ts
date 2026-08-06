@@ -14,19 +14,27 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+
+export const CreateEvaluationDatasetRequestBody = lazySchema(() =>
+  z.object({
+    name: z.string().min(1).max(256),
+    description: z.string().max(2048),
+    tags: DatasetTags.optional(),
+    maturity: DatasetMaturity.optional(),
+  })
+);
 export type CreateEvaluationDatasetRequestBody = z.infer<typeof CreateEvaluationDatasetRequestBody>;
-export const CreateEvaluationDatasetRequestBody = z.object({
-  name: z.string(),
-  description: z.string(),
-});
 export type CreateEvaluationDatasetRequestBodyInput = z.input<
   typeof CreateEvaluationDatasetRequestBody
 >;
 
+export const CreateEvaluationDatasetResponse = lazySchema(() =>
+  z.object({
+    dataset_id: z.string(),
+    name: z.string(),
+  })
+);
 export type CreateEvaluationDatasetResponse = z.infer<typeof CreateEvaluationDatasetResponse>;
-export const CreateEvaluationDatasetResponse = z.object({
-  dataset_id: z.string(),
-  name: z.string(),
-});

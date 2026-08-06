@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/picomatcher'
   - '@kbn/repo-packages'
   - '@kbn/dev-utils'
+  - '@kbn/es'
+  - '@kbn/rspack-optimizer'
 tags:
   - shared-server
   - package

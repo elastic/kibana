@@ -67,7 +67,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
   })),
   save: jest.fn(),
   saveDiscoverSession: jest.fn(),
-  checkForDuplicateTitle: jest.fn(),
+  hasLibraryItemWithTitle: jest.fn(),
   byValueToSavedSearch: toSavedSearchMock,
 });
 

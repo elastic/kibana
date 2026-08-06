@@ -70,7 +70,7 @@ export class SearchHomepagePlugin
         return renderApp(coreStart, startDeps, element, queryClient, kibanaVersion);
       },
       order: 0,
-      visibleIn: ['globalSearch', 'sideNav'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
 
     return result;

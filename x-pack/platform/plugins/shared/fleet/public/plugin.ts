@@ -14,6 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
@@ -59,7 +60,13 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import type { FleetAuthz } from '../common';
-import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
+import {
+  appRoutesService,
+  INTEGRATIONS_PLUGIN_ID,
+  PLUGIN_ID,
+  setupRouteService,
+  registerAwsOnboardingEvents,
+} from '../common';
 import {
   calculateAuthz,
   calculateEndpointExceptionsPrivilegesFromCapabilities,
@@ -79,11 +86,6 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import {
-  createCustomIntegrationsSearchProvider,
-  createPackageSearchProvider,
-} from './search_provider';
-import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
 import type {
@@ -166,6 +168,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
   private appUpdater$ = new Subject<AppUpdater>();
+  private logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
@@ -174,12 +177,16 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       this.config.experimentalFeatures || {}
     );
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
+
+    // registerEventType is on AnalyticsServiceSetup (setup), not AnalyticsServiceStart (start).
+    registerAwsOnboardingEvents(core.analytics);
 
     setCustomIntegrations(deps.customIntegrations);
 
@@ -281,8 +288,15 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Register components for home/add data integration
     if (deps.home) {
-      deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
-      deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+      const { home } = deps;
+      import('./components/home_integration')
+        .then(({ TutorialDirectoryHeaderLink, TutorialModuleNotice }) => {
+          home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
+          home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+        })
+        .catch(() => {
+          this.logger.error('Failed to load home integration components.');
+        });
 
       deps.home.featureCatalogue.register({
         id: 'fleet',
@@ -301,10 +315,17 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     }
 
     if (deps.globalSearch) {
-      deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
-      deps.globalSearch.registerResultProvider(
-        createCustomIntegrationsSearchProvider(deps.customIntegrations)
-      );
+      const { globalSearch } = deps;
+      import('./search_provider')
+        .then(({ createPackageSearchProvider, createCustomIntegrationsSearchProvider }) => {
+          globalSearch.registerResultProvider(createPackageSearchProvider(core));
+          globalSearch.registerResultProvider(
+            createCustomIntegrationsSearchProvider(deps.customIntegrations)
+          );
+        })
+        .catch(() => {
+          this.logger.error('Failed to load search providers.');
+        });
     }
 
     return {};

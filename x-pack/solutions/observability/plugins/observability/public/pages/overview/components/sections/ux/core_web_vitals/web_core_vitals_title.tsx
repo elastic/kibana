@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -93,15 +94,21 @@ export function WebCoreVitalsTitle({
               />
 
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.observability.ux.dashboard.webCoreVitals.browserSupportPopoverAriaLabel',
+                  { defaultMessage: 'Browser support for core web vitals' }
+                )}
                 isOpen={isBrowserPopoverOpen}
                 button={
-                  <EuiButtonIcon
-                    data-test-subj="o11yWebCoreVitalsTitleButton"
-                    aria-label={helpAriaLabel}
-                    onClick={() => setIsBrowserPopoverOpen(true)}
-                    color={'text'}
-                    iconType={'question'}
-                  />
+                  <EuiToolTip content={helpAriaLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj="o11yWebCoreVitalsTitleButton"
+                      aria-label={helpAriaLabel}
+                      onClick={() => setIsBrowserPopoverOpen(true)}
+                      color={'text'}
+                      iconType={'question'}
+                    />
+                  </EuiToolTip>
                 }
                 closePopover={closeBrowserPopover}
               >

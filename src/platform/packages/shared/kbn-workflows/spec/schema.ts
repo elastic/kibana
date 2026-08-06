@@ -9,8 +9,24 @@
 
 import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
+import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers';
+import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
+import {
+  isManualTrigger,
+  LegacyWorkflowInputSchema,
+} from './schema/triggers/manual_trigger_schema';
+import {
+  HITL_EXTERNAL_CHANNELS_DESCRIPTION,
+  HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
+  HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
+  MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
+  MAX_HITL_EXTERNAL_LINK_LENGTH,
+  MAX_HITL_MESSAGE_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
+} from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -74,15 +90,75 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
+export const CollisionStrategySchema = z
+  .enum(['cancel-in-progress', 'drop', 'queue'])
+  .describe(
+    'How to handle collisions when max concurrent runs is exceeded: `drop`, `cancel-in-progress` or `queue`.'
+  );
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
+export const DEFAULT_CONCURRENCY_QUEUE_SIZE = 100;
+export const DEFAULT_CONCURRENCY_QUEUE_TTL = '24h';
+
 export const ConcurrencySettingsSchema = z.object({
-  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
-  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
-  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+  key: z
+    .string()
+    .max(512)
+    .optional()
+    .describe(
+      'Liquid template that groups executions into a concurrency bucket (e.g. `{{ event.host.name }}`).'
+    ),
+  strategy: CollisionStrategySchema.optional(),
+  max: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe('Maximum concurrent runs allowed per concurrency group.'),
+  'queue-size': z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Only applies when strategy is `queue`. Maximum backlog size before new runs are skipped (default: `100`).'
+    ),
+  'queue-ttl': DurationSchema.optional().describe(
+    'Only applies when strategy is `queue`. Max time a run may stay queued before it is skipped (default: `24h`).'
+  ),
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
+
+export const LIQUID_PARSE_LIMIT_MAX = 600_000;
+export const LIQUID_RENDER_LIMIT_MAX = 2_000;
+export const LIQUID_MEMORY_LIMIT_MAX = 60_000_000;
+
+export const LiquidSettingsSchema = z.object({
+  parseLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_PARSE_LIMIT_MAX)
+    .optional()
+    .describe('Liquid parse character limit. Defaults to 150000; maximum is 600000.'),
+  renderLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_RENDER_LIMIT_MAX)
+    .optional()
+    .describe('Liquid render time limit in milliseconds. Defaults to 1000; maximum is 2000.'),
+  memoryLimit: z
+    .number()
+    .int()
+    .min(1)
+    .max(LIQUID_MEMORY_LIMIT_MAX)
+    .optional()
+    .describe(
+      'Liquid memory operation limit for array and string operations. Defaults to 15000000; maximum is 60000000.'
+    ),
+});
+export type LiquidSettings = z.infer<typeof LiquidSettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
@@ -90,6 +166,7 @@ export const WorkflowSettingsSchema = z.object({
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
   concurrency: ConcurrencySettingsSchema.optional(),
   'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
+  liquid: LiquidSettingsSchema.optional(),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -189,19 +266,97 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const WaitForApprovalSlackChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
+  message: z
+    .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .optional()
+    .describe(
+      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
+    ),
+});
+
+export const WaitForApprovalSlackApiChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .describe('Slack API connector saved object id or name'),
+  channels: z
+    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
+    .min(1)
+    .describe('Slack channel ids to post approval actions to'),
+  message: z
+    .string()
+    .max(MAX_HITL_MESSAGE_LENGTH)
+    .optional()
+    .describe(
+      'Optional notification template. Use {{context.hitl.externalFormLink}} for the external input form link.'
+    ),
+});
+
+export const WaitForApprovalChannelsSchema = z
+  .object({
+    slack: WaitForApprovalSlackChannelSchema.optional(),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+  })
+  .optional()
+  .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
+
+export const HitlExternalChannelsSchema = WaitForApprovalChannelsSchema;
+
 export const WaitForInputStepInputSchema = z
   .object({
-    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    message: z
+      .string()
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe('Message displayed to the user when waiting for input'),
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
+    channels: HitlExternalChannelsSchema,
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-});
+}).merge(TimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
+
+export const WaitForApprovalStepInputSchema = z
+  .object({
+    message: z
+      .string()
+      .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
+      .describe('Message displayed to approvers'),
+    approveLabel: z
+      .string()
+      .max(MAX_HITL_ACTION_LABEL_LENGTH)
+      .optional()
+      .describe('Label for the approve action (default: Approve)'),
+    rejectLabel: z
+      .string()
+      .max(MAX_HITL_ACTION_LABEL_LENGTH)
+      .optional()
+      .describe('Label for the reject action (default: Decline)'),
+    channels: WaitForApprovalChannelsSchema,
+  })
+  .optional();
+
+export const WaitForApprovalStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('waitForApproval')
+    .describe('Pause execution until approval or rejection is received'),
+  with: WaitForApprovalStepInputSchema,
+}).merge(TimeoutPropSchema);
+export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())
@@ -236,6 +391,12 @@ export const FetcherConfigSchema = z
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
+
+// Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
+// valid values). Reused by the connector schema (editor + validation) and the runtime guard so
+// the editor and runtime can never accept/reject different methods.
+export const KibanaHttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+export const KibanaHttpMethodSchema = z.enum(KibanaHttpMethods);
 
 export const ElasticsearchStepInputSchema = z.union([
   // Raw API format - like Dev Console
@@ -292,7 +453,7 @@ export const KibanaStepInputSchema = z.union([
   // Raw API format - direct HTTP API calls
   z.object({
     request: z.object({
-      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
+      method: KibanaHttpMethodSchema.optional().default('GET'),
       path: z.string().min(1),
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),
@@ -494,29 +655,190 @@ export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) =
   return schema;
 };
 
-export const ParallelStepConfigSchema = z.object({
-  branches: z
-    .array(
-      z.object({
-        name: z.string().describe('Unique name for this branch'),
-        steps: z.array(BaseStepSchema).describe('Steps to execute in this branch'),
-      })
+// Default for the number of branches that may run at once.
+export const DEFAULT_PARALLEL_CONCURRENCY = 5;
+// Hard ceiling on the requested concurrency, regardless of what an author sets.
+// Guards against an author pinning a worker with an unrealistic lane count.
+export const DEFAULT_PARALLEL_MAX_CONCURRENCY = 20;
+// Default cap on the total number of fan-out items for a dynamic parallel step.
+export const DEFAULT_PARALLEL_MAX_FAN_OUT = 100;
+
+// Upper bound on a static branch name. Generous for a human-readable identifier
+// while keeping the value bounded so validation can't be fed an unbounded string.
+export const PARALLEL_BRANCH_NAME_MAX_LENGTH = 256;
+// Upper bound on the dynamic `foreach` expression. A Liquid template can be
+// moderately long but should never be unbounded.
+export const PARALLEL_FOREACH_EXPRESSION_MAX_LENGTH = 2000;
+
+// `concurrency` accepts either a bare number (shorthand for `{ max: N }`) or an
+// object so authors can also control whether parked/polling lanes hold a slot.
+export const ParallelConcurrencyObjectSchema = z.object({
+  max: z
+    .number()
+    .int()
+    .positive()
+    .max(
+      DEFAULT_PARALLEL_MAX_CONCURRENCY,
+      `Parallel concurrency "max" cannot exceed ${DEFAULT_PARALLEL_MAX_CONCURRENCY}.`
     )
-    .describe('Array of named branches to execute in parallel'),
+    .optional()
+    .describe(
+      'Maximum number of branches that run at once. Defaults to a conservative finite cap.'
+    ),
+  'count-waiting': z
+    .boolean()
+    .optional()
+    .describe(
+      'When true (default), a branch that is waiting/polling still occupies a concurrency slot. ' +
+        'When false, waiting branches free their slot so more branches can start.'
+    ),
 });
-export const ParallelStepSchema = BaseStepSchema.extend({
+export type ParallelConcurrencyObject = z.infer<typeof ParallelConcurrencyObjectSchema>;
+
+export const ParallelConcurrencySchema = z
+  .union([
+    z
+      .number()
+      .int()
+      .positive()
+      .max(
+        DEFAULT_PARALLEL_MAX_CONCURRENCY,
+        `Parallel concurrency cannot exceed ${DEFAULT_PARALLEL_MAX_CONCURRENCY}.`
+      ),
+    ParallelConcurrencyObjectSchema,
+  ])
+  .describe('Concurrency control: a number (max lanes) or { max, count-waiting }.');
+
+export const ParallelModeSchema = z
+  .enum(['fail-fast', 'settled'])
+  .describe(
+    'fail-fast (default): stop scheduling new branches when one fails, let in-flight branches finish, then fail. ' +
+      'settled: let every branch reach a terminal state; the step succeeds and reports per-branch results.'
+  );
+export type ParallelMode = z.infer<typeof ParallelModeSchema>;
+
+// A single named branch in a static parallel step. Each branch has its own
+// (heterogeneous) body — unlike dynamic fan-out, branches run different steps.
+export const ParallelBranchSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .max(PARALLEL_BRANCH_NAME_MAX_LENGTH)
+    .describe(
+      'Branch identifier, used as the result `key` for this branch in the aggregate output.'
+    ),
+  steps: z
+    .array(BaseStepSchema)
+    .min(1)
+    .describe('Branch body. v1 supports a straight-line sequence of steps per branch.'),
+});
+
+// Shared so the base config schema and the connector-aware `getParallelStepSchema`
+// variant surface the same validation message for a degenerate single-branch step.
+const PARALLEL_STATIC_MIN_BRANCHES_MESSAGE =
+  'A static `parallel` step must declare at least two branches; a single-branch parallel is ' +
+  'degenerate (use a plain step sequence instead).';
+
+// The `parallel` step has two mutually exclusive modes:
+// - Dynamic fan-out (`foreach` + `steps`): run the SAME branch body once per
+//   runtime list item, concurrently.
+// - Static branches (`branches`): run a FIXED set of named, heterogeneous
+//   branch bodies concurrently (scatter-gather). The set is known at author
+//   time, so each branch compiles to its own real subgraph.
+export const ParallelStepConfigSchema = z.object({
+  foreach: z
+    .union([z.string().max(PARALLEL_FOREACH_EXPRESSION_MAX_LENGTH), z.array(z.unknown())])
+    .optional()
+    .describe(
+      'Dynamic fan-out: a Liquid expression evaluating to an array (or a literal array). The ' +
+        '`steps` body runs once per item, concurrently. Mutually exclusive with `branches`. ' +
+        'Inside a branch, access the item via {{ foreach.item }} / {{ foreach.index }}.'
+    ),
+  steps: z
+    .array(BaseStepSchema)
+    .min(1)
+    .optional()
+    .describe('Dynamic fan-out branch body executed once per item. Used with `foreach`.'),
+  branches: z
+    .array(ParallelBranchSchema)
+    .min(2, { message: PARALLEL_STATIC_MIN_BRANCHES_MESSAGE })
+    .optional()
+    .describe(
+      'Static scatter-gather: a fixed set of named branches, each with its own body, run ' +
+        'concurrently. Mutually exclusive with `foreach`/`steps`.'
+    ),
+  concurrency: ParallelConcurrencySchema.optional(),
+  mode: ParallelModeSchema.optional(),
+  'branch-timeout': DurationSchema.optional().describe(
+    'Maximum duration a single branch may run before it is failed with a timeout. ' +
+      'Independent of the step-level `timeout`, which bounds the whole parallel step.'
+  ),
+});
+// Object form (extendable). The exported `ParallelStepSchema` applies the
+// mode-exclusivity refinement on top; keep this base for `.extend()` callers.
+export const ParallelStepObjectSchema = BaseStepSchema.extend({
   type: z
     .literal('parallel')
     .describe(
-      'Execute multiple branches of steps concurrently. Each branch runs independently and results are available after all branches complete'
+      'Run branches concurrently and continue when all reach a terminal state. Either dynamic ' +
+        'fan-out (`foreach` + `steps`) or a fixed set of named `branches`. Results are collected ' +
+        'per branch with aggregate counts.'
     ),
   ...ParallelStepConfigSchema.shape,
+  ...TimeoutPropSchema.shape,
 });
-export type ParallelStep = z.infer<typeof ParallelStepSchema>;
+
+// Exactly one mode. Dynamic requires `steps`; static must not use top-level `steps`.
+// Accepts `unknown` so it can be used as a refinement on any parallel-step schema
+// variant (whose inferred output differs per call site); narrows internally.
+const parallelModeRefinement = (value: unknown): boolean => {
+  const step = (value ?? {}) as { foreach?: unknown; branches?: unknown; steps?: unknown };
+  const hasForeach = step.foreach !== undefined;
+  const hasBranches = step.branches !== undefined;
+  if (hasForeach === hasBranches) return false;
+  if (hasForeach) return Array.isArray(step.steps) && step.steps.length > 0;
+  return step.steps === undefined;
+};
+export const PARALLEL_MODE_REFINEMENT_MESSAGE =
+  'A "parallel" step must use either dynamic fan-out (`foreach` + `steps`) or static ' +
+  '`branches`, but not both. With `foreach`, provide `steps`; with `branches`, omit `steps`.';
+
+// Static `branches[].name` doubles as the result `key` in the aggregate output,
+// so duplicate names would make name-keyed correlation ambiguous (two results
+// sharing a `key`). Require names to be unique within a single parallel step.
+const parallelBranchNamesUniqueRefinement = (value: unknown): boolean => {
+  const step = (value ?? {}) as { branches?: Array<{ name?: unknown }> };
+  if (!Array.isArray(step.branches)) return true;
+  const names = step.branches
+    .map((branch) => branch?.name)
+    .filter((name): name is string => typeof name === 'string');
+  return new Set(names).size === names.length;
+};
+export const PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE =
+  'Static `parallel` branch names must be unique within a step; each `name` is used as the ' +
+  'result `key` in the aggregate output.';
+
+// Single source of truth for applying the parallel-step refinements. The base
+// `ParallelStepObjectSchema` is kept extendable (a `ZodEffects` from `.refine()`
+// cannot be `.extend()`ed), so callers extend the base first and then route it
+// through here to attach the refinements with consistent predicates + messages.
+const applyParallelModeRefinement = <T extends z.ZodTypeAny>(schema: T) =>
+  schema
+    .refine(parallelModeRefinement, { message: PARALLEL_MODE_REFINEMENT_MESSAGE })
+    .refine(parallelBranchNamesUniqueRefinement, { message: PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE });
+
+export const ParallelStepSchema = applyParallelModeRefinement(ParallelStepObjectSchema);
+export type ParallelStep = z.infer<typeof ParallelStepObjectSchema>;
 
 export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = ParallelStepSchema.extend({
-    branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
+  // Populate both the dynamic `steps` body and each static branch's `steps` with
+  // the resolved per-step schema so connector steps validate inside branches too.
+  const schema = ParallelStepObjectSchema.extend({
+    steps: z.array(stepSchema).min(1).optional(),
+    branches: z
+      .array(ParallelBranchSchema.extend({ steps: z.array(stepSchema).min(1) }))
+      .min(2, { message: PARALLEL_STATIC_MIN_BRANCHES_MESSAGE })
+      .optional(),
   });
 
   if (loose) {
@@ -524,7 +846,7 @@ export const getParallelStepSchema = (stepSchema: z.ZodType, loose: boolean = fa
     return schema.partial().required({ type: true });
   }
 
-  return schema;
+  return applyParallelModeRefinement(schema);
 };
 
 export const MergeStepConfigSchema = z.object({
@@ -622,56 +944,9 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
 }).extend(StepWithIfConditionSchema.shape);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
-/* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
-
-const WorkflowInputBaseSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  default: z.any().optional(),
-  required: z.boolean().optional(),
-});
-
-export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('string'),
-  default: z.string().optional(),
-});
-
-export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('number'),
-  default: z.number().optional(),
-});
-
-export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('boolean'),
-  default: z.boolean().optional(),
-});
-
-export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('choice'),
-  default: z.string().optional(),
-  options: z.array(z.string()),
-});
-
-export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('array'),
-  minItems: z.number().int().nonnegative().optional(),
-  maxItems: z.number().int().nonnegative().optional(),
-  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
-});
-
-export const WorkflowInputSchema = z.union([
-  WorkflowInputStringSchema,
-  WorkflowInputNumberSchema,
-  WorkflowInputBooleanSchema,
-  WorkflowInputChoiceSchema,
-  WorkflowInputArraySchema,
-]);
-export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
-
 /* --- Outputs --- */
 // Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
-export const WorkflowOutputSchema = WorkflowInputSchema;
+export const WorkflowOutputSchema = LegacyWorkflowInputSchema;
 export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
 
 /* --- Consts --- */
@@ -695,6 +970,7 @@ const StepSchema = z.lazy(() =>
     SwitchStepSchema,
     WaitStepSchema,
     WaitForInputStepSchema,
+    WaitForApprovalStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -721,11 +997,12 @@ export const BuiltInStepTypes = [
   ...LoopStepTypes,
   IfStepSchema.shape.type.value,
   SwitchStepSchema.shape.type.value,
-  ParallelStepSchema.shape.type.value,
+  ParallelStepObjectSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
+  WaitForApprovalStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
@@ -744,14 +1021,6 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  inputs: z
-    .union([
-      // New JSON Schema format
-      JsonModelSchema,
-      // Legacy array format (for backward compatibility)
-      z.array(WorkflowInputSchema),
-    ])
-    .optional(),
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
@@ -772,14 +1041,24 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  const { inputs: _, outputs: __, ...rest } = data;
+  const mappedTriggers = (data.triggers ?? []).map((trigger) => {
+    if (!isManualTrigger(trigger) || !trigger.inputs) {
+      return trigger;
+    }
+
+    return {
+      ...trigger,
+      inputs: normalizeFieldsToJsonSchema(trigger.inputs),
+    };
+  });
+
+  const { outputs: __, ...rest } = data;
   return {
     ...rest,
-    ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
     ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
+    triggers: mappedTriggers,
   };
 });
 
@@ -804,22 +1083,6 @@ const WorkflowSchemaForAutocompleteBase = z
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])
       .default([]),
-    inputs: z
-      .union([
-        // New JSON Schema format
-        JsonModelSchema,
-        // Legacy array format (for backward compatibility during parsing)
-        z.array(
-          z
-            .object({
-              name: z.string().catch(''),
-              type: z.string().catch(''),
-            })
-            .passthrough()
-        ),
-      ])
-      .optional()
-      .catch(undefined),
     outputs: z
       .union([
         JsonModelSchema,
@@ -860,6 +1123,30 @@ export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.t
 // Export base schema for extension (used in generate_yaml_schema_from_connectors.ts)
 export { WorkflowSchemaForAutocompleteBase };
 
+// Canonical shape for normalized LLM token usage. The `WorkflowTokenUsage` type
+// in `types/v1.ts` is derived from this schema, so there is a single source of
+// truth shared by runtime validation (workflow context) and the TS types.
+export const WorkflowTokenUsageSchema = z.object({
+  inputTokens: z.number().describe('Total input (prompt) tokens consumed.'),
+  outputTokens: z.number().describe('Total output (completion) tokens produced.'),
+  cachedTokens: z
+    .number()
+    .optional()
+    .describe('Cached input tokens reused. This is a subset of inputTokens.'),
+  totalTokens: z.number().describe('Sum of input and output tokens.'),
+});
+
+// Token usage attributed to a single step, adding the step id and its resolved
+// connector to the aggregate token shape.
+export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
+  stepId: z.string().max(512).describe('Id of the step that produced this usage.'),
+  connectorId: z
+    .string()
+    .max(512)
+    .optional()
+    .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
+});
+
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
@@ -867,6 +1154,7 @@ export const WorkflowExecutionContextSchema = z.object({
   url: z.string(),
   executedBy: z.string().optional(),
   triggeredBy: z.string().optional(),
+  usage: WorkflowTokenUsageSchema.optional(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
@@ -875,61 +1163,18 @@ export const WorkflowDataContextSchema = z.object({
   name: z.string(),
   enabled: z.boolean(),
   spaceId: z.string(),
+  version: z
+    .number()
+    .optional()
+    .describe('Workflow document version captured when the execution was created.'),
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
-
-// Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
-// Once a Zod-compatible version is available, we should import and use it instead.
-export const AlertSchema = z.object({
-  _id: z.string(),
-  _index: z.string(),
-  kibana: z.object({
-    alert: z.any(),
-  }),
-  '@timestamp': z.string(),
-});
-
-export const RuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  tags: z.array(z.string()),
-  consumer: z.string(),
-  producer: z.string(),
-  ruleTypeId: z.string(),
-});
-
-/**
- * Alert-specific event properties. Only present when the workflow has an alert trigger.
- */
-export const AlertEventPropsSchema = z.object({
-  alerts: z.array(z.union([AlertSchema, z.any()])),
-  rule: RuleSchema,
-  params: z.any(),
-});
-
-/**
- * Base fields present on every trigger event (injected by the platform).
- * Custom trigger event schemas are merged on top of this for workflow context and autocomplete.
- * Timestamp is only present for event-driven (custom) triggers; see EventTimestampSchema.
- */
-export const BaseEventSchema = z.object({
-  spaceId: z.string().describe('The space where the event was emitted.'),
-});
 
 /**
  * Timestamp injected by the platform for event-driven (custom) trigger events only.
  */
 export const EventTimestampSchema = z.object({
   timestamp: z.string().describe('Time when the event was received (ISO 8601).'),
-});
-
-/**
- * Full event schema (used for runtime validation of alert-triggered workflows).
- * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
- */
-export const AlertEventSchema = z.object({
-  ...BaseEventSchema.shape,
-  ...AlertEventPropsSchema.shape,
 });
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
@@ -945,12 +1190,39 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
   ])
 );
 
+export const WorkflowHitlTemplateContextSchema = z.object({
+  [HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe('External waitForInput form URL, available while the step is waiting'),
+  [HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY]: z
+    .string()
+    .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+    .optional()
+    .describe('External GET resume URL with token set. Append `&<field>=<value>` per with.schema.'),
+});
+
+export const WorkflowTemplatePersistedContextSchema = z.object({
+  hitl: WorkflowHitlTemplateContextSchema.optional(),
+});
+
 export const WorkflowContextSchema = z.object({
+  /**
+   * Persisted execution-context values exposed to templates as `context.*`
+   * (for example `context.hitl.externalFormLink` during external waitForInput).
+   */
+  context: WorkflowTemplatePersistedContextSchema.optional(),
+  /**
+   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
+   * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
+   * event.input values at execution time.
+   */
+  inputs: z.record(z.string(), z.unknown()).optional(),
   event: AlertEventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
-  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
   output: z
     .record(
       z.string(),

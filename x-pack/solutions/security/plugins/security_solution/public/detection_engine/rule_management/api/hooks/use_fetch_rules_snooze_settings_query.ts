@@ -48,7 +48,7 @@ export const useInvalidateFetchRulesSnoozeSettingsQuery = () => {
 
   return useCallback(() => {
     /**
-     * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
+     * Invalidate all queries that start with FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY. This
      * includes the in-memory query cache and paged query cache.
      */
     return queryClient.invalidateQueries(FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY, {

@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
@@ -141,15 +142,13 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       );
     });
 
-    it('returns null and warns when no token is stored (user has not authorized yet)', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: null });
+    it('throws ConnectorAuthorizationError with reason no_token when no token is stored', async () => {
+      connectorTokenClient.get.mockResolvedValue({ hasErrors: false, connectorToken: null });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'No access token found for connectorId: connector-1. User must complete OAuth authorization flow.'
-      );
+      const error = await getOAuthAuthorizationCodeAccessToken(baseOpts).catch((e) => e);
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('no_token');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns the stored token without refreshing when it has not expired', async () => {
@@ -178,22 +177,20 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
   });
 
   describe('token refresh', () => {
-    it('returns null and warns when access token is expired but no refresh token is stored', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
+    it('throws ConnectorAuthorizationError with reason token_expired when access token is expired but no refresh token is stored', async () => {
+      connectorTokenClient.get.mockResolvedValue({
         hasErrors: false,
         connectorToken: { ...expiredToken, refreshToken: undefined },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Access token expired and no refresh token available for connectorId: connector-1. User must re-authorize.'
-      );
+      const error = await getOAuthAuthorizationCodeAccessToken(baseOpts).catch((e) => e);
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('token_expired');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
-    it('returns null and warns when the refresh token itself is expired', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
+    it('throws ConnectorAuthorizationError with reason refresh_token_expired when the refresh token itself is expired', async () => {
+      connectorTokenClient.get.mockResolvedValue({
         hasErrors: false,
         connectorToken: {
           ...expiredToken,
@@ -201,12 +198,10 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refresh token expired for connectorId: connector-1. User must re-authorize.'
-      );
+      const error = await getOAuthAuthorizationCodeAccessToken(baseOpts).catch((e) => e);
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('refresh_token_expired');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns the refreshed token formatted as "tokenType accessToken"', async () => {
@@ -386,7 +381,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
   });
 
   describe('error handling', () => {
-    it('returns null and logs an error when requestOAuthRefreshToken throws', async () => {
+    it('returns null and logs an error when requestOAuthRefreshToken throws a non-auth error', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
@@ -401,6 +396,22 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: token endpoint unreachable'
       );
+    });
+
+    it('throws ConnectorAuthorizationError with reason token_revoked when the OAuth server returns invalid_grant', async () => {
+      connectorTokenClient.get.mockResolvedValueOnce({
+        hasErrors: false,
+        connectorToken: expiredToken,
+      });
+      (requestOAuthRefreshToken as jest.Mock).mockRejectedValueOnce(
+        new Error('{"error":"invalid_grant","error_description":"Token has been revoked"}')
+      );
+
+      const error = await getOAuthAuthorizationCodeAccessToken(baseOpts).catch((e) => e);
+
+      expect(error).toBeInstanceOf(ConnectorAuthorizationError);
+      expect(error.reason).toBe('token_revoked');
+      expect(error.authMethod).toBe('oauth_authorization_code');
     });
 
     it('returns null and logs an error when persisting the refreshed token fails', async () => {

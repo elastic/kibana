@@ -12,14 +12,13 @@ import type { IFieldSubTypeNested } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_paths';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { isLensSupportedType } from '../../../../common/utils/lens';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -101,14 +100,10 @@ export function getAggregatableFields(
 export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { pathname } = useLocation();
   const { addError } = useAppToasts();
-  const sourcererScope = getScopeFromPath(pathname);
+  const pageScope = getScopeFromPath(pathname);
 
-  const { browserFields: oldBrowserFields } = useSourcererDataView(sourcererScope);
-
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   return useCallback(() => {
     try {

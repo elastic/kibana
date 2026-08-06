@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -36,6 +37,30 @@ should_enable_fips() {
   is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
 }
 
+# Buildkite checkouts push with the Buildkite GitHub App credential, which has limited scopes. It cannot push to workflows for example.
+# Use an isolated git config so gh can provide GITHUB_TOKEN credentials for this push without changing global auth.
+push_as_github_token() {
+  local required_env_var
+
+  for required_env_var in GITHUB_TOKEN GITHUB_PR_OWNER GITHUB_PR_REPO GITHUB_PR_BRANCH; do
+    if [[ -z "${!required_env_var:-}" ]]; then
+      echo "Missing required environment variable for GITHUB_TOKEN push: $required_env_var" >&2
+      exit 1
+    fi
+  done
+
+  (
+    git_config_global="$(mktemp)"
+    trap 'rm -f "$git_config_global"' EXIT
+
+
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" gh auth setup-git --hostname github.com --force
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" git push \
+      "https://github.com/${GITHUB_PR_OWNER}/${GITHUB_PR_REPO}.git" \
+      "HEAD:${GITHUB_PR_BRANCH}"
+  )
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -43,6 +68,7 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
+  FORCE_GITHUB_TOKEN_PUSH_ARG="${4:-}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
@@ -65,7 +91,11 @@ check_for_changed_files() {
         echo "$CUSTOM_FIX_MESSAGE" >> "$COLLECT_COMMITS_MARKER_FILE"
       else
         echo "Auto-committing and pushing these changes."
-        git push
+        if [[ "${FORCE_GITHUB_TOKEN_PUSH:-}" == "true" || "$FORCE_GITHUB_TOKEN_PUSH_ARG" == "true" ]]; then
+          push_as_github_token
+        else
+          git push
+        fi
       fi
       exit 1
     else
@@ -180,10 +210,107 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+# For merge-queue builds (gh-readonly-queue/* branches), resolves the merge base
+# against the target branch and the list of first-parent commits this merge group
+# will add to the target branch when it lands. These are reported to ci-stats so
+# a single queue build can act as the metrics baseline for every commit it covers.
+set_merge_queue_git_info() {
+  MERGE_QUEUE_MERGE_BASE="$(buildkite-agent meta-data get merge-queue-merge-base --default '')"
+  MERGE_QUEUE_COVERED_COMMITS="$(buildkite-agent meta-data get merge-queue-covered-commits --default '')"
+
+  if [[ ! "$MERGE_QUEUE_MERGE_BASE" || ! "$MERGE_QUEUE_COVERED_COMMITS" ]]; then
+    if ! git fetch origin "$MERGE_QUEUE_TARGET_BRANCH" 2>/dev/null; then
+      echo "Failed to fetch $MERGE_QUEUE_TARGET_BRANCH to resolve merge queue git info" >&2
+      return 1
+    fi
+
+    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" ]]; then
+      echo "Failed to resolve merge queue merge base" >&2
+      return 1
+    fi
+
+    # first-parent commits between the merge base and the queue-branch head are
+    # the exact commits GitHub fast-forwards onto the target branch on success
+    MERGE_QUEUE_COVERED_COMMITS="$(git rev-list --first-parent "$MERGE_QUEUE_MERGE_BASE..HEAD" | paste -sd, -)"
+
+    buildkite-agent meta-data set merge-queue-merge-base "$MERGE_QUEUE_MERGE_BASE"
+    buildkite-agent meta-data set merge-queue-covered-commits "$MERGE_QUEUE_COVERED_COMMITS"
+  fi
+
+  export MERGE_QUEUE_MERGE_BASE
+  export MERGE_QUEUE_COVERED_COMMITS
+}
+
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+}
+
+GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
+download_tmp_artifact() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3" fallback="${4:-true}"
+  local region use_gcs=false
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
+      use_gcs=true
+      break
+    fi
+  done
+
+  if [[ "$use_gcs" == "true" ]]; then
+    if "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}" \
+      && gcloud storage cp \
+        "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
+        "${dest_dir}/${artifact_name}"; then
+      return 0
+    fi
+    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+  fi
+
+  if [[ "$fallback" != "true" ]]; then
+    return 1
+  fi
+
+  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+}
+
+upload_tmp_artifact() {
+  local local_path="$1" artifact_name="$2" build_id="$3"
+  local region pids=() failures=0
+
+  if ! "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"; then
+    echo "Service account activation failed; skipping GCS upload of ${artifact_name}. Same-region downloads will fall back to the buildkite artifact." >&2
+    return 0
+  fi
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    upload_tmp_artifact_to_region "$local_path" "$artifact_name" "$build_id" "$region" &
+    pids+=("$!")
+  done
+
+  for pid in "${pids[@]}"; do
+    if ! wait "$pid"; then
+      failures=$((failures + 1))
+    fi
+  done
+
+  if [[ "$failures" -gt 0 ]]; then
+    echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
+  fi
+
+  return 0
+}
+
+upload_tmp_artifact_to_region() {
+  local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+
+  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+    "$local_path" \
+    "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
 }
 
 print_if_dry_run() {

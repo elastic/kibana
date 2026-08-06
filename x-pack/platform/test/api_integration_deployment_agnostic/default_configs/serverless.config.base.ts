@@ -37,6 +37,7 @@ const esServerArgsFromController = {
   oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
   workplaceai: [],
+  vectordb: [],
 };
 
 // These args replicate the MKI setup from the kibana controller:
@@ -62,6 +63,7 @@ const kbnServerArgsFromController = {
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
   workplaceai: [],
+  vectordb: [],
 };
 
 export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(

@@ -6,35 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import type { RuleTypeParams } from '../../../../../common';
 import { RecoveredActionGroup } from '../../../../../common';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import type { RawRule } from '../../../../types';
 import type { Rule } from '../../../../../common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
@@ -61,50 +45,26 @@ const { getActiveSnoozeIfExist } = jest.requireMock(
 );
 const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
 const isAuthenticationTypeApiKeyMock = jest.fn();
 const getAuthenticationApiKeyMock = jest.fn();
 
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
+  actionsAuthorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 const paramsModifier = jest.fn();
 
 const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
@@ -669,6 +629,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -684,7 +645,8 @@ describe('bulkEdit()', () => {
       );
 
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -893,6 +855,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -907,7 +870,8 @@ describe('bulkEdit()', () => {
         { overwrite: true }
       );
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -1040,6 +1004,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -1055,7 +1020,8 @@ describe('bulkEdit()', () => {
       );
 
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -1211,6 +1177,7 @@ describe('bulkEdit()', () => {
               apiKey: null,
               apiKeyOwner: null,
               apiKeyCreatedByUser: null,
+              isSnoozedUntil: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
@@ -1229,7 +1196,8 @@ describe('bulkEdit()', () => {
       );
 
       expect(result.rules[0]).toEqual({
-        ...omit(existingRule.attributes, 'legacyId'),
+        ...existingRule.attributes,
+        isSnoozedUntil: null,
         createdAt: new Date(existingRule.attributes.createdAt),
         updatedAt: new Date(existingRule.attributes.updatedAt),
         executionStatus: {
@@ -3424,6 +3392,373 @@ describe('bulkEdit()', () => {
       });
 
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('change tracking', () => {
+    const updatedRuleSO = (id: string, error?: SavedObjectError) =>
+      ({
+        id,
+        type: RULE_SAVED_OBJECT_TYPE,
+        updated_at: '2023-03-05T10:30:00.000Z',
+        attributes: {
+          ...existingRule.attributes,
+          tags: ['foo', 'test-1'],
+          revision: 1,
+        },
+        references: [],
+        ...(error ? { error } : {}),
+      } as SavedObject<RawRule>);
+
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs every successfully edited rule with action "rule_update" by default', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      // bulkCount comes from the original total returned by `find` (mocked to 1).
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1' })],
+        {
+          action: 'rule_update',
+          spaceId: 'default',
+          data: { metadata: { bulkCount: 1 } },
+        }
+      );
+    });
+
+    test('captures the full post-edit attributes of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      const updated = updatedRuleSO('1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [updated] });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: updated.id,
+              name: updated.attributes.name,
+              tags: updated.attributes.tags,
+              alertTypeId: updated.attributes.alertTypeId,
+              createdAt: updated.attributes.createdAt,
+              updatedAt: updated.attributes.updatedAt,
+            }),
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('captures the context of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      const updated = updatedRuleSO('1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [updated] });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('captures rule.revision in object.sequence ', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      const updated = updatedRuleSO('1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [updated] });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 1,
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps every change with updated_at from the saved object', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          { ...existingDecryptedRule, id: '1' },
+          { ...existingDecryptedRule, id: '2' },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1'), updatedRuleSO('2')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+        '2023-03-05T10:30:00.000Z',
+        '2023-03-05T10:30:00.000Z',
+      ]);
+    });
+
+    test('skips rules whose saved object update failed (partial bulk failures)', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          { ...existingDecryptedRule, id: '1' },
+          { ...existingDecryptedRule, id: '2' },
+          { ...existingDecryptedRule, id: '3' },
+        ],
+      });
+      // Non-409 errors are not retried, so the partial failure case is single-pass.
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          updatedRuleSO('1'),
+          updatedRuleSO('2', {
+            error: 'InternalServerError',
+            message: 'something exploded',
+            statusCode: 500,
+          }),
+          updatedRuleSO('3'),
+        ],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1' }), expect.objectContaining({ objectId: '3' })],
+        expect.any(Object)
+      );
+    });
+
+    test('reports bulkCount as the original `find` total even when an OCC pass writes a subset', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Original operation targets 7 rules; bulkCount must reflect this even though
+      // this OCC pass only writes 2 rules.
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        aggregations: {
+          alertTypeId: {
+            buckets: [{ key: ['myType', 'myApp'], key_as_string: 'myType|myApp', doc_count: 7 }],
+          },
+        },
+        saved_objects: [],
+        per_page: 0,
+        page: 0,
+        total: 7,
+      });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          { ...existingDecryptedRule, id: '1' },
+          { ...existingDecryptedRule, id: '2' },
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1'), updatedRuleSO('2')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [, opts] = changeTrackingService.logBulk.mock.calls[0];
+      // bulkCount = 7 (original total), not 2 (rules in this pass).
+      expect(opts.data).toEqual({ metadata: { bulkCount: 7 } });
+    });
+
+    test('does not log when rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does nothing when no change tracking service is configured', async () => {
+      // Default rulesClient has no changeTrackingService configured.
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      // Negative assertion is exercised at the helper level.
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
+    });
+
+    test('logs action "rule_update_api_key" for a single apiKey operation', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'apiKey', operation: 'set' }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_update_api_key' })
+      );
+    });
+
+    test('logs action "rule_snooze" for a single snoozeSchedule set operation', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'snoozeSchedule',
+            operation: 'set',
+            value: {
+              duration: 28800000,
+              rRule: { dtstart: '2010-09-19T11:49:59.329Z', count: 1, tzid: 'UTC' },
+            },
+          },
+        ],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_snooze' })
+      );
+    });
+
+    test('logs action "rule_unsnooze" for a single snoozeSchedule delete operation', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'snoozeSchedule', operation: 'delete', value: [] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_unsnooze' })
+      );
+    });
+
+    test('falls back to "rule_update" when multiple operations are provided', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [updatedRuleSO('1')],
+      });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [
+          { field: 'tags', operation: 'add', value: ['test-1'] },
+          { field: 'apiKey', operation: 'set' },
+        ],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_update' })
+      );
     });
   });
 });

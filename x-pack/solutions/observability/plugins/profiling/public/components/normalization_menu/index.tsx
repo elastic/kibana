@@ -66,6 +66,7 @@ export function NormalizationMenu(props: Props) {
 
   const theme = useEuiTheme();
 
+  const popoverTitleId = useGeneratedHtmlId({ prefix: 'normalizationMenuPopover' });
   const baselineScaleFactorInputId = useGeneratedHtmlId({ prefix: 'baselineScaleFactor' });
   const comparisonScaleFactorInputId = useGeneratedHtmlId({ prefix: 'comparisonScaleFactor' });
 
@@ -92,7 +93,7 @@ export function NormalizationMenu(props: Props) {
             setIsPopoverOpen((popoverOpen) => !popoverOpen);
           }}
           compressed
-          prepend={NORMALIZE_BY_LABEL}
+          prepend={<EuiFormPrepend label={NORMALIZE_BY_LABEL} id={popoverTitleId} />}
           append={
             <EuiFormAppend
               element="button"
@@ -105,8 +106,9 @@ export function NormalizationMenu(props: Props) {
             />
           }
           css={css`
-            .euiFormLabel {
-              max-width: none;
+            .euiFormControlLayout__prepend {
+              max-inline-size: none;
+              overflow: visible !important;
             }
           `}
         >
@@ -124,6 +126,7 @@ export function NormalizationMenu(props: Props) {
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-labelledby={popoverTitleId}
     >
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
@@ -190,9 +193,7 @@ export function NormalizationMenu(props: Props) {
       <EuiSpacer size="s" />
       <EuiFieldNumber
         fullWidth
-        prepend={
-          <EuiFormPrepend inputId={baselineScaleFactorInputId}>{SCALE_LABEL}</EuiFormPrepend>
-        }
+        prepend={<EuiFormPrepend label={SCALE_LABEL} inputId={baselineScaleFactorInputId} />}
         data-test-subj="profilingNormalizationMenuFieldNumber"
         id={baselineScaleFactorInputId}
         value={baseline}
@@ -217,9 +218,7 @@ export function NormalizationMenu(props: Props) {
       <EuiSpacer size="s" />
       <EuiFieldNumber
         fullWidth
-        prepend={
-          <EuiFormPrepend inputId={comparisonScaleFactorInputId}>{SCALE_LABEL}</EuiFormPrepend>
-        }
+        prepend={<EuiFormPrepend label={SCALE_LABEL} inputId={comparisonScaleFactorInputId} />}
         data-test-subj="profilingNormalizationMenuFieldNumber"
         id={comparisonScaleFactorInputId}
         value={comparison}

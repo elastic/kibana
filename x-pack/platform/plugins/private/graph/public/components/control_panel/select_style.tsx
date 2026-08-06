@@ -23,7 +23,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
   return (
     <div css={gphSidebarPanelStyles}>
       <div css={gphSidebarHeaderStyles}>
-        <EuiIcon type="brush" size="s" />{' '}
+        <EuiIcon type="brush" size="s" aria-hidden={true} />{' '}
         {i18n.translate('xpack.graph.sidebar.styleVerticesTitle', {
           defaultMessage: 'Style selected vertices',
         })}

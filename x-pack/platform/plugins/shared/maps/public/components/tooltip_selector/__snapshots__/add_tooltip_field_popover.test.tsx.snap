@@ -28,6 +28,11 @@ exports[`Should remove selected fields from selectable 1`] = `
 >
   <EuiSelectable
     isPreFiltered={false}
+    listProps={
+      Object {
+        "paddingSize": "s",
+      }
+    }
     onChange={[Function]}
     optionMatcher={[Function]}
     options={
@@ -104,6 +109,11 @@ exports[`Should render 1`] = `
 >
   <EuiSelectable
     isPreFiltered={false}
+    listProps={
+      Object {
+        "paddingSize": "s",
+      }
+    }
     onChange={[Function]}
     optionMatcher={[Function]}
     options={

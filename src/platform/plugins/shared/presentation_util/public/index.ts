@@ -18,18 +18,11 @@ export {
   LazyLabsBeakerButton,
   LazyLabsFlyout,
   LazyDashboardPicker,
-  LazySavedObjectSaveModalDashboard,
-  LazySavedObjectSaveModalDashboardWithSaveResult,
+  SavedObjectSaveModalDashboard,
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
 } from './components';
-
-export {
-  PanelPlacementStrategy,
-  type PanelSettings,
-  type PanelResizeSettings,
-} from './registries/panel_placement';
 
 export function plugin() {
   return new PresentationUtilPlugin();

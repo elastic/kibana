@@ -18,7 +18,6 @@ import {
   DEFAULT_INDEX_KEY,
 } from '../../../../../common/constants';
 import type { InitializationFlowContext } from '../../types';
-import type { InitializeSecurityDataViewsProvisionContext } from './types';
 import {
   getOrCreateDefaultDataView,
   getOrCreateAlertDataView,
@@ -307,7 +306,7 @@ describe('getOrCreateAttackDataView', () => {
     expect(result.id).toBe(dataViewId);
   });
 
-  it('returns existing attack data view without creating when it already exists', async () => {
+  it('returns existing attack data view without creating when it already exists and matches', async () => {
     const service = createMockDataViewsService();
     const existingTitle = patternList.join();
     const existing = makeDataViewListItem(dataViewId, existingTitle, 'Security solution attacks');
@@ -320,7 +319,33 @@ describe('getOrCreateAttackDataView', () => {
     });
 
     expect(service.createAndSave).not.toHaveBeenCalled();
+    expect(service.updateSavedObject).not.toHaveBeenCalled();
     expect(result.id).toBe(dataViewId);
+  });
+
+  it('updates the data view when the pattern list differs', async () => {
+    const service = createMockDataViewsService();
+    const existingTitle = '.attack-discovery-default';
+    const existing = makeDataViewListItem(dataViewId, existingTitle, 'Security solution attacks');
+
+    const mockDataView = {
+      id: dataViewId,
+      title: existingTitle,
+      name: 'Security solution attacks',
+    };
+    service.get.mockResolvedValue(mockDataView as unknown as DataView);
+
+    const result = await getOrCreateAttackDataView({
+      dataViewsService: service,
+      allDataViews: [existing],
+      dataViewId,
+      patternList,
+    });
+
+    expect(service.get).toHaveBeenCalledWith(dataViewId);
+    expect(service.updateSavedObject).toHaveBeenCalledTimes(1);
+    expect(mockDataView.title).toBe(patternList.join());
+    expect(result.patternList).toEqual(patternList);
   });
 
   it('handles DuplicateDataViewError by fetching the existing data view', async () => {
@@ -346,7 +371,7 @@ describe('getOrCreateAttackDataView', () => {
 });
 
 // ---------------------------------------------------------------------------
-// initializeSecurityDataViewsFlow.provision
+// initializeSecurityDataViewsFlow
 // ---------------------------------------------------------------------------
 
 describe('initializeSecurityDataViewsFlow', () => {
@@ -354,35 +379,52 @@ describe('initializeSecurityDataViewsFlow', () => {
     expect(initializeSecurityDataViewsFlow.id).toBe(INITIALIZATION_FLOW_SECURITY_DATA_VIEWS);
   });
 
-  describe('provision', () => {
+  it('should be configured to run in parallel', () => {
+    expect(initializeSecurityDataViewsFlow.runFirst).toBeUndefined();
+  });
+
+  describe('runFlow', () => {
     let dataViewsService: jest.Mocked<DataViewsService>;
-    let logger: ReturnType<typeof loggerMock.create>;
 
     beforeEach(() => {
-      logger = loggerMock.create();
       dataViewsService = createMockDataViewsService();
       dataViewsService.getIdsWithTitle.mockResolvedValue([]);
     });
 
-    const buildProvisionContext = (
-      overrides?: Partial<InitializeSecurityDataViewsProvisionContext>
-    ): InitializeSecurityDataViewsProvisionContext => ({
-      dataViewsService,
-      enableAttackDataView: false,
-      ruleDataService: {
-        getResourceName: jest.fn().mockReturnValue(SIGNAL_INDEX),
-      } as unknown as InitializeSecurityDataViewsProvisionContext['ruleDataService'],
-      spaceId: SPACE_ID,
-      uiSettingsClient: {
-        get: jest.fn().mockResolvedValue(['auditbeat-*']),
-      } as unknown as InitializeSecurityDataViewsProvisionContext['uiSettingsClient'],
-      ...overrides,
-    });
+    const createMockFlowContext = (
+      overrides?: Partial<{
+        enableAttackDataView: boolean;
+        configPatternList: string[];
+      }>
+    ): InitializationFlowContext =>
+      ({
+        requestHandlerContext: {
+          securitySolution: Promise.resolve({
+            getInternalDataViewsService: jest.fn().mockResolvedValue(dataViewsService),
+            getConfig: jest.fn().mockReturnValue({
+              experimentalFeatures: {
+                enableAlertsAndAttacksAlignment: overrides?.enableAttackDataView ?? false,
+              },
+            }),
+            getRuleDataService: jest.fn().mockReturnValue({
+              getResourceName: jest.fn().mockReturnValue(SIGNAL_INDEX),
+            }),
+            getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+          }),
+          core: Promise.resolve({
+            uiSettings: {
+              client: {
+                get: jest.fn().mockResolvedValue(overrides?.configPatternList ?? ['auditbeat-*']),
+              },
+            },
+          }),
+        },
+        logger: loggerMock.create(),
+      } as unknown as InitializationFlowContext);
 
     it('returns status ready with default and alert data views', async () => {
-      const ctx = buildProvisionContext();
-
-      const result = await initializeSecurityDataViewsFlow.provision(ctx, logger);
+      const context = createMockFlowContext();
+      const result = await initializeSecurityDataViewsFlow.runFlow(context);
 
       expect(result.status).toBe(INITIALIZATION_FLOW_STATUS_READY);
       if (result.status === INITIALIZATION_FLOW_STATUS_READY && 'payload' in result) {
@@ -395,9 +437,8 @@ describe('initializeSecurityDataViewsFlow', () => {
     });
 
     it('includes attackDataView in payload when enableAttackDataView is true', async () => {
-      const ctx = buildProvisionContext({ enableAttackDataView: true });
-
-      const result = await initializeSecurityDataViewsFlow.provision(ctx, logger);
+      const context = createMockFlowContext({ enableAttackDataView: true });
+      const result = await initializeSecurityDataViewsFlow.runFlow(context);
 
       expect(result.status).toBe(INITIALIZATION_FLOW_STATUS_READY);
       if (result.status === INITIALIZATION_FLOW_STATUS_READY && 'payload' in result) {
@@ -406,9 +447,8 @@ describe('initializeSecurityDataViewsFlow', () => {
     });
 
     it('creates data views via the data views service', async () => {
-      const ctx = buildProvisionContext();
-
-      await initializeSecurityDataViewsFlow.provision(ctx, logger);
+      const context = createMockFlowContext();
+      await initializeSecurityDataViewsFlow.runFlow(context);
 
       // default + alert data views created
       expect(dataViewsService.createAndSave).toHaveBeenCalledTimes(2);
@@ -430,9 +470,8 @@ describe('initializeSecurityDataViewsFlow', () => {
     });
 
     it('creates attack data view when enabled', async () => {
-      const ctx = buildProvisionContext({ enableAttackDataView: true });
-
-      await initializeSecurityDataViewsFlow.provision(ctx, logger);
+      const context = createMockFlowContext({ enableAttackDataView: true });
+      await initializeSecurityDataViewsFlow.runFlow(context);
 
       // default + alert + attack
       expect(dataViewsService.createAndSave).toHaveBeenCalledTimes(3);
@@ -447,63 +486,28 @@ describe('initializeSecurityDataViewsFlow', () => {
     });
 
     it('reads config pattern list from uiSettingsClient', async () => {
-      const uiSettingsClient = {
-        get: jest.fn().mockResolvedValue(['filebeat-*', 'packetbeat-*']),
-      } as unknown as InitializeSecurityDataViewsProvisionContext['uiSettingsClient'];
-      const ctx = buildProvisionContext({ uiSettingsClient });
+      const context = createMockFlowContext({ configPatternList: ['filebeat-*', 'packetbeat-*'] });
+      await initializeSecurityDataViewsFlow.runFlow(context);
 
-      await initializeSecurityDataViewsFlow.provision(ctx, logger);
-
-      expect(uiSettingsClient.get).toHaveBeenCalledWith(DEFAULT_INDEX_KEY);
+      const coreContext = await context.requestHandlerContext.core;
+      expect(coreContext.uiSettings.client.get).toHaveBeenCalledWith(DEFAULT_INDEX_KEY);
     });
 
     it('refreshes data views list after creating/updating views', async () => {
-      const ctx = buildProvisionContext();
-
-      await initializeSecurityDataViewsFlow.provision(ctx, logger);
+      const context = createMockFlowContext();
+      await initializeSecurityDataViewsFlow.runFlow(context);
 
       // getIdsWithTitle called twice: once at start, once after creates/updates
       expect(dataViewsService.getIdsWithTitle).toHaveBeenCalledTimes(2);
     });
 
     it('logs a success message', async () => {
-      const ctx = buildProvisionContext();
+      const context = createMockFlowContext();
+      await initializeSecurityDataViewsFlow.runFlow(context);
 
-      await initializeSecurityDataViewsFlow.provision(ctx, logger);
-
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(context.logger.info).toHaveBeenCalledWith(
         `Sourcerer data views initialized for space '${SPACE_ID}'`
       );
-    });
-  });
-
-  describe('resolveProvisionContext', () => {
-    it('resolves the provision context from the request handler context', async () => {
-      const mockDataViewsService = createMockDataViewsService();
-      const mockContext = {
-        requestHandlerContext: {
-          securitySolution: Promise.resolve({
-            getInternalDataViewsService: jest.fn().mockResolvedValue(mockDataViewsService),
-            getConfig: jest.fn().mockReturnValue({
-              experimentalFeatures: { enableAlertsAndAttacksAlignment: true },
-            }),
-            getRuleDataService: jest.fn().mockReturnValue({}),
-            getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
-          }),
-          core: Promise.resolve({
-            uiSettings: { client: { get: jest.fn() } },
-          }),
-        },
-      } as unknown as InitializationFlowContext;
-
-      const result = await initializeSecurityDataViewsFlow.resolveProvisionContext(
-        mockContext,
-        loggerMock.create()
-      );
-
-      expect(result.dataViewsService).toBe(mockDataViewsService);
-      expect(result.spaceId).toBe(SPACE_ID);
-      expect(result.enableAttackDataView).toBe(true);
     });
   });
 });

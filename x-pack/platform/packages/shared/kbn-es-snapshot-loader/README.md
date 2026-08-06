@@ -363,6 +363,16 @@ describe('my test suite', () => {
 - To check templates:
   - `GET _index_template/*?filter_path=index_templates.name,index_templates.index_template.index_patterns,index_templates.index_template.data_stream`
 
+## Repository Verification
+
+By default, `register()` skips Elasticsearch's repository verification step (`verify: false`). This allows read-only credentials (e.g. a GCS service account with only `Storage Object Viewer`) to work without needing write access.
+
+When creating snapshots, pass `verify: true` to `register()` to catch misconfigurations early — the `createSnapshot` utility does this automatically. If you're building a custom write flow using the repository strategies directly, opt in explicitly:
+
+```typescript
+await repository.register({ esClient, log, repoName, verify: true });
+```
+
 ## How Replay Works
 
 1. Register the configured snapshot repository (URL or GCS)

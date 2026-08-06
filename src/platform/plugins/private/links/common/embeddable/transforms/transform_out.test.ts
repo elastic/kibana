@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LinkOptions } from '../../../server';
+import type { LinkOptions, LinksByValueState } from '../../../server';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import type { StoredLinksByValueState910 } from './bwc';
 import { transformOut } from './transform_out';
@@ -25,11 +25,12 @@ describe('transformOut', () => {
             openInNewTab: false,
             useCurrentDateRange: false,
             useCurrentFilters: false,
-          } as LinkOptions,
+          } as unknown,
         },
       ],
     } as LinksEmbeddableState;
-    expect(transformOut(byValueState, []).links?.[0].options).toMatchInlineSnapshot(`
+    expect((transformOut(byValueState, []) as LinksByValueState).links[0].options)
+      .toMatchInlineSnapshot(`
       Object {
         "open_in_new_tab": false,
         "use_filters": false,
@@ -49,11 +50,12 @@ describe('transformOut', () => {
           options: {
             openInNewTab: false,
             encodeUrl: true,
-          } as LinkOptions,
+          } as unknown,
         },
       ],
     } as LinksEmbeddableState;
-    expect(transformOut(byValueState, []).links?.[0].options).toMatchInlineSnapshot(`
+    expect((transformOut(byValueState, []) as LinksByValueState).links[0].options)
+      .toMatchInlineSnapshot(`
       Object {
         "encode_url": true,
         "open_in_new_tab": false,
@@ -79,7 +81,8 @@ describe('transformOut', () => {
         },
       ],
     } as LinksEmbeddableState;
-    expect(transformOut(byValueState, []).links?.[0].options).toMatchInlineSnapshot(`
+    expect((transformOut(byValueState, []) as LinksByValueState).links[0].options)
+      .toMatchInlineSnapshot(`
       Object {
         "open_in_new_tab": true,
       }
@@ -99,13 +102,40 @@ describe('transformOut', () => {
         },
       ],
     } as StoredLinksEmbeddableState;
-    expect(transformOut(byValueState, []).links).toMatchInlineSnapshot(`
+    expect((transformOut(byValueState, []) as LinksByValueState).links).toMatchInlineSnapshot(`
       Array [
         Object {
           "destination": "https://github.com/",
           "type": "externalLink",
         },
       ]
+    `);
+  });
+
+  test('should strip out unsupported properties from by-value state', () => {
+    const legacyState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      enhancements: {}, // unsupported
+      disabledActions: [], // unsupported
+      links: [
+        {
+          type: 'externalLink',
+          destination: 'https://example.com/',
+        },
+      ],
+    } as unknown as StoredLinksEmbeddableState;
+    expect(transformOut(legacyState, [])).toMatchInlineSnapshot(`
+      Object {
+        "layout": "vertical",
+        "links": Array [
+          Object {
+            "destination": "https://example.com/",
+            "type": "externalLink",
+          },
+        ],
+        "title": "Custom title",
+      }
     `);
   });
 

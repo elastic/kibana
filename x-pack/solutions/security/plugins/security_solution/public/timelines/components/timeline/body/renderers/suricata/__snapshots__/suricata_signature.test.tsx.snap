@@ -19,7 +19,8 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
       ]
     }
   />
-  <LinkFlexItem
+  <EuiFlexItem
+    css="unknown styles"
     grow={false}
   >
     <CellActionsRenderer
@@ -37,6 +38,6 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
         </GoogleLink>
       </div>
     </CellActionsRenderer>
-  </LinkFlexItem>
+  </EuiFlexItem>
 </EuiFlexGroup>
 `;

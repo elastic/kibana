@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Get Evaluation Datasets API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/datasets:
     get:
@@ -28,8 +28,68 @@ paths:
             minimum: 1
             maximum: 1000
             default: 25
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Filter datasets by name or description
+        # `maxItems` is deliberately omitted on these array parameters: the
+        # generator would emit `.max()` on the `ArrayFromString` wrapper, which
+        # doesn't support it. The number of tag filters is capped in
+        # `DatasetClient.list` instead, and maturity is bounded by its enum.
+        - name: tags
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              minLength: 1
+              maxLength: 64
+              pattern: '^[a-zA-Z0-9][a-zA-Z0-9:._-]*$'
+          style: form
+          explode: true
+          description: >-
+            Only return datasets carrying every one of these tags. Comparison is
+            case-insensitive.
+        - name: maturity
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
+          style: form
+          explode: true
+          description: Only return datasets at one of these maturity levels.
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - name
+              - created_at
+              - updated_at
+              - examples_count
+              - maturity
+            default: updated_at
+          description: >-
+            Sorting by `maturity` orders the levels alphabetically rather than by
+            how curated they are.
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -42,6 +102,8 @@ paths:
                       $ref: '#/components/schemas/DatasetSummary'
                   total:
                     type: integer
+                  facets:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetFacets'
                 required:
                   - datasets
                   - total
@@ -57,6 +119,10 @@ components:
           type: string
         description:
           type: string
+        tags:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
+        maturity:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
         examples_count:
           type: integer
         created_at:

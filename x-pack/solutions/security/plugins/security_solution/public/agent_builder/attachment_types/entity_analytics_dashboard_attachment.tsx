@@ -30,9 +30,15 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import { APP_UI_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
+import {
+  APP_UI_ID,
+  ENABLE_NEW_FLYOUT_SETTING,
+  SecurityAgentBuilderAttachments,
+} from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../common/search_strategy';
 import type { SeverityCount } from '../../entity_analytics/components/severity/types';
 import { RiskLevelBreakdownTable } from '../../entity_analytics/components/home/risk_level_breakdown_table';
@@ -42,6 +48,7 @@ import {
   navigateToEntityAnalyticsHomePageInApp,
   type SecurityAgentBuilderChrome,
 } from './entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent_navigation_context';
 
 export type EntityAnalyticsDashboardAttachment = Attachment<
   typeof SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
@@ -147,18 +154,8 @@ const EntityAnalyticsDashboardInlineContent: React.FC<
 };
 
 const EntityAnalyticsDashboardCanvasContent: React.FC<
-  AttachmentRenderProps<EntityAnalyticsDashboardAttachment> & {
-    application: ApplicationStart;
-    searchSession?: ISessionService;
-    /**
-     * Dismisses the canvas flyout. Provided by the Agent Builder canvas render
-     * callbacks. Forwarded into `EntityListTable` so per-row navigation into
-     * the Entity Analytics home flyout can close the overlay first, otherwise
-     * the canvas renders on top of the just-opened entity flyout.
-     */
-    closeCanvas?: () => void;
-  }
-> = ({ attachment, application, searchSession, closeCanvas }) => {
+  AttachmentRenderProps<EntityAnalyticsDashboardAttachment>
+> = ({ attachment }) => {
   const data = attachment.data;
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const [isRiskPanelNarrow, setIsRiskPanelNarrow] = useState(false);
@@ -166,6 +163,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
     if (!dimensions) return;
     setIsRiskPanelNarrow(dimensions.width < RISK_LEVEL_PANEL_STACK_WIDTH_THRESHOLD);
   }, []);
+
   const hasExplicitSeverityCount = data.severity_count != null;
   const inferredFromEntities = useMemo(
     () => inferSeverityCountFromEntities(data.entities ?? []),
@@ -473,12 +471,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
           </EuiTitle>
           <EuiSpacer size="m" />
           {data.entities.length ? (
-            <EntityListTable
-              entities={data.entities}
-              application={application}
-              searchSession={searchSession}
-              closeCanvas={closeCanvas}
-            />
+            <EntityListTable entities={data.entities} />
           ) : (
             <EuiText size="s" color="subdued">
               {i18n.translate(
@@ -500,13 +493,17 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
+  experimentalFeatures,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
@@ -514,7 +511,9 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       application,
       agentBuilder,
       chrome,
+      experimentalFeatures,
       searchSession,
+      uiSettings,
     })
   );
 };
@@ -523,72 +522,94 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
   application,
   agentBuilder,
   chrome,
+  experimentalFeatures,
   searchSession,
+  uiSettings,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-}): AttachmentUIDefinition<EntityAnalyticsDashboardAttachment> => ({
-  getLabel: (attachment) =>
-    attachment.data.attachmentLabel ??
-    i18n.translate('xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.pillLabel', {
-      defaultMessage: 'Entity Analytics dashboard',
-    }),
-  getIcon: () => 'dashboardApp',
-  canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
-  renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
-  renderCanvasContent: (props, { closeCanvas }) => (
-    <EntityAnalyticsDashboardCanvasContent
-      {...props}
-      application={application}
-      searchSession={searchSession}
-      closeCanvas={closeCanvas}
-    />
-  ),
-  getActionButtons: ({ attachment, openCanvas, isCanvas, openSidebarConversation }) => {
-    if (isCanvas) {
-      const data = attachment.data;
+  uiSettings?: IUiSettingsClient;
+}): AttachmentUIDefinition<EntityAnalyticsDashboardAttachment> => {
+  const getIsNewFlyoutEnabled = (): boolean =>
+    !experimentalFeatures.newFlyoutSystemDisabled &&
+    (uiSettings?.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false);
+
+  return {
+    getLabel: (attachment) =>
+      attachment.data.attachmentLabel ??
+      i18n.translate('xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.pillLabel', {
+        defaultMessage: 'Entity Analytics dashboard',
+      }),
+    getIcon: () => 'dashboardApp',
+    canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
+    renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
+    renderCanvasContent: (props, { closeCanvas }) => (
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={props.openSidebarConversation}
+        searchSession={searchSession}
+        isNewFlyoutEnabled={getIsNewFlyoutEnabled()}
+        closeCanvas={closeCanvas}
+      >
+        <EntityAnalyticsDashboardCanvasContent {...props} />
+      </EntityAnalyticsAgentNavigationProvider>
+    ),
+    getActionButtons: ({
+      attachment,
+      openCanvas,
+      isCanvas,
+      openSidebarConversation,
+      closeCanvas,
+    }) => {
+      if (isCanvas) {
+        const data = attachment.data;
+        return [
+          {
+            label: i18n.translate(
+              'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.openInSecurity',
+              {
+                defaultMessage: 'Open Entity Analytics in Security',
+              }
+            ),
+            icon: 'popout',
+            type: ActionButtonType.SECONDARY,
+            handler: () => {
+              closeCanvas?.();
+              navigateToEntityAnalyticsHomePageInApp({
+                application,
+                appId: APP_UI_ID,
+                agentBuilder,
+                chrome,
+                openSidebarConversation,
+                watchlistId: data.watchlist_id,
+                watchlistName: data.watchlist_name,
+                searchSession,
+              });
+            },
+          },
+        ];
+      }
+      if (!openCanvas) {
+        return [];
+      }
       return [
         {
           label: i18n.translate(
-            'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.openInSecurity',
+            'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.preview',
             {
-              defaultMessage: 'Open Entity Analytics in Security',
+              defaultMessage: 'Preview',
             }
           ),
-          icon: 'popout',
+          icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: () => {
-            navigateToEntityAnalyticsHomePageInApp({
-              application,
-              appId: APP_UI_ID,
-              agentBuilder,
-              chrome,
-              openSidebarConversation,
-              watchlistId: data.watchlist_id,
-              watchlistName: data.watchlist_name,
-              searchSession,
-            });
-          },
+          handler: openCanvas,
         },
       ];
-    }
-    if (!openCanvas) {
-      return [];
-    }
-    return [
-      {
-        label: i18n.translate(
-          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.preview',
-          {
-            defaultMessage: 'Preview',
-          }
-        ),
-        icon: 'eye',
-        type: ActionButtonType.SECONDARY,
-        handler: openCanvas,
-      },
-    ];
-  },
-});
+    },
+  };
+};

@@ -14,29 +14,67 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
+import { DatasetMaturity, DatasetFacets, DatasetTags } from '../common_attributes.gen';
+
+export const DatasetSummary = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    tags: DatasetTags.optional(),
+    maturity: DatasetMaturity.optional(),
+    examples_count: z.number().int(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+);
 export type DatasetSummary = z.infer<typeof DatasetSummary>;
-export const DatasetSummary = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  examples_count: z.number().int(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
 
+export const GetEvaluationDatasetsRequestQuery = lazySchema(() =>
+  z.object({
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(1000).optional().default(25),
+    /**
+     * Filter datasets by name or description
+     */
+    search: z.string().max(256).optional(),
+    /**
+     * Only return datasets carrying every one of these tags. Comparison is case-insensitive.
+     */
+    tags: ArrayFromString(
+      z
+        .string()
+        .min(1)
+        .max(64)
+        .regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/)
+    ).optional(),
+    /**
+     * Only return datasets at one of these maturity levels.
+     */
+    maturity: ArrayFromString(DatasetMaturity).optional(),
+    /**
+     * Sorting by `maturity` orders the levels alphabetically rather than by how curated they are.
+     */
+    sort_field: z
+      .enum(['name', 'created_at', 'updated_at', 'examples_count', 'maturity'])
+      .optional()
+      .default('updated_at'),
+    sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
+  })
+);
 export type GetEvaluationDatasetsRequestQuery = z.infer<typeof GetEvaluationDatasetsRequestQuery>;
-export const GetEvaluationDatasetsRequestQuery = z.object({
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(1000).optional().default(25),
-});
 export type GetEvaluationDatasetsRequestQueryInput = z.input<
   typeof GetEvaluationDatasetsRequestQuery
 >;
 
+export const GetEvaluationDatasetsResponse = lazySchema(() =>
+  z.object({
+    datasets: z.array(DatasetSummary),
+    total: z.number().int(),
+    facets: DatasetFacets.optional(),
+  })
+);
 export type GetEvaluationDatasetsResponse = z.infer<typeof GetEvaluationDatasetsResponse>;
-export const GetEvaluationDatasetsResponse = z.object({
-  datasets: z.array(DatasetSummary),
-  total: z.number().int(),
-});

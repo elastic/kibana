@@ -34,6 +34,79 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+% DEPRECATIONS
+% Paste in deprecations.md
+
+## 9.5.0 [kibana-9.5.0-deprecations]
+
+$$$kibana-276925$$$
+::::{dropdown} Migrate to the renamed Managed integrations API
+**Details**<br> The agentless policies API is renamed to the Managed integrations API. The `/api/fleet/agentless_policies` paths are now served at `/api/fleet/managed_integrations`, and the response model is renamed from `AgentlessPolicy` to `ManagedIntegration`. The original `agentless_policies` paths remain available as deprecated aliases that forward to the same handlers.
+
+**Impact**<br> Clients that call the `agentless_policies` paths keep working: The paths are retained as deprecated aliases, forward to the same handlers, and are marked deprecated in the API reference. Clients that reference the `AgentlessPolicy` schema (for example, code generated from the OpenAPI spec) no longer find it.
+
+**Action**<br> Update integrations to call `/api/fleet/managed_integrations` and consume the `ManagedIntegration` response model, and migrate off the deprecated `agentless_policies` paths.
+
+View [#276925]({{kib-pull}}276925).
+::::
+
+$$$kibana-272414$$$
+::::{dropdown} Migrate from deprecated `elastic.apm` settings
+**Details**<br> Elastic {{product.apm}} instrumentation settings under `elastic.apm` are deprecated in favor of OpenTelemetry. Settings continue to work in 9.5 but trigger deprecation warnings. Removal is planned for 10.0.0. Real User Monitoring still relies on Elastic {{product.apm}} until OpenTelemetry browser monitoring is production-ready.
+
+**Impact**<br> Deployments that configure `elastic.apm` receive startup deprecation warnings. The settings remain functional until removal in a future major version.
+
+**Action**<br> Plan migration to OpenTelemetry instrumentation. Remove `elastic.apm` configuration and use `telemetry.tracing` and `telemetry.metrics` instead. Refer to [Instrumenting with OTel traces](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces).
+
+View [#272414]({{kib-pull}}272414).
+::::
+
+$$$kibana-261591$$$
+::::{dropdown} Migrate from deprecated LLM connector types
+**Details**<br> The OpenAI (`.gen-ai`), {{bedrock}} (`.bedrock`), {{gemini}} (`.gemini`), and {{infer-cap}} (`.inference`) connector types are deprecated. Existing connectors remain usable and show deprecation badges and warnings on the {{connectors-ui}} page and in rule action selectors.
+
+**Impact**<br> Existing LLM connectors and rule actions that use them continue to work but display deprecation indicators.
+
+**Action**<br> For new AI integrations, use {{es}} {{infer}} endpoints instead of LLM connectors. Plan migration of existing LLM connectors and any rule actions that reference them before future removal.
+
+View [#261591]({{kib-pull}}261591).
+::::
+
+$$$kibana-277542$$$
+::::{dropdown} Replace the deprecated `include_comments` parameter in `cases.getCase`
+**Details**<br> The `include_comments` parameter on the `cases.getCase` workflow step is deprecated. It cannot represent all unified case attachment types. Existing workflows that set `include_comments` continue to work unchanged.
+
+**Impact**<br> Workflows that set `include_comments: true` on `cases.getCase` might receive an incomplete attachment array when unified attachments are present. YAML expressions that read legacy comment fields can return `undefined`.
+
+**Action**<br> Use the `cases.getAllAttachments` step to retrieve case attachments instead of `include_comments` on `cases.getCase`.
+
+View [#277542]({{kib-pull}}277542).
+::::
+
+## 9.4.0 [kibana-9.4.0-deprecations]
+
+$$$kibana-263694$$$
+::::{dropdown} Direct AI connector step types deprecated in favor of `ai.prompt`
+**Details**<br> All direct AI connector workflow step types (`inference.*`, `bedrock.*`, `gen-ai.*`, `gemini.*`) are now deprecated. These steps are hidden from autocomplete suggestions and the **Add Action** menu in the workflow editor. Existing workflows using these step types continue to work but display a deprecation warning.
+
+**Impact**<br> New workflows cannot easily discover or add direct AI connector steps. Existing workflows remain functional but show deprecation warnings in the editor.
+
+**Action**<br> Migrate workflows to use the purpose-built `ai.prompt` step instead of direct AI connector steps. The `ai.prompt` step provides a consistent interface for AI operations regardless of the underlying connector type.
+
+View [#263694]({{kib-pull}}263694).
+::::
+
+$$$kibana-242972$$$
+::::{dropdown} Deprecated `state:storeInSessionStorage` advanced setting
+**Details**<br> The artificial URL length limit has been removed from Kibana, and the `state:storeInSessionStorage` advanced setting is now deprecated. This setting was originally provided as a workaround for URL length limits in older browsers. Modern browsers no longer have these limits, and using this setting can prevent copying and pasting URLs directly between tabs.
+
+**Impact**<br> The `state:storeInSessionStorage` setting will be removed in a future version. Enabling this setting may cause issues with URL sharing in Discover and Dashboards.
+
+**Action**<br> Disable the `state:storeInSessionStorage` setting if it is currently enabled. Go to **Stack Management** > **Advanced Settings** and set `state:storeInSessionStorage` to `false`.
+
+View [#242972]({{kib-pull}}242972).
+::::
+
 ## 9.3.0 [kibana-9.3.0-deprecations]
 
 There are no deprecations in this version.

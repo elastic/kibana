@@ -12,7 +12,6 @@
     "public/**/*.json"
   ],
   "kbn_references": [
-    "@kbn/kibana-react-plugin",
     "@kbn/monaco",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
@@ -55,11 +54,13 @@
     "@kbn/css-utils",
     "@kbn/storybook",
     "@kbn/esql-composer",
-    "@kbn/deeplinks-analytics",
+    "@kbn/esql-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/restorable-state",
     "@kbn/lens-common",
-    "@kbn/field-types",
+    "@kbn/ebt-click",
+    "@kbn/apm-shared",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

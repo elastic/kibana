@@ -155,9 +155,9 @@ describe('XYChart component', () => {
 
     formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
       const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
-      const originalConvert = fieldFormat.convert?.bind(fieldFormat) ?? ((v: unknown) => v);
+      const originalConvert = fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
       convertSpy = jest.fn((value) => originalConvert(value));
-      fieldFormat.convert = convertSpy as typeof fieldFormat.convert;
+      fieldFormat.convertToText = convertSpy as typeof fieldFormat.convertToText;
       return fieldFormat;
     });
 
@@ -238,7 +238,7 @@ describe('XYChart component', () => {
                   source: 'esaggs',
                   sourceParams: {
                     type: 'date_histogram',
-                    params: {},
+                    params: { used_interval: '1d' },
                     appliedTimeRange: {
                       from: '2019-01-02T05:00:00.000Z',
                       to: '2019-01-03T05:00:00.000Z',
@@ -452,7 +452,7 @@ describe('XYChart component', () => {
                   source: 'esaggs',
                   sourceParams: {
                     type: 'date_histogram',
-                    params: {},
+                    params: { used_interval: '1d' },
                     appliedTimeRange: {
                       from: '2021-04-22T12:00:00.000Z',
                       to: '2021-04-24T12:00:00.000Z',
@@ -2009,6 +2009,78 @@ describe('XYChart component', () => {
     });
   });
 
+  describe('axis decimal precision', () => {
+    test('applies y axis maximumFractionDigits from number formatter params', () => {
+      const { data, args } = sampleArgs();
+      const yAxisFormatData: Datatable = {
+        ...data,
+        columns: data.columns.map((column) =>
+          column.id === 'a'
+            ? {
+                ...column,
+                meta: {
+                  ...column.meta,
+                  params: {
+                    id: 'number',
+                    params: {
+                      pattern: '0,0.00',
+                      decimals: 2,
+                    },
+                  },
+                },
+              }
+            : column
+        ),
+      };
+
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: args.layers.map((layer) => ({
+              ...layer,
+              accessors: ['a'],
+              splitAccessors: undefined,
+              table: yAxisFormatData,
+            })),
+          }}
+        />
+      );
+
+      const yAxis = component
+        .find(Axis)
+        .filterWhere((axis) => axis.prop('id') !== 'x')
+        .first();
+
+      expect(yAxis.prop('maximumFractionDigits')).toEqual(2);
+    });
+
+    test('does not set maximumFractionDigits when formatter does not include decimals', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: args.layers.map((layer) => ({
+              ...layer,
+              accessors: ['a'],
+              splitAccessors: undefined,
+            })),
+          }}
+        />
+      );
+
+      const yAxis = component
+        .find(Axis)
+        .filterWhere((axis) => axis.prop('id') !== 'x')
+        .first();
+
+      expect(yAxis.prop('maximumFractionDigits')).toBeUndefined();
+    });
+  });
+
   describe('y series coloring', () => {
     const args = createArgsWithLayers();
     const layer = args.layers[0] as DataLayerConfig;
@@ -2190,7 +2262,10 @@ describe('XYChart component', () => {
   test('it should pass the formatter function to the axis', () => {
     const localConvertSpy = jest.fn((x) => x);
     const getFormatSpy = jest.fn();
-    getFormatSpy.mockReturnValue({ convert: localConvertSpy });
+    getFormatSpy.mockReturnValue({
+      convertToText: localConvertSpy,
+      params: jest.fn(() => ({})),
+    });
 
     const { args } = sampleArgs();
 
@@ -2986,7 +3061,10 @@ describe('XYChart component', () => {
     const args = createArgsWithLayers([timeSampleLayer]);
 
     const getCustomFormatSpy = jest.fn();
-    getCustomFormatSpy.mockReturnValue({ convert: jest.fn((x) => Boolean(x)) });
+    getCustomFormatSpy.mockReturnValue({
+      convertToText: jest.fn((x) => Boolean(x)),
+      params: jest.fn(() => ({})),
+    });
 
     const component = shallow(
       <XYChart {...defaultProps} formatFactory={getCustomFormatSpy} args={{ ...args }} />

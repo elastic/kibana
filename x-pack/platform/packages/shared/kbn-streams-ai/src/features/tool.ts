@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Feature } from '@kbn/streams-schema';
+import { type Feature } from '@kbn/significant-events-schema';
 import { pick } from 'lodash';
 
 export interface GetStreamFeaturesInput {
@@ -22,6 +22,7 @@ export interface GetStreamFeaturesQuery<T extends string = string> {
 
 export type LlmFeature = Pick<
   Feature,
+  | 'id'
   | 'type'
   | 'subtype'
   | 'title'
@@ -100,6 +101,7 @@ export function createGetFeatureQueryFromToolArgs<T extends string>(allowedTypes
 
 export function toFeatureForLlmContext(feature: Feature): LlmFeature {
   return pick(feature, [
+    'id',
     'type',
     'subtype',
     'title',

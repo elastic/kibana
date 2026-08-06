@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { type IndiciesItem } from '../../../../server/routes/diagnostics/route';
+import { type IndiciesItem } from '@kbn/apm-types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
@@ -84,7 +84,7 @@ export function DiagnosticsIndices() {
         return (
           <>
             {fieldMappings.isValid ? (
-              <EuiIcon type="check" />
+              <EuiIcon type="check" aria-hidden={true} />
             ) : (
               <EuiIconTip
                 content={`The field "service.name" should be mapped as keyword but is mapped as "${fieldMappings.invalidType}"`}

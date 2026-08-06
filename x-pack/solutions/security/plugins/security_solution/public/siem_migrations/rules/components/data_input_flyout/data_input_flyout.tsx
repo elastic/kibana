@@ -37,8 +37,8 @@ import type {
 } from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
-import { QradarDataInputStep } from './types';
-import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
+import { QradarDataInputStep, SentinelDataInputStep } from './types';
+import { useRuleMigrationVendorCopy } from '../../hooks/use_rule_migration_vendor_copy';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -61,6 +61,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       setMigrationSourceDisabled,
       migrationSourceOptions,
     } = useMigrationSourceStep(initialMigrationStats?.vendor ?? MigrationSource.SPLUNK);
+    const { copyrightNotice } = useRuleMigrationVendorCopy(migrationSource);
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
       initialMigrationStats
@@ -89,6 +90,18 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
             }
             return QradarDataInputStep.Enhancements;
           });
+          return;
+        }
+
+        if (vendor === MigrationSource.SENTINEL) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(SentinelDataInputStep.Watchlists);
+            return;
+          }
+          if (migrationStats?.id) {
+            setDataInputStep(SentinelDataInputStep.End);
+          }
+          return;
         }
 
         if (newMissingResourcesIndexed?.macros.length) {
@@ -196,7 +209,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
               </>
               <EuiFlexItem>
                 <PanelText size="xs" subdued cursive>
-                  <p>{getCopyrightNoticeByVendor(migrationSource)}</p>
+                  <p>{copyrightNotice}</p>
                 </PanelText>
               </EuiFlexItem>
             </EuiFlexGroup>

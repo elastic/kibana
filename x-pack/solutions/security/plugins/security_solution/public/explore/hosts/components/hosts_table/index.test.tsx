@@ -11,9 +11,9 @@ import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { HostsTable } from '.';
 import { mockData } from './mock';
-import { HostPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,9 +45,21 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenHostFlyout = jest.fn();
+const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({ openRightPanel: mockOpenRightPanel })),
+  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
+}));
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => true,
+}));
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openHostFlyout: mockOpenHostFlyout,
+    openUserFlyout: jest.fn(),
+    openServiceFlyout: jest.fn(),
+    openGenericEntityFlyout: jest.fn(),
+  }),
 }));
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
@@ -65,7 +77,8 @@ describe('Hosts Table', () => {
   const store = createMockStore();
 
   beforeEach(() => {
-    mockOpenRightPanel.mockClear();
+    mockOpenHostFlyout.mockClear();
+    mockOpenFlyout.mockClear();
   });
 
   describe('rendering', () => {
@@ -220,15 +233,12 @@ describe('Hosts Table', () => {
 
       fireEvent.click(screen.getByTestId('host-details-button'));
 
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          entityId,
-          contextID: 'allHosts',
-          scopeId: 'allHosts',
-          isPreviewMode: false,
-        },
+      expect(mockOpenHostFlyout).toHaveBeenCalledWith({
+        hostName,
+        entityId,
+        contextID: 'allHosts',
+        scopeId: 'allHosts',
+        origin: FLYOUT_ORIGIN.HOSTS_TABLE,
       });
     });
 
@@ -252,7 +262,8 @@ describe('Hosts Table', () => {
 
       fireEvent.click(screen.getByTestId('host-details-button'));
 
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenHostFlyout).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
 
     describe('Sorting on Table', () => {

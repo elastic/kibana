@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-import type { DFAModelItem } from '../../../../../common/types/trained_models';
+import type { DFAModelItem } from '@kbn/ml-common-types/trained_models';
 import {
   EDIT_MESSAGE,
   CANCEL_EDIT_MESSAGE,
@@ -280,6 +280,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     values={{
                       fieldsList: (
                         <EuiPopover
+                          aria-label={i18n.translate(
+                            'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.reviewFieldsPopoverAriaLabel',
+                            { defaultMessage: 'Review inference input fields' }
+                          )}
                           button={
                             <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
                               You can review them here.

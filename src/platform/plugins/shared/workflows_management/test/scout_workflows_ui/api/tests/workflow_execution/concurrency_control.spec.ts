@@ -20,17 +20,18 @@ enabled: true
 description: Temporary workflow created by Scout API tests
 triggers:
   - type: manual
+    inputs:
+      type: object
+      properties:
+        env:
+          type: string
+        problem:
+          type: string
 settings:
   concurrency:
     key: "{{inputs.env}}-{{inputs.problem}}"
     strategy: "${strategy}"
-inputs:
-  type: object
-  properties:
-    env:
-      type: string
-    problem:
-      type: string
+
 
 steps:
   - name: hello_world_step_1

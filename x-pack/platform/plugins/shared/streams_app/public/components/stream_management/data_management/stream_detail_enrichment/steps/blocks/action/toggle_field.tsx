@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { useController } from 'react-hook-form';
 import type { EuiFormRowProps } from '@elastic/eui';
@@ -14,7 +15,7 @@ import type { ExtractBooleanFields, ProcessorFormState } from '../../../types';
 interface ToggleFieldProps {
   helpText?: EuiFormRowProps['helpText'];
   id?: string;
-  label: string;
+  label: ReactNode;
   name: ExtractBooleanFields<ProcessorFormState>;
 }
 

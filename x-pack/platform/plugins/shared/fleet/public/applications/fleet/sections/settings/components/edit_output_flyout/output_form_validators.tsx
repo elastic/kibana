@@ -8,6 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
+export { validateSslPathInput, validateSslPathsCombo };
+
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
   (value: string | { id: string } | undefined) => {
@@ -336,6 +339,7 @@ export function validateSSLCertificate(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export function validateSSLKey(value: string) {
@@ -346,6 +350,7 @@ export function validateSSLKey(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export const validateSSLKeySecret = toSecretValidator(validateSSLKey);

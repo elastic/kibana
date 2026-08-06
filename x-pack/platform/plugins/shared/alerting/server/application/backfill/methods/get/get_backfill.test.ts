@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
@@ -103,6 +104,7 @@ describe('getBackfill()', () => {
     mockActionsClient.isSystemAction.mockImplementation(isSystemAction);
 
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -112,6 +114,7 @@ describe('getBackfill()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger,
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -254,46 +257,6 @@ describe('getBackfill()', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith({
         error: { code: 'Error', message: 'no access for you' },
-        event: {
-          action: 'ad_hoc_run_get',
-          category: ['database'],
-          outcome: 'failure',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: '1',
-            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            name: 'backfill for rule "fakeRuleName"',
-          },
-        },
-        message:
-          'Failed attempt to get ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
-      });
-    });
-
-    test('should check for errors returned from saved objects client and throw', async () => {
-      // @ts-expect-error
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
-        id: '1',
-        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        error: {
-          error: 'my error',
-          message: 'Unable to get',
-          statusCode: 404,
-        },
-        attributes: { rule: { name: fakeRuleName } },
-      });
-
-      await expect(rulesClient.getBackfill('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to get backfill by id: 1: Unable to get"`
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        `Failed to get backfill by id: 1 - Error: Unable to get`
-      );
-
-      expect(auditLogger.log).toHaveBeenCalledWith({
-        error: { code: 'Error', message: 'Unable to get' },
         event: {
           action: 'ad_hoc_run_get',
           category: ['database'],

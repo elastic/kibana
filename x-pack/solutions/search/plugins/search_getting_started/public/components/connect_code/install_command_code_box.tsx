@@ -11,6 +11,8 @@ import {
   type AvailableLanguages,
   GettingStartedCodeExample,
 } from '@kbn/search-code-examples/src/getting-started-tutorials';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface Props {
   selectedLanguage: AvailableLanguages;
@@ -18,11 +20,22 @@ interface Props {
 
 export const InstallCommandCodeBox = ({ selectedLanguage }: Props) => {
   const installCommand = GettingStartedCodeExample[selectedLanguage].installCommandShell;
+  const usageTracker = useUsageTracker();
 
   if (!installCommand) return null;
 
   return (
-    <EuiCodeBlock isCopyable fontSize="m" language={'bash'}>
+    <EuiCodeBlock
+      isCopyable
+      fontSize="m"
+      language={'bash'}
+      onCopy={() => {
+        usageTracker.click([
+          AnalyticsEvents.codeExampleCopied,
+          `${AnalyticsEvents.codeExampleCopied}_install_${selectedLanguage}`,
+        ]);
+      }}
+    >
       {installCommand}
     </EuiCodeBlock>
   );

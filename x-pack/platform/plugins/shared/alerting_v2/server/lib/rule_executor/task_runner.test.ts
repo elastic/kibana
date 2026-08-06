@@ -6,15 +6,28 @@
  */
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 
 import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
 import { createRulePipelineState } from './test_utils';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import type { RuleExecutionMetricsSnapshot } from './metrics/types';
+
+const createEmptyMetricsSnapshot = (): RuleExecutionMetricsSnapshot => ({
+  executionId: 'execution-uuid',
+  startedAt: '2025-01-01T00:00:00.000Z',
+  endedAt: '2025-01-01T00:00:00.001Z',
+  durationMs: 1,
+  counters: {},
+});
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
   let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
-  let abortController: AbortController;
+  let signal: AbortSignal;
+
+  const executionUuid = 'execution-uuid';
 
   // @ts-expect-error: not all fields are required
   const taskInstance: ConcreteTaskInstance = {
@@ -27,8 +40,9 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
-    runner = new RuleExecutorTaskRunner(pipeline);
-    abortController = new AbortController();
+    const mockLoggerService = createLoggerService();
+    runner = new RuleExecutorTaskRunner(pipeline, mockLoggerService.loggerService);
+    signal = new AbortController().signal;
   });
 
   describe('extractExecutionInput', () => {
@@ -36,15 +50,17 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
-      await runner.run({ taskInstance, abortController });
+      await runner.run({ taskInstance, signal, executionUuid });
 
       expect(pipeline.execute).toHaveBeenCalledWith({
         ruleId: 'rule-1',
         spaceId: 'default',
         scheduledAt: taskInstance.scheduledAt?.toISOString(),
-        abortSignal: abortController.signal,
+        abortSignal: signal,
+        executionUuid,
       });
     });
 
@@ -57,10 +73,11 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
       // @ts-expect-error: testing the scheduledAt as a string
-      await runner.run({ taskInstance: taskWithDateScheduledAt, abortController });
+      await runner.run({ taskInstance: taskWithDateScheduledAt, signal, executionUuid });
 
       expect(pipeline.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -75,23 +92,28 @@ describe('RuleExecutorTaskRunner', () => {
       pipeline.execute.mockResolvedValue({
         completed: true,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, signal, executionUuid });
 
       expect(result).toEqual({ state: {} });
     });
 
-    it('preserves previous state when pipeline halts with rule_deleted', async () => {
+    it('throws an unrecoverable error and logs a warning when pipeline halts with rule_deleted', async () => {
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_deleted',
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner
+        .run({ taskInstance, signal, executionUuid })
+        .catch((error) => error);
 
-      expect(result).toEqual({ state: { foo: 'bar' } });
+      expect(result).toBeInstanceOf(Error);
+      expect(isUnrecoverableError(result)).toBe(true);
     });
 
     it('preserves previous state when pipeline halts with rule_disabled', async () => {
@@ -99,11 +121,24 @@ describe('RuleExecutorTaskRunner', () => {
         completed: false,
         haltReason: 'rule_disabled',
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, signal, executionUuid });
 
       expect(result).toEqual({ state: { foo: 'bar' } });
+    });
+
+    it('does not throw an unrecoverable error when pipeline completes', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: true,
+        finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
+      });
+
+      await expect(runner.run({ taskInstance, signal, executionUuid })).resolves.toEqual({
+        state: {},
+      });
     });
 
     it('returns empty state for unknown halt reasons', async () => {
@@ -111,9 +146,10 @@ describe('RuleExecutorTaskRunner', () => {
         completed: false,
         haltReason: undefined,
         finalState: createRulePipelineState(),
+        metrics: createEmptyMetricsSnapshot(),
       });
 
-      const result = await runner.run({ taskInstance, abortController });
+      const result = await runner.run({ taskInstance, signal, executionUuid });
 
       expect(result).toEqual({ state: {} });
     });
@@ -123,7 +159,7 @@ describe('RuleExecutorTaskRunner', () => {
     it('propagates pipeline errors', async () => {
       pipeline.execute.mockRejectedValue(new Error('Pipeline failed'));
 
-      await expect(runner.run({ taskInstance, abortController })).rejects.toThrow(
+      await expect(runner.run({ taskInstance, signal, executionUuid })).rejects.toThrow(
         'Pipeline failed'
       );
     });

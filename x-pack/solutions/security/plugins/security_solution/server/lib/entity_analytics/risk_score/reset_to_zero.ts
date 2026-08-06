@@ -60,6 +60,7 @@ export const resetToZero = async ({
     ? EntityIdentifierFields.generic
     : EntityTypeToIdentifierField[entityType];
   const esql = /* sql */ `
+    SET unmapped_fields="nullify";
     FROM ${alias}
     | WHERE ${entityType}.${RISK_SCORE_FIELD} > 0
     | EVAL id_value = TO_STRING(${entityField})
@@ -139,7 +140,7 @@ export const resetToZero = async ({
   });
 
   if (idBasedRiskScoringEnabled && crudClient) {
-    const entityStoreErrors = await persistRiskScoresToEntityStore({
+    const { unexpectedErrors: entityStoreErrors } = await persistRiskScoresToEntityStore({
       crudClient,
       logger,
       scores: { [entityType]: scores },

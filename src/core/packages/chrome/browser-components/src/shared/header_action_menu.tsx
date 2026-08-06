@@ -10,14 +10,14 @@
 import type { FC } from 'react';
 import React, { useRef, useLayoutEffect } from 'react';
 import type { UnmountCallback } from '@kbn/core-mount-utils-browser';
-import { useCurrentActionMenu } from './chrome_hooks';
+import { useInternalLegacyActionMenu } from './chrome_hooks';
 
 /**
  * Renders the currently mounted header action menu set via {@link ChromeStart.setHeaderActionMenu}.
  * @deprecated Use {@link HeaderAppMenu} instead. See kibana-team#2651.
  */
 export const HeaderActionMenu: FC = () => {
-  const mount = useCurrentActionMenu();
+  const mount = useInternalLegacyActionMenu();
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 

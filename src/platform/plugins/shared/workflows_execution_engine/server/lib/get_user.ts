@@ -16,7 +16,9 @@ import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/c
  * @param request - The Kibana request object
  * @param security - Core's security service instance
  * @param clusterClient - Elasticsearch cluster client for fallback authentication with API keys
- * @returns A promise that resolves to the username of the authenticated user or 'system' as fallback
+ * @returns User profile UID when available, username when resolvable, otherwise `'unknown'`.
+ * @remarks Always **resolves** with a string — does not throw or reject. Failures in auth lookup are
+ *   swallowed so callers (e.g. audit metadata) cannot block core workflow actions.
  */
 export async function getAuthenticatedUser(
   request: KibanaRequest,
@@ -26,8 +28,8 @@ export async function getAuthenticatedUser(
   // Try getCurrentUser first (works for regular authenticated requests)
   try {
     const user = security.authc.getCurrentUser(request);
-    if (user?.username) {
-      return user.username;
+    if (user?.profile_uid || user?.username) {
+      return user.profile_uid ?? user.username;
     }
   } catch (error) {
     // Fall through to API key authentication

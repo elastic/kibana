@@ -6,19 +6,19 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 
 export const NoFailureStorePanel = ({
-  openModal,
+  onEnableFailureStore,
   definition,
+  isExternalFlyoutOpen = false,
 }: {
-  openModal: (show: boolean) => void;
+  onEnableFailureStore: () => void;
   definition: Streams.ingest.all.GetResponse;
+  isExternalFlyoutOpen?: boolean;
 }) => {
-  const {
-    privileges: { manage_failure_store: manageFailureStorePrivilege },
-  } = definition;
+  const manageFailureStorePrivilege = definition.privileges?.manage_failure_store ?? false;
   return (
     <EuiPanel
       paddingSize="m"
@@ -29,34 +29,33 @@ export const NoFailureStorePanel = ({
     >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiText>
+          <EuiText size="s">
             <b>
               {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.title', {
                 defaultMessage: 'Failure store disabled',
               })}
             </b>
           </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText>
+          <EuiText size="s" color="subdued">
             {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.description', {
               defaultMessage:
-                'Enable the failure store to have this stream’s failed documents automatically placed',
+                "Enable the failure store to collect this stream's failed documents for later review.",
             })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {manageFailureStorePrivilege && (
-            <div>
-              <EuiButton
-                type="button"
-                onClick={() => openModal(true)}
-                data-test-subj="streamsAppFailureStoreEnableButton"
-              >
-                {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.button', {
-                  defaultMessage: 'Enable failure store',
-                })}
-              </EuiButton>
-            </div>
+            <EuiButton
+              type="button"
+              size="s"
+              onClick={onEnableFailureStore}
+              data-test-subj="streamsAppFailureStoreEnableButton"
+              disabled={isExternalFlyoutOpen}
+            >
+              {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.button', {
+                defaultMessage: 'Enable failure store',
+              })}
+            </EuiButton>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

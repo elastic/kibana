@@ -42,8 +42,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
-  // Failing: See https://github.com/elastic/kibana/issues/244588
-  describe.skip('alerts as data flapping', function () {
+  describe('alerts as data flapping', function () {
     this.tags('skipFIPS');
     afterEach(async () => {
       await es.deleteByQuery({
@@ -117,28 +116,33 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      // Query for alerts and rule state.
+      // See note in the "settle on recovered" test below for why we have to
+      // poll: the alert doc is indexed before the `execute` event, the task
+      // state is saved after, with up to ~50ms of buffered-store delay.
+      let alertDocs: Array<SearchHit<PatternFiringAlert>> = [];
+      let state: any;
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      let state: any = await getRuleState(ruleId);
+        // Should be 2 alert docs because alert pattern was:
+        // active, recovered, recovered, active, recovered
+        expect(alertDocs.length).to.equal(2);
 
-      // Should be 2 alert docs because alert pattern was:
-      // active, recovered, recovered, active, recovered
-      expect(alertDocs.length).to.equal(2);
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
-      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertRecoveredInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be false
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+        // Flapping value for alert doc and task state should be false
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+      });
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
@@ -149,28 +153,27 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Should be 3 alert docs now because alert became active again
+        expect(alertDocs.length).to.equal(3);
 
-      // Should be 3 alert docs now because alert became active again
-      expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
 
-      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be true because alert is flapping
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+        // Flapping value for alert doc and task state should be true because alert is flapping
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+      });
 
       // Run the rule 7 more times
       for (let i = 0; i < 7; i++) {
@@ -181,29 +184,28 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Should still be 3 alert docs
+        expect(alertDocs.length).to.equal(3);
 
-      // Should still be 3 alert docs
-      expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
-      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertRecoveredInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be false because alert was active for long
-      // enough to reset the flapping state
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+        // Flapping value for alert doc and task state should be false because alert was active for long
+        // enough to reset the flapping state
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+      });
     });
 
     it('should set flapping and flapping_history for flapping alerts that settle on recovered', async () => {
@@ -260,27 +262,38 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      // Query for alerts and rule state.
+      //
+      // The alert doc is indexed (with refresh) by the alerts client during
+      // `runRule`, before the `execute` event log entry is written. The task
+      // state is updated by Task Manager via a buffered partial update *after*
+      // the rule's `run()` returns (so after the event log is written), with up
+      // to a 50ms buffer flush + ES refresh delay. Waiting for the event log
+      // therefore guarantees the alert doc is current but not the task state,
+      // which is why we have to retry the comparison until both converge on
+      // the same run.
+      let alertDocs: Array<SearchHit<PatternFiringAlert>> = [];
+      let state: any;
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      let state: any = await getRuleState(ruleId);
+        // Should be 2 alert docs because alert pattern was:
+        // active, recovered, recovered, active, recovered
+        expect(alertDocs.length).to.equal(2);
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
-      // Should be 2 alert docs because alert pattern was:
-      // active, recovered, recovered, active, recovered
-      expect(alertDocs.length).to.equal(2);
-      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertRecoveredInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for task state should be false
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+        // Flapping value for task state should be false
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+      });
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
@@ -291,27 +304,26 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Should be 3 alert docs now because alert became active again
+        expect(alertDocs.length).to.equal(3);
+        expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+        expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
 
-      // Should be 3 alert docs now because alert became active again
-      expect(alertDocs.length).to.equal(3);
-      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
-      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be true because alert is flapping
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+        // Flapping value for alert doc and task state should be true because alert is flapping
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+      });
 
       // Run the rule 3 more times
       for (let i = 0; i < 3; i++) {
@@ -323,10 +335,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       }
 
       await retry.try(async () => {
-        // Query for alerts
         alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
-
-        // Get rule state from task document
         state = await getRuleState(ruleId);
 
         // Should still be 3 alert docs
@@ -397,12 +406,14 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
-      expect(alertDocs.length).to.equal(3);
+      await retry.try(async () => {
+        const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        expect(alertDocs.length).to.equal(3);
 
-      // Alert is recovered and flapping
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(alertDocs[0]._source![ALERT_PENDING_RECOVERED_COUNT]).to.equal(3);
+        // Alert is recovered and flapping
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(alertDocs[0]._source![ALERT_PENDING_RECOVERED_COUNT]).to.equal(3);
+      });
     });
 
     it('Should not fail when an alert is flapping and recovered for a rule with notify_when: onThrottleInterval', async () => {
@@ -455,14 +466,16 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
-      const state = await getRuleState(ruleId);
+      await retry.try(async () => {
+        const alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        const state = await getRuleState(ruleId);
 
-      expect(alertDocs.length).to.equal(2);
+        expect(alertDocs.length).to.equal(2);
 
-      // Alert is recovered and flapping
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+        // Alert is recovered and flapping
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(true);
+      });
     });
 
     it('should set flapping and flapping_history for flapping alerts over a period of time longer than the lookback', async () => {
@@ -521,25 +534,28 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      let alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      // See note in the "settle on recovered" test for why these reads are
+      // wrapped in retry.try.
+      let alertDocs: Array<SearchHit<PatternFiringAlert>> = [];
+      let state: any;
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      let state: any = await getRuleState(ruleId);
+        // Should be 3 alert docs because alert pattern was:
+        // active, recovered, recovered, active, recovered, active, recovered
+        expect(alertDocs.length).to.equal(3);
 
-      // Should be 3 alert docs because alert pattern was:
-      // active, recovered, recovered, active, recovered, active, recovered
-      expect(alertDocs.length).to.equal(3);
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertRecoveredInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertRecoveredInstances.alertA.meta.flappingHistory
-      );
-
-      // Alert shouldn't be flapping because the status change threshold hasn't been exceeded
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+        // Alert shouldn't be flapping because the status change threshold hasn't been exceeded
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(state.alertRecoveredInstances.alertA.meta.flapping).to.equal(false);
+      });
 
       // Run the rule 1 more time
       for (let i = 0; i < 1; i++) {
@@ -550,24 +566,23 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Should be 4 alert docs now because alert became active again
+        expect(alertDocs.length).to.equal(4);
 
-      // Should be 4 alert docs now because alert became active again
-      expect(alertDocs.length).to.equal(4);
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be false
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
+        // Flapping value for alert doc and task state should be false
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
+      });
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
@@ -578,24 +593,23 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Should still be 4 alert docs
+        expect(alertDocs.length).to.equal(4);
 
-      // Should still be 4 alert docs
-      expect(alertDocs.length).to.equal(4);
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be true
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+        // Flapping value for alert doc and task state should be true
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(true);
+        expect(state.alertInstances.alertA.meta.flapping).to.equal(true);
+      });
 
       // Run the rule 3 more times
       for (let i = 0; i < 3; i++) {
@@ -606,24 +620,23 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
-      // Query for alerts
-      alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        alertDocs = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      // Get rule state from task document
-      state = await getRuleState(ruleId);
+        // Should still be 4 alert docs
+        expect(alertDocs.length).to.equal(4);
 
-      // Should still be 4 alert docs
-      expect(alertDocs.length).to.equal(4);
+        // Newest alert doc is first
+        // Flapping history for newest alert doc should match flapping history in state
+        expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
+          state.alertInstances.alertA.meta.flappingHistory
+        );
 
-      // Newest alert doc is first
-      // Flapping history for newest alert doc should match flapping history in state
-      expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
-        state.alertInstances.alertA.meta.flappingHistory
-      );
-
-      // Flapping value for alert doc and task state should be true because lookback threshold exceeded
-      expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
-      expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
+        // Flapping value for alert doc and task state should be true because lookback threshold exceeded
+        expect(alertDocs[0]._source![ALERT_FLAPPING]).to.equal(false);
+        expect(state.alertInstances.alertA.meta.flapping).to.equal(false);
+      });
     });
 
     it('should allow rule specific flapping to override space flapping', async () => {
@@ -889,6 +902,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // --------------------------
       // RUN 1 - 10 new alerts
       // --------------------------
+      // Reads of alertDocs + task state are wrapped in retry.try because the
+      // task state update is buffered (see "settle on recovered" test for
+      // details) and may lag the `execute` event log entry we're waiting on.
+      // See https://github.com/elastic/kibana/issues/244588.
       let events: IValidatedEvent[] = await waitForEventLogDocs(
         ruleId,
         new Map([['execute', { equal: 1 }]])
@@ -897,43 +914,46 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       let executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
       expect(executionUuid).not.to.be(undefined);
 
-      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      let state: any;
+      await retry.try(async () => {
+        const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      let state: any = await getRuleState(ruleId);
-      expect(state.alertInstances.alertA.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertB.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertC.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertD.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertE.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertF.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertG.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertH.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertI.state.patternIndex).to.be(0);
-      expect(state.alertInstances.alertJ.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertA.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertB.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertC.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertD.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertE.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertF.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertG.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertH.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertI.state.patternIndex).to.be(0);
+        expect(state.alertInstances.alertJ.state.patternIndex).to.be(0);
 
-      expect(alertDocsRun1.length).to.equal(10);
+        expect(alertDocsRun1.length).to.equal(10);
 
-      expect(
-        alertDocsRun1
-          .filter((doc) => doc._source![ALERT_STATUS] === 'active')
-          .map((doc) => doc._source![ALERT_INSTANCE_ID])
-      ).to.eql([
-        'alertA',
-        'alertB',
-        'alertC',
-        'alertD',
-        'alertE',
-        'alertF',
-        'alertG',
-        'alertH',
-        'alertI',
-        'alertJ',
-      ]);
-      expect(
-        alertDocsRun1
-          .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
-          .map((doc) => doc._source![ALERT_INSTANCE_ID])
-      ).to.eql([]);
+        expect(
+          alertDocsRun1
+            .filter((doc) => doc._source![ALERT_STATUS] === 'active')
+            .map((doc) => doc._source![ALERT_INSTANCE_ID])
+        ).to.eql([
+          'alertA',
+          'alertB',
+          'alertC',
+          'alertD',
+          'alertE',
+          'alertF',
+          'alertG',
+          'alertH',
+          'alertI',
+          'alertJ',
+        ]);
+        expect(
+          alertDocsRun1
+            .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
+            .map((doc) => doc._source![ALERT_INSTANCE_ID])
+        ).to.eql([]);
+      });
 
       // --------------------------
       // RUN 2 - 10 recovered, 12 new
@@ -948,68 +968,70 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
       expect(executionUuid).not.to.be(undefined);
 
-      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      state = await getRuleState(ruleId);
-      expect(state.alertRecoveredInstances.alertA).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertB).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertC).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertD).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertE).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertF).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertG).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertH).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertI).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertJ).not.to.be(undefined);
-      expect(state.alertInstances.alertK.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertL.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertM.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertN.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertO.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertP.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertQ.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertR.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertS.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertT.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertU.state.patternIndex).to.be(1);
-      expect(state.alertInstances.alertV.state.patternIndex).to.be(1);
+        expect(state.alertRecoveredInstances.alertA).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertB).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertC).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertD).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertE).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertF).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertG).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertH).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertI).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertJ).not.to.be(undefined);
+        expect(state.alertInstances.alertK.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertL.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertM.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertN.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertO.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertP.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertQ.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertR.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertS.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertT.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertU.state.patternIndex).to.be(1);
+        expect(state.alertInstances.alertV.state.patternIndex).to.be(1);
 
-      expect(alertDocsRun2.length).to.equal(22);
+        expect(alertDocsRun2.length).to.equal(22);
 
-      expect(
-        alertDocsRun2
-          .filter((doc) => doc._source![ALERT_STATUS] === 'active')
-          .map((doc) => doc._source![ALERT_INSTANCE_ID])
-      ).to.eql([
-        'alertK',
-        'alertL',
-        'alertM',
-        'alertN',
-        'alertO',
-        'alertP',
-        'alertQ',
-        'alertR',
-        'alertS',
-        'alertT',
-        'alertU',
-        'alertV',
-      ]);
-      expect(
-        alertDocsRun2
-          .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
-          .map((doc) => doc._source![ALERT_INSTANCE_ID])
-      ).to.eql([
-        'alertA',
-        'alertB',
-        'alertC',
-        'alertD',
-        'alertE',
-        'alertF',
-        'alertG',
-        'alertH',
-        'alertI',
-        'alertJ',
-      ]);
+        expect(
+          alertDocsRun2
+            .filter((doc) => doc._source![ALERT_STATUS] === 'active')
+            .map((doc) => doc._source![ALERT_INSTANCE_ID])
+        ).to.eql([
+          'alertK',
+          'alertL',
+          'alertM',
+          'alertN',
+          'alertO',
+          'alertP',
+          'alertQ',
+          'alertR',
+          'alertS',
+          'alertT',
+          'alertU',
+          'alertV',
+        ]);
+        expect(
+          alertDocsRun2
+            .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
+            .map((doc) => doc._source![ALERT_INSTANCE_ID])
+        ).to.eql([
+          'alertA',
+          'alertB',
+          'alertC',
+          'alertD',
+          'alertE',
+          'alertF',
+          'alertG',
+          'alertH',
+          'alertI',
+          'alertJ',
+        ]);
+      });
 
       // --------------------------
       // RUN 3 - 22 recovered, 5 new
@@ -1024,67 +1046,69 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
       expect(executionUuid).not.to.be(undefined);
 
-      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+      await retry.try(async () => {
+        const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        state = await getRuleState(ruleId);
 
-      state = await getRuleState(ruleId);
-      expect(state.alertRecoveredInstances.alertA).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertB).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertC).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertD).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertE).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertF).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertG).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertH).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertK).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertL).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertM).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertN).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertO).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertP).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertQ).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertR).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertS).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertT).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertU).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertV).not.to.be(undefined);
-      expect(state.alertRecoveredInstances.alertI).to.be(undefined);
-      expect(state.alertRecoveredInstances.alertJ).to.be(undefined);
+        expect(state.alertRecoveredInstances.alertA).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertB).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertC).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertD).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertE).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertF).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertG).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertH).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertK).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertL).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertM).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertN).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertO).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertP).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertQ).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertR).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertS).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertT).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertU).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertV).not.to.be(undefined);
+        expect(state.alertRecoveredInstances.alertI).to.be(undefined);
+        expect(state.alertRecoveredInstances.alertJ).to.be(undefined);
 
-      expect(alertDocsRun3.length).to.equal(22);
+        expect(alertDocsRun3.length).to.equal(22);
 
-      expect(
-        alertDocsRun3
-          .filter((doc) => doc._source![ALERT_STATUS] === 'active')
-          .map((doc) => doc._source![ALERT_INSTANCE_ID])
-      ).to.eql([]);
-      expect(
-        alertDocsRun3
-          .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
-          .map((doc) => doc._source![ALERT_INSTANCE_ID])
-      ).to.eql([
-        'alertK',
-        'alertL',
-        'alertM',
-        'alertN',
-        'alertO',
-        'alertP',
-        'alertQ',
-        'alertR',
-        'alertS',
-        'alertT',
-        'alertU',
-        'alertV',
-        'alertA',
-        'alertB',
-        'alertC',
-        'alertD',
-        'alertE',
-        'alertF',
-        'alertG',
-        'alertH',
-        'alertI',
-        'alertJ',
-      ]);
+        expect(
+          alertDocsRun3
+            .filter((doc) => doc._source![ALERT_STATUS] === 'active')
+            .map((doc) => doc._source![ALERT_INSTANCE_ID])
+        ).to.eql([]);
+        expect(
+          alertDocsRun3
+            .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
+            .map((doc) => doc._source![ALERT_INSTANCE_ID])
+        ).to.eql([
+          'alertK',
+          'alertL',
+          'alertM',
+          'alertN',
+          'alertO',
+          'alertP',
+          'alertQ',
+          'alertR',
+          'alertS',
+          'alertT',
+          'alertU',
+          'alertV',
+          'alertA',
+          'alertB',
+          'alertC',
+          'alertD',
+          'alertE',
+          'alertF',
+          'alertG',
+          'alertH',
+          'alertI',
+          'alertJ',
+        ]);
+      });
     });
   });
 

@@ -15,10 +15,13 @@ export type ModelProviderFactoryMock = jest.MockedFn<
 >;
 
 export const createModelProviderMock = (): ModelProviderMock => {
+  const chatModel = { getConnector: jest.fn().mockReturnValue({ connectorId: 'mock-connector' }) };
   return {
-    getDefaultModel: jest.fn(),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn(),
+    getDefaultModel: jest.fn().mockResolvedValue({ chatModel }),
+    selectModel: jest.fn(),
+    getModelById: jest.fn(),
+    hasFastModel: jest.fn().mockResolvedValue(true),
+    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
   };
 };
 

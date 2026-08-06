@@ -8,6 +8,7 @@
 // Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
 
 import React from 'react';
+import { Subject } from 'rxjs';
 import { act, render, waitFor } from '@testing-library/react';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -139,5 +140,76 @@ describe('getEmbeddableAlertsTableFactory', () => {
         {}
       );
     });
+  });
+
+  it('should set `lastReloadRequestTime` when the dashboard triggers a reload', async () => {
+    const reload$ = new Subject<void>();
+    const parentApi = { ...getMockPresentationContainer(), reload$ };
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(987654321);
+
+    const { Component } = await factory.buildEmbeddable({
+      ...embeddableParams,
+      finalizeApi: (apiRegistration) => ({
+        ...(apiRegistration as any),
+        parentApi,
+      }),
+    });
+
+    // Render and flush the initial async fetch-context emission within `act`
+    await act(async () => {
+      render(<Component />);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalled();
+    // No reload has been requested yet, so the table should not have a reload timestamp
+    expect(mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0].lastReloadRequestTime).toBeUndefined();
+
+    // The fetch context pipeline resolves the reload asynchronously, so flush microtasks
+    // within `act` to apply the resulting state update without React warnings.
+    await act(async () => {
+      reload$.next();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0].lastReloadRequestTime).toBe(
+        987654321
+      );
+    });
+
+    dateNowSpy.mockRestore();
+  });
+
+  it('should propagate the table loading state to the `dataLoading$` panel observable', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+
+    // Render and flush the initial async fetch-context emission within `act`
+    await act(async () => {
+      render(<Component />);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalled();
+
+    const props = mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0];
+    expect(props?.onLoadingChange).toBeDefined();
+
+    let latestLoading: boolean | undefined;
+    const subscription = api.dataLoading$.subscribe((value) => {
+      latestLoading = value;
+    });
+
+    act(() => {
+      props?.onLoadingChange?.(false);
+    });
+    expect(latestLoading).toBe(false);
+
+    act(() => {
+      props?.onLoadingChange?.(true);
+    });
+    expect(latestLoading).toBe(true);
+
+    subscription.unsubscribe();
   });
 });

@@ -32,6 +32,7 @@ interface SummaryData extends SharedData {
   newColumns: string[];
   grouping: FieldSummary[];
   aggregates: FieldSummary[];
+  renamedColumnsPairs: Array<[string, string]>;
   query: string;
 }
 
@@ -40,6 +41,7 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
     newColumns: [],
     grouping: [],
     aggregates: [],
+    renamedColumnsPairs: [],
     query,
   };
 
@@ -58,6 +60,7 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
     newColumns: new Set(data.newColumns),
     grouping: new Set(data.grouping),
     aggregates: new Set(data.aggregates),
+    renamedColumnsPairs: new Set(data.renamedColumnsPairs),
   };
 };
 
@@ -133,22 +136,26 @@ const collectInFunctions = (
   ctx: FunctionCallExpressionVisitorContext<VisitorMethods, SummaryData>,
   isInByClause: boolean
 ) => {
-  const { newColumns, grouping, aggregates, query } = ctx.ctx.data;
+  const { newColumns, grouping, aggregates, renamedColumnsPairs, query } = ctx.ctx.data;
   const expression = ctx.node;
 
   // Assignment expression, STATS var=AVG(field)
   if (isAssignment(expression) && isColumn(expression.args[0])) {
-    // From the asignment, we extract the left side (fisrt argument) as the new column
-    const [column] = singleItems(expression.args);
+    // From the asignment, we extract the left and right sides
+    const [leftColumn, rightItem] = [...singleItems(expression.args)];
 
     const newColumn = {
-      field: getColumnName(column as ESQLColumn),
+      field: getColumnName(leftColumn as ESQLColumn),
       arg: expression,
     };
 
     newColumns.push(newColumn.field);
     if (isInByClause) {
       grouping.push(newColumn);
+      // STATS ... BY new = old behaves as a rename when the right side is a single column
+      if (isColumn(rightItem)) {
+        renamedColumnsPairs.push([newColumn.field, getColumnName(rightItem)]);
+      }
     } else {
       aggregates.push(newColumn);
     }

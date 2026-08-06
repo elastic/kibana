@@ -148,7 +148,7 @@ describe('StatusContextMenu', () => {
     );
 
     wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
-    expect(wrapper.find('EuiContextMenuItem').prop('onClick')).toBeUndefined();
+    expect(wrapper.find('EuiContextMenuItem')).toHaveLength(0);
   });
 
   it('correctly evaluates each status option', async () => {

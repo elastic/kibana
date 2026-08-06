@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
@@ -159,6 +159,7 @@ export const createActionHandler = async (
           input_type: 'osquery',
           agents: query.agents as string[],
           user_id: metadata?.currentUser,
+          space_id: options.space?.id ?? DEFAULT_SPACE_ID,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
             [k: string]: unknown;

@@ -13,32 +13,17 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
 } from './types';
-import { AgentBuilderPlugin } from './plugin';
 
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   ToolsSetup,
   ToolsStart,
-  SmlStart,
   ConversationsStart,
   ReadOnlyConversationClient,
 } from './types';
 
-export type { ConversationListOptions } from './services/conversation/client/types';
-
-export type {
-  SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
-  SmlContext,
-  SmlToAttachmentContext,
-  SmlListItem,
-  SmlSearchResult,
-  SmlIndexAttachmentParams,
-} from './services/sml';
-
-export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
@@ -46,6 +31,7 @@ export const plugin: PluginInitializer<
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<AgentBuilderConfig>) => {
+  const { AgentBuilderPlugin } = await import('./plugin');
   return new AgentBuilderPlugin(pluginInitializerContext);
 };
 

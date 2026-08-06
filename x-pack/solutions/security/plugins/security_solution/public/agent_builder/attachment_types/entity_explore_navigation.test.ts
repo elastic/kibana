@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
+  decodeFlyoutV2UrlParam,
+  FLYOUT_V2_URL_PARAM,
+} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { subscribeToFlyoutV2Navigation } from '../../flyout_v2/shared/url_state/flyout_v2_navigation';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
+import {
+  buildEntityFlyoutV2NavigationState,
   getAgentBuilderLastAgentIdForSecurityOpenChat,
   getHostNameForHostDetailsUrl,
   getServiceNameForServiceDetailsUrl,
@@ -161,7 +169,76 @@ describe('entity_explore_navigation', () => {
     });
   });
 
-  describe('search session clearing on cross-app navigation', () => {
+  describe('buildEntityFlyoutV2NavigationState', () => {
+    it.each([
+      ['host-panel', 'hostName', 'web-01', 'host'],
+      ['user-panel', 'userName', 'alice', 'user'],
+      ['service-panel', 'serviceName', 'auth-api', 'service'],
+    ] as const)('maps %s to a %s descriptor', (panelId, nameParam, entityName, kind) => {
+      expect(
+        buildEntityFlyoutV2NavigationState({
+          preview: [],
+          right: {
+            id: panelId,
+            params: {
+              [nameParam]: entityName,
+              entityId: `${kind}:entity-id`,
+              scopeId: 'agent-builder-entity-card',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          kind,
+          [`${kind}Name`]: entityName,
+          entityId: `${kind}:entity-id`,
+          scopeId: 'agent-builder-entity-card',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ]);
+    });
+
+    it('maps an entity investigation panel to a v2 tool and child entity stack', () => {
+      expect(
+        buildEntityFlyoutV2NavigationState({
+          preview: [],
+          left: {
+            id: 'host_details',
+            params: { path: { tab: 'graph_view' } },
+          },
+          right: {
+            id: 'host-panel',
+            params: {
+              hostName: 'web-01',
+              entityId: 'host:web-01',
+              scopeId: 'agent-builder-entity-card',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          kind: 'entityGraphView',
+          entityId: 'host:web-01',
+          scopeId: 'agent-builder-entity-card',
+          entityName: 'web-01',
+          entityType: 'host',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+        {
+          kind: 'host',
+          hostName: 'web-01',
+          entityId: 'host:web-01',
+          scopeId: 'agent-builder-entity-card',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ]);
+    });
+  });
+
+  describe('navigation helpers', () => {
+    const EA_HOME_PATH = '/app/security/entity_analytics_home_page';
+    const OTHER_PATH = '/app/security/alerts';
+
     const buildApplicationMock = (): jest.Mocked<ApplicationStart> =>
       ({
         navigateToApp: jest.fn(),
@@ -169,6 +246,23 @@ describe('entity_explore_navigation', () => {
 
     const buildSearchSessionMock = (): jest.Mocked<Pick<ISessionService, 'clear'>> => ({
       clear: jest.fn(),
+    });
+
+    const buildChromeMock = (sidebarAppId: string | null = 'agentBuilder') =>
+      ({
+        sidebar: { getCurrentAppId: () => sidebarAppId },
+      } as never);
+
+    const buildAgentBuilderNavigationMock = (): jest.Mocked<
+      Pick<AgentBuilderPluginStart, 'toggleChat' | 'openChat'>
+    > => ({
+      toggleChat: jest.fn(),
+      openChat: jest.fn(),
+    });
+
+    beforeEach(() => {
+      // Reset to a non-EA path so tests that set their own pathname don't bleed into each other.
+      window.history.replaceState({}, '', OTHER_PATH);
     });
 
     describe('navigateToEntityAnalyticsWithFlyoutInApp', () => {
@@ -179,7 +273,7 @@ describe('entity_explore_navigation', () => {
         window.history.replaceState(
           {},
           '',
-          `/app/security/entity_analytics_home_page?cspq=${encodeURIComponent(
+          `${EA_HOME_PATH}?cspq=${encodeURIComponent(
             risonQuery
           )}&watchlistId=wl-123&watchlistName=VIPs&groupBy=resolution`
         );
@@ -187,7 +281,10 @@ describe('entity_explore_navigation', () => {
         navigateToEntityAnalyticsWithFlyoutInApp({
           application,
           appId: 'securitySolutionUI',
-          flyout: { right: { id: 'service-panel', params: { serviceName: 'svc-a' } } },
+          flyout: {
+            preview: [],
+            right: { id: 'service-panel', params: { serviceName: 'svc-a' } },
+          },
         });
 
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
@@ -202,14 +299,56 @@ describe('entity_explore_navigation', () => {
         expect(params.get('flyout')).toContain('right');
       });
 
-      it('clears the search session before navigateToApp is called', () => {
+      it('writes flyoutV2 and removes a stale legacy flyout when the new flyout is enabled', () => {
+        const application = buildApplicationMock();
+        window.history.replaceState({}, '', `${EA_HOME_PATH}?flyout=stale&watchlistId=wl-123`);
+
+        navigateToEntityAnalyticsWithFlyoutInApp({
+          application,
+          appId: 'securitySolutionUI',
+          flyout: {
+            preview: [],
+            right: {
+              id: 'user-panel',
+              params: {
+                userName: 'alice',
+                entityId: 'user:alice@default',
+                scopeId: 'agent-builder-entity-card',
+              },
+            },
+          },
+          isNewFlyoutEnabled: true,
+        });
+
+        const [, options] = application.navigateToApp.mock.calls[0];
+        const path = (options as { path?: string }).path ?? '';
+        const params = new URLSearchParams(path.startsWith('?') ? path.slice(1) : path);
+
+        expect(params.get('flyout')).toBeNull();
+        expect(params.get('watchlistId')).toBe('wl-123');
+        expect(decodeFlyoutV2UrlParam(params.get(FLYOUT_V2_URL_PARAM))).toEqual([
+          {
+            kind: 'user',
+            userName: 'alice',
+            entityId: 'user:alice@default',
+            scopeId: 'agent-builder-entity-card',
+            origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+          },
+        ]);
+      });
+
+      it('clears the search session before navigateToApp is called (cross-app)', () => {
         const application = buildApplicationMock();
         const searchSession = buildSearchSessionMock();
 
         navigateToEntityAnalyticsWithFlyoutInApp({
           application,
           appId: 'securitySolutionUI',
-          flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+          flyout: {
+            preview: [],
+            left: { id: 'host_details', params: {} },
+            right: { id: 'host-panel', params: { hostName: 'web-01' } },
+          },
           searchSession: searchSession as unknown as ISessionService,
         });
 
@@ -227,15 +366,154 @@ describe('entity_explore_navigation', () => {
           navigateToEntityAnalyticsWithFlyoutInApp({
             application,
             appId: 'securitySolutionUI',
-            flyout: { left: { id: 'l' }, right: { id: 'r' }, preview: [] },
+            flyout: {
+              preview: [],
+              left: { id: 'host_details', params: {} },
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
           })
         ).not.toThrow();
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
       });
+
+      it('notifies the mounted app when navigating from another Security page', () => {
+        const application = buildApplicationMock();
+        const listener = jest.fn();
+        const unsubscribe = subscribeToFlyoutV2Navigation(listener);
+
+        navigateToEntityAnalyticsWithFlyoutInApp({
+          application,
+          appId: 'securitySolutionUI',
+          flyout: {
+            preview: [],
+            right: {
+              id: 'host-panel',
+              params: {
+                hostName: 'web-01',
+                entityId: 'host:web-01',
+                scopeId: 'agent-builder-entity-card',
+              },
+            },
+          },
+          isNewFlyoutEnabled: true,
+        });
+
+        expect(listener).toHaveBeenCalledWith({
+          urlParamKey: FLYOUT_V2_URL_PARAM,
+          descriptors: [
+            {
+              kind: 'host',
+              hostName: 'web-01',
+              entityId: 'host:web-01',
+              scopeId: 'agent-builder-entity-card',
+              origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+            },
+          ],
+        });
+
+        unsubscribe();
+      });
+
+      describe('when already on the EA home page', () => {
+        beforeEach(() => {
+          window.history.replaceState({}, '', EA_HOME_PATH);
+        });
+
+        it('still navigates to update the flyout URL param', () => {
+          const application = buildApplicationMock();
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
+          });
+
+          expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not close the sidebar', () => {
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+            chrome: buildChromeMock(),
+          });
+
+          expect(agentBuilder.toggleChat).not.toHaveBeenCalled();
+        });
+
+        it('does not clear the search session', () => {
+          const application = buildApplicationMock();
+          const searchSession = buildSearchSessionMock();
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: {
+              preview: [],
+              right: { id: 'host-panel', params: { hostName: 'web-01' } },
+            },
+            searchSession: searchSession as unknown as ISessionService,
+          });
+
+          expect(searchSession.clear).not.toHaveBeenCalled();
+        });
+
+        it('notifies the mounted app to open the v2 flyout without waiting for a remount', () => {
+          jest.useFakeTimers();
+          const application = buildApplicationMock();
+          const listener = jest.fn();
+          const unsubscribe = subscribeToFlyoutV2Navigation(listener);
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: {
+              preview: [],
+              right: {
+                id: 'host-panel',
+                params: {
+                  hostName: 'web-01',
+                  entityId: 'host:web-01',
+                  scopeId: 'agent-builder-entity-card',
+                },
+              },
+            },
+            isNewFlyoutEnabled: true,
+          });
+          jest.runAllTimers();
+
+          expect(listener).toHaveBeenCalledWith({
+            urlParamKey: FLYOUT_V2_URL_PARAM,
+            descriptors: [
+              {
+                kind: 'host',
+                hostName: 'web-01',
+                entityId: 'host:web-01',
+                scopeId: 'agent-builder-entity-card',
+                origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+              },
+            ],
+          });
+
+          unsubscribe();
+          jest.useRealTimers();
+        });
+      });
     });
 
     describe('navigateToEntityAnalyticsHomePageInApp', () => {
-      it('clears the search session before navigateToApp is called', () => {
+      it('clears the search session before navigateToApp is called (cross-app)', () => {
         const application = buildApplicationMock();
         const searchSession = buildSearchSessionMock();
 
@@ -262,6 +540,102 @@ describe('entity_explore_navigation', () => {
           })
         ).not.toThrow();
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+      });
+
+      describe('fallback when openSidebarConversation is not provided', () => {
+        const AGENT_BUILDER_AGENT_ID_KEY = 'agentBuilder.agentId';
+
+        beforeEach(() => {
+          window.localStorage.removeItem(AGENT_BUILDER_AGENT_ID_KEY);
+        });
+
+        afterEach(() => {
+          jest.useRealTimers();
+        });
+
+        it('opens chat via agentBuilder.openChat with sessionTag: security and the stored agentId', () => {
+          jest.useFakeTimers();
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+          const storedAgentId = 'my-agent';
+          window.localStorage.setItem(AGENT_BUILDER_AGENT_ID_KEY, JSON.stringify(storedAgentId));
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+          });
+
+          jest.runAllTimers();
+
+          expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+          expect(agentBuilder.openChat).toHaveBeenCalledWith({
+            sessionTag: 'security',
+            newConversation: false,
+            agentId: storedAgentId,
+          });
+        });
+      });
+
+      describe('when already on the EA home page', () => {
+        beforeEach(() => {
+          window.history.replaceState({}, '', EA_HOME_PATH);
+        });
+
+        it('skips navigation entirely when no watchlist params are needed', () => {
+          const application = buildApplicationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+          });
+
+          expect(application.navigateToApp).not.toHaveBeenCalled();
+        });
+
+        it('does not close the sidebar when no watchlist params are needed', () => {
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+            chrome: buildChromeMock(),
+          });
+
+          expect(agentBuilder.toggleChat).not.toHaveBeenCalled();
+        });
+
+        it('still navigates when watchlist params are provided', () => {
+          const application = buildApplicationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            watchlistId: 'wl-1',
+            watchlistName: 'VIPs',
+          });
+
+          expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+          const [, options] = application.navigateToApp.mock.calls[0];
+          expect((options as { path?: string }).path).toContain('watchlistId=wl-1');
+        });
+
+        it('does not close the sidebar even when navigating for watchlist params', () => {
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            watchlistId: 'wl-1',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+            chrome: buildChromeMock(),
+          });
+
+          expect(agentBuilder.toggleChat).not.toHaveBeenCalled();
+        });
       });
     });
   });

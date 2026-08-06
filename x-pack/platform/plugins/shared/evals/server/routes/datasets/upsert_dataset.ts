@@ -10,9 +10,9 @@ import {
   EVALS_DATASET_UPSERT_URL,
   INTERNAL_API_ACCESS,
   UpsertEvaluationDatasetRequestBody,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
   RemoteDecryptionError,
@@ -20,6 +20,7 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 export const registerUpsertDatasetRoute = ({
   router,
@@ -32,7 +33,7 @@ export const registerUpsertDatasetRoute = ({
       path: EVALS_DATASET_UPSERT_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Upsert evaluation dataset',
     })
@@ -74,12 +75,16 @@ export const registerUpsertDatasetRoute = ({
             });
           }
 
-          const { name, description, examples } = request.body;
-          const coreContext = await context.core;
+          const { name, description, tags, maturity, examples } = request.body;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
-          const upsertResult = await datasetClient.upsert(name, description, examples);
+          const datasetClient = evalsContext.datasetService.getClient();
+          const upsertResult = await datasetClient.upsert({
+            name,
+            description,
+            tags,
+            maturity,
+            examples,
+          });
 
           return response.ok({
             body: upsertResult,
@@ -93,7 +98,16 @@ export const registerUpsertDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to upsert evaluation dataset: ${error}`);
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Upsert evaluation dataset',
+          });
+          if (tooLarge) return tooLarge;
+
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to upsert evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to upsert evaluation dataset' },

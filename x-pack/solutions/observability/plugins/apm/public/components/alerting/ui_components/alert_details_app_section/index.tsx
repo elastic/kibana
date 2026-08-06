@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useMemo, useLayoutEffect } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AnomalyThreshold,
-  formatAlertEvaluationValue,
-  Threshold,
-} from '@kbn/observability-plugin/public';
+import { formatAlertEvaluationValue, Threshold } from '@kbn/observability-plugin/public';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
@@ -29,44 +24,45 @@ import {
 } from '@kbn/rule-data-utils';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { EuiCallOut } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
+  ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { getAlertUrlErrorDetails } from '../../../../../common/utils/formatters';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { FailedTransactionChart } from './failed_transaction_chart';
-import {
-  formatAnomalySeverityThreshold,
-  formatSeverityLabel,
-  getAggsTypeFromRule,
-  isAnomalyRuleType,
-} from './helpers';
-import { LatencyChart } from './latency_chart';
-import { ThroughputChart } from './throughput_chart';
-import type { AlertDetailsAppSectionProps, ChartId } from './types';
+import { isAnomalyRuleType, isErrorCountRuleType, getAlertDetailsRangeStart } from './helpers';
 import { CHART_LAYOUTS, DEFAULT_LAYOUT } from './types';
+import type { AlertDetailsAppSectionProps } from './types';
+import { AlertDetailsCharts } from './alert_details_charts';
+import { AlertDetailsServiceMapSection } from '../alert_details_service_map_section';
+import { AnomalyAlertCallout } from './anomaly_alert_callout';
+import type { AnomalyChartInfo } from './anomaly_severity_badge';
 
-export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {
+export function AlertDetailsAppSection({
+  rule,
+  alert,
+  timeZone,
+  setSources,
+}: AlertDetailsAppSectionProps) {
   const { services } = useKibana();
   createCallApmApi(services as CoreStart);
 
-  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as Exclude<
-    ApmRuleType,
-    ApmRuleType.ErrorCount
-  >;
+  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType;
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
   const alertSeverity = alert.fields[ALERT_SEVERITY] as ML_ANOMALY_SEVERITY | undefined;
   const detectorType = alert.fields[ANOMALY_DETECTOR_TYPE] as AnomalyDetectorType | undefined;
+  const anomalyTimestampField = alert.fields[ANOMALY_TIMESTAMP];
 
   const isAnomaly = isAnomalyRuleType(alertRuleTypeId);
   const chartLayout = CHART_LAYOUTS[detectorType ?? alertRuleTypeId] ?? DEFAULT_LAYOUT;
@@ -75,25 +71,32 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
   const serviceName = String(alert.fields[SERVICE_NAME]);
   const transactionName = alert.fields[TRANSACTION_NAME];
   const transactionType = alert.fields[TRANSACTION_TYPE];
+  const errorGroupingKey = alert.fields[ERROR_GROUP_ID];
 
-  const params = rule.params;
-  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType ?? 'avg');
-  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const anomalyTimestamp = useMemo(() => {
+    if (anomalyTimestampField === undefined || anomalyTimestampField === null) {
+      return undefined;
+    }
+
+    const timestamp = new Date(anomalyTimestampField as string | number).getTime();
+    return Number.isNaN(timestamp) ? undefined : timestamp;
+  }, [anomalyTimestampField]);
+
+  // For anomaly alerts, anchor the padded time range on the anomaly timestamp when it
+  // precedes the alert start (ML detection delay can push ALERT_START past the anomaly).
+  const alertStart = alert.fields[ALERT_START]!;
+  const rangeStart = getAlertDetailsRangeStart({
+    alertStart,
+    isAnomaly,
+    anomalyTimestamp,
+  });
+  const timeRange = getPaddedAlertTimeRange(rangeStart, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
   const chartThemes = useChartThemes();
 
   const thresholdComponent = useMemo(() => {
     if (isAnomaly) {
-      if (!alertSeverity || !alertEvaluationThreshold) return undefined;
-
-      return (
-        <AnomalyThreshold
-          chartProps={chartThemes}
-          id={`${chartLayout.primary}-anomaly-threshold`}
-          severity={formatSeverityLabel(alertSeverity)}
-          severityThreshold={formatAnomalySeverityThreshold(alertEvaluationThreshold)}
-        />
-      );
+      return undefined;
     }
 
     if (!alertEvaluationValue || !alertEvaluationThreshold) return undefined;
@@ -113,12 +116,58 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
     );
   }, [
     isAnomaly,
-    alertSeverity,
     alertEvaluationValue,
     alertEvaluationThreshold,
     chartThemes,
     chartLayout.primary,
     alertRuleTypeId,
+  ]);
+
+  const anomaly = useMemo<AnomalyChartInfo | undefined>(() => {
+    if (!isAnomaly || !alertSeverity || alertEvaluationValue == null) {
+      return undefined;
+    }
+
+    return {
+      severity: alertSeverity,
+      score: Number(alertEvaluationValue),
+      ...(anomalyTimestamp !== undefined ? { timestamp: anomalyTimestamp } : {}),
+    };
+  }, [alertEvaluationValue, alertSeverity, anomalyTimestamp, isAnomaly]);
+
+  useLayoutEffect(() => {
+    if (!isErrorCountRuleType(alertRuleTypeId) || !errorGroupingKey) {
+      setSources([]);
+      return;
+    }
+
+    const errorDetailsHref = services.http?.basePath.prepend(
+      getAlertUrlErrorDetails(serviceName, errorGroupingKey, environment)
+    );
+
+    setSources([
+      {
+        label: ERROR_GROUP_ID,
+        value: (
+          <EuiLink
+            data-test-subj="apmAlertDetailsErrorGroupKeyLink"
+            data-ebt-action="openInApm"
+            data-ebt-element="alertDetailsSources"
+            data-ebt-detail={alertRuleTypeId}
+            href={errorDetailsHref}
+          >
+            {errorGroupingKey}
+          </EuiLink>
+        ),
+      },
+    ]);
+  }, [
+    alertRuleTypeId,
+    environment,
+    errorGroupingKey,
+    serviceName,
+    services.http?.basePath,
+    setSources,
   ]);
 
   const { from, to } = timeRange;
@@ -146,65 +195,15 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
     );
   }
 
-  const chartRenderers: Record<ChartId, (isPrimary: boolean) => ReactElement> = {
-    latency: (isPrimary) => (
-      <LatencyChart
-        alert={alert}
-        transactionType={transactionType}
-        transactionName={transactionName}
-        serviceName={serviceName}
-        environment={environment}
-        start={from}
-        end={to}
-        comparisonChartTheme={comparisonChartTheme}
-        timeZone={timeZone}
-        latencyAggregationType={latencyAggregationType}
-        comparisonEnabled={false}
-        offset={''}
-        threshold={isPrimary ? thresholdComponent : undefined}
-        ruleTypeId={alertRuleTypeId}
-      />
-    ),
-    failedTransactionRate: (isPrimary) => (
-      <FailedTransactionChart
-        alert={alert}
-        transactionType={transactionType}
-        transactionName={transactionName}
-        serviceName={serviceName}
-        environment={environment}
-        start={from}
-        end={to}
-        comparisonChartTheme={comparisonChartTheme}
-        timeZone={timeZone}
-        comparisonEnabled={false}
-        offset={''}
-        threshold={isPrimary ? thresholdComponent : undefined}
-        ruleTypeId={alertRuleTypeId}
-      />
-    ),
-    throughput: (isPrimary) => (
-      <ThroughputChart
-        alert={alert}
-        transactionType={transactionType}
-        transactionName={transactionName}
-        serviceName={serviceName}
-        environment={environment}
-        start={from}
-        end={to}
-        comparisonChartTheme={comparisonChartTheme}
-        comparisonEnabled={false}
-        offset={''}
-        timeZone={timeZone}
-        threshold={isPrimary ? thresholdComponent : undefined}
-        ruleTypeId={alertRuleTypeId}
-      />
-    ),
-  };
-
-  const primaryChart = chartRenderers[chartLayout.primary](true);
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      {isAnomaly && alertSeverity && detectorType && alertEvaluationThreshold != null && (
+        <AnomalyAlertCallout
+          severity={alertSeverity}
+          detectorType={detectorType}
+          alertEvaluationThreshold={Number(alertEvaluationThreshold)}
+        />
+      )}
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}
@@ -213,17 +212,31 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         uiSettings={services.uiSettings!}
       >
         <ChartPointerEventContextProvider>
-          <EuiFlexItem>
-            {primaryChart}
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction="row" gutterSize="s">
-              {chartLayout.secondary.map((chartId) => (
-                <React.Fragment key={chartId}>{chartRenderers[chartId](false)}</React.Fragment>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <AlertDetailsCharts
+            alert={alert}
+            alertRuleTypeId={alertRuleTypeId}
+            chartLayout={chartLayout}
+            serviceName={serviceName}
+            environment={environment}
+            transactionName={transactionName}
+            transactionType={transactionType}
+            errorGroupingKey={errorGroupingKey}
+            ruleAggregationType={rule.params.aggregationType}
+            comparisonChartTheme={comparisonChartTheme}
+            timeZone={timeZone}
+            from={from}
+            to={to}
+            thresholdComponent={thresholdComponent}
+            anomaly={anomaly}
+          />
         </ChartPointerEventContextProvider>
       </TimeRangeMetadataContextProvider>
+      <AlertDetailsServiceMapSection
+        alert={alert}
+        rule={rule}
+        timeZone={timeZone}
+        setSources={setSources}
+      />
     </EuiFlexGroup>
   );
 }
