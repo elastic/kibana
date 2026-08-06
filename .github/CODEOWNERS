@@ -2662,6 +2662,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitoring/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_compute_engine/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
