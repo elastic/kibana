@@ -16,26 +16,19 @@ import {
   testData,
 } from '../fixtures';
 
-// The grid pages at 25 rows, so 30 keys guarantees exactly two pages.
 const PAGE_SIZE = 25;
 const KEY_COUNT = 30;
 const KEY_PREFIX = 'pagination-test-key';
 const SEED_BATCH_SIZE = 10;
 
-// Owner-scoped cleanup, resolved once while the session is known good so `afterEach` never has to
-// touch a browser that may have just died mid-test.
-let currentUsername: string | undefined;
-
 test.describe('API keys grid pagination', { tag: tags.stateful.classic }, () => {
+  let currentUsername: string | undefined;
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient }) => {
     currentUsername = undefined;
     await browserAuth.loginWithCustomRole(testData.OWN_API_KEYS_ROLE);
     currentUsername = await getCurrentUsername(page, kbnUrl);
     await invalidateApiKeysOwnedBy(esClient, currentUsername);
 
-    // Batched rather than serial: each create is a full browser->Kibana->ES round trip against a
-    // refresh-on-write index, and 30 of them in sequence consumed over half of Playwright's 60s
-    // per-test budget (hooks share it) on a warm local stack alone.
     for (let batch = 0; batch < KEY_COUNT / SEED_BATCH_SIZE; batch++) {
       await Promise.all(
         Array.from({ length: SEED_BATCH_SIZE }, (_, offset) => {
@@ -54,10 +47,6 @@ test.describe('API keys grid pagination', { tag: tags.stateful.classic }, () => 
     }
   });
 
-  // The prev/next disabled states are already covered against mocked data by
-  // api_keys_grid_page.test.tsx. What only an end-to-end test can show is that the `searchAfter`
-  // cursor really fetches a second, disjoint page from Elasticsearch and that going back restores
-  // the first one — so that, not the button state, is what this test leads with.
   test('pages through the full key set with the searchAfter cursor', async ({ pageObjects }) => {
     const apiKeys = pageObjects.apiKeys;
     let firstPage: string[] = [];
@@ -77,9 +66,6 @@ test.describe('API keys grid pagination', { tag: tags.stateful.classic }, () => 
       await apiKeys.goToNextPage();
       await expect(apiKeys.nextPageButton).toBeDisabled();
 
-      // Deliberately not an exact row count. The grid sorts on `creation` with no tie-breaker and
-      // pages with an exclusive `search_after` cursor, so two keys created in the same millisecond
-      // can legitimately cost page 2 a row. Disjointness is the property this test is about.
       const secondPage = await apiKeys.visibleApiKeyNames();
       expect(secondPage.length).toBeGreaterThan(0);
       expect(secondPage.filter((name) => firstPage.includes(name))).toStrictEqual([]);

@@ -40,7 +40,6 @@ test.describe('API key update', { tag: tags.stateful.classic }, () => {
 
       await expect(apiKeys.flyoutTitle).toHaveText('Update API key');
       await expect(apiKeys.submitButton).toBeEnabled();
-      // The name of an existing key is shown read-only in the overview, not as an editable input.
       await expect(apiKeys.nameInput).toBeHidden();
       await expect(apiKeys.keyStatus).toHaveText('Expires in a day');
       await expect(apiKeys.metadataSwitch).toBeEnabled();
@@ -58,10 +57,6 @@ test.describe('API key update', { tag: tags.stateful.classic }, () => {
       await apiKeys.setRoleDescriptorsValue(roleDescriptorsValue);
       await apiKeys.setMetadataValue(METADATA_VALUE);
 
-      // Reading both editors back before submitting: the Monaco helper addresses models by global
-      // index and silently falls back to model 0 when the index is out of range, so without this
-      // a late-registering metadata model would write metadata into the role-descriptors editor
-      // and the only symptom would be an opaque timeout on the flyout never closing.
       expect(await apiKeys.getRoleDescriptorsValue()).toBe(roleDescriptorsValue);
       expect(await apiKeys.getMetadataValue()).toBe(METADATA_VALUE);
 

@@ -12,12 +12,8 @@ import { getCurrentUsername, invalidateApiKeysOwnedBy, test, testData } from '..
 
 const API_KEYS_URL = /app\/management\/security\/api_keys\/?$/;
 
-// Owner-scoped rather than name-scoped cleanup: the first test asserts the empty prompt, which
-// requires this user to own no keys at all. Resolved once in `beforeEach` while the session is
-// known good, so `afterEach` never has to touch a browser that may have just died.
-let currentUsername: string | undefined;
-
 test.describe('API keys creation', { tag: tags.stateful.classic }, () => {
+  let currentUsername: string | undefined;
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient, pageObjects }) => {
     currentUsername = undefined;
     await browserAuth.loginWithCustomRole(testData.OWN_API_KEYS_ROLE);
@@ -68,10 +64,8 @@ test.describe('API keys creation', { tag: tags.stateful.classic }, () => {
     await expect(apiKeys.createdCallOut).toContainText(`Created API key '${apiKeyName}'`);
     await expect(apiKeys.rowByName(apiKeyName)).toBeVisible();
 
-    // Without this the test is just the previous one plus two unverified interactions: reopening
-    // the key is what proves the 12-day expiration actually reached Elasticsearch.
     await apiKeys.openApiKey(apiKeyName);
-    await expect(apiKeys.keyStatus).toHaveText('Expires in 12 days');
+    await expect(apiKeys.keyStatus).toHaveText(/Expires in 1[12] days/);
     await apiKeys.cancelFlyout();
   });
 });

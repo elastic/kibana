@@ -26,10 +26,6 @@ const expectReadOnlyDetailsFlyout = async (apiKeys: ApiKeysApp, expectedStatus: 
 };
 
 test.describe('API key read-only details flyout', { tag: tags.stateful.classic }, () => {
-  // Cleanup is by name and goes straight to `esClient`: each test logs in with a different role, so
-  // there is no shared session to resolve an owner from, and a name-scoped hook still runs after a
-  // test that failed before it ever logged in. Also runs up front so a leftover from an interrupted
-  // previous run can't produce two rows with the same name (a strict-mode violation on open).
   test.beforeEach(async ({ esClient }) => {
     await invalidateApiKeysByName(esClient, ALL_KEY_NAMES);
   });
@@ -52,8 +48,6 @@ test.describe('API key read-only details flyout', { tag: tags.stateful.classic }
       role_descriptors: testData.RESTRICTED_ROLE_DESCRIPTORS,
     });
 
-    // The worker reuses a single custom-role slot, so the username is unchanged by this re-login:
-    // the same user now owns the key but has lost the `save` capability for API keys.
     await browserAuth.loginWithCustomRole(testData.READ_SECURITY_ROLE);
     await pageObjects.apiKeys.goto();
     await pageObjects.apiKeys.openApiKey(OWN_KEY_NAME);
@@ -84,8 +78,6 @@ test.describe('API key read-only details flyout', { tag: tags.stateful.classic }
     pageObjects,
     esClient,
   }) => {
-    // Created through `esClient`, so the key belongs to the Elasticsearch superuser rather than the
-    // browser session's user. Seeing it at all requires `manage_api_key`.
     await esClient.security.createApiKey({ name: OTHER_USER_KEY_NAME, role_descriptors: {} });
 
     await browserAuth.loginWithCustomRole(testData.ALL_API_KEYS_ROLE);

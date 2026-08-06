@@ -22,8 +22,6 @@ const EXPIRY_FILTER_TEST_SUBJ: Record<ApiKeyExpiryFilter, string> = {
   expired: 'expiredFilterButton',
 };
 
-const testSubj = (id: string) => `[data-test-subj="${id}"]`;
-
 export class ApiKeysApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -61,20 +59,24 @@ export class ApiKeysApp {
     this.createdCallOut = page.testSubj.locator('apiKeyCreatedCallOut');
 
     this.flyout = page.testSubj.locator('apiKeyFlyout');
-    // Scoped to the flyout: `apiKeyStatus` is also rendered once per row in the grid's Status
-    // column, so a page-wide locator would resolve to many elements.
-    this.flyoutTitle = this.flyout.locator(testSubj('apiKeyFlyoutTitle'));
-    this.nameInput = this.flyout.locator(testSubj('apiKeyNameInput'));
-    this.customExpirationSwitch = this.flyout.locator(testSubj('apiKeyCustomExpirationSwitch'));
-    this.customExpirationInput = this.flyout.locator(testSubj('apiKeyCustomExpirationInput'));
-    this.metadataSwitch = this.flyout.locator(testSubj('apiKeysMetadataSwitch'));
-    this.roleDescriptorsSwitch = this.flyout.locator(testSubj('apiKeysRoleDescriptorsSwitch'));
-    this.keyStatus = this.flyout.locator(testSubj('apiKeyStatus'));
-    this.submitButton = this.flyout.locator(testSubj('formFlyoutSubmitButton'));
-    this.cancelButton = this.flyout.locator(testSubj('formFlyoutCancelButton'));
+    this.flyoutTitle = page.testSubj.locator('apiKeyFlyout > apiKeyFlyoutTitle');
+    this.nameInput = page.testSubj.locator('apiKeyFlyout > apiKeyNameInput');
+    this.customExpirationSwitch = page.testSubj.locator(
+      'apiKeyFlyout > apiKeyCustomExpirationSwitch'
+    );
+    this.customExpirationInput = page.testSubj.locator(
+      'apiKeyFlyout > apiKeyCustomExpirationInput'
+    );
+    this.metadataSwitch = page.testSubj.locator('apiKeyFlyout > apiKeysMetadataSwitch');
+    this.roleDescriptorsSwitch = page.testSubj.locator(
+      'apiKeyFlyout > apiKeysRoleDescriptorsSwitch'
+    );
+    this.keyStatus = page.testSubj.locator('apiKeyFlyout > apiKeyStatus');
+    this.submitButton = page.testSubj.locator('apiKeyFlyout > formFlyoutSubmitButton');
+    this.cancelButton = page.testSubj.locator('apiKeyFlyout > formFlyoutCancelButton');
     this.updateSuccessToast = page.testSubj.locator('updateApiKeySuccessToast');
 
-    this.anyRowName = page.locator('[data-test-subj^="apiKeyRowName-"]');
+    this.anyRowName = page.testSubj.locator('^apiKeyRowName-');
     this.searchBar = page.testSubj.locator('apiKeysSearchBar');
     this.ownerFilterButton = page.testSubj.locator('ownerFilterButton');
     this.selectAllCheckbox = page.testSubj.locator('checkboxSelectAll');
@@ -91,7 +93,6 @@ export class ApiKeysApp {
     return this.page.testSubj.locator(`apiKeyRowName-${apiKeyName}`);
   }
 
-  /** Names of the API keys on the page currently shown by the grid. */
   async visibleApiKeyNames(): Promise<string[]> {
     return this.anyRowName.allTextContents();
   }
@@ -138,11 +139,7 @@ export class ApiKeysApp {
     await this.flyout.waitFor({ state: 'hidden' });
   }
 
-  /**
-   * Reveals both JSON editors in the update flyout. Monaco models are only registered once their
-   * editor mounts, and `KibanaCodeEditorWrapper` addresses models by index — toggling role
-   * descriptors first and metadata second fixes them at index 0 and 1 respectively.
-   */
+  // Toggle order fixes the Monaco models at index 0 (role descriptors) and 1 (metadata).
   async revealJsonEditors() {
     await this.roleDescriptorsSwitch.click();
     await this.codeEditor.waitCodeEditorReady('apiKeysRoleDescriptorsCodeEditor');
@@ -178,7 +175,6 @@ export class ApiKeysApp {
     await this.confirmDeletion();
   }
 
-  /** These are toggles: the grid opens with `Personal` already selected, so the first click clears it. */
   async toggleTypeFilter(type: ApiKeyTypeFilter) {
     await this.page.testSubj.locator(TYPE_FILTER_TEST_SUBJ[type]).click();
   }
@@ -191,11 +187,7 @@ export class ApiKeysApp {
     await this.ownerFilterButton.click();
   }
 
-  /**
-   * `EuiFieldSearch` runs an incremental search from its `keyup` handler, which `fill()` never
-   * dispatches — the text would land in the box without the query ever being applied. Select-all
-   * plus real keystrokes replaces any previous query and triggers the search.
-   */
+  // EuiFieldSearch runs its incremental search on `keyup`, which `fill()` never dispatches.
   async search(query: string) {
     await this.searchBar.click();
     await this.searchBar.press('ControlOrMeta+a');

@@ -24,12 +24,6 @@ export interface CreatedApiKey {
   name: string;
 }
 
-/**
- * Creates an API key owned by the user the browser is currently logged in as, by reusing the
- * browser session cookie. `esClient` cannot be used for this — it authenticates as the
- * Elasticsearch superuser, so the resulting key would belong to someone else and the UI would
- * render its flyout read-only.
- */
 export const createApiKeyAsCurrentUser = async (
   page: ScoutPage,
   kbnUrl: KibanaUrl,
@@ -49,7 +43,6 @@ export const createApiKeyAsCurrentUser = async (
   return response.json();
 };
 
-/** Username of the user the browser is currently logged in as. */
 export const getCurrentUsername = async (page: ScoutPage, kbnUrl: KibanaUrl): Promise<string> => {
   const response = await page.request.get(kbnUrl.get('internal/security/me'), {
     headers: INTERNAL_HEADERS,
@@ -62,19 +55,24 @@ export const getCurrentUsername = async (page: ScoutPage, kbnUrl: KibanaUrl): Pr
   return (await response.json()).username;
 };
 
+export const resolveApiKeyOwner = async (esClient: EsClient, name: string): Promise<string> => {
+  const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
+    query: { term: { name } },
+  });
+
+  if (apiKeys.length === 0) {
+    throw new Error(`API key "${name}" is not queryable; cannot resolve its owner`);
+  }
+
+  return apiKeys[0].username;
+};
+
 const invalidate = async (esClient: EsClient, ids: string[]) => {
   if (ids.length > 0) {
     await esClient.security.invalidateApiKey({ ids });
   }
 };
 
-/**
- * Invalidates only the keys owned by `username`.
- *
- * Deliberately narrower than the FTR helper this replaces, which invalidated every key in the
- * cluster: Scout suites share a deployment, so a blanket invalidation would take out keys that
- * Scout's own auth, Fleet, and alerting depend on.
- */
 export const invalidateApiKeysOwnedBy = async (esClient: EsClient, username: string) => {
   const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
     query: { term: { username } },
@@ -87,7 +85,6 @@ export const invalidateApiKeysOwnedBy = async (esClient: EsClient, username: str
   );
 };
 
-/** Invalidates only the named keys, leaving the rest of the deployment's keys untouched. */
 export const invalidateApiKeysByName = async (esClient: EsClient, names: string[]) => {
   const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
     query: { terms: { name: names } },

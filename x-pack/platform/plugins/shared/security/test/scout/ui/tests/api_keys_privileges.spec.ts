@@ -10,14 +10,11 @@ import { expect } from '@kbn/scout/ui';
 
 import { test, testData } from '../fixtures';
 
-// https://www.elastic.co/guide/en/kibana/current/api-keys.html#api-keys-security-privileges
 test.describe('API keys management link', { tag: tags.stateful.classic }, () => {
   test('is hidden for a user without API key cluster privileges', async ({ browserAuth, page }) => {
     await browserAuth.loginWithBuiltInRole('kibana_admin');
     await page.gotoApp('management');
 
-    // Gating on the sidebar keeps the negative assertion meaningful: without it, the assertion
-    // would also pass when the nav never rendered at all.
     await expect(page.testSubj.locator('mgtSideBarNav')).toBeVisible();
     await expect(page.testSubj.locator('api_keys')).toBeHidden();
   });

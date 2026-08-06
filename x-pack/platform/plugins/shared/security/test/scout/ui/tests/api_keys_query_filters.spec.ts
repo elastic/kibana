@@ -12,6 +12,7 @@ import {
   createApiKeyAsCurrentUser,
   getCurrentUsername,
   invalidateApiKeysByName,
+  resolveApiKeyOwner,
   test,
   testData,
 } from '../fixtures';
@@ -23,10 +24,6 @@ const EXPIRED_KEY = 'test_api_key';
 const OWN_KEY = 'test_user_api_key';
 
 const SEEDED_KEYS = [CROSS_CLUSTER_KEY, MANAGED_BY_METADATA_KEY, MANAGED_BY_NAME_KEY, EXPIRED_KEY];
-
-// Resolved at runtime: the Elasticsearch user `esClient` authenticates as owns the seeded keys, and
-// its name differs between local and Cloud deployments.
-let seedOwnerUsername: string;
 
 test.describe('API keys grid filtering', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esClient }) => {
@@ -58,27 +55,11 @@ test.describe('API keys grid filtering', { tag: tags.stateful.classic }, () => {
       role_descriptors: { role_1: {} },
     });
 
-    // `1ms` rather than the FTR suite's `1s`: the key must already be expired when the first test
-    // reads the grid, and a one-second window is a race.
     await esClient.security.createApiKey({
       name: EXPIRED_KEY,
       expiration: '1ms',
       role_descriptors: { role_1: {} },
     });
-
-    const { api_keys: seededKeys } = await esClient.security.queryApiKeys({
-      query: { term: { name: CROSS_CLUSTER_KEY } },
-    });
-
-    // Without this an unrefreshed `.security` index fails all five tests with an opaque
-    // "Cannot read properties of undefined" instead of naming the missing seed.
-    if (seededKeys.length === 0) {
-      throw new Error(
-        `Seeded key "${CROSS_CLUSTER_KEY}" is not queryable; cannot resolve its owner`
-      );
-    }
-
-    seedOwnerUsername = seededKeys[0].username;
   });
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient, pageObjects }) => {
@@ -105,42 +86,46 @@ test.describe('API keys grid filtering', { tag: tags.stateful.classic }, () => {
     await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeHidden();
   });
 
-  test('separates active keys from expired keys', async ({ pageObjects }) => {
+  test('wires the type and expiry filter buttons to the grid query', async ({ pageObjects }) => {
     const apiKeys = pageObjects.apiKeys;
 
-    await apiKeys.toggleTypeFilter('personal');
-    await apiKeys.toggleExpiryFilter('active');
+    await test.step('clearing the default Personal filter shows every type', async () => {
+      await apiKeys.toggleTypeFilter('personal');
 
-    await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(MANAGED_BY_NAME_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeHidden();
+      await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeVisible();
+    });
 
-    await apiKeys.toggleExpiryFilter('expired');
+    await test.step('each type filter narrows to that type alone', async () => {
+      await apiKeys.toggleTypeFilter('cross_cluster');
+      await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeHidden();
 
-    await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeHidden();
+      await apiKeys.toggleTypeFilter('managed');
+      await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(MANAGED_BY_NAME_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeHidden();
+
+      await apiKeys.toggleTypeFilter('managed');
+    });
+
+    await test.step('the expiry filters separate active from expired', async () => {
+      await apiKeys.toggleExpiryFilter('active');
+      await expect(apiKeys.rowByName(MANAGED_BY_NAME_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeHidden();
+
+      await apiKeys.toggleExpiryFilter('expired');
+      await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeVisible();
+      await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeHidden();
+    });
   });
 
-  test('narrows the grid to one key type at a time', async ({ pageObjects }) => {
-    const apiKeys = pageObjects.apiKeys;
-
-    await apiKeys.toggleTypeFilter('personal');
-    await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeVisible();
-
-    await apiKeys.toggleTypeFilter('cross_cluster');
-    await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(EXPIRED_KEY)).toBeHidden();
-
-    await apiKeys.toggleTypeFilter('managed');
-    await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(MANAGED_BY_NAME_KEY)).toBeVisible();
-    await expect(apiKeys.rowByName(CROSS_CLUSTER_KEY)).toBeHidden();
-  });
-
-  test('narrows the grid to a selected owner', async ({ pageObjects, page, kbnUrl }) => {
+  test('narrows the grid to a selected owner', async ({ pageObjects, page, kbnUrl, esClient }) => {
     const apiKeys = pageObjects.apiKeys;
     const currentUsername = await getCurrentUsername(page, kbnUrl);
+    const seedOwnerUsername = await resolveApiKeyOwner(esClient, CROSS_CLUSTER_KEY);
 
     await apiKeys.toggleTypeFilter('personal');
     await apiKeys.openOwnerFilter();
@@ -173,9 +158,6 @@ test.describe('API keys grid filtering', { tag: tags.stateful.classic }, () => {
     await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeVisible();
     await expect(apiKeys.rowByName(OWN_KEY)).toBeHidden();
 
-    // A quoted single term matches on a word within the name. The `OWN_KEY` assertion is the one
-    // that can actually fail here: the previous query excluded that row, so it only reappears once
-    // the `"api"` response has landed.
     await apiKeys.search('"api"');
     await expect(apiKeys.rowByName(OWN_KEY)).toBeVisible();
     await expect(apiKeys.rowByName(MANAGED_BY_METADATA_KEY)).toBeVisible();

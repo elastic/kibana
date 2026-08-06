@@ -16,11 +16,8 @@ import {
   testData,
 } from '../fixtures';
 
-// Owner-scoped rather than name-scoped cleanup: both tests assert the empty prompt, which requires
-// this user to own no keys at all. Resolved once in `beforeEach` while the session is known good.
-let currentUsername: string | undefined;
-
 test.describe('API keys deletion', { tag: tags.stateful.classic }, () => {
+  let currentUsername: string | undefined;
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient }) => {
     currentUsername = undefined;
     await browserAuth.loginWithCustomRole(testData.OWN_API_KEYS_ROLE);
@@ -58,9 +55,6 @@ test.describe('API keys deletion', { tag: tags.stateful.classic }, () => {
     await apiKeys.goto();
     await expect(apiKeys.rowByName('api key 1')).toBeVisible();
 
-    // The second key goes through the grid's toolbar button rather than the API: it is the only
-    // coverage of `apiKeysCreateTableButton`, which is the create path every user with at least one
-    // existing key takes (the empty-prompt button is unreachable for them).
     await apiKeys.clickCreateFromTable();
     await apiKeys.setName('api key 2');
     await apiKeys.submitFlyout();
