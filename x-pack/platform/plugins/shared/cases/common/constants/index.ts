@@ -331,6 +331,7 @@ export const LOCAL_STORAGE_KEYS = {
   attachmentFilters: 'cases.attachments.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
+  caseViewSidebarWidth: 'cases.caseView.sidebarWidth',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
   // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
   // re-trigger the banner/tour by bumping the suffix.

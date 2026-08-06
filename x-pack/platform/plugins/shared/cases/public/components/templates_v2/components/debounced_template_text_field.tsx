@@ -41,7 +41,13 @@ export const DebouncedTemplateTextField: React.FC<DebouncedTemplateTextFieldProp
   error,
   helpText,
 }) => {
-  const { value: localValue, setValue, flush } = useDebouncedFieldValue<string>(value, onChange);
+  const {
+    value: localValue,
+    setValue,
+    flush,
+    onFocus,
+    onBlur,
+  } = useDebouncedFieldValue<string>(value, onChange);
 
   const sharedProps = {
     value: localValue,
@@ -51,7 +57,8 @@ export const DebouncedTemplateTextField: React.FC<DebouncedTemplateTextFieldProp
         flush();
       }
     },
-    onBlur: flush,
+    onFocus,
+    onBlur,
     isInvalid,
     fullWidth: true,
     'data-test-subj': dataTestSubj,
