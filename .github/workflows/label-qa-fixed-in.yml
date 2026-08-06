@@ -1,11 +1,11 @@
-name: Add QA labels to Fleet issues
+name: Add QA labels to Fleet and Streams UI issues
 on:
   # pull_request_target allows running actions on PRs from forks with a read/write GITHUB_TOKEN, but it will not allow
   # running workflows defined in the PRs itself, only workflows already merged into the target branch. This avoids
   # potential vulnerabilities that could allow someone to open a PR and retrieve secrets.
   # It's important that this workflow never runs any checkout actions which could be used to circumvent this protection.
   # See these links for more information:
-  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/ 
+  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/
   # - https://nathandavison.com/blog/github-actions-and-the-threat-of-malicious-pull-requests
   pull_request_target:
     types:
@@ -14,10 +14,11 @@ on:
 jobs:
   fetch_issues_to_label:
     runs-on: ubuntu-latest
-    # Only run on PRs that were merged for the Fleet team
+    # Only run on PRs that were merged for the Fleet or Streams UI team
     if: |
       github.event.pull_request.merged_at &&
-      contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
+      (contains(github.event.pull_request.labels.*.name, 'Team:Fleet') ||
+       contains(github.event.pull_request.labels.*.name, 'Team:streams-ui'))
     outputs:
       issue_ids: ${{ steps.issues_to_label.outputs.value }}
       label_ids: ${{ steps.label_ids.outputs.value }}
