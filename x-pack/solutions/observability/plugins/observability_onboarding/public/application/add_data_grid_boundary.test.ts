@@ -13,6 +13,14 @@ import { join, relative, resolve } from 'path';
  * code may import only react, EUI, emotion and i18n, tests add the testing
  * libraries, and hosts may reach it only through `index.ts`. This test lives
  * outside the directory because it needs `fs`/`path`, which the rule forbids.
+ *
+ * Everything a host varies arrives through props, including rendered icon
+ * nodes, resolved `href`/`onClick`, translated content strings, pre-filtered
+ * result items and a card renderer. Which tiles exist, where they navigate and
+ * where items come from stay in `add_data_page/`. Widening the allowlist below
+ * is a decision about what the future package may depend on, so the lift stays
+ * a directory move plus a manifest, a tsconfig, and renaming the
+ * `xpack.observability_onboarding.addDataGrid.*` i18n prefix.
  */
 const GRID_ROOT = resolve(__dirname, 'add_data_grid');
 
