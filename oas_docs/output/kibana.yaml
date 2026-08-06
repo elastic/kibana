@@ -76122,6 +76122,202 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/workflows/workflow/executions:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/executions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Search across all workflow executions.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+      operationId: get-workflows-workflow-executions
+      parameters:
+        - description: KQL query string to filter executions.
+          in: query
+          name: kql
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+        - description: Filter by execution status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - waiting_for_child
+                - running
+                - queued
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 11
+            type: array
+        - description: Filter by execution type.
+          in: query
+          name: executionTypes
+          required: false
+          schema:
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
+        - description: Filter by the user who triggered the execution.
+          in: query
+          name: executedBy
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: Filter by evaluated concurrency group key.
+          in: query
+          name: concurrencyGroupKey
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by startedAt.
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by startedAt.
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by finishedAt.
+          in: query
+          name: finishedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by finishedAt.
+          in: query
+          name: finishedBefore
+          required: false
+          schema:
+            type: string
+        - description: Field to collapse execution results by.
+          in: query
+          name: collapse
+          required: false
+          schema:
+            enum:
+              - concurrencyGroupKey
+              - status
+              - executedBy
+              - triggeredBy
+            type: string
+        - description: 'Field to sort by. One of: startedAt, duration, workflowId, triggeredBy.'
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - startedAt
+              - duration
+              - workflowId
+              - triggeredBy
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Number of results to return.
+          in: query
+          name: size
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: Whether to track total hit count.
+          in: query
+          name: trackTotalHits
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchExecutionsResponseExample:
+                  description: Example paginated list of workflow-level executions
+                  value:
+                    page: 1
+                    results:
+                      - duration: 3000
+                        error: null
+                        executedBy: elastic
+                        finishedAt: '2025-11-20T12:00:03.000Z'
+                        id: exec-a1b2c3d4-e5f6-7890
+                        isTestRun: false
+                        managed: false
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:00.000Z'
+                        status: completed
+                        tags:
+                          - reporting
+                        triggeredBy: manual
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowName: Example Workflow
+                    size: 25
+                    total: 1
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                searchExecutionsBadRequestExample:
+                  description: Example response when the kql parameter contains invalid syntax
+                  value:
+                    message: 'Invalid KQL: Expected AND, OR, or end of input but "f" found.'
+          description: Indicates a bad request, such as invalid KQL syntax
+      summary: Search workflow executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/executions?page=1&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/workflow/executions?from=0&size=25&trackTotalHits=true&kql=startedAt >= "now-15m"&sortField=startedAt&sortOrder=desc
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
@@ -91833,6 +92029,12 @@ components:
       additionalProperties: false
       description: Duration format between time units.
       properties:
+        compact:
+          description: When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.
+          type: boolean
+        decimals:
+          description: Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.
+          type: number
         from:
           description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
           enum:
@@ -94812,8 +95014,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -110388,11 +110589,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -110412,11 +110618,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -113415,7 +113626,7 @@ components:
                     docsCountPercentage:
                       default: null
                       maximum: 100
-                      minimum: 1
+                      minimum: 0
                       nullable: true
                       type: number
                     enabled:

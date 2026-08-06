@@ -67,6 +67,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
     ];
     return onIndexClicked || onDocumentClicked ? (
       <EuiPopover
+        aria-label={i18n.NEW_ENTRY_OPTIONS_ARIA_LABEL}
         button={
           <EuiButton
             data-test-subj="addEntry"
