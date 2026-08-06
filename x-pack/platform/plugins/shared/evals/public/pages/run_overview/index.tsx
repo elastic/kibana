@@ -263,7 +263,7 @@ export const RunOverviewPage: React.FC = () => {
         <EuiToolTip content={canCompare ? undefined : i18n.COMPARE_PENDING_HINT}>
           <EuiButton
             fill
-            iconType="code"
+            iconType="compare"
             isDisabled={!canCompare}
             onClick={onCompare}
             data-test-subj="evalsRunOverviewCompare"
