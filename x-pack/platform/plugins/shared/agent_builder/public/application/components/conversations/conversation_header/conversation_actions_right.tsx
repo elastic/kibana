@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { MoreActionsButton } from './more_actions_button';
 
 const labels = {
   container: i18n.translate('xpack.agentBuilder.conversationActions.container', {
@@ -37,7 +36,6 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      <MoreActionsButton onCloseSidebar={isEmbeddedContext ? onClose : undefined} />
       {isEmbeddedContext && (
         <EuiToolTip content={labels.close} disableScreenReaderOutput>
           <EuiButtonIcon

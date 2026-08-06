@@ -7,33 +7,34 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
+import { i18n } from '@kbn/i18n';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useConversation } from '../../../hooks/use_conversation';
 
-export const ConversationTypeButton: React.FC = () => {
+const labels = {
+  chatInfo: i18n.translate('xpack.agentBuilder.chatInfoButton.label', {
+    defaultMessage: 'Chat info',
+  }),
+};
+
+export const ChatInfoButton: React.FC = () => {
   const conversationId = useConversationId();
-  const { conversation } = useConversation();
   const { openConversationMetadata } = useAgentBuilderServices();
 
-  if (!conversationId || !conversation?.template_id) {
+  if (!conversationId) {
     return null;
   }
-
-  const appliedTemplate = CONVERSATION_TEMPLATES.find(
-    (template) => template.id === conversation.template_id
-  );
 
   return (
     <EuiButton
       size="s"
       color="text"
       fill={false}
+      iconType="info"
       onClick={() => openConversationMetadata({ conversationId })}
-      data-test-subj="agentBuilderConversationTypeButton"
+      data-test-subj="agentBuilderChatInfoButton"
     >
-      {appliedTemplate?.name ?? conversation.template_id}
+      {labels.chatInfo}
     </EuiButton>
   );
 };

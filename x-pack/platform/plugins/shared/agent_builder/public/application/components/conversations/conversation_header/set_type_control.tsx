@@ -91,10 +91,12 @@ export const SetTypeControl: React.FC = () => {
   const popoverTitleId = useGeneratedHtmlId();
 
   // While the conversation is loading we don't yet know whether a template is
-  // already applied — render nothing rather than flash "Set type" before flipping.
-  if (!conversationId || !CONVERSATION_TEMPLATES.length || isLoading || conversation?.template_id) {
+  // already applied — render nothing rather than flash enabled before flipping to disabled.
+  if (!conversationId || !CONVERSATION_TEMPLATES.length || isLoading) {
     return null;
   }
+
+  const hasTemplate = Boolean(conversation?.template_id);
 
   const handleChange = async (
     _options: TemplateOption[],
@@ -131,7 +133,7 @@ export const SetTypeControl: React.FC = () => {
       iconType="arrowRight"
       iconSide="right"
       isLoading={isApplying}
-      disabled={isStreaming || isApplying}
+      disabled={isStreaming || isApplying || hasTemplate}
       onClick={() => setIsPopoverOpen((open) => !open)}
       aria-expanded={isPopoverOpen}
       data-test-subj="agentBuilderSetTypeButton"
