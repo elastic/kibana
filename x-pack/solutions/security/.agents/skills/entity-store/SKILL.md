@@ -26,7 +26,7 @@ Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggr
 - **Kibana Task** runs ESQL queries with timestamp-based pagination (~10s batches)
 - **Upsert with conflict retry** — never overwrites entire documents
 - **LOOKUP JOIN + COALESCE** for field retention — preserves API-set fields across extraction runs
-- **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` (from `@kbn/entity-store-plugin`). Also ES stored scripts.
+- **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` (from `@kbn/entity-store-plugin`).
 - **Single shared index** — `.entities.v2.latest.security_{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
 - **Auto-enabled** — installs on Security Solution navigation. `entityStore` is a required plugin dependency of `securitySolution`.
 
@@ -92,7 +92,6 @@ x-pack/solutions/security/plugins/entity_store/
 - **`entity.source` ≠ `entity.namespace`** — `entity.source` (array) lists the index names the entity data came from. `entity.namespace` is the identity provider namespace (`active_directory`, `okta`, `entra_id`, `local`). For resolution target selection by IDP priority, use `entity.namespace`.
 - **Document `_id` = MD5 hash of EUID** — not the EUID itself.
 - **v1 endpoints being removed** — v1 routes are deprecated and being removed. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
-- **EUID stored scripts must be registered** before entity store init — they're deployed during install.
 - **CCS indices excluded** from extraction queries — cross-cluster data handled by separate `ccsLogsExtractionClient`.
 - **bucket_sort VALUE_NULL** — grouping queries using `bucket_sort` with pagination error if `from` is null. Always coalesce to 0: `from: pageIndex * pageSize || 0`. Manifests as `EsError: [bucket_sort] from doesn't support values of type: VALUE_NULL`.
 - **ES bulk `update` with partial `doc` does NOT run `default_pipeline`** — known upstream bug ([elastic/elasticsearch#105804](https://github.com/elastic/elasticsearch/issues/105804), fix targeted for ES v9.4.0). The latest index has a `dot_expander` pipeline, but it's bypassed by partial updates. Always use `unflattenObject` from `@kbn/object-utils` when writing partial docs with dotted keys (see `bulkUpdateEntityDocs` in `infra/elasticsearch/resolution.ts`).

@@ -38,6 +38,10 @@ export const INVENTORY_APP_ID = 'inventory';
 
 export const STREAMS_APP_ID = 'streams';
 
+export const SIGNIFICANT_EVENTS_APP_ID = 'significantEvents';
+
 export const INGEST_HUB_APP_ID = 'ingestHub';
 
 export const ONBOARDING_APP_ID = 'onboarding';
+
+export const NIGHTSHIFT_APP_ID = 'nightshift';

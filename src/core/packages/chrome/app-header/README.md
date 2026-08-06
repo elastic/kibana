@@ -5,19 +5,19 @@ React APIs for Kibana app headers during the Chrome Next migration.
 Chrome Next uses one shared header view with two placement models:
 
 - App-owned inline rendering, where the page renders `AppHeader` in its own React tree.
-- Chrome-owned rendering, where the app registers `AppHeaderConfig` and Chrome renders the layout
-  top-bar slot.
+- Chrome-owned rendering, where the app registers `ChromeAppHeaderConfig` and Chrome renders the
+  layout top-bar slot.
 
 Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
 the page cannot safely own the header placement yet.
 
 ## Folder layout
 
-Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
-files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
-graduates to its own folder only when it gains real complexity of its own — an internal component
-split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
-until they earn a folder; don't pre-folder simple slots.
+Region components (back button, badges, tabs, description, metadata, app menu, title actions, etc.)
+live as flat files directly in `src/app_header/`, with shared data resolution in
+`src/app_header/hooks/`. A region graduates to its own folder only when it gains real complexity of
+its own — an internal component split, dedicated stories, or a README. Today only `title_area/` meets
+that bar. Keep new regions flat until they earn a folder; don't pre-folder simple slots.
 
 ## Which API should I use?
 
@@ -32,6 +32,43 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
+
+## Back navigation
+
+Pass the destination as `back`. Kibana handles same-origin `href` values as SPA navigation, so an
+`onClick` that navigates to the same URL is unnecessary:
+
+```tsx
+<AppHeader back="/app/my-app" title="Details" />
+```
+
+Use the object form when the back button needs a destination label or click behavior that differs
+from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
+
+If a page already owns an in-page back (for example `EuiPageHeader` breadcrumbs or a custom back
+control) and would also get a Chrome Next compatibility back from breadcrumbs, mount:
+
+```tsx
+<>
+  <SuppressChromeBackButton />
+  <EuiPageHeader breadcrumbs={[...]} ... />
+</>
+```
+
+`SuppressChromeBackButton` is inert outside Chrome Next project style. Prefer a full `AppHeader`
+migration over long-lived suppression.
+
+Tri-state `back` lives only on chrome registration (`ChromeAppHeaderConfig` via
+`ChromeAppHeaderRegistration` / `chrome.next.appHeader.set`). The rendered `AppHeader` component
+does not accept `false`:
+
+- value — explicit chrome back (no breadcrumb fallback)
+- `false` — intentional no chrome back; suppresses the breadcrumb-derived fallback
+- omitted — allow the compatibility fallback to derive back from project breadcrumbs
+
+Do not register `{ back: false }` separately from another app-header config on the same route —
+`set` replaces the whole config. Prefer combining fields on one registration, or use
+`SuppressChromeBackButton` when suppression is the only registration.
 
 ## Discover tabs
 
@@ -62,11 +99,38 @@ Pass a title object when the page title can be renamed from the header:
 The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
 saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
+## Description and metadata
+
+Use `description` only when short explanatory text materially helps users understand the page. It
+accepts a string:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description="Query and analyze data stored across multiple Elasticsearch clusters."
+/>
+```
+
+To add a URL rendered with the fixed label "Learn more", use the object form:
+
+```tsx
+<AppHeader
+  title="Data federation"
+  description={{
+    text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+    learnMoreUrl: documentationUrl,
+  }}
+/>
+```
+
+Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
+structured entity facts such as status, owner, or creation time. Documentation links that are not
+part of a necessary description belong in the app menu via `docLink`.
+
 ## Title size
 
-The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
-metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
-is no size knob to set.
+The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —
+there is no size knob to set.
 
 ## Spacing
 

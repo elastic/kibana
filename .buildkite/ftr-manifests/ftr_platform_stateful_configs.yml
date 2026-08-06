@@ -55,8 +55,8 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
+  - x-pack/platform/test/functional_gen_ai/inference/generate_security_labs_artifacts.config.ts
 
-defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
   - src/platform/test/analytics/config.ts
@@ -82,19 +82,15 @@ enabled:
   - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/embeddable_2/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
-  - src/platform/test/functional/apps/discover/esql_3/config.ts
   - src/platform/test/functional/apps/discover/esql_4/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
-  - src/platform/test/functional/apps/discover/group3/config.ts
   - src/platform/test/functional/apps/discover/group4/config.ts
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group11/config.ts
-  - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group9/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
-  - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
@@ -105,7 +101,6 @@ enabled:
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
   - src/platform/test/functional/apps/visualize/group4/config.ts
-  - src/platform/test/functional/apps/visualize/group5/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
   - src/platform/test/functional/apps/visualize/group7/config.ts
   - src/platform/test/functional/apps/visualize/group8/config.ts
@@ -230,19 +225,14 @@ enabled:
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
-  - x-pack/platform/test/functional/apps/discover/group2/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group4/config.ts
-  - x-pack/platform/test/functional/apps/lens/group5/config.ts
-  - x-pack/platform/test/functional/apps/lens/group6/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
-  - x-pack/platform/test/functional/apps/lens/group9/config.ts
   - x-pack/platform/test/functional/apps/lens/group10/config.ts
-  - x-pack/platform/test/functional/apps/lens/group11/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
@@ -348,7 +338,6 @@ enabled:
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/platform/test/spaces_api_integration/access_control_objects/config.ts
   - x-pack/platform/test/spaces_api_integration/access_control_objects/feature_disabled.config.ts
-  - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/platform/test/reindex_service/config.ts

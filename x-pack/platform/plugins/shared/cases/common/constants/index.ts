@@ -205,10 +205,34 @@ export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connect
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATE_DEFINITION_LENGTH = 30000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
+/**
+ * Caps on the templates-v2 / extended-fields system, enforced on new writes only (existing data is
+ * never retroactively rejected). These bound what the public mutative template API can create so
+ * automation cannot grow the number of templates, per-template fields, or field values without
+ * limit. Enforced in the templates service write path (create/update and their `dry_run`
+ * preflight), which both the public routes and the internal editor routes call through — so one
+ * gate covers every mutative entry point. Deliberately NOT applied on the shared read schema, which
+ * also validates already-stored definitions.
+ *
+ * NOTE: version *history* is intentionally uncapped. `templateVersion` is monotonic and each update
+ * persists a new version SO, but pruning old snapshots is a separate garbage-collection concern
+ * tracked as a follow-up rather than a per-write limit that would reject legitimate edits.
+ */
+export const MAX_TEMPLATES_PER_OWNER = 200 as const;
+export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
+/**
+ * Backstop on the UTF-8 byte size of a single stored extended-field value. ES `flattened` fields
+ * have no key-count limit and subfields don't count toward `index.mapping.total_fields.limit`, but
+ * Lucene rejects a keyword term over 32,766 bytes and the SO write then fails opaquely. Measure the
+ * UTF-8 byte length (not `string.length`, which counts UTF-16 code units and can undercount
+ * non-ASCII input) so this maps directly onto Lucene's limit.
+ */
+export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
@@ -307,6 +331,7 @@ export const LOCAL_STORAGE_KEYS = {
   attachmentFilters: 'cases.attachments.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
+  caseViewSidebarWidth: 'cases.caseView.sidebarWidth',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
   // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
   // re-trigger the banner/tour by bumping the suffix.
@@ -387,6 +412,15 @@ export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
 export const CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE =
   'case_view_attachment_accordion_opened' as const;
 
+export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
+  'case_view_attach_button_clicked' as const;
+
+export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
+  'case_view_attach_menu_item_clicked' as const;
+
+export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
+  'case_markdown_editor_plugin_clicked' as const;
+
 /**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
  * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
@@ -403,3 +437,4 @@ export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
 export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;
+export const CASE_EXTENDED_FIELDS_CONTROLS = 'extended_fields_controls' as const;
