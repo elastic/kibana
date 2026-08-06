@@ -156,7 +156,7 @@ export const compareCmd: Command<void> = {
       [firstExperimentId, secondExperimentId] = positionals;
       if (!firstExperimentId || !secondExperimentId) {
         throw createFlagError(
-          'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
+          'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVAL_KBN_URL and EVAL_KBN_API_KEY.'
         );
       }
 
