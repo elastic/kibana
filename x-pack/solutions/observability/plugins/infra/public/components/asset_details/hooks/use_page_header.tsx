@@ -45,6 +45,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const {
     services: {
       application: { navigateToApp },
+      chrome,
     },
   } = useKibanaContextForPlugin();
 
@@ -59,6 +60,12 @@ export const useTemplateHeaderBreadcrumbs = () => {
     }
     e.preventDefault();
   };
+
+  // Chrome Next already surfaces an origin-aware compatibility Back from breadcrumbs.
+  // Keep the page-local Return only for classic chrome.
+  if (chrome.next.isEnabled) {
+    return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
+  }
 
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
