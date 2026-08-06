@@ -6,11 +6,17 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { tags, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
+import { setCodeEditorValueWhenReady } from '../../lib/code_editor';
 
 const INDEX_TEMPLATE_NAME = 'index-template-test-name';
+
+const waitForConfigurationFormReset = async (page: ScoutPage, serverless: boolean) => {
+  if (serverless) return;
+  await expect(page.testSubj.locator('sourceValueField')).toContainText('Synthetic _source');
+};
 
 const readJsonTab = async (page: ScoutPage, testSubj: string) => {
   const text = await page.testSubj.locator(testSubj).innerText();
@@ -49,7 +55,8 @@ test.describe(
 
       // Navigate to Index Settings and modify them
       await page.testSubj.locator('formWizardStep-2').click();
-      await new KibanaCodeEditorWrapper(page).setCodeEditorValue(
+      await setCodeEditorValueWhenReady(
+        page,
         JSON.stringify({
           index: {
             mapping: {
@@ -65,9 +72,12 @@ test.describe(
       await page.testSubj.locator('formWizardStep-3').click();
       await page.testSubj.locator('advancedOptionsTab').click();
 
+      await waitForConfigurationFormReset(page, config.serverless);
+
       // Clear the pre-populated default date formats, then add `basic_date`. The dynamic date
       // formats combo is the only combo box on this tab and has no test subject of its own.
       const clearButton = page.testSubj.locator('comboBoxClearButton');
+      await expect(clearButton).toBeVisible();
       await clearButton.click();
       await expect(clearButton).toBeHidden();
       // The combo's test subject sits on a wrapper div, so drive the inner search input directly.

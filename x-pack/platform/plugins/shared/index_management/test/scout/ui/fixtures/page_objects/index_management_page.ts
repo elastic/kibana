@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type ScoutPage, EuiFieldTextWrapper, EuiToastWrapper } from '@kbn/scout';
+import { type Locator, type ScoutPage, EuiFieldTextWrapper, EuiToastWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
@@ -108,26 +108,49 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator('nextButton').click();
   }
 
-  async clickTemplateDetailsLink(name: string) {
-    const searchBar = this.page.getByRole('searchbox', { name: /results lower in the page/ });
+  private async fillSearchBox(searchBox: Locator, value: string) {
     await expect(async () => {
-      await searchBar.fill(name);
-      await expect(searchBar).toHaveValue(name);
-    }).toPass({ timeout: 15_000 });
-    await this.page.testSubj
-      .locator('templateDetailsLink')
-      .and(this.page.getByRole('button', { name, exact: true }))
-      .dispatchEvent('click');
-    await expect(this.page.testSubj.locator('templateDetails')).toBeVisible();
+      await searchBox.fill(value);
+      await expect(searchBox).toHaveValue(value);
+    }).toPass({ timeout: 30_000 });
   }
 
+  private async filterDataStreams(name: string) {
+    await this.fillSearchBox(this.page.testSubj.locator('dataStreamSearch'), name);
+    const rowLinks = this.page.testSubj.locator('nameLink');
+    await expect(rowLinks.filter({ hasNotText: name })).toHaveCount(0);
+    await expect(rowLinks.filter({ hasText: name })).not.toHaveCount(0);
+  }
+
+  async clickTemplateDetailsLink(name: string) {
+    await this.fillSearchBox(
+      this.page.getByRole('searchbox', { name: /results lower in the page/ }),
+      name
+    );
+
+    const link = this.page.testSubj
+      .locator('templateDetailsLink')
+      .and(this.page.getByRole('button', { name, exact: true }));
+    await expect(link).toBeVisible();
+    await expect(async () => {
+      await link.click();
+      await expect(this.page.testSubj.locator('templateDetails')).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
+  }
+
+  // Open a data stream's details flyout by exact name. Serverless projects ship their own data
+  // streams, so filter the list down first; the same re-render race applies as above.
   async clickDataStreamNameLink(name: string) {
-    await this.page.testSubj.fill('dataStreamSearch', name);
-    await this.page.testSubj
+    await this.filterDataStreams(name);
+    const link = this.page.testSubj
       .locator('nameLink')
-      .and(this.page.getByRole('button', { name, exact: true }))
-      .dispatchEvent('click');
-    await expect(this.page.testSubj.locator('dataStreamDetailPanel')).toBeVisible();
+      .and(this.page.getByRole('button', { name, exact: true }));
+    await expect(async () => {
+      await link.click();
+      await expect(this.page.testSubj.locator('dataStreamDetailPanel')).toBeVisible({
+        timeout: 5_000,
+      });
+    }).toPass({ timeout: 60_000 });
   }
 
   async openDataStreamLifecycleFlyout(name: string) {
@@ -146,14 +169,11 @@ export class IndexManagement extends AbstractPageObject {
   }
 
   async stopInheritingDataStreamLifecycle() {
-    const inherit = this.page.testSubj.locator('dataLifecycleInheritCheckbox');
-    if ((await inherit.count()) > 0 && (await inherit.isChecked())) {
-      await inherit.click();
-    }
+    await this.page.testSubj.locator('dataLifecycleInheritCheckbox').uncheck();
   }
 
   async openBulkEditDataRetention(dataStreamNames: string[]) {
-    await this.page.testSubj.fill('dataStreamSearch', commonPrefix(dataStreamNames));
+    await this.filterDataStreams(commonPrefix(dataStreamNames));
     for (const name of dataStreamNames) {
       await this.page.testSubj.locator(`checkboxSelectRow-${name}`).check();
     }

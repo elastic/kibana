@@ -6,10 +6,11 @@
  */
 
 import type { EsClient, ScoutPage } from '@kbn/scout';
-import { tags, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import type { IndexManagement } from '../../fixtures/page_objects/index_management_page';
+import { setCodeEditorValueWhenReady } from '../../lib/code_editor';
 import { deleteDataStream } from '../../lib/data_streams';
 
 const INDEX_MODE = {
@@ -170,7 +171,7 @@ test.describe('Data streams index mode', { tag: tags.deploymentAgnostic }, () =>
     // The time series settings (`routing_path`) live in the Index settings step and are invalid for
     // logsdb, so clear them.
     await page.testSubj.locator('formWizardStep-2').click();
-    await new KibanaCodeEditorWrapper(page).setCodeEditorValue('{}');
+    await setCodeEditorValueWhenReady(page, '{}');
     await page.testSubj.locator('formWizardStep-5').click();
     await expect(reviewStepIndexMode(page)).toHaveText(INDEX_MODE.LOGSDB);
 
@@ -202,7 +203,8 @@ test.describe('Data streams index mode', { tag: tags.deploymentAgnostic }, () =>
 
     // Time series mode requires a routing path, which only the Index settings step can provide.
     await page.testSubj.locator('formWizardStep-2').click();
-    await new KibanaCodeEditorWrapper(page).setCodeEditorValue(
+    await setCodeEditorValueWhenReady(
+      page,
       JSON.stringify({ index: { mode: 'time_series', routing_path: 'test' } })
     );
     await page.testSubj.locator('formWizardStep-5').click();
