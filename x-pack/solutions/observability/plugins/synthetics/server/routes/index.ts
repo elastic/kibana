@@ -31,6 +31,7 @@ import type { SyntheticsRestApiRouteFactory } from './types';
 import { getSyntheticsCertsRoute } from './certs/get_certificates';
 import { getSyntheticsCertsFacetsRoute } from './certs/get_certificates_facets';
 import { getSyntheticsSuggestionsRoute } from './suggestions/suggestions_route';
+import { getSyntheticsFieldSuggestionsRoute } from './suggestions/field_suggestions_route';
 import { getAgentPoliciesRoute } from './settings/private_locations/get_agent_policies';
 import { inspectSyntheticsMonitorRoute } from './monitor_cruds/inspect_monitor';
 import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
@@ -118,6 +119,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsCertsRoute,
   getSyntheticsCertsFacetsRoute,
   getSyntheticsSuggestionsRoute,
+  getSyntheticsFieldSuggestionsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
