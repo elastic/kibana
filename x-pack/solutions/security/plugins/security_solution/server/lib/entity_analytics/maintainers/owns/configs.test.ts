@@ -15,8 +15,14 @@ const overrideConfigs = OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is OverrideRelationshipIntegrationConfig => c.kind === 'override'
 );
 
+const OKTA_ID = 'entityanalytics_okta';
+
+const oktaConfig = OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.find(
+  (c): c is OverrideRelationshipIntegrationConfig => c.id === OKTA_ID
+)!;
+
 describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the one expected integration (okta)', () => {
+  it('ships exactly the expected integrations', () => {
     expect(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'entityanalytics_okta',
     ]);
@@ -55,85 +61,57 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: indexPattern points to the entity index (not a log index)',
-    (config) => {
-      expect(config.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
-      expect(config.indexPattern('default')).not.toContain('myns');
-    }
-  );
+  it('entityanalytics_okta: indexPattern points to the entity index', () => {
+    expect(oktaConfig.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
+    expect(oktaConfig.indexPattern('default')).not.toContain('myns');
+  });
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query expands raw host.id before CONCAT (CONCAT is null on multi-valued input)',
-    (config) => {
-      const query = buildTargetsPerActorQuery(config, 'default');
-      // MV_EXPAND must precede CONCAT so actors with multiple owned devices
-      // resolve all targets instead of returning NULL.
-      expect(query).toContain('raw_identifiers.host.id');
-      expect(query).toContain('MV_EXPAND rawKey0');
-      expect(query).toContain('CONCAT("host:", rawKey0)');
-    }
-  );
+  it('entityanalytics_okta: override query expands raw host.id before CONCAT (CONCAT is null on multi-valued input)', () => {
+    const query = buildTargetsPerActorQuery(oktaConfig, 'default');
+    expect(query).toContain('raw_identifiers.host.id');
+    expect(query).toContain('MV_EXPAND rawKey0');
+    expect(query).toContain('CONCAT("host:", rawKey0)');
+  });
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query does NOT resolve host.name (device display name is not a valid EUID basis)',
-    (config) => {
-      const query = buildTargetsPerActorQuery(config, 'default');
-      expect(query).not.toContain('raw_identifiers.host.name');
-    }
-  );
+  it('entityanalytics_okta: override query does NOT resolve host.name (device display name is not a valid EUID basis)', () => {
+    const query = buildTargetsPerActorQuery(oktaConfig, 'default');
+    expect(query).not.toContain('raw_identifiers.host.name');
+  });
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query guards against non-EUID target values via RLIKE',
-    (config) => {
-      const query = buildTargetsPerActorQuery(config, 'default');
-      // Rejects empty/prefix-only values like "host:" produced by a blank raw field.
-      expect(query).toContain('targetEntityId RLIKE ".+:.+"');
-    }
-  );
+  it('entityanalytics_okta: override query guards against non-EUID target values via RLIKE', () => {
+    const query = buildTargetsPerActorQuery(oktaConfig, 'default');
+    expect(query).toContain('targetEntityId RLIKE ".+:.+"');
+  });
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query does NOT filter by entity.type (actor discovered by entity.id)',
-    (config) => {
-      const query = buildTargetsPerActorQuery(config, 'default');
-      expect(query).not.toContain('entity.type ==');
-    }
-  );
+  it('entityanalytics_okta: override query does NOT filter by entity.type (actor discovered by entity.id)', () => {
+    const query = buildTargetsPerActorQuery(oktaConfig, 'default');
+    expect(query).not.toContain('entity.type ==');
+  });
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query sets actorUserId from entity.id (already EUID-prefixed)',
-    (config) => {
-      const query = buildTargetsPerActorQuery(config, 'default');
-      expect(query).toContain('actorUserId = entity.id');
-    }
-  );
+  it('entityanalytics_okta: override query sets actorUserId from entity.id (already EUID-prefixed)', () => {
+    const query = buildTargetsPerActorQuery(oktaConfig, 'default');
+    expect(query).toContain('actorUserId = entity.id');
+  });
 
   describe('lookback window', () => {
-    it('declares disableLookbackWindow on every config (entity-index source)', () => {
-      for (const config of OWNS_INTEGRATION_RELATIONSHIP_CONFIGS) {
-        expect(config.disableLookbackWindow).toBe(true);
-      }
+    it('entityanalytics_okta declares disableLookbackWindow (entity-index source)', () => {
+      expect(oktaConfig.disableLookbackWindow).toBe(true);
     });
 
-    it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-      '$id: Step 1 actor discovery query omits the @timestamp lookback range',
-      (config) => {
-        const query = buildActorDiscoveryQuery(config, undefined) as {
-          query: { bool: { filter: unknown[] } };
-        };
-        const hasTimestampRange = query.query.bool.filter.some((f) =>
-          JSON.stringify(f).includes('"@timestamp"')
-        );
-        expect(hasTimestampRange).toBe(false);
-      }
-    );
+    it('entityanalytics_okta: Step 1 actor discovery query omits the @timestamp lookback range', () => {
+      const query = buildActorDiscoveryQuery(oktaConfig, undefined) as {
+        query: { bool: { filter: unknown[] } };
+      };
+      const hasTimestampRange = query.query.bool.filter.some((f) =>
+        JSON.stringify(f).includes('"@timestamp"')
+      );
+      expect(hasTimestampRange).toBe(false);
+    });
   });
 
   describe('validateTargetIds', () => {
-    it('declares validateTargetIds on every config (device docs may not be indexed as entities)', () => {
-      for (const config of OWNS_INTEGRATION_RELATIONSHIP_CONFIGS) {
-        expect(config.validateTargetIds).toBe(true);
-      }
+    it('entityanalytics_okta declares validateTargetIds (raw_identifiers targets may not exist)', () => {
+      expect(oktaConfig.validateTargetIds).toBe(true);
     });
   });
 
