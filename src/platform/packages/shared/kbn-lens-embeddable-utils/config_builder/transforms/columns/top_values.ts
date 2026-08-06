@@ -10,6 +10,7 @@
 import {
   LENS_DOCUMENT_FIELD_NAME,
   type FieldBasedIndexPatternColumn,
+  type LastValueIndexPatternColumn,
   type PercentileIndexPatternColumn,
   type PercentileRanksIndexPatternColumn,
   type TermsIndexPatternColumn,
@@ -18,6 +19,7 @@ import {
 import type {
   LensApiTermsOperation,
   TermOperationRankByCustomCountOperationType,
+  TermOperationRankByCustomLastValueType,
   TermOperationRankByCustomOperationType,
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
@@ -44,6 +46,12 @@ function isCountOrderAgg(
   return orderAgg.operationType === 'count';
 }
 
+function isLastValueOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is LastValueIndexPatternColumn {
+  return orderAgg.operationType === 'last_value';
+}
+
 function isBaseCustomOperation(
   operation: string
 ): operation is TermOperationRankByCustomOperationType['operation'] {
@@ -55,7 +63,6 @@ function isBaseCustomOperation(
     'standard_deviation',
     'unique_count',
     'sum',
-    'last_value',
   ];
   return ops.includes(operation);
 }
@@ -139,6 +146,7 @@ export function fromTermsLensApiToLensState(
 function getCustomOrderAgg(
   rankBy:
     | TermOperationRankByCustomOperationType
+    | TermOperationRankByCustomLastValueType
     | TermOperationRankByCustomCountOperationType
     | TermOperationRankByCustomPercentileType
     | TermOperationRankByCustomPercentileRankType
@@ -173,6 +181,22 @@ function getCustomOrderAgg(
       dataType: 'number',
       isBucketed: false,
       label: '',
+    };
+    return orderAgg;
+  }
+
+  if (rankBy.operation === 'last_value') {
+    // `time_field` maps to the state `sortField` (the date field the last value is sorted by), which
+    // IS read at render (`last_value.tsx` `toEsAggsFn` passes it to `aggTopMetrics`/`aggTopHit`). It is
+    // optional on the API: when omitted the order-agg has no `sortField` and the panel cannot render
+    // until re-saved from the editor. This solution was needed to avoid a breaking change in the API.
+    const orderAgg: FieldBasedIndexPatternColumn & { params?: { sortField?: string } } = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      params: { sortField: rankBy.time_field }, // always emit a `params` object (empty when `time_field` is absent) to avoid crashing the Lens editor on load
     };
     return orderAgg;
   }
@@ -219,6 +243,19 @@ function getCustomRankByFromOrderAgg(
       operation: 'count',
       direction: orderDirection,
       ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+    };
+    return rankBy;
+  }
+
+  if (isLastValueOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomLastValueType = {
+      type: 'custom',
+      operation: 'last_value',
+      field: sourceField,
+      direction: orderDirection,
+      // Real persisted order-aggs always carry `sortField`; guard for the malformed case so the round
+      // trip stays lossless (omit `time_field` rather than emit `undefined`).
+      ...(orderAgg.params?.sortField ? { time_field: orderAgg.params.sortField } : {}),
     };
     return rankBy;
   }
