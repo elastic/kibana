@@ -115,6 +115,7 @@ toc:
           - file: connectors-kibana/monday-com-action-type.md
           - file: connectors-kibana/new-relic-action-type.md
           - file: connectors-kibana/notion-action-type.md
+          - file: connectors-kibana/okta-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/opensearch-aws-opensearch-service-action-type.md
