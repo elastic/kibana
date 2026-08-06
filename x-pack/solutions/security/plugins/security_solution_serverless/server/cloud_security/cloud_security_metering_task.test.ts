@@ -346,8 +346,20 @@ describe('getGcpComputeDurationFilter', () => {
 
   it('should use 24 hours as the minimum running duration', () => {
     const filter = getGcpComputeDurationFilter();
-    const rangeClause = (filter.bool.should as any[])[1].bool.must[1];
-    expect(rangeClause.range[GCP_COMPUTE_DURATION_RUNTIME_FIELD].gte).toBe(minDurationMillis);
+    const [, gcpComputeClause] = filter.bool.should;
+
+    expect(gcpComputeClause).toEqual({
+      bool: {
+        must: [
+          { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+          {
+            range: {
+              [GCP_COMPUTE_DURATION_RUNTIME_FIELD]: { gte: 24 * 60 * 60 * 1000 },
+            },
+          },
+        ],
+      },
+    });
   });
 });
 
@@ -384,9 +396,11 @@ describe('getAssetAggQueryByCloudSecuritySolution', () => {
   it('should include runtime_mappings and GCP duration filter for CSPM', () => {
     const result = getAssetAggQueryByCloudSecuritySolution(CSPM);
 
-    expect(result).toHaveProperty('runtime_mappings');
-    expect((result as any).runtime_mappings).toHaveProperty(GCP_COMPUTE_DURATION_RUNTIME_FIELD);
-    expect((result.query as any).bool.must).toHaveLength(2);
+    if (!('runtime_mappings' in result)) {
+      throw new Error('expected the CSPM asset agg query to include runtime_mappings');
+    }
+    expect(result.runtime_mappings).toHaveProperty(GCP_COMPUTE_DURATION_RUNTIME_FIELD);
+    expect(result.query.bool.must).toHaveLength(2);
   });
 
   it('should not include runtime_mappings for KSPM', () => {
