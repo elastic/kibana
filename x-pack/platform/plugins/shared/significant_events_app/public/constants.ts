@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-/** How often to poll the server (status + result data) while a sig-events pipeline is running. */
+/** How often to poll the server (status + result data) while a significant events pipeline is running. */
 export const RUNNING_POLL_INTERVAL_MS = 5 * 1000;

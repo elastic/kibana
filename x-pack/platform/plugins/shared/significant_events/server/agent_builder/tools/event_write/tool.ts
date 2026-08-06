@@ -48,6 +48,10 @@ export const eventsWriteItemSchema = significantEventSchema
     conversation_id: true,
   })
   .extend({
+    event_id: z
+      .string()
+      .optional()
+      .transform((v) => (v === '' ? undefined : v)),
     dedup_window: z
       .string()
       .max(256)
@@ -58,7 +62,7 @@ export const eventsWriteItemSchema = significantEventSchema
 
           Provide this to write a new event candidate without an explicit event_id.
           
-          If an active (status: pending or open) event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is created with status "pending".
+          If an active (status "open") event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is written with the caller-supplied status.
         `
       ),
   })
@@ -81,7 +85,7 @@ const eventsWriteItemsSchema = z
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'The significant event items to write. It must contain at least one item and no more than the maximum allowed.',
+        "The significant event items to write. Provide a complete, non-empty array. Do not call this tool to plan or probe: `'{}'` and `'{ \"items\": [] }'` are invalid. For a new event, omit event_id; for a continuation, supply a non-empty existing event_id.",
     })
   );
 
@@ -114,15 +118,12 @@ export function createEventsWriteTool({
     description: dedent`
       Write a batch of significant events. Submit at most one item per event_id.
 
-      **dedup_window** (e.g. "now-24h"), no event_id: write a new candidate. Skipped if an active
-      event with the same stream and rule UUIDs already exists in the window (written: false,
-      reason: duplicate_within_window); otherwise written with status "pending".
+      **dedup_window** (e.g. "now-24h"), no event_id: write a new event. Skipped if an open event
+      with the same stream and rule UUIDs already exists in the window (written: false,
+      reason: duplicate_within_window); otherwise written with the caller-supplied status.
 
       **event_id**, no dedup_window: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. Use status "open" when continuing an
-      existing event_id so it stays on the default read path; use dedup_window (without event_id)
-      for new candidates, which are written as "pending". Any settled status (open, closed, dismissed)
-      may be set directly on snapshot writes.
+      Signals and topology are merged with prior versions.
 
       **neither**: a synthetic event_id is generated.
     `,

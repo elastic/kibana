@@ -15,8 +15,7 @@ import {
 } from '@kbn/core/public';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
-import { BehaviorSubject, distinctUntilChanged, map, type Subscription } from 'rxjs';
+import { BehaviorSubject, catchError, from, map, of, type Subscription } from 'rxjs';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import type {
   NightshiftPublicSetup,
@@ -44,7 +43,7 @@ export class NightshiftPlugin
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
-      title: i18n.translate('xpack.observability.nightshift.appTitle', {
+      title: i18n.translate('xpack.nightshift.appTitle', {
         defaultMessage: 'Nightshift',
       }),
       appRoute: NIGHTSHIFT_APP_ROUTE,
@@ -55,7 +54,7 @@ export class NightshiftPlugin
       // with the same algorithm, and the standalone app renders as "Nightshift"
       // rather than "Observability / Nightshift".
       keywords: ['nightshift', 'significant events'],
-      // Hidden until the rollout flag is on; start() feeds the real value.
+      // Hidden until Significant Events reports itself available; start() feeds the real value.
       visibleIn: [],
       updater$: this.appUpdater$,
       mount: async (appMountParameters: AppMountParameters) => {
@@ -76,14 +75,36 @@ export class NightshiftPlugin
     return {};
   }
 
-  start(coreStart: CoreStart): NightshiftPublicStart {
-    this.availabilitySubscription = coreStart.featureFlags
-      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
+  start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
+    const { agentBuilder } = pluginsStart;
+    if (agentBuilder) {
+      void import('./chat/agent_builder/significant_event_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.context.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
+    }
+
+    // Single source of truth: aggregates rollout flag, project type, pricing tier, license and
+    // required plugins. The flag alone would surface the app where the feature cannot run.
+    this.availabilitySubscription = from(
+      pluginsStart.significantEvents.significantEventsRepositoryClient.fetch(
+        'GET /internal/significant_events/availability',
+        { signal: null }
+      )
+    )
       .pipe(
-        distinctUntilChanged(),
+        map(({ available }) => available),
+        catchError(() => of(false)),
         map(
           (isAvailable): AppUpdater =>
-            () => ({ visibleIn: isAvailable ? ['globalSearch'] : [] })
+            () => ({
+              visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
+            })
         )
       )
       .subscribe(this.appUpdater$);

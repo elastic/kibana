@@ -402,24 +402,20 @@ describe('GoogleCalendar', () => {
   });
 
   describe('test handler', () => {
-    it('should return ok: true on successful connection', async () => {
+    const testSpec = GoogleCalendar.test;
+
+    it('should return {} on successful connection', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });
 
-      const result = await GoogleCalendar.test?.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Google Calendar API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return ok: false on error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
 
-      const result = await GoogleCalendar.test?.handler(mockContext);
-
-      expect(result).toMatchObject({ ok: false });
-      expect((result as { message: string }).message).toContain('Unauthorized');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });
