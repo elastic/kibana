@@ -25,7 +25,7 @@ export interface ConversationService {
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor | undefined>;
+  }): Promise<ConversationRoundAuthor>;
 }
 
 interface ConversationServiceDeps {
@@ -75,19 +75,14 @@ export class ConversationServiceImpl implements ConversationService {
   }: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor | undefined> {
+  }): Promise<ConversationRoundAuthor> {
     if (origin?.author) {
       return origin.author;
     }
 
     const user = await this.getCurrentUser({ request });
-    const id = user.id ?? user.username;
 
-    if (!id) {
-      return undefined;
-    }
-
-    return { id, ...(user.username ? { username: user.username } : {}) };
+    return { id: user.id ?? user.username, username: user.username };
   }
 
   private async getCurrentUser({ request }: { request: KibanaRequest }) {
