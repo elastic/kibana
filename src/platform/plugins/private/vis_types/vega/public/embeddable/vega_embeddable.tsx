@@ -42,6 +42,7 @@ import {
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
+  type SupportsJsonExport,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
@@ -94,6 +95,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   HasEditCapabilities &
   HasInspectorAdapters &
   HasSupportedTriggers &
+  SupportsJsonExport &
   PublishesBlockingError &
   PublishesDataLoading &
   PublishesWritableDescription &
@@ -228,6 +230,7 @@ export const vegaEmbeddableFactory = (
         });
       },
       getInspectorAdapters: () => inspectorAdapters,
+      supportsJsonExport: true,
     });
 
     const getExecutionContext = () => ({

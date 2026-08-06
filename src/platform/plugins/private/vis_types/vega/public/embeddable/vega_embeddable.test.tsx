@@ -167,6 +167,11 @@ describe('vegaEmbeddableFactory', () => {
     );
   });
 
+  it('supports JSON export', async () => {
+    const { api } = await buildEmbeddable();
+    expect(api.supportsJsonExport).toBe(true);
+  });
+
   it('renders the Vega component from the resolved parser', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();
     render(<PanelComponent />);
