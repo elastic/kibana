@@ -2784,6 +2784,11 @@
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.21.0.tgz#a5011aab9e6082e706937b26ef23445933fa0d15"
   integrity sha512-7XhUbtnlkSEZK15kN3t+tzIMxsbKm/dSkKBFalj+20NvPKe1kBY7mR2P7vuijEn+f06z5+A8bVGKO0v39cr6Wg==
 
+"@google/generative-ai@^0.24.1":
+  version "0.24.1"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
+  integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
+
 "@grpc/grpc-js@1.14.4", "@grpc/grpc-js@^1.14.3":
   version "1.14.4"
   resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.14.4.tgz#e73ff57d97802f063999545f43ebb2b1eca65d9d"
@@ -8257,6 +8262,13 @@
   dependencies:
     "@langchain/google-common" "2.2.0"
     google-auth-library "^10.6.2"
+
+"@langchain/google-genai@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-2.2.0.tgz#42879b9694a47e40341822d709d5c8aee24a1266"
+  integrity sha512-1mDqbmB6+iC6ZBQY15r5xJg9wPErnQ774inpKh6qi6BrrjadDwaPHoklJW5IXU94edKiDpm1akIzJCrQDWe6yA==
+  dependencies:
+    "@google/generative-ai" "^0.24.1"
 
 "@langchain/google-vertexai@2.2.0":
   version "2.2.0"
