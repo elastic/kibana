@@ -76,7 +76,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     closeModal,
     dismissInvite,
     submit,
-  } = useFeedback(rawRound?.id ?? '');
+  } = useFeedback(rawRound?.id ?? '', rawRound?.feedback);
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);

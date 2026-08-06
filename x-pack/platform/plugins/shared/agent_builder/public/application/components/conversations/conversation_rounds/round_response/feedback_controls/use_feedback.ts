@@ -35,10 +35,13 @@ export interface UseFeedbackReturn extends FeedbackState {
 const SUBMITTED_VISIBLE_MS = 2500;
 const SUBMITTED_FADE_MS = 500;
 
-export const useFeedback = (roundId: string): UseFeedbackReturn => {
+export const useFeedback = (
+  roundId: string,
+  initialFeedback?: { vote: 'up' | 'down' }
+): UseFeedbackReturn => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
-  const [vote, setVoteState] = useState<Vote>(null);
+  const [vote, setVoteState] = useState<Vote>(initialFeedback?.vote ?? null);
   const [chips, setChips] = useState<string[]>([]);
   const [comment, setCommentState] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
