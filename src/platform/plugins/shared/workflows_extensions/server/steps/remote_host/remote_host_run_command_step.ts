@@ -8,15 +8,15 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
-import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
-import { createPollServerStepDefinition } from '../../step_registry/types';
 import {
   executeCommandInConnector,
   killCommandInConnector,
   tryExtractCommandOutputFromConnector,
 } from './execute_in_connector';
-import { ExecutionError } from '@kbn/workflows/server';
+import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
+import { createPollServerStepDefinition } from '../../step_registry/types';
 
 const StateSchema = z.object({
   commandId: z.string(),
