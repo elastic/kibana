@@ -21,8 +21,8 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { EpisodesClient } from '../lib/episodes_client';
 import { RulesClient } from '../lib/rules_client';
-import { QueryServiceScopedToken } from '../lib/services/query_service/tokens';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
@@ -73,8 +73,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     (logger, injection) =>
       createEpisodeAttachmentType({
         logger,
-        getQueryService: (context) =>
-          resolveRequestScoped(injection, context.request, QueryServiceScopedToken),
+        getEpisodesClient: (context) =>
+          resolveRequestScoped(injection, context.request, EpisodesClient),
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
   );
