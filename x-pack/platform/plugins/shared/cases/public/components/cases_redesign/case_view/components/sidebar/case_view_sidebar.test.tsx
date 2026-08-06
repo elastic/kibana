@@ -92,6 +92,7 @@ const useGetCasesFeaturesRes = {
 };
 
 const replaceCustomField = jest.fn();
+const onUpdateField = jest.fn();
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
@@ -117,7 +118,7 @@ describe('CaseViewSidebar (redesign)', () => {
     });
     useOnUpdateFieldMock.mockReturnValue({
       isLoading: false,
-      useOnUpdateField: jest.fn,
+      onUpdateField,
     });
     useReplaceCustomFieldMock.mockImplementation(() => ({
       isUpdatingCustomField: false,
@@ -185,8 +186,11 @@ describe('CaseViewSidebar (redesign)', () => {
     ).not.toBeTruthy();
   });
 
-  it('preserves a pending severity edit when the Attributes accordion is collapsed and reopened', async () => {
+  it('persists a severity change immediately, with no confirm step', async () => {
     const user = userEvent.setup();
+    // Set here rather than in the `beforeAll` block: the `beforeEach` below it clears mocks, so a
+    // return value registered up there is gone by the time a test runs.
+    useOnUpdateFieldMock.mockReturnValue({ isLoading: false, onUpdateField });
 
     renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
@@ -198,15 +202,11 @@ describe('CaseViewSidebar (redesign)', () => {
     await waitForEuiPopoverOpen();
     await user.click(screen.getByTestId(`case-severity-selection-${CaseSeverity.CRITICAL}`));
 
-    expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
-
-    await user.click(screen.getByTestId('case-view-sidebar-attributes-toggle'));
-    await user.click(screen.getByTestId('case-view-sidebar-attributes-toggle'));
-
-    expect(
-      screen.getAllByTestId(`case-severity-selection-${CaseSeverity.CRITICAL}`).length
-    ).not.toBe(0);
-    expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
+    expect(onUpdateField).toHaveBeenCalledWith({
+      key: 'severity',
+      value: CaseSeverity.CRITICAL,
+    });
+    expect(screen.queryByTestId('template-field-confirm-severity')).not.toBeInTheDocument();
   });
 
   it('does not render duplicate data-test-subj when assignees and participants are both loading', async () => {
@@ -313,6 +313,15 @@ describe('CaseViewSidebar (redesign)', () => {
     expect(await screen.findByTestId('case-view-sidebar-legacy-custom-fields')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByRole('switch'));
+
+    // The legacy custom fields section buffers edits: toggling puts the section into edit mode and
+    // the write only goes out on Save.
+    expect(replaceCustomField).not.toHaveBeenCalled();
+    expect(await screen.findByTestId('section-edit-changed-count')).toHaveTextContent(
+      '1 unsaved field'
+    );
+
+    await userEvent.click(await screen.findByTestId('section-edit-save'));
 
     await waitFor(() => {
       expect(replaceCustomField).toHaveBeenCalledWith({

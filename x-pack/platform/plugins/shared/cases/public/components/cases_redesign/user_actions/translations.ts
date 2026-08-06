@@ -51,3 +51,10 @@ export const EXPAND_ALL_ACTIVITIES = i18n.translate(
   'xpack.cases.caseView.redesign.userActions.expandAllActivities',
   { defaultMessage: 'Expand all' }
 );
+
+export const SHOW_MORE_ACTIVITY = i18n.translate(
+  'xpack.cases.casesRedesign.userActions.showMoreActivity',
+  {
+    defaultMessage: 'Show more',
+  }
+);

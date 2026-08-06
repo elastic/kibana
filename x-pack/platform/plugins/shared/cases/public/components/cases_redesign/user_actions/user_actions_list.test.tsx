@@ -89,7 +89,13 @@ describe('UserActionsList', () => {
 
     await userEvent.click(await screen.findByTestId('case-user-action-collapse-0'));
 
-    expect(screen.queryByTestId('test-comment')).not.toBeInTheDocument();
+    // Collapsed, the body is cropped to a preview rather than removed, so the row still says what
+    // it holds — and the crop is inert, so nothing inside it is reachable.
+    const preview = await screen.findByTestId('case-user-action-preview-0');
+    expect(preview).toContainElement(screen.getByTestId('test-comment'));
+    // The crop is the inert part; the wrapper stays reachable for the "Show more" control.
+    expect(screen.getByTestId('case-user-action-preview-0-crop')).toHaveAttribute('inert');
+    expect(screen.queryByTestId('case-user-action-preview-1')).not.toBeInTheDocument();
     expect(screen.getByTestId('second-test-comment')).toBeInTheDocument();
     expect(screen.getByTestId('comment-editor')).toBeInTheDocument();
     expect(screen.queryByTestId('case-user-action-collapse-2')).not.toBeInTheDocument();
@@ -97,5 +103,6 @@ describe('UserActionsList', () => {
     await userEvent.click(await screen.findByTestId('case-user-action-collapse-0'));
 
     expect(await screen.findByTestId('test-comment')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-user-action-preview-0')).not.toBeInTheDocument();
   });
 });

@@ -6,11 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import type { CasesConfigurationUI, CaseUICustomField } from '../../../../common/ui';
 import type { CaseUI } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
+import {
+  ModifiedFieldAnnouncement,
+  useFieldMarkerStyles,
+} from '../../templates_v2/field_types/section_edit_bar';
+import * as i18n from '../../templates_v2/translations';
 
 interface Props {
   isLoading: boolean;
@@ -19,6 +24,17 @@ interface Props {
   onSubmit: (customField: CaseUICustomField) => void;
   /** Defaults to classic (legacy case view). Redesign passes `inline`. */
   editVariant?: 'classic' | 'inline';
+  /**
+   * Section edit mode: keys whose value has been changed but not yet saved. Each gets a marker and
+   * its own revert control.
+   */
+  modifiedKeys?: ReadonlySet<string>;
+  onRevertField?: (key: string) => void;
+  /**
+   * Bumped per key to remount that field's editor, which is how a revert or cancel reaches the
+   * form state each custom field type owns internally.
+   */
+  resetTokens?: Readonly<Record<string, number>>;
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
@@ -27,8 +43,12 @@ const CustomFieldsComponent: React.FC<Props> = ({
   customFieldsConfiguration,
   onSubmit,
   editVariant = 'classic',
+  modifiedKeys,
+  onRevertField,
+  resetTokens,
 }) => {
   const { permissions } = useCasesContext();
+  const markerStyles = useFieldMarkerStyles();
   const onSubmitCustomField = useCallback(
     (customFieldToAdd: CaseUICustomField) => {
       onSubmit(customFieldToAdd);
@@ -43,14 +63,18 @@ const CustomFieldsComponent: React.FC<Props> = ({
     const customField = customFields.find((field) => field.key === customFieldConf.key);
 
     const EditComponent = customFieldType.Edit;
+    const isModified = modifiedKeys?.has(customFieldConf.key) === true;
 
     return (
       <EuiFlexItem
         grow={false}
         data-test-subj={`case-custom-field-wrapper-${customFieldConf.key}`}
         key={customFieldConf.key}
+        css={[markerStyles.row, isModified ? markerStyles.modified : undefined]}
       >
+        {isModified ? <ModifiedFieldAnnouncement /> : null}
         <EditComponent
+          key={`${customFieldConf.key}-${resetTokens?.[customFieldConf.key] ?? 0}`}
           isLoading={isLoading}
           canUpdate={permissions.update}
           customFieldConfiguration={customFieldConf}
@@ -58,6 +82,20 @@ const CustomFieldsComponent: React.FC<Props> = ({
           onSubmit={onSubmitCustomField}
           editVariant={editVariant}
         />
+        {isModified && onRevertField ? (
+          // Matches the template-field revert: a quiet button, not a flush link, so the only way
+          // back for a single field is not missed under a filled input.
+          <EuiButton
+            size="s"
+            color="primary"
+            fill={false}
+            iconType="editorUndo"
+            onClick={() => onRevertField(customFieldConf.key)}
+            data-test-subj={`case-custom-field-revert-${customFieldConf.key}`}
+          >
+            {i18n.REVERT_FIELD}
+          </EuiButton>
+        ) : null}
       </EuiFlexItem>
     );
   });

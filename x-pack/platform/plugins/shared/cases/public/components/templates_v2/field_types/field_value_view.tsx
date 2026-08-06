@@ -203,10 +203,10 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
           {valueText !== undefined ? (
             valueText
           ) : (
-            // An empty value states what to do, not just that nothing is there.
-            <EuiTextColor color="subdued">
-              <em>{onEdit ? i18n.ADD_FIELD_VALUE(label) : i18n.FIELD_VALUE_NOT_SET}</em>
-            </EuiTextColor>
+            // One phrase for every empty field, editable or not, so a column of them reads as one
+            // state rather than a mix of instructions. Subdued but upright: italics on a third of
+            // the rows made the panel look like it was quoting itself.
+            <EuiTextColor color="subdued">{i18n.FIELD_VALUE_NOT_SET}</EuiTextColor>
           )}
         </EuiText>
       </span>

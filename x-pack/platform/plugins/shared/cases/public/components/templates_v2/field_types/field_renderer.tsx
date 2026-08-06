@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { z } from '@kbn/zod/v4';
-import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { FormProvider, useForm, useFormContext, useFormState, useWatch } from 'react-hook-form';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
@@ -22,6 +22,7 @@ import { getYamlDefaultAsString } from '../utils';
 import { useResolvedFields } from '../../field_library/hooks/use_resolved_fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { FieldValueView } from './field_value_view';
+import { ModifiedFieldAnnouncement, useFieldMarkerStyles } from './section_edit_bar';
 import * as i18n from '../translations';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
@@ -46,6 +47,10 @@ interface TemplateFieldRowProps {
   onEdit?: () => void;
   onEditCancel?: () => void;
   showExitEdit: boolean;
+  /** Section edit mode: this field differs from the last saved value. */
+  isModified?: boolean;
+  /** Section edit mode: discard this field's change without leaving edit mode. */
+  onRevert?: () => void;
 }
 
 /**
@@ -84,7 +89,12 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
     onEdit,
     onEditCancel,
     showExitEdit,
+    isModified = false,
+    onRevert,
   }) => {
+    const { euiTheme } = useEuiTheme();
+    const markerStyles = useFieldMarkerStyles();
+
     const handleConfirm = useCallback(() => {
       if (onEditCancel) {
         onFieldConfirm?.(field.name, field.type, onEditCancel);
@@ -124,8 +134,28 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
     }
 
     return (
-      <div data-test-subj={`template-field-${field.name}`} css={{ marginBottom }}>
+      <div
+        data-test-subj={`template-field-${field.name}`}
+        css={[{ marginBottom }, markerStyles.row, isModified ? markerStyles.modified : undefined]}
+      >
+        {isModified ? <ModifiedFieldAnnouncement /> : null}
         <Control {...controlProps} onEditCancel={onEditCancel} />
+        {onRevert ? (
+          // A real button rather than a bare link: this is the only way back for a single field, and
+          // as flush blue text under a filled input it was routinely missed. Unfilled primary reads
+          // as clearly actionable while still deferring to the section's filled Save.
+          <EuiButton
+            size="s"
+            color="primary"
+            fill={false}
+            iconType="editorUndo"
+            onClick={onRevert}
+            css={{ marginBlockStart: euiTheme.size.xs }}
+            data-test-subj={`template-field-revert-${field.name}`}
+          >
+            {i18n.REVERT_FIELD}
+          </EuiButton>
+        ) : null}
         {showExitEdit && onEditCancel ? (
           <EuiButtonEmpty
             size="s"
@@ -148,11 +178,27 @@ export const FieldsRenderer: FC<{
   savingFieldKey?: string;
   /** Renders read-only values with an explicit per-field Edit control. */
   viewMode?: boolean;
-}> = ({ resolvedFields, onFieldConfirm, savingFieldKey, viewMode = false }) => {
+  /**
+   * Section edit mode: clicking any value opens the whole section rather than that one field, so
+   * the reader edits a group and commits it once. When set, per-field confirm/cancel is replaced by
+   * the section's own bar, and changed fields get a marker and their own revert.
+   */
+  onSectionEditRequest?: () => void;
+}> = ({
+  resolvedFields,
+  onFieldConfirm,
+  savingFieldKey,
+  viewMode = false,
+  onSectionEditRequest,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
+  const { dirtyFields } = useFormState({ control });
   const { permissions } = useCasesContext();
   const [editingFieldName, setEditingFieldName] = useState<string>();
+
+  const isSectionMode = onSectionEditRequest != null;
+  const dirtyFieldKeys = (dirtyFields?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<string, boolean>;
 
   const fieldTypeMap = useMemo(
     () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.type])),
@@ -210,14 +256,21 @@ export const FieldsRenderer: FC<{
           viewMode &&
           permissions?.update === true &&
           !isDisplayOnlyField(field) &&
-          (editingFieldName === undefined || editingFieldName === field.name);
-        const isEditing = editingFieldName === field.name;
+          (isSectionMode || editingFieldName === undefined || editingFieldName === field.name);
+        const isEditing = !isSectionMode && editingFieldName === field.name;
         const showValueView = viewMode && !isEditing && !isDisplayOnlyField(field);
-        const fieldPath = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(field.name, field.type)}`;
+        const snakeKey = getFieldSnakeKey(field.name, field.type);
+        const fieldPath = `${CASE_EXTENDED_FIELDS}.${snakeKey}`;
         const showExitEdit = isEditing && !control.getFieldState(fieldPath).isDirty;
 
-        const handleEdit = canEdit ? () => setEditingFieldName(field.name) : undefined;
+        const handleEdit = canEdit
+          ? isSectionMode
+            ? onSectionEditRequest
+            : () => setEditingFieldName(field.name)
+          : undefined;
         const handleEditCancel = isEditing ? () => setEditingFieldName(undefined) : undefined;
+
+        const isModified = isSectionMode && dirtyFieldKeys[snakeKey] === true;
 
         return (
           <TemplateFieldRow
@@ -235,6 +288,8 @@ export const FieldsRenderer: FC<{
             onEdit={handleEdit}
             onEditCancel={handleEditCancel}
             showExitEdit={showExitEdit}
+            isModified={isModified}
+            onRevert={isModified ? () => resetField(fieldPath) : undefined}
           />
         );
       })}

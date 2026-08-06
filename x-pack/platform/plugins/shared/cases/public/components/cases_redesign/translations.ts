@@ -183,3 +183,25 @@ export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
     defaultMessage: 'Legacy custom fields',
   }
 );
+
+export const RESIZE_SIDEBAR = i18n.translate('xpack.cases.casesRedesign.details.resizeSidebar', {
+  defaultMessage: 'Resize the case details panel',
+});
+
+export const NO_VALUE = i18n.translate('xpack.cases.casesRedesign.details.noValue', {
+  defaultMessage: 'No value',
+});
+
+export const UNSAVED_CHANGES_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.casesRedesign.details.unsavedChangesCount', {
+    values: { count },
+    defaultMessage: '{count} unsaved',
+  });
+
+export const REVERT_FIELD = i18n.translate('xpack.cases.casesRedesign.details.revertField', {
+  defaultMessage: 'Revert',
+});
+
+export const FIELD_MODIFIED = i18n.translate('xpack.cases.casesRedesign.details.fieldModified', {
+  defaultMessage: 'Modified',
+});

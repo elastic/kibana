@@ -917,14 +917,8 @@ export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFie
 });
 
 export const FIELD_VALUE_NOT_SET = i18n.translate('xpack.cases.templates.fieldValueNotSet', {
-  defaultMessage: 'Not set',
+  defaultMessage: 'No value',
 });
-
-export const ADD_FIELD_VALUE = (label: string) =>
-  i18n.translate('xpack.cases.templates.addFieldValue', {
-    defaultMessage: 'Add {label}',
-    values: { label },
-  });
 
 export const EDIT_FIELD_LABEL = (label: string) =>
   i18n.translate('xpack.cases.templates.editFieldAriaLabel', {
@@ -1251,3 +1245,25 @@ export const CONDITION_REQUIRED_WHEN = i18n.translate(
   'xpack.cases.templates.actionsMenu.condition.requiredWhen',
   { defaultMessage: 'Require when…' }
 );
+
+export const UNSAVED_FIELD_CHANGES = (count: number) =>
+  i18n.translate('xpack.cases.templates.unsavedFieldChanges', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# unsaved field} other {# unsaved fields}}',
+  });
+
+export const SECTION_EDIT_CANCEL = i18n.translate('xpack.cases.templates.sectionEditCancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const SECTION_EDIT_SAVE = i18n.translate('xpack.cases.templates.sectionEditSave', {
+  defaultMessage: 'Save',
+});
+
+export const REVERT_FIELD = i18n.translate('xpack.cases.templates.revertField', {
+  defaultMessage: 'Revert',
+});
+
+export const FIELD_MODIFIED = i18n.translate('xpack.cases.templates.fieldModified', {
+  defaultMessage: 'Modified',
+});

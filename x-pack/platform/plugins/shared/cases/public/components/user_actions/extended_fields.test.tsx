@@ -86,7 +86,7 @@ describe('createExtendedFieldsUserActionBuilder', () => {
     expect(screen.getByText('set My Field to yo')).toBeInTheDocument();
   });
 
-  it('renders generic label when multiple fields are updated at once', () => {
+  it('renders one row per field when several are updated at once', () => {
     const userAction = getUserAction('extended_fields', UserActionActions.update, {
       type: 'extended_fields',
       payload: {
@@ -105,6 +105,32 @@ describe('createExtendedFieldsUserActionBuilder', () => {
     const createdUserAction = builder.build();
     renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-    expect(screen.getByText('updated template fields')).toBeInTheDocument();
+    // A section save writes every changed field in one request, but the history reads as "what
+    // changed" — one line per field, the same as editing a field on its own. Sorted by label.
+    expect(createdUserAction).toHaveLength(2);
+    expect(screen.getByText('set Affected Systems to web-server')).toBeInTheDocument();
+    expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
+    expect(screen.queryByText('updated template fields')).not.toBeInTheDocument();
+  });
+
+  it('keeps a single copy link across the rows of one multi-field update', () => {
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: {
+        extendedFields: {
+          riskScoreAsKeyword: 'high',
+          affectedSystemsAsKeyword: 'web-server',
+        },
+      },
+    });
+
+    const createdUserAction = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    }).build();
+
+    // One user action behind the rows means one permalink; repeating it would duplicate DOM ids.
+    expect(createdUserAction[0].actions).toBeDefined();
+    expect(createdUserAction[1].actions).toBeUndefined();
   });
 });

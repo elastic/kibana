@@ -24,14 +24,20 @@ export const MoreFiltersSelectable = ({
   const { euiTheme } = useEuiTheme();
   return (
     <MultiSelectFilter
-      buttonIconType="pencil"
+      // `controlsHorizontal`, not a plus: this control both adds and removes which filters are
+      // shown, so "add" describes only half of what it does. The sliders glyph reads as "adjust
+      // which controls are here", which is exactly the job.
+      buttonIconType="controlsHorizontal"
       hideActiveOptionsNumber
       id="more-filters"
       onChange={onChange}
       options={options}
       selectedOptionKeys={activeFilters}
       isLoading={isLoading}
-      buttonCss={css`
+      // The nudge sits on the anchor, not the button: on the button it moved the button out of
+      // alignment with its cell, so the hover and selected backgrounds painted 4px off from the
+      // filter group's border. On the anchor, button and background move together.
+      anchorCss={css`
         margin-left: -${euiTheme.size.xs};
       `}
     />

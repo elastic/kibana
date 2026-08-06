@@ -76,6 +76,13 @@ interface UseFilterParams<T extends string, K extends string = string> {
   selectedOptionKeys?: string[];
   isLoading: boolean;
   buttonCss?: SerializedStyles;
+  /**
+   * Applied to the popover that anchors the filter button, rather than to the button itself. Nudging
+   * the button alone moves it out of alignment with the cell it sits in, so its hover and selected
+   * backgrounds paint offset from the filter group's border; shifting the anchor moves the button
+   * and its backgrounds together.
+   */
+  anchorCss?: SerializedStyles;
 }
 export const MultiSelectFilter = <T extends string, K extends string = string>({
   buttonLabel,
@@ -90,6 +97,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   renderOption,
   isLoading,
   buttonCss,
+  anchorCss,
 }: UseFilterParams<T, K>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -126,6 +134,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   return (
     <EuiPopover
       aria-label={i18n.FILTER_OPTIONS_POPOVER_ARIA_LABEL}
+      css={anchorCss}
       ownFocus
       button={
         <EuiFilterButton

@@ -7,12 +7,10 @@
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCommentList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -29,6 +27,8 @@ import type { UseUserActionsHandler } from '../../user_actions/use_user_actions_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CommentRenderingProvider } from '../../user_actions/comment/comment_rendering_context';
 import { useHighlightLinkedComment } from './hooks/use_highlight_linked_comment';
+import { CollapsedActivityPreview } from './collapsed_activity_preview';
+import { useRegisterActivityCollapseControls } from './activity_collapse_context';
 import * as i18n from './translations';
 
 const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
@@ -58,6 +58,19 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
 
     & .euiCommentEvent__header {
       display: none;
+    }
+  }
+
+  /* The header controls arrive from two places — the collapse toggle added below, and the copy-link
+     and kebab built by the shared (non-redesign) builders, which space themselves with their own
+     gutter. Only the gap is normalised here; all three keep EuiButtonIcon's default primary colour,
+     which is what the copy-link and kebab have always used. */
+  & .euiCommentEvent__headerActions {
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+
+    & .euiFlexGroup {
+      gap: ${euiTheme.size.xs};
     }
   }
 
@@ -154,13 +167,12 @@ export const UserActionsList = React.memo(
             // the body: in the body it occupied a column of its own, pushed the content sideways,
             // and was left stranded next to nothing once the content was hidden.
             actions: (
-              <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       aria-label={toggleLabel}
                       aria-expanded={!isCollapsed}
-                      color="text"
                       iconType={isCollapsed ? 'unfold' : 'fold'}
                       onClick={() => toggleComment(commentId)}
                       data-test-subj={`case-user-action-collapse-${index}`}
@@ -170,10 +182,19 @@ export const UserActionsList = React.memo(
                 {comment.actions ? <EuiFlexItem grow={false}>{comment.actions}</EuiFlexItem> : null}
               </EuiFlexGroup>
             ),
-            // Collapsing all the way to the header makes the row read exactly like the one-line
-            // update events it sits between, so a compacted feed stays visually uniform. The
-            // content is removed rather than clipped, which also keeps it out of the tab order.
-            children: isCollapsed ? undefined : comment.children,
+            // Collapsing to the header alone left the row saying nothing about what it holds, so a
+            // collapsed activity keeps a cropped preview of its own body — the same bargain the
+            // case description already strikes when collapsed.
+            children: isCollapsed ? (
+              <CollapsedActivityPreview
+                onExpand={() => toggleComment(commentId)}
+                data-test-subj={`case-user-action-preview-${index}`}
+              >
+                {comment.children}
+              </CollapsedActivityPreview>
+            ) : (
+              comment.children
+            ),
           };
         }),
       [comments, collapsedCommentIds, collapsibleCommentIds, toggleComment]
@@ -190,6 +211,16 @@ export const UserActionsList = React.memo(
       [collapsibleCommentIds]
     );
     const expandAll = React.useCallback(() => setCollapsedCommentIds(new Set()), []);
+
+    // Published rather than rendered here: the pair belongs directly under the filter row, which is
+    // where the attachments tab puts it. See ActivityCollapseControls.
+    useRegisterActivityCollapseControls({
+      canCollapse: hasCollapsibleComments,
+      allCollapsed,
+      allExpanded,
+      collapseAll,
+      expandAll,
+    });
 
     const commentRenderingContext = useMemo(
       () => ({
@@ -224,36 +255,6 @@ export const UserActionsList = React.memo(
 
     return (
       <CommentRenderingProvider value={commentRenderingContext}>
-        {/* Sits directly above the feed it acts on, so the scope of "all" is never in question. */}
-        {hasCollapsibleComments ? (
-          <>
-            <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="fold"
-                  onClick={collapseAll}
-                  disabled={allCollapsed}
-                  data-test-subj="case-user-actions-collapse-all"
-                >
-                  {i18n.COLLAPSE_ALL_ACTIVITIES}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="unfold"
-                  onClick={expandAll}
-                  disabled={allExpanded}
-                  data-test-subj="case-user-actions-expand-all"
-                >
-                  {i18n.EXPAND_ALL_ACTIVITIES}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        ) : null}
         <EuiCommentList
           css={getCommentListCss(euiTheme)}
           comments={collapsibleComments}
