@@ -12,6 +12,7 @@ import type { ExtendedFieldsUserAction } from '../../../common/types/domain';
 import type { CasesConfigurationUI } from '../../../common/ui';
 import type { CaseUI } from '../../../common/ui/types';
 import { getFieldCamelKey, getV2FieldType } from '../../../common/utils/template_fields';
+import { getExtendedFieldDisplayValue } from '../all_cases/extended_field_columns';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { ScrollableMarkdown } from '../markdown_editor';
@@ -47,6 +48,21 @@ const buildFieldLabels = (
   return labels;
 };
 
+// Maps a payload key (camelCased) to its field's control type (e.g. "USER_PICKER"), so a value
+// that needs parsing — rather than a plain `String(value)` — is rendered correctly. Sourced from
+// the case's server-enriched `extendedFieldsControls` (covers template + global fields, keyed by
+// snake storage key e.g. `new_field_as_keyword`); a key with no entry (e.g. a not-yet-migrated
+// legacy custom field) falls back to plain string rendering, matching prior behavior.
+const buildFieldControls = (
+  extendedFieldsControls: CaseUI['extendedFieldsControls'] | undefined
+): Map<string, string> => {
+  const controls = new Map<string, string>();
+  for (const [storageKey, control] of Object.entries(extendedFieldsControls ?? {})) {
+    controls.set(camelCase(storageKey), control);
+  }
+  return controls;
+};
+
 const isMultilineValue = (value: unknown): value is string =>
   typeof value === 'string' && value.includes('\n');
 
@@ -55,7 +71,12 @@ interface LabelAndBody {
   body?: React.ReactNode;
 }
 
-const getFieldLabelAndBody = (key: string, value: unknown, displayName: string): LabelAndBody => {
+const getFieldLabelAndBody = (
+  key: string,
+  value: unknown,
+  displayName: string,
+  fieldControls: Map<string, string>
+): LabelAndBody => {
   if (key.endsWith('AsDate') && typeof value === 'string') {
     const maybeDate = getMaybeDate(value);
     if (maybeDate.isValid()) {
@@ -77,7 +98,13 @@ const getFieldLabelAndBody = (key: string, value: unknown, displayName: string):
     };
   }
 
-  return { label: i18n.SET_TEMPLATE_FIELD_LABEL(displayName, String(value)) };
+  const control = fieldControls.get(key);
+  const displayValue =
+    control != null && typeof value === 'string'
+      ? getExtendedFieldDisplayValue(control, value)
+      : String(value);
+
+  return { label: i18n.SET_TEMPLATE_FIELD_LABEL(displayName, displayValue) };
 };
 
 export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
@@ -93,6 +120,7 @@ export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
       casesConfiguration.customFields,
       caseData.extendedFieldsLabels
     );
+    const fieldControls = buildFieldControls(caseData.extendedFieldsControls);
 
     const buildEntry = (label: LabelAndBody['label'], body: LabelAndBody['body']) => {
       const [entry] = createCommonUpdateUserActionBuilder({
@@ -129,7 +157,7 @@ export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
       }))
       .sort((a, b) => a.displayName.localeCompare(b.displayName))
       .map(({ key, value, displayName }, index) => {
-        const { label, body } = getFieldLabelAndBody(key, value, displayName);
+        const { label, body } = getFieldLabelAndBody(key, value, displayName, fieldControls);
         const entry = buildEntry(label, body);
 
         // Distinct per field so each row is addressable, while the copy-link stays on the first row

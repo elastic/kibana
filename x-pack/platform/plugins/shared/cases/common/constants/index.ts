@@ -426,3 +426,4 @@ export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
 export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;
+export const CASE_EXTENDED_FIELDS_CONTROLS = 'extended_fields_controls' as const;
