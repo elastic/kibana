@@ -16,21 +16,20 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
-import { ConfirmDeleteModal } from '../components';
+import { ConfirmDeleteModal, SpacesUnsavedChangesPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
-import { SpaceValidator } from '../lib';
+import { haveFormValuesChanged, SpaceValidator } from '../lib';
 import type { CustomizeSpaceFormValues } from '../types';
 
 interface Props {
@@ -55,6 +54,9 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     imageUrl: imageAvatarSelected ? space.imageUrl : '',
   });
 
+  // pristine form values, used to determine whether the user has actually made any changes
+  const initialFormValuesRef = useRef<CustomizeSpaceFormValues>(formValues);
+
   // space initials are blank by default, they must be calculated
   const getSpaceFromFormValues = (newFormValues: CustomizeSpaceFormValues) => {
     return { ...newFormValues, initials: getSpaceInitials(newFormValues) };
@@ -72,29 +74,6 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const initialFeatureVisibilityRef = useRef<string[]>(space.disabledFeatures ?? []);
   const storedFeatureVisibilityRef = useRef<string[] | undefined>(undefined);
-
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: isDirty,
-    http,
-    openConfirm: overlays.openConfirm,
-    navigateToUrl,
-    history,
-    titleText: i18n.translate('xpack.spaces.management.spaceDetails.unsavedChangesPromptTitle', {
-      defaultMessage: 'Leave without saving?',
-    }),
-    messageText: i18n.translate(
-      'xpack.spaces.management.spaceDetails.unsavedChangesPromptMessage',
-      {
-        defaultMessage: "Unsaved changes won't be applied to the space and will be lost.",
-      }
-    ),
-    cancelButtonText: i18n.translate('xpack.spaces.management.spaceDetails.keepEditingButton', {
-      defaultMessage: 'Save before leaving',
-    }),
-    confirmButtonText: i18n.translate('xpack.spaces.management.spaceDetails.leavePageButton', {
-      defaultMessage: 'Leave',
-    }),
-  });
 
   useEffect(() => {
     let unmounted = false;
@@ -125,16 +104,18 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const onChangeSpaceSettings = useCallback(
     (newFormValues: CustomizeSpaceFormValues) => {
-      setFormValues({ ...formValues, ...newFormValues });
-      setIsDirty(true);
+      const updatedFormValues = { ...formValues, ...newFormValues };
+      setFormValues(updatedFormValues);
+      setIsDirty(haveFormValuesChanged(initialFormValuesRef.current, updatedFormValues));
     },
     [formValues]
   );
 
   const onChangeFeatures = useCallback(
     (updatedSpace: CustomizeSpaceFormValues) => {
-      setFormValues({ ...formValues, ...updatedSpace });
-      setIsDirty(true);
+      const updatedFormValues = { ...formValues, ...updatedSpace };
+      setFormValues(updatedFormValues);
+      setIsDirty(haveFormValuesChanged(initialFormValuesRef.current, updatedFormValues));
       setShowUserImpactWarning(true);
     },
     [formValues]
@@ -365,6 +346,14 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   return (
     <>
+      <SpacesUnsavedChangesPrompt
+        hasUnsavedChanges={isDirty}
+        http={http}
+        overlays={overlays}
+        navigateToUrl={navigateToUrl}
+        history={history}
+      />
+
       {doShowAlteringActiveSpaceDialog()}
       {doShowConfirmDeleteSpaceDialog()}
 

@@ -489,6 +489,55 @@ describe('EditSpaceSettings', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('no longer considers the form dirty once a change has been reverted', async () => {
+    const features = [
+      new KibanaFeature({
+        id: 'feature-1',
+        name: 'feature 1',
+        app: [],
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        privileges: null,
+      }),
+    ];
+
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={features}
+          allowFeatureVisibility={true}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // the "Apply changes" button is only rendered while the form has unsaved changes
+    expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    await userEvent.click(feature1Checkbox);
+
+    expect(await screen.findByTestId('save-space-button')).toBeInTheDocument();
+
+    await userEvent.click(feature1Checkbox);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+    });
+  });
+
   it('submits the disabled features list when the solution view is undefined', async () => {
     const features = [
       new KibanaFeature({

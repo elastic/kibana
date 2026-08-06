@@ -7,3 +7,4 @@
 
 export { ConfirmDeleteModal } from './confirm_delete_modal';
 export { UnauthorizedPrompt } from './unauthorized_prompt';
+export { SpacesUnsavedChangesPrompt } from './unsaved_changes_prompt';

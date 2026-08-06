@@ -218,6 +218,19 @@ test.describe('Spaces Management: Create and Edit', { tag: tags.stateful.classic
     }
   });
 
+  test('prompts before leaving the create form with unsaved changes', async ({ pageObjects }) => {
+    await pageObjects.spaces.gotoCreateSpace();
+
+    await pageObjects.spaces.setSpaceName(`prompt${RUN_ID} space`);
+    await pageObjects.spaces.clickLogo();
+
+    await expect(pageObjects.spaces.navigationBlockConfirmModalLocator()).toBeVisible();
+
+    // Dismissing the prompt keeps the user on the form, with their changes intact.
+    await pageObjects.spaces.cancelModal();
+    await expect(pageObjects.spaces.createPageLocator()).toBeVisible();
+  });
+
   test('create space page has no accessibility violations', async ({ page, pageObjects }) => {
     await pageObjects.spaces.gotoSpacesGrid();
     await pageObjects.spaces.clickCreateSpace();

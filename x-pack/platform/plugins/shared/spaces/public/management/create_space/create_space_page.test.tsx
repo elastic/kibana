@@ -10,11 +10,12 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { coreMock, notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { CreateSpacePage } from './create_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
@@ -27,6 +28,16 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
     EuiOverlayMask: (props: any) => <div>{props.children}</div>,
   };
 });
+
+jest.mock('@kbn/unsaved-changes-prompt', () => ({
+  useUnsavedChangesPrompt: jest.fn(),
+}));
+
+/** Whether the form currently considers itself to have unsaved changes. */
+const hasUnsavedChanges = () => {
+  const { calls } = jest.mocked(useUnsavedChangesPrompt).mock;
+  return calls[calls.length - 1][0].hasUnsavedChanges;
+};
 
 const space: Space = {
   id: 'my-space',
@@ -59,6 +70,12 @@ describe('ManageSpacePage', () => {
   });
 
   const history = scopedHistoryMock.create();
+  const coreStart = coreMock.createStart();
+  const navigationServices = {
+    http: coreStart.http,
+    overlays: coreStart.overlays,
+    navigateToUrl: coreStart.application.navigateToUrl,
+  };
 
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();
@@ -71,6 +88,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -120,6 +138,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -173,6 +192,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -204,6 +224,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -235,6 +256,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -270,6 +292,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -304,6 +327,7 @@ describe('ManageSpacePage', () => {
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -335,6 +359,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -366,6 +391,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -398,6 +424,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -430,6 +457,7 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         history={history}
+        {...navigationServices}
         capabilities={{
           navLinks: {},
           management: {},
@@ -497,6 +525,7 @@ describe('ManageSpacePage', () => {
           getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
           history={history}
+          {...navigationServices}
           capabilities={{
             navLinks: {},
             management: {},
@@ -545,6 +574,85 @@ describe('ManageSpacePage', () => {
       projectRouting: '_alias:_origin',
     });
   }, 10000);
+
+  describe('unsaved changes', () => {
+    const renderCreateSpacePage = async () => {
+      const spacesManager = spacesManagerMock.create();
+      spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+      spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+      renderWithIntl(
+        <CreateSpacePage
+          spacesManager={spacesManager as unknown as SpacesManager}
+          getFeatures={featuresStart.getFeatures}
+          notifications={notificationServiceMock.createStartContract()}
+          history={history}
+          {...navigationServices}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          }}
+          eventTracker={eventTracker}
+          allowFeatureVisibility
+          allowSolutionVisibility
+          isCpsTierEligible={false}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+      });
+    };
+
+    beforeEach(() => {
+      jest.mocked(useUnsavedChangesPrompt).mockClear();
+    });
+
+    it('does not prompt when the form has not been touched', async () => {
+      await renderCreateSpacePage();
+
+      expect(hasUnsavedChanges()).toBe(false);
+    });
+
+    it('prompts once the form has been edited', async () => {
+      await renderCreateSpacePage();
+
+      fireEvent.change(screen.getByTestId('addSpaceName'), {
+        target: { value: 'New Space Name' },
+      });
+
+      expect(hasUnsavedChanges()).toBe(true);
+    });
+
+    it('stops prompting when the edit is reverted', async () => {
+      await renderCreateSpacePage();
+
+      fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
+        target: { value: 'some description' },
+      });
+      expect(hasUnsavedChanges()).toBe(true);
+
+      fireEvent.change(screen.getByTestId('descriptionSpaceText'), { target: { value: '' } });
+
+      expect(hasUnsavedChanges()).toBe(false);
+    });
+
+    it('clears its unsaved changes when the form is cancelled', async () => {
+      await renderCreateSpacePage();
+
+      fireEvent.change(screen.getByTestId('addSpaceName'), {
+        target: { value: 'New Space Name' },
+      });
+      expect(hasUnsavedChanges()).toBe(true);
+
+      await userEvent.click(screen.getByTestId('cancel-space-button'));
+
+      expect(hasUnsavedChanges()).toBe(false);
+      expect(history.push).toHaveBeenCalledWith('/');
+    });
+  });
 });
 
 async function updateSolutionView(solution: SolutionView) {

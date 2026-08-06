@@ -20,7 +20,14 @@ import {
 import { difference } from 'lodash';
 import React, { Component } from 'react';
 
-import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type {
+  ApplicationStart,
+  Capabilities,
+  HttpStart,
+  NotificationsStart,
+  OverlayStart,
+  ScopedHistory,
+} from '@kbn/core/public';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
@@ -33,14 +40,14 @@ import type { EventTracker } from '../../analytics';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
-import { UnauthorizedPrompt } from '../components';
+import { SpacesUnsavedChangesPrompt, UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
-import { toSpaceIdentifier } from '../lib';
+import { haveFormValuesChanged, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import type { CustomizeSpaceFormValues } from '../types';
 
@@ -52,6 +59,9 @@ interface Props {
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
   history: ScopedHistory;
+  http: HttpStart;
+  overlays: OverlayStart;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
@@ -60,11 +70,14 @@ interface Props {
 
 interface State {
   space: CustomizeSpaceFormValues;
+  /** pristine form values, used to determine whether the user has actually made any changes */
+  initialSpace?: CustomizeSpaceFormValues;
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
+  isDirty: boolean;
   isLoading: boolean;
   saveInProgress: boolean;
   formError?: {
@@ -81,6 +94,7 @@ export class CreateSpacePage extends Component<Props, State> {
     this.validator = new SpaceValidator({ shouldValidate: false });
     this.state = {
       isLoading: true,
+      isDirty: false,
       showAlteringActiveSpaceDialog: false,
       saveInProgress: false,
       space: {
@@ -108,7 +122,9 @@ export class CreateSpacePage extends Component<Props, State> {
         await this.loadSpace(spaceId, getFeatures());
       } else {
         const features = await getFeatures();
-        this.setState({ isLoading: false, features });
+        // capture the pristine form values with the updater form, so that any default values applied
+        // during mount (e.g. project routing) are not treated as unsaved changes
+        this.setState((state) => ({ isLoading: false, features, initialSpace: state.space }));
       }
     } catch (e) {
       notifications.toasts.addError(e, {
@@ -205,10 +221,19 @@ export class CreateSpacePage extends Component<Props, State> {
   );
 
   public getForm = () => {
-    const { showAlteringActiveSpaceDialog } = this.state;
+    const { showAlteringActiveSpaceDialog, isDirty, saveInProgress } = this.state;
+    const { http, overlays, navigateToUrl, history } = this.props;
 
     return (
       <div data-test-subj="spaces-create-page">
+        <SpacesUnsavedChangesPrompt
+          hasUnsavedChanges={isDirty && !saveInProgress}
+          http={http}
+          overlays={overlays}
+          navigateToUrl={navigateToUrl}
+          history={history}
+        />
+
         <CustomizeSpace
           space={this.state.space}
           onChange={this.onSpaceChange}
@@ -349,9 +374,10 @@ export class CreateSpacePage extends Component<Props, State> {
   };
 
   public onSpaceChange = (updatedSpace: CustomizeSpaceFormValues) => {
-    this.setState({
+    this.setState((state) => ({
       space: updatedSpace,
-    });
+      isDirty: haveFormValuesChanged(state.initialSpace ?? {}, updatedSpace),
+    }));
   };
 
   public saveSpace = () => {
@@ -383,20 +409,24 @@ export class CreateSpacePage extends Component<Props, State> {
           onLoadSpace(space);
         }
 
+        const formValues: CustomizeSpaceFormValues = {
+          ...space,
+          avatarType: space.imageUrl ? 'image' : 'initials',
+          initials: space.initials || getSpaceInitials(space),
+          color: space.color || getSpaceColor(space),
+          customIdentifier: false,
+          customAvatarInitials:
+            !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+          customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
+        };
+
         this.setState({
-          space: {
-            ...space,
-            avatarType: space.imageUrl ? 'image' : 'initials',
-            initials: space.initials || getSpaceInitials(space),
-            color: space.color || getSpaceColor(space),
-            customIdentifier: false,
-            customAvatarInitials:
-              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
-            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
-          },
+          space: formValues,
+          initialSpace: formValues,
           features,
           originalSpace: space,
           isLoading: false,
+          isDirty: false,
         });
       }
     } catch (error) {
@@ -498,5 +528,11 @@ export class CreateSpacePage extends Component<Props, State> {
       });
   };
 
-  private backToSpacesList = () => this.props.history.push('/');
+  private backToSpacesList = () => {
+    // the form is being abandoned or has been saved, so stop warning about its changes. Matches
+    // `onClickCancel` on the edit space form, and keeps the prompt from firing a second time once
+    // the user has confirmed that they want to leave.
+    this.setState({ isDirty: false });
+    this.props.history.push('/');
+  };
 }
