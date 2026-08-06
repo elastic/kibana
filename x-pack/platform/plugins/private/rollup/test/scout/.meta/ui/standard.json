@@ -1,5 +1,5 @@
 {
-  "sha1": "f0679f24e37ba4656211a08ba96a9c9c137b96c9",
+  "sha1": "8d223c68ffe9764705f717327cec285670e6b41b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
-        "line": 46,
-        "column": 55
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "a5dc581b971cba4-9ceb46d2c15bd68",
+      "title": "Rollup jobs - hybrid data view creates a rollup data view over an alias to the rollup index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
+        "line": 76,
+        "column": 9
       }
     },
     {
@@ -29,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/rollup_jobs_wizard.spec.ts",
-        "line": 32,
-        "column": 13
+        "line": 44,
+        "column": 9
       }
     },
     {
@@ -43,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/tsvb.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 52,
+        "column": 9
       }
     }
   ]

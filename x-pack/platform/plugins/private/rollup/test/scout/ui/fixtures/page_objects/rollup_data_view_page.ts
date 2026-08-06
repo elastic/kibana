@@ -35,7 +35,15 @@ export class RollupDataViewPage {
     await this.typeIndexPattern(indexPattern);
     await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout: 30_000 });
 
-    await this.page.components.comboBox('timestampField').setSelectedOptions([timeField]);
+    // The editor disables the timestamp combo box until its options resolve, which happens after
+    // title validation clears — open it only once it is enabled, or the dropdown renders empty.
+    const timestampField = this.page.testSubj.locator('timestampField');
+    await expect(timestampField.getByTestId('comboBoxSearchInput')).toBeEnabled({
+      timeout: 30_000,
+    });
+    await this.page.components
+      .comboBox('timestampField')
+      .setSelectedOptions([timeField], { timeout: 15_000 });
 
     await this.saveButton.click();
     await this.flyout.waitFor({ state: 'hidden' });
