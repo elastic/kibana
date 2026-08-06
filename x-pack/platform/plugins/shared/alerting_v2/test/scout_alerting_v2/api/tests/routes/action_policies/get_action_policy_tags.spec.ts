@@ -92,6 +92,15 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
     }
   );
 
+  apiTest('search: should accept an empty search value', async ({ apiClient }) => {
+    const response = await apiClient.get(tagsUrl({ search: '' }), {
+      headers: readerHeaders,
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual({ tags: [] });
+  });
+
   apiTest(
     'search: should escape regex special characters in the prefix',
     async ({ apiClient, apiServices }) => {
