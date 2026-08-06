@@ -1825,6 +1825,169 @@ describe('TemplatesService', () => {
 
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
+
+    it('does not cap version history: allows update well past the former version limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Busy Template',
+            owner: 'securitySolution',
+            definition: buildDefinition('Busy Template'),
+            templateVersion: 1000,
+          })
+        );
+
+      await service.updateTemplate('template-id', {
+        name: 'Busy Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Busy Template'),
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({ templateVersion: 1001 }),
+        expect.any(Object)
+      );
+    });
+
+    describe('validateWriteInput (dry_run preflight)', () => {
+      it('surfaces the per-owner count cap on the create dry_run preflight', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput({
+            name: 'One Too Many',
+            owner: 'securitySolution',
+            definition: buildDefinition('One Too Many'),
+          })
+        ).rejects.toThrow(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      it('does NOT apply the create-only count cap on the update dry_run preflight', async () => {
+        const service = createService();
+        // Owner is at the limit, but an update (identified by `excludeTemplateId`) edits an existing
+        // template in place — it must not be rejected by the create-only count cap.
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Edited In Place',
+              owner: 'securitySolution',
+              definition: buildDefinition('Edited In Place'),
+            },
+            { excludeTemplateId: 'template-id' }
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      it('applies the count cap on the update dry_run preflight when the update changes owner', async () => {
+        const service = createService();
+        // The target owner (observability) is at the limit; the update moves the template from
+        // securitySolution into observability, so the cap must be enforced — mirroring the real
+        // `updateTemplate` write, which asserts the target-owner count whenever `input.owner`
+        // differs from the template's current owner.
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Moved Owner',
+              owner: 'observability',
+              definition: buildDefinition('Moved Owner'),
+            },
+            { excludeTemplateId: 'template-id', currentOwner: 'securitySolution' }
+          )
+        ).rejects.toThrow(
+          `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+        );
+      });
+
+      it('does NOT apply the count cap on the update dry_run preflight when the owner is unchanged', async () => {
+        const service = createService();
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+        );
+
+        await expect(
+          service.validateWriteInput(
+            {
+              name: 'Same Owner',
+              owner: 'securitySolution',
+              definition: buildDefinition('Same Owner'),
+            },
+            { excludeTemplateId: 'template-id', currentOwner: 'securitySolution' }
+          )
+        ).resolves.toBeUndefined();
+      });
+
+      it('rejects the dry_run preflight when a definition declares too many fields', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Many Fields',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Too Many Fields', MAX_FIELDS_PER_TEMPLATE + 1),
+          })
+        ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+      });
+
+      it('rejects the dry_run preflight when a template default exceeds the maximum byte size', async () => {
+        const service = createService();
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Large Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithDefault(
+              'Large Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          })
+        ).rejects.toThrow(
+          `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+        );
+      });
+
+      it('rejects the dry_run preflight when the definition exceeds the SO maxLength', async () => {
+        const service = createService();
+        const definition = `name: Too Long\nseverity: low\nfields: []\n#${'y'.repeat(
+          MAX_TEMPLATE_DEFINITION_LENGTH
+        )}`;
+
+        expect(definition.length).toBeGreaterThan(MAX_TEMPLATE_DEFINITION_LENGTH);
+
+        await expect(
+          service.validateWriteInput({
+            name: 'Too Long',
+            owner: 'securitySolution',
+            definition,
+          })
+        ).rejects.toThrow(
+          `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
+        );
+
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('incrementUsageStats', () => {
