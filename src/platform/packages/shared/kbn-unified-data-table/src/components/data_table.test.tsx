@@ -812,7 +812,7 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: null,
+          additionalControls: expect.anything(),
           showColumnSelector: false,
           showDisplaySelector: {
             allowDensity: false,
@@ -838,7 +838,7 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: null,
+          additionalControls: expect.anything(),
           showColumnSelector: false,
           showDisplaySelector: {
             allowDensity: false,
@@ -864,7 +864,7 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: null,
+          additionalControls: expect.anything(),
           showColumnSelector: false,
           showDisplaySelector: {
             allowDensity: true,
@@ -891,7 +891,7 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: null,
+          additionalControls: expect.anything(),
           showColumnSelector: false,
           showDisplaySelector: {
             allowDensity: false,
@@ -908,7 +908,7 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'should hide display settings if no handlers provided',
+      'should still show Summary toggle in display settings if no other handlers provided',
       async () => {
         await renderComponent({
           ...getProps(),
@@ -917,9 +917,14 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: null,
+          additionalControls: expect.anything(),
           showColumnSelector: false,
-          showDisplaySelector: undefined,
+          showDisplaySelector: {
+            allowDensity: false,
+            allowResetButton: false,
+            allowRowHeight: false,
+            customRender: expect.any(Function),
+          },
           showFullScreenSelector: true,
           showKeyboardShortcuts: true,
           showSortSelector: true,
@@ -1232,7 +1237,7 @@ describe('UnifiedDataTable', () => {
         expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
           expect.objectContaining({
             gridProps: expect.objectContaining({
-              additionalControls: null,
+              additionalControls: expect.anything(),
             }),
             toolbarProps: expect.objectContaining({
               hasRoomForGridControls: true,
@@ -1243,9 +1248,10 @@ describe('UnifiedDataTable', () => {
         // the default eui controls should be available for custom rendering
         expect(toolbarParams?.columnSortingControl).toBeTruthy();
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-        expect(gridParams?.additionalControls).toBe(null);
+        // Summary column toggle is always present in additionalControls
+        expect(gridParams?.additionalControls).toBeTruthy();
 
-        // additional controls become available after selecting a document
+        // selection controls remain available after selecting a document
         await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(esHitsMock[0])}`));
 
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
@@ -1854,5 +1860,48 @@ describe('UnifiedDataTable', () => {
 
       expect(ref.current?.setFocusedCell).toBeDefined();
     });
+  });
+
+  describe('Summary column toggle', () => {
+    it(
+      'should show the toolbar toggle as checked and disabled in summary-only mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          columns: [],
+        });
+
+        const toggle = screen.getByTestId('additionalControlsShowSummaryColumn');
+        expect(toggle).toBeChecked();
+        expect(toggle).toBeDisabled();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should append and remove the Summary column via the toolbar toggle',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          showTimeCol: false,
+        });
+
+        const toggle = screen.getByTestId('additionalControlsShowSummaryColumn');
+        expect(toggle).not.toBeChecked();
+
+        await userEvent.click(toggle);
+
+        expect(toggle).toBeChecked();
+        expect(screen.getByTestId('dataGridHeaderCell-_source')).toBeVisible();
+        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
+
+        await userEvent.click(toggle);
+
+        expect(toggle).not.toBeChecked();
+        expect(screen.queryByTestId('dataGridHeaderCell-_source')).not.toBeInTheDocument();
+        expect(screen.getByTestId('dataGridHeaderCell-message')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 });
