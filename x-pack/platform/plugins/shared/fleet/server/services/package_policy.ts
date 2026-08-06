@@ -1593,16 +1593,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIDs(soClient, uniquePolicyIdsR);
 
-      for (const policyId of uniquePolicyIdsR) {
-        const agentPolicy = agentPolicies.find((p) => p.id === policyId);
-        if (agentPolicy) {
-          // is the agent policy attached to package policy with endpoint
-          await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-            user: options?.user,
-            removeProtection: agentPoliciesWithEndpointPackagePolicies.has(policyId),
-          });
+      await this.bumpAgentPoliciesRevision(
+        { soClient, esClient },
+        agentPolicies.map((p) => p.id),
+        {
+          user: options?.user,
+          asyncDeploy: options?.asyncDeploy,
+          removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
         }
-      }
+      );
     }
 
     if (secretsToDelete.length > 0) {
