@@ -265,6 +265,28 @@ describe('IacProvisionerService', () => {
     );
   });
 
+  it('aborts the request after the render timeout and maps to IacProvisionerUnavailableError', async () => {
+    jest.useFakeTimers();
+    mockConfig();
+    mockLogger();
+    // fetch never settles on its own; it only rejects once the abort signal
+    // fires — proving the RENDER_TIMEOUT_MS timer is what bounds the request.
+    mockedFetch.mockImplementationOnce(
+      (_url, opts: any) =>
+        new Promise((_resolve, reject) => {
+          opts.signal.addEventListener('abort', () => {
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+          });
+        })
+    );
+
+    const promise = iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    const assertion = expect(promise).rejects.toThrow(IacProvisionerUnavailableError);
+    await jest.advanceTimersByTimeAsync(30_000);
+    await assertion;
+    jest.useRealTimers();
+  });
+
   it('throws IacProvisionerConfigError when only the certificate is configured', async () => {
     // A half-configured pair must not silently downgrade to an
     // unauthenticated connection.
