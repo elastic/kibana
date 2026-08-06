@@ -78,10 +78,8 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
   }
 }
 
-const EPOCH_ISO = new Date(0).toISOString();
-
 function computeTimestampBounds(episodes: readonly AlertEpisode[]): { gte: string; lte: string } {
-  const epoch = EPOCH_ISO;
+  const epoch = new Date(0).toISOString();
   let gte: string | undefined;
   let lte: string | undefined;
 
