@@ -2066,12 +2066,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@118.0.0":
+"@elastic/eui@file:./eui_118.0.0_splitbutton_redesign_03.tgz":
   version "118.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-118.0.0.tgz#119d4455097baf58d4972a28d55463792bd7510b"
-  integrity sha512-JfibbY9gfIhIh5NPAaoGHkcs8oG2Y+ir7vR6CrKgItrT/Ujk4dMkqBpnGyBxvJd+c6RmCgdCDy2CTjEI+0b40g==
+  resolved "file:./eui_118.0.0_splitbutton_redesign_03.tgz#242ac7c25a0c47f36c1852761560403492389531"
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"

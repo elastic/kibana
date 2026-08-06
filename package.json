@@ -148,7 +148,7 @@
     "@elastic/elasticsearch": "9.4.2",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.16.0",
-    "@elastic/eui": "118.0.0",
+    "@elastic/eui": "file:./eui_118.0.0_splitbutton_redesign_03.tgz",
     "@elastic/eui-illustrations": "1.0.1",
     "@elastic/eui-theme-borealis": "8.0.0",
     "@elastic/filesaver": "1.1.2",
