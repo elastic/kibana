@@ -17,16 +17,16 @@ import type {
   EntriesArray,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
-import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
-import { RuleExceptionList } from '../../../common/api/detection_engine/model/rule_schema';
-import { assertUnreachable } from '../../../common/utility_types';
 import type {
   ExceptionEntryInput,
   ExceptionItemBaseInput,
   ExceptionItemOutcome,
   ExceptionItemOutput,
-} from '../../../common/workflows/step_types/exceptions/common/exception_item_schemas';
+} from '@kbn/securitysolution-exceptions-common/workflows';
+import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
+import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
+import { RuleExceptionList } from '../../../common/api/detection_engine/model/rule_schema';
+import { assertUnreachable } from '../../../common/utility_types';
 
 /**
  * The step action on whose behalf a util call runs; used as the verb phrase

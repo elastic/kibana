@@ -12,8 +12,8 @@ import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ALL_OPERATORS } from '@kbn/securitysolution-list-utils';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
-import type { ExceptionEntryInput } from '../../../common/workflows/step_types/exceptions/common/exception_item_schemas';
-import { exceptionEntryOperatorSchema } from '../../../common/workflows/step_types/exceptions/common/exception_item_schemas';
+import type { ExceptionEntryInput } from '@kbn/securitysolution-exceptions-common/workflows';
+import { exceptionEntryOperatorSchema } from '@kbn/securitysolution-exceptions-common/workflows';
 import {
   createExceptionItemForRule,
   createExceptionItemInList,

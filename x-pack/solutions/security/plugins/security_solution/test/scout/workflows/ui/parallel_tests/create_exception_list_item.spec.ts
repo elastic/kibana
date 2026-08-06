@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExceptionItemOutput } from '../../../../../common/workflows/step_types/exceptions/common/exception_item_schemas';
+import type { ExceptionItemOutput } from '@kbn/securitysolution-exceptions-common/workflows';
 import { spaceTest, expect, tags } from '../fixtures';
 import type { NamespaceType } from '../common/exception_step_test_api';
 import { EXCEPTION_WORKFLOW_STEP_ROLE } from '../common/exception_workflow_step_role';

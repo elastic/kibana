@@ -7,14 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
+import { ListType } from '@kbn/securitysolution-lists-common/api';
 import {
   ExceptionListItem,
   ExceptionListItemDescription,
   ExceptionListItemName,
   ExceptionListItemOsTypeArray,
   ExceptionListItemTags,
-} from '@kbn/securitysolution-exceptions-common/api';
-import { ListType } from '@kbn/securitysolution-lists-common/api';
+} from '../api';
 
 /**
  * Entry operators, mirroring the operator labels of the exceptions UI. Each

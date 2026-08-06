@@ -18,7 +18,7 @@ import {
   exceptionItemBaseSchema,
   exceptionItemOutputSchema,
   OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
-} from '../exceptions/common/exception_item_schemas';
+} from '@kbn/securitysolution-exceptions-common/workflows';
 
 export const CreateExceptionListItemStepId = 'security.createExceptionListItem' as const;
 
