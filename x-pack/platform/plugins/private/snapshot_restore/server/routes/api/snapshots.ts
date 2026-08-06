@@ -174,8 +174,8 @@ export function registerSnapshotsRoutes({
   );
 
   const getOneParamsSchema = schema.object({
-    repository: schema.string(),
-    snapshot: schema.string(),
+    repository: schema.string({ maxLength: 1000 }),
+    snapshot: schema.string({ maxLength: 1000 }),
   });
 
   // GET one snapshot
@@ -238,8 +238,8 @@ export function registerSnapshotsRoutes({
 
   const deleteSchema = schema.arrayOf(
     schema.object({
-      repository: schema.string(),
-      snapshot: schema.string(),
+      repository: schema.string({ maxLength: 1000 }),
+      snapshot: schema.string({ maxLength: 1000 }),
     }),
     { maxSize: 1000 }
   );

@@ -22,6 +22,11 @@ describe('Proxy route validation', () => {
       });
     });
     describe('throws for', () => {
+      it('overlong path value', () => {
+        expect(() => {
+          query.validate({ method: 'GET', path: 'a'.repeat(4097) });
+        }).toThrow('maximum length of [4096]');
+      });
       it('empty query method value', () => {
         expect(() => {
           query.validate({ method: '', path: 'test' });
