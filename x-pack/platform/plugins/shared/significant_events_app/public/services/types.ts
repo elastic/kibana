@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { FocusedSignificantEventService } from './focused_significant_event_service';
 
 /**
  * App-scoped services threaded through the Kibana context.
@@ -18,4 +19,5 @@ export interface SignificantEventsAppServices {
    * every feature-flag evaluation POSTs a usage counter.
    */
   availability$: Observable<boolean>;
+  focusedSignificantEventService: FocusedSignificantEventService;
 }

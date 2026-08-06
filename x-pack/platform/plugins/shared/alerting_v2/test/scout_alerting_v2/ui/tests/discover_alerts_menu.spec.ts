@@ -15,8 +15,7 @@ const SAMPLE_DATA_SET = 'ecommerce';
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
  */
-// Failing: See https://github.com/elastic/kibana/issues/274946
-test.describe.skip(
+test.describe(
   'Discover Alerts menu with alerting v2',
   {
     tag: '@local-stateful-classic',
@@ -27,7 +26,7 @@ test.describe.skip(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAlertingV2Viewer();
+      await browserAuth.loginAsAlertingV2Editor();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'
