@@ -267,6 +267,125 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'is idempotent by item_id: a second run skips and leaves the item unchanged',
+      async ({ pageObjects, apiServices }) => {
+        spaceTest.setTimeout(180_000);
+        const rule = await apiServices.exceptionStep.createQueryRule(
+          'rule-idempotent-skip',
+          'Idempotent skip rule'
+        );
+        const itemId = 'wf-rule-exception-idempotent-skip';
+        const stepWith = {
+          rule_id: rule.id,
+          item_id: itemId,
+          name: 'Original name',
+          description: 'Original description',
+          entries: [{ field: 'host.name', operator: 'is', value: 'original' }],
+        };
+
+        // First run creates the item.
+        await pageObjects.workflowsApp.gotoNewWorkflow();
+        await pageObjects.workflowsApp.setYamlEditorValue(
+          buildManualWorkflowYaml('wf-rule-exception-skip-create', [
+            { name: STEP_NAME, type: STEP_TYPE, with: stepWith },
+          ])
+        );
+        await pageObjects.workflowsApp.saveWorkflow();
+        await pageObjects.workflowsApp.runWorkflow();
+        await pageObjects.workflowsApp.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+        const created = await pageObjects.workflowsApp.getStepResultJson<ExceptionItemOutput>(
+          STEP_NAME,
+          'output'
+        );
+        expect(created.outcome).toBe('created');
+
+        // Second run with the same item_id and no overwrite skips.
+        await pageObjects.workflowsApp.gotoNewWorkflow();
+        await pageObjects.workflowsApp.setYamlEditorValue(
+          buildManualWorkflowYaml('wf-rule-exception-skip-rerun', [
+            { name: STEP_NAME, type: STEP_TYPE, with: stepWith },
+          ])
+        );
+        await pageObjects.workflowsApp.saveWorkflow();
+        await pageObjects.workflowsApp.runWorkflow();
+        await pageObjects.workflowsApp.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+        const skipped = await pageObjects.workflowsApp.getStepResultJson<ExceptionItemOutput>(
+          STEP_NAME,
+          'output'
+        );
+        expect(skipped.outcome).toBe('skipped');
+        expect(skipped.id).toBe(created.id);
+
+        const item = await apiServices.exceptionStep.getExceptionItemByItemId(itemId, 'single');
+        expect(item.name).toBe('Original name');
+
+        // Exactly one item exists for the reused item_id (no duplicate).
+        const items = await apiServices.exceptionStep.findItemsInList(item.list_id, 'single');
+        expect(items).toHaveLength(1);
+      }
+    );
+
+    spaceTest(
+      'fails without skipping, overwriting, or creating when item_id belongs to a different list',
+      async ({ pageObjects, apiServices }) => {
+        spaceTest.setTimeout(120_000);
+        const rule = await apiServices.exceptionStep.createQueryRule(
+          'rule-conflict',
+          'Conflict rule'
+        );
+        const foreignListId = 'wf-rule-conflict-foreign-list';
+        await apiServices.exceptionStep.createExceptionList(foreignListId, 'single');
+
+        const itemId = 'wf-rule-conflict-item-id';
+        await apiServices.exceptionStep.createExceptionListItem(
+          foreignListId,
+          'single',
+          itemId,
+          'Foreign item'
+        );
+
+        try {
+          await pageObjects.workflowsApp.gotoNewWorkflow();
+          await pageObjects.workflowsApp.setYamlEditorValue(
+            buildManualWorkflowYaml('wf-rule-exception-conflict', [
+              {
+                name: STEP_NAME,
+                type: STEP_TYPE,
+                with: {
+                  rule_id: rule.id,
+                  item_id: itemId,
+                  name: 'Should not be created',
+                  description: 'item_id already belongs to a different list',
+                  entries: [{ field: 'host.name', operator: 'is', value: 'x' }],
+                },
+              },
+            ])
+          );
+          await pageObjects.workflowsApp.saveWorkflow();
+          await pageObjects.workflowsApp.runWorkflow();
+          await pageObjects.workflowsApp.waitForExecutionStatus('failed', EXECUTION_TIMEOUT);
+
+          // The foreign item is untouched, and the rule got no default list.
+          const foreignItem = await apiServices.exceptionStep.getExceptionItemByItemId(
+            itemId,
+            'single'
+          );
+          expect(foreignItem.list_id).toBe(foreignListId);
+          expect(foreignItem.name).toBe('Foreign item');
+
+          const updatedRule = await apiServices.exceptionStep.getRule(rule.id);
+          const ruleDefaultLists = (updatedRule.exceptions_list ?? []).filter(
+            (list) => list.type === 'rule_default'
+          );
+          expect(ruleDefaultLists).toHaveLength(0);
+        } finally {
+          await apiServices.exceptionStep.deleteExceptionItem(itemId, 'single');
+          await apiServices.exceptionStep.deleteExceptionList(foreignListId, 'single');
+        }
+      }
+    );
+
+    spaceTest(
       'shows a failed execution when the target rule does not exist',
       async ({ pageObjects }) => {
         spaceTest.setTimeout(120_000);

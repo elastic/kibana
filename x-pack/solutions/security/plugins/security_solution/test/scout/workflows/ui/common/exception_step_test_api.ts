@@ -113,6 +113,33 @@ export class ExceptionStepTestApi {
     });
   }
 
+  /**
+   * Creates an item directly via the exception-list-items API (bypassing the
+   * workflow step), for tests that need a pre-existing item on a specific
+   * list, e.g. to set up an `item_id` collision on a different list.
+   */
+  async createExceptionListItem(
+    listId: string,
+    namespaceType: NamespaceType,
+    itemId: string,
+    name: string
+  ): Promise<ExceptionListItem> {
+    const { data } = await this.kbnClient.request<ExceptionListItem>({
+      method: 'POST',
+      path: this.path(EXCEPTION_LIST_ITEM_URL),
+      body: {
+        list_id: listId,
+        namespace_type: namespaceType,
+        item_id: itemId,
+        name,
+        description: name,
+        type: 'simple',
+        entries: [{ type: 'match', field: 'host.name', operator: 'included', value: 'foreign' }],
+      },
+    });
+    return data;
+  }
+
   async deleteExceptionList(listId: string, namespaceType: NamespaceType): Promise<void> {
     await this.kbnClient.request({
       method: 'DELETE',
