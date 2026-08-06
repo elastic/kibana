@@ -13,7 +13,11 @@ import {
 } from '../../../common/services/output_helpers';
 
 import type { AgentPolicySOAttributes, AgentPolicy, PackagePolicy } from '../../types';
-import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
+import {
+  BEATS_OUTPUT_TYPES,
+  LICENCE_FOR_PER_POLICY_OUTPUT,
+  outputType,
+} from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
 import { outputService } from '../output';
@@ -62,8 +66,7 @@ export async function validateOutputForPolicy(
 
   const data = { ...existingData, ...newData };
 
-  const isOutputTypeRestricted =
-    allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
+  const isOutputTypeRestricted = allowedOutputTypeForPolicy.length !== BEATS_OUTPUT_TYPES.length;
 
   if (isOutputTypeRestricted) {
     const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
@@ -122,8 +125,7 @@ export async function validateAgentPolicyOutputForIntegration(
     allowedOutputTypeForPackagePolicy.includes(type)
   );
 
-  const isOutputTypeRestricted =
-    allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
+  const isOutputTypeRestricted = allowedOutputTypeForPolicy.length !== BEATS_OUTPUT_TYPES.length;
 
   if (isOutputTypeRestricted) {
     const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
