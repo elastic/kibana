@@ -112,13 +112,10 @@ apiTest.describe(
 
         await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
 
-        const ids = await waitForRelationshipIds(
-          esClient,
-          RELATIONSHIP_KEY,
-          entityId,
-          `host:${deviceId}`
-        );
-        expect(ids).toBeDefined();
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, entityId, `host:${deviceId}`);
+
+        const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, entityId);
+        expect(ids).toStrictEqual([`host:${deviceId}`]);
       }
     );
 
