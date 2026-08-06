@@ -166,8 +166,14 @@ describe('getNormalizeCommonFields', () => {
         },
         namespace: 'test-namespace',
         version: '8.7.0',
+        maintenanceWindows: [
+          { id: 'mw-1', title: 'First maintenance window' },
+          { id: 'mw-2', title: 'Second maintenance window' },
+        ],
       };
-      const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+      const normalizedFields = getNormalizeCommonFields(
+        config as unknown as NormalizedProjectProps
+      ); // typecasting to allow testing of invalid user configs
       expect(normalizedFields).toEqual({
         errors: [],
         normalizedFields: {
@@ -235,8 +241,9 @@ describe('getNormalizeCommonFields', () => {
       },
       namespace: 'test-namespace',
       version: '8.7.0',
+      maintenanceWindows: [{ id: 'mw-3', title: 'Maintenance window' }],
     };
-    const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+    const normalizedFields = getNormalizeCommonFields(config as unknown as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
     expect(normalizedFields).toEqual({
       errors: [],
       normalizedFields: {
@@ -328,14 +335,13 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
     expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1', 'mw-id-2']);
   });
 
-  it('passes references through when no maintenance windows are available to resolve against', () => {
+  it('throws when a referenced maintenance window is unavailable', () => {
     const config = {
       ...baseConfig,
       monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
       maintenanceWindows: [],
     };
-    const { normalizedFields } = getNormalizeCommonFields(config as NormalizedProjectProps);
-    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1']);
+    expect(() => getNormalizeCommonFields(config as NormalizedProjectProps)).toThrow(/mw-id-1/);
   });
 
   it('throws for an unresolved maintenance window reference', () => {

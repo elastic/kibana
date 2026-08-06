@@ -85,11 +85,10 @@ describe('resolveMaintenanceWindowsOrThrow', () => {
     expect(resolveMaintenanceWindowsOrThrow([], maintenanceWindows)).toEqual([]);
   });
 
-  it('passes refs through unchanged when no maintenance windows are available', () => {
-    expect(resolveMaintenanceWindowsOrThrow(['id-1', 'some-name'], [])).toEqual([
-      'id-1',
-      'some-name',
-    ]);
+  it('throws when refs are supplied but no maintenance windows are available', () => {
+    expect(() => resolveMaintenanceWindowsOrThrow(['id-1', 'some-name'], [])).toThrow(
+      InvalidMaintenanceWindowError
+    );
   });
 
   it('resolves names and ids to ids', () => {
@@ -110,9 +109,10 @@ describe('resolveMaintenanceWindowsOrThrow', () => {
     );
   });
 
-  it('includes available titles in the error message', () => {
-    expect(() => resolveMaintenanceWindowsOrThrow(['nope'], maintenanceWindows)).toThrow(
-      /Weekend window/
-    );
+  it('does not include available maintenance window titles in the error message', () => {
+    const resolve = () => resolveMaintenanceWindowsOrThrow(['nope'], maintenanceWindows);
+
+    expect(resolve).toThrow(/nope/);
+    expect(resolve).not.toThrow(/Weekend window/);
   });
 });

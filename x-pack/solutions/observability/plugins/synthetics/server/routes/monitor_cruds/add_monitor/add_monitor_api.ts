@@ -10,6 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorAttributes,
@@ -170,7 +171,8 @@ export class AddEditMonitorAPI {
   async normalizeMonitor(
     requestPayload: CreateMonitorPayLoad,
     monitorPayload: CreateMonitorPayLoad,
-    prevLocations?: MonitorFields['locations']
+    prevLocations?: MonitorFields['locations'],
+    maintenanceWindows?: MaintenanceWindow[]
   ) {
     const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
@@ -195,13 +197,15 @@ export class AddEditMonitorAPI {
     const maintenanceWindowRefs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
     let resolvedMaintenanceWindows = maintenanceWindowRefs;
     if (maintenanceWindowRefs && maintenanceWindowRefs.length > 0) {
-      const maintenanceWindows =
+      const resolvedMaintenanceWindowList =
+        maintenanceWindows ??
         (await syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
           this.routeContext.spaceId
-        )) ?? [];
+        )) ??
+        [];
       resolvedMaintenanceWindows = resolveMaintenanceWindowsOrThrow(
         maintenanceWindowRefs,
-        maintenanceWindows
+        resolvedMaintenanceWindowList
       );
     }
 

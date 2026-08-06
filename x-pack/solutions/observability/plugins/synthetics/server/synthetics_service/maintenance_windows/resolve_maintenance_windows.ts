@@ -64,25 +64,10 @@ export const resolveMaintenanceWindowRefs = (
 export const getInvalidMaintenanceWindowsError = ({
   invalid,
   ambiguous,
-  maintenanceWindows,
 }: {
   invalid: string[];
   ambiguous: string[];
-  maintenanceWindows: MaintenanceWindow[];
 }) => {
-  const availableTitles = maintenanceWindows
-    .map((mw) => mw.title)
-    .filter(Boolean)
-    .join(', ');
-  const available = availableTitles
-    ? i18n.translate('xpack.synthetics.maintenanceWindows.validation.available', {
-        defaultMessage: ' Available maintenance windows are: {availableTitles}.',
-        values: { availableTitles },
-      })
-    : i18n.translate('xpack.synthetics.maintenanceWindows.validation.noneAvailable', {
-        defaultMessage: ' No maintenance windows are available in this space.',
-      });
-
   const invalidMsg = invalid.length
     ? i18n.translate('xpack.synthetics.maintenanceWindows.validation.invalid', {
         defaultMessage: `Couldn't find maintenance window(s) with id or name: {invalid}.`,
@@ -98,13 +83,13 @@ export const getInvalidMaintenanceWindowsError = ({
       })
     : '';
 
-  return `${[invalidMsg, ambiguousMsg].filter(Boolean).join(' ')}${available}`;
+  return [invalidMsg, ambiguousMsg].filter(Boolean).join(' ');
 };
 
 /**
  * Resolves MW references to ids, throwing {@link InvalidMaintenanceWindowError}
- * when any reference is unknown or ambiguous. Empty/undefined input is returned
- * unchanged.
+ * when any reference is unknown or ambiguous. Empty/undefined input returns an
+ * empty array.
  */
 export const resolveMaintenanceWindowsOrThrow = (
   refs: string[] | undefined,
@@ -114,18 +99,11 @@ export const resolveMaintenanceWindowsOrThrow = (
     return refs ?? [];
   }
 
-  // With no maintenance windows to resolve against we can't validate the refs
-  // (the MW client may be unavailable or the space genuinely has none). Preserve
-  // the prior passthrough behavior rather than failing an otherwise-valid save.
-  if (maintenanceWindows.length === 0) {
-    return refs;
-  }
-
   const { ids, invalid, ambiguous } = resolveMaintenanceWindowRefs(refs, maintenanceWindows);
 
   if (invalid.length || ambiguous.length) {
     throw new InvalidMaintenanceWindowError(
-      getInvalidMaintenanceWindowsError({ invalid, ambiguous, maintenanceWindows })
+      getInvalidMaintenanceWindowsError({ invalid, ambiguous })
     );
   }
 

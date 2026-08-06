@@ -305,11 +305,18 @@ describe('AddNewMonitorsPublicAPI', () => {
       expect(result.maintenance_windows).toEqual(['mw-1']);
     });
 
-    it('throws for an unresolved reference when maintenance windows exist', async () => {
+    it('throws for an unresolved reference', async () => {
       const { api } = buildApi([{ id: 'mw-1', title: 'Weekend window' }]);
       await expect(
         api.normalizeMonitor({ type: 'http', maintenance_windows: ['nope'] } as any, {} as any)
       ).rejects.toThrow(/nope/);
+    });
+
+    it('throws when maintenance windows are unavailable', async () => {
+      const { api } = buildApi([]);
+      await expect(
+        api.normalizeMonitor({ type: 'http', maintenance_windows: ['mw-1'] } as any, {} as any)
+      ).rejects.toThrow(/mw-1/);
     });
 
     it('does not fetch maintenance windows when none are referenced', async () => {
