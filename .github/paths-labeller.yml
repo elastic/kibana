@@ -35,6 +35,22 @@
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
+- 'Team:streams-ui':
+    - 'x-pack/platform/plugins/shared/streams/**/*.*'
+    - 'x-pack/platform/plugins/shared/streams_app/**/*.*'
+    - 'x-pack/platform/plugins/shared/ingest_hub/**/*.*'
+    - 'x-pack/platform/plugins/shared/fields_metadata/**/*.*'
+    - 'x-pack/solutions/observability/plugins/observability_onboarding/**/*.*'
+    - 'src/platform/packages/shared/kbn-grok-ui/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-streamlang/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-streamlang-tests/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-streams-schema/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-streams-ai/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-sample-parser/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-grok-heuristics/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-dissect-heuristics/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-content-packs-schema/**/*.*'
 - 'ci:project-deploy-observability':
     - 'packages/kbn-apm-*/**/*.*'
     - 'src/platform/plugins/shared/ai_assistant_management/**/*.*'
