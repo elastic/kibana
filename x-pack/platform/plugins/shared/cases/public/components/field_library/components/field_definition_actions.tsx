@@ -98,6 +98,7 @@ export const FieldDefinitionActions: React.FC<FieldDefinitionActionsProps> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.FIELD_ACTIONS_MENU(fieldDefinition.name)}
       isOpen={isOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
