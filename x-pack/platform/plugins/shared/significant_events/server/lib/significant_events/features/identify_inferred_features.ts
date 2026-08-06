@@ -445,7 +445,7 @@ async function tryIdentifyFeatures(
 // ---------------------------------------------------------------------------
 
 interface RunInferredIterationOptions {
-  esClient: ElasticsearchClient;
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
   samplingSource: string;
@@ -491,7 +491,7 @@ type InferredIterationResult =
     };
 
 async function runInferredIteration({
-  esClient,
+  samplingEsClient,
   kiClient,
   streamName,
   samplingSource,
@@ -525,7 +525,7 @@ async function runInferredIteration({
   } = tuning;
 
   const batchResult = await fetchSampleDocuments({
-    esClient,
+    esClient: samplingEsClient,
     index: samplingSource,
     start,
     end,
@@ -658,6 +658,12 @@ async function runInferredIteration({
 
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
+  /**
+   * Client used to sample documents from `samplingSource`. Separate from `esClient` because the
+   * sampling source can live on a remote CPS-connected project, while `esClient` reads the
+   * plugin's own (origin-only) indices.
+   */
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
@@ -689,6 +695,7 @@ export interface IdentifyInferredFeaturesResult {
 
 export async function identifyInferredFeatures({
   esClient,
+  samplingEsClient,
   kiClient,
   soClient,
   inferenceClient,
@@ -758,7 +765,7 @@ export async function identifyInferredFeatures({
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
-    esClient,
+    samplingEsClient,
     kiClient,
     streamName,
     samplingSource,
