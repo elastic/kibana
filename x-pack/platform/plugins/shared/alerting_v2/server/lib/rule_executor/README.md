@@ -140,9 +140,11 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Parameter | Value | Source |
 | --- | --- | --- |
 | Task type | `alerting_v2:rule_executor` | [`task_definition.ts`](task_definition.ts) |
-| Task timeout | `5m` | [`task_definition.ts`](task_definition.ts) |
+| Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`get_task_timeout.ts`](../get_task_timeout.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
+
+`xpack.alerting_v2.rules.run.timeout`, when set, applies uniformly to the rule executor task; `getTaskTimeout` resolves it as `config → task definition → DEFAULT_RULE_EXECUTION_TIMEOUT` and leaves the timeouts of other task types (dispatcher, telemetry, API-key invalidation) untouched. The resolved value is applied where tasks are registered with Task Manager in [`setup/bind_tasks.ts`](../../setup/bind_tasks.ts).
 
 `ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
