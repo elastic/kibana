@@ -2180,6 +2180,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return exports.closeExportFlyout();
     },
 
+    closeExportPopover() {
+      return exports.closeExportPopover();
+    },
+
     async isPopoverItemEnabled(label: string) {
       await this.clickExportButton();
 
@@ -2197,7 +2201,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return isExportPopoverOpen;
       });
 
-      await testSubjects.click(`exportMenuItem-${label}`);
+      await testSubjects.clickWhenNotDisabled(`exportMenuItem-${label}`);
     },
 
     async getUrl() {

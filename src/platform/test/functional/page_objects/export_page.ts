@@ -14,6 +14,7 @@ export class ExportPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   async exportButtonExists() {
     return await this.testSubjects.exists('exportTopNavButton');
@@ -44,6 +45,16 @@ export class ExportPageObject extends FtrService {
 
   async isExportPopoverOpen() {
     return await this.testSubjects.exists('exportPopoverPanel');
+  }
+
+  async closeExportPopover() {
+    if (!(await this.isExportPopoverOpen())) {
+      return;
+    }
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.retry.waitFor('export popover to close', async () => {
+      return !(await this.isExportPopoverOpen());
+    });
   }
 
   async isPopoverItemEnabled(label: string) {

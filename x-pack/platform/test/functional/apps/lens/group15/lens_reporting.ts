@@ -71,6 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('toastCloseButton');
       }
 
+      await lens.closeExportPopover();
       await lens.closeExportFlyout();
     });
 
