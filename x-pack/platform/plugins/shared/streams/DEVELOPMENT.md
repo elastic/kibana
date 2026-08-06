@@ -384,7 +384,7 @@ redirect shim) via two optional plugins:
 - `significant_events` — `significantEventsRepositoryClient.fetch('GET /internal/significant_events/availability')`
 
 When either is absent, or the availability probe returns unavailable, SE UI stays hidden.
-Streams does not subscribe to SEA `availability$`.
+Streams gates on that server probe directly; SEA does not expose an availability observable.
 
 ### UI Routes
 

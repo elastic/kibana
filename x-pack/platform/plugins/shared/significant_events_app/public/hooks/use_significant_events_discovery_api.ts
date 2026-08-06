@@ -10,13 +10,7 @@ import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
 export const useSignificantEventsDiscoveryApi = () => {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   const { signal } = useAbortController();
 

@@ -12,6 +12,7 @@ import type { ExtendedFieldsUserAction } from '../../../common/types/domain';
 import type { CasesConfigurationUI } from '../../../common/ui';
 import type { CaseUI } from '../../../common/ui/types';
 import { getFieldCamelKey, getV2FieldType } from '../../../common/utils/template_fields';
+import { getExtendedFieldDisplayValue } from '../all_cases/extended_field_columns';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { ScrollableMarkdown } from '../markdown_editor';
@@ -47,6 +48,21 @@ const buildFieldLabels = (
   return labels;
 };
 
+// Maps a payload key (camelCased) to its field's control type (e.g. "USER_PICKER"), so a value
+// that needs parsing — rather than a plain `String(value)` — is rendered correctly. Sourced from
+// the case's server-enriched `extendedFieldsControls` (covers template + global fields, keyed by
+// snake storage key e.g. `new_field_as_keyword`); a key with no entry (e.g. a not-yet-migrated
+// legacy custom field) falls back to plain string rendering, matching prior behavior.
+const buildFieldControls = (
+  extendedFieldsControls: CaseUI['extendedFieldsControls'] | undefined
+): Map<string, string> => {
+  const controls = new Map<string, string>();
+  for (const [storageKey, control] of Object.entries(extendedFieldsControls ?? {})) {
+    controls.set(camelCase(storageKey), control);
+  }
+  return controls;
+};
+
 const isMultilineValue = (value: unknown): value is string =>
   typeof value === 'string' && value.includes('\n');
 
@@ -55,42 +71,40 @@ interface LabelAndBody {
   body?: React.ReactNode;
 }
 
-const getLabelAndBody = (
-  userAction: SnakeToCamelCase<ExtendedFieldsUserAction>,
-  fieldLabels: Map<string, string>
+const getFieldLabelAndBody = (
+  key: string,
+  value: unknown,
+  displayName: string,
+  fieldControls: Map<string, string>
 ): LabelAndBody => {
-  const extendedFields = userAction.payload.extendedFields ?? {};
-  const entries = Object.entries(extendedFields);
-
-  if (entries.length === 1) {
-    const [key, value] = entries[0];
-    const displayName = fieldLabels.get(key) ?? getFieldDisplayName(key);
-
-    if (key.endsWith('AsDate') && typeof value === 'string') {
-      const maybeDate = getMaybeDate(value);
-      if (maybeDate.isValid()) {
-        return {
-          label: (
-            <>
-              {i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName)}{' '}
-              <PreferenceFormattedDate value={maybeDate.toDate()} stripMs />
-            </>
-          ),
-        };
-      }
-    }
-
-    if (isMultilineValue(value)) {
+  if (key.endsWith('AsDate') && typeof value === 'string') {
+    const maybeDate = getMaybeDate(value);
+    if (maybeDate.isValid()) {
       return {
-        label: i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName),
-        body: <ScrollableMarkdown content={value} />,
+        label: (
+          <>
+            {i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName)}{' '}
+            <PreferenceFormattedDate value={maybeDate.toDate()} stripMs />
+          </>
+        ),
       };
     }
-
-    return { label: i18n.SET_TEMPLATE_FIELD_LABEL(displayName, String(value)) };
   }
 
-  return { label: i18n.UPDATED_TEMPLATE_FIELDS };
+  if (isMultilineValue(value)) {
+    return {
+      label: i18n.SET_TEMPLATE_FIELD_LABEL_PREFIX(displayName),
+      body: <ScrollableMarkdown content={value} />,
+    };
+  }
+
+  const control = fieldControls.get(key);
+  const displayValue =
+    control != null && typeof value === 'string'
+      ? getExtendedFieldDisplayValue(control, value)
+      : String(value);
+
+  return { label: i18n.SET_TEMPLATE_FIELD_LABEL(displayName, displayValue) };
 };
 
 export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
@@ -106,21 +120,57 @@ export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
       casesConfiguration.customFields,
       caseData.extendedFieldsLabels
     );
-    const { label, body } = getLabelAndBody(extendedFieldsUserAction, fieldLabels);
-    const commonBuilder = createCommonUpdateUserActionBuilder({
-      userAction,
-      userProfiles,
-      handleOutlineComment,
-      label,
-      icon: 'dot',
-    });
+    const fieldControls = buildFieldControls(caseData.extendedFieldsControls);
 
-    const result = commonBuilder.build();
+    const buildEntry = (label: LabelAndBody['label'], body: LabelAndBody['body']) => {
+      const [entry] = createCommonUpdateUserActionBuilder({
+        userAction,
+        userProfiles,
+        handleOutlineComment,
+        label,
+        icon: 'dot',
+      }).build();
 
-    if (body) {
-      result[0].children = body;
+      if (body) {
+        entry.children = body;
+      }
+
+      return entry;
+    };
+
+    const entries = Object.entries(extendedFieldsUserAction.payload.extendedFields ?? {});
+
+    if (entries.length === 0) {
+      return [buildEntry(i18n.UPDATED_TEMPLATE_FIELDS, undefined)];
     }
 
-    return result;
+    // One activity row per field, even though the fields were saved as a single update. Saving a
+    // section writes every changed field in one request — that keeps the write atomic and avoids
+    // two forms racing on the same case version — but the history should still read as "what
+    // changed", one line per field, exactly as it does when a field is edited on its own.
+    // Sorted by label so a multi-field save reads in a stable order rather than payload order.
+    return entries
+      .map(([key, value]) => ({
+        key,
+        value,
+        displayName: fieldLabels.get(key) ?? getFieldDisplayName(key),
+      }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+      .map(({ key, value, displayName }, index) => {
+        const { label, body } = getFieldLabelAndBody(key, value, displayName, fieldControls);
+        const entry = buildEntry(label, body);
+
+        // Distinct per field so each row is addressable, while the copy-link stays on the first row
+        // only: there is one user action behind these rows, so one permalink — repeating it would
+        // both duplicate DOM ids and imply each field could be linked to separately.
+        entry[
+          'data-test-subj'
+        ] = `${userAction.type}-${userAction.action}-action-${userAction.id}-${key}`;
+        if (index > 0) {
+          delete entry.actions;
+        }
+
+        return entry;
+      });
   },
 });

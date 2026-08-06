@@ -20,11 +20,6 @@ interface WorkdayItemResponse {
   [key: string]: unknown;
 }
 
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('Workday', () => {
   const mockClient = {
     get: jest.fn(),
@@ -393,16 +388,12 @@ describe('Workday', () => {
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({ data: { data: [{ id: 'wid-001' }], total: 1 } });
 
-      if (!Workday.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await Workday.test.handler(mockContext)) as TestResult;
+      const result = await Workday.test.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.workday.com/ccx/api/common/v1/mycompany/workers',
         { params: { limit: 1 } }
       );
-      expect(result.ok).toBe(true);
       expect(result.message).toBe('Successfully connected to Workday');
     });
 

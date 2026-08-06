@@ -246,7 +246,11 @@ function SpanFlyoutBody({
     timestamp: span['@timestamp'],
   });
 
-  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+  const genAiTabContent = getGenAiTabContent({
+    isGenAiSpan,
+    genAi,
+    ebt: { element: SPAN_FLYOUT_EBT_ELEMENTS.TABS },
+  });
 
   const tabs = [
     {
