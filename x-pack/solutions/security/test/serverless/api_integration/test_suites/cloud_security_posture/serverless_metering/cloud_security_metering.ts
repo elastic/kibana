@@ -13,7 +13,7 @@ import {
 import type * as http from 'http';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsIndexDataProvider } from '../utils';
-import { getMockFindings } from './mock_data';
+import { getMockFindings, getMockGcpComputeFindings } from './mock_data';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { RoleCredentials } from '../../../services';
 import type { UsageRecord } from './mock_usage_server';
@@ -115,14 +115,70 @@ export default function (providerContext: FtrProviderContext) {
 
       let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
-        if (interceptedRequestBody.length > 0) {
-          interceptedRequestBody = getInterceptedRequestPayload();
-          expect(interceptedRequestBody.length).to.greaterThan(0);
-          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
-          expect(usageSubTypes).to.contain('cspm');
-          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
-        }
+        interceptedRequestBody = getInterceptedRequestPayload();
+        expect(interceptedRequestBody.length).to.greaterThan(0);
+        const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+        expect(usageSubTypes).to.contain('cspm');
+        expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+        expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
+      });
+    });
+
+    it('Should only count GCP compute instances with at least 24h running time for CSPM', async () => {
+      await createPackagePolicy(
+        supertestWithoutAuth,
+        agentPolicyId,
+        'cspm',
+        'cloudbeat/cis_aws',
+        'aws',
+        'cspm',
+        'CSPM-1',
+        roleAuthc,
+        internalRequestHeader
+      );
+
+      // Billable: past the 24h minimum running duration
+      const longRunningInstances = getMockGcpComputeFindings({
+        numberOfFindings: 2,
+        runningDurationHours: 48,
+        status: 'RUNNING',
+      });
+      const longTerminatedInstances = getMockGcpComputeFindings({
+        numberOfFindings: 1,
+        runningDurationHours: 30,
+        status: 'TERMINATED',
+      });
+
+      // Not billable: ephemeral instances below the 24h minimum
+      const shortRunningInstances = getMockGcpComputeFindings({
+        numberOfFindings: 3,
+        runningDurationHours: 2,
+        status: 'RUNNING',
+      });
+      const shortTerminatedInstances = getMockGcpComputeFindings({
+        numberOfFindings: 2,
+        runningDurationHours: 3,
+        status: 'TERMINATED',
+      });
+
+      await findingsIndex.addBulk([
+        ...longRunningInstances,
+        ...longTerminatedInstances,
+        ...shortRunningInstances,
+        ...shortTerminatedInstances,
+      ]);
+
+      let interceptedRequestBody: UsageRecord[] = [];
+      await retry.try(async () => {
+        interceptedRequestBody = getInterceptedRequestPayload();
+        expect(interceptedRequestBody.length).to.greaterThan(0);
+        const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+        expect(usageSubTypes).to.contain('cspm');
+        expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+        // Only the 3 instances with >=24h running time are billable
+        expect(interceptedRequestBody[0].usage.quantity).to.be(
+          longRunningInstances.length + longTerminatedInstances.length
+        );
       });
     });
 
@@ -155,14 +211,12 @@ export default function (providerContext: FtrProviderContext) {
       let interceptedRequestBody: UsageRecord[] = [];
 
       await retry.try(async () => {
-        if (interceptedRequestBody.length > 0) {
-          interceptedRequestBody = getInterceptedRequestPayload();
-          expect(interceptedRequestBody.length).to.greaterThan(0);
-          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
-          expect(usageSubTypes).to.contain('kspm');
-          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
-        }
+        interceptedRequestBody = getInterceptedRequestPayload();
+        expect(interceptedRequestBody.length).to.greaterThan(0);
+        const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+        expect(usageSubTypes).to.contain('kspm');
+        expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+        expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
       });
     });
 
