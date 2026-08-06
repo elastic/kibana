@@ -20,6 +20,7 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
     const now = new Date().toISOString();
 
     await esClient.bulk({
+      refresh: 'wait_for',
       operations: [
         { index: { _index: INDEX_000001 } },
         { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },

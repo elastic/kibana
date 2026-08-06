@@ -20,6 +20,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ esClient, apiServices, discoverScoutSpace }) => {
       await esClient.bulk({
+        refresh: 'wait_for',
         operations: [
           { index: { _index: INDEX_NAME, _id: DOC_ID } },
           { '@timestamp': '2015-09-21T09:30:23', name: 'Dmitry' },
