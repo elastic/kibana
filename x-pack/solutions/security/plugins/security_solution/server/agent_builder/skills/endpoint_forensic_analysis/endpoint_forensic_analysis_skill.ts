@@ -21,6 +21,7 @@ export const ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS = [
   `${internalNamespaces.osquery}.run_live_query`,
   `${internalNamespaces.osquery}.get_live_query_results`,
   `${internalNamespaces.osquery}.list_packs`,
+  `${internalNamespaces.osquery}.resolve_agent_ids`,
 ] as const;
 
 export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID = securityTool(
@@ -37,6 +38,8 @@ const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
   'logs-endpoint.events.file-*',
   'logs-endpoint.events.registry-*',
 ] as const;
+
+const escapeEsqlString = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 const discoverTelemetrySchema = z.object({
   hosts: z
@@ -131,6 +134,7 @@ Always scope \`@timestamp\`. Cite index and query in answers.
 For live-state questions, use these Osquery tools in sequence:
 - \`osquery.list_saved_queries\` to find prebuilt queries matching the investigative need
 - \`osquery.get_table_schema\` to verify column names before authoring a custom query
+- \`osquery.resolve_agent_ids\` to turn host names into Elastic Agent IDs — \`run_live_query\` takes \`agent_ids\`, not host names. Do NOT query the \`.fleet-agents\` index via ES|QL/search; it requires ES-level privileges most roles lack and fails with a security_exception.
 - \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents (waits ~30s inline for rows)
 - \`osquery.get_live_query_results\` when \`run_live_query\` returns \`status: dispatched\` — pass the \`action_id\` and wait up to 60s for agent rows
 - \`osquery.list_packs\` to find Elastic-built packs when the analyst references a pack by name
@@ -151,16 +155,7 @@ After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IO
 | Indicator type | Value | First seen | Source event |
 |---|---|---|---|
 
-Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, mutex, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
-
-**Mutex coverage (second-tier Osquery source — REQUIRED, not optional).** The \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` tool cannot return mutexes from Elastic Defend telemetry. After calling it, act on the \`osquery_mutex_guidance\` block in its result:
-
-1. Call \`osquery.check_integration\`. If unavailable/enrolled-less, render the mutex IoC row as \`— (requires Osquery integration)\` and note it in the summary.
-2. If available: resolve each host to its Elastic Agent ID by calling \`osquery.resolve_agent_ids\` (do NOT query the \`.fleet-agents\` index directly via ES|QL/search — that system index requires ES-level privileges most roles lack and fails with a security_exception), then call \`osquery.run_live_query\` with the winbaseobj Mutant query from the guidance block.
-3. Filter out benign system mutexes (\`SM0:*\`, \`WilStaging_*\`, \`_MSI*\`) and add surviving named-mutex values to the IoC table mutex row.
-4. Only after the mutex row is populated (or explicitly marked unavailable) is IoC extraction complete — proceed to the cross-environment hunt offer.
-
-This makes the mutex a genuine second-tier IoC source read from the live host, not a documented gap.
+Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
 
 ### 6. Lateral movement
 Trace outbound internal connections from source host; correlate with process creation on destinations.
@@ -233,18 +228,16 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions, ' +
-        'PLUS an osquery_mutex_guidance block — the executable Osquery winbaseobj query and host→agent_id resolution ' +
-        'needed to fill the mutex IoC row from the live host (Defend telemetry has no mutex field). ' +
+        'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions. ' +
         'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
         const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
-        const hostFilter = hosts.map((h) => `"${h}"`).join(', ');
+        const hostFilter = hosts.map((h) => `"${escapeEsqlString(h)}"`).join(', ');
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.extension, event.action, host.name, @timestamp`,
+          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension`,
           `| LIMIT 500`,
         ].join(' ');
 
@@ -323,28 +316,6 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           // Index missing or query error — return empty structure so the agent can report "no hits"
         }
 
-        // Mutexes are NOT in Elastic Defend telemetry (no dedicated ES|QL-queryable field).
-        // The genuine source is the Osquery `winbaseobj` live table (object_type = 'Mutant'),
-        // which IS in the schema catalog and passes the run_live_query allowlist. Emit a
-        // structured guidance block the agent MUST act on via osquery.run_live_query — this
-        // is not a documentation-only constraint; it is an executable next step.
-        const osqueryMutexGuidance = {
-          indicator_type: 'mutex',
-          why_esql_cannot_cover:
-            'Elastic Defend telemetry has no dedicated mutex field. Named mutexes (a classic malware IoC) must be read from the live host via Osquery.',
-          required_tool: 'osquery.run_live_query',
-          query: "SELECT object_name, session_id FROM winbaseobj WHERE object_type = 'Mutant'",
-          query_explanation:
-            "winbaseobj lists named Windows kernel objects across terminal-services sessions; object_type = 'Mutant' filters to mutexes. Returns the mutex name(s) a process created — these are the IoC values to hunt for fleet-wide.",
-          catalog_table: 'winbaseobj (Windows-only, in osquery v5.19.0 schema catalog)',
-          agent_resolution:
-            'run_live_query takes agent_ids, not host names. Call osquery.resolve_agent_ids with the hostnames to get each Elastic Agent ID — do NOT query the .fleet-agents index directly via ES|QL/search, it requires ES-level privileges most roles lack and will fail with a security_exception.',
-          after_query:
-            'Filter out benign system mutexes (SM0:*, WilStaging_*, _MSI*). Add surviving named-mutex values to the IoC table under the mutex row before offering the cross-environment hunt.',
-          availability_gate:
-            'Before dispatching, call osquery.check_integration. If Osquery is not installed/enrolled, report mutex as "— (requires Osquery integration)" rather than skipping the indicator type.',
-        };
-
         return {
           results: [
             {
@@ -353,9 +324,8 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 hosts,
                 time_window_hours: timeWindowHours,
                 iocs,
-                osquery_mutex_guidance: osqueryMutexGuidance,
                 guidance:
-                  'Present as a markdown table (one row per indicator type, mutex row included). Then: (1) execute the osquery_mutex_guidance via osquery.run_live_query to fill the mutex row with real values; (2) offer the cross-environment hunt per the Cross-Skill Handoff section.',
+                  'Present as a markdown table (one row per indicator type), then offer a cross-environment hunt with these values.',
               },
             },
           ],

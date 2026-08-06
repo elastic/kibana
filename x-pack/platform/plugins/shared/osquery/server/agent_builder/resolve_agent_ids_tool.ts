@@ -7,14 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
-
-const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
 
@@ -62,15 +60,7 @@ export const resolveAgentIdsTool = (
     'ES-level privileges most roles do not have and will fail with a security_exception. ' +
     'Returns one entry per requested hostname; agent_id is null if no enrolled agent matched.',
   schema: resolveAgentIdsSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async () => ({
-      status: osqueryContext.experimentalFeatures.agentBuilderTools ? 'available' : 'unavailable',
-      reason: osqueryContext.experimentalFeatures.agentBuilderTools
-        ? undefined
-        : 'Osquery Agent Builder tools are not enabled',
-    }),
-  },
+  availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request, spaceId }) => {
     const { hostnames } = input;
     const agentService = osqueryContext.service.getAgentService();

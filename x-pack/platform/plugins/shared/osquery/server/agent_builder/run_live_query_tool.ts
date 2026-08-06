@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import type { SchemaService } from '../lib/schema_service';
 import type { OsqueryTable } from '../../common/types/schema';
@@ -21,8 +21,6 @@ import type { StartPlugins } from '../types';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 import { validateReadOnlyQuery } from './validate_read_only_query';
 import { pollActionResponses } from './poll_action_responses';
-
-const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const RUN_LIVE_QUERY_TOOL_ID = osqueryTool('run_live_query');
 
@@ -61,15 +59,7 @@ export const runLiveQueryTool = (
   description:
     'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~30s; otherwise returns action_id — call osquery.get_live_query_results to wait longer and display rows in chat.',
   schema: runLiveQuerySchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async () => ({
-      status: osqueryContext.experimentalFeatures.agentBuilderTools ? 'available' : 'unavailable',
-      reason: osqueryContext.experimentalFeatures.agentBuilderTools
-        ? undefined
-        : 'Osquery Agent Builder tools are not enabled',
-    }),
-  },
+  availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { query, agent_ids: agentIds, timeout } = input;
 

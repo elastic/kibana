@@ -7,16 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 import { fetchOsqueryPackagePolicyIds } from '../routes/utils';
-
-const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const CHECK_INTEGRATION_TOOL_ID = osqueryTool('check_integration');
 
@@ -45,15 +43,7 @@ export const checkIntegrationTool = (
   description:
     'Check whether the Osquery integration is installed and whether osquerybeat agents are enrolled. Use this before any other osquery tool to determine if live host interrogation via Osquery is available. Returns installation status, version, and agent enrollment count.',
   schema: checkIntegrationSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async () => ({
-      status: osqueryContext.experimentalFeatures.agentBuilderTools ? 'available' : 'unavailable',
-      reason: osqueryContext.experimentalFeatures.agentBuilderTools
-        ? undefined
-        : 'Osquery Agent Builder tools are not enabled',
-    }),
-  },
+  availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (_input, { request, spaceId }) => {
     const packageService = osqueryContext.service.getPackageService()?.asInternalUser;
     const agentService = osqueryContext.service.getAgentService();
