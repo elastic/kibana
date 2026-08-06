@@ -35,7 +35,6 @@
     "@kbn/cloud-plugin",
     "@kbn/react-query",
     "@kbn/core-chrome-browser",
-    "@kbn/app-header",
   ],
   "exclude": [
     "target/**/*",
