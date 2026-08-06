@@ -565,11 +565,13 @@ describe('Summary Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `(1) alert has been filtered out for: test:222-222`
+        `(1) alert has been filtered out for: test:222-222`,
+        { labels: { actionId: 'action-2', actionTypeId: 'test' } }
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `(1) alert has been filtered out for: test:333-333`
+        `(1) alert has been filtered out for: test:333-333`,
+        { labels: { actionId: 'action-3', actionTypeId: 'test' } }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -625,7 +627,8 @@ describe('Summary Action Scheduler', () => {
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug).toHaveBeenCalledWith(
-        `(2) alerts have been filtered out for: test:333-333`
+        `(2) alerts have been filtered out for: test:333-333`,
+        { labels: { actionId: 'action-3', actionTypeId: 'test' } }
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(1);
@@ -744,7 +747,7 @@ describe('Summary Action Scheduler', () => {
 
       expect(logger.debug).toHaveBeenCalledWith(
         `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions has been reached.`,
-        { labels: { actionId: 'action-3', ruleId: 'rule-id-1' } }
+        { labels: { actionId: 'action-3', ruleId: 'rule-id-1', actionTypeId: 'test' } }
       );
 
       expect(results).toHaveLength(1);
@@ -802,7 +805,7 @@ describe('Summary Action Scheduler', () => {
 
       expect(logger.debug).toHaveBeenCalledWith(
         `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions for connector type test has been reached.`,
-        { labels: { actionId: 'action-3', ruleId: 'rule-id-1' } }
+        { labels: { actionId: 'action-3', actionTypeId: 'test', ruleId: 'rule-id-1' } }
       );
 
       expect(results).toHaveLength(1);

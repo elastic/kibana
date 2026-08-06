@@ -1217,8 +1217,6 @@ describe('Task Runner', () => {
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
       {
         labels: {
-          actionId: '1',
-          actionTypeId: 'action',
           executionId: RULE_EXECUTION_UUID,
           alertId: '2',
           ruleId: '1',
@@ -1377,8 +1375,6 @@ describe('Task Runner', () => {
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
       {
         labels: {
-          actionId: '1',
-          actionTypeId: 'action',
           executionId: RULE_EXECUTION_UUID,
           alertId: '2',
           ruleId: '1',
@@ -3155,7 +3151,6 @@ describe('Task Runner', () => {
         labels: {
           actionId: '4',
           actionTypeId: 'action',
-          alertId: '1',
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
           ruleType: 'test',
@@ -3357,7 +3352,6 @@ describe('Task Runner', () => {
         labels: {
           actionId: '1',
           actionTypeId: '.server-log',
-          alertId: '2',
           executionId: RULE_EXECUTION_UUID,
           ruleId: '1',
           ruleType: 'test',

@@ -432,6 +432,7 @@ describe('System Action Scheduler', () => {
         {
           labels: {
             actionId: 'system-action-1',
+            actionTypeId: '.test-system-action',
             ruleId: 'rule-id-1',
             ruleType: 'test',
             spaceId: 'test1',
@@ -502,6 +503,7 @@ describe('System Action Scheduler', () => {
         {
           labels: {
             actionId: 'system-action-1',
+            actionTypeId: '.test-system-action',
             ruleId: 'rule-id-1',
             ruleType: 'test',
             spaceId: 'test1',

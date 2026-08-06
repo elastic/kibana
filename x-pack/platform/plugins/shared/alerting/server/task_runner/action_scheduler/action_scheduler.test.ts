@@ -1617,7 +1617,8 @@ describe('Action Scheduler', () => {
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      '(2) alerts have been filtered out for: testActionTypeId:111'
+      '(2) alerts have been filtered out for: testActionTypeId:111',
+      { labels: { actionId: '1', actionTypeId: 'testActionTypeId' } }
     );
   });
 
@@ -1879,7 +1880,8 @@ describe('Action Scheduler', () => {
 
     expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      '(3) alerts have been filtered out for: testActionTypeId:1'
+      '(3) alerts have been filtered out for: testActionTypeId:1',
+      { labels: { actionId: '1', actionTypeId: 'testActionTypeId' } }
     );
   });
 
@@ -1931,7 +1933,8 @@ describe('Action Scheduler', () => {
 
     expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
-      '(3) alerts have been filtered out for: testActionTypeId:1'
+      '(3) alerts have been filtered out for: testActionTypeId:1',
+      { labels: { actionId: '1', actionTypeId: 'testActionTypeId' } }
     );
   });
 
@@ -1958,6 +1961,7 @@ describe('Action Scheduler', () => {
           actionTypeId: 'test',
           alertId: '1',
           executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
           spaceId: 'test1',
         },
       }
@@ -1970,6 +1974,7 @@ describe('Action Scheduler', () => {
           alertId: '2',
           actionTypeId: 'test',
           executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
           spaceId: 'test1',
         },
       }
@@ -1982,6 +1987,7 @@ describe('Action Scheduler', () => {
           alertId: '3',
           actionTypeId: 'test',
           executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
           spaceId: 'test1',
         },
       }

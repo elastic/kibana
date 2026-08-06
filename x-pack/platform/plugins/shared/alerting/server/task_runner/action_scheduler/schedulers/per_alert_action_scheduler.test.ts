@@ -347,6 +347,7 @@ describe('Per-Alert Action Scheduler', () => {
             actionId: 'action-1',
             actionTypeId: 'test',
             alertId: '1',
+            ruleId: 'rule-id-1',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             spaceId: 'test1',
           },
@@ -414,9 +415,6 @@ describe('Per-Alert Action Scheduler', () => {
         `Invalid action group \"invalid\" for rule \"test\".`,
         {
           labels: {
-            actionId: 'action-1',
-            actionTypeId: 'test',
-            alertId: '2',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
             ruleType: 'test',
@@ -564,8 +562,6 @@ describe('Per-Alert Action Scheduler', () => {
         `skipping scheduling of actions for '2' in rule rule-label: rule is muted`,
         {
           labels: {
-            actionId: 'action-1',
-            actionTypeId: 'test',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
             spaceId: 'test1',
@@ -610,8 +606,6 @@ describe('Per-Alert Action Scheduler', () => {
         {
           labels: {
             alertId: '2',
-            actionId: 'action-1',
-            actionTypeId: 'test',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
             spaceId: 'test1',
@@ -1284,7 +1278,6 @@ describe('Per-Alert Action Scheduler', () => {
           labels: {
             actionId: 'action-2',
             actionTypeId: 'test',
-            alertId: '2',
             ruleId: 'rule-id-1',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             spaceId: 'test1',
@@ -1332,7 +1325,6 @@ describe('Per-Alert Action Scheduler', () => {
           labels: {
             actionId: 'action-1',
             actionTypeId: 'test',
-            alertId: '2',
             ruleId: 'rule-id-1',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             spaceId: 'test1',
@@ -1481,10 +1473,9 @@ describe('Per-Alert Action Scheduler', () => {
         `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`,
         {
           labels: {
-            actionId: 'action-1',
-            actionTypeId: 'test',
             alertId: '2',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleType: 'test',
             ruleId: 'rule-id-1',
             spaceId: 'test1',
           },

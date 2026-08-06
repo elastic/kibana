@@ -52,7 +52,7 @@ describe('shouldScheduleAction', () => {
     });
     expect(logger.debug).toHaveBeenCalledWith(
       `Rule "1" skipped scheduling action "1" because the maximum number of allowed actions has been reached.`,
-      { labels: { actionId: '1', ruleId: '1' } }
+      { labels: { actionId: '1', actionTypeId: 'test-action-type-id', ruleId: '1' } }
     );
   });
 
@@ -134,6 +134,7 @@ describe('shouldScheduleAction', () => {
       {
         labels: {
           actionId: '1',
+          actionTypeId: 'test-action-type-id',
           ruleId: '1',
         },
       }

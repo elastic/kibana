@@ -41,6 +41,7 @@ export const shouldScheduleAction = (opts: ShouldScheduleActionOpts): boolean =>
         labels: {
           actionId: action.id,
           ruleId: opts.ruleId,
+          actionTypeId: action.actionTypeId,
         },
       }
     );
@@ -60,6 +61,7 @@ export const shouldScheduleAction = (opts: ShouldScheduleActionOpts): boolean =>
           labels: {
             actionId: action.id,
             ruleId: opts.ruleId,
+            actionTypeId: action.actionTypeId,
           },
         }
       );

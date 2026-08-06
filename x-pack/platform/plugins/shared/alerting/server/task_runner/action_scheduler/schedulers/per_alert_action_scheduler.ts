@@ -136,28 +136,20 @@ export class PerAlertActionScheduler<
     }> = [];
     const results: ActionsToSchedule[] = [];
 
-    this.context.logger = createTaskRunnerLogger({
+    const logger = createTaskRunnerLogger({
       logger: this.context.logger,
       labels: {
         executionId: this.context.executionId,
         spaceId: this.context.taskInstance.params.spaceId,
         taskInstanceId: this.context.taskInstance.id,
         ruleType: this.context.rule.alertTypeId,
+        ruleId: this.context.rule.id,
       },
     });
     const activeAlertsArray = Object.values(activeAlerts || {});
     const recoveredAlertsArray = Object.values(recoveredAlerts || {});
 
     for (const action of this.actions) {
-      const logger = createTaskRunnerLogger({
-        logger: this.context.logger,
-        labels: {
-          actionId: action.id,
-          actionTypeId: action.actionTypeId,
-          ruleId: this.context.rule.id,
-        },
-      });
-
       let summarizedAlerts = null;
 
       if (action.useAlertDataForTemplate || action.alertsFilter) {
@@ -221,23 +213,13 @@ export class PerAlertActionScheduler<
     const ruleUrl = buildRuleUrl({
       getViewInAppRelativeUrl: this.context.ruleType.getViewInAppRelativeUrl,
       kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
-      logger: this.context.logger,
+      logger,
       rule: this.context.rule,
       spaceId: this.context.taskInstance.params.spaceId,
     });
 
     let sliceStart = Date.now();
     for (const { action, alert } of executables) {
-      this.context.logger = createTaskRunnerLogger({
-        logger: this.context.logger,
-        labels: {
-          alertId: alert.getId(),
-          actionId: action.id,
-          actionTypeId: action.actionTypeId,
-          ruleId: this.context.rule.id,
-        },
-      });
-
       if (Date.now() - sliceStart > YIELD_AFTER_MS) {
         await new Promise(setImmediate);
         sliceStart = Date.now();
@@ -248,7 +230,7 @@ export class PerAlertActionScheduler<
           action,
           actionsConfigMap: this.context.taskRunnerContext.actionsConfigMap,
           isActionExecutable: this.context.taskRunnerContext.actionsPlugin.isActionExecutable,
-          logger: this.context.logger,
+          logger,
           ruleId: this.context.rule.id,
           ruleRunMetricsStore: this.context.ruleRunMetricsStore,
         })
@@ -372,7 +354,7 @@ export class PerAlertActionScheduler<
     const {
       context: { rule, ruleLabel },
     } = this;
-    this.context.logger = createTaskRunnerLogger({
+    const logger = createTaskRunnerLogger({
       logger: this.context.logger,
       labels: {
         alertId,
@@ -380,6 +362,9 @@ export class PerAlertActionScheduler<
         ruleType: rule.alertTypeId,
         actionId: action.id,
         actionTypeId: action.actionTypeId,
+        executionId: this.context.executionId,
+        taskInstanceId: this.context.taskInstance.id,
+        spaceId: this.context.taskInstance.params.spaceId,
       },
     });
     const notifyWhen = action.frequency?.notifyWhen || rule.notifyWhen;
@@ -390,7 +375,7 @@ export class PerAlertActionScheduler<
         (this.skippedAlerts[alertId] &&
           this.skippedAlerts[alertId].reason !== Reasons.ACTION_GROUP_NOT_CHANGED)
       ) {
-        this.context.logger.debug(
+        logger.debug(
           `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: alert is active but action group has not changed`
         );
       }
@@ -412,8 +397,18 @@ export class PerAlertActionScheduler<
           !this.skippedAlerts[alertId] ||
           (this.skippedAlerts[alertId] && this.skippedAlerts[alertId].reason !== Reasons.THROTTLED)
         ) {
-          this.context.logger.debug(
-            `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: rule is throttled`
+          logger.debug(
+            `skipping scheduling of actions for '${alertId}' in rule ${ruleLabel}: rule is throttled`,
+            {
+              labels: {
+                alertId,
+                ruleId: this.context.rule.id,
+                ruleType: this.context.rule.alertTypeId,
+                spaceId: this.context.taskInstance.params.spaceId,
+                executionId: this.context.executionId,
+                taskInstanceId: this.context.taskInstance.id,
+              },
+            }
           );
         }
         this.skippedAlerts[alertId] = { reason: Reasons.THROTTLED };
@@ -445,6 +440,9 @@ export class PerAlertActionScheduler<
               alertId,
               ruleId: this.context.rule.id,
               ruleType: this.context.rule.alertTypeId,
+              spaceId: this.context.taskInstance.params.spaceId,
+              executionId: this.context.executionId,
+              taskInstanceId: this.context.taskInstance.id,
             },
           }
         );
@@ -470,6 +468,11 @@ export class PerAlertActionScheduler<
           {
             labels: {
               alertId,
+              ruleId: this.context.rule.id,
+              ruleType: this.context.rule.alertTypeId,
+              spaceId: this.context.taskInstance.params.spaceId,
+              executionId: this.context.executionId,
+              taskInstanceId: this.context.taskInstance.id,
             },
           }
         );
@@ -494,6 +497,11 @@ export class PerAlertActionScheduler<
           {
             labels: {
               alertId,
+              ruleId: this.context.rule.id,
+              ruleType: this.context.ruleType.id,
+              spaceId: this.context.taskInstance.params.spaceId,
+              executionId: this.context.executionId,
+              taskInstanceId: this.context.taskInstance.id,
             },
           }
         );
@@ -529,15 +537,21 @@ export class PerAlertActionScheduler<
   }: HelperOpts<ActionGroupIds, RecoveryActionGroupId>) {
     const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
     if (alertMaintenanceWindowIds.length !== 0) {
+      const alertId = alert.getId();
       this.context.logger.debug(
-        `no scheduling of actions "${action.id}" for alert "${alert.getId()}" from rule "${
+        `no scheduling of actions "${action.id}" for alert "${alertId}" from rule "${
           this.context.rule.id
         }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`,
         {
           labels: {
-            alertId: alert.getId(),
+            alertId,
             actionId: action.id,
             actionTypeId: action.actionTypeId,
+            ruleId: this.context.rule.id,
+            ruleType: this.context.rule.alertTypeId,
+            spaceId: this.context.taskInstance.params.spaceId,
+            executionId: this.context.executionId,
+            taskInstanceId: this.context.taskInstance.id,
           },
         }
       );
