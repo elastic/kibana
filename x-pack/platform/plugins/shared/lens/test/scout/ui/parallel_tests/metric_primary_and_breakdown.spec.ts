@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { buildMetricVisualization, createLogstashLensEditorSuiteSetup } from '../fixtures';
+import {
+  buildMetricVisualization,
+  createLogstashLensEditorSuiteSetup,
+  spaceTest,
+} from '../fixtures';
 
 const PRIMARY_PANEL = 'lnsMetric_primaryMetricDimensionPanel';
 const BREAKDOWN_PANEL = 'lnsMetric_breakdownByDimensionPanel';
@@ -80,7 +83,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // Number of values (5) + the "Other" bucket. `waitForVisualization` only waits for
         // rendering to settle, not for this specific tile count, so assert it explicitly first —
         // `toHaveCount` auto-retries, covering the query round-trip after the size change commits.
-        await expect(lens.getMetricTilesLocator()).toHaveCount(6);
+        await expect(lens.metricTilesLocator).toHaveCount(6);
 
         const data = await lens.getMetricVisualizationData();
         // First 5 tiles are top IP terms, the last is the "Other" bucket (structural check;
@@ -122,7 +125,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.waitForVisualization('mtrVis');
         // The progress bar lands in a render pass after the one `waitForVisualization` settles
         // on, so wait for it directly (auto-retries) rather than racing a one-shot data snapshot.
-        await expect(lens.getMetricProgressBarLocator()).not.toHaveCount(0);
+        await expect(lens.metricProgressBar).not.toHaveCount(0);
 
         const [datum] = await lens.getMetricVisualizationData();
         expect(datum.showingBar).toBe(true);
@@ -159,7 +162,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         expect(title).toMatch(IP_TITLE);
         await lens.clickMetricTileByTitle(title);
         // Filtering to a single IP collapses the breakdown to that one term (no "Other" bucket).
-        await expect(lens.getMetricTilesLocator()).toHaveCount(1);
+        await expect(lens.metricTilesLocator).toHaveCount(1);
 
         await expect.poll(() => filterBar.getFiltersLabel()).toStrictEqual([`ip: ${title}`]);
 
@@ -168,7 +171,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // Removing the filter re-issues the query; `waitForVisualization` can settle on a
         // transient render before the full result set arrives, so also wait for the tile count
         // to be fully restored before reading tile data below.
-        await expect(lens.getMetricTilesLocator()).toHaveCount(6);
+        await expect(lens.metricTilesLocator).toHaveCount(6);
       });
 
       await spaceTest.step('applies a static color to every tile', async () => {

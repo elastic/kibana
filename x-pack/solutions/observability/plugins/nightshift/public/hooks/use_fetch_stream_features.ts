@@ -6,32 +6,27 @@
  */
 
 import { useQueries, useQuery, type UseQueryOptions, type UseQueryResult } from '@kbn/react-query';
-import type { RouteRepositoryClient } from '@kbn/server-route-repository';
-import type { SignificantEventsRouteRepository } from '@kbn/significant-events-plugin/server';
+import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
-import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import type { StreamsRepositoryClientOptions } from '@kbn/streams-plugin/public/api';
 import { useKibana } from './use_kibana';
 
-type MergedStreamsRepositoryClient = RouteRepositoryClient<
-  StreamsRouteRepository & SignificantEventsRouteRepository,
-  StreamsRepositoryClientOptions
->;
-
 const fetchStreamFeatures = async (
-  streamsRepositoryClient: MergedStreamsRepositoryClient,
+  significantEventsRepositoryClient: SignificantEventsRepositoryClient,
   streamName: string,
   signal: AbortSignal | undefined
 ): Promise<Feature[]> => {
-  const response = await streamsRepositoryClient.fetch('GET /internal/streams/{name}/features', {
-    params: {
-      path: { name: streamName },
-      query: {
-        include_excluded: true,
+  const response = await significantEventsRepositoryClient.fetch(
+    'GET /internal/streams/{name}/features',
+    {
+      params: {
+        path: { name: streamName },
+        query: {
+          include_excluded: true,
+        },
       },
-    },
-    signal: signal ?? null,
-  });
+      signal: signal ?? null,
+    }
+  );
 
   return (response.features ?? []).filter((feature) => !isComputedFeature(feature));
 };
@@ -39,29 +34,32 @@ const fetchStreamFeatures = async (
 export const useFetchStreamFeatures = (
   streamName: string | undefined
 ): UseQueryResult<Feature[], Error> => {
-  const { streams } = useKibana().services;
-  const streamsRepositoryClient = streams.streamsRepositoryClient as MergedStreamsRepositoryClient;
+  const {
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
 
   return useQuery<Feature[], Error>({
     queryKey: ['nightshift.streamFeatures', streamName],
     enabled: Boolean(streamName),
     queryFn: async ({ signal }) =>
-      fetchStreamFeatures(streamsRepositoryClient, streamName!, signal),
+      fetchStreamFeatures(significantEventsRepositoryClient, streamName!, signal),
   });
 };
 
 export const useFetchStreamFeaturesByStream = (
   streamNames: string[]
 ): ReadonlyMap<string, Feature[]> => {
-  const { streams } = useKibana().services;
-  const streamsRepositoryClient = streams.streamsRepositoryClient as MergedStreamsRepositoryClient;
+  const {
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
 
   const queries = useQueries({
     queries: streamNames.map(
       (streamName): UseQueryOptions<Feature[], Error> => ({
         queryKey: ['nightshift.streamFeatures', streamName],
         enabled: Boolean(streamName),
-        queryFn: ({ signal }) => fetchStreamFeatures(streamsRepositoryClient, streamName, signal),
+        queryFn: ({ signal }) =>
+          fetchStreamFeatures(significantEventsRepositoryClient, streamName, signal),
       })
     ),
   });

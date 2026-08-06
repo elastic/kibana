@@ -458,7 +458,7 @@ describe('NightshiftApp', () => {
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
-        autoSendInitialMessage: true,
+        autoSendInitialMessage: false,
         initialMessage: 'Explain this significant event: Test significant event',
         attachments: [expect.objectContaining({ id: event.event_uuid, origin: event.event_id })],
       })

@@ -349,6 +349,7 @@ export function KnowledgeIndicatorsTable() {
       </EuiPanel>
       {selectedKnowledgeIndicator ? (
         <KnowledgeIndicatorDetailsFlyout
+          key={getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)}
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
