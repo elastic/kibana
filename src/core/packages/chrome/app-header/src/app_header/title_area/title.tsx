@@ -412,7 +412,10 @@ export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' })
   );
 
   return (
-    <div css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}>
+    <div
+      data-test-subj={APP_HEADER_TEST_SUBJECTS.titleContainer}
+      css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}
+    >
       <EuiTitle size={size}>
         <h1>
           {isEditing ? (

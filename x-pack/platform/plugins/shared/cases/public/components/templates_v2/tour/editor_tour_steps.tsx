@@ -25,9 +25,13 @@ export const TEMPLATE_EDITOR_TOUR_STEPS: CasesTourStep[] = [
   {
     // First, because the name is the one field a template cannot be saved without, and it moved out
     // of the Configuration tab into the page title where it is easy to walk straight past.
+    //
+    // Anchored to the title's stable container, not the title button: the anchor gets reparented
+    // into the popover, and clicking the button (which this step invites) swaps it for an input —
+    // React then crashes removing a node that was moved out from under it.
     stepId: 'name',
     title: i18n.EDITOR_STEP_NAME_TITLE,
-    anchor: '[data-test-subj="appHeaderTitleButton"]',
+    anchor: '[data-test-subj="appHeaderTitleContainer"]',
     anchorPosition: 'downLeft',
     content: wrap(i18n.EDITOR_STEP_NAME_DESCRIPTION),
   },
