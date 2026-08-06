@@ -151,6 +151,8 @@ Use all of the data at your disposal to reach a conclusion (source code, logs, f
 
 Every conclusion must cite specific evidence. Do not guess.
 
+Before classifying a UI failure as test-side, read the application code that renders the awaited element and confirm the state the test waits for is actually reachable.
+
 ## Environment constraints
 
 **Scratch files**: write throwaway files inside the repository checkout (the current working directory). Redirecting (`>`) elsewhere (e.g. `/tmp/...`) may be blocked — use a path under the repo root.
@@ -354,7 +356,7 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 
 Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
-- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis.
+- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis. Scope each rule-out to the evidence layer it actually covers — e.g. server logs can't rule out a client-side rendering bug.
 - **Verification:** the one command or step that reproduces the failure or confirms the fix.
 - **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 
