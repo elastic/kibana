@@ -87,7 +87,7 @@ export function TagsComboBox({
           {(copy) => (
             /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
             <EuiButtonIcon
-              iconType="copyClipboard"
+              iconType="copy"
               display="base"
               size="m"
               color="text"

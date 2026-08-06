@@ -348,7 +348,7 @@ export const BriefPage: React.FC = () => {
         </EuiFlexGroup>
       ) : null}
 
-      {error ? <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.LOAD_ERROR}</h2>} /> : null}
+      {error ? <EuiEmptyPrompt iconType="warning" title={<h2>{i18n.LOAD_ERROR}</h2>} /> : null}
 
       {!isLoading && !error && filtered.length === 0 ? (
         <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{i18n.EMPTY_BUCKET}</h2>} />

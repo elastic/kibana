@@ -202,7 +202,7 @@ function InvestigationFlyoutRow({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={canToggle ? expandRowLabel : undefined} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 aria-label={canToggle ? expandRowLabel : undefined}
                 aria-expanded={canToggle ? isOpen : false}
                 aria-controls={canToggle ? contentId : undefined}

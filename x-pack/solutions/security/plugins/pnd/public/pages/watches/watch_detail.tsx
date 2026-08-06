@@ -372,7 +372,7 @@ export const WatchDetailPage: React.FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={stubToast}>
+            <EuiButtonEmpty size="s" iconType="plusCircle" onClick={stubToast}>
               {i18n.ADD_CAPABILITY}
             </EuiButtonEmpty>
           </EuiFlexItem>

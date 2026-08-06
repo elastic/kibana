@@ -130,7 +130,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 disableScreenReaderOutput
               >
                 <EuiButtonIcon
-                  iconType="expand"
+                  iconType="maximize"
                   size="xs"
                   color="text"
                   onClick={() => setActiveFlyoutServiceId(service.id)}

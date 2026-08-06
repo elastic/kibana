@@ -312,7 +312,7 @@ export function ServiceSettingsFlyout({
                       )}
                     </EuiFlexGroup>
                   ))}
-                  <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={handleRegionRowAdd}>
+                  <EuiButtonEmpty size="xs" iconType="plusCircle" onClick={handleRegionRowAdd}>
                     <FormattedMessage
                       id="xpack.ingestHub.serviceSettingsStep.flyout.regions.addRow"
                       defaultMessage="Add region"

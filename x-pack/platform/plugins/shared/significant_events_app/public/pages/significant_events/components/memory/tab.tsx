@@ -201,7 +201,7 @@ export function MemoryTab() {
                       disableScreenReaderOutput
                     >
                       <EuiButtonIcon
-                        iconType="plusInCircle"
+                        iconType="plusCircle"
                         aria-label={i18n.translate(
                           'xpack.significantEventsApp.memory.newEntryButton',
                           {
@@ -233,7 +233,7 @@ export function MemoryTab() {
                         disableScreenReaderOutput
                       >
                         <EuiButtonIcon
-                          iconType="boxesHorizontal"
+                          iconType="boxesVertical"
                           aria-label={i18n.translate(
                             'xpack.significantEventsApp.memory.workflowActionsButton',
                             {

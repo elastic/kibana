@@ -258,7 +258,7 @@ export const CreateAiIndexPage = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               iconSide="right"
               data-test-subj="contextCreateAiIndexButton"
               onClick={createAndContinue}

@@ -74,7 +74,7 @@ export const MultiSelectFilter = <TValue extends string>({
       button={
         <EuiFilterButton
           data-test-subj={dataTestSubj}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isOpen}
           numFilters={options.length}
           hasActiveFilters={selected.length > 0}
