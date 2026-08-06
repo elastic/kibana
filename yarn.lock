@@ -10119,20 +10119,20 @@
   resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.25.1.tgz#0c91f23cccdc007801558ab79371df6a3884b721"
   integrity sha512-erG2RbA8QQMKW+D9Y7Uahez1dU+TzmyTzv9qlB7b0Pr/DS2SmUg5H8pJbkLcRrSxoshczZdB1UqsuE3RAk7UYQ==
 
-"@launchdarkly/js-server-sdk-common@2.19.3":
-  version "2.19.3"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.19.3.tgz#831a14a1df84137e0caaf7b776c13c7e9d7ec4cd"
-  integrity sha512-1VTbCagS11S5LCefGTzLNXwgdGwdQBjEkymjh5O/TfdguPADX6yRCFSAjBWtw7Hb9H8C8NAQ6hY/fpadonKgUA==
+"@launchdarkly/js-server-sdk-common@2.19.2":
+  version "2.19.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.19.2.tgz#6296d91950f8db5f72ac4ff4a5ee16b047f05d4a"
+  integrity sha512-SZApHxn0PqYyRFfXtrJKQAGx6tlLD2sV0XvqOUkUdey1lKeObOL4hIw+70gQ3jrRAIvEH+SBC0uqlJ7uGlrRyA==
   dependencies:
     "@launchdarkly/js-sdk-common" "2.25.1"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@9.12.1":
-  version "9.12.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.12.1.tgz#e95cd8559587f598e1445d1c4bb593bf27923444"
-  integrity sha512-GX33IDZ/e1EvzRTO5Wn0X6samUSqKthJT3P0Y8P2gQ0D1peswJ/QsPcKZoPgu7QMWSC2wkFKQ8jkEAJguHsIow==
+"@launchdarkly/node-server-sdk@9.11.3":
+  version "9.11.3"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.11.3.tgz#d59a1daa868f4c5f37eb5fc48533fa916afbfcfe"
+  integrity sha512-Nhw7kZmTE14pzSEO06ttSjhAPeVVtFQoGbaJ33Bf3fxNPUCR8ZIBALzPVnZTTWz+hAqhrntMp8JzKcA7Bw6GCQ==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.19.3"
+    "@launchdarkly/js-server-sdk-common" "2.19.2"
     https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
@@ -10143,10 +10143,10 @@
   dependencies:
     "@launchdarkly/js-sdk-common" "2.25.1"
 
-"@launchdarkly/openfeature-node-server@1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.3.3.tgz#b137996ea98b998062522e05ddc6e91784fb2336"
-  integrity sha512-5Wgmi95Gtp/wWdOA26CSHAVSDul8JSEULHDMugnSK1ZYYbw2HiVe8ogxC3o+cHxrsfZMHAReXoXLEacF02K3AQ==
+"@launchdarkly/openfeature-node-server@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.3.0.tgz#782e832e0a5178c31f8f19090a8d9365a4a449b2"
+  integrity sha512-yaYhlS76Iboiz96kDfTNvdrwaH9q75T+HQ2LKN+gAD9DkUc6Jm+2Ypp0A1fxJPHgIJd68pRCXhZYG4YLzj7+Bw==
   dependencies:
     "@launchdarkly/openfeature-js-server-common" "1.0.0"
 
