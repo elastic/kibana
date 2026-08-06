@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { submitFeedback } from './feedback_api';
 
 type Vote = 'up' | 'down' | null;
@@ -17,6 +17,7 @@ export interface FeedbackState {
   modalOpen: boolean;
   inviteVisible: boolean;
   submitted: boolean;
+  submittedFading: boolean;
   isSubmitting: boolean;
 }
 
@@ -30,6 +31,9 @@ export interface UseFeedbackReturn extends FeedbackState {
   submit: () => Promise<void>;
 }
 
+const SUBMITTED_VISIBLE_MS = 2500;
+const SUBMITTED_FADE_MS = 500;
+
 export const useFeedback = (roundId: string): UseFeedbackReturn => {
   const [vote, setVoteState] = useState<Vote>(null);
   const [chips, setChips] = useState<string[]>([]);
@@ -37,24 +41,41 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
   const [modalOpen, setModalOpen] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedFading, setSubmittedFading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refs so callbacks always see latest values without re-creating
   const voteRef = useRef(vote);
   const chipsRef = useRef(chips);
   const commentRef = useRef(comment);
+  const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   voteRef.current = vote;
   chipsRef.current = chips;
   commentRef.current = comment;
 
+  useEffect(() => {
+    return () => {
+      if (timer1Ref.current) clearTimeout(timer1Ref.current);
+      if (timer2Ref.current) clearTimeout(timer2Ref.current);
+    };
+  }, []);
+
+  const clearSubmittedTimers = useCallback(() => {
+    if (timer1Ref.current) clearTimeout(timer1Ref.current);
+    if (timer2Ref.current) clearTimeout(timer2Ref.current);
+  }, []);
+
   const reset = useCallback(() => {
+    clearSubmittedTimers();
     setVoteState(null);
     setChips([]);
     setCommentState('');
     setModalOpen(false);
     setInviteVisible(false);
     setSubmitted(false);
-  }, []);
+    setSubmittedFading(false);
+  }, [clearSubmittedTimers]);
 
   const setVote = useCallback(
     (next: 'up' | 'down') => {
@@ -65,9 +86,11 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
         return;
       }
 
+      clearSubmittedTimers();
       setChips([]);
       setCommentState('');
       setSubmitted(false);
+      setSubmittedFading(false);
 
       if (next === 'down') {
         setVoteState('down');
@@ -80,7 +103,7 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
         submitFeedback({ roundId, vote: 'up', chips: [], comment: '' });
       }
     },
-    [roundId, reset]
+    [roundId, reset, clearSubmittedTimers]
   );
 
   const toggleChip = useCallback((chip: string) => {
@@ -97,8 +120,8 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
   }, []);
 
   const closeModal = useCallback(() => {
-    reset();
-  }, [reset]);
+    setModalOpen(false);
+  }, []);
 
   const dismissInvite = useCallback(() => setInviteVisible(false), []);
 
@@ -114,11 +137,22 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
         comment: commentRef.current,
       });
       setSubmitted(true);
+      setSubmittedFading(false);
       setModalOpen(false);
+
+      // After SUBMITTED_VISIBLE_MS, start fading; remove after fade completes
+      clearSubmittedTimers();
+      timer1Ref.current = setTimeout(() => {
+        setSubmittedFading(true);
+        timer2Ref.current = setTimeout(() => {
+          setSubmitted(false);
+          setSubmittedFading(false);
+        }, SUBMITTED_FADE_MS);
+      }, SUBMITTED_VISIBLE_MS);
     } finally {
       setIsSubmitting(false);
     }
-  }, [roundId]);
+  }, [roundId, clearSubmittedTimers]);
 
   return {
     vote,
@@ -127,6 +161,7 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
     modalOpen,
     inviteVisible,
     submitted,
+    submittedFading,
     isSubmitting,
     setVote,
     toggleChip,

@@ -15,7 +15,7 @@ export const FeedbackSubmitted: React.FC = () => (
       <EuiIcon type="checkInCircleFilled" color="success" size="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
+      <EuiText size="xs">
         <span>
           {i18n.translate('xpack.agentBuilder.feedback.submitted', {
             defaultMessage: 'Thanks for your feedback',
