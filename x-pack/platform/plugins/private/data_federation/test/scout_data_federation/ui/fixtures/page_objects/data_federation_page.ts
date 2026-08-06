@@ -6,7 +6,6 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export class DataFederationPage {
   readonly pageTitle;
@@ -97,9 +96,9 @@ export class DataFederationPage {
 
   async confirmModalConfirm(): Promise<void> {
     const modal = this.getConfirmModal();
-    await expect(modal).toBeVisible();
+    await modal.waitFor({ state: 'visible' });
     await modal.locator('[data-test-subj="confirmModalConfirmButton"]').click();
-    await expect(modal).toBeHidden();
+    await modal.waitFor({ state: 'hidden' });
   }
 
   async createS3DataSource({
@@ -116,7 +115,7 @@ export class DataFederationPage {
     secretKey: string;
   }): Promise<void> {
     await this.connectDataSourceButton.click();
-    await expect(this.createDataSourceFlyout).toBeVisible();
+    await this.createDataSourceFlyout.waitFor({ state: 'visible' });
 
     await this.createDataSourceFlyoutName.fill(name);
     await this.createDataSourceFlyoutDescription.fill(description);
@@ -125,8 +124,7 @@ export class DataFederationPage {
     await this.createDataSourceFlyoutS3SecretKey.fill(secretKey);
 
     await this.createDataSourceFlyoutSubmit.click();
-    await expect(this.createDataSourceFlyoutSaveError).toHaveCount(0);
-    await expect(this.createDataSourceFlyout).toBeHidden();
+    await this.createDataSourceFlyout.waitFor({ state: 'hidden' });
   }
 
   async editDataSourceDescription({
@@ -138,19 +136,19 @@ export class DataFederationPage {
   }): Promise<void> {
     const row = this.getDataSourceRow(dataSourceName);
     await row.locator('[data-test-subj="dataSetsEditButton"]').click();
-    await expect(this.editDataSourceFlyout).toBeVisible();
+    await this.editDataSourceFlyout.waitFor({ state: 'visible' });
 
     await this.createDataSourceFlyoutDescription.fill(description);
     await this.createDataSourceFlyoutSubmit.click();
 
-    await expect(this.editDataSourceFlyout).toBeHidden();
+    await this.editDataSourceFlyout.waitFor({ state: 'hidden' });
   }
 
   async deleteDataSource(dataSourceName: string): Promise<void> {
     const row = this.getDataSourceRow(dataSourceName);
     await row.locator('[data-test-subj="dataSetsDeleteIconButton"]').click();
     await this.confirmModalConfirm();
-    await expect(row).toBeHidden();
+    await row.waitFor({ state: 'hidden' });
   }
 
   async createDataSet({
@@ -164,9 +162,8 @@ export class DataFederationPage {
     resource: string;
     format: string;
   }): Promise<void> {
-    await expect(this.createDataSetButton).toBeEnabled();
     await this.createDataSetButton.click();
-    await expect(this.createDataSetFlyout).toBeVisible();
+    await this.createDataSetFlyout.waitFor({ state: 'visible' });
 
     await this.createDataSetFlyoutDataSource.selectOption({ value: dataSourceName });
     await this.createDataSetFlyoutName.fill(name);
@@ -174,8 +171,7 @@ export class DataFederationPage {
     await this.createDataSetFlyoutSettingsFormat.selectOption({ value: format });
 
     await this.createDataSetFlyoutSubmit.click();
-    await expect(this.createDataSetFlyoutSaveError).toHaveCount(0);
-    await expect(this.createDataSetFlyout).toBeHidden();
+    await this.createDataSetFlyout.waitFor({ state: 'hidden' });
   }
 
   async editDataSetResource({
@@ -187,18 +183,18 @@ export class DataFederationPage {
   }): Promise<void> {
     const row = this.getDataSetRow(dataSetName);
     await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
-    await expect(this.editDataSetFlyout).toBeVisible();
+    await this.editDataSetFlyout.waitFor({ state: 'visible' });
 
     await this.createDataSetFlyoutResource.fill(resource);
     await this.createDataSetFlyoutSubmit.click();
 
-    await expect(this.editDataSetFlyout).toBeHidden();
+    await this.editDataSetFlyout.waitFor({ state: 'hidden' });
   }
 
   async deleteDataSet(dataSetName: string): Promise<void> {
     const row = this.getDataSetRow(dataSetName);
     await row.locator('[data-test-subj="dataSetsSetsDeleteIconButton"]').click();
     await this.confirmModalConfirm();
-    await expect(row).toBeHidden();
+    await row.waitFor({ state: 'hidden' });
   }
 }
