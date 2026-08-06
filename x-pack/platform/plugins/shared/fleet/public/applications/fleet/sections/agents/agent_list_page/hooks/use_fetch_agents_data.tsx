@@ -238,34 +238,42 @@ export function useFetchAgentsData() {
   const [allTags, setAllTags] = useState<string[]>();
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
-  const { data: actionStatusData } = useQuery({
+  const { data: errorActionIds } = useQuery({
     refetchInterval: REFRESH_INTERVAL_MS,
     queryKey: ['get-action-statuses'],
-    initialData: { errorActionIds: [] as string[], scheduledActionsCount: 0 },
+    initialData: [] as string[],
     queryFn: async () => {
-      const actionStatusResponse = await sendGetActionStatus({
+      const response = await sendGetActionStatus({
         perPage: MAX_AGENT_ACTIONS,
+        latest: REFRESH_INTERVAL_MS + 5000,
       });
-      const items = actionStatusResponse.data?.items ?? [];
-      return {
-        errorActionIds: items
-          .filter((action) => (action.latestErrors?.length ?? 0) > 0)
-          .map((action) => action.actionId),
-        scheduledActionsCount: items
-          .filter((action) => action.type === 'UNENROLL' && isScheduledAction(action))
-          .reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0),
-      };
+      return (response.data?.items ?? [])
+        .filter((action) => (action.latestErrors?.length ?? 0) > 0)
+        .map((action) => action.actionId);
+    },
+  });
+
+  const { data: scheduledActionsCount } = useQuery({
+    refetchInterval: REFRESH_INTERVAL_MS,
+    queryKey: ['get-scheduled-action-statuses'],
+    initialData: 0,
+    queryFn: async () => {
+      const response = await sendGetActionStatus({
+        perPage: MAX_AGENT_ACTIONS,
+        scheduledOnly: true,
+      });
+      return (response.data?.items ?? [])
+        .filter((action) => action.type === 'UNENROLL' && isScheduledAction(action))
+        .reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0);
     },
   });
 
   useEffect(() => {
-    const allRecentActionErrors = [
-      ...new Set([...latestAgentActionErrors, ...actionStatusData.errorActionIds]),
-    ];
+    const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...errorActionIds])];
     if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
       setLatestAgentActionErrors(allRecentActionErrors);
     }
-  }, [latestAgentActionErrors, actionStatusData.errorActionIds]);
+  }, [latestAgentActionErrors, errorActionIds]);
 
   // Use session storage state for pagination and sort
   const queryKeyPagination = JSON.stringify({
@@ -475,7 +483,7 @@ export function useFetchAgentsData() {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
-    scheduledActionsCount: actionStatusData.scheduledActionsCount,
+    scheduledActionsCount,
     isUsingFilter,
     clearFilters: sessionState.clearFilters,
     onTableChange: sessionState.onTableChange,
