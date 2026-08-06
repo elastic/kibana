@@ -15,7 +15,6 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +48,7 @@ import {
   apiPublishesIsEditableByUser,
 } from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
+import { isESQLModeEnabled } from './utils';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -121,8 +121,6 @@ export function initializeEditApi(
   const isManaged = (currentState: LensRuntimeState) => {
     return currentState.managed || (hasManagedApi(parentApi) ? parentApi.isManaged : false);
   };
-
-  const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
   const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
@@ -231,7 +229,7 @@ export function initializeEditApi(
     }
     const currentState = getState();
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled({ uiSettings })) {
       return false;
     }
     if (isManaged(currentState)) {
