@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EbtClickAttrs, EbtClickAttrsWithoutAction, EbtClickAttrsElementOnly } from './types';
-export * from './constants';
-export * from './helpers';
-export { useEcsFieldNames } from './hooks/use_ecs_field_names';
+import React from 'react';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const UnifiedDocViewerObservabilityTracesGenAi = dynamic(() => import('.'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});
