@@ -83,6 +83,11 @@ export function ChatMessageText({
     ol > li > p {
       margin-bottom: ${euiTheme.size.s};
     }
+
+    .euiMarkdownFormat > ul > li,
+    .euiMarkdownFormat > ol > li {
+      line-height: ${euiTheme.size.l};
+    }
   `;
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
