@@ -48,7 +48,11 @@ describe('GithubConnector', () => {
   const mockJson = { ok: true };
   const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
 
-  const mockWriteResponse = { id: 1, number: 42, html_url: 'https://github.com/elastic/kibana/issues/42' };
+  const mockWriteResponse = {
+    id: 1,
+    number: 42,
+    html_url: 'https://github.com/elastic/kibana/issues/42',
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
