@@ -65,9 +65,21 @@ describe('getCreateAlertEventStepDefinition', () => {
     await handler(context);
 
     expect(mockIngest).toHaveBeenCalledWith(
-      context.input,
+      expect.objectContaining(context.input),
       expect.objectContaining({ abortSignal: context.abortSignal })
     );
+  });
+
+  it('throws ValidationError when source violates schema refinements', async () => {
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: jest.fn() });
+
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const context = createMockContext();
+    context.input = { ...context.input, source: 'elastic_monitoring' };
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
   });
 
   it('propagates PermissionError from the factory unchanged', async () => {

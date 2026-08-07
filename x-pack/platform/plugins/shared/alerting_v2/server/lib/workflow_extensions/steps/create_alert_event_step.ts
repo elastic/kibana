@@ -8,6 +8,7 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import { createAlertEventDataSchema } from '@kbn/alerting-v2-schemas';
 import { createAlertEventStepCommonDefinition } from '../../../../common/workflows/steps/create_alert_event_step_common';
 import type { AlertEventsClientApi } from '../../../../types';
 
@@ -20,13 +21,21 @@ export function getCreateAlertEventStepDefinition(
       const client = await getAlertEventsClient(context.contextManager.getFakeRequest());
 
       try {
-        const result = await client.createAlertEvent(context.input, {
+        const parsed = createAlertEventDataSchema.parse(context.input);
+        const result = await client.createAlertEvent(parsed, {
           abortSignal: context.abortSignal,
         });
         return { output: result };
       } catch (error) {
         if (error instanceof ExecutionError) throw error;
         if (error instanceof Error && error.name === 'AbortError') throw error;
+        if (error instanceof Error && error.name === 'ZodError') {
+          throw new ExecutionError({
+            type: 'ValidationError',
+            message: error.message,
+            details: { name: error.name, message: error.message },
+          });
+        }
         throw new ExecutionError({
           type: 'ApiError',
           message: error instanceof Error ? error.message : 'Failed to create alert event',
