@@ -22,7 +22,7 @@
 @elastic/esql@4.16.0
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@117.1.0
+@elastic/eui@118.0.0
 @elastic/numeral@2.5.1
 @elastic/pretty-printer@4.16.0
 @elastic/prismjs-esql@4.14.0
