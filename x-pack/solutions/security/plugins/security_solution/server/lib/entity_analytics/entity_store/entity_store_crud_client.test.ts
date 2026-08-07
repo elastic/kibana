@@ -20,6 +20,8 @@ import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
 import type { TransformPreviewTransformResponse } from '@elastic/elasticsearch/lib/api/types';
 
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: jest.fn() }));
+
 describe('EntityStoreCrudClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const esClientMock = clusterClientMock.asCurrentUser;
@@ -201,9 +203,7 @@ describe('EntityStoreCrudClient', () => {
       jest.useFakeTimers();
       jest.setSystemTime(mockedDate);
 
-      // overly complex mock implementation to work around type issues
-      // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
-      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+      (uuid.v4 as jest.Mock).mockReturnValueOnce('123');
 
       const doc: Entity = {
         entity: {
@@ -256,7 +256,7 @@ describe('EntityStoreCrudClient', () => {
         refresh: 'wait_for',
       });
 
-      expect(v4Spy).toBeCalledTimes(1);
+      expect(uuid.v4).toBeCalledTimes(1);
     });
 
     it('when valid update entity for generic type', async () => {
@@ -268,9 +268,7 @@ describe('EntityStoreCrudClient', () => {
       jest.useFakeTimers();
       jest.setSystemTime(mockedDate);
 
-      // overly complex mock implementation to work around type issues
-      // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
-      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+      (uuid.v4 as jest.Mock).mockReturnValueOnce('123');
 
       const doc: Entity = {
         entity: {
@@ -332,7 +330,7 @@ describe('EntityStoreCrudClient', () => {
         refresh: 'wait_for',
       });
 
-      expect(v4Spy).toBeCalledTimes(1);
+      expect(uuid.v4).toBeCalledTimes(1);
     });
 
     it('when valid update entity using force', async () => {
@@ -344,9 +342,7 @@ describe('EntityStoreCrudClient', () => {
       jest.useFakeTimers();
       jest.setSystemTime(mockedDate);
 
-      // overly complex mock implementation to work around type issues
-      // https://github.com/uuidjs/uuid/issues/825#issuecomment-2519038887
-      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+      (uuid.v4 as jest.Mock).mockReturnValueOnce('123');
 
       const doc: Entity = {
         host: {
@@ -425,7 +421,7 @@ describe('EntityStoreCrudClient', () => {
         refresh: 'wait_for',
       });
 
-      expect(v4Spy).toBeCalledTimes(1);
+      expect(uuid.v4).toBeCalledTimes(1);
     });
 
     it('when valid update entity, but no entity found, just create', async () => {
@@ -448,7 +444,7 @@ describe('EntityStoreCrudClient', () => {
       jest.useFakeTimers();
       jest.setSystemTime(mockedDate);
 
-      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+      (uuid.v4 as jest.Mock).mockReturnValueOnce('123');
 
       const doc: Entity = {
         entity: {
@@ -491,7 +487,7 @@ describe('EntityStoreCrudClient', () => {
         },
         refresh: 'wait_for',
       });
-      expect(v4Spy).toBeCalledTimes(1);
+      expect(uuid.v4).toBeCalledTimes(1);
       expect(esClientMock.transform.previewTransform).toBeCalledWith(
         {
           pivot: {
