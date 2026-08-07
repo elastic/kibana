@@ -129,8 +129,7 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
       },
     });
     expect(properties.stepUsage).toEqual({
-      type: 'object',
-      dynamic: false,
+      type: 'nested',
       properties: {
         stepId: { type: 'keyword', ignore_above: 1024 },
         connectorId: { type: 'keyword', ignore_above: 1024 },
