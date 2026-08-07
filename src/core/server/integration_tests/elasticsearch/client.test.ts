@@ -73,7 +73,8 @@ function createFakeElasticsearchServer(): Promise<http.Server> {
   });
 }
 
-describe('fake elasticsearch', () => {
+// Failing: See https://github.com/elastic/kibana/issues/171295
+describe.skip('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
