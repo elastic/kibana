@@ -20,7 +20,12 @@ import type { OptionsListValidationAggregationBuilder } from './types';
  */
 export const getValidationAggregationBuilder: () => OptionsListValidationAggregationBuilder =
   () => ({
-    buildAggregation: ({ selectedOptions, fieldName, fieldSpec, filters }: OptionsListRequestBody) => {
+    buildAggregation: ({
+      selectedOptions,
+      fieldName,
+      fieldSpec,
+      filters,
+    }: OptionsListRequestBody) => {
       let selectedOptionsFilters;
       if (selectedOptions) {
         selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
