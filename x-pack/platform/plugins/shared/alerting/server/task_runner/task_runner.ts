@@ -571,6 +571,7 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        tags: runRuleParams.rule.tags,
       });
 
       // Set rule monitoring data

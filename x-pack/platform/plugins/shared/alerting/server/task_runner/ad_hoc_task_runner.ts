@@ -399,6 +399,7 @@ export class AdHocTaskRunner implements CancellableTask {
         name: rule.name,
         consumer: rule.consumer,
         revision: rule.revision,
+        tags: rule.tags,
       });
 
       try {

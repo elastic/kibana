@@ -555,6 +555,7 @@ describe('Task Runner Cancel', () => {
       name: mockedRuleTypeSavedObject.name,
       consumer: mockedRuleTypeSavedObject.consumer,
       revision: mockedRuleTypeSavedObject.revision,
+      tags: mockedRuleTypeSavedObject.tags,
     });
     expect(alertingEventLogger.getStartAndDuration).toHaveBeenCalled();
 
