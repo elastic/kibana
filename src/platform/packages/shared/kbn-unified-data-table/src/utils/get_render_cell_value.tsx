@@ -24,11 +24,10 @@ import type {
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer } from '../types';
+import type { CustomCellRenderer, SourceDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import { SOURCE_CELL_RENDERER } from '../constants';
 import { JsonTreeViewer } from '../components/json_tree_viewer/json_tree_viewer';
 import {
   getTreeExpansion,
@@ -52,6 +51,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
+  sourceDisplayMode,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -63,6 +63,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
+  sourceDisplayMode: SourceDisplayMode;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -190,51 +191,48 @@ export const getRenderCellValueFn = ({
       });
     }
 
-    if (
-      field?.type === '_source' ||
-      useTopLevelObjectColumns ||
-      (isPlainRecord && columnId === '_source')
-    ) {
-      // Evaluation toggle (see SOURCE_CELL_RENDERER): swap the field-summary view for the
-      // JSON tree of the document. In-grid only — the popover path is untouched.
-      if (SOURCE_CELL_RENDERER === 'jsonTreeViewer') {
-        const documentTree = buildDocumentTree({
-          row,
-          dataView,
-          columnsMeta,
-          shouldShowFieldHandler,
-        });
-        if (isInTableSearchCounting && inTableSearchTerm) {
-          // Offscreen match-counting pass: the in-table search wrapper only walks the cell's text to
-          // count matches. Skip the interactive tree entirely and render the document's content as
-          // cheap text — doing this (instead of mounting the full tree) for every row is what keeps
-          // Find-in-table responsive on large result sets.
-          return <span className={CELL_CLASS}>{getDocumentText(documentTree)}</span>;
-        }
-        // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
-        // remount in-table search forces on every keystroke.
-        return (
-          // The tree stays unaware of the grid: it lets Escape bubble, and the cell renderer turns
-          // that into "return focus to the grid cell" so the grid's own navigation resumes.
-          <span
-            className={CELL_CLASS}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
-                event.stopPropagation();
-                event.currentTarget.closest<HTMLElement>('[role="gridcell"]')?.focus();
-              }
-            }}
-          >
-            <JsonTreeViewer
-              json={documentTree}
-              initialState={getTreeExpansion(row.raw)}
-              onStateChange={(state) => setTreeExpansion(row.raw, state)}
-              expandNodesContainingTerm={inTableSearchTerm}
-              formatValue={formatTreeValue}
-            />
-          </span>
-        );
+    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+
+    if (isSourceColumn && sourceDisplayMode === 'json') {
+      const documentTree = buildDocumentTree({
+        row,
+        dataView,
+        columnsMeta,
+        shouldShowFieldHandler,
+      });
+      if (isInTableSearchCounting && inTableSearchTerm) {
+        // Offscreen match-counting pass: the in-table search wrapper only walks the cell's text to
+        // count matches. Skip the interactive tree entirely and render the document's content as
+        // cheap text — doing this (instead of mounting the full tree) for every row is what keeps
+        // Find-in-table responsive on large result sets.
+        return <span className={CELL_CLASS}>{getDocumentText(documentTree)}</span>;
       }
+      // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
+      // remount in-table search forces on every keystroke.
+      return (
+        // The tree stays unaware of the grid: it lets Escape bubble, and the cell renderer turns
+        // that into "return focus to the grid cell" so the grid's own navigation resumes.
+        <span
+          className={CELL_CLASS}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.stopPropagation();
+              event.currentTarget.closest<HTMLElement>('[role="gridcell"]')?.focus();
+            }
+          }}
+        >
+          <JsonTreeViewer
+            json={documentTree}
+            initialState={getTreeExpansion(row.raw)}
+            onStateChange={(state) => setTreeExpansion(row.raw, state)}
+            expandNodesContainingTerm={inTableSearchTerm}
+            formatValue={formatTreeValue}
+          />
+        </span>
+      );
+    }
+
+    if (isSourceColumn || useTopLevelObjectColumns) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}

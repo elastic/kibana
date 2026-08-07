@@ -11,12 +11,12 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, within } from '@testing-library/react';
-import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
+import { UnifiedDataTableSourceColumnHeader } from './data_table_source_column_header';
 
-describe('UnifiedDataTableSummaryColumnHeader', () => {
+describe('UnifiedDataTableSourceColumnHeader', () => {
   it('renders column name and tooltip icon', () => {
     renderWithKibanaRenderContext(
-      <UnifiedDataTableSummaryColumnHeader columnDisplayName="My Column" />
+      <UnifiedDataTableSourceColumnHeader columnDisplayName="My Column" />
     );
 
     const column = screen.getByText('My Column');
@@ -29,7 +29,7 @@ describe('UnifiedDataTableSummaryColumnHeader', () => {
     const customTitle = 'Custom title';
 
     renderWithKibanaRenderContext(
-      <UnifiedDataTableSummaryColumnHeader
+      <UnifiedDataTableSourceColumnHeader
         columnDisplayName="Column"
         tooltipContent={customContent}
         tooltipTitle={customTitle}
@@ -44,7 +44,7 @@ describe('UnifiedDataTableSummaryColumnHeader', () => {
   });
 
   it('renders default column name and tooltip', async () => {
-    renderWithKibanaRenderContext(<UnifiedDataTableSummaryColumnHeader />);
+    renderWithKibanaRenderContext(<UnifiedDataTableSourceColumnHeader />);
 
     expect(screen.getByText('Summary')).toBeVisible();
 

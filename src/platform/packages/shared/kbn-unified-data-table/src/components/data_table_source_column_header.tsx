@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
@@ -30,7 +31,7 @@ const SUMMARY_COLUMN_NAME = i18n.translate('unifiedDataTable.tableHeader.summary
   defaultMessage: 'Summary',
 });
 
-export const UnifiedDataTableSummaryColumnHeader = ({
+export const UnifiedDataTableSourceColumnHeader = ({
   headerRowHeight = ROWS_HEIGHT_OPTIONS.single,
   columnDisplayName = SUMMARY_COLUMN_NAME,
   tooltipContent = DEFAULT_COLUMN_HEADER_TOOLTIP_CONTENT,
@@ -39,13 +40,27 @@ export const UnifiedDataTableSummaryColumnHeader = ({
 }: {
   headerRowHeight?: number;
   columnDisplayName?: string;
-  tooltipContent?: React.ReactNode | string;
+  tooltipContent?: React.ReactNode | string | null;
   tooltipTitle?: string;
   iconTipDataTestSubj?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const marginStyle = useMemo(() => ({ marginLeft: euiTheme.size.xs }), [euiTheme.size.xs]);
+
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {columnDisplayName}
+      {tooltipContent && (
+        <span css={marginStyle}>
+          <EuiIconTip
+            data-test-subj={iconTipDataTestSubj}
+            type="question"
+            content={tooltipContent}
+            title={tooltipTitle}
+          />
+        </span>
+      )}
     </ColumnHeaderTruncateContainer>
   );
 };

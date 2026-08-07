@@ -78,6 +78,7 @@ import type {
   DataGridPaginationMode,
   CustomBulkActions,
   DocMap,
+  SourceDisplayMode,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -523,6 +524,12 @@ interface InternalUnifiedDataTableProps {
    * When true, filter actions on computed columns will be hidden.
    */
   hideFilteringOnComputedColumns?: boolean;
+
+  /**
+   * Set to 'json' to display a JSON representation of the source document
+   * instead of the Summary column. Defualt is summary.
+   */
+  sourceDisplayMode?: SourceDisplayMode;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -613,6 +620,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
+      sourceDisplayMode = 'summary',
     },
     ref
   ) => {
@@ -877,6 +885,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           columnsMeta,
+          sourceDisplayMode,
         }),
       [
         dataView,
@@ -888,6 +897,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         isPlainRecord,
         dataGridDensity,
         columnsMeta,
+        sourceDisplayMode,
       ]
     );
 
@@ -1073,6 +1083,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           disableCellActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
+          sourceDisplayMode,
         }),
       [
         cellActionsHandling,
@@ -1099,6 +1110,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         sortedColumns,
         disableCellActions,
         hideFilteringOnComputedColumns,
+        sourceDisplayMode,
       ]
     );
 

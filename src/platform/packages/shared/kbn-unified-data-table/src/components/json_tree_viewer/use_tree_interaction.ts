@@ -191,10 +191,6 @@ export const useRovingTreeNavigation = (
   const onRowKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>, row: NodeRow | PagerRow) => {
       const index = orderedIds.indexOf(rowKey(row));
-      // Claim the keys the tree navigates with. `stopPropagation` is the important half: EuiDataGrid
-      // moves the focused cell from a bubble-phase keydown on the grid body, so without it Arrow/
-      // Home/End would jump between grid cells instead of tree rows. Keys the tree does not handle
-      // (Tab, Escape, PageUp/Down) still bubble, so the grid's own navigation keeps working.
       const claim = () => {
         event.preventDefault();
         event.stopPropagation();

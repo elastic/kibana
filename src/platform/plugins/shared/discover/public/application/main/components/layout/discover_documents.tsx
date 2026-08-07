@@ -119,7 +119,8 @@ function DiscoverDocumentsComponent({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata, discoverFeatureFlags } =
+    services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -437,6 +438,12 @@ function DiscoverDocumentsComponent({
     [isDataLoading, styles.progress]
   );
 
+  // This is temporary, sourceDisplayMode should be get from the app state.
+  const sourceDisplayMode = useMemo(
+    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
+    [discoverFeatureFlags]
+  );
+
   const canSaveDiscoverTable = services.embeddableEditor.canSaveToDashboard();
 
   const saveToDashboardButton = useMemo(
@@ -638,6 +645,7 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
+            sourceDisplayMode={sourceDisplayMode}
           />
         </CellActionsProvider>
       </div>
