@@ -196,7 +196,7 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, events: events.filter((e) => e.status !== 'pending') };
+    return { detections, events };
   },
 });
 

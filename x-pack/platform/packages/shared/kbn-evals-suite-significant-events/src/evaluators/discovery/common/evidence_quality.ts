@@ -26,22 +26,8 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
-    id: 'evidence_description_is_hypothesis_test',
-    text: 'Every signal where the agent set `confirmed` to true or false must use: "Found: [signature/target from row]. Impact: [blocked/degraded path or none/un affected]. Verdict: confirms | refutes | inconclusive." Omit Impact only for zero-row refutes ("Found: no match. Verdict: refutes."). Descriptions must not name dependency chains, upstream causes, or topology — those belong in causal_features and blast_radius. Signals without a confirmed value were not verified and are exempt.',
-    score: 1,
-  },
-  ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
-];
-
-/**
- * Judge-authored descriptions follow the compact re-ran/Found/Impact/Verdict contract from the judge
- * instructions (`<communication>`); carried entries keep whatever format they arrived with,
- * including the discovery-agent Found/Impact/Verdict template.
- */
-export const JUDGE_EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
-  {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every signal the judge verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must use: "re-ran at <HH:MMZ> — Found: [signature, target, or endpoint]. Impact: [persistence, recovery, or blocked path]. Verdict: confirms | refutes | inconclusive." Do not put topology or dependency chains in the description. The discovery-agent Found/Impact/Verdict template is not acceptable for these judge-authored entries (they require the re-ran prefix). Entries carried forward unchanged from the input (older `collected_at`) are acceptable in any format. Signals without a confirmed value were not verified and are exempt.',
+    text: 'Every signal the agent verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must describe the check in one to three plain sentences covering what was checked, what the data showed, and what that means for the event. The four-part template ("Testing: … Expected if true: … Found: … Verdict: …") is not acceptable for these agent-authored entries. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format, including the four-part template. Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,

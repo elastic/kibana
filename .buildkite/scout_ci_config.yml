@@ -75,6 +75,7 @@ plugins:
     - serverless_observability
     - share
     - significant_events
+    - significant_events_app
     - slo
     - snapshot_restore
     - spaces
@@ -88,6 +89,7 @@ plugins:
     - unified_search
     - upgrade_assistant
     - uptime
+    - usage_collection
     - ux
     - vis_types/timeseries
     - watcher

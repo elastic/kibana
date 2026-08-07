@@ -46,6 +46,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
 
+  // ML anomaly detection (Agent Builder skill tools)
+  `${internalNamespaces.ml}.ad_get_job_info`,
+  `${internalNamespaces.ml}.ad_create_job`,
+  `${internalNamespaces.ml}.ad_manage_job_state`,
+  `${internalNamespaces.ml}.ad_update_job_config`,
+  `${internalNamespaces.ml}.query_anomalies`,
+
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
@@ -57,6 +64,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.create_watchlist`,
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.get_entity_graph`,
   `${internalNamespaces.security}.list_watchlists`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
@@ -127,7 +135,6 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
-  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -212,6 +219,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.investigation',
   'observability.service-map',
 
+  // ML
+  `${internalNamespaces.ml}.anomaly-detection`,
+
   // Search
   `${internalNamespaces.search}.keyword-search`,
   `${internalNamespaces.search}.catalog-ecommerce`,
@@ -287,6 +297,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
+  'security.entity_graph',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
