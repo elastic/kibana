@@ -106,3 +106,27 @@ export const MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 1;
 export const MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 50;
 export const MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES = 1;
 export const MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES = 20;
+
+/**
+ * Flaky rule throttle defaults.
+ *
+ * A rule is treated as flaky when it fires at least
+ * DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD change-point detections
+ * inside the detection lookback window. Suppressed rules are probed once their
+ * oldest unprocessed detection reaches
+ * DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES minutes old.
+ * Rules with severity_score at/above
+ * DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE are never suppressed.
+ */
+export const DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD = 10;
+export const MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD = 2;
+export const MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD = 1000;
+export const DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 360;
+export const MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 10;
+// The probe clock derives from detections inside the 24h detectionLookback window.
+// A probe age above 1440 can never be reached because detections age out first.
+export const MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 1440;
+export const DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 80;
+export const MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 0;
+// 101 means "no rule is exempt" — severity scores top out at 100.
+export const MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 101;

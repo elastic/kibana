@@ -29,6 +29,9 @@ export interface SignificantEventsScheduledReviewWorkflowTemplateValues
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
   maxReviewPasses: number;
+  flakyRuleDetectionThreshold: number;
+  flakyRuleProbeAfterMinutes: number;
+  flakyRuleExemptSeverityScore: number;
 }
 
 const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
@@ -73,13 +76,23 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 4,
+  version: 5,
   billable: false,
-  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, maxReviewPasses }) =>
+  yamlTemplate: ({
+    reviewIntervalMinutes,
+    discoveryBatchSize,
+    maxReviewPasses,
+    flakyRuleDetectionThreshold,
+    flakyRuleProbeAfterMinutes,
+    flakyRuleExemptSeverityScore,
+  }) =>
     renderTemplate(SCHEDULED_REVIEW_YAML, {
       __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
       __MAX_REVIEW_PASSES__: maxReviewPasses,
       __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
+      __FLAKY_RULE_DETECTION_THRESHOLD__: flakyRuleDetectionThreshold,
+      __FLAKY_RULE_PROBE_AFTER_MINUTES__: flakyRuleProbeAfterMinutes,
+      __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__: flakyRuleExemptSeverityScore,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;
