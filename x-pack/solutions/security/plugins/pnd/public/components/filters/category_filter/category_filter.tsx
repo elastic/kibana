@@ -7,16 +7,9 @@
 
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RecommendedAction } from '@kbn/pnd-common';
+import { CONVERSATION_CATEGORY_COLORS, type RecommendedAction } from '@kbn/pnd-common';
 import { CONVERSATION_QUEUE_CATEGORIES } from '../../conversation_queue';
 import { ALL_CATEGORIES } from './translations';
-
-const BUCKET_COLORS: Record<RecommendedAction, 'danger' | 'warning' | 'primary' | 'accent'> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'primary',
-  tune: 'accent',
-};
 
 interface CategoryFilterProps {
   selectedBucket: 'all' | RecommendedAction;
@@ -44,7 +37,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       <EuiFlexItem key={bucket.id} grow={false}>
         <EuiButton
           size="s"
-          color={BUCKET_COLORS[bucket.id]}
+          color={CONVERSATION_CATEGORY_COLORS[bucket.id]}
           fill={selectedBucket === bucket.id}
           onClick={() => onChange(selectedBucket === bucket.id ? 'all' : bucket.id)}
         >

@@ -97,6 +97,7 @@ export type {
 } from './impl/watches/watch_helpers';
 
 export {
+  CONVERSATION_CATEGORY_COLORS,
   MOCK_CLEAN_RUN_NOTE,
   MOCK_INVESTIGATIONS,
   MOCK_MANAGED_WATCHES,
