@@ -26,6 +26,7 @@ export {
 export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventInvestigation,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
@@ -40,6 +41,13 @@ export {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
