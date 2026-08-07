@@ -16,6 +16,7 @@
  * Engine pin: see build.sh YARA_VERSION / dist/ENGINE.md (matches Elastic Endpoint).
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +31,11 @@
 
 #define MAX_DIAGNOSTICS 64
 #define MAX_MESSAGE_LEN 512
-#define MAX_JSON_LEN (MAX_DIAGNOSTICS * (MAX_MESSAGE_LEN + 64) + 128)
+/* Escaped messages can be ~2x source length; budget both error and warning arrays. */
+#define MAX_JSON_ITEM_LEN (MAX_MESSAGE_LEN * 2 + 80)
+#define MAX_JSON_LEN (MAX_DIAGNOSTICS * MAX_JSON_ITEM_LEN * 2 + 64)
+/* Bytes needed to terminate with "]}" (NUL is written into the final byte). */
+#define JSON_CLOSE_LEN 2
 
 typedef struct {
   char severity[16];
@@ -120,48 +125,87 @@ static void compiler_callback(
   }
 }
 
+/**
+ * Append formatted text into out[*offset].
+ * Returns 1 if fully written, 0 if the buffer is full/truncated, -1 on encoding error.
+ * Never advances *offset past cap, and never writes past out[cap).
+ */
+static int append_fmt(char* out, size_t cap, size_t* offset, const char* fmt, ...) {
+  if (*offset >= cap) {
+    return 0;
+  }
+
+  size_t remaining = cap - *offset;
+  va_list ap;
+  va_start(ap, fmt);
+  int n = vsnprintf(out + *offset, remaining, fmt, ap);
+  va_end(ap);
+
+  if (n < 0) {
+    return -1;
+  }
+
+  /* snprintf returns the length that would have been written (excluding NUL). */
+  if ((size_t)n >= remaining) {
+    /* Truncated: string is NUL-terminated at out[cap - 1]. */
+    *offset = cap - 1;
+    return 0;
+  }
+
+  *offset += (size_t)n;
+  return 1;
+}
+
 static char* build_json(const yara_validate_ctx_t* ctx) {
   char* out = (char*)malloc(MAX_JSON_LEN);
   if (out == NULL) {
     return NULL;
   }
 
+  /* Reserve tail bytes so we can always close with "]}". */
+  const size_t content_cap = MAX_JSON_LEN - JSON_CLOSE_LEN;
   size_t offset = 0;
-  offset += (size_t)snprintf(out + offset, MAX_JSON_LEN - offset, "{\"errors\":[");
+
+  if (append_fmt(out, content_cap, &offset, "{\"errors\":[") <= 0) {
+    memcpy(out, "{\"errors\":[],\"warnings\":[]}", 27);
+    out[27] = '\0';
+    return out;
+  }
 
   for (int i = 0; i < ctx->error_count; i++) {
     char escaped[MAX_MESSAGE_LEN * 2];
     json_escape(ctx->errors[i].message, escaped, sizeof(escaped));
-    offset += (size_t)snprintf(
-        out + offset,
-        MAX_JSON_LEN - offset,
-        "%s{\"severity\":\"error\",\"message\":\"%s\",\"line\":%d}",
-        i > 0 ? "," : "",
-        escaped,
-        ctx->errors[i].line);
-    if (offset >= MAX_JSON_LEN - 1) {
+    if (append_fmt(
+            out,
+            content_cap,
+            &offset,
+            "%s{\"severity\":\"error\",\"message\":\"%s\",\"line\":%d}",
+            i > 0 ? "," : "",
+            escaped,
+            ctx->errors[i].line) <= 0) {
       break;
     }
   }
 
-  offset += (size_t)snprintf(out + offset, MAX_JSON_LEN - offset, "],\"warnings\":[");
-
-  for (int i = 0; i < ctx->warning_count; i++) {
-    char escaped[MAX_MESSAGE_LEN * 2];
-    json_escape(ctx->warnings[i].message, escaped, sizeof(escaped));
-    offset += (size_t)snprintf(
-        out + offset,
-        MAX_JSON_LEN - offset,
-        "%s{\"severity\":\"warning\",\"message\":\"%s\",\"line\":%d}",
-        i > 0 ? "," : "",
-        escaped,
-        ctx->warnings[i].line);
-    if (offset >= MAX_JSON_LEN - 1) {
-      break;
+  if (append_fmt(out, content_cap, &offset, "],\"warnings\":[") > 0) {
+    for (int i = 0; i < ctx->warning_count; i++) {
+      char escaped[MAX_MESSAGE_LEN * 2];
+      json_escape(ctx->warnings[i].message, escaped, sizeof(escaped));
+      if (append_fmt(
+              out,
+              content_cap,
+              &offset,
+              "%s{\"severity\":\"warning\",\"message\":\"%s\",\"line\":%d}",
+              i > 0 ? "," : "",
+              escaped,
+              ctx->warnings[i].line) <= 0) {
+        break;
+      }
     }
   }
 
-  snprintf(out + offset, MAX_JSON_LEN - offset, "]}");
+  /* Guaranteed: content_cap leaves room for "]}" + NUL within MAX_JSON_LEN. */
+  memcpy(out + offset, "]}", JSON_CLOSE_LEN + 1);
   return out;
 }
 
