@@ -41,6 +41,7 @@ export interface FeedbackState {
   inviteVisible: boolean;
   submitted: boolean;
   submittedFading: boolean;
+  isSubmitting: boolean;
 }
 
 export interface UseFeedbackReturn extends FeedbackState {
@@ -71,13 +72,16 @@ export const useFeedback = (
   const [modalOpen, setModalOpen] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
   const [submittedPhase, setSubmittedPhase] = useState<SubmittedPhase>('idle');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isSubmittingRef = useRef(false);
   const voteRef = useRef(vote);
   const serverVoteRef = useRef(serverVote);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   voteRef.current = vote;
   serverVoteRef.current = serverVote;
+  isSubmittingRef.current = isSubmitting;
 
   const clearSubmittedTimers = useCallback(() => {
     if (timer1Ref.current) clearTimeout(timer1Ref.current);
@@ -95,6 +99,8 @@ export const useFeedback = (
       setModalOpen(false);
       setInviteVisible(false);
       setSubmittedPhase('idle');
+      setIsSubmitting(false);
+      isSubmittingRef.current = false;
     },
     [clearSubmittedTimers]
   );
@@ -125,17 +131,25 @@ export const useFeedback = (
 
   const setVote = useCallback(
     (next: 'up' | 'down') => {
+      if (isSubmittingRef.current) return;
+
       const prev = voteRef.current;
 
       if (prev === next) {
         resetTo();
         if (conversationId) {
+          isSubmittingRef.current = true;
+          setIsSubmitting(true);
           conversationsService
             .submitRoundFeedback({ conversationId, roundId, vote: null })
             .then(() => patchCache(undefined))
             .catch(() => {
               addErrorToast({ title: labels.retractError });
               setVoteState(prev);
+            })
+            .finally(() => {
+              isSubmittingRef.current = false;
+              setIsSubmitting(false);
             });
         }
         return;
@@ -155,6 +169,8 @@ export const useFeedback = (
         setModalOpen(false);
         setInviteVisible(true);
         if (conversationId) {
+          isSubmittingRef.current = true;
+          setIsSubmitting(true);
           conversationsService
             .submitRoundFeedback({ conversationId, roundId, vote: 'up' })
             .then(() =>
@@ -169,6 +185,10 @@ export const useFeedback = (
               addErrorToast({ title: labels.voteError });
               setVoteState(prev);
               setInviteVisible(false);
+            })
+            .finally(() => {
+              isSubmittingRef.current = false;
+              setIsSubmitting(false);
             });
         }
       }
@@ -254,6 +274,7 @@ export const useFeedback = (
     inviteVisible,
     submitted: submittedPhase !== 'idle',
     submittedFading: submittedPhase === 'fading',
+    isSubmitting,
     setVote,
     toggleChip,
     setComment,

@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 
 const labels = {
   prompt: i18n.translate('xpack.agentBuilder.feedback.upInvite.prompt', {
@@ -34,7 +36,16 @@ export const UpInvite: React.FC<UpInviteProps> = ({ onTellUsMore, onDismiss }) =
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty size="xs" onClick={onTellUsMore} data-test-subj="roundFeedbackTellUsMore">
+      <EuiButtonEmpty
+        size="xs"
+        onClick={onTellUsMore}
+        data-test-subj="roundFeedbackTellUsMore"
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_INVITE_TELL_US_MORE,
+          detail: 'conversation',
+        })}
+      >
         {labels.tellUsMore}
       </EuiButtonEmpty>
     </EuiFlexItem>
@@ -46,6 +57,11 @@ export const UpInvite: React.FC<UpInviteProps> = ({ onTellUsMore, onDismiss }) =
         aria-label={labels.dismiss}
         onClick={onDismiss}
         data-test-subj="roundFeedbackDismissInvite"
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_INVITE_DISMISSED,
+          detail: 'conversation',
+        })}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
