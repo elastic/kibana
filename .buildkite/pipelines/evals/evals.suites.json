@@ -351,7 +351,7 @@
       "id": "agent-builder-visualizations",
       "name": "Agent Builder Visualizations",
       "slackChannel": "#kibana-presentation-reminders",
-      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder-visualizations/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder-visualizations/kbn-evals-suite-agent-builder-visualizations/playwright.config.ts",
       "tags": [
         "platform",
         "agent-builder-visualizations"
