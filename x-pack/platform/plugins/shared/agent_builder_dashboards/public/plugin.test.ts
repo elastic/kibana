@@ -17,6 +17,7 @@ jest.mock('./attachment_types', () => ({
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
   const openChat = jest.fn();
+  const registerBrowserTool = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
     ({
@@ -31,7 +32,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
 
   const createStartDependencies = () =>
     ({
-      agentBuilder: { openChat },
+      agentBuilder: { openChat, browserTools: { register: registerBrowserTool } },
       dashboard: {},
       share: {
         url: {
@@ -48,6 +49,21 @@ describe('AgentBuilderDashboardsPlugin', () => {
   beforeEach(() => {
     registerActionAsync.mockClear();
     openChat.mockClear();
+    registerBrowserTool.mockClear();
+  });
+
+  it('registers the capture_dashboard_screenshot browser tool', () => {
+    const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
+
+    plugin.start(createCoreStart(true), createStartDependencies());
+
+    expect(registerBrowserTool).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'capture_dashboard_screenshot',
+        returnsResult: true,
+        resultType: 'image',
+      })
+    );
   });
 
   it('registers a lazy open-dashboard-chat action when Agent Builder is available', async () => {

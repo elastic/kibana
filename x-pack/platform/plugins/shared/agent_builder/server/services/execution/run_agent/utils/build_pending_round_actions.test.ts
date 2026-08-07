@@ -24,7 +24,7 @@ describe('buildPendingRoundActions', () => {
     response: { message: '' },
   } as any;
 
-  it('concatenates roundToActions output and pending ask_user_question actions, and returns consumedPromptIds', () => {
+  it('concatenates roundToActions output and pending ask_user_question actions, and returns consumedPromptIds', async () => {
     const askStep = createAskUserQuestionStep({
       prompt_id: 's1',
       questions: [
@@ -48,11 +48,12 @@ describe('buildPendingRoundActions', () => {
       },
     } as any;
 
-    const result = buildPendingRoundActions({
+    const result = await buildPendingRoundActions({
       round,
       promptState,
       toolIdMapping: new Map(),
       eventEmitter: jest.fn(),
+      attachmentStateManager: {} as any,
     });
 
     expect(result.actions.length).toBeGreaterThanOrEqual(2);

@@ -9,6 +9,7 @@ export { AgentBuilderAccessChecker } from './access';
 export { AgentService } from './agents';
 export { AttachmentsService } from './attachments';
 export { RenderersService } from './renderers';
+export { BrowserToolsService } from './browser_tools';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { DocLinksService } from './doc_links';

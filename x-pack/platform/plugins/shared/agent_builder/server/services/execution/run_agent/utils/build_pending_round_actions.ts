@@ -8,33 +8,44 @@
 import type { ChatAgentEvent, ConversationRound } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import { roundToActions } from './round_to_actions';
 import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
+import { pendingBrowserToolPromptsToActions } from './pending_browser_tool_prompts_to_actions';
 
 /**
  * Build the action list from the current pending round, for execution resuming (after HITL interrupts).
  */
-export const buildPendingRoundActions = ({
+export const buildPendingRoundActions = async ({
   round,
   promptState,
   toolIdMapping,
   eventEmitter,
+  attachmentStateManager,
 }: {
   round: ConversationRound | ProcessedConversationRound;
   promptState: PromptStorageState;
   toolIdMapping: ToolIdMapping;
   eventEmitter: (event: ChatAgentEvent) => void;
-}): { actions: ResearchAgentAction[]; consumedPromptIds: string[] } => {
+  attachmentStateManager: AttachmentStateManager;
+}): Promise<{ actions: ResearchAgentAction[]; consumedPromptIds: string[] }> => {
   const stepActions = roundToActions({ round, toolIdMapping });
   const { actions: askActions, consumedPromptIds } = pendingAskUserQuestionStepsToActions({
     round,
     promptState,
     eventEmitter,
   });
+  const { actions: browserToolActions, consumedPromptIds: consumedBrowserToolPromptIds } =
+    await pendingBrowserToolPromptsToActions({
+      round,
+      promptState,
+      attachmentStateManager,
+      eventEmitter,
+    });
   return {
-    actions: [...stepActions, ...askActions],
-    consumedPromptIds,
+    actions: [...stepActions, ...askActions, ...browserToolActions],
+    consumedPromptIds: [...consumedPromptIds, ...consumedBrowserToolPromptIds],
   };
 };

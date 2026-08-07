@@ -29,6 +29,7 @@ import {
 } from '@kbn/agent-builder-common/chat/conversation';
 import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
+import { isBrowserToolCallPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
 import type { BrowserToolExecutor } from '../../services/browser_tool_executor';
@@ -103,7 +104,9 @@ export const subscribeToChatEvents = ({
       const toolId = event.data.tool_id;
       if (toolId && browserToolExecutor && browserApiTools) {
         const toolDef = browserApiTools.find((tool) => tool.id === toolId);
-        if (toolDef) {
+        // Two-way tools are driven by the `browser_tool_call` prompt instead: the round pauses
+        // and `BrowserToolCallPrompt` runs the handler, so running it here would double-execute.
+        if (toolDef && !toolDef.returnsResult) {
           const toolsMap = new Map([[toolId, toolDef]]);
           browserToolExecutor
             .executeToolCalls(
@@ -138,9 +141,15 @@ export const subscribeToChatEvents = ({
         timeToFirstToken: event.data.time_to_first_token,
       });
     } else if (isPromptRequestEvent(event)) {
-      conversationActions.addPendingPrompt({
-        prompt: event.data.prompt,
-      });
+      // Browser tool call prompts auto-execute on mount, and their handlers read conversation
+      // state (e.g. attachments) that only reaches the cache with `round_complete`. Skip them
+      // here so they mount from the authoritative round applied on `round_complete`, after
+      // `setAttachments` has run.
+      if (!isBrowserToolCallPrompt(event.data.prompt)) {
+        conversationActions.addPendingPrompt({
+          prompt: event.data.prompt,
+        });
+      }
     } else if (isCompactionStartedEvent(event)) {
       conversationActions.addCompactionStep({
         tokenCountBefore: event.data.token_count_before,

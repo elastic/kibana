@@ -72,3 +72,4 @@ export type TextAttachment = Attachment<AttachmentType.text>;
 export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
 export type ConnectorAttachment = Attachment<AttachmentType.connector>;
+export type ImageAttachment = Attachment<AttachmentType.image>;

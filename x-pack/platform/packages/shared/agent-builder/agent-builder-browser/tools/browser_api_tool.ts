@@ -6,7 +6,23 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { z, type ZodType } from '@kbn/zod/v4';
+
+/**
+ * Context handed to a browser API tool handler alongside the validated parameters.
+ * Populated by the conversation UI running the tool.
+ */
+export interface BrowserApiToolHandlerContext {
+  /** Id of the conversation the tool call belongs to. Undefined for unsaved conversations. */
+  conversationId?: string;
+  /**
+   * Attachments of the conversation the tool call belongs to, as streamed to the client.
+   * Includes attachments created during the current round, which may not be persisted yet —
+   * handlers must read attachments from here rather than fetching the stored conversation.
+   */
+  attachments?: VersionedAttachment[];
+}
 
 /**
  * Definition of a browser API tool that can be provided by consumers
@@ -38,10 +54,40 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
 
   /**
    * Handler function that executes when the tool is called.
-   * This function runs in the browser and receives validated parameters.
-   * Results are NOT returned to the LLM (one-way communication).
+   * This function runs in the browser and receives validated parameters, plus a
+   * context object describing where the call is running (e.g. the conversation id).
+   * May return a promise.
+   *
+   * The returned value is only sent back to the LLM when `returnsResult` is true;
+   * otherwise it is discarded (one-way communication).
    */
-  handler: (params: TParams) => void | Promise<void>;
+  handler: (params: TParams, context: BrowserApiToolHandlerContext) => unknown;
+
+  /**
+   * Opt in to two-way communication.
+   *
+   * When true, the agent execution pauses on the tool call and resumes once the handler
+   * settles, with its JSON-serialized return value handed to the model as the tool result.
+   * The value must be JSON-serializable, and stays subject to a size limit.
+   *
+   * Prefer idempotent handlers: reloading the page while a call is pending runs the handler
+   * again, since the pending call is what the reloaded page resumes from.
+   *
+   * Defaults to false, which keeps the fire-and-forget behavior: the model gets an
+   * immediate acknowledgement and does not wait for the handler.
+   */
+  returnsResult?: boolean;
+
+  /**
+   * Declares the shape of the handler's return value. Only meaningful with `returnsResult: true`.
+   *
+   * - `'json'` (default): the JSON-serialized return value is handed to the model verbatim.
+   * - `'image'`: the return value must be `{ content: <data URL>, mime_type, filename?, image_attachment_key?, ... }`.
+   *   The server extracts the image into a hidden `image` attachment and hands the model
+   *   `{ image_attachment_id, ...other fields }` instead, so base64 never enters the model context.
+   *   Image results are exempt from the ordinary result size limit (bounded by the route's body cap).
+   */
+  resultType?: 'json' | 'image';
 }
 
 export function toToolMetadata<TParams>(
@@ -57,5 +103,7 @@ export function toToolMetadata<TParams>(
       });
       return jsonSchema;
     })(),
+    returns_result: tool.returnsResult,
+    result_type: tool.resultType,
   };
 }

@@ -8,6 +8,7 @@
 import { Subject } from 'rxjs';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { ChatEventType, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
@@ -124,5 +125,46 @@ describe('subscribeToChatEvents — roundComplete', () => {
     await done;
 
     expect(conversationActions.setAttachments).not.toHaveBeenCalled();
+  });
+});
+
+describe('subscribeToChatEvents — promptRequest', () => {
+  const subscribe = async (event: ChatEvent) => {
+    const events$ = new Subject<ChatEvent>();
+    const conversationActions = buildActionsMock();
+    const done = subscribeToChatEvents({ events$, conversationActions, isAborted: () => false });
+    events$.next(event);
+    events$.complete();
+    await done;
+    return conversationActions;
+  };
+
+  it('adds non-browser prompts as pending on prompt_request', async () => {
+    const prompt = {
+      type: AgentPromptType.confirmation,
+      id: 'prompt-1',
+      message: 'Allow?',
+    };
+    const conversationActions = await subscribe({
+      type: ChatEventType.promptRequest,
+      data: { prompt },
+    } as unknown as ChatEvent);
+
+    expect(conversationActions.addPendingPrompt).toHaveBeenCalledWith({ prompt });
+  });
+
+  it('does not add browser tool call prompts on prompt_request (applied on round_complete instead)', async () => {
+    const prompt = {
+      type: AgentPromptType.browser_tool_call,
+      id: 'prompt-1',
+      tool_id: 'capture_dashboard_screenshot',
+      params: {},
+    };
+    const conversationActions = await subscribe({
+      type: ChatEventType.promptRequest,
+      data: { prompt },
+    } as unknown as ChatEvent);
+
+    expect(conversationActions.addPendingPrompt).not.toHaveBeenCalled();
   });
 });

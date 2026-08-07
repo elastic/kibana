@@ -6,3 +6,4 @@
  */
 
 export { generateDashboardTool } from './generate';
+export { validateDashboardTool } from './validate';

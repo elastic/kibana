@@ -28,6 +28,7 @@ import {
   AgentService,
   AttachmentsService,
   RenderersService,
+  BrowserToolsService,
   ChatService,
   ConversationsService,
   DocLinksService,
@@ -43,6 +44,7 @@ import {
 import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicRenderersContract } from './services/renderers';
+import { createPublicBrowserToolsContract } from './services/browser_tools';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
@@ -156,6 +158,7 @@ export class AgentBuilderPlugin
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
     const renderersService = new RenderersService();
+    const browserToolsService = new BrowserToolsService();
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
@@ -225,6 +228,7 @@ export class AgentBuilderPlugin
       agentService,
       attachmentsService,
       renderersService,
+      browserToolsService,
       chatService,
       conversationsService,
       docLinksService,
@@ -311,6 +315,7 @@ export class AgentBuilderPlugin
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       renderers: createPublicRenderersContract({ renderersService }),
+      browserTools: createPublicBrowserToolsContract({ browserToolsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
       getAgentBuilderAccess: createPublicEmbeddableChatAccess({
