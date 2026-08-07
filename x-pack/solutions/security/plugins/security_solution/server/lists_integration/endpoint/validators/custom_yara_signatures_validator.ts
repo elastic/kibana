@@ -200,11 +200,25 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       throw new EndpointArtifactExceptionValidationError('YARA rule content is missing');
     }
 
-    const { errors } = await validateYaraRule(ruleText);
+    let errors;
+    try {
+      // Only errors are rejected on create/update.
+      ({ errors } = await validateYaraRule(ruleText));
+    } catch (error) {
+      this.logger.error(`Error validating YARA rule: ${error.message}`);
+      throw new EndpointArtifactExceptionValidationError(
+        'Unable to validate YARA rule due to an internal error. Please try again later.',
+        500
+      );
+    }
 
-    // TODO: in POC we reject on errors, and allow warnings. Improve error messages.
     if (errors.length > 0) {
-      const libyaraVersion = await getYaraEngineVersion();
+      let libyaraVersion = 'unknown';
+      try {
+        libyaraVersion = await getYaraEngineVersion();
+      } catch (error) {
+        this.logger.error(`Error getting YARA engine version: ${error.message}`);
+      }
 
       const details = errors
         .map((e) => (e.line > 0 ? `line ${e.line}: ${e.message}` : e.message))

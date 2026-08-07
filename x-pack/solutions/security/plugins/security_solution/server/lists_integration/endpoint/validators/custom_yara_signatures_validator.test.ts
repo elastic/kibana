@@ -290,5 +290,22 @@ describe('YARA Signatures API validations', () => {
         customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
       ).resolves.not.toThrow();
     });
+
+    it('rejects create with a safe 500 when the YARA engine fails', async () => {
+      mockValidateYaraRule.mockRejectedValue(
+        new WebAssembly.RuntimeError('memory access out of bounds')
+      );
+
+      const error = await customYaraSignaturesValidator
+        .validatePreCreateItem(buildCreateItem())
+        .catch((err) => err);
+
+      expect(error).toBeInstanceOf(EndpointArtifactExceptionValidationError);
+      expect(error.message).toContain(
+        'Unable to validate YARA rule due to an internal error. Please try again later.'
+      );
+      expect(error.message).not.toContain('memory access out of bounds');
+      expect(error.getStatusCode()).toBe(500);
+    });
   });
 });
