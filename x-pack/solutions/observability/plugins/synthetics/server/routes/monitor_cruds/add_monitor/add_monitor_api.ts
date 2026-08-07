@@ -172,7 +172,7 @@ export class AddEditMonitorAPI {
     requestPayload: CreateMonitorPayLoad,
     monitorPayload: CreateMonitorPayLoad,
     prevLocations?: MonitorFields['locations'],
-    maintenanceWindows?: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[] = []
   ) {
     const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
@@ -197,15 +197,9 @@ export class AddEditMonitorAPI {
     const maintenanceWindowRefs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
     let resolvedMaintenanceWindows = maintenanceWindowRefs;
     if (maintenanceWindowRefs && maintenanceWindowRefs.length > 0) {
-      const resolvedMaintenanceWindowList =
-        maintenanceWindows ??
-        (await syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
-          this.routeContext.spaceId
-        )) ??
-        [];
       resolvedMaintenanceWindows = resolveMaintenanceWindowsOrThrow(
         maintenanceWindowRefs,
-        resolvedMaintenanceWindowList
+        maintenanceWindows
       );
     }
 

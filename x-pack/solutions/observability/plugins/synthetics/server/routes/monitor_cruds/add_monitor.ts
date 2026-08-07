@@ -100,9 +100,18 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         });
       }
 
+      const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
+      const maintenanceWindows = maintenanceWindowRefs?.length
+        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+            spaceId
+          )) ?? []
+        : [];
+
       const monitorWithDefaults = await addMonitorAPI.normalizeMonitor(
         formattedConfig!,
-        request.body as CreateMonitorPayLoad
+        request.body as CreateMonitorPayLoad,
+        undefined,
+        maintenanceWindows
       );
 
       const validationResult = validateMonitor(monitorWithDefaults, spaceId);

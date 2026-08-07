@@ -124,10 +124,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
+      const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
+      const maintenanceWindows = maintenanceWindowRefs?.length
+        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+            spaceId
+          )) ?? []
+        : [];
+
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
         monitor as CreateMonitorPayLoad,
-        previousMonitor.attributes.locations
+        previousMonitor.attributes.locations,
+        maintenanceWindows
       );
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
