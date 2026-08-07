@@ -67,16 +67,19 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_ALREADY_RUNNING`              | 409    | `runRuleNow` targeted a rule whose executor task is already running                                                                 | `{ rule_id }`                              |
 | `RULE_RUN_CONFLICT`                 | 409    | `runRuleNow` raced another writer updating the executor task; retry                                                                 | `{ rule_id }`                              |
 | `RULE_RUN_ERROR`                    | 500    | `runRuleNow` failed for an unexpected reason (e.g. executor task missing)                                                           | `{ rule_id }`                              |
+| `RULE_CHANGE_NOT_FOUND`             | 404    | `getRuleChange` cannot find a change-history event by id for the given rule                                                         | `{ rule_id, event_id }`                    |
+| `RULE_CHANGE_HISTORY_UNAVAILABLE`   | 503    | The change-history data stream is not initialized (or change history is disabled)                                                   | _(none)_                                   |
 
 ### Action policies (`server/lib/action_policy_client/`)
 
-| Code                             | Status | When                                                               | `details`              |
-| -------------------------------- | ------ | ------------------------------------------------------------------ | ---------------------- |
-| `ACTION_POLICY_NOT_FOUND`        | 404    | `get` / `update` / `delete` cannot find an action policy by id     | `{ action_policy_id }` |
-| `ACTION_POLICY_ALREADY_EXISTS`   | 409    | `createActionPolicy` collides with an existing id                  | `{ action_policy_id }` |
-| `ACTION_POLICY_VERSION_CONFLICT` | 409    | An update / delete races another writer                            | `{ action_policy_id }` |
-| `INVALID_ACTION_POLICY_DATA`     | 400    | The submitted body fails the domain-level schema check             | `{ context, errors }`  |
-| `INVALID_DATE_STRING`            | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing | `{ value }`            |
+| Code                             | Status         | When                                                                                                                                                                                                              | `details`              |
+| -------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `ACTION_POLICY_NOT_FOUND`        | 404            | `get` / `update` / `delete` cannot find an action policy by id                                                                                                                                                    | `{ action_policy_id }` |
+| `ACTION_POLICY_ALREADY_EXISTS`   | 409            | `createActionPolicy` collides with an existing id                                                                                                                                                                 | `{ action_policy_id }` |
+| `ACTION_POLICY_VERSION_CONFLICT` | 409            | An update / delete races another writer                                                                                                                                                                           | `{ action_policy_id }` |
+| `INVALID_ACTION_POLICY_DATA`     | 400            | The submitted body fails the domain-level schema check                                                                                                                                                            | `{ context, errors }`  |
+| `INVALID_DATE_STRING`            | 400            | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                | `{ value }`            |
+| `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 

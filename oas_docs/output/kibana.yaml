@@ -349,6 +349,7 @@ tags:
     name: short url
     x-displayName: Short URLs
   - name: significant_events
+    x-displayName: Significant Events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -13747,7 +13748,141 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a case template from a YAML definition. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation (body, YAML definition, name uniqueness, authorization) without creating anything. Requires the Cases feature to be enabled in the space.
+      operationId: createCaseTemplateDefaultSpace
+      parameters:
+        - description: 'When true, validates the request without creating the template and returns `{"valid": true}`.'
+          in: query
+          name: dry_run
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createCaseTemplateRequest:
+                $ref: '#/components/examples/Cases_template_write_request'
+            schema:
+              $ref: '#/components/schemas/Cases_template_write_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+                dryRunResponse:
+                  $ref: '#/components/examples/Cases_template_dry_run_response'
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Cases_template_v2_response'
+                  - $ref: '#/components/schemas/Cases_template_dry_run_response'
+          description: 'Indicates a successful call. Returns the created template, or `{"valid": true}` for a dry run.'
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_template_limit'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: |
+            The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 templates per owner, max 200 fields per template).
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have the manage templates privilege for the owner.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: A template with the same name already exists for the owner.
+      summary: Create a case template
+      tags:
+        - cases
+      x-state: Technical preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/cases/templates/{template_id}:
+    delete:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates/{template_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Soft-deletes a case template (all versions). Existing cases keep their pinned template reference; the template stops appearing in the case creation flow and in find responses. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space.
+      operationId: deleteCaseTemplateDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_template_id'
+      responses:
+        '204':
+          description: The template was deleted.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have the manage templates privilege for the owner.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The template was not found.
+      summary: Delete a case template
+      tags:
+        - cases
+      x-state: Technical preview
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     get:
       description: |
         **Spaces method and path for this operation:**
@@ -13792,6 +13927,101 @@ paths:
       summary: Get a case template by ID
       tags:
         - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates/{template_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Fully replaces a case template. Every accepted update creates a new template version; previous versions stay retrievable with the `version` query parameter of the get template API, and cases keep the version they were created with. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation without writing. Requires the Cases feature to be enabled in the space.
+      operationId: updateCaseTemplateDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_template_id'
+        - description: 'When true, validates the request without updating the template and returns `{"valid": true}`.'
+          in: query
+          name: dry_run
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateCaseTemplateRequest:
+                $ref: '#/components/examples/Cases_template_write_request'
+            schema:
+              $ref: '#/components/schemas/Cases_template_write_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dryRunResponse:
+                  $ref: '#/components/examples/Cases_template_dry_run_response'
+                updateCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Cases_template_v2_response'
+                  - $ref: '#/components/schemas/Cases_template_dry_run_response'
+          description: 'Indicates a successful call. Returns the new template version, or `{"valid": true}` for a dry run.'
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_template_limit'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: |
+            The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 fields per template).
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have the manage templates privilege for the owner.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The template was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: A template with the same name already exists for the owner.
+      summary: Update a case template
+      tags:
+        - cases
+      x-state: Technical preview
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -21035,6 +21265,16 @@ paths:
         content:
           application/json:
             examples:
+              ElasticDefend:
+                summary: Cancel a response action on an Elastic Defend host
+                value:
+                  agent_type: endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    force: true
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
               MicrosoftDefenderEndpoint:
                 summary: Cancel a response action on a Microsoft Defender for Endpoint host
                 value:
@@ -23866,7 +24106,7 @@ paths:
           name: product_name
   /api/exception_lists:
     delete:
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -23874,6 +24114,10 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Delete an exception list using the `id` or `list_id` field.
+
+        Before deleting an exception list that is linked to detection rules, remove or unlink the
+        exception list from those rules. Deleting a linked exception list can leave rules referencing
+        an exception list that no longer exists.
       operationId: DeleteExceptionList
       parameters:
         - description: Exception list's identifier. Either `id` or `list_id` must be specified.
@@ -46169,7 +46413,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -46244,7 +46489,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -76107,6 +76353,202 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/workflows/workflow/executions:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/executions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Search across all workflow executions.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+      operationId: get-workflows-workflow-executions
+      parameters:
+        - description: KQL query string to filter executions.
+          in: query
+          name: kql
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+        - description: Filter by execution status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - waiting_for_child
+                - running
+                - queued
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 11
+            type: array
+        - description: Filter by execution type.
+          in: query
+          name: executionTypes
+          required: false
+          schema:
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
+        - description: Filter by the user who triggered the execution.
+          in: query
+          name: executedBy
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: Filter by evaluated concurrency group key.
+          in: query
+          name: concurrencyGroupKey
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by startedAt.
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by startedAt.
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by finishedAt.
+          in: query
+          name: finishedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by finishedAt.
+          in: query
+          name: finishedBefore
+          required: false
+          schema:
+            type: string
+        - description: Field to collapse execution results by.
+          in: query
+          name: collapse
+          required: false
+          schema:
+            enum:
+              - concurrencyGroupKey
+              - status
+              - executedBy
+              - triggeredBy
+            type: string
+        - description: 'Field to sort by. One of: startedAt, duration, workflowId, triggeredBy.'
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - startedAt
+              - duration
+              - workflowId
+              - triggeredBy
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Number of results to return.
+          in: query
+          name: size
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: Whether to track total hit count.
+          in: query
+          name: trackTotalHits
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchExecutionsResponseExample:
+                  description: Example paginated list of workflow-level executions
+                  value:
+                    page: 1
+                    results:
+                      - duration: 3000
+                        error: null
+                        executedBy: elastic
+                        finishedAt: '2025-11-20T12:00:03.000Z'
+                        id: exec-a1b2c3d4-e5f6-7890
+                        isTestRun: false
+                        managed: false
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:00.000Z'
+                        status: completed
+                        tags:
+                          - reporting
+                        triggeredBy: manual
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowName: Example Workflow
+                    size: 25
+                    total: 1
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                searchExecutionsBadRequestExample:
+                  description: Example response when the kql parameter contains invalid syntax
+                  value:
+                    message: 'Invalid KQL: Expected AND, OR, or end of input but "f" found.'
+          description: Indicates a bad request, such as invalid KQL syntax
+      summary: Search workflow executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/executions?page=1&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/workflow/executions?from=0&size=25&trackTotalHits=true&kql=startedAt >= "now-15m"&sortField=startedAt&sortOrder=desc
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
@@ -78737,6 +79179,12 @@ components:
         error: Bad Request
         message: Template [invalid-template-id] not found for owner [cases]
         statusCode: 400
+    Cases_response_400_template_limit:
+      summary: A template resource limit was exceeded.
+      value:
+        error: Bad Request
+        message: A template cannot define more than 200 fields.
+        statusCode: 400
     Cases_response_401:
       summary: Authorization information is missing or invalid.
       value:
@@ -78755,6 +79203,12 @@ components:
         error: Not Found
         message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
         statusCode: 404
+    Cases_response_409:
+      summary: A resource conflict occurred.
+      value:
+        error: Conflict
+        message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:
@@ -78847,6 +79301,31 @@ components:
         updated_at: null
         updated_by: null
         version: WzIwNzMsMV0=
+    Cases_template_dry_run_response:
+      summary: Dry-run validation succeeded without writing.
+      value:
+        valid: true
+    Cases_template_write_request:
+      summary: Create or fully replace a case template.
+      value:
+        definition: |
+          name: Security incident
+          severity: high
+          tags: [security]
+          fields:
+            - name: priority
+              label: Priority
+              type: keyword
+              control: SELECT_BASIC
+              metadata:
+                options: [low, medium, high]
+                default: medium
+        description: Default template for security incidents.
+        isEnabled: true
+        name: Security incident
+        owner: cases
+        tags:
+          - security
     Cases_update_case_configuration_request:
       summary: Update the case settings.
       value:
@@ -85639,6 +86118,18 @@ components:
         $ref: '#/components/schemas/Cases_string'
       maxItems: 100
       type: array
+    Cases_template_dry_run_response:
+      description: Returned instead of the template when the request was sent with `dry_run=true`.
+      properties:
+        valid:
+          description: Always `true` — validation failures return a 4xx error instead.
+          enum:
+            - true
+          type: boolean
+      required:
+        - valid
+      title: Template write dry run response
+      type: object
     Cases_template_tags:
       description: |
         The words and phrases that help categorize templates. It can be an empty array.
@@ -85742,6 +86233,53 @@ components:
         - deletedAt
         - isLatest
         - latestVersion
+    Cases_template_write_request:
+      description: |
+        The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.
+
+        Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).
+      properties:
+        definition:
+          description: |
+            The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+          example: |
+            name: Security incident
+            severity: high
+            tags: [security]
+            fields:
+              - name: priority
+                label: Priority
+                type: keyword
+                control: SELECT_BASIC
+                metadata:
+                  options: [low, medium, high]
+                  default: medium
+              - $ref: risk_score
+          maxLength: 30000
+          type: string
+        description:
+          description: A description of the template.
+          maxLength: 1000
+          type: string
+        isEnabled:
+          default: true
+          description: Disabled templates are hidden from the case creation flow.
+          type: boolean
+        name:
+          description: |
+            The template identity name, unique per owner (case-insensitive). May be omitted when the YAML definition provides a case-default title (`name:`), which is then used as the identity name.
+          maxLength: 50
+          minLength: 1
+          type: string
+        owner:
+          $ref: '#/components/schemas/Cases_owner'
+        tags:
+          $ref: '#/components/schemas/Cases_template_tags'
+      required:
+        - owner
+        - definition
+      title: Template write request
+      type: object
     Cases_templates:
       items:
         type: object
@@ -91818,6 +92356,12 @@ components:
       additionalProperties: false
       description: Duration format between time units.
       properties:
+        compact:
+          description: When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.
+          type: boolean
+        decimals:
+          description: Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.
+          type: number
         from:
           description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
           enum:
@@ -94797,8 +95341,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -96593,7 +97136,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -96631,8 +97173,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -96648,8 +97189,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -96660,16 +97200,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -96715,7 +97252,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -96746,8 +97282,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -96756,8 +97291,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -96766,16 +97300,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -103540,7 +104071,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -103683,7 +104214,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -103718,6 +104249,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -103831,7 +104364,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -103916,7 +104449,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -104863,7 +105396,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -105006,7 +105539,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -105041,6 +105574,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -105154,7 +105689,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -105239,7 +105774,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -110381,11 +110916,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -110405,11 +110945,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -111447,7 +111992,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -111584,7 +112129,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -111619,6 +112164,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -111729,7 +112276,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -111808,7 +112355,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -113406,7 +113953,7 @@ components:
                     docsCountPercentage:
                       default: null
                       maximum: 100
-                      minimum: 1
+                      minimum: 0
                       nullable: true
                       type: number
                     enabled:
@@ -125551,15 +126098,9 @@ components:
         - type: object
           properties:
             parameters:
-              type: object
-              properties:
-                id:
-                  description: ID of the response action to cancel
-                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-                  minLength: 1
-                  type: string
-              required:
-                - id
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_ElasticDefendCancelParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDECancelParameters'
           required:
             - parameters
     Security_Endpoint_Management_API_CloudFileScriptParameters:
@@ -125665,6 +126206,23 @@ components:
           example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
           type: string
+    Security_Endpoint_Management_API_ElasticDefendCancelParameters:
+      description: Elastic Defend agent type
+      properties:
+        force:
+          description: Forcefully cancel the response action even when it is already running
+          example: true
+          type: boolean
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: ElasticDefendCancelParameters
+      type: object
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -126385,6 +126943,19 @@ components:
       example: "united.endpoint.host.os.name : 'Windows'"
       maxLength: 30000
       type: string
+    Security_Endpoint_Management_API_MDECancelParameters:
+      description: Microsoft Defender for Endpoint agent type
+      properties:
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: MDECancelParameters
+      type: object
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
       example:
