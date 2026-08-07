@@ -18,7 +18,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
@@ -33,7 +32,6 @@ import * as i18n from './translations';
 
 export const WatchesPage: React.FC = () => {
   const history = useHistory();
-  const { services } = useKibana();
   const { data, isLoading, error, refetch } = useWatches();
   usePndDocTitle(i18n.PAGE_TITLE);
 
@@ -43,10 +41,6 @@ export const WatchesPage: React.FC = () => {
     },
     [history]
   );
-
-  const onNewWatch = useCallback(() => {
-    services.notifications?.toasts.addInfo(i18n.POC_STUB_TOAST);
-  }, [services.notifications]);
 
   const sectionCount = useMemo(() => {
     if (!data) return '';
@@ -63,17 +57,6 @@ export const WatchesPage: React.FC = () => {
           title={i18n.PAGE_TITLE}
           subtitle={i18n.PAGE_SUBTITLE}
           leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-          rightSideItems={[
-            <EuiButton
-              key="new-watch"
-              fill
-              iconType="plusInCircle"
-              onClick={onNewWatch}
-              data-test-subj="pndNewWatchButton"
-            >
-              {i18n.NEW_WATCH}
-            </EuiButton>,
-          ]}
         />
 
         {isLoading && !data ? (
@@ -111,6 +94,17 @@ export const WatchesPage: React.FC = () => {
                 <EuiSpacer size="m" />
               </>
             ) : null}
+            {data.setupFailed.length > 0 ? (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  title={i18n.watchSetupFailed(data.setupFailed)}
+                />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             <CoverageStrip watches={data.watches} onSelectWatch={onSelectWatch} />
             <EuiSpacer size="l" />
             <EuiFlexGroup alignItems="baseline" gutterSize="s">
@@ -126,11 +120,7 @@ export const WatchesPage: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <WatchCardGrid
-              watches={data.watches}
-              onSelectWatch={onSelectWatch}
-              onNewWatch={onNewWatch}
-            />
+            <WatchCardGrid watches={data.watches} onSelectWatch={onSelectWatch} />
           </>
         ) : null}
       </PndPageSection>

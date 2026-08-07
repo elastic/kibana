@@ -12,6 +12,7 @@ import type {
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  UpdatedWorkflowResponseDto,
 } from '@kbn/workflows';
 
 /**
@@ -45,17 +46,18 @@ export interface WatchWorkflowsManagementClient {
   ): Promise<WorkflowExecutionDto | null>;
 
   createWorkflow(
-    workflow: { yaml: string },
+    workflow: { yaml: string; id?: string },
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto>;
 
-  deleteWorkflows(
-    workflowIds: string[],
+  /** Ordinary update path (YAML and enabled state) for customer-owned watches. */
+  updateWorkflow(
+    id: string,
+    workflow: { yaml?: string; enabled?: boolean },
     spaceId: string,
-    request: KibanaRequest,
-    options?: { force?: boolean }
-  ): Promise<{ successfulIds?: string[] }>;
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto>;
 }
 
 export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagementClient {
@@ -103,19 +105,19 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
   }
 
   createWorkflow(
-    workflow: { yaml: string },
+    workflow: { yaml: string; id?: string },
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     return this.management.createWorkflow(workflow, spaceId, request);
   }
 
-  deleteWorkflows(
-    workflowIds: string[],
+  updateWorkflow(
+    id: string,
+    workflow: { yaml?: string; enabled?: boolean },
     spaceId: string,
-    request: KibanaRequest,
-    options?: { force?: boolean }
-  ): Promise<{ successfulIds?: string[] }> {
-    return this.management.deleteWorkflows(workflowIds, spaceId, request, options);
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto> {
+    return this.management.updateWorkflow(id, workflow, spaceId, request);
   }
 }

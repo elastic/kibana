@@ -6,11 +6,10 @@
  */
 
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
+import { PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 
 /**
- * Live watch routes project managed Workflows. Require the same privilege pair
- * Workflows uses for managed reads (`read` + `readManaged`). Execution history
+ * Live watch routes project Workflows. Execution history
  * is optional enrichment and must not gate the route — projection already
  * soft-fails when execution reads are unavailable.
  *
@@ -25,3 +24,29 @@ export const getLiveWatchReadPrivileges = () => [
 
 export const getWatchRoutePrivileges = (useMockData: boolean) =>
   useMockData ? [PND_API_PRIVILEGE_READ] : getLiveWatchReadPrivileges();
+
+export const getWatchHistoryExtendedPrivileges = (useMockData: boolean) =>
+  useMockData
+    ? []
+    : [
+        WorkflowsManagementApiActions.readExecution,
+        WorkflowsManagementApiActions.readManagedExecution,
+      ];
+
+export const getWatchSetupPrivileges = (useMockData: boolean) =>
+  useMockData
+    ? [PND_API_PRIVILEGE_WRITE]
+    : [
+        PND_API_PRIVILEGE_WRITE,
+        WorkflowsManagementApiActions.create,
+        WorkflowsManagementApiActions.update,
+      ];
+
+export const getLiveWatchWritePrivileges = () => [
+  PND_API_PRIVILEGE_WRITE,
+  WorkflowsManagementApiActions.update,
+  WorkflowsManagementApiActions.read,
+];
+
+export const getWatchWritePrivileges = (useMockData: boolean) =>
+  useMockData ? [PND_API_PRIVILEGE_WRITE] : getLiveWatchWritePrivileges();

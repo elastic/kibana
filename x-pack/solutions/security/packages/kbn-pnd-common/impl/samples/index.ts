@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { MOCK_MANAGED_WATCHES, createMockWatch, getMockWatchById } from './watches';
+export { MOCK_WATCHES, createMockWatch, getMockWatchById } from './watches';
 
 export {
   MOCK_INVESTIGATIONS,

@@ -34,7 +34,6 @@ interface WatchPolicyAttrs {
   to?: number;
   mode?: ScheduleMode;
   cadence?: ScheduleCadence;
-  every?: number;
   scopeSummary?: string;
   ui?: {
     color?: string;
@@ -60,9 +59,8 @@ const asBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
 
 const asAutonomyLevel = (value: unknown): AutonomyLevel => {
-  const n = asNumber(value, 1);
-  if (n >= 1 && n <= 5) return n as AutonomyLevel;
-  return 1;
+  if (value === 'manual' || value === 'assisted' || value === 'supervised') return value;
+  return 'manual';
 };
 
 const asScopeAccess = (value: unknown): ScopeAccess => {
@@ -122,9 +120,22 @@ export const projectTriggers = (
   });
 };
 
+export const extractScheduleInterval = (
+  definition: WorkflowYaml | null | undefined
+): string | null => {
+  for (const trigger of definition?.triggers ?? []) {
+    const type = (trigger as { type?: string }).type;
+    if (type !== 'scheduled' && type !== 'schedule') continue;
+    const withBlock = (trigger as { with?: Record<string, unknown> }).with;
+    if (withBlock && typeof withBlock.every === 'string') return withBlock.every;
+  }
+  return null;
+};
+
 export const projectSchedule = (
   triggers: WatchTriggerProjection[],
-  policy: WatchPolicyAttrs | undefined
+  policy: WatchPolicyAttrs | undefined,
+  scheduleInterval: string | null = null
 ): WatchSchedule => {
   const hasSchedule = triggers.some((t) => t.type === 'schedule');
   const hasEvent = triggers.some((t) => t.type === 'event');
@@ -148,9 +159,26 @@ export const projectSchedule = (
     to: asNumber(policy?.to, 18),
     onDemand,
     cadence: hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual',
-    every: asNumber(policy?.every, 60),
+    every: scheduleIntervalToDisplayMinutes(scheduleInterval),
     handoff: asHandoff(policy?.handoff),
   };
+};
+
+const scheduleIntervalToDisplayMinutes = (interval: string | null): number => {
+  if (!interval) return 60;
+  const match = /^(\d+)([smhd])$/.exec(interval);
+  if (!match) return 60;
+  const amount = Number(match[1]);
+  switch (match[2]) {
+    case 's':
+      return Math.max(1, Math.ceil(amount / 60));
+    case 'h':
+      return amount * 60;
+    case 'd':
+      return amount * 60 * 24;
+    default:
+      return amount;
+  }
 };
 
 const projectScopes = (policy: WatchPolicyAttrs | undefined): WatchScope[] => {
@@ -297,7 +325,8 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
   const definition = item.definition;
   const policy = extractWatchPolicy(definition);
   const triggers = projectTriggers(definition);
-  const schedule = projectSchedule(triggers, policy);
+  const scheduleInterval = extractScheduleInterval(definition);
+  const schedule = projectSchedule(triggers, policy, scheduleInterval);
   const coverage = coverageFromSchedule(schedule);
   const recentRuns = projectRecentRunsFromHistory(item.history);
   const lastRun = recentRuns[0]?.startedAt ?? null;
@@ -324,6 +353,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     scopes: projectScopes(policy),
     callables: projectCallablesFromDefinition(definition, policy),
     autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
+    scheduleInterval,
     metrics: {
       // Real 7-day run counts are not available from the list/history projection yet.
       runs7d: null,
@@ -334,34 +364,3 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     recentRuns,
   };
 };
-
-export const buildCustomWatchYaml = (name: string, description: string): string => `version: "1"
-name: ${JSON.stringify(name)}
-description: ${JSON.stringify(description)}
-enabled: true
-tags:
-  - watch
-  - watch-custom
-triggers:
-  - type: manual
-consts:
-  watch_policy:
-    mandate: ${JSON.stringify(name)}
-    autonomyLevel: 1
-    handoff: none
-    onDemand: true
-    draft: false
-    cadence: manual
-    mode: demand
-    ui:
-      color: "#6b7280"
-      icon: sparkles
-    scopeSummary: Custom
-    scopes: []
-    callables: []
-steps:
-  - name: run_watch
-    type: console
-    with:
-      message: "Custom watch skeleton — add agent skills next"
-`;

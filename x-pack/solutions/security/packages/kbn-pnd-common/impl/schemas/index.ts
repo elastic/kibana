@@ -14,6 +14,7 @@ export {
   WorkflowTriggerType,
   WatchRunAction,
   WatchSchedule,
+  WatchSettings,
   WatchScope,
   WatchCallableRef,
   WatchRecentRunStep,
@@ -36,7 +37,13 @@ export {
 } from './components/investigation.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
-export { GetWatchResponse } from './watches/get_watch_route.gen';
+export { GetWatchRequestParams, GetWatchResponse } from './watches/get_watch_route.gen';
+export {
+  UpdateWatchRequestParams,
+  UpdateWatchRequestBody,
+  UpdateWatchResponse,
+} from './watches/update_watch_route.gen';
+export { SetupWatchesResponse } from './watches/setup_watches_route.gen';
 export { ListInvestigationsResponse } from './investigations/list_investigations_route.gen';
 export { GetInvestigationResponse } from './investigations/get_investigation_route.gen';
 export { ListInvestigationProposalsResponse } from './investigations/list_investigation_proposals_route.gen';

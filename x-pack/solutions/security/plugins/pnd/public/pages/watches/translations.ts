@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { AutonomyLevel } from '@kbn/pnd-common';
 
 export const PAGE_TITLE = i18n.translate('xpack.pnd.watches.pageTitle', {
   defaultMessage: 'Watches',
@@ -70,10 +71,6 @@ export const ON_DEMAND = i18n.translate('xpack.pnd.watches.schedule.onDemand', {
   defaultMessage: 'On demand',
 });
 
-export const TIME_BASED = i18n.translate('xpack.pnd.watches.schedule.timeBased', {
-  defaultMessage: 'Time-based',
-});
-
 export const DRAFT_BADGE = i18n.translate('xpack.pnd.watches.badge.draft', {
   defaultMessage: 'Draft',
 });
@@ -116,36 +113,6 @@ export const DATA_SCOPE = i18n.translate('xpack.pnd.watches.card.dataScope', {
   defaultMessage: 'Data scope',
 });
 
-export const NEW_WATCH_TITLE = i18n.translate('xpack.pnd.watches.newWatch.title', {
-  defaultMessage: 'New watch',
-});
-
-export const NEW_WATCH_DESCRIPTION = i18n.translate('xpack.pnd.watches.newWatch.description', {
-  defaultMessage: 'Create a custom tagged workflow',
-});
-
-export const NEW_CUSTOM_WATCH_NAME = i18n.translate('xpack.pnd.watches.newWatch.defaultName', {
-  defaultMessage: 'Custom watch',
-});
-
-export const NEW_CUSTOM_WATCH_DESCRIPTION = i18n.translate(
-  'xpack.pnd.watches.newWatch.defaultDescription',
-  {
-    defaultMessage: 'Custom watch scaffold — edit the workflow YAML to add agent skills.',
-  }
-);
-
-export const CUSTOM_WATCH_CREATED = i18n.translate('xpack.pnd.watches.newWatch.created', {
-  defaultMessage: 'Custom watch created',
-});
-
-export const CUSTOM_WATCH_CREATE_FAILED = i18n.translate(
-  'xpack.pnd.watches.newWatch.createFailed',
-  {
-    defaultMessage: 'Failed to create custom watch',
-  }
-);
-
 export const LOADING_WATCHES = i18n.translate('xpack.pnd.watches.loading', {
   defaultMessage: 'Loading watches…',
 });
@@ -162,6 +129,12 @@ export const STALE_DATA_WARNING = i18n.translate('xpack.pnd.watches.staleDataWar
   defaultMessage: 'The latest refresh failed. Showing the most recently loaded watch data.',
 });
 
+export const watchSetupFailed = (watchIds: string[]) =>
+  i18n.translate('xpack.pnd.watches.setupFailed', {
+    defaultMessage: 'Some watch starting points could not be created: {watchIds}',
+    values: { watchIds: watchIds.join(', ') },
+  });
+
 export const RETRY = i18n.translate('xpack.pnd.watches.retry', {
   defaultMessage: 'Retry',
 });
@@ -176,40 +149,6 @@ export const SAVE = i18n.translate('xpack.pnd.watches.detail.save', {
 
 export const DISCARD = i18n.translate('xpack.pnd.watches.detail.discard', {
   defaultMessage: 'Discard',
-});
-
-export const DELETE = i18n.translate('xpack.pnd.watches.detail.delete', {
-  defaultMessage: 'Delete',
-});
-
-export const DELETE_CONFIRM_TITLE = i18n.translate('xpack.pnd.watches.detail.deleteConfirm.title', {
-  defaultMessage: 'Delete this watch?',
-});
-
-export const deleteConfirmBody = (name: string) =>
-  i18n.translate('xpack.pnd.watches.detail.deleteConfirm.body', {
-    defaultMessage:
-      'Permanently delete "{name}" and its workflow. Managed catalog watches cannot be deleted here.',
-    values: { name },
-  });
-
-export const DELETE_CONFIRM_BUTTON = i18n.translate(
-  'xpack.pnd.watches.detail.deleteConfirm.confirm',
-  {
-    defaultMessage: 'Delete watch',
-  }
-);
-
-export const DELETE_CANCEL = i18n.translate('xpack.pnd.watches.detail.deleteConfirm.cancel', {
-  defaultMessage: 'Cancel',
-});
-
-export const DELETE_SUCCESS = i18n.translate('xpack.pnd.watches.detail.deleteSuccess', {
-  defaultMessage: 'Watch deleted',
-});
-
-export const DELETE_FAILED = i18n.translate('xpack.pnd.watches.detail.deleteFailed', {
-  defaultMessage: 'Failed to delete watch',
 });
 
 export const IDENTITY_TITLE = i18n.translate('xpack.pnd.watches.detail.identity.title', {
@@ -244,6 +183,32 @@ export const AUTONOMY_GUARDRAILS_NOTE = i18n.translate(
   }
 );
 
+export const AUTONOMY_MANUAL_OPTION = i18n.translate(
+  'xpack.pnd.watches.detail.autonomy.manualButtonLabel',
+  { defaultMessage: 'Manual' }
+);
+
+export const AUTONOMY_ASSISTED_OPTION = i18n.translate(
+  'xpack.pnd.watches.detail.autonomy.assistedButtonLabel',
+  { defaultMessage: 'Assisted' }
+);
+
+export const AUTONOMY_SUPERVISED_OPTION = i18n.translate(
+  'xpack.pnd.watches.detail.autonomy.supervisedButtonLabel',
+  { defaultMessage: 'Supervised' }
+);
+
+export const autonomyLevelLabel = (level: AutonomyLevel): string => {
+  switch (level) {
+    case 'manual':
+      return AUTONOMY_MANUAL_OPTION;
+    case 'assisted':
+      return AUTONOMY_ASSISTED_OPTION;
+    case 'supervised':
+      return AUTONOMY_SUPERVISED_OPTION;
+  }
+};
+
 export const SCHEDULE_TITLE = i18n.translate('xpack.pnd.watches.detail.schedule.title', {
   defaultMessage: 'Schedule',
 });
@@ -263,17 +228,58 @@ export const SCHEDULE_PROJECTION_NOTE = i18n.translate(
   'xpack.pnd.watches.detail.schedule.projectionNote',
   {
     defaultMessage:
-      'Projected from the backing workflow. Edits below are local stubs until YAML write-back lands.',
+      'Projected from the backing workflow. Interval changes are written to its scheduled trigger.',
   }
 );
 
-export const CADENCE_LABEL = i18n.translate('xpack.pnd.watches.detail.schedule.cadence', {
-  defaultMessage: 'Cadence',
+export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.intervalLabel',
+  { defaultMessage: 'Schedule interval' }
+);
+
+export const SCHEDULE_INTERVAL_HELP = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.intervalDescription',
+  { defaultMessage: 'Changes the interval used by the scheduled workflow task.' }
+);
+
+export const SCHEDULE_INTERVAL_15_MINUTES = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.every15MinutesDropDownOptionLabel',
+  { defaultMessage: 'Every 15 minutes' }
+);
+
+export const SCHEDULE_INTERVAL_1_HOUR = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.everyHourDropDownOptionLabel',
+  { defaultMessage: 'Every hour' }
+);
+
+export const SCHEDULE_INTERVAL_6_HOURS = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.every6HoursDropDownOptionLabel',
+  { defaultMessage: 'Every 6 hours' }
+);
+
+export const SCHEDULE_INTERVAL_1_DAY = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.everyDayDropDownOptionLabel',
+  { defaultMessage: 'Every day' }
+);
+
+export const NO_SCHEDULE_TITLE = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.unscheduledTitle',
+  { defaultMessage: 'No scheduled trigger' }
+);
+
+export const NO_SCHEDULE_DESCRIPTION = i18n.translate(
+  'xpack.pnd.watches.detail.schedule.unscheduledDescription',
+  { defaultMessage: 'This watch is started by an event or on demand, so it has no interval.' }
+);
+
+export const SETTINGS_SAVED = i18n.translate('xpack.pnd.watches.detail.settingsSavedDescription', {
+  defaultMessage: 'Watch settings saved',
 });
 
-export const HANDOFF_LABEL = i18n.translate('xpack.pnd.watches.detail.schedule.handoff', {
-  defaultMessage: 'Hand-off',
-});
+export const SETTINGS_SAVE_FAILED = i18n.translate(
+  'xpack.pnd.watches.detail.settingsSaveFailedErrorMessage',
+  { defaultMessage: 'Failed to save watch settings' }
+);
 
 export const AGENT_CAPABILITIES_TITLE = i18n.translate(
   'xpack.pnd.watches.detail.capabilities.heading',
@@ -405,10 +411,6 @@ export const STUB_EMPTY_BODY = i18n.translate('xpack.pnd.watches.stub.emptyBody'
     'This surface will load live Workflows, Skills, and Activity data once those APIs are wired in.',
 });
 
-export const NEW_WATCH = i18n.translate('xpack.pnd.watches.newWatch', {
-  defaultMessage: 'New watch',
-});
-
 export const WATCH_NOT_FOUND_TITLE = i18n.translate('xpack.pnd.watches.notFound.title', {
   defaultMessage: 'Watch not found',
 });
@@ -437,38 +439,6 @@ export const capabilityToggleAriaLabel = (name: string) =>
 
 export const POC_STUB_TOAST = i18n.translate('xpack.pnd.watches.pocStub', {
   defaultMessage: 'POC stub — changes are not persisted yet.',
-});
-
-export const CADENCE_STREAM = i18n.translate('xpack.pnd.watches.cadence.stream', {
-  defaultMessage: 'Streaming',
-});
-
-export const CADENCE_SWEEP = i18n.translate('xpack.pnd.watches.cadence.sweep', {
-  defaultMessage: 'Interval sweeps',
-});
-
-export const CADENCE_MANUAL = i18n.translate('xpack.pnd.watches.cadence.manual', {
-  defaultMessage: 'Manual sessions',
-});
-
-export const HANDOFF_OFFICER = i18n.translate('xpack.pnd.watches.handoff.officer', {
-  defaultMessage: 'Escalates to Watch Officer',
-});
-
-export const HANDOFF_ONCALL = i18n.translate('xpack.pnd.watches.handoff.oncall', {
-  defaultMessage: 'Pages on-call for criticals',
-});
-
-export const HANDOFF_BRIEF = i18n.translate('xpack.pnd.watches.handoff.brief', {
-  defaultMessage: 'Receipts to the morning brief',
-});
-
-export const HANDOFF_RECORDS = i18n.translate('xpack.pnd.watches.handoff.records', {
-  defaultMessage: 'Findings to Records',
-});
-
-export const HANDOFF_NONE = i18n.translate('xpack.pnd.watches.handoff.none', {
-  defaultMessage: 'No hand-off',
 });
 
 export const LAST_RUN_PREFIX = i18n.translate('xpack.pnd.watches.capability.lastRunPrefix', {

@@ -6,10 +6,10 @@
  */
 
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  PREBUILT_WATCH_DARK_ID,
+  PREBUILT_WATCH_DEEP_ID,
+  PREBUILT_WATCH_FLOOR_ID,
+  PREBUILT_WATCH_OFFICER_ID,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
   WATCH_FLOOR_TAG,
@@ -19,14 +19,14 @@ import {
 import type { Watch } from '../schemas/components/watch.gen';
 
 const floorWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  id: PREBUILT_WATCH_FLOOR_ID,
   name: 'Watch Floor',
   tags: [WATCH_TAG, WATCH_FLOOR_TAG],
   color: '#16b3a6',
   icon: 'alert',
   enabled: true,
   draft: false,
-  managed: true,
+  managed: false,
   sortOrder: 10,
   mandate: 'Frontline triage',
   description:
@@ -37,7 +37,7 @@ const floorWatchBase: Watch = {
     from: 0,
     to: 23,
     onDemand: false,
-    cadence: 'stream',
+    cadence: 'sweep',
     every: 60,
     handoff: 'officer',
   },
@@ -63,7 +63,8 @@ const floorWatchBase: Watch = {
       lastRun: '2026-07-20T14:02:00Z',
     },
   ],
-  autonomyLevel: 3,
+  autonomyLevel: 'assisted',
+  scheduleInterval: null,
   metrics: {
     runs7d: 847,
     acceptedPct: 91,
@@ -96,14 +97,14 @@ const floorWatchBase: Watch = {
 };
 
 const officerWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  id: PREBUILT_WATCH_OFFICER_ID,
   name: 'Watch Officer',
   tags: [WATCH_TAG, WATCH_OFFICER_TAG],
   color: '#3b82f6',
   icon: 'bell',
   enabled: true,
   draft: false,
-  managed: true,
+  managed: false,
   sortOrder: 20,
   mandate: 'Escalation & briefs',
   description:
@@ -118,7 +119,10 @@ const officerWatchBase: Watch = {
     every: 60,
     handoff: 'oncall',
   },
-  triggers: [{ type: 'manual', summary: 'Manual / on demand' }],
+  triggers: [
+    { type: 'schedule', summary: 'Schedule · every 1h' },
+    { type: 'manual', summary: 'Manual / on demand' },
+  ],
   coverage: [[0, 24]],
   scopeSummary: 'Open threads · on-call · deploys',
   scopes: [
@@ -127,7 +131,8 @@ const officerWatchBase: Watch = {
     { name: 'Deploy history', access: 'full', label: 'Read' },
   ],
   callables: [],
-  autonomyLevel: 4,
+  autonomyLevel: 'supervised',
+  scheduleInterval: '1h',
   metrics: {
     runs7d: 23,
     acceptedPct: 78,
@@ -151,36 +156,33 @@ const officerWatchBase: Watch = {
 };
 
 const darkWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_DARK_ID,
+  id: PREBUILT_WATCH_DARK_ID,
   name: 'Dark Watch',
   tags: [WATCH_TAG, WATCH_DARK_TAG],
   color: '#f59e0b',
   icon: 'bolt',
   enabled: true,
   draft: false,
-  managed: true,
+  managed: false,
   sortOrder: 30,
   mandate: 'Continuous, technology-aware hunting for relevant threats and coverage gaps',
   description:
-    'Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC sweeps and reviewable findings.',
+    'Dark Watch skeleton. Continuous, technology-aware hunting with hourly UTC sweeps and reviewable findings.',
   schedule: {
     set: true,
-    mode: 'window',
-    from: 22,
-    to: 6,
+    mode: 'always',
+    from: 0,
+    to: 23,
     onDemand: true,
     cadence: 'sweep',
     every: 60,
     handoff: 'brief',
   },
   triggers: [
-    { type: 'schedule', summary: 'Schedule · hourly from 22:00–06:00 UTC' },
+    { type: 'schedule', summary: 'Schedule · every 1h' },
     { type: 'manual', summary: 'Manual / on demand' },
   ],
-  coverage: [
-    [22, 24],
-    [0, 6],
-  ],
+  coverage: [[0, 24]],
   scopeSummary: 'Mail · IdP · edge / VPN',
   scopes: [
     { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
@@ -188,7 +190,8 @@ const darkWatchBase: Watch = {
     { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
   callables: [],
-  autonomyLevel: 2,
+  autonomyLevel: 'manual',
+  scheduleInterval: '1h',
   metrics: {
     runs7d: 56,
     acceptedPct: 65,
@@ -209,14 +212,14 @@ const darkWatchBase: Watch = {
 };
 
 const deepWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_DEEP_ID,
+  id: PREBUILT_WATCH_DEEP_ID,
   name: 'Deep Watch',
   tags: [WATCH_TAG, WATCH_DEEP_TAG],
   color: '#8b5cf6',
   icon: 'console',
   enabled: true,
   draft: false,
-  managed: true,
+  managed: false,
   sortOrder: 40,
   mandate: 'Deep investigation & hunts',
   description:
@@ -240,7 +243,8 @@ const deepWatchBase: Watch = {
     { name: 'DNS · netflow', access: 'full', label: 'Read' },
   ],
   callables: [],
-  autonomyLevel: 3,
+  autonomyLevel: 'assisted',
+  scheduleInterval: null,
   metrics: {
     runs7d: 4,
     acceptedPct: null,
@@ -260,7 +264,7 @@ const deepWatchBase: Watch = {
   ],
 };
 
-export const MOCK_MANAGED_WATCHES: Watch[] = [
+export const MOCK_WATCHES: Watch[] = [
   floorWatchBase,
   officerWatchBase,
   darkWatchBase,
@@ -275,4 +279,4 @@ export const createMockWatch = (overrides: Partial<Watch> = {}): Watch => ({
 });
 
 export const getMockWatchById = (watchId: string): Watch | undefined =>
-  MOCK_MANAGED_WATCHES.find((watch) => watch.id === watchId);
+  MOCK_WATCHES.find((watch) => watch.id === watchId);

@@ -11,6 +11,7 @@ import {
   normalizeWorkflowTriggerType,
   projectCallablesFromDefinition,
   projectSchedule,
+  projectWorkflowToWatch,
 } from './project_watch';
 
 describe('project watch', () => {
@@ -24,7 +25,7 @@ describe('project watch', () => {
         consts: {
           watch_policy: {
             mandate: 'Deep investigation & hunts',
-            autonomyLevel: 3,
+            autonomyLevel: 'assisted',
             handoff: 'records',
             ui: { color: '#8b5cf6', icon: 'console', order: 40 },
           },
@@ -34,10 +35,36 @@ describe('project watch', () => {
 
       expect(extractWatchPolicy(definition)).toMatchObject({
         mandate: 'Deep investigation & hunts',
-        autonomyLevel: 3,
+        autonomyLevel: 'assisted',
         handoff: 'records',
         ui: { color: '#8b5cf6', icon: 'console', order: 40 },
       });
+    });
+  });
+
+  it('projects three-level autonomy and the real scheduled interval', () => {
+    const watch = projectWorkflowToWatch({
+      id: 'security-watch-dark',
+      name: 'Dark Watch',
+      description: 'Hunts',
+      enabled: true,
+      managed: false,
+      createdAt: '2026-08-06T00:00:00.000Z',
+      valid: true,
+      definition: {
+        version: '1',
+        name: 'Dark Watch',
+        enabled: true,
+        tags: ['watch'],
+        triggers: [{ type: 'scheduled', with: { every: '6h' } }],
+        consts: { watch_policy: { autonomyLevel: 'supervised' } },
+        steps: [],
+      },
+    } as never);
+
+    expect(watch).toMatchObject({
+      autonomyLevel: 'supervised',
+      scheduleInterval: '6h',
     });
   });
 
@@ -74,6 +101,12 @@ describe('project watch', () => {
           to: 6,
         })
       ).toMatchObject({ mode: 'window', set: true, from: 22, to: 6 });
+    });
+
+    it('derives display minutes from the authoritative workflow interval', () => {
+      expect(
+        projectSchedule([{ type: 'schedule', summary: 'Scheduled' }], { mode: 'always' }, '90s')
+      ).toMatchObject({ every: 2 });
     });
   });
 

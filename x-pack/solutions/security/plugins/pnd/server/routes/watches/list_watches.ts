@@ -7,9 +7,9 @@
 
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCHES_URL } from '@kbn/pnd-common';
 import type { ListWatchesResponse } from '@kbn/pnd-common';
-import { MOCK_MANAGED_WATCHES } from '@kbn/pnd-common';
+import { MOCK_WATCHES } from '@kbn/pnd-common';
 import type { RouteDependencies } from '../register_routes';
-import { getWatchRoutePrivileges } from './watch_route_security';
+import { getWatchHistoryExtendedPrivileges, getWatchRoutePrivileges } from './watch_route_security';
 
 export const registerListWatchesRoute = ({
   router,
@@ -18,6 +18,7 @@ export const registerListWatchesRoute = ({
   getSpaceId,
   getWatchProjection,
 }: RouteDependencies) => {
+  const extendedPrivileges = getWatchHistoryExtendedPrivileges(config.ui.useMockData);
   router.versioned
     .get({
       path: PND_WATCHES_URL,
@@ -25,6 +26,7 @@ export const registerListWatchesRoute = ({
       security: {
         authz: {
           requiredPrivileges: getWatchRoutePrivileges(config.ui.useMockData),
+          ...(extendedPrivileges.length > 0 ? { extendedPrivileges } : {}),
         },
       },
       summary: 'List PND watches',
@@ -39,7 +41,7 @@ export const registerListWatchesRoute = ({
       async (_context, request, response) => {
         try {
           if (config.ui.useMockData) {
-            const body: ListWatchesResponse = { watches: MOCK_MANAGED_WATCHES };
+            const body: ListWatchesResponse = { watches: MOCK_WATCHES };
             return response.ok({ body });
           }
 
@@ -48,7 +50,7 @@ export const registerListWatchesRoute = ({
             return response.ok({ body: { watches: [] } });
           }
 
-          const body: ListWatchesResponse = await projection.list(getSpaceId(request));
+          const body: ListWatchesResponse = await projection.list(request, getSpaceId(request));
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);

@@ -17,10 +17,12 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Throughline UI-facing autonomy level (1 Suggest only through 5 Acts · trusted)
+ * Customer-selected watch autonomy
  */
-export const AutonomyLevel = lazySchema(() => z.number().int().min(1).max(5));
+export const AutonomyLevel = lazySchema(() => z.enum(['manual', 'assisted', 'supervised']));
 export type AutonomyLevel = z.infer<typeof AutonomyLevel>;
+export type AutonomyLevelEnum = typeof AutonomyLevel.enum;
+export const AutonomyLevelEnum = AutonomyLevel.enum;
 
 export const ScheduleMode = lazySchema(() => z.enum(['always', 'window', 'demand']));
 export type ScheduleMode = z.infer<typeof ScheduleMode>;
@@ -82,6 +84,24 @@ export const WatchSchedule = lazySchema(() =>
   })
 );
 export type WatchSchedule = z.infer<typeof WatchSchedule>;
+
+export const WatchSettings = lazySchema(() =>
+  z.object({
+    enabled: z.boolean(),
+    description: z.string().max(4000),
+    autonomyLevel: AutonomyLevel,
+    /**
+     * Positive simple interval for the scheduled workflow trigger, or null when unscheduled
+     */
+    scheduleInterval: z
+      .string()
+      .min(2)
+      .max(16)
+      .regex(/^(([6-9]\d|\d{3,})s|[1-9]\d*[mhd])$/)
+      .nullable(),
+  })
+);
+export type WatchSettings = z.infer<typeof WatchSettings>;
 
 export const WatchScope = lazySchema(() =>
   z.object({
@@ -182,11 +202,11 @@ export const Watch = lazySchema(() =>
     enabled: z.boolean(),
     draft: z.boolean(),
     /**
-     * True for Security-managed catalog watches
+     * Whether the projected source workflow is managed
      */
     managed: z.boolean(),
     /**
-     * Catalog sort key; MAX_SAFE_INTEGER when unset (custom watches last)
+     * Catalog sort key; MAX_SAFE_INTEGER when unset
      */
     sortOrder: z.number().int(),
     /**
@@ -206,6 +226,10 @@ export const Watch = lazySchema(() =>
     autonomyLevel: AutonomyLevel,
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
+    /**
+     * Simple interval on the scheduled workflow trigger, or null when unscheduled
+     */
+    scheduleInterval: z.string().nullable(),
   })
 );
 export type Watch = z.infer<typeof Watch>;

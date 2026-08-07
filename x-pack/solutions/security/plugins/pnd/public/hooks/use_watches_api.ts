@@ -8,9 +8,22 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { API_VERSIONS, PND_WATCHES_URL, buildWatchUrl } from '@kbn/pnd-common';
-import type { GetWatchResponse, ListWatchesResponse } from '@kbn/pnd-common';
+import {
+  API_VERSIONS,
+  PND_WATCHES_SETUP_URL,
+  PND_WATCHES_URL,
+  buildWatchUrl,
+} from '@kbn/pnd-common';
+import type {
+  GetWatchResponse,
+  ListWatchesResponse,
+  SetupWatchesResponse,
+  WatchSettings,
+} from '@kbn/pnd-common';
+import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { queryKeys } from '../query_keys';
+
+let setupWatchesPromise: Promise<SetupWatchesResponse> | undefined;
 
 const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
   if (failureCount >= 3) {
@@ -24,13 +37,31 @@ const retryOnTransientError = (failureCount: number, error: unknown): boolean =>
 
 export const useWatches = () => {
   const { services } = useKibana();
+  const capabilities = services.application?.capabilities;
+  const canSetUpWatches =
+    capabilities?.pnd?.write === true &&
+    capabilities?.workflowsManagement?.[WorkflowsManagementUiActions.create] === true &&
+    capabilities?.workflowsManagement?.[WorkflowsManagementUiActions.update] === true;
 
   return useQuery({
     queryKey: queryKeys.watches.list(),
-    queryFn: async (): Promise<ListWatchesResponse> =>
-      services.http!.get<ListWatchesResponse>(PND_WATCHES_URL, {
+    queryFn: async (): Promise<ListWatchesResponse & { setupFailed: string[] }> => {
+      if (canSetUpWatches && !setupWatchesPromise) {
+        setupWatchesPromise = services
+          .http!.post<SetupWatchesResponse>(PND_WATCHES_SETUP_URL, {
+            version: API_VERSIONS.internal.v1,
+          })
+          .catch((error) => {
+            setupWatchesPromise = undefined;
+            throw error;
+          });
+      }
+      const setup = setupWatchesPromise ? await setupWatchesPromise : { failed: [] };
+      const watches = await services.http!.get<ListWatchesResponse>(PND_WATCHES_URL, {
         version: API_VERSIONS.internal.v1,
-      }),
+      });
+      return { ...watches, setupFailed: setup.failed };
+    },
     keepPreviousData: true,
     retry: retryOnTransientError,
   });
@@ -54,31 +85,25 @@ export const useWatch = (watchId: string | undefined) => {
   });
 };
 
-/** POC stub — custom watch creation lands in a follow-up PR. */
-export const useCreateWatch = () => {
+export const useUpdateWatchSettings = () => {
+  const { services } = useKibana();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (): Promise<GetWatchResponse> => {
-      throw new Error('Custom watch creation is not available in this foundation PR');
-    },
-    onSuccess: async () => {
+    mutationFn: async ({
+      watchId,
+      body,
+    }: {
+      watchId: string;
+      body: WatchSettings;
+    }): Promise<GetWatchResponse> =>
+      services.http!.put<GetWatchResponse>(buildWatchUrl(watchId), {
+        version: API_VERSIONS.internal.v1,
+        body: JSON.stringify(body),
+      }),
+    onSuccess: async (data, variables) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
-    },
-  });
-};
-
-/** POC stub — custom watch deletion lands in a follow-up PR. */
-export const useDeleteWatch = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (_watchId: string): Promise<void> => {
-      throw new Error('Custom watch deletion is not available in this foundation PR');
-    },
-    onSuccess: async (_data, watchId) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
-      await queryClient.removeQueries({ queryKey: queryKeys.watches.detail(watchId) });
+      queryClient.setQueryData(queryKeys.watches.detail(variables.watchId), data);
     },
   });
 };

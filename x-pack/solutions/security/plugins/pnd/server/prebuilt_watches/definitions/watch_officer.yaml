@@ -8,15 +8,18 @@ tags:
   - watch
   - watch-officer
 triggers:
+  - type: scheduled
+    with:
+      every: "1h"
   - type: manual
 consts:
   watch_policy:
     mandate: Escalation & briefs
-    autonomyLevel: 4
+    autonomyLevel: supervised
     handoff: oncall
     onDemand: false
     draft: false
-    cadence: stream
+    cadence: sweep
     mode: always
     ui:
       color: "#3b82f6"

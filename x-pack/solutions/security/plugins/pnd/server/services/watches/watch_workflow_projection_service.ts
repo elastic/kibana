@@ -6,29 +6,19 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
-import { WATCH_TAG } from '@kbn/pnd-common';
+import { WATCH_TAG, type WatchSettings } from '@kbn/pnd-common';
 import { compareWatchesForDisplay, GetWatchResponse, ListWatchesResponse } from '@kbn/pnd-common';
-
-export interface CreateWatchRequest {
-  name: string;
-  description?: string;
-}
-import {
-  buildCustomWatchYaml,
-  normalizeWorkflowTriggerType,
-  projectWorkflowToWatch,
-} from './project_watch';
-import { createWatchDeleteForbiddenError, createWatchNotFoundError } from './watch_errors';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { normalizeWorkflowTriggerType, projectWorkflowToWatch } from './project_watch';
+import { ensurePrebuiltWatches, type EnsurePrebuiltWatchesResult } from './ensure_prebuilt_watches';
+import { updateWatchSettings } from './watch_settings_write';
+import { createWatchNotFoundError } from './watch_errors';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
-
-const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
 
 export class WatchWorkflowProjectionService {
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
-    private readonly logger: Logger,
-    private readonly installationReady: Promise<void> = Promise.resolve()
+    private readonly logger: Logger
   ) {}
 
   private requireManagement(): WatchWorkflowsManagementClient {
@@ -38,12 +28,21 @@ export class WatchWorkflowProjectionService {
     return this.management;
   }
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
-    await this.installationReady;
+  async setup(request: KibanaRequest, spaceId: string): Promise<EnsurePrebuiltWatchesResult> {
     const management = this.requireManagement();
-    // Managed catalog watches opt into `selector:watch` visibility; custom
-    // unmanaged watches still match via tag `watch` under managedFilter `all`.
-    // Default getWorkflows managedFilter is 'unmanaged' — must request 'all'.
+    return ensurePrebuiltWatches({ management, spaceId, request, logger: this.logger });
+  }
+
+  async list(request: KibanaRequest, spaceId: string): Promise<ListWatchesResponse> {
+    const management = this.requireManagement();
+    const includeExecutionHistory =
+      request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
+    const includeManagedExecutionHistory =
+      includeExecutionHistory &&
+      request.authzResult?.[WorkflowsManagementApiActions.readManagedExecution] === true;
+
+    // Discovery remains tag-based so customer-authored watches and future
+    // starting points do not need to be added to an id allow-list.
     const result = await management.getWorkflows(
       {
         tags: [WATCH_TAG],
@@ -51,10 +50,9 @@ export class WatchWorkflowProjectionService {
         page: 1,
         enabled: [true, false],
         managedFilter: 'all',
-        visibilityContext: [WATCH_VISIBILITY_CONTEXT],
       },
       spaceId,
-      { includeExecutionHistory: true, includeManagedExecutionHistory: true }
+      { includeExecutionHistory, includeManagedExecutionHistory }
     );
 
     const watches = result.results
@@ -68,8 +66,11 @@ export class WatchWorkflowProjectionService {
     return ListWatchesResponse.parse({ watches });
   }
 
-  async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
-    await this.installationReady;
+  async get(
+    watchId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetWatchResponse | undefined> {
     const management = this.requireManagement();
     const detail = await management.getWorkflow(watchId, spaceId);
     if (!detail) {
@@ -95,7 +96,15 @@ export class WatchWorkflowProjectionService {
       history: undefined,
     };
 
-    // Enrich with recent executions when possible
+    const canReadExecutionHistory =
+      request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true &&
+      (!detail.managed ||
+        request.authzResult?.[WorkflowsManagementApiActions.readManagedExecution] === true);
+    if (!canReadExecutionHistory) {
+      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem) });
+    }
+
+    // Enrich with recent executions when authorized.
     try {
       const executions = await management.getWorkflowExecutions(
         { workflowId: watchId, page: 1, size: 10 },
@@ -110,7 +119,11 @@ export class WatchWorkflowProjectionService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const watch = projectWorkflowToWatch({ ...listItem, history, tags: detail.definition?.tags });
+      const watch = projectWorkflowToWatch({
+        ...listItem,
+        history,
+        tags: detail.definition?.tags,
+      });
 
       // Attach step summaries for the latest few runs
       const enrichedRuns = await Promise.all(
@@ -151,38 +164,18 @@ export class WatchWorkflowProjectionService {
     }
   }
 
-  async createCustom(
+  async updateSettings(
     request: KibanaRequest,
+    watchId: string,
     spaceId: string,
-    body: CreateWatchRequest
+    settings: WatchSettings
   ): Promise<GetWatchResponse> {
     const management = this.requireManagement();
-    const name = body.name.trim() || 'Custom watch';
-    const description =
-      body.description?.trim() ||
-      'Custom watch scaffold — tagged watch so it appears in the Watches catalog.';
-    const yaml = buildCustomWatchYaml(name, description);
-    const created = await management.createWorkflow({ yaml }, spaceId, request);
-    const projected = await this.get(created.id, spaceId);
+    await updateWatchSettings({ management, watchId, spaceId, request, settings });
+    const projected = await this.get(watchId, spaceId, request);
     if (!projected) {
-      throw new Error(`Created watch "${created.id}" but failed to reload it`);
+      throw createWatchNotFoundError(watchId);
     }
     return projected;
-  }
-
-  async deleteCustom(request: KibanaRequest, watchId: string, spaceId: string): Promise<void> {
-    const management = this.requireManagement();
-    const detail = await management.getWorkflow(watchId, spaceId);
-    if (!detail) {
-      throw createWatchNotFoundError(watchId);
-    }
-    if (detail.managed === true) {
-      throw createWatchDeleteForbiddenError(watchId);
-    }
-    const tags = detail.definition?.tags ?? [];
-    if (!tags.includes(WATCH_TAG)) {
-      throw createWatchNotFoundError(watchId);
-    }
-    await management.deleteWorkflows([watchId], spaceId, request);
   }
 }

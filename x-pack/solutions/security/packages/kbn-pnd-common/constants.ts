@@ -13,6 +13,7 @@ export const PND_APP_PATH = '/app/pnd' as const;
 export const PND_INTERNAL_URL = '/internal/pnd' as const;
 
 export const PND_WATCHES_URL = `${PND_INTERNAL_URL}/watches` as const;
+export const PND_WATCHES_SETUP_URL = `${PND_WATCHES_URL}/setup` as const;
 export const PND_WATCH_URL_TEMPLATE = `${PND_WATCHES_URL}/{watchId}` as const;
 
 export const buildWatchUrl = (watchId: string) =>
@@ -30,17 +31,17 @@ export const PND_INVESTIGATION_PROPOSALS_URL_TEMPLATE =
 export const buildInvestigationProposalsUrl = (id: string) =>
   `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}/proposals`;
 
-/** Managed catalog workflow ids — owned by Security. */
-export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
-export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
-export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
-export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
+/** Stable ids for the customer-owned watch starting points. */
+export const PREBUILT_WATCH_FLOOR_ID = 'security-watch-floor' as const;
+export const PREBUILT_WATCH_OFFICER_ID = 'security-watch-officer' as const;
+export const PREBUILT_WATCH_DARK_ID = 'security-watch-dark' as const;
+export const PREBUILT_WATCH_DEEP_ID = 'security-watch-deep' as const;
 
-export const SYSTEM_SECURITY_WATCH_IDS = [
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WATCH_DARK_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
+export const PREBUILT_WATCH_IDS = [
+  PREBUILT_WATCH_FLOOR_ID,
+  PREBUILT_WATCH_OFFICER_ID,
+  PREBUILT_WATCH_DARK_ID,
+  PREBUILT_WATCH_DEEP_ID,
 ] as const;
 
 export const WATCH_TAG = 'watch' as const;
@@ -48,8 +49,6 @@ export const WATCH_FLOOR_TAG = 'watch-floor' as const;
 export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_DARK_TAG = 'watch-dark' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
-export const WATCH_CUSTOM_TAG = 'watch-custom' as const;
-
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
   WATCH_OFFICER_TAG,

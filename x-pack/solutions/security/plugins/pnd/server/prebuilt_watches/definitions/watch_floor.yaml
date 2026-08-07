@@ -13,7 +13,7 @@ triggers:
 consts:
   watch_policy:
     mandate: Frontline triage
-    autonomyLevel: 3
+    autonomyLevel: assisted
     handoff: officer
     onDemand: false
     draft: false

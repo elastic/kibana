@@ -12,7 +12,7 @@ triggers:
 consts:
   watch_policy:
     mandate: Deep investigation & hunts
-    autonomyLevel: 3
+    autonomyLevel: assisted
     handoff: records
     onDemand: true
     draft: false

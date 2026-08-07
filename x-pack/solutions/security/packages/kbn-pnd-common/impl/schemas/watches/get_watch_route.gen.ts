@@ -21,9 +21,9 @@ import { Watch } from '../components/watch.gen';
 export const GetWatchRequestParams = lazySchema(() =>
   z.object({
     /**
-     * Managed or custom watch workflow id
+     * Watch workflow id
      */
-    watchId: z.string(),
+    watchId: z.string().min(1).max(128),
   })
 );
 export type GetWatchRequestParams = z.infer<typeof GetWatchRequestParams>;

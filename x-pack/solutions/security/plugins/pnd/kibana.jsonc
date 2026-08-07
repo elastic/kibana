@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "pnd"],
-    "requiredPlugins": ["features", "workflowsExtensions"],
+    "requiredPlugins": ["features"],
     "optionalPlugins": ["spaces", "agentBuilder", "workflowsManagement"],
     "requiredBundles": ["kibanaReact"]
   }

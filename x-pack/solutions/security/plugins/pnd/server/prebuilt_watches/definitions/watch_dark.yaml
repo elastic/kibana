@@ -1,7 +1,7 @@
 version: "1"
 name: Dark Watch
 description: >
-  Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC
+  Dark Watch skeleton. Continuous, technology-aware hunting with hourly UTC
   sweeps and reviewable findings.
 enabled: true
 tags:
@@ -10,25 +10,17 @@ tags:
 triggers:
   - type: scheduled
     with:
-      rrule:
-        freq: DAILY
-        interval: 1
-        tzid: UTC
-        byhour: [22, 23, 0, 1, 2, 3, 4, 5]
-        byminute: [0]
+      every: "1h"
   - type: manual
 consts:
   watch_policy:
     mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
-    autonomyLevel: 2
+    autonomyLevel: manual
     handoff: brief
     onDemand: true
     draft: false
     cadence: sweep
-    every: 60
-    from: 22
-    to: 6
-    mode: window
+    mode: always
     ui:
       color: "#f59e0b"
       icon: bolt

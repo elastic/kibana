@@ -7,10 +7,9 @@ components:
   x-codegen-enabled: true
   schemas:
     AutonomyLevel:
-      type: integer
-      minimum: 1
-      maximum: 5
-      description: Throughline UI-facing autonomy level (1 Suggest only through 5 Acts · trusted)
+      type: string
+      enum: [manual, assisted, supervised]
+      description: Customer-selected watch autonomy
 
     ScheduleMode:
       type: string
@@ -74,6 +73,29 @@ components:
           description: Interval minutes when cadence is sweep
         handoff:
           $ref: '#/components/schemas/ScheduleHandoff'
+
+    WatchSettings:
+      type: object
+      required:
+        - enabled
+        - description
+        - autonomyLevel
+        - scheduleInterval
+      properties:
+        enabled:
+          type: boolean
+        description:
+          type: string
+          maxLength: 4000
+        autonomyLevel:
+          $ref: '#/components/schemas/AutonomyLevel'
+        scheduleInterval:
+          type: string
+          nullable: true
+          minLength: 2
+          maxLength: 16
+          pattern: '^(([6-9]\d|\d{3,})s|[1-9]\d*[mhd])$'
+          description: Positive simple interval for the scheduled workflow trigger, or null when unscheduled
 
     WatchScope:
       type: object
@@ -216,6 +238,7 @@ components:
         - autonomyLevel
         - metrics
         - recentRuns
+        - scheduleInterval
       properties:
         id:
           type: string
@@ -238,10 +261,10 @@ components:
           type: boolean
         managed:
           type: boolean
-          description: True for Security-managed catalog watches
+          description: Whether the projected source workflow is managed
         sortOrder:
           type: integer
-          description: Catalog sort key; MAX_SAFE_INTEGER when unset (custom watches last)
+          description: Catalog sort key; MAX_SAFE_INTEGER when unset
         mandate:
           type: string
           description: Short mandate shown on cards
@@ -280,3 +303,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchRecentRun'
+        scheduleInterval:
+          type: string
+          nullable: true
+          description: Simple interval on the scheduled workflow trigger, or null when unscheduled

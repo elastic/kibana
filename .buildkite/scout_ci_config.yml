@@ -62,6 +62,7 @@ plugins:
     - observability_onboarding
     - osquery
     - painless_lab
+    - pnd
     - profiling
     - saved_objects_management
     - saved_objects_tagging

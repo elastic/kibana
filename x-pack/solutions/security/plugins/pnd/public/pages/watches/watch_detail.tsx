@@ -11,36 +11,31 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiConfirmModal,
+  EuiButtonGroup,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiRange,
+  EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AUTONOMY_LABELS,
-  coverageFromSchedule,
-  type AutonomyLevel,
-  type Watch,
-  type WatchCallableRef,
-  type WatchSchedule,
-} from '@kbn/pnd-common';
+import { type AutonomyLevel, type Watch, type WatchCallableRef } from '@kbn/pnd-common';
+import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { useWatch } from '../../hooks/use_watches_api';
+import { useUpdateWatchSettings, useWatch } from '../../hooks/use_watches_api';
 import { AgentCapabilitiesList } from './components/agent_capabilities_list';
 import { AutonomyMeter } from './components/autonomy_meter';
 import { RecentRunsTable } from './components/recent_runs_table';
@@ -58,59 +53,83 @@ const SCOPE_COLOR: Record<string, string> = {
   denied: '#ef4444',
 };
 
+const SCHEDULE_INTERVAL_OPTIONS = [
+  { value: '15m', text: i18n.SCHEDULE_INTERVAL_15_MINUTES },
+  { value: '1h', text: i18n.SCHEDULE_INTERVAL_1_HOUR },
+  { value: '6h', text: i18n.SCHEDULE_INTERVAL_6_HOURS },
+  { value: '1d', text: i18n.SCHEDULE_INTERVAL_1_DAY },
+];
+
 export const WatchDetailPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
   const { services } = useKibana();
   const { data, isLoading, error, refetch } = useWatch(watchId);
+  const updateSettings = useUpdateWatchSettings();
+  const capabilities = services.application?.capabilities;
+  const hasWatchWritePrivileges =
+    capabilities?.pnd?.write === true &&
+    capabilities?.workflowsManagement?.[WorkflowsManagementUiActions.read] === true &&
+    capabilities?.workflowsManagement?.[WorkflowsManagementUiActions.update] === true;
 
   const [localWatch, setLocalWatch] = useState<Watch | null>(null);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const confirmModalTitleId = useGeneratedHtmlId();
+  const [isDirty, setIsDirty] = useState(false);
   usePndDocTitle(localWatch?.name ?? i18n.PAGE_TITLE);
 
   useEffect(() => {
     setLocalWatch(null);
-    setIsDeleteConfirmOpen(false);
+    setIsDirty(false);
   }, [watchId]);
 
   useEffect(() => {
-    if (!data?.watch || data.watch.id !== watchId) {
+    if (isDirty || !data?.watch || data.watch.id !== watchId) {
       return;
     }
-    setLocalWatch((prev) => {
-      if (prev == null || prev.id !== data.watch.id) {
-        return data.watch;
-      }
-      return prev;
-    });
-  }, [data, watchId]);
+    setLocalWatch(data.watch);
+  }, [data, isDirty, watchId]);
+
+  const scheduleIntervalOptions = useMemo(() => {
+    const currentInterval = localWatch?.scheduleInterval;
+    if (
+      !currentInterval ||
+      SCHEDULE_INTERVAL_OPTIONS.some(({ value }) => value === currentInterval)
+    ) {
+      return SCHEDULE_INTERVAL_OPTIONS;
+    }
+    return [{ value: currentInterval, text: currentInterval }, ...SCHEDULE_INTERVAL_OPTIONS];
+  }, [localWatch?.scheduleInterval]);
 
   const stubToast = useCallback(() => {
     services.notifications?.toasts.addInfo(i18n.POC_STUB_TOAST);
   }, [services.notifications]);
 
-  const onConfirmDelete = useCallback(() => {
-    setIsDeleteConfirmOpen(false);
-    stubToast();
-  }, [stubToast]);
-
-  const onScheduleChange = useCallback((schedule: WatchSchedule) => {
-    setLocalWatch((prev) =>
-      prev
-        ? {
-            ...prev,
-            schedule,
-            coverage: coverageFromSchedule(schedule),
-          }
-        : prev
-    );
-  }, []);
-
   const onAutonomyChange = useCallback((level: AutonomyLevel) => {
     setLocalWatch((prev) => (prev ? { ...prev, autonomyLevel: level } : prev));
+    setIsDirty(true);
   }, []);
+
+  const onSave = useCallback(async () => {
+    if (!localWatch) return;
+    try {
+      const result = await updateSettings.mutateAsync({
+        watchId: localWatch.id,
+        body: {
+          enabled: localWatch.enabled,
+          description: localWatch.description,
+          autonomyLevel: localWatch.autonomyLevel,
+          scheduleInterval: localWatch.scheduleInterval,
+        },
+      });
+      setLocalWatch(result.watch);
+      setIsDirty(false);
+      services.notifications?.toasts.addSuccess(i18n.SETTINGS_SAVED);
+    } catch (err) {
+      services.notifications?.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.SETTINGS_SAVE_FAILED,
+      });
+    }
+  }, [localWatch, updateSettings, services.notifications]);
 
   const onToggleCallable = useCallback(
     (callableId: string) => {
@@ -179,6 +198,7 @@ export const WatchDetailPage: React.FC = () => {
   }
 
   const watch = localWatch;
+  const canEdit = hasWatchWritePrivileges && !watch.managed;
 
   return (
     <WatchesSectionLayout active="watches">
@@ -208,20 +228,44 @@ export const WatchDetailPage: React.FC = () => {
           leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
           backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
           rightSideItems={[
-            <EuiButton key="save" fill onClick={stubToast}>
-              {i18n.SAVE}
-            </EuiButton>,
-            <EuiButtonEmpty key="discard" onClick={() => history.push('/watches')}>
-              {i18n.DISCARD}
-            </EuiButtonEmpty>,
-            ...(!watch.managed
+            <EuiSwitch
+              key="enabled"
+              label={watch.enabled ? i18n.ACTIVE_BADGE : i18n.PAUSED_BADGE}
+              checked={watch.enabled}
+              onChange={(e) => {
+                setLocalWatch((previous) =>
+                  previous ? { ...previous, enabled: e.target.checked } : previous
+                );
+                setIsDirty(true);
+              }}
+              disabled={!canEdit}
+              compressed
+            />,
+            ...(canEdit
               ? [
-                  <EuiButtonEmpty
-                    key="delete"
-                    color="danger"
-                    onClick={() => setIsDeleteConfirmOpen(true)}
+                  <EuiButton
+                    key="save"
+                    fill
+                    onClick={onSave}
+                    isLoading={updateSettings.isLoading}
+                    disabled={!isDirty}
+                    data-test-subj="pndWatchSaveButton"
                   >
-                    {i18n.DELETE}
+                    {i18n.SAVE}
+                  </EuiButton>,
+                  <EuiButtonEmpty
+                    key="discard"
+                    disabled={!isDirty}
+                    onClick={() => {
+                      if (data?.watch) {
+                        setLocalWatch(data.watch);
+                        setIsDirty(false);
+                      } else {
+                        history.push('/watches');
+                      }
+                    }}
+                  >
+                    {i18n.DISCARD}
                   </EuiButtonEmpty>,
                 ]
               : []),
@@ -232,22 +276,6 @@ export const WatchDetailPage: React.FC = () => {
           <p>{watch.description}</p>
         </EuiText>
         <EuiSpacer size="m" />
-
-        {isDeleteConfirmOpen ? (
-          <EuiConfirmModal
-            aria-labelledby={confirmModalTitleId}
-            title={i18n.DELETE_CONFIRM_TITLE}
-            titleProps={{ id: confirmModalTitleId }}
-            onCancel={() => setIsDeleteConfirmOpen(false)}
-            onConfirm={onConfirmDelete}
-            cancelButtonText={i18n.DELETE_CANCEL}
-            confirmButtonText={i18n.DELETE_CONFIRM_BUTTON}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          >
-            <p>{i18n.deleteConfirmBody(watch.name)}</p>
-          </EuiConfirmModal>
-        ) : null}
 
         <div
           css={css`
@@ -303,9 +331,12 @@ export const WatchDetailPage: React.FC = () => {
           <EuiFormRow label={i18n.DESCRIPTION_LABEL} fullWidth>
             <EuiTextArea
               value={watch.description}
-              onChange={(e) =>
-                setLocalWatch((prev) => (prev ? { ...prev, description: e.target.value } : prev))
-              }
+              onChange={(e) => {
+                setLocalWatch((prev) => (prev ? { ...prev, description: e.target.value } : prev));
+                setIsDirty(true);
+              }}
+              disabled={!canEdit}
+              maxLength={4000}
               rows={2}
               fullWidth
               compressed
@@ -324,28 +355,21 @@ export const WatchDetailPage: React.FC = () => {
                 <EuiFlexItem grow={false}>
                   <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {watch.autonomyLevel} / 5
-                  </EuiText>
-                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
-              <EuiRange
-                min={1}
-                max={5}
-                step={1}
-                value={watch.autonomyLevel}
-                onChange={(e) =>
-                  onAutonomyChange(Number((e.target as HTMLInputElement).value) as AutonomyLevel)
-                }
-                showTicks
-                ticks={AUTONOMY_LABELS.map((label, i) => ({
-                  value: i + 1,
-                  label: i === 0 || i === 4 ? label : '',
-                }))}
-                fullWidth
-                compressed
+              <EuiButtonGroup
+                legend={i18n.AUTONOMY_LEVEL}
+                idSelected={watch.autonomyLevel}
+                onChange={(id) => onAutonomyChange(id as AutonomyLevel)}
+                options={[
+                  { id: 'manual', label: i18n.AUTONOMY_MANUAL_OPTION },
+                  { id: 'assisted', label: i18n.AUTONOMY_ASSISTED_OPTION },
+                  { id: 'supervised', label: i18n.AUTONOMY_SUPERVISED_OPTION },
+                ]}
+                buttonSize="compressed"
+                color="primary"
+                isFullWidth
+                isDisabled={!canEdit}
               />
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued">
@@ -359,7 +383,41 @@ export const WatchDetailPage: React.FC = () => {
 
         {/* Schedule */}
         <SectionHeading title={i18n.SCHEDULE_TITLE} subtitle={i18n.SCHEDULE_SUBTITLE} />
-        <SchedulePanel watch={watch} onScheduleChange={onScheduleChange} />
+        {watch.scheduleInterval ? (
+          <>
+            <EuiPanel hasBorder paddingSize="m">
+              <EuiFormRow
+                label={i18n.SCHEDULE_INTERVAL_LABEL}
+                helpText={i18n.SCHEDULE_INTERVAL_HELP}
+                fullWidth
+              >
+                <EuiSelect
+                  options={scheduleIntervalOptions}
+                  value={watch.scheduleInterval}
+                  onChange={(e) => {
+                    setLocalWatch((prev) =>
+                      prev ? { ...prev, scheduleInterval: e.target.value } : prev
+                    );
+                    setIsDirty(true);
+                  }}
+                  disabled={!canEdit}
+                  compressed
+                  fullWidth
+                  data-test-subj="pndWatchScheduleInterval"
+                />
+              </EuiFormRow>
+            </EuiPanel>
+            <EuiSpacer size="s" />
+          </>
+        ) : (
+          <>
+            <EuiCallOut announceOnMount size="s" color="warning" title={i18n.NO_SCHEDULE_TITLE}>
+              {i18n.NO_SCHEDULE_DESCRIPTION}
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <SchedulePanel watch={watch} />
 
         <EuiSpacer size="l" />
 

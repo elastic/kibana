@@ -9,45 +9,23 @@ import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Watch, WatchSchedule } from '@kbn/pnd-common';
+import type { Watch } from '@kbn/pnd-common';
 import * as i18n from '../translations';
 
 interface SchedulePanelProps {
   watch: Watch;
-  /** POC: local-only projection edit; not written back to workflow YAML yet. */
-  onScheduleChange?: (schedule: WatchSchedule) => void;
 }
 
-const CADENCE_OPTIONS = [
-  { value: 'stream', text: i18n.CADENCE_STREAM },
-  { value: 'sweep', text: i18n.CADENCE_SWEEP },
-  { value: 'manual', text: i18n.CADENCE_MANUAL },
-];
-
-const HANDOFF_OPTIONS = [
-  { value: 'officer', text: i18n.HANDOFF_OFFICER },
-  { value: 'oncall', text: i18n.HANDOFF_ONCALL },
-  { value: 'brief', text: i18n.HANDOFF_BRIEF },
-  { value: 'records', text: i18n.HANDOFF_RECORDS },
-  { value: 'none', text: i18n.HANDOFF_NONE },
-];
-
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ watch, onScheduleChange }) => {
+export const SchedulePanel: React.FC<SchedulePanelProps> = ({ watch }) => {
   const { euiTheme } = useEuiTheme();
-  const { schedule, coverage, color } = watch;
-
-  const modeId =
-    schedule.mode === 'always' ? 'always' : schedule.mode === 'demand' ? 'demand' : 'window';
+  const { coverage, color } = watch;
 
   return (
     <EuiPanel hasBorder paddingSize="m">
@@ -82,26 +60,6 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ watch, onScheduleC
           <EuiSpacer size="s" />
         </>
       ) : null}
-
-      <EuiFormRow label={i18n.SCHEDULE_TITLE} fullWidth>
-        <EuiButtonGroup
-          legend={i18n.SCHEDULE_TITLE}
-          idSelected={modeId}
-          onChange={(id) => {
-            if (!onScheduleChange) return;
-            const mode = id === 'always' ? 'always' : id === 'demand' ? 'demand' : 'window';
-            onScheduleChange({ ...schedule, mode, set: mode !== 'demand' });
-          }}
-          options={[
-            { id: 'always', label: i18n.ALWAYS_ON },
-            { id: 'window', label: i18n.TIME_BASED },
-            { id: 'demand', label: i18n.ON_DEMAND },
-          ]}
-          buttonSize="compressed"
-          color="primary"
-          isFullWidth
-        />
-      </EuiFormRow>
 
       <div
         css={css`
@@ -138,41 +96,6 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ watch, onScheduleC
             </EuiText>
           </EuiFlexItem>
         ))}
-      </EuiFlexGroup>
-
-      <EuiFlexGroup gutterSize="m" style={{ marginTop: euiTheme.size.m }}>
-        <EuiFlexItem>
-          <EuiFormRow label={i18n.CADENCE_LABEL} fullWidth>
-            <EuiSelect
-              options={CADENCE_OPTIONS}
-              value={schedule.cadence}
-              onChange={(e) =>
-                onScheduleChange?.({
-                  ...schedule,
-                  cadence: e.target.value as WatchSchedule['cadence'],
-                })
-              }
-              compressed
-              fullWidth
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label={i18n.HANDOFF_LABEL} fullWidth>
-            <EuiSelect
-              options={HANDOFF_OPTIONS}
-              value={schedule.handoff}
-              onChange={(e) =>
-                onScheduleChange?.({
-                  ...schedule,
-                  handoff: e.target.value as WatchSchedule['handoff'],
-                })
-              }
-              compressed
-              fullWidth
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

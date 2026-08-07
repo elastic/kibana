@@ -18,7 +18,9 @@ paths:
           required: true
           schema:
             type: string
-          description: Managed or custom watch workflow id
+            minLength: 1
+            maxLength: 128
+          description: Watch workflow id
       responses:
         '200':
           description: Successful response

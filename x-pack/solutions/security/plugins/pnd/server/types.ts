@@ -8,8 +8,6 @@
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 export type PndPluginSetup = Record<string, never>;
@@ -17,13 +15,11 @@ export type PndPluginStart = Record<string, never>;
 
 export interface PndSetupDependencies {
   features: FeaturesPluginSetup;
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface PndStartDependencies {
   spaces?: SpacesPluginStart;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 export type PndRouter = IRouter;

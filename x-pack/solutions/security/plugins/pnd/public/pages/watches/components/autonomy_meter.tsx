@@ -9,13 +9,15 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import type { AutonomyLevel } from '@kbn/pnd-common';
-import { autonomyLabel } from '@kbn/pnd-common';
+import { autonomyLevelLabel } from '../translations';
 
 interface AutonomyMeterProps {
   level: AutonomyLevel;
   showLabel?: boolean;
   color?: string;
 }
+
+const AUTONOMY_LEVELS: AutonomyLevel[] = ['manual', 'assisted', 'supervised'];
 
 export const AutonomyMeter: React.FC<AutonomyMeterProps> = ({ level, showLabel = true, color }) => {
   const { euiTheme } = useEuiTheme();
@@ -32,15 +34,17 @@ export const AutonomyMeter: React.FC<AutonomyMeterProps> = ({ level, showLabel =
           `}
           aria-hidden="true"
         >
-          {[1, 2, 3, 4, 5].map((n) => (
+          {AUTONOMY_LEVELS.map((autonomyLevel, index) => (
             <span
-              key={n}
+              key={autonomyLevel}
               css={css`
                 width: 10px;
                 height: 4px;
                 border-radius: 2px;
-                background: ${n <= level ? accent : euiTheme.colors.lightShade};
-                border: ${n === level ? `1px dashed ${accent}` : 'none'};
+                background: ${index <= AUTONOMY_LEVELS.indexOf(level)
+                  ? accent
+                  : euiTheme.colors.lightShade};
+                border: ${autonomyLevel === level ? `1px dashed ${accent}` : 'none'};
               `}
             />
           ))}
@@ -49,7 +53,7 @@ export const AutonomyMeter: React.FC<AutonomyMeterProps> = ({ level, showLabel =
       {showLabel ? (
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <strong>{autonomyLabel(level)}</strong>
+            <strong>{autonomyLevelLabel(level)}</strong>
           </EuiText>
         </EuiFlexItem>
       ) : null}

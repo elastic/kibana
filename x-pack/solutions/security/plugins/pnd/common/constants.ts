@@ -16,11 +16,15 @@ export {
   PND_INVESTIGATIONS_URL,
   PND_INVESTIGATION_URL_TEMPLATE,
   PND_WATCHES_URL,
+  PND_WATCHES_SETUP_URL,
   PND_WATCH_URL_TEMPLATE,
   buildInvestigationUrl,
   buildWatchUrl,
-  SYSTEM_SECURITY_WATCH_IDS,
+  PREBUILT_WATCH_IDS,
 } from '@kbn/pnd-common';
 
 /** API privilege for read-only PND internal routes. */
 export const PND_API_PRIVILEGE_READ = 'pnd_read' as const;
+
+/** API privilege for mutating customer-owned PND resources. */
+export const PND_API_PRIVILEGE_WRITE = 'pnd_write' as const;

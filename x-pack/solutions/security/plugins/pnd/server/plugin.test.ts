@@ -9,17 +9,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PndConfig } from './config';
 import { PndPlugin } from './plugin';
-import { installStatic } from './managed_workflows/install_static';
-import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
-
-jest.mock('./managed_workflows/register_owner', () => ({
-  registerOwner: jest.fn(),
-}));
-
-jest.mock('./managed_workflows/install_static', () => ({
-  installStatic: jest.fn().mockResolvedValue(undefined),
-}));
 
 jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
@@ -45,77 +35,72 @@ describe('PndPlugin feature-flag gating', () => {
   });
 
   describe('when xpack.pnd.enabled is false', () => {
-    it('does not register managed-workflow ownership, features, or HTTP routes', () => {
+    it('does not register features or HTTP routes', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: false })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
-      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
       plugin.setup(
         coreSetup as never,
         {
           features,
-          workflowsExtensions,
           workflowsManagement: undefined,
         } as never
       );
 
-      expect(registerOwner).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
     });
-
-    it('does not install managed watch workflows on start', () => {
-      const plugin = new PndPlugin(createContext(createConfig({ enabled: false })));
-      const coreStart = coreMock.createStart();
-
-      plugin.start(coreStart, {
-        spaces: undefined,
-        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
-      } as never);
-
-      expect(installStatic).not.toHaveBeenCalled();
-    });
   });
 
   describe('when xpack.pnd.enabled is true', () => {
-    it('registers ownership, feature privileges, and routes during setup', () => {
+    it('registers feature privileges and routes during setup', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
-      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
       plugin.setup(
         coreSetup as never,
         {
           features,
-          workflowsExtensions,
           workflowsManagement: { management: {} },
         } as never
       );
 
-      expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
-      expect(features.registerKibanaFeature).toHaveBeenCalled();
+      expect(features.registerKibanaFeature).toHaveBeenCalledWith(
+        expect.objectContaining({
+          privileges: expect.objectContaining({
+            all: expect.objectContaining({ ui: ['show', 'write'] }),
+            read: expect.objectContaining({ ui: ['show'] }),
+          }),
+        })
+      );
       expect(registerRoutes).toHaveBeenCalled();
     });
 
-    it('installs managed watch workflows during start', () => {
-      const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
+    it('creates the live projection without managed workflow installation', () => {
+      const plugin = new PndPlugin(
+        createContext(createConfig({ enabled: true, ui: { useMockData: false } }))
+      );
+      const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
-      const workflowsExtensions = { initManagedWorkflowsClient: jest.fn() };
+      const features = { registerKibanaFeature: jest.fn() };
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features,
+          workflowsManagement: { management: {} },
+        } as never
+      );
 
       plugin.start(coreStart, {
         spaces: undefined,
-        workflowsExtensions,
       } as never);
 
-      expect(installStatic).toHaveBeenCalledWith(
-        expect.objectContaining({
-          enabled: true,
-          workflowsExtensions,
-        })
-      );
+      const routeDependencies = (registerRoutes as jest.Mock).mock.calls[0][0];
+      expect(routeDependencies.getWatchProjection()).toBeDefined();
     });
   });
 });

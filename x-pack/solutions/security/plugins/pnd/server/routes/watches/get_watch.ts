@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCH_URL_TEMPLATE } from '@kbn/pnd-common';
+import {
+  API_VERSIONS,
+  GetWatchRequestParams,
+  INTERNAL_API_ACCESS,
+  PND_WATCH_URL_TEMPLATE,
+} from '@kbn/pnd-common';
 import type { GetWatchResponse } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { getMockWatchById } from '@kbn/pnd-common';
 import type { RouteDependencies } from '../register_routes';
-import { getWatchRoutePrivileges } from './watch_route_security';
-
-const GetWatchRequestParams = z.object({
-  watchId: z.string().min(1).max(128),
-});
+import { getWatchHistoryExtendedPrivileges, getWatchRoutePrivileges } from './watch_route_security';
 
 export const registerGetWatchRoute = ({
   router,
@@ -24,6 +24,7 @@ export const registerGetWatchRoute = ({
   getSpaceId,
   getWatchProjection,
 }: RouteDependencies) => {
+  const extendedPrivileges = getWatchHistoryExtendedPrivileges(config.ui.useMockData);
   router.versioned
     .get({
       path: PND_WATCH_URL_TEMPLATE,
@@ -31,6 +32,7 @@ export const registerGetWatchRoute = ({
       security: {
         authz: {
           requiredPrivileges: getWatchRoutePrivileges(config.ui.useMockData),
+          ...(extendedPrivileges.length > 0 ? { extendedPrivileges } : {}),
         },
       },
       summary: 'Get a PND watch by id',
@@ -66,7 +68,7 @@ export const registerGetWatchRoute = ({
             });
           }
 
-          const result = await projection.get(watchId, getSpaceId(request));
+          const result = await projection.get(watchId, getSpaceId(request), request);
           if (!result) {
             return response.notFound({
               body: { message: `Watch "${watchId}" not found` },

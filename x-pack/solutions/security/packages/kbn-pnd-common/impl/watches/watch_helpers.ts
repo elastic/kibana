@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AutonomyLevel, ScheduleMode } from '../schemas/components/watch.gen';
+import type { ScheduleMode } from '../schemas/components/watch.gen';
 
 /** Minimal schedule shape used by coverage helpers. */
 export interface WatchScheduleCoverageInput {
@@ -15,19 +15,6 @@ export interface WatchScheduleCoverageInput {
   to: number;
 }
 
-/**
- * Labels for Throughline UI-facing autonomy levels.
- * 1 Suggest only · 2 Reads auto · 3 Drafts auto · 4 Acts · gated · 5 Acts · trusted
- */
-export const AUTONOMY_LABELS = [
-  'Suggest only',
-  'Reads auto',
-  'Drafts auto',
-  'Acts · gated',
-  'Acts · trusted',
-] as const;
-
-export type AutonomyLabel = (typeof AUTONOMY_LABELS)[number];
 export const SKILL_LABELS: Record<string, string> = {
   'alert-analysis': 'Alert analysis',
   'alert-triage': 'Alert triage',
@@ -73,11 +60,6 @@ export interface WatchDisplaySortable {
 export function compareWatchesForDisplay(a: WatchDisplaySortable, b: WatchDisplaySortable): number {
   if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
   return a.name.localeCompare(b.name);
-}
-
-export function autonomyLabel(level: AutonomyLevel): AutonomyLabel {
-  const clamped = Math.min(Math.max(Math.trunc(level), 1), 5);
-  return AUTONOMY_LABELS[clamped - 1];
 }
 
 export function skillLabel(skillId: string): string {
