@@ -428,19 +428,11 @@ export const CensysConnector: ConnectorSpec = {
           `${CENSYS_API_BASE_URL}/v3/accounts/organizations/${encodeURIComponent(organizationId)}`,
           await buildRequestConfig(ctx)
         );
-        return { ok: true, message: 'Successfully connected to Censys Platform API' };
+        return {};
       } catch (error) {
-        try {
-          throwCensysError(error);
-        } catch (enriched) {
-          return {
-            ok: false,
-            message: enriched instanceof Error ? enriched.message : String(enriched),
-          };
-        }
-        const message = error instanceof Error ? error.message : String(error);
-        return { ok: false, message: `Failed to connect Censys API: ${message}` };
+        throw throwCensysError(error) ?? error;
       }
     },
+    enabled: true,
   },
 };
