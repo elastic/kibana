@@ -30,7 +30,9 @@ interface CreateEpisodeAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
-  getPrivilegeChecker: (context: { request: AttachmentResolveContext['request'] }) => PrivilegeChecker;
+  getPrivilegeChecker: (context: {
+    request: AttachmentResolveContext['request'];
+  }) => PrivilegeChecker;
 }
 
 const formatEpisodeDescription = ({

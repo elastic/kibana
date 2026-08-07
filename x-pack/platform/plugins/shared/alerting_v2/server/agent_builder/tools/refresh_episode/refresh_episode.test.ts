@@ -87,10 +87,7 @@ describe('refreshEpisodeTool', () => {
       };
       get.mockResolvedValueOnce(refreshed);
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(get).toHaveBeenCalledWith('ep-1');
       expect(result).toEqual({
@@ -117,10 +114,7 @@ describe('refreshEpisodeTool', () => {
       };
       get.mockResolvedValueOnce(episodeWithNulls);
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(result).toEqual({
         results: [
@@ -140,10 +134,7 @@ describe('refreshEpisodeTool', () => {
     it('returns an error when the episode is missing', async () => {
       get.mockResolvedValueOnce(undefined);
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(result).toEqual({
         results: [
@@ -158,10 +149,7 @@ describe('refreshEpisodeTool', () => {
     it('returns an error when get throws', async () => {
       get.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(result).toEqual({
         results: [

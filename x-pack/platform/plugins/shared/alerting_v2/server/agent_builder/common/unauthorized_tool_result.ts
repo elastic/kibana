@@ -15,7 +15,7 @@ import type { PrivilegeChecker } from '../../lib/services/privilege_checker/priv
 
 const DEFAULT_ADVICE = 'Ask an administrator to grant this privilege.';
 
-export type UnauthorizedToolResult = {
+export interface UnauthorizedToolResult {
   results: Array<{
     type: ToolResultType.error;
     data: {
@@ -23,7 +23,7 @@ export type UnauthorizedToolResult = {
       metadata: { missingPrivileges: string[] };
     };
   }>;
-};
+}
 
 type EnsureToolPrivilegeParams = {
   privilegeChecker: PrivilegeChecker;

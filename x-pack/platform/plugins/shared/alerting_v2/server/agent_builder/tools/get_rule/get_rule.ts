@@ -33,7 +33,9 @@ export interface GetRuleToolParams {
   ruleId: string;
   logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
-  getPrivilegeChecker: (context: { request: AttachmentFormatContext['request'] }) => PrivilegeChecker;
+  getPrivilegeChecker: (context: {
+    request: AttachmentFormatContext['request'];
+  }) => PrivilegeChecker;
 }
 
 export const getRuleTool = ({

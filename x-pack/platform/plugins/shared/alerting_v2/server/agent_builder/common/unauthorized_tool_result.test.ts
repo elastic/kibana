@@ -64,7 +64,7 @@ describe('ensureToolPrivilege', () => {
     ({
       canRead: jest.fn().mockResolvedValue(canRead),
       canWrite: jest.fn().mockResolvedValue(canWrite),
-    }) as unknown as PrivilegeChecker;
+    } as unknown as PrivilegeChecker);
 
   it('returns undefined when the user is authorized', async () => {
     const privilegeChecker = createPrivilegeChecker({ canRead: true });

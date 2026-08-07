@@ -32,7 +32,9 @@ export interface RefreshEpisodeToolParams {
   episodeId: string;
   logger: LoggerServiceContract;
   getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
-  getPrivilegeChecker: (context: { request: AttachmentFormatContext['request'] }) => PrivilegeChecker;
+  getPrivilegeChecker: (context: {
+    request: AttachmentFormatContext['request'];
+  }) => PrivilegeChecker;
 }
 
 export const refreshEpisodeTool = ({

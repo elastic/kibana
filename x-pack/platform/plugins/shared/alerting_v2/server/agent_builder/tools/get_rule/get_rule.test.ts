@@ -92,10 +92,7 @@ describe('getRuleTool', () => {
     it('returns the associated rule', async () => {
       getRule.mockResolvedValueOnce(baseRuleData);
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(result).toEqual({
@@ -114,10 +111,7 @@ describe('getRuleTool', () => {
     it('returns an error without logging when getRule returns 404', async () => {
       getRule.mockRejectedValueOnce(Boom.notFound('Rule not found'));
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(result).toEqual({
         results: [
@@ -135,10 +129,7 @@ describe('getRuleTool', () => {
     it('returns an error and logs a warning when getRule throws unexpectedly', async () => {
       getRule.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await createTool().handler(
-        {},
-        agentBuilderMocks.tools.createHandlerContext()
-      );
+      const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
       expect(result).toEqual({
         results: [
