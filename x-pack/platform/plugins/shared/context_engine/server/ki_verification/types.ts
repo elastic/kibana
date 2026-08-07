@@ -20,14 +20,15 @@ export interface KnowledgeItemCandidate {
   attributes?: Record<string, unknown>;
 }
 
-export type KiVerifierStatus = 'valid' | 'invalid' | 'skipped';
+export type KiVerifierStatus = 'valid' | 'invalid' | 'skipped' | 'error';
 
 export interface KiVerifierResult {
   /** Id of the verifier that produced this result. */
   verifier: string;
   /**
    * `valid` when all checks passed, `invalid` when at least one check failed,
-   * and `skipped` when the verifier does not apply to the KI.
+   * `skipped` when the verifier does not apply to the KI, and `error` when the
+   * verifier could not complete its check (no judgment on the KI).
    */
   status: KiVerifierStatus;
   messages: string[];
@@ -52,8 +53,14 @@ export interface KiVerifier {
   verify(ki: KnowledgeItemCandidate, context: KiVerifierContext): Promise<KiVerifierResult>;
 }
 
+/**
+ * `invalid` when any verifier reported the KI as invalid, `indeterminate` when
+ * no verifier reported invalid but at least one could not complete its check,
+ * `valid` otherwise.
+ */
+export type KiVerificationVerdict = 'valid' | 'invalid' | 'indeterminate';
+
 export interface KiVerificationSummary {
-  /** `false` when any verifier reported `invalid`. */
-  valid: boolean;
+  verdict: KiVerificationVerdict;
   results: KiVerifierResult[];
 }

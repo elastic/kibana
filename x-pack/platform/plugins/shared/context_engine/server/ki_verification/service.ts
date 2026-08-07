@@ -28,12 +28,15 @@ export class KiVerificationService {
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         context.logger.warn(`KI verifier '${verifier.id}' failed: ${errorMessage}`);
-        results.push({ verifier: verifier.id, status: 'invalid', messages: [errorMessage] });
+        results.push({ verifier: verifier.id, status: 'error', messages: [errorMessage] });
       }
     }
 
+    const hasInvalid = results.some((result) => result.status === 'invalid');
+    const hasError = results.some((result) => result.status === 'error');
+
     return {
-      valid: results.every((result) => result.status !== 'invalid'),
+      verdict: hasInvalid ? 'invalid' : hasError ? 'indeterminate' : 'valid',
       results,
     };
   }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createEsqlVerifier } from './esql_verifier';
 import type { KiVerifierContext } from '../types';
@@ -46,8 +47,16 @@ describe('createEsqlVerifier', () => {
     expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 
-  it('returns invalid when execution against Elasticsearch fails', async () => {
-    esClient.esql.query.mockRejectedValue(new Error('index_not_found_exception'));
+  it('returns invalid when Elasticsearch rejects the query with a 400', async () => {
+    esClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        headers: {},
+        meta: {} as never,
+        body: { error: { type: 'verification_exception', reason: 'Unknown index [my-index]' } },
+        warnings: null,
+      })
+    );
 
     const result = await verifier.verify(
       { content: '```esql\nFROM my-index | LIMIT 10\n```' },
@@ -55,7 +64,59 @@ describe('createEsqlVerifier', () => {
     );
 
     expect(result.status).toBe('invalid');
-    expect(result.messages[0]).toContain('index_not_found_exception');
+    expect(result.messages[0]).toContain('Invalid ES|QL query');
+  });
+
+  it('returns error when execution fails for reasons other than query rejection', async () => {
+    esClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 403,
+        headers: {},
+        meta: {} as never,
+        body: { error: { type: 'security_exception', reason: 'action unauthorized' } },
+        warnings: null,
+      })
+    );
+
+    const result = await verifier.verify(
+      { content: '```esql\nFROM my-index | LIMIT 10\n```' },
+      context
+    );
+
+    expect(result.status).toBe('error');
+    expect(result.messages[0]).toContain('Could not verify ES|QL query');
+  });
+
+  it('returns error when execution fails with a non-response error', async () => {
+    esClient.esql.query.mockRejectedValue(new Error('connect ECONNREFUSED'));
+
+    const result = await verifier.verify(
+      { content: '```esql\nFROM my-index | LIMIT 10\n```' },
+      context
+    );
+
+    expect(result.status).toBe('error');
+    expect(result.messages[0]).toContain('ECONNREFUSED');
+  });
+
+  it('reports invalid over error when different queries fail differently', async () => {
+    esClient.esql.query.mockRejectedValue(new Error('connect ECONNREFUSED'));
+
+    const result = await verifier.verify(
+      {
+        content: [
+          '```esql',
+          'FROM my-index | LIMIT 10',
+          '```',
+          '```esql',
+          'FROM | WHERE',
+          '```',
+        ].join('\n'),
+      },
+      context
+    );
+
+    expect(result.status).toBe('invalid');
   });
 
   it('returns skipped when the KI contains no ES|QL', async () => {

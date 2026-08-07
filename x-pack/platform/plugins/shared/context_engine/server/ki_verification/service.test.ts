@@ -33,32 +33,48 @@ describe('KiVerificationService', () => {
     return new KiVerificationService(registry);
   };
 
-  it('returns valid when all verifiers pass', async () => {
+  it('returns a valid verdict when all verifiers pass', async () => {
     const service = makeService([makeVerifier('a', 'valid'), makeVerifier('b', 'valid')]);
 
     const summary = await service.verify({}, context);
 
-    expect(summary.valid).toBe(true);
+    expect(summary.verdict).toBe('valid');
     expect(summary.results).toHaveLength(2);
   });
 
-  it('returns invalid when any verifier fails', async () => {
+  it('returns an invalid verdict when any verifier fails', async () => {
     const service = makeService([makeVerifier('a', 'valid'), makeVerifier('b', 'invalid')]);
 
     const summary = await service.verify({}, context);
 
-    expect(summary.valid).toBe(false);
+    expect(summary.verdict).toBe('invalid');
   });
 
-  it('does not count skipped verifiers against validity', async () => {
+  it('does not count skipped verifiers against the verdict', async () => {
     const service = makeService([makeVerifier('a', 'skipped'), makeVerifier('b', 'valid')]);
 
     const summary = await service.verify({}, context);
 
-    expect(summary.valid).toBe(true);
+    expect(summary.verdict).toBe('valid');
   });
 
-  it('records a throwing verifier as invalid without throwing and logs a warning', async () => {
+  it('returns an indeterminate verdict when a verifier errors and none report invalid', async () => {
+    const service = makeService([makeVerifier('a', 'valid'), makeVerifier('b', 'error')]);
+
+    const summary = await service.verify({}, context);
+
+    expect(summary.verdict).toBe('indeterminate');
+  });
+
+  it('reports invalid over indeterminate when both occur', async () => {
+    const service = makeService([makeVerifier('a', 'error'), makeVerifier('b', 'invalid')]);
+
+    const summary = await service.verify({}, context);
+
+    expect(summary.verdict).toBe('invalid');
+  });
+
+  it('records a throwing verifier as error without throwing and logs a warning', async () => {
     const throwing: KiVerifier = {
       id: 'broken',
       verify: jest.fn().mockRejectedValue(new Error('boom')),
@@ -67,10 +83,10 @@ describe('KiVerificationService', () => {
 
     const summary = await service.verify({}, context);
 
-    expect(summary.valid).toBe(false);
+    expect(summary.verdict).toBe('indeterminate');
     expect(summary.results[0]).toEqual({
       verifier: 'broken',
-      status: 'invalid',
+      status: 'error',
       messages: ['boom'],
     });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));

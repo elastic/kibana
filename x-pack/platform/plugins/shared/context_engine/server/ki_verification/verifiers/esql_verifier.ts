@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { validateQuery } from '@kbn/esql-language';
 import type {
   KiVerifier,
@@ -35,10 +36,18 @@ const extractQueries = (ki: KnowledgeItemCandidate): string[] => {
   return queries;
 };
 
-const verifyQuery = async (query: string, context: KiVerifierContext): Promise<string[]> => {
-  const { errors } = await validateQuery(query);
-  if (errors.length > 0) {
-    return errors.map((error) => ('text' in error ? error.text : error.message));
+interface QueryCheck {
+  outcome: 'valid' | 'invalid' | 'error';
+  messages: string[];
+}
+
+const checkQuery = async (query: string, context: KiVerifierContext): Promise<QueryCheck> => {
+  const { errors: validationErrors } = await validateQuery(query);
+  if (validationErrors.length > 0) {
+    return {
+      outcome: 'invalid',
+      messages: validationErrors.map((error) => ('text' in error ? error.text : error.message)),
+    };
   }
 
   try {
@@ -46,9 +55,17 @@ const verifyQuery = async (query: string, context: KiVerifierContext): Promise<s
       { query: `${query}\n| LIMIT 0` },
       { signal: context.abortSignal, requestTimeout: '10s' }
     );
-    return [];
+    return { outcome: 'valid', messages: [] };
   } catch (error) {
-    return [error instanceof Error ? error.message : String(error)];
+    const message = error instanceof Error ? error.message : String(error);
+    // A 400 means Elasticsearch rejected the query itself (parsing or
+    // verification, e.g. an unknown index or column), so the KI is invalid.
+    // Anything else (auth, timeouts, availability) means the check could not
+    // be completed and is no judgment on the KI.
+    if (error instanceof errors.ResponseError && error.statusCode === 400) {
+      return { outcome: 'invalid', messages: [message] };
+    }
+    return { outcome: 'error', messages: [message] };
   }
 };
 
@@ -66,15 +83,21 @@ export const createEsqlVerifier = (): KiVerifier => ({
     }
 
     const failures: string[] = [];
+    const checkErrors: string[] = [];
     for (const query of queries) {
-      const errorMessages = await verifyQuery(query, context);
-      if (errorMessages.length > 0) {
-        failures.push(`Invalid ES|QL query "${query}": ${errorMessages.join('; ')}`);
+      const { outcome, messages } = await checkQuery(query, context);
+      if (outcome === 'invalid') {
+        failures.push(`Invalid ES|QL query "${query}": ${messages.join('; ')}`);
+      } else if (outcome === 'error') {
+        checkErrors.push(`Could not verify ES|QL query "${query}": ${messages.join('; ')}`);
       }
     }
 
     if (failures.length > 0) {
       return { verifier: 'esql', status: 'invalid', messages: failures };
+    }
+    if (checkErrors.length > 0) {
+      return { verifier: 'esql', status: 'error', messages: checkErrors };
     }
 
     return {

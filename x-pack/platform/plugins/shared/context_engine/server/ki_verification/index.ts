@@ -17,6 +17,7 @@ export type {
   KiVerificationLogger,
   KiVerifier,
   KiVerificationSummary,
+  KiVerificationVerdict,
 } from './types';
 export { KiVerifierRegistry } from './registry';
 export { KiVerificationService } from './service';

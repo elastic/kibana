@@ -53,15 +53,19 @@ const VerifyKiInputSchema = z.object({
 });
 
 const VerifyKiOutputSchema = z.object({
-  valid: z.boolean().describe('`true` when no verifier reported the knowledge item as invalid.'),
+  verdict: z
+    .enum(['valid', 'invalid', 'indeterminate'])
+    .describe(
+      '`invalid` when any verifier reported the knowledge item as invalid, `indeterminate` when no verifier reported invalid but at least one could not complete its check, `valid` otherwise.'
+    ),
   results: z
     .array(
       z.object({
         verifier: z.string().describe('Id of the verifier that produced this result.'),
         status: z
-          .enum(['valid', 'invalid', 'skipped'])
+          .enum(['valid', 'invalid', 'skipped', 'error'])
           .describe(
-            '`valid` when all checks passed, `invalid` when at least one check failed, `skipped` when the verifier does not apply.'
+            '`valid` when all checks passed, `invalid` when at least one check failed, `skipped` when the verifier does not apply, `error` when the verifier could not complete its check.'
           ),
         messages: z.array(z.string()).describe('Details about the verification outcome.'),
       })
@@ -91,7 +95,7 @@ export const verifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'Runs the registered knowledge item verifiers against a candidate KI and reports whether it is valid. The ES|QL verifier extracts ES|QL queries from fenced code blocks in the KI content and from the `esql` attribute, validates that they parse, and confirms they execute successfully. Use the `valid` output to gate whether the KI is persisted to an AI index.',
+        'Runs the registered knowledge item verifiers against a candidate KI and reports a verdict. The ES|QL verifier extracts ES|QL queries from fenced code blocks in the KI content and from the `esql` attribute, validates that they parse, and confirms they execute successfully. Use the `verdict` output to gate whether the KI is persisted to an AI index; `indeterminate` means verification could not be completed and is not a judgment on the KI.',
     }),
     examples: [
       `## Verify a KI before indexing it

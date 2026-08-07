@@ -8,7 +8,7 @@ Candidate knowledge items (KIs) are verified by the `context-engine.verifyKi` wo
 
 - **Verification framework** (`server/ki_verification/`) — a `KiVerifierRegistry` to register verifiers, a `KiVerificationService` that applies them to a candidate KI, and the first verifier:
   - **ES|QL verifier** — extracts ES|QL from fenced ` ```esql ` blocks in the KI `content` and from the `esql` attribute, validates that each query parses (`validateQuery` from `@kbn/esql-language`, no round-trip), then confirms it executes (`<query> | LIMIT 0` must return 200, even with empty results).
-- **`context-engine.verifyKi` workflow step** — runs the verifiers against a candidate KI and outputs `{ valid, results }`. Verification failures are step *output*, not step errors, so workflows can branch on `valid`.
+- **`context-engine.verifyKi` workflow step** — runs the verifiers against a candidate KI and outputs `{ verdict, results }`. The verdict is `valid`, `invalid`, or `indeterminate` (no verifier reported invalid, but at least one could not complete its check — e.g. auth failures or timeouts — so no judgment on the KI). Verification failures are step *output*, not step errors, so workflows can branch on `verdict`.
 
 No verification metadata is written to the KI record, and no retrieval-side changes are needed: with verify-before-persist, everything in the AI index passed verification by construction.
 
@@ -75,7 +75,7 @@ steps:
           ki: '${{ foreach.item }}'
       - name: gate_ki
         type: if
-        condition: 'steps.verify_ki.output.valid : true'
+        condition: 'steps.verify_ki.output.verdict : "valid"'
         steps:
           - name: persist_ki
             type: elasticsearch.index
@@ -158,7 +158,7 @@ steps:
           ki: '${{ foreach.item._source }}'
       - name: gate_ki
         type: if
-        condition: 'steps.verify_ki.output.valid : false'
+        condition: 'steps.verify_ki.output.verdict : "invalid"'
         steps:
           - name: request_delete_approval
             type: waitForApproval
@@ -192,9 +192,10 @@ steps:
 
 The run pauses at `request_delete_approval` for each failing KI; approve or reject from the workflow execution view. After approving, the broken KI is gone from the index and the valid one is untouched.
 
+The delete gate only fires on an `invalid` verdict. When verification cannot be completed (the runner lacks permissions, Elasticsearch is unavailable, a timeout), the verdict is `indeterminate` and the KI is left alone — deletion never triggers on a failure to verify. A real sweep would add an `indeterminate` branch that logs or alerts.
+
 Caveats for anything past a POC:
 
-- The ES|QL verifier fails a KI on *execution* errors too, which can be transient (source index temporarily missing, permissions). Parse errors are strong delete signals; execution errors are weaker. Before automating deletes without HITL, the verifier result should distinguish the two so the delete gate can be stricter.
 - `elasticsearch.search` is capped at `size` here; a real sweep needs pagination.
 - `waitForApproval` is tech preview.
 
