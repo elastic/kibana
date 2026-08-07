@@ -83,7 +83,9 @@ export class EuiDataGridObject extends BaseObject {
     // keeps this safe when several grids coexist.
     const actionsMenu = this.root.page().getByTestId(`dataGridHeaderCellActionGroup-${columnId}`);
     await actionsMenu.waitFor({ state: 'visible' });
-    await actionsMenu.locator(`.euiListGroupItem__label[title="${actionLabel}"]`).click();
+    // getByTitle auto-escapes the label (quotes would break an interpolated
+    // CSS attribute selector).
+    await actionsMenu.getByTitle(actionLabel, { exact: true }).click();
     await actionsMenu.waitFor({ state: 'hidden' });
   }
 
