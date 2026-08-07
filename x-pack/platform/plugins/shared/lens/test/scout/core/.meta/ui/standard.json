@@ -1,0 +1,87 @@
+{
+  "sha1": "292edf334dd6010365d8b5a1b6997483b64738b7",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "498cbb8f400ae8a-2867e4a4bffc4e3",
+      "title": "Lens Convert to ES|QL button should not display button for inline visualizations when feature flag is set to false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion_disabled.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "8947d467d92594e-e5040a56b0ee7d7",
+      "title": "Lens Convert to ES|QL should display ES|QL conversion modal for inline visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 41,
+        "column": 21
+      }
+    },
+    {
+      "id": "8947d467d92594e-0e83d94e28c3793",
+      "title": "Lens Convert to ES|QL should update and reflect the visualization configuration after the conversion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 52,
+        "column": 5
+      }
+    },
+    {
+      "id": "8947d467d92594e-d972ca73bd4e33a",
+      "title": "Lens Convert to ES|QL should correctly cancel the conversion and close the flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 81,
+        "column": 16
+      }
+    },
+    {
+      "id": "8947d467d92594e-cfb66e0984c0af4",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button for visualizations saved to library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/esql_conversion_enabled.spec.ts",
+        "line": 95,
+        "column": 11
+      }
+    },
+    {
+      "id": "8662e5941181d3e-e3b22d6d08f1ea3",
+      "title": "Lens metric trendline with custom time field renders trendline when referenced data view time field is not timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/tests/metric_trendline_custom_time_field.spec.ts",
+        "line": 55,
+        "column": 69
+      }
+    }
+  ]
+}
