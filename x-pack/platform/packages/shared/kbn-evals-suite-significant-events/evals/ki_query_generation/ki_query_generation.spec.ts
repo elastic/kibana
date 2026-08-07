@@ -51,7 +51,7 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 /** Concurrent scenario runs per experiment. Each scenario has its own isolated
  * replay index, so raising this is safe. */
-const QUERYGEN_CONCURRENCY = Number(process.env.SIGEVENTS_QUERYGEN_CONCURRENCY) || 4;
+const QUERYGEN_CONCURRENCY = Number(process.env.SIGEVENTS_QUERYGEN_CONCURRENCY) || 2;
 
 /** A replay that drops more than this fraction of docs (typically mapping
  * conflicts) is treated as unusable and the scenario is skipped rather than
