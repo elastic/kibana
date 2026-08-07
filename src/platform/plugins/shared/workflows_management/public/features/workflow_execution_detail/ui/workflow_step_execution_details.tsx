@@ -88,7 +88,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       () =>
         stepExecution?.stepType
           ? workflowsExtensions.getStepDefinition(stepExecution.stepType)?.logs ?? {
-              enabled: true,
+              enabled: false,
             }
           : undefined,
       [stepExecution?.stepType, workflowsExtensions]
