@@ -1,5 +1,5 @@
 {
-  "sha1": "40309bd9ddc040a97ba9c75480a00644b1625885",
+  "sha1": "08104eeffd78dc01899f595c58d2d097fcb6642e",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -324,7 +324,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 20
       }
     },
@@ -740,7 +740,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 36,
+        "line": 44,
         "column": 79
       }
     },
@@ -753,21 +753,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 75,
+        "line": 105,
         "column": 29
       }
     },
     {
-      "id": "20f54b9a7292df7-ccdfd4111abaa66",
-      "title": "Lens metric secondary replaces the secondary metric label and badge when the primary metric becomes non-numeric",
+      "id": "20f54b9a7292df7-5321a3b4bfa89d2",
+      "title": "Lens metric secondary shows and hides the secondary metric name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 116,
+        "line": 149,
         "column": 30
+      }
+    },
+    {
+      "id": "20f54b9a7292df7-4cabdf7b76e2cf1",
+      "title": "Lens metric secondary keeps the secondary metric name and resets the badge when the primary metric becomes non-numeric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
+        "line": 167,
+        "column": 9
       }
     },
     {
