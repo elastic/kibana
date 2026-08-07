@@ -25,13 +25,15 @@ export type UnauthorizedToolResult = {
   }>;
 };
 
-/**
- * Builds a tool handler return value for a Kibana privilege authorization failure.
- *
- * @param action - Short description of the denied action (e.g. "refresh episode")
- * @param missingPrivileges - Human-readable privilege names (e.g. ["Alerts: Read"])
- * @param advice - Optional trailing guidance after the missing-privilege sentence
- */
+type EnsureToolPrivilegeParams = {
+  privilegeChecker: PrivilegeChecker;
+  action: string;
+  advice?: string;
+} & (
+  | { feature: AlertingV2Feature; level: 'read' }
+  | { feature: WritableAlertingV2Feature; level: 'all' }
+);
+
 export const createUnauthorizedToolResult = ({
   action,
   missingPrivileges,
@@ -58,19 +60,6 @@ export const createUnauthorizedToolResult = ({
   };
 };
 
-type EnsureToolPrivilegeParams = {
-  privilegeChecker: PrivilegeChecker;
-  action: string;
-  advice?: string;
-} & (
-  | { feature: AlertingV2Feature; level: 'read' }
-  | { feature: WritableAlertingV2Feature; level: 'all' }
-);
-
-/**
- * Checks the required Alerting v2 privilege and returns an unauthorized tool
- * result when the check fails. Returns `undefined` when authorized.
- */
 export const ensureToolPrivilege = async ({
   privilegeChecker,
   feature,

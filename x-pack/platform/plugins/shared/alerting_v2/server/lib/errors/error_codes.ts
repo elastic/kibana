@@ -340,28 +340,13 @@ export const ALERTING_LOG_CODES = {
 
 
   // ─────────────────────────── Agent Builder ─────────────────────────
-  /**
-   * The episode-attachment `refresh_episode` bounded tool failed while
-   * re-fetching the episode. The tool returns an error result to the agent;
-   * the conversation continues.
-   */
+  /** `refresh_episode` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
-  /**
-   * The episode-attachment `get_rule` bounded tool failed while fetching the
-   * associated rule. The tool returns an error result to the agent; the
-   * conversation continues.
-   */
+  /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
-  /**
-   * Resolving an episode attachment origin failed. The attachment resolve
-   * hook returns undefined so the conversation can continue without the
-   * refreshed snapshot.
-   */
+  /** Episode attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
-  /**
-   * Checking whether an episode attachment is stale failed. The isStale hook
-   * returns false so the conversation continues with the existing snapshot.
-   */
+  /** Episode attachment isStale check failed; returns false. */
   AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────
