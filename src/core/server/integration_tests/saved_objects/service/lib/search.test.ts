@@ -117,9 +117,7 @@ describe('SOR - search API', () => {
     });
 
     expect(documents.hits.total).toHaveProperty('value', 5);
-    // `match_all` has no `sort`, so hit order is non-deterministic; assert the full set instead of a position.
-    const names = documents.hits.hits.map((hit) => (hit._source?.['test-type'] as UserType)?.name);
-    expect(names).toEqual(expect.arrayContaining(users.map((user) => user.name)));
+    expect(documents.hits.hits.map(({ _source }) => _source?.['test-type'])).toEqual(expect.arrayContaining(users));
   });
 
   it('should perform objects search using bool query', async () => {
