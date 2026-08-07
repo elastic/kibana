@@ -63,3 +63,12 @@ fi
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'pnpm kbn bootstrap'
 fi
+
+# Opt-in per job (CLEAR_INSTALL_CACHE) to free disk on constrained agents.
+# Reclaims store entries not hardlinked into node_modules (drift vs the baked
+# image) — or the full duplicate where the store is copied cross-device.
+if [[ "${CLEAR_INSTALL_CACHE:-}" ]]; then
+  echo "Clearing pnpm store at $(pnpm store path)"
+  rm -rf "$(pnpm store path)"
+  df -h . || echo "Failed to get disk space"
+fi

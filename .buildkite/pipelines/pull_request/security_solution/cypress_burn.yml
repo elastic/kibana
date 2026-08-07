@@ -3,7 +3,7 @@ steps:
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     key: defend-workflows-burn
     env:
-      CLEAR_YARN_CACHE: '1'
+      CLEAR_INSTALL_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -23,7 +23,7 @@ steps:
     key: defend-workflows-serverless-burn
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     env:
-      CLEAR_YARN_CACHE: '1'
+      CLEAR_INSTALL_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
