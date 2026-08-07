@@ -28,12 +28,12 @@ export type WorkflowExecutionsTableColumnId =
  * Values sized for typical content (e.g. "13 minutes ago", "Schedule", duration).
  */
 export const EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS = 240;
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER = 110;
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED = 140;
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION = 88;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER = 120;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED = 160;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION = 100;
 
 /** Floor width so fixed columns + Actions + a usable Workflow column (~200px) still fit; below this we scroll. */
-export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 880;
+export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 920;
 
 export interface WorkflowExecutionsGridColumnSettings {
   display: string;

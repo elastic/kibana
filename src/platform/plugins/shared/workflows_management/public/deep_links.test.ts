@@ -41,6 +41,12 @@ describe('getDeepLinks', () => {
     );
   });
 
+  it('orders Executions before Template Library when both are enabled', () => {
+    const deepLinks = getDeepLinks({ executionsViewEnabled: true, libraryEnabled: true });
+
+    expect(deepLinks.map((link) => link.id)).toEqual(['list', 'executions', 'library']);
+  });
+
   it('does not set visibleIn on the workflows deep link when the library is disabled', () => {
     const [workflowsDeepLink] = getDeepLinks({ libraryEnabled: false });
 

@@ -39,17 +39,6 @@ export function getDeepLinks({
     },
   ];
 
-  if (libraryEnabled) {
-    links.push({
-      id: WorkflowsPageName.library,
-      title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
-        defaultMessage: 'Template Library',
-      }),
-      path: '/library',
-      visibleIn: sideNavVisibleIn,
-    });
-  }
-
   if (executionsViewEnabled) {
     links.push({
       id: WorkflowsPageName.executions,
@@ -58,6 +47,17 @@ export function getDeepLinks({
       }),
       path: '/executions',
       // Without projectSideNav, solution nav strips this node (DEFAULT_LINK_VISIBILITY is globalSearch-only).
+      visibleIn: sideNavVisibleIn,
+    });
+  }
+
+  if (libraryEnabled) {
+    links.push({
+      id: WorkflowsPageName.library,
+      title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
+        defaultMessage: 'Template Library',
+      }),
+      path: '/library',
       visibleIn: sideNavVisibleIn,
     });
   }

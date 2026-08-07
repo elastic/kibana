@@ -175,7 +175,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflowsManagement.executionsPage.column.trigger', {
           defaultMessage: 'Trigger',
         }),
-        width: '110px',
+        width: '120px',
         render: (_value, execution) => <WorkflowExecutionTriggersCell execution={execution} />,
       },
       {
@@ -183,7 +183,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflowsManagement.executionsPage.column.started', {
           defaultMessage: 'Started',
         }),
-        width: '140px',
+        width: '160px',
         render: (_value, execution) => <WorkflowExecutionStartedAtCell execution={execution} />,
       },
       {
@@ -191,7 +191,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflowsManagement.executionsPage.column.duration', {
           defaultMessage: 'Duration',
         }),
-        width: '88px',
+        width: '100px',
         align: 'right',
         render: (_value, execution) => <WorkflowExecutionDurationCell execution={execution} />,
       },
