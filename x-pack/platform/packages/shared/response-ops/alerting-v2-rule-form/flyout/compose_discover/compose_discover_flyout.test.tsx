@@ -1469,6 +1469,26 @@ describe('ComposeDiscoverFlyout', () => {
     });
   });
 
+  describe('step clamping after a YAML-edited kind change', () => {
+    it('clamps step back into range when YAML changes kind to one with fewer steps', () => {
+      renderFlyout({ mode: 'create' });
+
+      // Notifications (step 3) only exists for alert kind — reachable before the
+      // YAML edit below drops the rule to signal (3 steps: indices 0-2).
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 3 });
+      });
+      expect(getLatestFormProps().state.step).toBe(3);
+
+      // Enabling YAML mode applies the mocked parse, which returns kind: 'signal'.
+      clickEditMode('yaml');
+      // Disabling re-parses the same buffer through the fix's clamp logic.
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.step).toBe(2);
+    });
+  });
+
   describe('recovery_strategy removal on update', () => {
     const ruleWithRecoveryStrategy = {
       id: 'test-rule-id',

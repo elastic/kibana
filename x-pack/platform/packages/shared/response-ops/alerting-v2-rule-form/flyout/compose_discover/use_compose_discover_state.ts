@@ -115,8 +115,10 @@ export function reducer(
           : {}),
       };
     case 'KIND_CHANGE':
-      // Reset manual split when switching kind — the unified query is rebuilt.
-      // Stay on the current step (Outcome owns mode selection); do not force the sandbox open.
+      /*
+       * Reset manual split when switching kind — the unified query is rebuilt.
+       * Stay on the current step (Outcome owns mode selection); do not force the sandbox open.
+       */
       return action.kind === 'alert'
         ? { ...state, activeTab: 'base', manualSplitEnabled: false }
         : {

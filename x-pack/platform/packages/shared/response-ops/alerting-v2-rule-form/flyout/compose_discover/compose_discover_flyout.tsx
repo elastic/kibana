@@ -58,7 +58,12 @@ import {
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
 import { validateStep, evaluateStepValidation } from './validate_step';
-import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import {
+  getSandboxTabs,
+  getStepIds,
+  getBuilderStepIds,
+  useComposeDiscoverState,
+} from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
@@ -630,8 +635,10 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
-        // Keep noDataStrategy in form state so alert↔signal round-trips preserve a
-        // still-valid choice; request mappers omit it for signal rules.
+        /*
+         * Keep noDataStrategy in form state so alert↔signal round-trips preserve a
+         * still-valid choice; request mappers omit it for signal rules.
+         */
         methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
@@ -806,6 +813,19 @@ export function ComposeDiscoverFlyout({
           if (yamlWasDirty) {
             hasBeenEditedRef.current = true;
           }
+          /*
+           * YAML editing bypasses the KIND_CHANGE action, so a kind edited in the
+           * buffer can leave `step` pointing past the new kind's step count (e.g.
+           * alert's Notifications step has no signal equivalent) — clamp it.
+           */
+          const stepCount = (
+            builderType
+              ? getBuilderStepIds(composed.kind === 'alert')
+              : getStepIds(composed.kind === 'alert')
+          ).length;
+          if (uiState.step > stepCount - 1) {
+            dispatch({ type: 'SET_STEP', step: stepCount - 1 });
+          }
         }
         /*
          * No apply on parse-failure path: the debounced parse always calls
@@ -815,7 +835,16 @@ export function ComposeDiscoverFlyout({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch, forceYamlMode]
+    [
+      cancelYamlParse,
+      methods,
+      yamlText,
+      applyYamlValuesToFormAndSandbox,
+      dispatch,
+      forceYamlMode,
+      builderType,
+      uiState.step,
+    ]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -837,8 +866,10 @@ export function ComposeDiscoverFlyout({
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
     }
-    // Manual split with an empty alert condition stays composed + empty segment —
-    // the schema rejects that at save; do not coerce to standalone.
+    /*
+     * Manual split with an empty alert condition stays composed + empty segment —
+     * the schema rejects that at save; do not coerce to standalone.
+     */
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });

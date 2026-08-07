@@ -370,8 +370,10 @@ test.describe(
       });
 
       await test.step('opens in form mode; select the correct time field', async () => {
-        // Composed alerts stay in the form. The stored @timestamp is not in the
-        // index options; wait for options to load then pick the correct field.
+        /*
+         * Composed alerts stay in the form. The stored @timestamp is not in the
+         * index options; wait for options to load then pick the correct field.
+         */
         await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeHidden();
         await pageObjects.composeDiscover.selectTimeField('timestamp');
         await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
