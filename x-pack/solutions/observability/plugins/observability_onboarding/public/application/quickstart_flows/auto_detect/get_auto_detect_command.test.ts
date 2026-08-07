@@ -18,7 +18,7 @@ describe('getAutoDetectCommand', () => {
     metricsEnabled: true,
   };
 
-  it('generates the basic command', () => {
+  it('generates a basic command', () => {
     const command = getAutoDetectCommand(baseParams);
 
     expect(command).toContain('curl http://localhost:5603/api/auto_detect.sh');
