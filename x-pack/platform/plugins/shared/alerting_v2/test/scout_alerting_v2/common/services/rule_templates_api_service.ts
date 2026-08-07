@@ -17,26 +17,17 @@ const SAVED_OBJECT_ES_HEADERS = {
   'x-elastic-product-origin': 'kibana',
 };
 
-/**
- * Type migration version stamped on seeded templates. Model version 4 is where
- * the `engine: "v2"` template shape was introduced, so it is the earliest
- * version these documents are valid under. Later model versions are applied on
- * read, which keeps this constant correct as new ones are added — it only has
- * to stay at or below the version Kibana is running.
- */
+/** Earliest model version that accepts the `engine: "v2"` template shape. */
 const TYPE_MIGRATION_VERSION = '10.4.0';
 
 export interface SeedRuleTemplateParams {
   id: string;
-  /** Stored attributes. Deliberately untyped so specs can seed invalid content. */
   attributes: Record<string, unknown>;
   spaceId?: string;
 }
 
 export interface RuleTemplatesApiService {
-  /** Indexes a rule template saved object with the given attributes. */
   create: (params: SeedRuleTemplateParams) => Promise<void>;
-  /** Removes every rule template saved object. */
   cleanUp: () => Promise<void>;
 }
 

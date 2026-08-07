@@ -6,15 +6,3 @@
  */
 
 export const APP_ID = 'alerting_v2';
-
-/**
- * Upper bound on the number of distinct tags a terms aggregation returns.
- * Shared by the rules and rule-template tag APIs so both filter UIs behave the
- * same.
- */
-export const TAGS_AGG_SIZE = 10000;
-
-/** Shape of the `tags` terms aggregation used by the tag-list APIs. */
-export interface TagsAggregationResult {
-  tags: { buckets: Array<{ key: string }> };
-}
