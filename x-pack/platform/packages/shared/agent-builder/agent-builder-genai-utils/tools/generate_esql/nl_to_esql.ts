@@ -29,7 +29,11 @@ export class GenerateEsqlNoDataError extends Error {
 
 export interface GenerateEsqlResponse {
   /**
-   * The ES|QL query which was generated
+   * The ES|QL query which was generated.
+   *
+   * `undefined` when the model failed to produce a query after exhausting retries — in that
+   * case {@link GenerateEsqlResponse.error} is always set. Consumers should check `error`
+   * before using `query`.
    */
   query?: string;
   /**
