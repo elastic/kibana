@@ -100,9 +100,11 @@ on_exit() {
   trap - EXIT
   # The pre-run snapshot is only a baseline; ES fills `.es` while the suite runs, so these are the
   # numbers that show a watermark breach. Skipped in the parent fanout step, which never starts ES.
+  # Diagnostics must never abort the trap under `set -e`, or the steps below are skipped and the
+  # failure goes unrecorded for triage.
   if [[ -d .es ]]; then
     echo "--- Disk usage after the run"
-    df -h .
+    df -h . || true
     du -sh .es 2>/dev/null || true
   fi
   cleanup
