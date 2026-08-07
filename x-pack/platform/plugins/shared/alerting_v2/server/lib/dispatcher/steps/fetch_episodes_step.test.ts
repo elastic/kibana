@@ -9,6 +9,7 @@ import { FetchEpisodesStep, parseDataJson, parseAlertEpisodes } from './fetch_ep
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
 
 describe('FetchEpisodesStep', () => {
   it('returns episodes and continues when episodes are found', async () => {
@@ -148,10 +149,13 @@ describe('parseAlertEpisodes', () => {
       {
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
         rule_id: 'r1',
+        source: 'internal',
+        space_id: 'default',
         group_hash: 'h1',
         episode_id: 'e1',
         episode_status: 'active' as const,
         data_json: '{"host":"server-01"}',
+        severity: null,
       },
     ];
 
@@ -167,10 +171,13 @@ describe('parseAlertEpisodes', () => {
       {
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
         rule_id: 'r1',
+        source: 'internal',
+        space_id: 'default',
         group_hash: 'h1',
         episode_id: 'e1',
         episode_status: 'active' as const,
         data_json: null,
+        severity: null,
       },
     ];
 
@@ -178,5 +185,70 @@ describe('parseAlertEpisodes', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].data).toBeUndefined();
+  });
+
+  it('includes severity when severity is not null', () => {
+    const raw = [
+      {
+        last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        rule_id: 'r1',
+        source: 'internal',
+        space_id: 'default',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        episode_status: 'active' as const,
+        data_json: null,
+        severity: 'medium' as AlertEventSeverity,
+      },
+    ];
+
+    const result = parseAlertEpisodes(raw);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBe('medium');
+  });
+
+  it('omits severity when severity is null', () => {
+    const raw = [
+      {
+        last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        rule_id: 'r1',
+        source: 'internal',
+        space_id: 'default',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        episode_status: 'active' as const,
+        data_json: null,
+        severity: null,
+      },
+    ];
+
+    const result = parseAlertEpisodes(raw);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].severity).toBeUndefined();
+  });
+
+  it('passes source, space_id, and null rule_id through for external episodes', () => {
+    const raw = [
+      {
+        last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        rule_id: null,
+        source: 'pagerduty',
+        space_id: 'space-a',
+        group_hash: 'h1',
+        episode_id: 'e1',
+        episode_status: 'active' as const,
+        data_json: null,
+        severity: null,
+      },
+    ];
+
+    const result = parseAlertEpisodes(raw);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].rule_id).toBeNull();
+    expect(result[0].source).toBe('pagerduty');
+    expect(result[0].space_id).toBe('space-a');
   });
 });

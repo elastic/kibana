@@ -12,7 +12,7 @@ import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
 } from '../queries/related_episodes_query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchSameGroupEpisodesQuery } from './use_fetch_same_group_episodes_query';
 

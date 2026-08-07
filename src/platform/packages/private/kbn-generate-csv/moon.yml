@@ -31,8 +31,10 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/search-types'
   - '@kbn/task-manager-plugin'
+  - '@kbn/esql-types'
   - '@kbn/esql-utils'
   - '@kbn/safer-lodash-set'
+  - '@kbn/datemath'
 tags:
   - shared-server
   - package

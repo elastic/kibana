@@ -36,11 +36,16 @@ import type {
   RouteSecurity,
   RequestTiming,
 } from '@kbn/core-http-server';
+import { type SpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
+import {
+  RequestValidationFailure,
+  type RequestValidationSource,
+} from './request_validation_failure';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { patchRequest } from './patch_requests';
@@ -114,9 +119,18 @@ export class CoreKibanaRequest<
     query: Q;
     body: B;
   } {
-    const params = routeValidator.getParams(raw.params, 'request params');
-    const query = routeValidator.getQuery(raw.query, 'request query');
-    const body = routeValidator.getBody(raw.body, 'request body');
+    const params = validateRequestPart(
+      () => routeValidator.getParams(raw.params, 'request params'),
+      'params'
+    );
+    const query = validateRequestPart(
+      () => routeValidator.getQuery(raw.query, 'request query'),
+      'query'
+    );
+    const body = validateRequestPart(
+      () => routeValidator.getBody(raw.body, 'request body'),
+      'body'
+    );
     return { query, params, body };
   }
 
@@ -152,10 +166,12 @@ export class CoreKibanaRequest<
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
+  /** {@inheritDoc KibanaRequest.spaceId} */
+  public readonly spaceId: SpaceId;
+  /** {@inheritDoc KibanaRequest.basePath} */
+  public readonly basePath: string;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
-  /** {@inheritDoc KibanaRequest.spaceId} */
-  public readonly spaceId: string;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -182,9 +198,12 @@ export class CoreKibanaRequest<
 
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
+    // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
+    // FakeRawRequests carry it as a top-level field.
+    this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
+    this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
-    this.spaceId = appState?.spaceId ?? 'default';
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
     this.injectHostInfo(request);
 
@@ -403,6 +422,30 @@ export class CoreKibanaRequest<
     return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.excludeFromRateLimiter;
   }
+}
+
+function validateRequestPart<T>(validate: () => T, source: RequestValidationSource): T {
+  try {
+    return validate();
+  } catch (error) {
+    throw new RequestValidationFailure(
+      error instanceof Error ? error.message : String(error),
+      source,
+      getRawValidationError(error)
+    );
+  }
+}
+
+function getRawValidationError(error: unknown): unknown {
+  if (
+    error instanceof Error &&
+    'cause' in error &&
+    error.cause instanceof Error &&
+    'rawError' in error.cause
+  ) {
+    return error.cause.rawError;
+  }
+  return error;
 }
 
 /**

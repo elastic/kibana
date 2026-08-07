@@ -21,7 +21,6 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import { createRequestHandlerContext } from '../create_request_handler_context';
 
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
@@ -51,10 +50,8 @@ export const createDashboardAttachmentType = ({
     if (!context.savedObjectsClient) {
       throw new Error('Saved objects client is required to read dashboard attachments');
     }
-    // todo: this should be passed from agent builder
-    const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
     const dashboardClient = await getDashboardClient();
-    return dashboardClient.read(requestHandlerContext, origin);
+    return dashboardClient.read(context.savedObjectsClient, origin);
   };
 
   return {
@@ -133,7 +130,7 @@ export const createDashboardAttachmentType = ({
       };
     },
     getAgentDescription: () =>
-      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this attachment, use the \`platform.dashboard.manage_dashboard\` tool (load the dashboard-management skill first).`,
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboard-management skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardAttachmentId\`; the tool reads and updates this attachment in place.`,
     getTools: () => [],
   };
 };
@@ -156,7 +153,7 @@ const formatDashboardAttachment = (attachmentId: string, data: DashboardAttachme
     sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
 
   // Include attachment id prominently so the LLM can reference it in subsequent calls
-  return `Dashboard "${data.title}" (dashboardAttachment.id: "${attachmentId}")
+  return `Dashboard "${data.title}" (dashboardAttachmentId: "${attachmentId}")
 Description: ${data.description}
 Panels: ${panelCount}${sectionInfo}`;
 };

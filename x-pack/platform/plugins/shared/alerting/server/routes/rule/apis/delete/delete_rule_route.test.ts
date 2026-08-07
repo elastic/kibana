@@ -52,6 +52,12 @@ describe('deleteRuleRoute', () => {
     const [config, handler] = router.delete.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}"`);
+    expect(config.options).toMatchObject({ access: 'public' });
+    expect(config.validate).toEqual(
+      expect.objectContaining({
+        request: expect.not.objectContaining({ query: expect.anything() }),
+      })
+    );
 
     rulesClient.delete.mockResolvedValueOnce({});
 

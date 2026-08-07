@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getSnoozeActionPolicyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -26,7 +26,9 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -115,6 +117,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ACTION_POLICY_NOT_FOUND');
   });
 
   apiTest('validation: rejects an invalid date string', async ({ apiClient, apiServices }) => {
@@ -128,6 +131,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -143,6 +147,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -157,6 +162,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing snoozedUntil', async ({ apiClient, apiServices }) => {
@@ -170,6 +176,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
@@ -179,7 +186,25 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'test-snooze-strict' })
+      );
+
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { snoozedUntil: getSnoozeDate(), unknownField: 'x' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest(
     'authorization: 200 with full alerting_v2 privileges (write)',
@@ -202,7 +227,9 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'reader-cannot-snooze' })
       );

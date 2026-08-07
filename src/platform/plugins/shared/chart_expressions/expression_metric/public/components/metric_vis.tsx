@@ -31,7 +31,7 @@ import type {
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
@@ -71,6 +71,9 @@ export interface MetricVisComponentProps {
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
+const getMetricSpacing = (density: MetricVisComponentProps['config']['metric']['density']) =>
+  density === 'compact' ? 'small' : 'large';
+
 function buildTrendConfig(
   { palette, textPalette, visuals, baseline }: MetricVisParam['secondaryTrend'],
   value: number | string
@@ -97,7 +100,9 @@ function buildTrendConfig(
   };
 }
 
-const DEFAULT_TILE_SIDE_LENGTH = 310;
+const DEFAULT_SINGLE_TILE_WIDTH = 300;
+const DEFAULT_SINGLE_TILE_HEIGHT = 160;
+const DEFAULT_MULTI_TILE_SIDE_LENGTH = 200;
 
 export const MetricVis = ({
   data,
@@ -124,14 +129,25 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength =
-      grid.current.length * grid.current[0]?.length > 1 ? 200 : DEFAULT_TILE_SIDE_LENGTH;
+    const rows = grid.current.length;
+    const columns = grid.current[0]?.length ?? 0;
+    const hasMultipleTiles = rows * columns > 1;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
         maxDimensions: {
-          y: { value: grid.current.length * maxTileSideLength, unit: 'pixels' },
-          x: { value: grid.current[0]?.length * maxTileSideLength, unit: 'pixels' },
+          y: {
+            value: hasMultipleTiles
+              ? rows * DEFAULT_MULTI_TILE_SIDE_LENGTH
+              : DEFAULT_SINGLE_TILE_HEIGHT,
+            unit: 'pixels',
+          },
+          x: {
+            value: hasMultipleTiles
+              ? columns * DEFAULT_MULTI_TILE_SIDE_LENGTH
+              : DEFAULT_SINGLE_TILE_WIDTH,
+            unit: 'pixels',
+          },
         },
       },
     };
@@ -150,12 +166,13 @@ export const MetricVis = ({
   );
 
   let breakdownByColumn: DatatableColumn | undefined;
-  let formatBreakdownValue: FieldFormatConvertFunction;
+  let formatBreakdownValue: TextContextTypeConvert;
   if (config.dimensions.breakdownBy) {
     breakdownByColumn = getColumnByAccessor(config.dimensions.breakdownBy, data.columns);
-    formatBreakdownValue = getFormatService()
-      .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
-      .getConverterFor('text');
+    const breakdownFormatter = getFormatService().deserialize(
+      getFormatByAccessor(config.dimensions.breakdownBy, data.columns)
+    );
+    formatBreakdownValue = (v: unknown) => breakdownFormatter.convertToText(v);
   }
 
   const maxColId = config.dimensions.max
@@ -284,7 +301,10 @@ export const MetricVis = ({
     return {
       ...baseMetric,
       // Override the background and main value color when the color is applied to the value
-      ...(config.metric.applyColorTo === 'value' && { color: defaultColor, valueColor: tileColor }),
+      ...(config.metric.applyColorTo === 'value' && {
+        color: defaultColor,
+        valueColor: tileColor === defaultColor ? undefined : tileColor,
+      }),
       ...(config.metric.applyColorTo === 'background' && {
         color: tileColor,
         valueColor: undefined,
@@ -362,6 +382,7 @@ export const MetricVis = ({
                   extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
+                  spacing: getMetricSpacing(config.metric.density),
                   valuePosition: config.metric.primaryPosition,
                 },
               },

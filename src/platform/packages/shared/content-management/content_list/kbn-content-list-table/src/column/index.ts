@@ -8,7 +8,7 @@
  */
 
 // Declarative components and props.
-export { Column, type ColumnProps } from './part';
+export { Column, createColumn, type ColumnProps } from './part';
 export {
   NameColumn,
   type NameColumnProps,

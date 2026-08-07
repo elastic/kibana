@@ -15,6 +15,16 @@ export {
   PRODUCTION_ENVIRONMENT,
   METRICS_ENVIRONMENT,
   SERVICE_AWS_LAMBDA,
+  SERVICE_METRICS_MIGRATION_SEQUENTIAL,
+  SERVICE_METRICS_MIGRATION_OVERLAP,
+  METRICS_MIGRATION_CLASSIC_START_DATE,
+  METRICS_MIGRATION_SEQUENTIAL_CLASSIC_END_DATE,
+  METRICS_MIGRATION_SEQUENTIAL_OTEL_START_DATE,
+  METRICS_MIGRATION_OVERLAP_OTEL_START_DATE,
+  METRICS_MIGRATION_OVERLAP_CLASSIC_END_DATE,
+  METRICS_MIGRATION_OTEL_END_DATE,
+  METRICS_MIGRATION_NO_DATA_START_DATE,
+  METRICS_MIGRATION_NO_DATA_END_DATE,
   APM_METRICS_SERVICE_NAMES,
 } from '../../shared/constants';
 
@@ -50,9 +60,17 @@ export const EDOT_ERROR_MESSAGE = '[ResponseError] index_not_found_exception';
 export const SERVICE_AZURE_FUNCTIONS = 'synth-dotnet';
 export const SERVICE_MOBILE_ANDROID = 'synth-android';
 export const SERVICE_MOBILE_IOS = 'synth-ios';
+// Dedicated mobile service carrying device/os/network dimensions for the
+// "most used" charts, kept separate from SERVICE_MOBILE_ANDROID.
+export const SERVICE_MOBILE_MOST_USED = 'synth-android-most-used';
+// Prefix for the bulk services dataset used to exercise inventory pagination.
+export const MULTIPLE_SERVICES_PREFIX = 'multi-svc-';
 export const SERVICE_SYNTH_GO = 'synth-go-1';
 export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
+export const SERVICE_INFRA_ALL_DATA = 'synth-infra-all';
+export const SERVICE_INFRA_HOST_ONLY = 'synth-infra-host-only';
+export const SERVICE_INFRA_NO_DATA = 'synth-infra-no-data';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';

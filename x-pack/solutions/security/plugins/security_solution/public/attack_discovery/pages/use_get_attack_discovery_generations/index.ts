@@ -41,6 +41,7 @@ export const useGetAttackDiscoveryGenerations = ({
   end,
   http,
   isAssistantEnabled,
+  scheduled,
   size,
   start,
   refetchOnWindowFocus = false,
@@ -54,20 +55,26 @@ export const useGetAttackDiscoveryGenerations = ({
   }, []);
 
   const queryFn = useCallback(async () => {
-    return http.fetch<GetAttackDiscoveryGenerationsResponse>(ATTACK_DISCOVERY_GENERATIONS, {
-      method: 'GET',
-      version: API_VERSIONS.public.v1,
-      query: {
-        end,
-        size,
-        start,
-      },
-      signal: abortController.current.signal,
-    });
-  }, [end, http, size, start]);
+    const response = await http.fetch<GetAttackDiscoveryGenerationsResponse>(
+      ATTACK_DISCOVERY_GENERATIONS,
+      {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: {
+          end,
+          scheduled,
+          size,
+          start,
+        },
+        signal: abortController.current.signal,
+      }
+    );
+
+    return response;
+  }, [end, http, scheduled, size, start]);
 
   const { data, error, isLoading, refetch, status } = useQuery(
-    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, size, start],
+    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, scheduled, size, start],
     queryFn,
     {
       enabled: isAssistantEnabled,

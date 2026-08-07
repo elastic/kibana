@@ -40,10 +40,10 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
       },
       multi_value_counts: {
         properties: {
-          data_streams: {
+          index_names: {
             type: 'integer',
             _meta: {
-              description: 'Count of METRICS_INFO rows where data_stream had more than one value',
+              description: 'Count of METRICS_INFO rows where index_name had more than one value',
             },
           },
           field_types: {

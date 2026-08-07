@@ -22,6 +22,7 @@ const baseTheme = {
     width: { thin: '1px' },
   },
   size: { base: '16px', xs: '8px' },
+  levels: { content: 0 },
   colors: {},
 };
 

@@ -8,22 +8,23 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
-  EuiButton,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonIcon,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -311,15 +312,22 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
         <EuiTitle size="m">
           <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
             {policyName}{' '}
-            <EuiButtonIcon
-              iconType="refresh"
-              color="text"
-              aria-label={i18n.translate(
-                'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
-                { defaultMessage: 'Reload' }
-              )}
-              onClick={() => reload()}
-            />
+            <EuiToolTip
+              content={i18n.translate('xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel', {
+                defaultMessage: 'Reload',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="refresh"
+                color="text"
+                aria-label={i18n.translate(
+                  'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
+                  { defaultMessage: 'Reload' }
+                )}
+                onClick={() => reload()}
+              />
+            </EuiToolTip>
           </h2>
         </EuiTitle>
         {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (

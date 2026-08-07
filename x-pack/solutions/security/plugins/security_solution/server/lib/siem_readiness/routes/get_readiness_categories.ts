@@ -11,6 +11,7 @@ import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from '@kbn/siem-readiness';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
 import { fetchCategories } from '../fetchers';
+import { assertSiemReadinessEnabled } from '../assert_siem_readiness_enabled';
 
 export const getReadinessCategoriesRoute = (
   router: SiemReadinessRoutesDeps['router'],
@@ -36,6 +37,15 @@ export const getReadinessCategoriesRoute = (
 
         try {
           const core = await context.core;
+
+          const disabledResponse = await assertSiemReadinessEnabled(
+            core.uiSettings.client,
+            response
+          );
+          if (disabledResponse) {
+            return disabledResponse;
+          }
+
           const esClient = core.elasticsearch.client.asCurrentUser;
 
           const categoriesResponse = await fetchCategories({ esClient, logger });

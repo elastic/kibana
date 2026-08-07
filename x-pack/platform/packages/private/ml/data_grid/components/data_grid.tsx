@@ -257,8 +257,10 @@ export const DataGrid: FC<Props> = memo(
                 <EuiCopy
                   beforeMessage={props.copyToClipboardDescription}
                   textToCopy={props.copyToClipboard}
+                  tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy: () => void) => (
+                    /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                     <EuiButtonIcon
                       onClick={copy}
                       iconType="copy"

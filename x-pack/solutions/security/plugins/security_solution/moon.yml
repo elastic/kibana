@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/session-view-plugin'
   - '@kbn/security-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/timelines-plugin'
   - '@kbn/es-query'
   - '@kbn/as-code-shared-transforms'
@@ -90,6 +91,7 @@ dependsOn:
   - '@kbn/securitysolution-exception-list-components'
   - '@kbn/securitysolution-exceptions-common'
   - '@kbn/rison'
+  - '@kbn/announcement-banner'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/securitysolution-hook-utils'
   - '@kbn/test-jest-helpers'
@@ -208,8 +210,6 @@ dependsOn:
   - '@kbn/siem-readiness'
   - '@kbn/presentation-publishing'
   - '@kbn/entity-store'
-  - '@kbn/entityManager-plugin'
-  - '@kbn/entities-schema'
   - '@kbn/inference-plugin'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-security-server-mocks'
@@ -217,6 +217,8 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server'
+  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -237,6 +239,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-langchain'
   - '@kbn/scout-security'
+  - '@kbn/ftr-llm-proxy'
   - '@kbn/custom-icons'
   - '@kbn/security-plugin-types-common'
   - '@kbn/management-settings-ids'
@@ -253,7 +256,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-metrics-server'
   - '@kbn/core-elasticsearch-server-utils'
-  - '@kbn/rrule'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/object-utils'
@@ -274,7 +276,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
   - '@kbn/kql'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-security-common'
   - '@kbn/entity-store'
   - '@kbn/as-code-filters-transforms'
@@ -290,6 +292,7 @@ dependsOn:
   - '@kbn/anonymization-common'
   - '@kbn/workflows-extensions'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/shared-ux-markdown'
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
   - '@kbn/evals-plugin'
@@ -297,6 +300,11 @@ dependsOn:
   - '@kbn/core-overlays-browser'
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
+  - '@kbn/date-range-picker'
+  - '@kbn/esql-types'
+  - '@kbn/discoveries-schemas'
+  - '@kbn/chart-icons'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - plugin
   - prod
@@ -309,6 +317,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json

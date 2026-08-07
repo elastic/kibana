@@ -30,11 +30,12 @@ import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-secti
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import type { SerializedError } from '@reduxjs/toolkit';
+import type { SerializedError } from 'redux-toolkit-v1';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
@@ -72,6 +73,10 @@ export interface DiscoverAppState {
    * Hide table
    */
   hideTable?: boolean;
+  /**
+   * Hide the field list sidebar (collapsed state)
+   */
+  hideSidebar?: boolean;
   /**
    * The current data source
    */
@@ -124,6 +129,12 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
+   * be reconsidered in a future version once the embedding story is clearer.
+   */
+  isApproximate?: boolean;
 }
 
 export interface CascadedDocumentsState {
@@ -142,28 +153,35 @@ export enum TabInitializationStatus {
   Error = 'Error',
 }
 
-export const DEFAULT_PROFILE_STATE_FIELDS = [
+export const PROFILE_APP_STATE_DEFAULT_FIELDS = [
   'columns',
   'rowHeight',
   'breakdownField',
   'hideChart',
   'hideTable',
+  'hideSidebar',
 ] as const;
 
-export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
+export type ProfileAppStateDefaultField = (typeof PROFILE_APP_STATE_DEFAULT_FIELDS)[number];
 
-type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
+type NonEmptyProfileAppStateDefaultFields = [
+  ProfileAppStateDefaultField,
+  ...ProfileAppStateDefaultField[]
+];
 
-export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+export type ProfileAppStateDefaultFields = 'all' | 'none' | NonEmptyProfileAppStateDefaultFields;
 
-export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+export type ProfileAppStateSnapshot = Partial<Pick<DiscoverAppState, ProfileAppStateDefaultField>>;
 
-export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
+export type ProfileAppStateSnapshotsByProfileId = Record<
+  string,
+  ProfileAppStateSnapshot | undefined
+>;
 
-export interface DefaultProfileState {
+export interface ProfileAppStateDefaults {
   resetId: string;
-  fieldsToReset: DefaultProfileStateFields;
-  snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
+  fieldsToReset: ProfileAppStateDefaultFields;
+  snapshotsByProfileId: ProfileAppStateSnapshotsByProfileId;
 }
 
 // This is used to identify heavy state values (e.g. long lists of nested objects)
@@ -203,7 +221,8 @@ export interface TabState extends TabItem {
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
-  defaultProfileState: DefaultProfileState;
+  profileAppStateDefaults: ProfileAppStateDefaults;
+  profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;

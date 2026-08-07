@@ -12,7 +12,6 @@ import {
   htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,6 +33,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import type { SaveResult } from './show_saved_object_save_modal';
 
@@ -192,7 +192,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
         <EuiModalBody>
           {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
-          <EuiForm component="form" onSubmit={this.onFormSubmit} id={this.formId}>
+          <EuiForm component="form" onSubmit={this.onFormSubmit} id={this.formId} noValidate>
             {!this.props.showDescription && this.props.description && (
               <EuiText size="s" color="subdued">
                 {this.props.description}
@@ -391,7 +391,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
     return (
       <>
         <div ref={this.warning} tabIndex={-1}>
-          <EuiCallOut
+          <KbnWarningCallout
             title={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleLabel"
@@ -399,11 +399,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
                 values={{ objectType: this.props.objectType }}
               />
             }
-            color="warning"
-            data-test-subj="titleDuplicateWarnMsg"
-            id={duplicateWarningId}
-          >
-            <p>
+            text={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
                 defaultMessage="Saving ''{title}'' creates a duplicate title."
@@ -411,8 +407,10 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
                   title: this.state.title,
                 }}
               />
-            </p>
-          </EuiCallOut>
+            }
+            data-test-subj="titleDuplicateWarnMsg"
+            id={duplicateWarningId}
+          />
         </div>
         <EuiSpacer />
       </>

@@ -40,13 +40,10 @@ test.describe('Index template wizard - Mappings step', { tag: tags.stateful.clas
     }
   });
 
-  test("clearing up the Numeric subtype dropdown doesn't break the page", async ({
-    page,
-    pageObjects,
-  }) => {
+  test("clearing up the Numeric subtype dropdown doesn't break the page", async ({ page }) => {
     // The Create Field form is already open by default when mappings are empty
     // Select Numeric type
-    await pageObjects.indexManagement.setComboBox('fieldType', 'Numeric');
+    await page.components.comboBox('fieldType').setSelectedOptions(['Numeric']);
 
     // Clear up subtype dropdown
     await page.testSubj.locator('fieldSubType').click();
@@ -59,13 +56,10 @@ test.describe('Index template wizard - Mappings step', { tag: tags.stateful.clas
     await expect(page.testSubj.locator('nextButton')).toBeVisible();
   });
 
-  test("clearing up the Range subtype dropdown doesn't break the page", async ({
-    page,
-    pageObjects,
-  }) => {
+  test("clearing up the Range subtype dropdown doesn't break the page", async ({ page }) => {
     // The Create Field form is already open by default when mappings are empty
     // Select Range type
-    await pageObjects.indexManagement.setComboBox('fieldType', 'Range');
+    await page.components.comboBox('fieldType').setSelectedOptions(['Range']);
 
     // Clear up subtype dropdown
     await page.testSubj.locator('fieldSubType').click();

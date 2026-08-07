@@ -44,14 +44,10 @@ interface AttackDetailsContainerProps {
   attack: AttackDiscoveryAlert;
   /** Whether to show anonymized values instead of replacements */
   showAnonymized?: boolean;
-  /** Filters applied from grouping */
-  groupingFilters: Filter[];
   /** Default filters to apply to the alerts table */
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
   isTableLoading: boolean;
-  /** The count of related alerts after all filters applied */
-  filteredAlertsCount: number;
 }
 
 /**
@@ -61,14 +57,7 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({
-    attack,
-    groupingFilters,
-    defaultFilters,
-    isTableLoading,
-    showAnonymized,
-    filteredAlertsCount,
-  }) => {
+  ({ attack, defaultFilters, isTableLoading, showAnonymized }) => {
     const {
       services: { telemetry },
     } = useKibana();
@@ -101,7 +90,7 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
             <>
               <EuiSpacer size="s" />
               <AlertsTab
-                groupingFilters={groupingFilters}
+                attackAlertIds={attack.alertIds}
                 defaultFilters={defaultFilters}
                 isTableLoading={isTableLoading}
               />
@@ -109,12 +98,12 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
           ),
           append: attack ? (
             <EuiNotificationBadge size="m" color="subdued">
-              {`${filteredAlertsCount}/${attack.alertIds.length}`}
+              {attack.alertIds.length}
             </EuiNotificationBadge>
           ) : undefined,
         },
       ],
-      [attack, showAnonymized, groupingFilters, defaultFilters, isTableLoading, filteredAlertsCount]
+      [attack, showAnonymized, defaultFilters, isTableLoading]
     );
 
     const selectedTabContent = useMemo(() => {

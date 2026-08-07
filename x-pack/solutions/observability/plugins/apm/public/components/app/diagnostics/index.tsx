@@ -7,7 +7,7 @@
 
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { EuiButton, EuiCallOut, EuiIcon, EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -31,18 +31,19 @@ import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { DiagnosticsApmDocuments } from './apm_documents_tab';
 import { isPending } from '../../../hooks/use_fetcher';
 
-const params = t.type({
-  query: t.intersection([
-    t.type({
-      rangeFrom: t.string,
-      rangeTo: t.string,
-    }),
-    t.partial({
-      refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-      refreshInterval: t.string,
-      kuery: t.string,
-    }),
-  ]),
+const params = z.object({
+  query: z
+    .object({
+      rangeFrom: z.string(),
+      rangeTo: z.string(),
+    })
+    .merge(
+      z.object({
+        refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+        refreshInterval: z.string().optional(),
+        kuery: z.string().optional(),
+      })
+    ),
 });
 
 export const diagnosticsRoute = {

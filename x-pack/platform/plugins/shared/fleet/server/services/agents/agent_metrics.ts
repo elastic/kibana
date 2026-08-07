@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
-import { DATA_TIERS } from '../../../common/constants';
+import { DATA_TIERS, OPAMP_NON_REPORTING_STATUSES } from '../../../common/constants';
 
 const AGGREGATION_MAX_SIZE = 1000;
 
@@ -42,22 +42,45 @@ export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, 
 }
 
 async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
-  // Map service.instance.id (hostname from elastic.display.name) → agentIds.
-  // Multiple agents can share the same display name, and all should receive the same metrics bucket.
-  // Collectors report service.instance.id as their hostname, not their Fleet agent ID.
-  const instanceIdToAgentIds = new Map<string, string[]>();
+  // Map service.instance.id (hostname from elastic.display.name) → the single active agent that
+  // should receive metrics for that host. Collectors report service.instance.id as their hostname,
+  // not their Fleet agent ID, so multiple agent entries can share the same key.
+  //
+  // Two rules keep stale/re-enrolled collectors from receiving a live collector's metrics:
+  //
+  // 1. Offline/inactive/unenrolled agents are excluded entirely (they have already timed out).
+  //
+  // 2. When multiple *online* agents share a hostname — the ~5-minute transition window after
+  //    a collector is stopped but before Fleet marks it offline — only the most recently enrolled
+  //    agent wins the hostname. Its telemetry supersedes the older agent's because re-enrollment
+  //    always produces a newer enrolled_at timestamp.
+  //
+  // See https://github.com/elastic/kibana/issues/274843
+  const agentById = new Map(agents.map((a) => [a.id, a]));
+  const instanceIdToAgentId = new Map<string, string>();
   for (const agent of agents) {
+    if (agent.status && OPAMP_NON_REPORTING_STATUSES.includes(agent.status)) {
+      continue;
+    }
     const instanceId =
       (agent.non_identifying_attributes?.['elastic.display.name'] as string | undefined) ??
       agent.id;
-    const ids = instanceIdToAgentIds.get(instanceId);
-    if (ids) {
-      ids.push(agent.id);
+    const existingId = instanceIdToAgentId.get(instanceId);
+    if (!existingId) {
+      instanceIdToAgentId.set(instanceId, agent.id);
     } else {
-      instanceIdToAgentIds.set(instanceId, [agent.id]);
+      const existing = agentById.get(existingId);
+      if ((agent.enrolled_at ?? '') > (existing?.enrolled_at ?? '')) {
+        instanceIdToAgentId.set(instanceId, agent.id);
+      }
     }
   }
-  const instanceIds = Array.from(instanceIdToAgentIds.keys());
+  const instanceIds = Array.from(instanceIdToAgentId.keys());
+
+  // If no agents are actively reporting, skip the ES query entirely.
+  if (instanceIds.length === 0) {
+    return agents.map(({ id }) => ({ id, metrics: undefined }));
+  }
 
   const res = await esClient.search<
     unknown,
@@ -78,14 +101,12 @@ async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents:
 
   const formattedResults =
     res.aggregations?.agents.buckets.reduce((acc, bucket) => {
-      const agentIds = instanceIdToAgentIds.get(bucket.key);
-      if (agentIds) {
-        for (const agentId of agentIds) {
-          acc[agentId] = {
-            avg_memory_size: bucket.max_memory_size.value,
-            avg_cpu: bucket.avg_cpu.value,
-          };
-        }
+      const agentId = instanceIdToAgentId.get(bucket.key);
+      if (agentId) {
+        acc[agentId] = {
+          avg_memory_size: bucket.max_memory_size.value,
+          avg_cpu: bucket.avg_cpu.value,
+        };
       }
       return acc;
     }, {} as Record<string, { avg_memory_size: number; avg_cpu: number }>) ?? {};

@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { VECTORDB_APP_ID, TUTORIALS_DEEP_LINK_ID } from '../common/constants';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import {
+  VECTORDB_APP_ID,
+  GETTING_STARTED_DEEP_LINK_ID,
+  GETTING_STARTED_PATH,
+} from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessVectordbPluginSetup,
@@ -36,15 +42,16 @@ export class ServerlessVectordbPlugin
         defaultMessage: 'Vector DB',
       }),
       appRoute: '/app/vectordb',
-      euiIconType: 'logoElasticsearch',
+      euiIconType: 'logoVectorDB',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
-          id: TUTORIALS_DEEP_LINK_ID,
-          path: '/tutorials',
-          title: i18n.translate('xpack.serverlessVectordb.tutorials.title', {
-            defaultMessage: 'Tutorials',
+          id: GETTING_STARTED_DEEP_LINK_ID,
+          path: GETTING_STARTED_PATH,
+          title: i18n.translate('xpack.serverlessVectordb.gettingStarted.title', {
+            defaultMessage: 'Getting started',
           }),
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
       ],
       async mount(params) {
@@ -66,10 +73,22 @@ export class ServerlessVectordbPlugin
   }
 
   public start(
-    _core: CoreStart,
-    { serverless }: ServerlessVectordbStartDependencies
+    core: CoreStart,
+    { navigation }: ServerlessVectordbStartDependencies
   ): ServerlessVectordbPluginStart {
-    serverless.initNavigation('vectordb', of(createNavigationTree()));
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
+      map(([application, chatExperience]) => {
+        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+        return createNavigationTree({
+          ...application,
+          core,
+          showAiAssistant,
+        });
+      })
+    );
+    navigation.initNavigation('vectordb', navigationTree$);
     return {};
   }
 

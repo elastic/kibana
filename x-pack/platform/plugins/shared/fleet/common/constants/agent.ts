@@ -61,6 +61,18 @@ export const ActiveAgentStatuses = [
   'orphaned',
 ]; // excluded: unenrolling, unenrolled, inactive, uninstalled
 
+// OTel (OpAMP) collectors in these states are not actively reporting telemetry.
+// Used in metric queries to prevent a newly enrolled collector on the same host from
+// leaking its live metrics to a stale/offline agent entry (same service.instance.id).
+// Must stay in sync across the server (agent_metrics.ts) and client (CollectorContext).
+// See https://github.com/elastic/kibana/issues/274843
+export const OPAMP_NON_REPORTING_STATUSES: ReadonlyArray<(typeof AgentStatuses)[number]> = [
+  'offline',
+  'inactive',
+  'unenrolled',
+  'uninstalled',
+];
+
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined
 export const UNPRIVILEGED_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;

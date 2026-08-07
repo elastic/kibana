@@ -48,7 +48,8 @@ export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION'
   | 'MIGRATE'
-  | 'PRIVILEGE_LEVEL_CHANGE';
+  | 'PRIVILEGE_LEVEL_CHANGE'
+  | 'REMOVE_COLLECTOR';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -118,6 +119,7 @@ interface AgentBase {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
+  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting' | 'disconnected';
@@ -178,6 +180,7 @@ export interface Agent extends AgentBase {
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
   outputs?: OutputMap;
   status?: AgentStatus;
+  pipeline_config?: string;
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;
@@ -331,6 +334,10 @@ export interface FleetServerAgent {
    * The policy ID for the Elastic Agent
    */
   policy_id?: string;
+  /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
   /**
    * The current policy revision_idx for the Elastic Agent
    */

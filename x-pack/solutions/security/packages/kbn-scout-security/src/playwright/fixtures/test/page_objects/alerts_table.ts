@@ -22,6 +22,9 @@ export class AlertsTablePage {
   public bulkRunWorkflowMenuItem: Locator;
   public bulkWorkflowPanel: Locator;
   public selectedShowBulkActionsButton: Locator;
+  public bulkAddToChatMenuItem: Locator;
+  public selectAllAlertsButton: Locator;
+  public bulkActionsHeaderCheckbox: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
@@ -37,6 +40,9 @@ export class AlertsTablePage {
     this.selectedShowBulkActionsButton = this.page.testSubj.locator(
       'selectedShowBulkActionsButton'
     );
+    this.bulkAddToChatMenuItem = this.page.testSubj.locator('bulk-add-to-chat');
+    this.selectAllAlertsButton = this.page.testSubj.locator('selectAllAlertsButton');
+    this.bulkActionsHeaderCheckbox = this.page.testSubj.locator('bulk-actions-header');
   }
 
   async navigate() {
@@ -76,5 +82,27 @@ export class AlertsTablePage {
   async waitForDetectionsAlertsWrapper() {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
+  }
+
+  /**
+   * Open the alert's row context menu and click "Add rule exception". Used by
+   * tests that exercise the exception flyout end-to-end (e.g. bulk-close
+   * regressions).
+   */
+  async openAddRuleException(ruleName: string) {
+    await this.openAlertContextMenu(ruleName);
+    await this.page.testSubj.locator('add-exception-menu-item').click();
+  }
+
+  async waitForRuleAlert(ruleName: string) {
+    const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    await expect(cell).toBeVisible({ timeout: 60_000 });
+    return cell;
+  }
+
+  async checkAlertRowCheckbox(ruleName: string) {
+    const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    const row = cell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByRole('checkbox').check();
   }
 }

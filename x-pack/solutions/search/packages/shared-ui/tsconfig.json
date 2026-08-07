@@ -6,5 +6,5 @@
   },
   "include": ["index.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/i18n", "@kbn/cloud-plugin"]
+  "kbn_references": ["@kbn/i18n"]
 }

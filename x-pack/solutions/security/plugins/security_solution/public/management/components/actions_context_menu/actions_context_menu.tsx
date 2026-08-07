@@ -66,15 +66,22 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
 
     const menuButton = useMemo(() => {
       const button = (
-        <EuiButtonIcon
-          data-test-subj={getTestId('button')}
-          iconType={icon}
-          onClick={handleToggleMenu}
-          isDisabled={isDisabled}
-          aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
+        <EuiToolTip
+          content={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
             defaultMessage: 'Open',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={getTestId('button')}
+            iconType={icon}
+            onClick={handleToggleMenu}
+            isDisabled={isDisabled}
+            aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
+              defaultMessage: 'Open',
+            })}
+          />
+        </EuiToolTip>
       );
 
       if (isDisabled && disabledTooltip) {
@@ -93,6 +100,9 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         button={menuButton}
         isOpen={isOpen}
         closePopover={handleCloseMenu}
+        aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.popover.ariaLabel', {
+          defaultMessage: 'Actions menu',
+        })}
       >
         <EuiContextMenuPanel items={menuItems} data-test-subj={getTestId('contextMenuPanel')} />
       </EuiPopover>

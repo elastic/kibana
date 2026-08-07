@@ -40,6 +40,7 @@ import type { OutputType, ValueOf } from '../../../../../../../common/types';
 
 import {
   outputTypeSupportPresets,
+  outputTypeSupportsOtelExporter,
   outputYmlIncludesReservedPerformanceKey,
 } from '../../../../../../../common/services/output_helpers';
 
@@ -111,9 +112,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
+  const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
   const supportsPresets = inputs.typeInput.value
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
+  const supportsOtelExporter = outputTypeSupportsOtelExporter(
+    inputs.typeInput.value as ValueOf<OutputType> | undefined
+  );
 
   const yamlConfigValue = inputs.additionalYamlConfigInput.value;
   const presetValue = inputs.presetInput.value;
@@ -335,7 +340,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           </EuiFormRow>
 
           {renderOutputTypeSection(inputs.typeInput.value)}
-          {isRemoteESOutput ? null : (
+          {isRemoteESOutput || isKafkaOutput ? null : (
             <EuiFormRow
               fullWidth
               label={
@@ -587,7 +592,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </div>
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
-          {isESOutput && (
+          {supportsOtelExporter && (
             <>
               <EuiSpacer size="l" />
               <EuiAccordion

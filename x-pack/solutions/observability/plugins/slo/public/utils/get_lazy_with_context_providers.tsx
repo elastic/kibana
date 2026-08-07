@@ -57,6 +57,23 @@ export const getLazyWithContextProviders =
   ): React.FunctionComponent<React.ComponentProps<TElement>> => {
     const { spinnerSize = 'xl' } = options ?? {};
     const queryClient = new QueryClient();
+    const unwrappingSloClient: SLORepositoryClient = {
+      fetch: (endpoint, ...args) =>
+        sloClient.fetch(endpoint, ...args).then((response) => {
+          if (response && typeof response === 'object') {
+            const resp = response as Record<string, unknown>;
+            if ('_wrapped' in resp && '_inspect' in resp) {
+              return resp._wrapped as typeof response;
+            }
+            if ('_inspect' in resp) {
+              const { _inspect, ...rest } = resp;
+              return rest as typeof response;
+            }
+          }
+          return response;
+        }),
+      stream: sloClient.stream,
+    };
     return (props) => (
       <KibanaContextProvider
         services={{
@@ -75,7 +92,7 @@ export const getLazyWithContextProviders =
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
             experimentalFeatures,
-            sloClient,
+            sloClient: unwrappingSloClient,
             telemetry,
           }}
         >

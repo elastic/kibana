@@ -13,13 +13,15 @@ import type {
   EuiDataGridToolbarProps,
 } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
+  EuiScreenReaderOnly,
+  EuiToolTip,
   euiScreenReaderOnly,
-  EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -60,22 +62,30 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
   const { selectedRowIndex, onRowSelected } = useRowSelection();
 
   return (
-    <EuiButtonIcon
-      onClick={() => {
-        if (onRowSelected) {
-          onRowSelected(rowIndex);
-        }
-      }}
-      aria-label={i18n.translate(
-        'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-        {
-          defaultMessage: 'Select row {rowIndex}',
-          values: { rowIndex: rowIndex + 1 },
-        }
-      )}
-      iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
-      color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
-    />
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel', {
+        defaultMessage: 'Select row {rowIndex}',
+        values: { rowIndex: rowIndex + 1 },
+      })}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        onClick={() => {
+          if (onRowSelected) {
+            onRowSelected(rowIndex);
+          }
+        }}
+        aria-label={i18n.translate(
+          'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+          {
+            defaultMessage: 'Select row {rowIndex}',
+            values: { rowIndex: rowIndex + 1 },
+          }
+        )}
+        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+        color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
+      />
+    </EuiToolTip>
   );
 }
 
@@ -322,7 +332,16 @@ export function PreviewTable({
       {
         id: 'selection',
         width: 36,
-        headerCellRender: () => null,
+        headerCellRender: () => (
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate(
+                'xpack.streams.resultPanel.euiDataGrid.preview.rowSelectionColumnHeader',
+                { defaultMessage: 'Row selection' }
+              )}
+            </span>
+          </EuiScreenReaderOnly>
+        ),
         rowCellRender: ({ rowIndex, setCellProps }) => (
           <RowSelectionCell
             rowIndex={rowIndex}

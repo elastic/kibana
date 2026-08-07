@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 
 import type { InstallablePackage, Installation } from '../../../../common';
@@ -62,6 +62,8 @@ jest.mock('../../app_context', () => {
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
       getCloud: jest.fn(),
+      getTaskManagerStart: jest.fn(() => ({ runSoon: jest.fn().mockResolvedValue({}) })),
+      getKibanaVersion: jest.fn(() => '8.0.0'),
     },
   };
 });
@@ -165,6 +167,44 @@ describe('createInstallation', () => {
       });
     });
   });
+
+  describe('es_index_patterns', () => {
+    beforeEach(() => {
+      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        enableOtelIntegrations: true,
+      });
+      soClient.create.mockClear();
+    });
+
+    it('stores an .otel pattern for an OTel data stream', async () => {
+      const otelPackageInfo: InstallablePackage = {
+        ...packageInfo,
+        policy_templates: [{ name: 'test-package', inputs: [{ type: 'otelcol' }] } as any],
+        data_streams: [
+          {
+            type: 'metrics',
+            dataset: 'test-package.metrics',
+            path: 'metrics',
+            title: 'metrics',
+            release: 'ga',
+            streams: [{ input: 'otelcol' } as any],
+          } as any,
+        ],
+      };
+
+      await createInstallation({
+        savedObjectsClient: soClient,
+        packageInfo: otelPackageInfo,
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+      const [, savedObject] = soClient.create.mock.calls[0];
+      expect((savedObject as Installation).es_index_patterns).toEqual({
+        metrics: 'metrics-test-package.metrics.otel-*',
+      });
+    });
+  });
 });
 
 describe('install', () => {
@@ -209,6 +249,59 @@ describe('install', () => {
         status: 'failure',
         automaticInstall: false,
       });
+    });
+
+    it('should bypass out-of-date check when allow_outdated_version is true', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.1.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        allowOutdatedVersion: true,
+      });
+
+      // Should reach the state machine (i.e. not fail with out-of-date error)
+      expect(response.error).toBeUndefined();
+      expect(response.status).toEqual('installed');
+    });
+
+    it('should still reject out-of-date version without allow_outdated_version', async () => {
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.1.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error!.message).toEqual(
+        'apache-1.1.0 is out-of-date and cannot be installed or updated'
+      );
+    });
+
+    it('should not bypass agentless guard when allow_outdated_version is true but not force', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        // use the latest version so the out-of-date check is not the blocking issue
+        pkgkey: 'test_package',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        allowOutdatedVersion: true,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error!.message).toEqual(
+        'test_package contains agentless policy templates, agentless is not available on this deployment'
+      );
     });
 
     it('should send telemetry on install failure, license error', async () => {
@@ -495,6 +588,80 @@ describe('install', () => {
       expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
         expect.objectContaining({ useStreaming: true })
       );
+    });
+
+    describe('content pack autodiscovery runSoon trigger', () => {
+      let mockRunSoon: jest.Mock;
+
+      beforeEach(() => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        mockRunSoon = jest.fn().mockResolvedValue({});
+        jest
+          .mocked(appContextService.getTaskManagerStart)
+          .mockReturnValue({ runSoon: mockRunSoon } as any);
+      });
+
+      it('should trigger runSoon after a successful user-initiated install', async () => {
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(mockRunSoon).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not trigger runSoon for automatic installs', async () => {
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          automaticInstall: true,
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(mockRunSoon).not.toHaveBeenCalled();
+      });
+
+      it('should not trigger runSoon for content package installs', async () => {
+        jest.mocked(Registry.getPackage).mockResolvedValueOnce({
+          packageInfo: {
+            type: 'content',
+            license: 'basic',
+            conditions: { elastic: { subscription: 'basic' } },
+          },
+          paths: [],
+        } as any);
+
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(mockRunSoon).not.toHaveBeenCalled();
+      });
+
+      it('should not trigger runSoon when the install fails', async () => {
+        jest
+          .mocked(installStateMachine._stateMachineInstallPackage)
+          .mockRejectedValueOnce(new Error('install failed'));
+
+        await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(mockRunSoon).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -1031,7 +1198,6 @@ describe('saveKibanaAssetsRefs', () => {
   beforeEach(() => {
     soClient.get.mockReset();
     soClient.update.mockReset();
-    (soClient.getCurrentNamespace as jest.Mock).mockReturnValue('my-space');
   });
 
   it('should append to existing additional space refs when saveAsAdditionnalSpace and append are both true', async () => {
@@ -1051,6 +1217,7 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'new-template', type: 'alerting_rule_template' as any }],
+      'my-space',
       true,
       true
     );
@@ -1087,6 +1254,7 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'existing-template', type: 'alerting_rule_template' as any }],
+      'my-space',
       true,
       true
     );
@@ -1114,13 +1282,69 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'new-dashboard', type: 'dashboard' as any }],
-      true,
-      false
+      'my-space',
+      true
     );
 
     const updateCall = soClient.update.mock.calls[0][2] as any;
     const spaceRefs = updateCall.additional_spaces_installed_kibana['my-space'];
     expect(spaceRefs).toHaveLength(1);
     expect(spaceRefs[0].id).toBe('new-dashboard');
+  });
+
+  it('should strip the installed_kibana_space_id key from additional_spaces when writing a new additional-space entry', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        installed_kibana_space_id: 'default',
+        additional_spaces_installed_kibana: {
+          default: [{ id: 'misplaced-dash', type: 'dashboard' }],
+          'space-a': [{ id: 'a-dash', type: 'dashboard' }],
+        },
+      },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'b-dash', type: 'dashboard' as any }],
+      'space-b',
+      true
+    );
+
+    const updateCall = soClient.update.mock.calls[0][2] as any;
+    const keys = Object.keys(updateCall.additional_spaces_installed_kibana);
+    expect(keys).not.toContain('default');
+    expect(keys).toContain('space-a');
+    expect(keys).toContain('space-b');
+  });
+
+  it('should be a no-op and log an error when saveAsAdditionnalSpace is true and spaceId matches installed_kibana_space_id', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        installed_kibana_space_id: 'my-space',
+        additional_spaces_installed_kibana: {},
+      },
+    } as any);
+
+    const mockLogger = appContextService.getLogger();
+    (mockLogger.error as jest.Mock).mockClear();
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'some-dash', type: 'dashboard' as any }],
+      'my-space',
+      true
+    );
+
+    expect(soClient.update).not.toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('my-space'));
   });
 });

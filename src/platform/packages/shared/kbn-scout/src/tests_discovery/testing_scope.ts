@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   CRITICAL_FILES_SCOUT,
+  SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
   SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
   SCOUT_TESTS_ONLY_SCOPE_GLOBS,
   SCOUT_TEST_SCOPE_PATTERN,
@@ -33,6 +34,7 @@ const compileMatchers = (patterns: readonly string[]): readonly Minimatch[] =>
 const CRITICAL_FILES_MATCHERS = compileMatchers(CRITICAL_FILES_SCOUT);
 const IGNORE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
 const SCOPE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
+const EXCLUDE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_EXCLUDE_GLOBS);
 
 const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
   matchers.some((m) => m.match(file));
@@ -61,12 +63,16 @@ export const criticalScoutFilesTouched = (changedFiles: readonly string[]): bool
  * Returns true when, after dropping noise files (READMEs, markdown, changelogs),
  * every remaining changed file lives inside a Scout test scope. Empty diffs
  * (or noise-only diffs) return false — there is nothing to fast-path.
+ *
+ * Changes under a Scout `fixtures/` directory are excluded: page objects there
+ * can be imported by other plugins, so they fall through to dependency-tree mode.
  */
 export const isScoutTestsOnlyDiff = (changedFiles: readonly string[]): boolean => {
   let sawMeaningful = false;
   for (const file of changedFiles) {
     if (matchesAny(file, IGNORE_MATCHERS)) continue;
     sawMeaningful = true;
+    if (matchesAny(file, EXCLUDE_MATCHERS)) return false;
     if (!matchesAny(file, SCOPE_MATCHERS)) return false;
   }
   return sawMeaningful;
@@ -94,8 +100,10 @@ export const deriveScoutConfigsForFile = (
     return [];
   }
 
-  const [, prefix, scoutDir, type, rest = ''] = match;
-  const scope = `${prefix}/test/${scoutDir}/${type}`;
+  const [, prefix, scoutDir, namespace, type, rest = ''] = match;
+  const scope = namespace
+    ? `${prefix}/test/${scoutDir}/${namespace}/${type}`
+    : `${prefix}/test/${scoutDir}/${type}`;
 
   if (rest.startsWith('tests/')) {
     return filterExisting([`${scope}/${PLAYWRIGHT_CONFIG}`], repoRoot, existsCache);
@@ -105,8 +113,8 @@ export const deriveScoutConfigsForFile = (
     return filterExisting([`${scope}/${PARALLEL_PLAYWRIGHT_CONFIG}`], repoRoot, existsCache);
   }
 
-  // Shared scope file (fixtures/, helpers, constants, page_objects/, .meta/, ...)
-  // or the playwright config itself: map to whichever configs exist in the scope.
+  // Shared scope file (helpers, constants, .meta/, ...) or the playwright config
+  // itself: map to whichever configs exist in the scope.
   return filterExisting(
     [`${scope}/${PLAYWRIGHT_CONFIG}`, `${scope}/${PARALLEL_PLAYWRIGHT_CONFIG}`],
     repoRoot,

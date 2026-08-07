@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - Api Keys', function () {
+    loadTestFile(require.resolve('./fake_request_self_client'));
     loadTestFile(require.resolve('./grant_api_key'));
     loadTestFile(require.resolve('./has_active_key'));
   });

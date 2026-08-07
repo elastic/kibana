@@ -11,16 +11,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiTitle,
-  EuiPanel,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonIcon,
-  EuiSpacer,
   EuiCallOut,
-  EuiHorizontalRule,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
@@ -68,32 +69,52 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonIcon
-            color="primary"
-            onClick={() => onEditJob(index)}
-            iconType="pencil"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
               {
                 defaultMessage: 'Edit',
               }
             )}
-            data-test-subj="mlAdvancedDetectorEditButton"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color="primary"
+              onClick={() => onEditJob(index)}
+              iconType="pencil"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.editButton',
+                {
+                  defaultMessage: 'Edit',
+                }
+              )}
+              data-test-subj="mlAdvancedDetectorEditButton"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonIcon
-            color="danger"
-            onClick={() => onDeleteJob(index)}
-            iconType="trash"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
               {
                 defaultMessage: 'Delete',
               }
             )}
-            data-test-subj="mlAdvancedDetectorDeleteButton"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color="danger"
+              onClick={() => onDeleteJob(index)}
+              iconType="trash"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorList.deleteButton',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
+              data-test-subj="mlAdvancedDetectorDeleteButton"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

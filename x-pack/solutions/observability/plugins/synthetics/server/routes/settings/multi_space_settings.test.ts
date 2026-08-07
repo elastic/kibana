@@ -18,11 +18,14 @@ const NOT_FOUND_SENTINEL = { status: 404 };
 
 const buildServer = ({
   isElasticsearchServerless = false,
-  ccsEnabled = true,
-}: { isElasticsearchServerless?: boolean; ccsEnabled?: boolean } = {}) =>
+  invalidateCache = jest.fn(),
+}: {
+  isElasticsearchServerless?: boolean;
+  invalidateCache?: jest.Mock;
+} = {}) =>
   ({
     isElasticsearchServerless,
-    config: { experimental: { ccs: { enabled: ccsEnabled } } },
+    syntheticsIndicesCache: { invalidate: invalidateCache, get: jest.fn() },
   } as unknown as RouteContext['server']);
 
 const buildResponse = () =>
@@ -44,7 +47,7 @@ describe('multi space settings routes', () => {
   });
 
   describe('createGetMultiSpaceSettingsRoute', () => {
-    it('returns the settings produced by the repository when CCS is enabled', async () => {
+    it('returns the settings produced by the repository on stateful', async () => {
       const expected: SyntheticsMultiSpaceSettingsWithSpaces = {
         useAllRemoteClusters: true,
         selectedRemoteClusters: ['cluster-a'],
@@ -69,23 +72,6 @@ describe('multi space settings routes', () => {
       const result = await route.handler(
         buildRouteContext({
           server: buildServer({ isElasticsearchServerless: true }),
-          response,
-        })
-      );
-
-      expect(response.notFound).toHaveBeenCalledTimes(1);
-      expect(result).toBe(NOT_FOUND_SENTINEL);
-      expect(getSpy).not.toHaveBeenCalled();
-    });
-
-    it('returns 404 when the experimental CCS flag is disabled', async () => {
-      const getSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get');
-      const response = buildResponse();
-
-      const route = createGetMultiSpaceSettingsRoute();
-      const result = await route.handler(
-        buildRouteContext({
-          server: buildServer({ ccsEnabled: false }),
           response,
         })
       );
@@ -162,22 +148,66 @@ describe('multi space settings routes', () => {
       expect(saveSpy).not.toHaveBeenCalled();
     });
 
-    it('returns 404 when the experimental CCS flag is disabled', async () => {
-      const saveSpy = jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
-      const response = buildResponse();
+    it('invalidates the synthetics indices cache after a successful save', async () => {
+      jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockResolvedValue({
+          useAllRemoteClusters: true,
+          selectedRemoteClusters: ['cluster-a'],
+          spaces: ['default'],
+        });
+
+      const invalidateCache = jest.fn();
+      const route = createPutMultiSpaceSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server: buildServer({ invalidateCache }),
+          request: {
+            body: { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+          } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(invalidateCache).toHaveBeenCalledTimes(1);
+      expect(invalidateCache).toHaveBeenCalledWith();
+    });
+
+    it('does not invalidate the cache when the route short-circuits on serverless', async () => {
+      jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const invalidateCache = jest.fn();
 
       const route = createPutMultiSpaceSettingsRoute();
-      const result = await route.handler(
+      await route.handler(
         buildRouteContext({
-          server: buildServer({ ccsEnabled: false }),
-          response,
+          server: buildServer({ isElasticsearchServerless: true, invalidateCache }),
           request: { body: { useAllRemoteClusters: true } } as unknown as RouteContext['request'],
         })
       );
 
-      expect(response.notFound).toHaveBeenCalledTimes(1);
-      expect(result).toBe(NOT_FOUND_SENTINEL);
-      expect(saveSpy).not.toHaveBeenCalled();
+      expect(invalidateCache).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the cache even when save throws after a partial update', async () => {
+      jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockRejectedValue(new Error('updateObjectsSpaces failed'));
+
+      const invalidateCache = jest.fn();
+      const route = createPutMultiSpaceSettingsRoute();
+
+      await expect(
+        route.handler(
+          buildRouteContext({
+            server: buildServer({ invalidateCache }),
+            request: {
+              body: { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+            } as unknown as RouteContext['request'],
+          })
+        )
+      ).rejects.toThrow('updateObjectsSpaces failed');
+
+      expect(invalidateCache).toHaveBeenCalledTimes(1);
+      expect(invalidateCache).toHaveBeenCalledWith();
     });
   });
 });

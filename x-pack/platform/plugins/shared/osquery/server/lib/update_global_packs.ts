@@ -10,7 +10,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import produce from 'immer';
+import produce from 'immer-v9';
 import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
@@ -22,7 +22,8 @@ export const updateGlobalPacksCreateCallback = async (
   packsClient: SavedObjectsClient,
   allPacks: PackSavedObject[],
   osqueryContext: OsqueryAppContextService,
-  spaceId?: string
+  spaceId?: string,
+  isRruleFeatureEnabled: boolean = false
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
@@ -37,6 +38,16 @@ export const updateGlobalPacksCreateCallback = async (
 
   const packsContainingShardForPolicy: PackSavedObject[] = [];
   allPacks.map((pack) => {
+    // Never (re)attach a disabled global pack to a newly created package policy;
+    // otherwise enrolling a new agent silently re-schedules a pack the user
+    // already turned off. Fail closed on a falsy `enabled` — an unset
+    // (`undefined`) `enabled` is intentionally treated as "do not attach",
+    // matching how create_pack_route (`if (enabled && ...)`) and the reconciler
+    // (`pack.attributes.enabled && ...`) gate wire writes.
+    if (!pack.enabled) {
+      return;
+    }
+
     const shards = convertShardsToObject(pack.shards);
 
     return map(shards, (shard, shardName) => {
@@ -75,10 +86,21 @@ export const updateGlobalPacksCreateCallback = async (
       const resolvedSpaceId = spaceId || 'default';
       map(packsContainingShardForPolicy, (pack) => {
         const packKey = makePackKey(pack.name, resolvedSpaceId);
+        const { queries, ...packDefaults } = convertSOQueriesToPackConfig(pack.queries, {
+          spaceId: resolvedSpaceId,
+          packSchedule: {
+            schedule_type: pack.schedule_type,
+            interval: pack.interval,
+            rrule_schedule: pack.rrule_schedule,
+          },
+          isRruleFeatureEnabled,
+        });
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
           pack_id: pack.saved_object_id,
-          queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId),
+          pack_name: pack.name,
+          ...packDefaults,
+          queries,
         });
       });
 

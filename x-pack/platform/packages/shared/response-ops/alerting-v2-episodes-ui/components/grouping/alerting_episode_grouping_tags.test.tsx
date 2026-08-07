@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AlertingEpisodeGroupingTags } from './alerting_episode_grouping_tags';
 
 describe('AlertingEpisodeGroupingTags', () => {
@@ -47,5 +48,36 @@ describe('AlertingEpisodeGroupingTags', () => {
     await user.click(screen.getByLabelText('host.name: server-1'));
 
     expect(await screen.findByText('host.name')).toBeInTheDocument();
+  });
+
+  it('flattens object-shaped values without a data view (e.g. IP objects) into readable text', () => {
+    render(
+      <AlertingEpisodeGroupingTags
+        fields={['source.ip']}
+        data={{ 'source.ip': { ip: '10.0.0.1' } }}
+        data-test-subj="groupingTags"
+      />
+    );
+
+    expect(screen.getByLabelText('source.ip: 10.0.0.1')).toBeInTheDocument();
+  });
+
+  it('formats values with the data view field formatter when a data view is provided', () => {
+    const dataView = {
+      getFieldByName: (name: string) =>
+        name === 'source.ip' ? { name, type: 'ip', esTypes: ['ip'] } : undefined,
+      getFormatterForField: () => ({ convertToText: (value: unknown) => `ip(${String(value)})` }),
+    } as unknown as DataView;
+
+    render(
+      <AlertingEpisodeGroupingTags
+        fields={['source.ip']}
+        data={{ 'source.ip': '10.0.0.1' }}
+        dataView={dataView}
+        data-test-subj="groupingTags"
+      />
+    );
+
+    expect(screen.getByLabelText('source.ip: ip(10.0.0.1)')).toBeInTheDocument();
   });
 });

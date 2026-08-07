@@ -85,7 +85,6 @@ export const UserActionsList = React.memo(
     currentUserProfile,
     data: caseData,
     casesConfiguration,
-    actionsNavigation,
     commentRefs,
     handleManageQuote,
     bottomActions = [],
@@ -146,7 +145,6 @@ export const UserActionsList = React.memo(
           euiTheme,
           handleOutlineComment,
           handleDeleteComment,
-          actionsNavigation,
         });
         return [...userActions, ...userActionBuilder.build()];
       }, []);
@@ -168,7 +166,6 @@ export const UserActionsList = React.memo(
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
-      actionsNavigation,
     ]);
 
     const comments = bottomActions?.length

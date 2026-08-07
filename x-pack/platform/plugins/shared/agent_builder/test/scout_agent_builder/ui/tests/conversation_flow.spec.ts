@@ -64,11 +64,9 @@ test.describe(
         ).toContainText(MOCKED_TITLE);
       }).toPass({ timeout: 120_000 });
 
-      await pageObjects.agentBuilder.clickThinkingToggle();
-      await expect(async () => {
-        const thinking = await pageObjects.agentBuilder.getThinkingDetails();
-        expect(thinking).toContain('Calling tool platform.core.search');
-      }).toPass({ timeout: 60_000 });
+      const toolCallStep = page.testSubj.locator('agentBuilderToolCallStep');
+      await expect(toolCallStep).toContainText('tool: platform.core.search', { timeout: 60_000 });
+      await expect(toolCallStep).toContainText('ran.');
 
       await pageObjects.agentBuilder.clickNewConversationButton();
       await expect(async () => {

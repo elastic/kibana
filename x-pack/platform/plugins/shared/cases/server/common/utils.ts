@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
@@ -58,7 +58,7 @@ import type {
   AttachmentRequestV2,
   AttachmentsFindResponseV2,
   CasePostRequest,
-  CasesFindResponse,
+  CasesSearchResponse,
 } from '../../common/types/api';
 import {
   isEventAttachmentType,
@@ -77,14 +77,39 @@ export const defaultSortField = 'created_at';
  */
 export const nullUser: User = { username: null, full_name: null, email: null };
 
+/**
+ * A stored template reference is always version-pinned. The create request may omit `version`
+ * (server-side template expansion resolves it to the latest), so by the time a case is persisted
+ * the version must have been stamped — this converts the request shape to the storage shape and
+ * guards the invariant.
+ */
+const pinStoredTemplate = (
+  template: CasePostRequest['template']
+): CaseTransformedAttributes['template'] => {
+  if (template == null) {
+    return template;
+  }
+
+  if (template.version === undefined) {
+    throw new Error(
+      `Cannot persist case: template ${template.id} has no pinned version. Template expansion must resolve the version before the case is saved.`
+    );
+  }
+
+  return { id: template.id, version: template.version };
+};
+
 export const transformNewCase = ({
   user,
-  newCase,
+  newCase: { template, ...newCase },
 }: {
   user: User;
   newCase: CasePostRequest;
 }): CaseTransformedAttributes => ({
   ...newCase,
+  // Re-added only when present so an absent template stays absent (an explicit
+  // `template: undefined` key changes SO create payloads and snapshots).
+  ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
@@ -111,6 +136,7 @@ export const transformCases = ({
   page,
   perPage,
   total,
+  mttr,
 }: {
   casesMap: Map<string, Case>;
   countOpenCases: number;
@@ -119,7 +145,9 @@ export const transformCases = ({
   page: number;
   perPage: number;
   total: number;
-}): CasesFindResponse => ({
+  /** Average resolve time in seconds of the matching cases; only the search API provides it. */
+  mttr?: number | null;
+}): CasesSearchResponse => ({
   page,
   per_page: perPage,
   total,
@@ -127,6 +155,11 @@ export const transformCases = ({
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
+  // Only add the `mttr` key when a value was passed. The public `find` caller passes nothing, so
+  // the resulting object has no `mttr` key and still satisfies the strict `CasesFindResponseRt`
+  // decode. Do NOT change this to `mttr: mttr ?? null` — that would leak `mttr` onto the public
+  // `_find` response and break its strict decode / OpenAPI contract.
+  ...(mttr !== undefined ? { mttr } : {}),
 });
 
 export const flattenCaseSavedObject = ({
@@ -518,8 +551,8 @@ export const getCaseViewPath = (params: {
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
   const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
-  const appRoute = getApplicationRoute(OWNER_INFO, owner);
-  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
+  const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
+  const basePath = `${publicBaseUrlWithSpace}${ownerInfo.appBasePath}${ownerInfo.casesBasePath}`;
 
   if (commentId) {
     const commentPath = normalizePath(

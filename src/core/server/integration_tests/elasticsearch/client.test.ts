@@ -25,7 +25,8 @@ const UNKNOWN_PRODUCT_ERROR =
   'The client noticed that the server is not Elasticsearch and we do not support this unknown product.';
 const UNKNOWN_PRODUCT_STATUS_SUMMARY = `Unable to retrieve version information from Elasticsearch nodes. ${UNKNOWN_PRODUCT_ERROR}`;
 
-describe('elasticsearch clients', () => {
+// Failing: See https://github.com/elastic/kibana/issues/171294
+describe.skip('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
 

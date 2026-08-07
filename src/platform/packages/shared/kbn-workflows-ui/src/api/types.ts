@@ -11,10 +11,14 @@ import type {
   BulkCreateWorkflowsCommand,
   ExecutionStatus,
   ExecutionType,
+  UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
+  WorkflowsEventsLogDocumentSource,
+  WorkflowsSearchParams,
 } from '@kbn/workflows';
+import type { Template } from '@kbn/workflows-library';
 
 export interface BulkCreateWorkflowsParams {
   workflows: BulkCreateWorkflowsCommand['workflows'];
@@ -38,6 +42,14 @@ export interface MgetWorkflowsParams {
   source?: string[];
 }
 
+export interface CheckWorkflowIdConflictsParams {
+  workflows: BulkCreateWorkflowsParams['workflows'];
+}
+
+export interface CheckWorkflowIdConflictsResponse {
+  existingIds: string[];
+}
+
 export interface ValidateWorkflowParams {
   yaml: string;
 }
@@ -53,6 +65,7 @@ export interface ExportWorkflowsResponse {
 
 export interface GetAggsParams {
   fields: string[];
+  managed?: WorkflowsSearchParams['managed'];
 }
 
 export interface GetSchemaParams {
@@ -68,6 +81,23 @@ export interface TestWorkflowParams {
   workflowId?: string;
   workflowYaml?: string;
   inputs: Record<string, unknown>;
+}
+
+export interface SearchExecutionsParams {
+  kql?: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  executedBy?: string[];
+  concurrencyGroupKey?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  size?: number;
+  trackTotalHits?: boolean;
 }
 
 export interface GetWorkflowExecutionsParams {
@@ -139,4 +169,53 @@ export interface ResumeExecutionParams {
 
 export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
+}
+
+export interface SearchTriggerEventLogParams {
+  kql?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface SearchTriggerEventLogHit {
+  id: string;
+  source: WorkflowsEventsLogDocumentSource;
+}
+
+export interface SearchTriggerEventLogResult {
+  hits: SearchTriggerEventLogHit[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export interface RestoreWorkflowVersionParams {
+  signal?: AbortSignal;
+}
+
+export interface RestoreWorkflowVersionResponseDto extends UpdatedWorkflowResponseDto {
+  version: number;
+}
+
+export interface GetCatalogParams {
+  solution?: string;
+  category?: string;
+  search?: string;
+}
+
+export interface GetCatalogResponse {
+  templates: Template[];
+}
+
+export interface GetLibraryHealthResponse {
+  sourceMode: 'http' | 'bundle';
+  lastRefreshAt?: string;
+  lastError?: { message: string; at: string };
+  enabled: boolean;
+}
+
+export interface InstallTemplateResponse {
+  workflowId: string;
 }

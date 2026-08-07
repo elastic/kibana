@@ -18,14 +18,34 @@ import { actionPolicyMappings } from './action_policy_mappings';
 import { ruleMappings } from './rule_mappings';
 import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+import {
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../../common/saved_object_types';
 
-export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
-export const ACTION_POLICY_SAVED_OBJECT_TYPE = 'alerting_action_policy';
-export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
+export {
+  RULE_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
+};
 
-export const ActionPolicyAttributesToEncrypt = ['auth.apiKey'];
+export const ActionPolicyAttributesToEncrypt = ['apiKey'];
 
-export const ActionPolicyAttributesIncludedInAAD = ['auth.owner', 'auth.createdByUser'];
+/**
+ * Use caution when removing items from this array! These fields are used to
+ * construct decryption AAD and must remain to prevent decryption failures.
+ */
+export const ActionPolicyAttributesIncludedInAAD = ['apiKeyOwner', 'apiKeyCreatedByUser'];
+
+export type ActionPolicyAttributesNotPartiallyUpdatable =
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'apiKeyCreatedByUser';
+
+export type PartiallyUpdateableActionPolicyAttributes = Partial<
+  Omit<ActionPolicySavedObjectAttributes, ActionPolicyAttributesNotPartiallyUpdatable>
+>;
 
 export function registerSavedObjects({
   savedObjects,

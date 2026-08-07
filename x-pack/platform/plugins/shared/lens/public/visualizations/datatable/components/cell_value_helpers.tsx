@@ -17,7 +17,7 @@ import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
-export type RenderMode = 'badge' | 'link' | 'formatted';
+export type RenderMode = 'badge' | 'progress' | 'link' | 'formatted';
 
 export type Alignment = 'left' | 'right' | 'center' | undefined;
 
@@ -63,6 +63,9 @@ export const getRenderMode = (
   isNonColorable: boolean
 ): RenderMode => {
   if (colorMode === 'badge' && !isNonColorable) return 'badge';
+  // Progress bars only render for numeric values; empty/non-numeric cells fall back
+  // to the formatted (or link) rendering so blanks stay subdued.
+  if (colorMode === 'progress' && !isNonColorable) return 'progress';
   if (isClickable) return 'link';
   return 'formatted';
 };
@@ -72,7 +75,7 @@ export const getRenderMode = (
  * dynamic coloring (cell/text/badge). They should remain subdued, consistent with
  * the non-colored ("none") mode.
  */
-export const isNonColorableValue = (rawValue: RawValue): boolean =>
+export const isEmptyValue = (rawValue: RawValue): boolean =>
   rawValue == null ||
   rawValue === MISSING_TOKEN ||
   rawValue === '' ||
@@ -101,8 +104,9 @@ export const applyCellColoring = ({
   getCellColor,
   isDarkMode,
 }: ApplyColoringArgs): React.CSSProperties | null => {
-  if (colorMode === 'none' || colorMode === 'badge') return null;
-  if (isNonColorableValue(rawValue)) return null;
+  // 'none'/'badge' have no cell/text style; 'progress' renders its own Meter colors.
+  if (colorMode === 'none' || colorMode === 'badge' || colorMode === 'progress') return null;
+  if (isEmptyValue(rawValue)) return null;
 
   const color = getCellColor(columnId, palette, colorMapping)(rawValue);
   if (!color) return null;

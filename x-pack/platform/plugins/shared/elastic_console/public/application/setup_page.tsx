@@ -93,7 +93,12 @@ export const SetupPage: React.FC = () => {
 
         {setupData && (
           <>
-            <EuiCallOut title="Credentials generated" color="success" iconType="check">
+            <EuiCallOut
+              announceOnMount
+              title="Credentials generated"
+              color="success"
+              iconType="check"
+            >
               <p>
                 Your API key and connection details are ready. Click{' '}
                 <strong>Connect local agent</strong> to send them automatically to your local agent,

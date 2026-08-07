@@ -9,6 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
@@ -112,6 +113,12 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
+
+      // The agent-builder-assisted tag is stamped on the data persisted via update()
+      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
+        data: { tags?: string[] };
+      };
+      expect(updateCall.data.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when creating a policy without a name', async () => {
@@ -180,6 +187,41 @@ describe('manageActionPolicyTool', () => {
 
       expect(ctx.attachments.add).toHaveBeenCalled();
     });
+  });
+
+  it('creates a rule-scoped policy with the rule.id matcher in the result', async () => {
+    const deps = createDeps();
+    const tool = manageActionPolicyTool(deps);
+    const ctx = createContext();
+
+    const result = await tool.handler(
+      {
+        operations: [
+          { operation: 'set_metadata', name: 'Rule-scoped Policy', description: 'desc' },
+          {
+            operation: 'set_destinations',
+            destinations: [{ type: 'workflow', id: 'wf-1' }],
+          },
+          { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
+        ],
+      },
+      ctx
+    );
+
+    const { results } = result as {
+      results: Array<{
+        type: string;
+        data?: {
+          actionPolicyAttachment?: {
+            matcher?: string | null;
+            name?: string;
+          };
+        };
+      }>;
+    };
+    expect(results[0].type).toBe(ToolResultType.other);
+    expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+    expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
   });
 
   describe('logger severity', () => {

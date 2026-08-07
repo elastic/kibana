@@ -237,8 +237,14 @@ export const PipelineTable: FunctionComponent<Props> = ({
     </EuiFilterButton>
   );
 
+  const reloadButtonLabel = i18n.translate(
+    'xpack.ingestPipelines.list.table.reloadButtonAriaLabel',
+    { defaultMessage: 'Refresh' }
+  );
+
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     'data-test-subj': 'pipelinesTable',
+    itemId: 'name',
     sorting,
     selection: {
       onSelectionChange: setSelection,
@@ -279,18 +285,18 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButtonIcon
-          key="reloadButton"
-          iconType="refresh"
-          color="success"
-          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
-            defaultMessage: 'refresh',
-          })}
-          data-test-subj="reloadButton"
-          size="m"
-          display="base"
-          onClick={onReloadClick}
-        />,
+        <EuiToolTip content={reloadButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            key="reloadButton"
+            iconType="refresh"
+            color="success"
+            aria-label={reloadButtonLabel}
+            data-test-subj="reloadButton"
+            size="m"
+            display="base"
+            onClick={onReloadClick}
+          />
+        </EuiToolTip>,
       ],
       box: {
         incremental: true,

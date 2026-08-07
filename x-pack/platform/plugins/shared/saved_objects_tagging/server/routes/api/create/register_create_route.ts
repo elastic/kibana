@@ -26,6 +26,10 @@ export const registerCreateRoute = (router: TagsPluginRouter, usageCounter?: Usa
   createRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).createTagOASOperationObject,
+      },
       validate: {
         request: {
           body: tagRequestAttributesSchema,
@@ -48,7 +52,7 @@ export const registerCreateRoute = (router: TagsPluginRouter, usageCounter?: Usa
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           const result = await create(ctx, req.body);
           if (result.outcome === 'conflict') {

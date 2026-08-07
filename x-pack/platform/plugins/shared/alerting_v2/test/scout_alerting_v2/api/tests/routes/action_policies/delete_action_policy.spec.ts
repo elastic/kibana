@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -23,7 +23,9 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -52,7 +54,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
 
       expect(deleteResponse).toHaveStatusCode(204);
 
-      const remaining = await apiServices.alertingV2.actionPolicies.list({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.actionPolicies.list({ per_page: 100 });
       expect(remaining.items.map((policy) => policy.id)).not.toContain(created.id);
     }
   );
@@ -63,6 +65,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ACTION_POLICY_NOT_FOUND');
   });
 
   apiTest(
@@ -81,6 +84,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       });
       expect(secondDelete).toHaveStatusCode(404);
+      expect(secondDelete.body.code).toBe('ACTION_POLICY_NOT_FOUND');
     }
   );
 
@@ -90,6 +94,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -110,7 +115,9 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'reader-cannot-delete' })
       );

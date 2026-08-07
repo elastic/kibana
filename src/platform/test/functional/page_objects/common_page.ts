@@ -30,6 +30,14 @@ export class CommonPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  // cookieAuth / browserAuth are only registered in stateful functional configs.
+  // Use hasService guards so this page object remains safe in serverless configs too.
+  private readonly cookieAuth = this.ctx.hasService('cookieAuth')
+    ? this.ctx.getService('cookieAuth')
+    : undefined;
+  private readonly browserAuth = this.ctx.hasService('browserAuth')
+    ? this.ctx.getService('browserAuth')
+    : undefined;
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -83,24 +91,37 @@ export class CommonPageObject extends FtrService {
 
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
-      if (this.config.get('security.disableTestUser')) {
-        await this.loginPage.login(
-          this.config.get('servers.kibana.username'),
-          this.config.get('servers.kibana.password')
-        );
+      if (this.config.get('security.cookieLogin') && this.cookieAuth && this.browserAuth) {
+        // Cookie-login path: generate a session via the login API and inject the sid cookie
+        // directly, bypassing the Selenium form fill entirely.
+        // Pass appUrl as targetUrl so loginByCookie navigates there in one step.
+        const cookie = this.config.get('security.disableTestUser')
+          ? await this.cookieAuth.getCookieForKibanaUser()
+          : await this.cookieAuth.getCookieForTestUser();
+        await this.browserAuth.loginByCookie(cookie, {
+          expectUserMenuButton: false,
+          targetUrl: appUrl,
+        });
       } else {
-        await this.loginPage.login('test_user', 'changeme');
-      }
+        if (this.config.get('security.disableTestUser')) {
+          await this.loginPage.login(
+            this.config.get('servers.kibana.username'),
+            this.config.get('servers.kibana.password')
+          );
+        } else {
+          await this.loginPage.login('test_user', 'changeme');
+        }
 
-      if (appUrl.includes('/status')) {
-        await this.testSubjects.find('statusPageRoot');
-      } else {
-        await this.find.byCssSelector(
-          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-          6 * this.defaultFindTimeout
-        );
+        if (appUrl.includes('/status')) {
+          await this.testSubjects.find('statusPageRoot');
+        } else {
+          await this.find.byCssSelector(
+            '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+            6 * this.defaultFindTimeout
+          );
+        }
+        await this.browser.get(appUrl, insertTimestamp);
       }
-      await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
     }

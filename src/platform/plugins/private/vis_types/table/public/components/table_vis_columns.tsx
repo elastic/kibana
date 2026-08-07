@@ -65,7 +65,7 @@ export const createGridColumns = (
             // incoming data might change and put the current page out of bounds - check whether row actually exists
             const rowValue = rows[rowIndex]?.[columnId];
             if (rowValue == null) return null;
-            const cellContent = formattedColumn.formatter.convert(rowValue);
+            const cellContent = formattedColumn.formatter.convertToText(rowValue);
 
             const filterForText = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueText',
@@ -101,7 +101,7 @@ export const createGridColumns = (
             // incoming data might change and put the current page out of bounds - check whether row actually exists
             const rowValue = rows[rowIndex]?.[columnId];
             if (rowValue == null) return null;
-            const cellContent = formattedColumn.formatter.convert(rowValue);
+            const cellContent = formattedColumn.formatter.convertToText(rowValue);
 
             const filterOutText = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueText',

@@ -8,18 +8,16 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import {
-  bulkOperationParamsSchema,
-  bulkOperationResponseSchema,
-  errorResponseSchema,
-} from '@kbn/alerting-v2-schemas';
-import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
+import { bulkByIdsSchema, bulkResponseSchema, errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { bulkDeleteRulesOasExamples } from './bulk_delete_rules_oas_example';
 
 @injectable()
 export class BulkDeleteRulesRoute extends BaseAlertingRoute {
@@ -31,20 +29,21 @@ export class BulkDeleteRulesRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Delete rules in bulk',
+    summary: 'Delete rules in bulk by ID',
+    oasOperationObject: bulkDeleteRulesOasExamples,
   } as const;
   static schemas = {
     request: {
-      body: bulkOperationParamsSchema,
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
-        body: () => bulkOperationResponseSchema,
-        description: 'Indicates a successful call.',
+        body: () => bulkResponseSchema,
+        description: 'Returns the result of the bulk delete operation.',
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -54,16 +53,14 @@ export class BulkDeleteRulesRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkOperationParams>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const { ids, filter, search, match_all } = this.request.body;
-    const params = ids ? { ids } : { filter, search, match_all };
-    const result = await this.rulesClient.bulkDeleteRules(params);
+    const result = await this.rulesClient.bulkDeleteRules({ ids: this.request.body.ids });
     return this.ctx.response.ok({ body: result });
   }
 }

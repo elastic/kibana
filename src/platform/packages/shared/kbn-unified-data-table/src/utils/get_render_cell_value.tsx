@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
@@ -20,7 +20,8 @@ import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldValueReact } from '@kbn/discover-utils';
+import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
+import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -237,16 +238,23 @@ function renderPopoverContent({
   isPlainRecord?: boolean;
 }) {
   const closeButton = (
-    <EuiButtonIcon
-      aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
+    <EuiToolTip
+      content={i18n.translate('unifiedDataTable.grid.closePopover', {
         defaultMessage: `Close popover`,
       })}
-      data-test-subj="docTableClosePopover"
-      iconSize="s"
-      iconType="cross"
-      size="xs"
-      onClick={closePopover}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('unifiedDataTable.grid.closePopover', {
+          defaultMessage: `Close popover`,
+        })}
+        data-test-subj="docTableClosePopover"
+        iconSize="s"
+        iconType="cross"
+        size="xs"
+        onClick={closePopover}
+      />
+    </EuiToolTip>
   );
   if (
     useTopLevelObjectColumns ||
@@ -263,6 +271,13 @@ function renderPopoverContent({
     );
   }
 
+  const value = row.flattened[columnId];
+
+  const formattedValue =
+    field?.type === 'string' && typeof value === 'string'
+      ? tryPrettyPrintJsonBlocks(value) ?? value
+      : value;
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -272,15 +287,23 @@ function renderPopoverContent({
     >
       <EuiFlexItem>
         <DataTablePopoverCellValue>
-          <span>
+          <div
+            data-test-subj="dataTableExpandCellActionPopoverValue"
+            css={css`
+              white-space: pre-wrap;
+              max-height: 350px;
+              overflow: auto;
+            `}
+            tabIndex={0}
+          >
             {formatFieldValueReact({
-              value: row.flattened[columnId],
+              value: formattedValue,
               hit: row.raw,
               fieldFormats,
               dataView,
               field,
             })}
-          </span>
+          </div>
         </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>

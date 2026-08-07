@@ -33,16 +33,16 @@ export const useAuthenticator = (reloadPage = false) => {
       body: JSON.stringify(params),
     });
 
-    if (reloadPage) {
-      const form = createForm(
-        services.http.basePath.prepend('/api/security/saml/callback'),
-        response
-      );
+    const { acsUrl, ...samlFields } = response;
+    const formAction = acsUrl ?? services.http.basePath.prepend('/api/security/saml/callback');
+
+    if (reloadPage || acsUrl) {
+      const form = createForm(formAction, samlFields);
       form.submit();
       await new Promise(() => {});
     } else {
       await services.http.post('/api/security/saml/callback', {
-        body: JSON.stringify(response),
+        body: JSON.stringify(samlFields),
         asResponse: true,
         rawResponse: true,
       });
@@ -71,9 +71,6 @@ export const RoleSwitcher = () => {
       services.notifications.toasts.add(
         createReloadPageToast({
           user: authenticateUserState.value,
-          userProfile: services.userProfile,
-          theme: services.theme,
-          i18n: services.i18n,
         })
       );
     }

@@ -73,6 +73,7 @@ describe('search for unified alerts', () => {
           index: [
             '.alerts-security.alerts-default',
             '.alerts-security.attack.discovery.alerts-default',
+            '.adhoc.alerts-security.attack.discovery.alerts-default',
           ],
         })
       );

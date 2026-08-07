@@ -105,7 +105,7 @@ export const useBulkActionItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
       if (onUpdateFailure) {
         onUpdateFailure(newStatus, error);
       }

@@ -74,6 +74,7 @@ const StatusFilterComponent: React.FC<Props> = ({
   return (
     <EuiFilterGroup>
       <EuiPopover
+        aria-label={i18n.STATUS}
         button={button}
         closePopover={closePopover}
         data-test-subj="statusFilterPopover"

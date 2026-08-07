@@ -299,9 +299,9 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: 'API MKI - rules_management:essentials:qa:serverless:release'
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless:release
-        key: rules_management:essentials:qa:serverless:release
+      - label: 'API MKI - rule_management:essentials:qa:serverless:release'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:essentials:qa:serverless:release
+        key: rule_management:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

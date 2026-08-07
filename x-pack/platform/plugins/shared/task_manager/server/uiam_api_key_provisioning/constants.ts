@@ -20,7 +20,7 @@ export const TASK_TIMEOUT = '5m';
  * Lower bound for `task.runAt` in the UIAM provisioning fetch query (Elasticsearch date math).
  * Keeps eligible tasks from being claimed for execution imminently; evaluated as `now` on the cluster.
  */
-export const UIAM_PROVISIONING_FETCH_RUN_AT_GT = 'now+30s';
+export const UIAM_PROVISIONING_FETCH_RUN_AT_GT = 'now+20s';
 /** When there are more tasks to convert, run again after this many ms (10m) to process the next batch. */
 export const RUN_AT_INTERVAL_MS = 600_000;
 
@@ -30,11 +30,5 @@ export const FETCH_BATCH_SIZE = 500;
  * Page size when listing final UIAM provisioning status SOs (matches Alerting `GET_STATUS_BATCH_SIZE`).
  */
 export const GET_STATUS_BATCH_SIZE = 500;
-
-/**
- * UIAM convert error code returned when the Elasticsearch API key creator is not a Cloud user.
- * Source: https://github.com/elastic/uiam/blob/main/modules/domain/src/main/java/co/elastic/cloud/uiam/domain/errors/ErrorCode.java
- */
-export const NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE = '0x357391';
 
 export const TAGS = ['serverless', 'task-manager', 'uiam-api-key-provisioning', 'background-task'];

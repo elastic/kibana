@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { constants, createPrivateKey, createVerify } from 'crypto';
+import { constants, createPrivateKey, createPublicKey, createVerify } from 'crypto';
 import { buildClientAssertion, computeCertificateThumbprint } from './build_client_assertion';
 
 // Self-signed test certificate and key (RSA 2048-bit, CN=test)
@@ -57,6 +57,18 @@ bfmuaE0dTkJhIoON89GC2XHOmxnU2Zh/WpJcOFXZAoGAe9bC1fjFTaRY1ayYGLrB
 ZnjybYsLOa0bcyPjPSSAgTJIktx31zU2i4hYguMrSjKM707l/wgc5tGYntxG73ko
 XdrjUG57ieFN1nGLViofieM=
 -----END PRIVATE KEY-----`;
+
+// EC P-256 key pair for ES256 tests
+const EC_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgAmBQluMyOy70OvNB
+LmmvYamJiHFsVcG3Cj/to3OGyTahRANCAAQYN+IASozB6gAgsH+k5ZWsXCIUVjv2
+thQfxUD7JMh2Rk58ANGzKptcKa1r7LpL4Q73lgeswTCE8aYANJ9tLOmK
+-----END PRIVATE KEY-----`;
+
+const EC_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEGDfiAEqMweoAILB/pOWVrFwiFFY7
+9rYUH8VA+yTIdkZOfADRsyqbXCmta+y6S+EO95YHrMEwhPGmADSfbSzpig==
+-----END PUBLIC KEY-----`;
 
 const TOKEN_URL = 'https://login.microsoftonline.com/test-tenant/oauth2/v2.0/token';
 const CLIENT_ID = 'test-client-id';
@@ -318,6 +330,45 @@ describe('buildClientAssertion', () => {
       const isValid = createVerify('sha256')
         .update(signingInput)
         .verify({ key: TEST_CERT, padding: constants.RSA_PKCS1_PADDING }, signature);
+      expect(isValid).toBe(true);
+    });
+
+    // crypto.sign() (one-shot) is used instead of createSign() (streaming) so that
+    // FIPS providers do not pre-bind the digest context to PKCS1 before PSS is applied.
+    // Verify that all three algorithms still produce cryptographically valid signatures.
+    it('should produce a valid ES256 (ECDSA P-256 + SHA-256) signature', () => {
+      const jwt = buildClientAssertion({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        algorithm: 'ES256',
+        certificateBinding: { kind: 'kid', keyId: 'ec-key-1' },
+        privateKey: EC_PRIVATE_KEY,
+      });
+
+      const [headerB64, payloadB64, signatureB64] = jwt.split('.');
+      const header = JSON.parse(
+        Buffer.from(headerB64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()
+      );
+      expect(header.alg).toBe('ES256');
+      expect(header.kid).toBe('ec-key-1');
+
+      const signingInput = `${headerB64}.${payloadB64}`;
+      const sigPadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
+      // ieee-p1363 format: pad to 64 bytes total (two 32-byte integers) then convert to DER for verification
+      const rawSig = Buffer.from(sigPadded, 'base64');
+      const half = rawSig.length / 2;
+      const r = rawSig.subarray(0, half);
+      const s = rawSig.subarray(half);
+      const toDerInt = (buf: Buffer) => {
+        const trimmed = buf[0] >= 0x80 ? Buffer.concat([Buffer.from([0x00]), buf]) : buf;
+        return Buffer.concat([Buffer.from([0x02, trimmed.length]), trimmed]);
+      };
+      const rDer = toDerInt(r);
+      const sDer = toDerInt(s);
+      const derSig = Buffer.concat([Buffer.from([0x30, rDer.length + sDer.length]), rDer, sDer]);
+
+      const publicKey = createPublicKey({ key: EC_PUBLIC_KEY, format: 'pem' });
+      const isValid = createVerify('sha256').update(signingInput).verify(publicKey, derSig);
       expect(isValid).toBe(true);
     });
 
