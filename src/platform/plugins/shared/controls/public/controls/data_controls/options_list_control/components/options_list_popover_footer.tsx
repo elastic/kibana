@@ -43,13 +43,13 @@ const aggregationToggleButtons = [
 export const OptionsListPopoverFooter = () => {
   const { componentApi } = useOptionsListContext();
 
-  const [exclude, viewMode, loading, isPartial] = useBatchedPublishingSubjects(
+  const [exclude, viewMode, isPartial, loading] = useBatchedPublishingSubjects(
     isDSLOptionsListApi(componentApi) ? componentApi.exclude$ : new BehaviorSubject(false),
     isDSLOptionsListApi(componentApi)
       ? componentApi.viewMode$
       : new BehaviorSubject('view' as ViewMode),
-    componentApi.dataLoading$,
-    componentApi.isPartial$
+    isDSLOptionsListApi(componentApi) ? componentApi.isPartial$ : new BehaviorSubject(false),
+    componentApi.dataLoading$
   );
 
   return (
