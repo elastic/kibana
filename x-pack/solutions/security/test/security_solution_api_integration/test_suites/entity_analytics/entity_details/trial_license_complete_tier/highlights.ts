@@ -27,7 +27,7 @@ import {
   forceStartDatafeeds,
   indexDocuments,
   setupMlModulesWithRetry,
-  waitForMlJobToBeInstalled,
+  waitForMlJobToBeQueryable,
 } from '../../../detections_response/utils';
 import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
       // On serverless, ML runs on a separate node that can lag behind setup, so the highlights API's
       // jobsSummary() call returns no security jobs (empty anomalies) if queried too early. Wait until
       // the job is queryable in the security group before asserting.
-      await waitForMlJobToBeInstalled({ jobId: mlJobId, retry, supertest });
+      await waitForMlJobToBeQueryable({ jobId: mlJobId, retry, supertest });
     });
 
     after(async () => {

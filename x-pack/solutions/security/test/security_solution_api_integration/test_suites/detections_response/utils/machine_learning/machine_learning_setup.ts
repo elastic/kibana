@@ -8,6 +8,7 @@
 import type SuperTest from 'supertest';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 
 interface ModuleJob {
@@ -72,7 +73,7 @@ export const setupMlModulesWithRetry = async ({
     return response;
   });
 
-export const waitForMlJobToBeInstalled = async ({
+export const waitForMlJobToBeQueryable = async ({
   jobId,
   retry,
   supertest,
@@ -82,17 +83,15 @@ export const waitForMlJobToBeInstalled = async ({
   supertest: SuperTest.Agent;
 }) =>
   retry.try(async () => {
-    const { body } = await supertest
+    const { body }: { body: MlSummaryJob[] } = await supertest
       .post(`/internal/ml/jobs/jobs_summary`)
       .set(getCommonRequestHeader('1'))
       .send({ jobIds: [jobId] })
       .expect(200);
 
-    const installedJob = (body as Array<{ id: string; groups: string[] }>).find(
-      (job) => job.id === jobId && job.groups.includes(ML_GROUP_ID)
-    );
+    const queryableJob = body.find((job) => job.id === jobId && job.groups.includes(ML_GROUP_ID));
 
-    if (!installedJob) {
+    if (!queryableJob) {
       throw new Error(
         `Expected ML job "${jobId}" to be queryable in the "${ML_GROUP_ID}" group, but got ${JSON.stringify(
           body
@@ -100,7 +99,7 @@ export const waitForMlJobToBeInstalled = async ({
       );
     }
 
-    return installedJob;
+    return queryableJob;
   });
 
 export const forceStartDatafeeds = async ({
