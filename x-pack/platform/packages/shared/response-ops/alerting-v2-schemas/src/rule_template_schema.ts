@@ -72,10 +72,7 @@ export const findRuleTemplatesRequestSchema = z.object({
   sort_field: findRuleTemplatesSortFieldSchema
     .optional()
     .describe('The field to sort rule templates by. Defaults to name.'),
-  sort_order: z
-    .enum(['asc', 'desc'])
-    .optional()
-    .describe('The direction to sort rule templates.'),
+  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rule templates.'),
   tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
     .optional()
     .describe(
@@ -99,11 +96,7 @@ export type FindRuleTemplatesResponse = z.infer<typeof findRuleTemplatesResponse
 
 /** Path parameters for the single rule template API. */
 export const ruleTemplateIdParamsSchema = z.object({
-  id: z
-    .string()
-    .min(1)
-    .max(ID_MAX_LENGTH)
-    .describe('The identifier for the rule template.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
 });
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;
