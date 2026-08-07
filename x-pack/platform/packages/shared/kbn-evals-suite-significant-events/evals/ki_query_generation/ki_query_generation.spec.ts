@@ -53,11 +53,6 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
  * replay index, so raising this is safe. */
 const QUERYGEN_CONCURRENCY = Number(process.env.SIGEVENTS_QUERYGEN_CONCURRENCY) || 4;
 
-/** Agent step budgets. Grounded runs get more steps to cover the extra semantic
- * code search tool calls on top of feature retrieval and query generation. */
-const MAX_STEPS_GROUNDED = 12;
-const MAX_STEPS_UNGROUNDED = 8;
-
 /** A replay that drops more than this fraction of docs (typically mapping
  * conflicts) is treated as unusable and the scenario is skipped rather than
  * scored on partial data. */
@@ -407,7 +402,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   ...eventSearchTool.callbacks,
                   ...groundingTools?.additionalToolCallbacks,
                 },
-                maxSteps: groundingTools ? MAX_STEPS_GROUNDED : MAX_STEPS_UNGROUNDED,
+                maxSteps: groundingTools ? 12 : 8,
               });
 
               logger.info(
