@@ -142,7 +142,10 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.debug({ message: () => `Invalid manage_rule input: ${message}` });
+        logger.debug({
+          message: () => `Invalid manage_rule input: ${message}`,
+          labels: { space_id: spaceId },
+        });
       } else {
         logger.warn({
           message: 'Failed to manage rule',

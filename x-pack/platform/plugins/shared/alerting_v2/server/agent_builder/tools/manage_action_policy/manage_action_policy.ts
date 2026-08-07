@@ -166,6 +166,7 @@ Use operations[] to:
       if (error instanceof ActionPolicyOperationValidationError) {
         logger.debug({
           message: () => `Invalid manage_action_policy input: ${message}`,
+          labels: { space_id: spaceId },
         });
       } else {
         logger.warn({
