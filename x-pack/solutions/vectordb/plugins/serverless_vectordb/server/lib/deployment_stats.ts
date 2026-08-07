@@ -33,10 +33,36 @@ interface IndexStats {
   vectorCount: number | null;
 }
 
-const INDEX_STATS_UNAVAILABLE: IndexStats = {
+export const INDEX_STATS_UNAVAILABLE: IndexStats = {
   indicesCount: null,
   storeSizeBytes: null,
   vectorCount: null,
+};
+
+const USER_INDICES_PATTERN = ['*', '-.*'];
+
+/**
+ * Whether the caller may see cluster-wide totals. Every source behind `fetchIndexStats` runs with
+ * elevated privileges, so Elasticsearch will not reject an unprivileged caller on its own and the
+ * route has to ask on their behalf. Errors deny access rather than granting it.
+ */
+export const hasIndexManagePrivilege = async (
+  client: IScopedClusterClient,
+  logger: Logger
+): Promise<boolean> => {
+  try {
+    const { has_all_requested: hasAllRequested } =
+      await client.asCurrentUser.security.hasPrivileges({
+        index: [{ names: USER_INDICES_PATTERN, privileges: ['manage'] }],
+      });
+
+    return hasAllRequested;
+  } catch (error) {
+    logger.warn(
+      `Failed to check index privileges for vectordb deployment stats. Denying access: ${error.message}`
+    );
+    return false;
+  }
 };
 
 /**
@@ -48,7 +74,7 @@ const INDEX_STATS_UNAVAILABLE: IndexStats = {
  */
 const countVectors = async (client: IScopedClusterClient): Promise<number> => {
   const stats = await client.asInternalUser.indices.stats({
-    index: ['*', '-.*'],
+    index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
     level: 'cluster',
     metric: ['dense_vector', 'sparse_vector'],

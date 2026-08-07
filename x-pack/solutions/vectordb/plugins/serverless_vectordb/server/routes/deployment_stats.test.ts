@@ -14,7 +14,11 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
+import {
+  fetchDashboardsCount,
+  fetchIndexStats,
+  hasIndexManagePrivilege,
+} from '../lib/deployment_stats';
 import { registerDeploymentStatsRoute } from './deployment_stats';
 
 jest.mock('../lib/deployment_stats');
@@ -22,6 +26,9 @@ jest.mock('../lib/deployment_stats');
 const mockFetchIndexStats = fetchIndexStats as jest.MockedFunction<typeof fetchIndexStats>;
 const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
   typeof fetchDashboardsCount
+>;
+const mockHasIndexManagePrivilege = hasIndexManagePrivilege as jest.MockedFunction<
+  typeof hasIndexManagePrivilege
 >;
 
 describe('registerDeploymentStatsRoute', () => {
@@ -36,6 +43,7 @@ describe('registerDeploymentStatsRoute', () => {
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     soClient = savedObjectsClientMock.create();
+    mockHasIndexManagePrivilege.mockResolvedValue(true);
 
     registerDeploymentStatsRoute(router, logger);
   });
@@ -120,6 +128,27 @@ describe('registerDeploymentStatsRoute', () => {
       },
     });
     expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('withholds index stats but still returns the dashboard count without the `manage` privilege', async () => {
+    mockHasIndexManagePrivilege.mockResolvedValue(false);
+    mockFetchDashboardsCount.mockResolvedValue(2);
+
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpServerMock.createResponseFactory();
+
+    await getHandler()(createContext(), request, response);
+
+    expect(mockFetchIndexStats).not.toHaveBeenCalled();
+    expect(response.forbidden).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        indicesCount: null,
+        storeSizeBytes: null,
+        vectorCount: null,
+        dashboardsCount: 2,
+      },
+    });
   });
 
   it('returns a custom error when resolving the core context throws', async () => {
