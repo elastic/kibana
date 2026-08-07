@@ -166,69 +166,69 @@ export function ProjectPickerFilterForm({
 
   return (
     <FormProvider {...form}>
-          <EuiForm>
-            <EuiFormRow
-              label={null}
-              isInvalid={Object.keys(errors).length > 0}
-              helpText={filterFormHelpText}
-              fullWidth
-            >
-              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-                <EuiFlexItem>
-                  <FilterSelectionInput
-                    form={form}
-                    getFilteringDimensionsOptions={getFilteringDimensionsOptions}
-                    getFilterValuesOptions={getFilterValuesOptions}
-                    onFilterInputChanged={setFilterInput}
-                    validateExpression={validateExpression}
-                  />
+      <EuiForm>
+        <EuiFormRow
+          label={null}
+          isInvalid={Object.keys(errors).length > 0}
+          helpText={filterFormHelpText}
+          fullWidth
+        >
+          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+            <EuiFlexItem>
+              <FilterSelectionInput
+                form={form}
+                getFilteringDimensionsOptions={getFilteringDimensionsOptions}
+                getFilterValuesOptions={getFilterValuesOptions}
+                onFilterInputChanged={setFilterInput}
+                validateExpression={validateExpression}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    id="createFilterTooltip"
+                    content={i18n.translate('cpsUtils.projectPicker.filterBox.createFilter', {
+                      defaultMessage: 'Create filter',
+                    })}
+                    position="top"
+                  >
+                    <EuiButtonIcon
+                      size="s"
+                      iconType="check"
+                      display="base"
+                      color="success"
+                      aria-labelledby="createFilterTooltip"
+                      data-test-subj="projectPickerFilterFormCreateBtn"
+                      onClick={handleOnCreateFilter}
+                      disabled={shouldDisableCreateFilter}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup responsive={false} gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        id="createFilterTooltip"
-                        content={i18n.translate('cpsUtils.projectPicker.filterBox.createFilter', {
-                          defaultMessage: 'Create filter',
-                        })}
-                        position="top"
-                      >
-                        <EuiButtonIcon
-                          size="s"
-                          iconType="check"
-                          display="base"
-                          color="success"
-                          aria-labelledby="createFilterTooltip"
-                          data-test-subj="projectPickerFilterFormCreateBtn"
-                          onClick={handleOnCreateFilter}
-                          disabled={shouldDisableCreateFilter}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        id="cancelFilterCreationTooltip"
-                        content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
-                          defaultMessage: 'Cancel filter creation',
-                        })}
-                        position="top"
-                      >
-                        <EuiButtonIcon
-                          size="s"
-                          iconType="cross"
-                          display="base"
-                          color="danger"
-                          aria-labelledby="cancelFilterCreationTooltip"
-                          data-test-subj="projectPickerFilterFormCancelBtn"
-                          onClick={onCloseFilterFormRequested}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiToolTip
+                    id="cancelFilterCreationTooltip"
+                    content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
+                      defaultMessage: 'Cancel filter creation',
+                    })}
+                    position="top"
+                  >
+                    <EuiButtonIcon
+                      size="s"
+                      iconType="cross"
+                      display="base"
+                      color="danger"
+                      aria-labelledby="cancelFilterCreationTooltip"
+                      data-test-subj="projectPickerFilterFormCancelBtn"
+                      onClick={onCloseFilterFormRequested}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFormRow>
-          </EuiForm>
-        </FormProvider>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      </EuiForm>
+    </FormProvider>
   );
 }
