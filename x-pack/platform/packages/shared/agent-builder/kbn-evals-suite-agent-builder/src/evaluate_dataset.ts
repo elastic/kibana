@@ -318,7 +318,6 @@ export function createEvaluateExternalDataset({
   log: ToolingLog;
 }): EvaluateExternalDataset {
   return async function evaluateExternalDataset(datasetName: string) {
-    const resolvesFromPhoenix = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
@@ -329,13 +328,11 @@ export function createEvaluateExternalDataset({
     await executorClient.runExperiment(
       {
         dataset: {
-          name: datasetName,
-          description: resolvesFromPhoenix
-            ? 'External dataset resolved from Phoenix by name'
-            : 'External dataset resolved from Elasticsearch by name',
-          // Examples are resolved from upstream dataset storage, not provided in code.
-          examples: [],
-        },
+            name: datasetName,
+            description: 'External dataset resolved from Elasticsearch by name',
+            // Examples are resolved from upstream dataset storage, not provided in code.
+            examples: [],
+          },
         task,
         trustUpstreamDataset: true,
       },
