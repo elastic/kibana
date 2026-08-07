@@ -25,6 +25,12 @@ export {
   replayIntoManagedStream,
 } from './replay_into_managed_stream';
 
+export {
+  queryGenReplayIndexName,
+  deleteQueryGenReplayIndices,
+  replaySnapshotIntoIndex,
+} from './replay_into_index';
+
 export { replayKnowledgeIndicatorsSnapshot } from './replay_knowledge_indicators_snapshot';
 
 export {

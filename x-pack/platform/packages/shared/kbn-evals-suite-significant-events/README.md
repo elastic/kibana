@@ -144,11 +144,13 @@ node scripts/evals run \
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
 | `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-02-25`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
-| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
+| `SIGEVENTS_QUERYGEN_CONCURRENCY`        | Concurrent scenario runs per KI query generation experiment (each scenario has its own isolated replay index) | `4`     |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
 | `TRACING_ES_API_KEY`                    | API key for the trace Elasticsearch cluster                                 | —                          |
+
+> **KI query generation KI source:** queries are always generated from **canonical** KIs derived from each scenario's `expected_ground_truth`; scenarios without ground truth are skipped. The earlier `snapshot`/`both` variants and the `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` (`SIGEVENTS_QUERYGEN_FEATURES_SOURCE`) toggle were removed, so results are not directly comparable to runs from before that change.
 
 ## Collected metrics
 

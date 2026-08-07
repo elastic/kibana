@@ -8,11 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  MANAGED_STREAM_SEARCH_PATTERN,
-  type KIFeatureExtractionScenario,
-  type KIQueryGenerationScenario,
-} from '../../src/datasets';
+import type { KIFeatureExtractionScenario, KIQueryGenerationScenario } from '../../src/datasets';
 
 const SAMPLE_DOCS_SIZE = 500;
 const SAMPLE_DOCS_PER_FILTER = 5;
@@ -58,11 +54,13 @@ const addUniqueHits = ({
  */
 export const collectSampleDocuments = async ({
   esClient,
+  index,
   extractionScenario,
   queryGenerationScenario,
   log,
 }: {
   esClient: Client;
+  index: string;
   extractionScenario?: KIFeatureExtractionScenario;
   queryGenerationScenario?: KIQueryGenerationScenario;
   log: ToolingLog;
@@ -90,7 +88,7 @@ export const collectSampleDocuments = async ({
 
         return samplingFilters.map(async (filter) => {
           const result = await esClient.search<Record<string, unknown>>({
-            index: MANAGED_STREAM_SEARCH_PATTERN,
+            index,
             size: SAMPLE_DOCS_PER_FILTER,
             query: { bool: { filter: [...baseQuery, filter] } },
             sort: [{ '@timestamp': { order: 'desc' } }],
@@ -140,7 +138,7 @@ export const collectSampleDocuments = async ({
         : { bool: { filter: baseQuery } };
 
     const fillResult = await esClient.search<Record<string, unknown>>({
-      index: MANAGED_STREAM_SEARCH_PATTERN,
+      index,
       size: remaining,
       query: fillQuery,
       sort: [{ '@timestamp': { order: 'desc' } }],

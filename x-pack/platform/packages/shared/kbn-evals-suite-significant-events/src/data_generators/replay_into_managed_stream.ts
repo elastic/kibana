@@ -12,31 +12,21 @@ import { createGcsRepository } from '@kbn/es-snapshot-loader';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import { ensureLogsIndexTemplate } from './logs_index_template';
+import type { ReplayStats } from './snapshot_replay_common';
+import {
+  LOGS_STREAM_NAME,
+  REINDEX_REQUEST_TIMEOUT_MS,
+  TIMESTAMP_TRANSFORM_SCRIPT,
+  deleteIndicesByPrefix,
+  getLogsIndicesFromSnapshot,
+  summarizeReindexResult,
+} from './snapshot_replay_common';
 
-const LOGS_STREAM_NAME = 'logs';
+export type { ReplayStats } from './snapshot_replay_common';
+
 const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
-const REINDEX_REQUEST_TIMEOUT_MS = 30 * 60 * 1000;
-const MAX_LOGGED_REINDEX_FAILURES = 5;
 
 const replayTempPrefix = (runId: number): string => `${REPLAY_TEMP_PREFIX}${runId}-`;
-
-const TIMESTAMP_TRANSFORM_SCRIPT = `
-  // Reset the _id field to null to avoid conflicts with subsequent reindex operations
-  ctx._id = null;
-  if (ctx.containsKey('@timestamp') && ctx['@timestamp'] != null) {
-    Instant maxTime = Instant.parse(params.max_timestamp);
-    Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
-    long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
-    ctx['@timestamp'] = now.minusMillis(deltaMillis).toString();
-  }
-`;
-
-export interface ReplayStats {
-  total: number;
-  created: number;
-  skipped: number;
-}
 
 interface ReplayArtifacts {
   runId: number;
@@ -61,39 +51,6 @@ const createReplayArtifacts = (): ReplayArtifacts => {
     pipelineName: `sigevents-ts-transform-${runId}`,
     tempIndices: [],
   };
-};
-
-const getLogsIndicesFromSnapshot = async ({
-  esClient,
-  repoName,
-  snapshotName,
-}: {
-  esClient: Client;
-  repoName: string;
-  snapshotName: string;
-}): Promise<string[]> => {
-  const snapshotInfo = await esClient.snapshot.get({
-    repository: repoName,
-    snapshot: snapshotName,
-  });
-
-  const snapshot = snapshotInfo.snapshots?.[0];
-  if (!snapshot) {
-    throw new Error(`Snapshot "${snapshotName}" not found in repository "${repoName}"`);
-  }
-
-  // Restrict to the `logs` data stream's own backing indices (`.ds-logs-<date>-<gen>`). The hyphen
-  // matters: `.startsWith('.ds-logs')` would also match sibling streams like `logs.ecs`
-  // (`.ds-logs.ecs-…`), which the discovery eval does not target — and restoring those extra backing
-  // indices is what trips `index_not_found` at reindex. The agent reads `FROM logs`, so only `logs`.
-  const logsIndices = (snapshot.indices ?? []).filter(
-    (indexName) => indexName.startsWith('.ds-logs-') || indexName === LOGS_STREAM_NAME
-  );
-  if (logsIndices.length === 0) {
-    throw new Error(`No logs indices found in snapshot "${snapshotName}"`);
-  }
-
-  return logsIndices;
 };
 
 const restoreLogsIndicesToTemp = async ({
@@ -258,7 +215,7 @@ const createReplayPipeline = async ({
       {
         script: {
           lang: 'painless',
-          params: { max_timestamp: maxTimestamp },
+          params: { max_timestamp: maxTimestamp, now_millis: Date.now() },
           source: TIMESTAMP_TRANSFORM_SCRIPT,
         },
       },
@@ -294,25 +251,6 @@ const setWriteIndexDefaultPipeline = async ({
   });
 };
 
-const logReindexFailures = ({
-  log,
-  failures,
-  skipped,
-}: {
-  log: ToolingLog;
-  failures: Array<{ cause?: { reason?: string; type?: string } }>;
-  skipped: number;
-}): void => {
-  log.warning(`Reindex: ${skipped} docs skipped due to mapping conflicts`);
-  for (const failure of failures.slice(0, MAX_LOGGED_REINDEX_FAILURES)) {
-    const reason = failure.cause?.reason?.split('\n')[0]?.slice(0, 150) ?? 'unknown';
-    log.debug(`  - ${failure.cause?.type ?? 'error'}: ${reason}`);
-  }
-  if (failures.length > MAX_LOGGED_REINDEX_FAILURES) {
-    log.debug(`  ... and ${failures.length - MAX_LOGGED_REINDEX_FAILURES} more`);
-  }
-};
-
 const reindexTempIndicesIntoManagedStream = async ({
   esClient,
   tempIndices,
@@ -332,18 +270,7 @@ const reindexTempIndicesIntoManagedStream = async ({
     { requestTimeout: REINDEX_REQUEST_TIMEOUT_MS }
   );
 
-  const total = reindexResult.total ?? 0;
-  const created = reindexResult.created ?? 0;
-  const failures = (reindexResult.failures ?? []) as Array<{
-    cause?: { reason?: string; type?: string };
-  }>;
-  const skipped = total - created;
-
-  if (failures.length > 0) {
-    logReindexFailures({ log, failures, skipped });
-  }
-
-  return { total, created, skipped };
+  return summarizeReindexResult({ reindexResult, log });
 };
 
 const cleanupReplayArtifacts = async ({
@@ -392,34 +319,11 @@ const cleanupReplayArtifacts = async ({
   }
 };
 
-export const deleteTemporaryReplayIndices = async (
+export const deleteTemporaryReplayIndices = (
   esClient: Client,
   log: ToolingLog,
   prefix: string = REPLAY_TEMP_PREFIX
-): Promise<void> => {
-  try {
-    const resolved = await esClient.indices.get({
-      index: `${prefix}*`,
-      expand_wildcards: 'all',
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
-    const indexNames = Object.keys(resolved);
-    if (indexNames.length === 0) return;
-    await esClient.indices.delete({
-      index: indexNames,
-      expand_wildcards: 'all',
-      ignore_unavailable: true,
-    });
-    log.debug(`Deleted ${indexNames.length} temporary replay indices`);
-  } catch (error) {
-    log.warning(
-      `Failed to delete temporary replay indices: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-};
+): Promise<void> => deleteIndicesByPrefix(esClient, log, prefix);
 
 /**
  * Replays a snapshot into the managed `logs` ES stream by setting a
