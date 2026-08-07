@@ -11,6 +11,7 @@ import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { search } from './search';
+import { transformDashboardOut } from '../transforms';
 
 jest.mock('@kbn/as-code-utils', () => ({
   findWithTagFilter: jest.fn(),
@@ -28,6 +29,7 @@ jest.mock('../transforms', () => ({
 }));
 
 const findWithTagFilterMock = findWithTagFilter as jest.MockedFunction<typeof findWithTagFilter>;
+const mockedTransformDashboardOut = jest.mocked(transformDashboardOut);
 
 const createRequestCtx = (): RequestHandlerContext =>
   ({
@@ -39,7 +41,17 @@ const createRequestCtx = (): RequestHandlerContext =>
 describe('dashboard search sort options', () => {
   beforeEach(() => {
     findWithTagFilterMock.mockResolvedValue({
-      saved_objects: [],
+      saved_objects: [
+        {
+          id: 'dashboard-1',
+          type: 'dashboard',
+          attributes: {},
+          references: [],
+          managed: false,
+          updated_at: '2026-08-07T00:00:00.000Z',
+          version: 'WzEsMV0=',
+        },
+      ],
       total: 0,
       page: 1,
       per_page: 20,
@@ -59,6 +71,8 @@ describe('dashboard search sort options', () => {
         sortOrder: 'desc',
       })
     );
+    expect(mockedTransformDashboardOut).toHaveBeenCalled();
+    expect(mockedTransformDashboardOut.mock.calls[0]).toHaveLength(5);
   });
 
   it('omits sort options when query is present', async () => {
@@ -68,5 +82,7 @@ describe('dashboard search sort options', () => {
     expect(findOptions).not.toHaveProperty('sortField');
     expect(findOptions).not.toHaveProperty('sortOrder');
     expect(findOptions).toHaveProperty('search');
+    expect(mockedTransformDashboardOut).toHaveBeenCalled();
+    expect(mockedTransformDashboardOut.mock.calls[0]).toHaveLength(5);
   });
 });

@@ -12,4 +12,11 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
-export { COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES, TEST_DASHBOARD_ID } from './constants';
+export {
+  COMMON_HEADERS,
+  DASHBOARD_API_PATH,
+  KBN_ARCHIVES,
+  LEGACY_VEGA_DASHBOARD_ID,
+  LEGACY_VEGA_VISUALIZATION_ID,
+  TEST_DASHBOARD_ID,
+} from './constants';

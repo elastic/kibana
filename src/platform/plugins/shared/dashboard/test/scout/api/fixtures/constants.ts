@@ -24,7 +24,12 @@ export const KBN_ARCHIVES = {
   TAGS: 'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/tags.json',
   MANY_DASHBOARDS:
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many_dashboards.json',
+  LEGACY_VEGA_PANEL_MIGRATION:
+    'src/platform/plugins/shared/dashboard/test/scout/api/fixtures/archives/legacy_vega_panel_migration.json',
 } as const;
 
 /** Test dashboard ID used in fixtures - is a saved object loaded by the kbn_archiver */
 export const TEST_DASHBOARD_ID = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
+
+export const LEGACY_VEGA_DASHBOARD_ID = 'legacy_vega_dashboard';
+export const LEGACY_VEGA_VISUALIZATION_ID = 'legacy_vega_visualization';
