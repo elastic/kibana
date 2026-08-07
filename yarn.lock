@@ -22651,7 +22651,6 @@ launchdarkly-js-sdk-common@5.8.2:
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"
-    uuid "^8.0.0"
 
 lazy-ass@^2.0.3:
   version "2.0.3"
