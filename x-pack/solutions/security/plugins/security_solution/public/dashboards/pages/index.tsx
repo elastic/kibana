@@ -11,10 +11,12 @@ import { DashboardsLandingPage } from './landing_page';
 import { DashboardView } from './details';
 import { DASHBOARDS_PATH } from '../../../common/constants';
 import { DashboardContextProvider } from '../context/dashboard_context';
+import { HashDashboardLinkRedirect } from '../components/hash_dashboard_link_redirect';
 
 const DashboardsContainerComponent = () => {
   return (
     <DashboardContextProvider>
+      <HashDashboardLinkRedirect />
       <Routes>
         <Route strict path={`${DASHBOARDS_PATH}/create`}>
           <DashboardView initialViewMode={'edit'} />
