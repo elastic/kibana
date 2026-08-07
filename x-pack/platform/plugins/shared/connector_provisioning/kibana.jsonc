@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/connector-provisioning-plugin",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Registers the connector-provisioning.provisionConnectorFromSecret Workflow step, which creates/upserts Kibana connectors from secrets resolved by another connector (e.g. HashiCorp Vault) without ever exposing the resolved values outside this step.",
+  "plugin": {
+    "id": "connectorProvisioning",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["actions", "workflowsExtensions"]
+  }
+}
