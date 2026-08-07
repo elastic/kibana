@@ -42415,7 +42415,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -42490,7 +42491,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
