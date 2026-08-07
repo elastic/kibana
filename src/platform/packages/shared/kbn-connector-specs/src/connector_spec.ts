@@ -113,10 +113,27 @@ export interface EarsGetTokenOpts {
   scope?: string;
 }
 
+/**
+ * HashiCorp Vault AppRole login (https://developer.hashicorp.com/vault/docs/auth/approle).
+ * `address`/`namespace` are duplicated here (rather than read from the connector's own
+ * `config`) because `AuthContext.getToken()`/`AuthTypeSpec.configure()` only ever receive
+ * the auth type's own `secret` fields, never the connector's `config` -- see the
+ * connector-provisioning plan §5.4 for the underlying design tradeoff.
+ */
+export interface VaultAppRoleGetTokenOpts {
+  authType: 'vault_approle';
+  address: string;
+  namespace?: string;
+  mountPath: string;
+  roleId: string;
+  secretId: string;
+}
+
 export type GetTokenOpts =
   | OAuthGetTokenOpts
   | OAuthClientCredsPrivateKeyJWTGetTokenOpts
-  | EarsGetTokenOpts;
+  | EarsGetTokenOpts
+  | VaultAppRoleGetTokenOpts;
 
 export interface AuthContext {
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
@@ -229,6 +246,15 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /**
+   * Marks this action's successful `data` output as sensitive (e.g. it returns raw
+   * credential material). When true, `ActionExecutor.execute()` redacts the result
+   * (`data` becomes `{ redacted: true }`) on every execution surface (HTTP `_execute`,
+   * Workflows, Agent Builder) unless the caller supplies the actions plugin's
+   * `allowSensitiveOutput` capability token. See `sensitive_output_access_token.ts` in
+   * the actions plugin for the enforcement mechanism.
+   */
+  sensitiveOutput?: boolean;
 }
 
 export interface ActionContext {

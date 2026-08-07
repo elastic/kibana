@@ -10,6 +10,7 @@ import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
 import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
 import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
+import { VaultAppRoleStrategy } from './vault_approle_strategy';
 
 describe('getAxiosAuthStrategy', () => {
   it('returns EarsStrategy for "ears"', () => {
@@ -30,6 +31,10 @@ describe('getAxiosAuthStrategy', () => {
     expect(getAxiosAuthStrategy('oauth_client_credentials_private_key_jwt')).toBeInstanceOf(
       OAuthClientCredentialsPrivateKeyJwtStrategy
     );
+  });
+
+  it('returns VaultAppRoleStrategy for "vault_approle"', () => {
+    expect(getAxiosAuthStrategy('vault_approle')).toBeInstanceOf(VaultAppRoleStrategy);
   });
 
   it('returns OAuthClientCredentialsStrategy for "none"', () => {

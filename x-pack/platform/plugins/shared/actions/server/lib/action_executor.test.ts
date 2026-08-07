@@ -32,10 +32,22 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { ConnectorAuthorizationError } from '@kbn/connector-specs';
+import {
+  ConnectorAuthorizationError,
+  getConnectorSpec,
+  TEST_CONNECTOR_SUB_ACTION,
+} from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
+import { SENSITIVE_OUTPUT_ACCESS_TOKEN } from './sensitive_output_access_token';
+
+jest.mock('@kbn/connector-specs', () => ({
+  ...jest.requireActual('@kbn/connector-specs'),
+  getConnectorSpec: jest.fn(),
+}));
+const mockGetConnectorSpec = getConnectorSpec as jest.Mock;
 
 const mockRateLimiterLog = jest.fn();
 const mockRateLimiterIsRateLimited = jest.fn().mockReturnValue(false);
@@ -201,6 +213,56 @@ const subFeatureConnectorSavedObject = {
     actionTypeId: 'test.sub-feature-action',
   },
 };
+
+const specBackedConnectorType: jest.Mocked<ConnectorType> = {
+  id: 'test-spec-backed',
+  name: 'Test Spec Backed',
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
+  validate: {
+    config: { schema: z.object({}) },
+    secrets: { schema: z.object({}) },
+    params: {
+      schema: z.object({
+        subAction: z.string(),
+        subActionParams: z.record(z.string(), z.unknown()).optional(),
+      }),
+    },
+  },
+  executor: jest.fn(),
+};
+
+const specBackedConnectorSavedObject = {
+  ...connectorSavedObject,
+  attributes: {
+    ...connectorSavedObject.attributes,
+    actionTypeId: 'test-spec-backed',
+    config: {},
+    secrets: {},
+  },
+};
+
+const sensitiveOutputSpecFixture = {
+  metadata: {
+    id: 'test-spec-backed',
+    displayName: 'Test Spec Backed',
+    description: 'Test fixture',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  actions: {
+    readSecret: {
+      input: z.any(),
+      handler: jest.fn(),
+      sensitiveOutput: true,
+    },
+    nonSensitiveAction: {
+      input: z.any(),
+      handler: jest.fn(),
+    },
+  },
+  test: { handler: jest.fn(), enabled: true },
+} as unknown as ConnectorSpec;
 
 interface ActionUsage {
   request_body_bytes: number;
@@ -2477,5 +2539,145 @@ describe('execute() - spaceId override', () => {
       CONNECTOR_ID,
       { namespace: 'some-namespace' }
     );
+  });
+});
+
+describe('sensitiveOutput redaction', () => {
+  const RAW_SECRET_VALUE = { value: 'CANARY-do-not-leak' };
+  const mockSpecBackedExecutor = specBackedConnectorType.executor as jest.Mock;
+
+  const executeSensitiveActionParams = {
+    ...executeParams,
+    params: { subAction: 'readSecret', subActionParams: {} },
+  };
+
+  beforeEach(() => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+      specBackedConnectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValue(specBackedConnectorType);
+  });
+
+  test('redacts data when the resolved action definition has sensitiveOutput: true and no token is supplied', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: RAW_SECRET_VALUE,
+    });
+
+    const result = await actionExecutor.execute(executeSensitiveActionParams);
+
+    expect(result.data).toEqual({ redacted: true });
+  });
+
+  test('does not redact when the caller supplies the actions plugin capability token', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: RAW_SECRET_VALUE,
+    });
+
+    const result = await actionExecutor.execute({
+      ...executeSensitiveActionParams,
+      allowSensitiveOutput: SENSITIVE_OUTPUT_ACCESS_TOKEN,
+    });
+
+    expect(result.data).toEqual(RAW_SECRET_VALUE);
+  });
+
+  test('does not unlock with an arbitrary symbol that is not the actions plugin token', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: RAW_SECRET_VALUE,
+    });
+
+    const result = await actionExecutor.execute({
+      ...executeSensitiveActionParams,
+      allowSensitiveOutput: Symbol('not-the-real-token'),
+    });
+
+    expect(result.data).toEqual({ redacted: true });
+  });
+
+  test('does not redact when the resolved action definition has sensitiveOutput: false (or unset)', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: { fine: 'to see' },
+    });
+
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      params: { subAction: 'nonSensitiveAction', subActionParams: {} },
+    });
+
+    expect(result.data).toEqual({ fine: 'to see' });
+  });
+
+  test('does not redact when getConnectorSpec finds no spec for the connector type (legacy connectors)', async () => {
+    mockGetConnectorSpec.mockReturnValue(undefined);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: RAW_SECRET_VALUE,
+    });
+
+    const result = await actionExecutor.execute(executeSensitiveActionParams);
+
+    expect(result.data).toEqual(RAW_SECRET_VALUE);
+  });
+
+  test('fails safe (redacts) when a spec exists but the specific action definition cannot be resolved', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: RAW_SECRET_VALUE,
+    });
+
+    // `unknownAction` does not exist on `sensitiveOutputSpecFixture.actions` -- this
+    // combination should be unreachable via real spec-connector dispatch (an unknown
+    // subAction throws before a successful result), but the redaction algorithm must
+    // still fail safe (redact) rather than fail open if it is ever reached.
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      params: { subAction: 'unknownAction', subActionParams: {} },
+    });
+
+    expect(result.data).toEqual({ redacted: true });
+  });
+
+  test('does not redact the Test-tab `_test` sub-action, which is framework-injected and absent from spec.actions', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'ok',
+      data: { fine: 'to see' },
+    });
+
+    const result = await actionExecutor.execute({
+      ...executeParams,
+      params: { subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} },
+    });
+
+    expect(result.data).toEqual({ fine: 'to see' });
+  });
+
+  test('does not redact error results, even for a sensitiveOutput action', async () => {
+    mockGetConnectorSpec.mockReturnValue(sensitiveOutputSpecFixture);
+    mockSpecBackedExecutor.mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'error',
+      message: 'boom',
+    });
+
+    const result = await actionExecutor.execute(executeSensitiveActionParams);
+
+    expect(result).not.toHaveProperty('data');
   });
 });

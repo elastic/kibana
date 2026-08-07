@@ -10,6 +10,7 @@ import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
 import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
 import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
+import { VaultAppRoleStrategy } from './vault_approle_strategy';
 
 /**
  * Returns the AxiosAuthStrategy for the given auth type.
@@ -24,6 +25,8 @@ export const getAxiosAuthStrategy = (authTypeId: string): AxiosAuthStrategy => {
       return new OAuthAuthCodeStrategy();
     case 'oauth_client_credentials_private_key_jwt':
       return new OAuthClientCredentialsPrivateKeyJwtStrategy();
+    case 'vault_approle':
+      return new VaultAppRoleStrategy();
     default:
       return new OAuthClientCredentialsStrategy();
   }

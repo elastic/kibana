@@ -35,6 +35,13 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
+    '.hashicorp_vault',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconHashicorpVault" */ './specs/hashicorp_vault/icon')
+    ),
+  ],
+  [
     '.pagerduty_mcp',
     lazy(
       () => import(/* webpackChunkName: "connectorIconPagerdutyMcp" */ './specs/pagerduty/icon')

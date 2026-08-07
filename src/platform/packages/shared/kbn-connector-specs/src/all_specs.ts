@@ -35,6 +35,7 @@ export * from './specs/slack/slack';
 export * from './specs/azure_blob/azure_blob';
 export * from './specs/gmail/gmail';
 export * from './specs/one_password/one_password';
+export * from './specs/hashicorp_vault/hashicorp_vault';
 export * from './specs/firecrawl/firecrawl';
 export * from './specs/zoom/zoom';
 export * from './specs/zendesk/zendesk';

@@ -70,6 +70,7 @@ const createStartMock = () => {
     registerDynamicConnector: jest.fn(),
     unregisterDynamicConnector: jest.fn(),
     getRelayClient: jest.fn(),
+    getSensitiveOutputAccessToken: jest.fn(),
   });
 
   return mock;
