@@ -10,7 +10,7 @@ Object {
         ],
         "annotations": Array [],
         "areaFill": Array [
-          "gradient",
+          "solid",
         ],
         "emphasizeFitting": Array [
           true,
@@ -19,7 +19,7 @@ Object {
           "Nearest",
         ],
         "fillOpacity": Array [
-          0.6,
+          0.3,
         ],
         "fittingFunction": Array [
           "Carry",
@@ -42,7 +42,7 @@ Object {
                     "c",
                   ],
                   "colorMapping": Array [
-                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"},\\"touched\\":false}],\\"paletteId\\":\\"elastic_line_optimized\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
+                    "{\\"assignments\\":[],\\"specialAssignments\\":[{\\"rules\\":[{\\"type\\":\\"other\\"}],\\"color\\":{\\"type\\":\\"loop\\"},\\"touched\\":false}],\\"paletteId\\":\\"default\\",\\"colorMode\\":{\\"type\\":\\"categorical\\"}}",
                   ],
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
@@ -71,7 +71,7 @@ Object {
                         Object {
                           "arguments": Object {
                             "name": Array [
-                              "elastic_line_optimized",
+                              "default",
                             ],
                           },
                           "function": "system_palette",

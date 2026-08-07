@@ -2809,7 +2809,7 @@ describe('xy_visualization', () => {
         (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
           label: 'Overwritten label',
         });
-        const palette = paletteServiceMock.get(KbnPalette.ElasticLineOptimized);
+        const palette = paletteServiceMock.get('default');
         (palette.getCategoricalColor as jest.Mock).mockClear();
         callConfigAndFindYConfig({}, 'c');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
@@ -4597,6 +4597,14 @@ describe('xy_visualization', () => {
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
         expect(newState.areaFill).toEqual('solid');
+      });
+
+      it('preserves an existing areaFill when switching area subtypes', () => {
+        const state = exampleState();
+        state.areaFill = 'gradient';
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
+        const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
+        expect(newState.areaFill).toEqual('gradient');
       });
     });
   });

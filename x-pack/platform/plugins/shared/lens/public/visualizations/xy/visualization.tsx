@@ -25,7 +25,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { AreaFillOptions, LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
@@ -80,6 +80,7 @@ import {
 } from './color_assignment';
 import { getDefaultPalette } from './default_palette';
 import {
+  AREA_SERIES,
   getAnnotationLayerErrors,
   isHorizontalChart,
   isHorizontalSeries,
@@ -300,13 +301,16 @@ export const getXyVisualization = ({
         compatibleSeriesType
       );
 
-    return {
-      ...state,
-      preferredSeriesType: compatibleSeriesType,
-      layers: layerId
-        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-        : state.layers.map(switchLayer),
-    };
+    return applyChartDefaultsIfNeeded(
+      {
+        ...state,
+        preferredSeriesType: compatibleSeriesType,
+        layers: layerId
+          ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+          : state.layers.map(switchLayer),
+      },
+      compatibleSeriesType
+    );
   },
 
   getSuggestions,
@@ -815,10 +819,13 @@ export const getXyVisualization = ({
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
           setState(
-            updateLayer(
-              state,
-              applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
-              index
+            applyChartDefaultsIfNeeded(
+              updateLayer(
+                state,
+                applySeriesDefaultsIfNeeded(newLayer, layer.seriesType, newLayer.seriesType),
+                index
+              ),
+              newLayer.seriesType
             )
           )
         }
@@ -1318,6 +1325,23 @@ function applySeriesDefaultsIfNeeded(
   }
   return updated;
 }
+
+/**
+ * Applies chart-type-specific defaults after a type switch.
+ */
+export const applyChartDefaultsIfNeeded = (
+  state: XYVisualizationState,
+  toSeriesType: SeriesType
+): XYVisualizationState => {
+  if (!AREA_SERIES.includes(toSeriesType) || state.areaFill !== undefined) {
+    return state;
+  }
+
+  return {
+    ...state,
+    areaFill: AreaFillOptions.SOLID,
+  };
+};
 
 /**
  * Resolves the default palette when switching between series types.
