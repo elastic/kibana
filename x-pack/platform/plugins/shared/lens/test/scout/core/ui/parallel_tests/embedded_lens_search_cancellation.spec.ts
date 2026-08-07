@@ -7,8 +7,7 @@
 
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { spaceTest } from '@kbn/scout';
-import { testData } from '../fixtures';
+import { testData, spaceTest } from '../fixtures';
 
 const ESQL_QUERY = 'FROM logstash-* | STATS count = COUNT(*) BY ts = BUCKET(@timestamp, 1 hour)';
 
