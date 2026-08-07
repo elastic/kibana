@@ -12,16 +12,15 @@ import type { EsClient } from '@kbn/scout';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { significantEventsCpsApiTest as apiTest, COMMON_API_HEADERS } from '../fixtures';
 
-// `logs-*` so streamsAdmin's existing `logs*` index privilege covers the data read. The
-// matching `logs` template is data-stream-only, so we create an explicit data stream (with our
-// own higher-priority template) rather than a plain index.
+// `logs-*` data stream so CPS can resolve the same unqualified name on origin + linked.
+// The matching `logs` template is data-stream-only, so we create an explicit data stream
+// (with our own higher-priority template) rather than a plain index.
 const CPS_TEST_INDEX = 'logs-cps-se-ki-test';
 const CPS_TEST_TEMPLATE = 'cps-se-ki-test-template';
-const VIEW_PREFIX = '$.';
-const ROOT_STREAM = 'logs.otel';
-const PARENT_STREAM = `${ROOT_STREAM}.cpsse`;
-const QUERY_STREAM = `${PARENT_STREAM}.qs`;
-const PARENT_VIEW = `${VIEW_PREFIX}${PARENT_STREAM}`;
+// Classic parent so the query stream can `FROM` the data stream directly (no intermediate
+// `$.…` parent view). Nested view → view → index under CPS is a known fragile edge;
+// origin view → real indices across projects is the supported shape.
+const QUERY_STREAM = `${CPS_TEST_INDEX}.qs`;
 
 const NOW = Date.now();
 const WINDOW_START = NOW - 10 * 60_000;
@@ -94,19 +93,12 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, streamsTest, esClient, linkedProject }) => {
-      // Use the built-in admin role (same as entity_store CPS). This suite proves space-based
-      // stream-data routing, not Streams RBAC. Custom `streamsAdmin` roles repeatedly fail on
-      // serverless when resolving query-stream ES|QL views (`$.logs…`) even with matching
-      // index privileges — identify returns 403 on `indices:data/read/esql/resolve_fields`.
+      // Built-in admin (same as entity_store CPS): this suite proves space-based stream-data
+      // routing, not Streams RBAC.
       const credentials = await samlAuth.asInteractiveUser('admin');
       cookieHeader = credentials.cookieHeader;
 
       await streamsTest.enableQueryStreams();
-
-      await streamsTest.forkStream(ROOT_STREAM, PARENT_STREAM, {
-        field: 'service.name',
-        eq: 'cps-se-test',
-      });
 
       // The data stream has to exist on both projects before the query stream is created, because
       // Kibana validates the desired stream state by running the ES|QL query against the origin
@@ -116,17 +108,30 @@ apiTest.describe(
       await ensureTestDataStream(esClient);
       await ensureTestDataStream(linkedProject.esClient);
 
-      await streamsTest.createEsqlView(PARENT_VIEW, `FROM ${CPS_TEST_INDEX}`);
+      await streamsTest.createStream(CPS_TEST_INDEX, {
+        dashboards: [],
+        rules: [],
+        stream: {
+          description: 'CPS significant events test classic stream',
+          type: 'classic',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            failure_store: { inherit: {} },
+            classic: {},
+          },
+        },
+      });
 
       await streamsTest.createQueryStream(
         QUERY_STREAM,
-        `FROM ${PARENT_VIEW} | KEEP @timestamp, cps_se_marker, message, \`service.name\``
+        `FROM ${CPS_TEST_INDEX} | KEEP @timestamp, cps_se_marker, message, \`service.name\``
       );
     });
 
     apiTest.afterAll(async ({ streamsTest, esClient, linkedProject }) => {
-      await streamsTest.deleteEsqlView(PARENT_VIEW);
-      await streamsTest.cleanupTestStreams(PARENT_STREAM);
+      await streamsTest.cleanupTestStreams(CPS_TEST_INDEX);
       await streamsTest.disableQueryStreams();
       await deleteTestDataStream(esClient);
       await deleteTestDataStream(linkedProject.esClient);
