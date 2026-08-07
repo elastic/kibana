@@ -37,19 +37,19 @@ const workflowActionPolicyDestinationSchema = z
     id: z.string().min(1).max(ID_MAX_LENGTH).describe('The workflow connector identifier.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_workflow_action_policy_destination' });
+  .meta({ id: 'alerting_workflow_action_policy_destination' });
 
 export const actionPolicyDestinationSchema = z
   .discriminatedUnion('type', [workflowActionPolicyDestinationSchema])
   .describe('An action policy destination configuration.')
-  .meta({ id: 'alerting_v2_action_policy_destination' });
+  .meta({ id: 'alerting_action_policy_destination' });
 
 export const groupingModeSchema = z
   .enum(['per_episode', 'all', 'per_field'])
   .describe(
     'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
   )
-  .meta({ id: 'alerting_v2_action_policy_grouping_mode' });
+  .meta({ id: 'alerting_action_policy_grouping_mode' });
 
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
@@ -69,7 +69,7 @@ const throttleSchema = z
       ),
   })
   .strict()
-  .meta({ id: 'alerting_v2_action_policy_throttle' });
+  .meta({ id: 'alerting_action_policy_throttle' });
 
 export const PER_EPISODE_STRATEGIES = new Set<string>([
   'on_status_change',
@@ -136,7 +136,7 @@ export const snoozeActionPolicyBodySchema = z
       .describe('The ISO datetime until which the action policy should be snoozed.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_snooze_action_policy_request' });
+  .meta({ id: 'alerting_snooze_action_policy_request' });
 
 export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema>;
 
@@ -152,7 +152,7 @@ export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
       .describe('The ISO datetime until which the targeted action policies should be snoozed.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_bulk_snooze_action_policies_request' });
+  .meta({ id: 'alerting_bulk_snooze_action_policies_request' });
 
 export type BulkSnoozeActionPoliciesBody = z.infer<typeof bulkSnoozeActionPoliciesBodySchema>;
 
@@ -188,7 +188,7 @@ const createActionPolicyDataBaseSchema = z
 
 export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema
   .check(validateGroupingModeAndStrategy)
-  .meta({ id: 'alerting_v2_new_action_policy' });
+  .meta({ id: 'alerting_new_action_policy' });
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataSchema>;
@@ -256,7 +256,7 @@ export const updateActionPolicyBodySchema = updateActionPolicyDataSchema
         'The current version of the action policy, used for optimistic concurrency control.'
       ),
   })
-  .meta({ id: 'alerting_v2_update_action_policy' });
+  .meta({ id: 'alerting_update_action_policy' });
 
 export type UpdateActionPolicyBody = z.infer<typeof updateActionPolicyBodySchema>;
 

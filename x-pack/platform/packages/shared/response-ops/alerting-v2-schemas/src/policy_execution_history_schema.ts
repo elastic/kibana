@@ -128,7 +128,7 @@ export const policyExecutionHistoryItemSchema = z
       ),
     workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
   })
-  .meta({ id: 'alerting_v2_policy_execution_history_item' });
+  .meta({ id: 'alerting_policy_execution_history_item' });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
 export const searchMatchCountsSchema = z.object({
@@ -151,7 +151,7 @@ export const listPolicyExecutionHistoryResponseSchema = z
         'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
       ),
   })
-  .meta({ id: 'alerting_v2_policy_execution_history_response' });
+  .meta({ id: 'alerting_policy_execution_history_response' });
 export type ListPolicyExecutionHistoryResponse = z.infer<
   typeof listPolicyExecutionHistoryResponseSchema
 >;

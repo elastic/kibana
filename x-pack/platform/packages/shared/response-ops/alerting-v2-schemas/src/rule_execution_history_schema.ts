@@ -99,7 +99,7 @@ export const ruleExecutionViewSchema = z
       })
       .nullable(),
   })
-  .meta({ id: 'alerting_v2_rule_execution' });
+  .meta({ id: 'alerting_rule_execution' });
 
 export type RuleExecutionView = z.infer<typeof ruleExecutionViewSchema>;
 
@@ -110,6 +110,6 @@ export const listRuleExecutionsResponseSchema = z
     page: z.number().int().min(1),
     perPage: z.number().int().min(1),
   })
-  .meta({ id: 'alerting_v2_rule_executions_response' });
+  .meta({ id: 'alerting_rule_executions_response' });
 
 export type ListRuleExecutionsResponse = z.infer<typeof listRuleExecutionsResponseSchema>;

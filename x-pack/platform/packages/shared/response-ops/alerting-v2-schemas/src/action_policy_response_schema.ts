@@ -61,7 +61,7 @@ export const actionPolicyResponseSchema = z
     updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
     updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
   })
-  .meta({ id: 'alerting_v2_action_policy_response' });
+  .meta({ id: 'alerting_action_policy_response' });
 
 export type ActionPolicyResponse = z.infer<typeof actionPolicyResponseSchema>;
 
@@ -73,6 +73,6 @@ export const findActionPoliciesResponseSchema = z
     perPage: z.number().describe('The number of action policies per page.'),
   })
   .describe('Paginated list of action policies.')
-  .meta({ id: 'alerting_v2_action_policy_list_response' });
+  .meta({ id: 'alerting_action_policy_list_response' });
 
 export type FindActionPoliciesResponse = z.infer<typeof findActionPoliciesResponseSchema>;

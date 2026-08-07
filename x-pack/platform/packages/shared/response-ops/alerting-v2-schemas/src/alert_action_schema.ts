@@ -42,7 +42,7 @@ const ackActionSchema = z
       .describe('The episode identifier for the alert to acknowledge.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_ack_alert_action' });
+  .meta({ id: 'alerting_ack_alert_action' });
 
 const unackActionSchema = z
   .object({
@@ -56,7 +56,7 @@ const unackActionSchema = z
       .describe('The episode identifier for the alert to unacknowledge.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_unack_alert_action' });
+  .meta({ id: 'alerting_unack_alert_action' });
 
 const assignActionSchema = z
   .object({
@@ -73,7 +73,7 @@ const assignActionSchema = z
       ),
   })
   .strict()
-  .meta({ id: 'alerting_v2_assign_alert_action' });
+  .meta({ id: 'alerting_assign_alert_action' });
 
 const tagActionSchema = z
   .object({
@@ -81,7 +81,7 @@ const tagActionSchema = z
     tags: tagsSchema.describe('List of tags to add to the alert.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_tag_alert_action' });
+  .meta({ id: 'alerting_tag_alert_action' });
 
 const snoozeActionSchema = z
   .object({
@@ -89,7 +89,7 @@ const snoozeActionSchema = z
     expiry: z.iso.datetime().optional().describe('ISO datetime when snooze should expire.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_snooze_alert_action' });
+  .meta({ id: 'alerting_snooze_alert_action' });
 
 const unsnoozeActionSchema = z
   .object({
@@ -98,7 +98,7 @@ const unsnoozeActionSchema = z
       .describe('Removes snooze from an alert.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_unsnooze_alert_action' });
+  .meta({ id: 'alerting_unsnooze_alert_action' });
 
 const activateActionSchema = z
   .object({
@@ -106,7 +106,7 @@ const activateActionSchema = z
     reason: z.string().min(1).max(1024).describe('Reason for activating the alert.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_activate_alert_action' });
+  .meta({ id: 'alerting_activate_alert_action' });
 
 const deactivateActionSchema = z
   .object({
@@ -114,48 +114,48 @@ const deactivateActionSchema = z
     reason: z.string().min(1).max(1024).describe('Reason for deactivating the alert.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_deactivate_alert_action' });
+  .meta({ id: 'alerting_deactivate_alert_action' });
 
 export const createAckAlertActionBodySchema = ackActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_ack_alert_action' });
+  .meta({ id: 'alerting_new_ack_alert_action' });
 export type CreateAckAlertActionBody = z.infer<typeof createAckAlertActionBodySchema>;
 
 export const createUnackAlertActionBodySchema = unackActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_unack_alert_action' });
+  .meta({ id: 'alerting_new_unack_alert_action' });
 export type CreateUnackAlertActionBody = z.infer<typeof createUnackAlertActionBodySchema>;
 
 export const createAssignAlertActionBodySchema = assignActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_assign_alert_action' });
+  .meta({ id: 'alerting_new_assign_alert_action' });
 export type CreateAssignAlertActionBody = z.infer<typeof createAssignAlertActionBodySchema>;
 
 export const createTagAlertActionBodySchema = tagActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_tag_alert_action' });
+  .meta({ id: 'alerting_new_tag_alert_action' });
 export type CreateTagAlertActionBody = z.infer<typeof createTagAlertActionBodySchema>;
 
 export const createSnoozeAlertActionBodySchema = snoozeActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_snooze_alert_action' });
+  .meta({ id: 'alerting_new_snooze_alert_action' });
 export type CreateSnoozeAlertActionBody = z.infer<typeof createSnoozeAlertActionBodySchema>;
 
 export const createUnsnoozeAlertActionBodySchema = unsnoozeActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_unsnooze_alert_action' });
+  .meta({ id: 'alerting_new_unsnooze_alert_action' });
 export type CreateUnsnoozeAlertActionBody = z.infer<typeof createUnsnoozeAlertActionBodySchema>;
 
 export const createActivateAlertActionBodySchema = activateActionSchema
   .omit({ action_type: true })
   .strict()
-  .meta({ id: 'alerting_v2_new_activate_alert_action' });
+  .meta({ id: 'alerting_new_activate_alert_action' });
 export type CreateActivateAlertActionBody = z.infer<typeof createActivateAlertActionBodySchema>;
 
 export const createDeactivateAlertActionBodySchema = deactivateActionSchema
@@ -163,7 +163,7 @@ export const createDeactivateAlertActionBodySchema = deactivateActionSchema
     action_type: true,
   })
   .strict()
-  .meta({ id: 'alerting_v2_new_deactivate_alert_action' });
+  .meta({ id: 'alerting_new_deactivate_alert_action' });
 export type CreateDeactivateAlertActionBody = z.infer<typeof createDeactivateAlertActionBodySchema>;
 
 export const createAlertActionBodySchema = z
@@ -180,7 +180,7 @@ export const createAlertActionBodySchema = z
   .describe(
     'Request body for creating a single alert action. One of: ack, unack, assign, tag, snooze, unsnooze, activate, deactivate.'
   )
-  .meta({ id: 'alerting_v2_alert_action' });
+  .meta({ id: 'alerting_alert_action' });
 
 export type CreateAlertActionBody = z.infer<typeof createAlertActionBodySchema>;
 
@@ -209,7 +209,7 @@ export const bulkCreateAlertActionItemBodySchema = createAlertActionBodySchema
       .strict()
       .describe('Alert action payload with group identifier for bulk requests.')
   )
-  .meta({ id: 'alerting_v2_bulk_create_alert_action_item' });
+  .meta({ id: 'alerting_bulk_create_alert_action_item' });
 export type BulkCreateAlertActionItemBody = z.infer<typeof bulkCreateAlertActionItemBodySchema>;
 
 export const bulkCreateAlertActionBodySchema = z
@@ -219,5 +219,5 @@ export const bulkCreateAlertActionBodySchema = z
   .describe(
     `Request body for bulk create alert actions. Array of 1 to ${MAX_BULK_ITEMS} actions, each with group_hash and action payload.`
   )
-  .meta({ id: 'alerting_v2_bulk_create_alert_actions_request' });
+  .meta({ id: 'alerting_bulk_create_alert_actions_request' });
 export type BulkCreateAlertActionBody = z.infer<typeof bulkCreateAlertActionBodySchema>;

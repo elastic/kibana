@@ -158,7 +158,7 @@ describe('rule template create-rule schema coupling', () => {
         "schema": Object {
           "additionalProperties": false,
           "definitions": Object {
-            "alerting_v2_composed_rule_query": Object {
+            "alerting_composed_rule_query": Object {
               "additionalProperties": false,
               "description": "Composed query: a shared base with appendable breach and recovery segments.",
               "properties": Object {
@@ -212,7 +212,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_v2_rule_artifact": Object {
+            "alerting_rule_artifact": Object {
               "additionalProperties": false,
               "properties": Object {
                 "id": Object {
@@ -241,7 +241,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_v2_rule_grouping": Object {
+            "alerting_rule_grouping": Object {
               "additionalProperties": false,
               "description": "Grouping configuration.",
               "properties": Object {
@@ -261,7 +261,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_v2_rule_metadata": Object {
+            "alerting_rule_metadata": Object {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
@@ -303,18 +303,18 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_v2_rule_query": Object {
+            "alerting_rule_query": Object {
               "description": "Detection query configuration.",
               "oneOf": Array [
                 Object {
-                  "$ref": "#/definitions/alerting_v2_composed_rule_query",
+                  "$ref": "#/definitions/alerting_composed_rule_query",
                 },
                 Object {
-                  "$ref": "#/definitions/alerting_v2_standalone_rule_query",
+                  "$ref": "#/definitions/alerting_standalone_rule_query",
                 },
               ],
             },
-            "alerting_v2_rule_schedule": Object {
+            "alerting_rule_schedule": Object {
               "additionalProperties": false,
               "description": "Execution schedule configuration.",
               "properties": Object {
@@ -332,7 +332,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_v2_standalone_rule_query": Object {
+            "alerting_standalone_rule_query": Object {
               "additionalProperties": false,
               "description": "Standalone queries: independent full queries for breach, recovery, and no_data.",
               "properties": Object {
@@ -399,7 +399,7 @@ describe('rule template create-rule schema coupling', () => {
           "properties": Object {
             "artifacts": Object {
               "items": Object {
-                "$ref": "#/definitions/alerting_v2_rule_artifact",
+                "$ref": "#/definitions/alerting_rule_artifact",
               },
               "maxItems": 100,
               "type": "array",
@@ -407,7 +407,7 @@ describe('rule template create-rule schema coupling', () => {
             "grouping": Object {
               "allOf": Array [
                 Object {
-                  "$ref": "#/definitions/alerting_v2_rule_grouping",
+                  "$ref": "#/definitions/alerting_rule_grouping",
                 },
               ],
             },
@@ -420,7 +420,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "string",
             },
             "metadata": Object {
-              "$ref": "#/definitions/alerting_v2_rule_metadata",
+              "$ref": "#/definitions/alerting_rule_metadata",
             },
             "no_data_strategy": Object {
               "description": "How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query.",
@@ -433,7 +433,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "string",
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_v2_rule_query",
+              "$ref": "#/definitions/alerting_rule_query",
             },
             "recovery_strategy": Object {
               "description": "How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery.",
@@ -445,7 +445,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "string",
             },
             "schedule": Object {
-              "$ref": "#/definitions/alerting_v2_rule_schedule",
+              "$ref": "#/definitions/alerting_rule_schedule",
             },
             "state_transition": Object {
               "anyOf": Array [
@@ -540,13 +540,13 @@ describe('rule template create-rule schema coupling', () => {
       required: ['engine', 'rule'],
     });
 
-    // createRuleDataSchema carries .meta({ id: 'alerting_v2_new_rule' }), so when nested
+    // createRuleDataSchema carries .meta({ id: 'alerting_new_rule' }), so when nested
     // under the template schema Zod emits a $ref instead of inlining the object.
     expect(templateJson.properties?.rule).toEqual({
-      $ref: '#/definitions/alerting_v2_new_rule',
+      $ref: '#/definitions/alerting_new_rule',
     });
 
-    const { alerting_v2_new_rule: ruleBody, ...ruleNestedDefs } = templateJson.definitions ?? {};
+    const { alerting_new_rule: ruleBody, ...ruleNestedDefs } = templateJson.definitions ?? {};
     const resolvedRule = {
       ...(ruleBody as Record<string, unknown>),
       definitions: ruleNestedDefs,

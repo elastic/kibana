@@ -81,7 +81,7 @@ export const metadataSchema = z
   })
   .strict()
   .describe('Rule metadata.')
-  .meta({ id: 'alerting_v2_rule_metadata' });
+  .meta({ id: 'alerting_rule_metadata' });
 
 /** Schedule (required) */
 
@@ -102,7 +102,7 @@ export const scheduleSchema = z
   })
   .strict()
   .describe('Execution schedule configuration.')
-  .meta({ id: 'alerting_v2_rule_schedule' });
+  .meta({ id: 'alerting_rule_schedule' });
 
 /** Query (required) */
 
@@ -216,7 +216,7 @@ export const composedQuerySchema = z
     }
   })
   .describe('Composed query: a shared base with appendable breach and recovery segments.')
-  .meta({ id: 'alerting_v2_composed_rule_query' });
+  .meta({ id: 'alerting_composed_rule_query' });
 
 export const standaloneQuerySchema = z
   .object({
@@ -231,12 +231,12 @@ export const standaloneQuerySchema = z
   })
   .strict()
   .describe('Standalone queries: independent full queries for breach, recovery, and no_data.')
-  .meta({ id: 'alerting_v2_standalone_rule_query' });
+  .meta({ id: 'alerting_standalone_rule_query' });
 
 export const querySchema = z
   .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
   .describe('Detection query configuration.')
-  .meta({ id: 'alerting_v2_rule_query' });
+  .meta({ id: 'alerting_rule_query' });
 
 export type Query = z.infer<typeof querySchema>;
 
@@ -343,7 +343,7 @@ export const groupingSchema = z
   })
   .strict()
   .describe('Grouping configuration.')
-  .meta({ id: 'alerting_v2_rule_grouping' });
+  .meta({ id: 'alerting_rule_grouping' });
 
 /** Artifacts (optional) */
 
@@ -365,7 +365,7 @@ const artifactSchema = z
       });
     }
   })
-  .meta({ id: 'alerting_v2_rule_artifact' });
+  .meta({ id: 'alerting_rule_artifact' });
 
 /** Create rule API schema */
 
@@ -508,7 +508,7 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     path: ['query', 'no_data'],
   })
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
-  .meta({ id: 'alerting_v2_new_rule' });
+  .meta({ id: 'alerting_new_rule' });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
@@ -574,7 +574,7 @@ export const updateRuleBodySchema = updateRuleDataSchema
       .optional()
       .describe('The current version of the rule, used for optimistic concurrency control.'),
   })
-  .meta({ id: 'alerting_v2_update_rule' });
+  .meta({ id: 'alerting_update_rule' });
 
 export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
@@ -606,7 +606,7 @@ export const ruleResponseSchema = createRuleDataBaseSchema
         'The saved object version token of the rule, used for optimistic concurrency control.'
       ),
   })
-  .meta({ id: 'alerting_v2_rule_response' });
+  .meta({ id: 'alerting_rule_response' });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 
@@ -646,7 +646,7 @@ export const findRulesResponseSchema = z
     perPage: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.')
-  .meta({ id: 'alerting_v2_rule_list_response' });
+  .meta({ id: 'alerting_rule_list_response' });
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
@@ -667,7 +667,7 @@ export const ruleTagsResponseSchema = z
     tags: z.array(z.string()).describe('The list of unique rule tags.'),
   })
   .describe('All unique tags across rules.')
-  .meta({ id: 'alerting_v2_rule_tags_response' });
+  .meta({ id: 'alerting_rule_tags_response' });
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
@@ -690,7 +690,7 @@ export const bulkGetRulesParamsSchema = z
       .describe('Rule identifiers to retrieve. The response preserved this order.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_bulk_get_rules_request' });
+  .meta({ id: 'alerting_bulk_get_rules_request' });
 
 export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
 
@@ -703,6 +703,6 @@ export const bulkGetRulesResponseSchema = z
       .array(ruleResponseSchema)
       .describe('The requested rules, in the same order as the requested ids.'),
   })
-  .meta({ id: 'alerting_v2_bulk_get_rules_response' });
+  .meta({ id: 'alerting_bulk_get_rules_response' });
 
 export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;

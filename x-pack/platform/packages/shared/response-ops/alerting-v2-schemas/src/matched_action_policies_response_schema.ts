@@ -31,7 +31,7 @@ export const matchActionPoliciesForRuleBodySchema = z
       .optional(),
   })
   .strict()
-  .meta({ id: 'alerting_v2_match_action_policies_for_rule_request' });
+  .meta({ id: 'alerting_match_action_policies_for_rule_request' });
 
 export type MatchActionPoliciesForRuleBody = z.infer<typeof matchActionPoliciesForRuleBodySchema>;
 
@@ -49,7 +49,7 @@ export const matchedActionPolicySchema = z
     category: matchedActionPolicyCategorySchema,
   })
   .describe('An action policy that matches a rule, along with the reason it matched.')
-  .meta({ id: 'alerting_v2_matched_action_policy' });
+  .meta({ id: 'alerting_matched_action_policy' });
 
 export type MatchedActionPolicy = z.infer<typeof matchedActionPolicySchema>;
 
@@ -65,7 +65,7 @@ export const matchActionPoliciesForRuleResponseSchema = z
       ),
   })
   .describe('Action policies that match a given rule, grouped by match category.')
-  .meta({ id: 'alerting_v2_match_action_policies_for_rule_response' });
+  .meta({ id: 'alerting_match_action_policies_for_rule_response' });
 
 export type MatchActionPoliciesForRuleResponse = z.infer<
   typeof matchActionPoliciesForRuleResponseSchema

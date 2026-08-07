@@ -26,7 +26,7 @@ export const bulkByIdsSchema = z
       .describe('Explicit list of IDs to operate on.'),
   })
   .strict()
-  .meta({ id: 'alerting_v2_bulk_by_ids_request' });
+  .meta({ id: 'alerting_bulk_by_ids_request' });
 
 export type BulkByIdsParams = z.infer<typeof bulkByIdsSchema>;
 
@@ -71,7 +71,7 @@ export const bulkByQuerySchema = z
   .refine((data) => data.match_all !== true || (data.filter == null && data.search == null), {
     message: '`match_all` cannot be combined with `filter` or `search`.',
   })
-  .meta({ id: 'alerting_v2_bulk_by_query_request' });
+  .meta({ id: 'alerting_bulk_by_query_request' });
 
 // Use `z.input` so `force` (which has a `.default(false)`) is optional at the
 // call site. The server applies the default via the route's Zod parser.
@@ -114,7 +114,7 @@ export const bulkResponseSchema = z
     errors: z.array(bulkErrorSchema).describe('Errors encountered during the operation.'),
   })
   .describe('Result of an executed bulk operation.')
-  .meta({ id: 'alerting_v2_bulk_operation_response' });
+  .meta({ id: 'alerting_bulk_operation_response' });
 
 export type BulkResponse = z.infer<typeof bulkResponseSchema>;
 
@@ -140,7 +140,7 @@ export const dryRunResponseSchema = z
       ),
   })
   .describe('Dry-run preview returned by a by-query bulk endpoint when `force` is false.')
-  .meta({ id: 'alerting_v2_bulk_dry_run_response' });
+  .meta({ id: 'alerting_bulk_dry_run_response' });
 
 export type DryRunResponse = z.infer<typeof dryRunResponseSchema>;
 

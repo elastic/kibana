@@ -44,6 +44,6 @@ export const errorResponseSchema = z
         'Optional structured context (e.g., validation field errors, conflict resource IDs).'
       ),
   })
-  .meta({ id: 'alerting_v2_error_response' });
+  .meta({ id: 'alerting_error_response' });
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
