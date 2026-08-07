@@ -21,8 +21,7 @@ export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
 export const ACTION_POLICY_TAGS_MAX_COUNT = 10;
 export const ACTION_POLICY_TAG_MAX_LENGTH = 128;
 
-/** Mirrors the `per_page` upper bound in `findRuleTemplatesRequestSchema`. */
-export const RULE_TEMPLATE_PER_PAGE_MAX = 100;
+export { RULE_TEMPLATE_MAX_PER_PAGE as RULE_TEMPLATE_PER_PAGE_MAX } from '@kbn/alerting-v2-schemas';
 
 export {
   MAX_TAG_LENGTH as RULE_TEMPLATE_TAG_MAX_LENGTH,

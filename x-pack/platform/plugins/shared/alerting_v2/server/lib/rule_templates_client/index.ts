@@ -9,9 +9,7 @@ export { RuleTemplatesClient } from './rule_templates_client';
 export { RuleTemplateSavedObjectsClientToken } from './tokens';
 export type {
   FindRuleTemplatesArgs,
-  FindRuleTemplatesResponse,
   GetRuleTemplateArgs,
   GetRuleTemplateTagsArgs,
-  RuleTemplateResponse,
   RuleTemplateSavedObjectAttributes,
 } from './types';

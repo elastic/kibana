@@ -20,12 +20,11 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { RuleTemplateSavedObjectsClientToken } from './tokens';
+import type { FindRuleTemplatesResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type {
   FindRuleTemplatesArgs,
-  FindRuleTemplatesResponse,
   GetRuleTemplateArgs,
   GetRuleTemplateTagsArgs,
-  RuleTemplateResponse,
   RuleTemplateSavedObjectAttributes,
 } from './types';
 import {

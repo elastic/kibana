@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { arrayOrSingleSchema } from './common';
 import { createRuleDataSchema } from './rule_data_schema';
-import { ID_MAX_LENGTH, MAX_SEARCH_LENGTH } from './constants';
+import { ID_MAX_LENGTH, MAX_SEARCH_LENGTH, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
 const engineField = z
   .literal('v2')
@@ -59,7 +59,7 @@ export const findRuleTemplatesRequestSchema = z.object({
   per_page: z.coerce
     .number()
     .min(1)
-    .max(100)
+    .max(RULE_TEMPLATE_MAX_PER_PAGE)
     .optional()
     .describe('The number of rule templates to return per page. Defaults to 20.'),
   search: z

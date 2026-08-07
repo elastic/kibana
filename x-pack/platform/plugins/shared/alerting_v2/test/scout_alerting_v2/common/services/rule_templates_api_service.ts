@@ -13,11 +13,6 @@ import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../constants';
 
 const DEFAULT_SPACE_ID = 'default';
 
-/**
- * Saved object indices are system indices; writing to them from tests requires
- * the Kibana product-origin header to avoid being rejected as an external
- * write.
- */
 const SAVED_OBJECT_ES_HEADERS = {
   'x-elastic-product-origin': 'kibana',
 };
@@ -38,15 +33,6 @@ export interface SeedRuleTemplateParams {
   spaceId?: string;
 }
 
-/**
- * Test-time seeding for the `alerting_rule_template` saved objects the v2 read
- * APIs serve.
- *
- * Templates are installed by Fleet packages in production and there is no write
- * API, so specs index the saved objects directly. The type is hidden and shared
- * with alerting v1, which is also why this cannot go through the saved objects
- * HTTP API.
- */
 export interface RuleTemplatesApiService {
   /** Indexes a rule template saved object with the given attributes. */
   create: (params: SeedRuleTemplateParams) => Promise<void>;

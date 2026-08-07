@@ -1,16 +1,100 @@
 {
   "10.4.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.4.0 and 10.5.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "name": "test template",
+      "tags": [],
+      "ruleTypeId": ".test",
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "params": {},
+      "schedule": {
+        "interval": "1m"
+      },
+      "alertDelay": {
+        "active": 1
+      },
+      "engine": "v1"
+    },
+    {
+      "engine": "v2",
+      "rule": {
+        "kind": "alert",
+        "metadata": {
+          "name": "Pod CrashLoopBackOff",
+          "description": "Alerts when containers have a high restart count.",
+          "tags": ["Kubernetes"]
+        },
+        "schedule": {
+          "every": "1m",
+          "lookback": "15m"
+        },
+        "state_transition": {
+          "pending_count": 3
+        },
+        "recovery_strategy": "no_breach",
+        "query": {
+          "format": "composed",
+          "base": "TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name",
+          "breach": {
+            "segment": "WHERE restarts > 0 | SORT restarts DESC | LIMIT 50"
+          }
+        },
+        "grouping": {
+          "fields": ["k8s.pod.name"]
+        },
+        "time_field": "@timestamp"
+      }
     }
   ],
   "10.5.0": [
-    {}
+    {
+      "name": "test template",
+      "tags": [],
+      "ruleTypeId": ".test",
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "params": {},
+      "schedule": {
+        "interval": "1m"
+      },
+      "alertDelay": {
+        "active": 1
+      },
+      "engine": "v1"
+    },
+    {
+      "engine": "v2",
+      "rule": {
+        "kind": "alert",
+        "metadata": {
+          "name": "Pod CrashLoopBackOff",
+          "description": "Alerts when containers have a high restart count.",
+          "tags": ["Kubernetes"]
+        },
+        "schedule": {
+          "every": "1m",
+          "lookback": "15m"
+        },
+        "state_transition": {
+          "pending_count": 3
+        },
+        "recovery_strategy": "no_breach",
+        "query": {
+          "format": "composed",
+          "base": "TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name",
+          "breach": {
+            "segment": "WHERE restarts > 0 | SORT restarts DESC | LIMIT 50"
+          }
+        },
+        "grouping": {
+          "fields": ["k8s.pod.name"]
+        },
+        "time_field": "@timestamp"
+      }
+    }
   ]
 }

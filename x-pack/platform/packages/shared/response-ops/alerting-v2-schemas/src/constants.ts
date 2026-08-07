@@ -96,6 +96,9 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
 
+/** Maximum number of rule templates returned per page. */
+export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
+
 /** Maximum number of rule change-history events returned per page. */
 export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = 100;
 

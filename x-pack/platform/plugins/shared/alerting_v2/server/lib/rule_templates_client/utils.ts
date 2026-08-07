@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { ruleTemplateDataSchema, type RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
+import {
+  ruleTemplateDataSchema,
+  type FindRuleTemplatesSortField,
+  type RuleTemplateResponse,
+} from '@kbn/alerting-v2-schemas';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
-import type { FindRuleTemplatesSortField } from './types';
 
 const ATTRIBUTES_PREFIX = `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes`;
 

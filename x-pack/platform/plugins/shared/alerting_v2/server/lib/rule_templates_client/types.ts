@@ -5,20 +5,7 @@
  * 2.0.
  */
 
-import type {
-  FindRuleTemplatesResponse,
-  FindRuleTemplatesSortField,
-  RuleTemplateData,
-  RuleTemplateResponse,
-} from '@kbn/alerting-v2-schemas';
-
-/** Re-exported from the shared schemas package. */
-export type {
-  FindRuleTemplatesResponse,
-  FindRuleTemplatesSortField,
-  RuleTemplateData,
-  RuleTemplateResponse,
-};
+import type { FindRuleTemplatesSortField, RuleTemplateData } from '@kbn/alerting-v2-schemas';
 
 /**
  * Stored attributes of an `engine: "v2"` rule template. Reads go through Zod
