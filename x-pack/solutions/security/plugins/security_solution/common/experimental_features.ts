@@ -92,13 +92,6 @@ export const allowedExperimentalValues = Object.freeze({
    * it covers from the internal user to a project-routed current-user client. Off until the request
    * user holds index privileges on the Defend indices: a missing grant drops rows silently.
    */
-  defendCrossProjectSearch: false,
-
-  /**
-   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
-   * it covers from the internal user to a project-routed current-user client. Off until the request
-   * user holds index privileges on the Defend indices: a missing grant drops rows silently.
-   */
   defendCrossProjectSearch: true,
 
   /**
