@@ -33,7 +33,7 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
 
   const baseActions = spec.actions ?? {};
 
-  if (!spec.test?.enabled) {
+  if (!spec.test.enabled) {
     return baseActions;
   }
 
@@ -53,7 +53,7 @@ export const createConnectorTypeFromSpec = (
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);
 
-  const hasTest = Boolean(spec.test?.enabled);
+  const hasTest = Boolean(spec.test.enabled);
   const hasActions = Boolean(spec.actions);
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
@@ -87,6 +87,6 @@ export const createConnectorTypeFromSpec = (
     source: ACTION_TYPE_SOURCES.spec,
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
-    isTestable: Boolean(spec.test?.enabled),
+    isTestable: Boolean(spec.test.enabled),
   };
 };

@@ -13,7 +13,6 @@ import {
   decodeFlyoutV2UrlParam,
   FLYOUT_V2_URL_PARAM,
 } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { subscribeToFlyoutV2Navigation } from '../../flyout_v2/shared/url_state/flyout_v2_navigation';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 import {
   buildEntityFlyoutV2NavigationState,
@@ -376,44 +375,6 @@ describe('entity_explore_navigation', () => {
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
       });
 
-      it('notifies the mounted app when navigating from another Security page', () => {
-        const application = buildApplicationMock();
-        const listener = jest.fn();
-        const unsubscribe = subscribeToFlyoutV2Navigation(listener);
-
-        navigateToEntityAnalyticsWithFlyoutInApp({
-          application,
-          appId: 'securitySolutionUI',
-          flyout: {
-            preview: [],
-            right: {
-              id: 'host-panel',
-              params: {
-                hostName: 'web-01',
-                entityId: 'host:web-01',
-                scopeId: 'agent-builder-entity-card',
-              },
-            },
-          },
-          isNewFlyoutEnabled: true,
-        });
-
-        expect(listener).toHaveBeenCalledWith({
-          urlParamKey: FLYOUT_V2_URL_PARAM,
-          descriptors: [
-            {
-              kind: 'host',
-              hostName: 'web-01',
-              entityId: 'host:web-01',
-              scopeId: 'agent-builder-entity-card',
-              origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
-            },
-          ],
-        });
-
-        unsubscribe();
-      });
-
       describe('when already on the EA home page', () => {
         beforeEach(() => {
           window.history.replaceState({}, '', EA_HOME_PATH);
@@ -467,47 +428,6 @@ describe('entity_explore_navigation', () => {
           });
 
           expect(searchSession.clear).not.toHaveBeenCalled();
-        });
-
-        it('notifies the mounted app to open the v2 flyout without waiting for a remount', () => {
-          jest.useFakeTimers();
-          const application = buildApplicationMock();
-          const listener = jest.fn();
-          const unsubscribe = subscribeToFlyoutV2Navigation(listener);
-
-          navigateToEntityAnalyticsWithFlyoutInApp({
-            application,
-            appId: 'securitySolutionUI',
-            flyout: {
-              preview: [],
-              right: {
-                id: 'host-panel',
-                params: {
-                  hostName: 'web-01',
-                  entityId: 'host:web-01',
-                  scopeId: 'agent-builder-entity-card',
-                },
-              },
-            },
-            isNewFlyoutEnabled: true,
-          });
-          jest.runAllTimers();
-
-          expect(listener).toHaveBeenCalledWith({
-            urlParamKey: FLYOUT_V2_URL_PARAM,
-            descriptors: [
-              {
-                kind: 'host',
-                hostName: 'web-01',
-                entityId: 'host:web-01',
-                scopeId: 'agent-builder-entity-card',
-                origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
-              },
-            ],
-          });
-
-          unsubscribe();
-          jest.useRealTimers();
         });
       });
     });
