@@ -285,7 +285,8 @@ export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string
 
 export const stripPriorModePerQueryFields = (
   query: PackQueryInput,
-  newPackMode: ScheduleType | undefined
+  newPackMode: ScheduleType | undefined,
+  priorPackMode?: ScheduleType | null
 ): PackQueryInput => {
   if (newPackMode === 'rrule') {
     // Drop legacy interval override; preserve a same-mode rrule override.
@@ -304,6 +305,15 @@ export const stripPriorModePerQueryFields = (
     const { schedule_type: scheduleType, rrule_schedule: _rruleSchedule, ...rest } = query;
     if (scheduleType === 'rrule') {
       return rest;
+    }
+
+    // On a legacy→interval transition, drop bare interval values that were
+    // never explicitly set by the user — they are stale copies from prebuilt
+    // packs. Only an explicit schedule_type: 'interval' marker survives.
+    if (scheduleType === undefined && priorPackMode == null) {
+      const { interval: _interval, ...stripped } = rest;
+
+      return stripped;
     }
 
     return scheduleType === undefined ? rest : { ...rest, schedule_type: scheduleType };
@@ -383,11 +393,10 @@ export const convertSOQueriesToPackConfig = (
           scheduleFields = { rrule_schedule: queryRrule };
         }
       } else if (packMode === 'interval') {
-        if (
-          querySchedType !== 'rrule' &&
-          interval !== undefined &&
-          interval !== packSchedule?.interval
-        ) {
+        // Only emit a per-query interval when the user explicitly overrode via
+        // the flyout (schedule_type: 'interval'). A stored interval value alone
+        // (e.g. copied from a prebuilt pack) must not override default_native_schedule.
+        if (querySchedType === 'interval' && interval !== undefined) {
           scheduleFields = { interval };
         }
       } else {

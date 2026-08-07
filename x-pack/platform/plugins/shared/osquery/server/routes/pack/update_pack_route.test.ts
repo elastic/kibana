@@ -1148,6 +1148,73 @@ describe('updatePackRoute', () => {
       expect(responseBody.data.rrule_schedule).toEqual(rruleValue);
       expect(responseBody.data).not.toHaveProperty('interval');
     });
+
+    // Regression guard for #279946: duplicated prebuilt pack has stale per-query
+    // intervals (3600s). After the user sets a pack-level interval (120s), the
+    // legacy→interval transition must strip the bare intervals so the wire emits
+    // only default_native_schedule, not per-query overrides that would shadow it.
+    it('legacy→interval transition: duplicated prebuilt pack — bare 3600s intervals stripped from SO and wire', async () => {
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          // No pack-level schedule_type: legacy state, as a duplicated prebuilt pack starts.
+          schedule_type: undefined,
+          interval: undefined,
+          rrule_schedule: null,
+          queries: [
+            {
+              id: 'forensic-1',
+              name: 'forensic-1',
+              query: 'SELECT * FROM users;',
+              interval: 3600, // stale from prebuilt pack — no explicit schedule_type
+              schedule_id: 'sched-f1',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+            {
+              id: 'forensic-2',
+              name: 'forensic-2',
+              query: 'SELECT * FROM processes;',
+              interval: 3600,
+              schedule_id: 'sched-f2',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { schedule_type: 'interval', interval: 120 },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+
+      // SO write: bare intervals stripped, schedule_id/start_date preserved.
+      const writtenQueries = patchedAttributes.queries as Array<Record<string, unknown>>;
+      const f1 = writtenQueries.find((q) => q.id === 'forensic-1')!;
+      const f2 = writtenQueries.find((q) => q.id === 'forensic-2')!;
+      expect(f1).not.toHaveProperty('interval');
+      expect(f1).not.toHaveProperty('schedule_type');
+      expect(f1.schedule_id).toBe('sched-f1');
+      expect(f2).not.toHaveProperty('interval');
+      expect(f2.schedule_id).toBe('sched-f2');
+
+      // Pack-level schedule written.
+      expect(patchedAttributes.schedule_type).toBe('interval');
+      expect(patchedAttributes.interval).toBe(120);
+    });
   });
 
   describe('schedule-validation error response shape', () => {

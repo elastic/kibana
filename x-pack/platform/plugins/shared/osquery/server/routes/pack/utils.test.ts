@@ -193,20 +193,49 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('interval');
     });
 
-    test('per-query interval override (same mode, different value) — emitted on the query', () => {
+    // Regression guard for #279946: a stale per-query interval copied from a
+    // prebuilt pack must NOT override default_native_schedule on the wire.
+    // Only an explicit schedule_type: 'interval' marker (set via the flyout)
+    // should produce a per-query interval override.
+    test('stale marker-less per-query interval — NOT emitted, query inherits pack default', () => {
       const out = convertSOQueriesToPackConfig(
         [
-          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 },
+          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 3600 },
           { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 120 },
         ],
         {
-          packSchedule: { schedule_type: 'interval', interval: 60 },
+          packSchedule: { schedule_type: 'interval', interval: 120 },
           isRruleFeatureEnabled: true,
         }
       );
-      expect(out.default_native_schedule).toEqual({ interval: 60 });
+      expect(out.default_native_schedule).toEqual({ interval: 120 });
+      // q1 has a stale interval (3600) without schedule_type — must NOT reach the wire.
       expect(out.queries.q1).not.toHaveProperty('interval');
-      expect(out.queries.q2.interval).toBe(120);
+      // q2 matches the pack interval and has no marker — also must NOT be emitted.
+      expect(out.queries.q2).not.toHaveProperty('interval');
+    });
+
+    test('explicit per-query interval override (schedule_type: interval) — emitted on the query', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          { id: 'q1', name: 'q1', query: 'SELECT 1' },
+          {
+            id: 'q2',
+            name: 'q2',
+            query: 'SELECT 2',
+            schedule_type: 'interval' as const,
+            interval: 3600,
+          },
+        ],
+        {
+          packSchedule: { schedule_type: 'interval', interval: 120 },
+          isRruleFeatureEnabled: true,
+        }
+      );
+      expect(out.default_native_schedule).toEqual({ interval: 120 });
+      expect(out.queries.q1).not.toHaveProperty('interval');
+      // q2 has an explicit flyout override — must reach the wire.
+      expect(out.queries.q2.interval).toBe(3600);
     });
 
     test('legacy pack (no schedule_type) — per-query interval only, no default_*_schedule', () => {
@@ -693,6 +722,41 @@ describe('Pack utils', () => {
           'interval'
         )
       ).toEqual({ query: 'SELECT 1', interval: 30, schedule_type: 'interval' });
+    });
+
+    // Regression guard for #279946: legacy→interval transition must drop bare
+    // interval values (stale prebuilt-pack copies) from queries without an
+    // explicit schedule_type marker.
+    test('legacy→interval transition — drops bare interval without schedule_type marker', () => {
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 3600 },
+          'interval',
+          undefined // prior mode: legacy (no pack schedule_type)
+        )
+      ).toEqual({ query: 'SELECT 1' });
+    });
+
+    test('legacy→interval transition — preserves explicit interval override (schedule_type: interval)', () => {
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 3600, schedule_type: 'interval' },
+          'interval',
+          undefined // prior mode: legacy
+        )
+      ).toEqual({ query: 'SELECT 1', interval: 3600, schedule_type: 'interval' });
+    });
+
+    test('interval→interval (same mode edit) — bare interval WITHOUT prior legacy mode is preserved', () => {
+      // When the pack was already in interval mode (priorPackMode: 'interval'),
+      // a bare interval value is NOT dropped — only the legacy→interval transition strips it.
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 3600 },
+          'interval',
+          'interval' // prior mode: already interval
+        )
+      ).toEqual({ query: 'SELECT 1', interval: 3600 });
     });
 
     test('mode cleared — drops both override flavours and interval', () => {
