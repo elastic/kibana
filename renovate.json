@@ -2395,8 +2395,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "express",
-      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
+      "groupName": "zod-to-json-schema",
+      "matchDepNames": ["zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],
