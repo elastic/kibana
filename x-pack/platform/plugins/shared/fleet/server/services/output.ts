@@ -706,6 +706,8 @@ class OutputService {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1145,6 +1147,11 @@ class OutputService {
       updateData.hosts
     ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
     }
 
     if (

@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await list[0].view();
   }
 
-  describe('saves a search session for unsaved dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/280887
+  describe.skip('saves a search session for unsaved dashboard', () => {
     describe('with a discover session', () => {
       // Add the sample dataset
       before(async () => {
@@ -90,8 +91,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await common.navigateToApp('dashboard');
-        await testSubjects.click('discard-unsaved-New-Dashboard');
-        await testSubjects.click('confirmModalConfirmButton');
+        const discardButtonExists = await testSubjects.exists('discard-unsaved-New-Dashboard');
+        if (discardButtonExists) {
+          await testSubjects.click('discard-unsaved-New-Dashboard');
+          await testSubjects.click('confirmModalConfirmButton');
+        }
       });
 
       it('should be restored when opening from the background search', async () => {

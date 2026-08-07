@@ -1,3 +1,4 @@
+@xterm/xterm
 safe-stable-stringify
 ajv-draft-04
 ajv-formats
@@ -49,3 +50,4 @@ patch-package
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/resources
 agent-base
+@swc/helpers

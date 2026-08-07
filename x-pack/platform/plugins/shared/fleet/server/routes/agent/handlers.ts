@@ -7,6 +7,7 @@
 
 import { omit, uniq } from 'lodash';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { Script } from '@elastic/elasticsearch/lib/api/types';
@@ -47,10 +48,16 @@ import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 import { getPackageInfo } from '../../services/epm/packages';
-import { generateTemplateIndexPattern } from '../../services/epm/elasticsearch/template/template';
+import {
+  generateTemplateIndexPattern,
+  generateNamespaceTemplateIndexPattern,
+  isOtelDataStream,
+} from '../../services/epm/elasticsearch/template/template';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
-import { appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import { AGENTS_INDEX } from '../../constants';
+import type { AgentClient } from '../../services';
+import type { RegistryDataStream } from '../../types';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -369,7 +376,63 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
-export const getAgentDataHandler: RequestHandler<
+/**
+ * Resolves the namespace-scoped OTel pattern for the identity-free incoming-data path, or
+ * undefined if any condition of the gate (agent, policy, namespace) does not hold. The pattern
+ * is scoped to a single namespace, never a wildcard, since there is no `agent.id` left to
+ * narrow the match once the identity filter is dropped.
+ */
+async function resolveAgentlessOtelDataStreamPattern({
+  agentClient,
+  soClient,
+  agentId,
+  pkgName,
+  pkgVersion,
+  otelDataStreams,
+}: {
+  agentClient: AgentClient;
+  soClient: SavedObjectsClientContract;
+  agentId: string;
+  pkgName: string;
+  pkgVersion: string;
+  otelDataStreams: RegistryDataStream[];
+}): Promise<string | undefined> {
+  const [agent] = await agentClient.getByIds([agentId], { ignoreMissing: true });
+  if (!agent?.policy_id) {
+    return undefined;
+  }
+
+  const [agentPolicy] = await agentPolicyService.getByIds(soClient, [agent.policy_id], {
+    withPackagePolicies: true,
+    ignoreMissing: true,
+  });
+  if (!agentPolicy?.supports_agentless) {
+    return undefined;
+  }
+
+  // Require exactly one attached package policy matching pkgName and pkgVersion; zero or more
+  // than one (e.g. attached in multiple namespaces) is ambiguous, so fall back to the identity
+  // path instead of guessing.
+  const matchingPackagePolicies = (agentPolicy.package_policies ?? []).filter(
+    (packagePolicy) =>
+      packagePolicy.package?.name === pkgName && packagePolicy.package?.version === pkgVersion
+  );
+  if (matchingPackagePolicies.length !== 1) {
+    return undefined;
+  }
+  const [matchingPackagePolicy] = matchingPackagePolicies;
+
+  const namespace = matchingPackagePolicy.namespace || agentPolicy.namespace;
+  if (!namespace) {
+    return undefined;
+  }
+
+  return otelDataStreams
+    .map((ds) => generateNamespaceTemplateIndexPattern(ds, namespace, true))
+    .join(',');
+}
+
+export const getAgentDataHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentDataRequestSchema.query>
 > = async (context, request, response) => {
@@ -383,6 +446,8 @@ export const getAgentDataHandler: RequestHandler<
   // If a package is specified, get data stream patterns for that package
   // and scope incoming data query to that pattern
   let dataStreamPattern: string | undefined;
+  let otelDataStreams: RegistryDataStream[] = [];
+  let nonOtelDataStreams: RegistryDataStream[] = [];
   if (pkgName && pkgVersion) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: coreContext.savedObjects.client,
@@ -390,9 +455,60 @@ export const getAgentDataHandler: RequestHandler<
       pkgName,
       pkgVersion,
     });
-    dataStreamPattern = (packageInfo.data_streams || [])
-      .map((ds) => generateTemplateIndexPattern(ds))
-      .join(',');
+    // Input-only OTel packages declare no manifest data streams, so this falls through to the
+    // identity path. Known gap: https://github.com/elastic/ingest-dev/issues/8988.
+    const dataStreams = packageInfo.data_streams || [];
+    otelDataStreams = dataStreams.filter((ds) => isOtelDataStream(ds, packageInfo));
+    nonOtelDataStreams = dataStreams.filter((ds) => !isOtelDataStream(ds, packageInfo));
+    dataStreamPattern =
+      dataStreams
+        .map((ds) => generateTemplateIndexPattern(ds, isOtelDataStream(ds, packageInfo)))
+        .join(',') || undefined;
+
+    // Native OTel data has no queryable agent identity, so only a single-agent, namespace-scoped
+    // lookup can answer for it.
+    if (otelDataStreams.length > 0 && agentsIds.length === 1) {
+      const fleetContext = await context.fleet;
+      // internalSoClient reads only policy metadata for the gate below; the route still requires
+      // agents:read, and ES data is queried with asCurrentUser.
+      const namespacedPattern = await resolveAgentlessOtelDataStreamPattern({
+        agentClient: fleetContext.agentClient.asCurrentUser,
+        soClient: fleetContext.internalSoClient,
+        agentId: agentsIds[0],
+        pkgName,
+        pkgVersion,
+        otelDataStreams,
+      });
+
+      if (namespacedPattern) {
+        const identityFreeResult = await AgentService.getIncomingDataByDataStreams({
+          esClient,
+          agentId: agentsIds[0],
+          dataStreamPattern: namespacedPattern,
+          returnDataPreview,
+        });
+
+        // Combine with the identity path's answer so non-OTel streams in a mixed package
+        // aren't silently ignored.
+        if (nonOtelDataStreams.length === 0) {
+          return response.ok({ body: identityFreeResult });
+        }
+
+        const nonOtelPattern = nonOtelDataStreams
+          .map((ds) => generateTemplateIndexPattern(ds, false))
+          .join(',');
+        const identityResult = await AgentService.getIncomingDataByAgentsId({
+          esClient,
+          agentsIds,
+          dataStreamPattern: nonOtelPattern,
+          returnDataPreview,
+        });
+
+        return response.ok({
+          body: combineIncomingDataResults(agentsIds[0], identityFreeResult, identityResult),
+        });
+      }
+    }
   }
 
   const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId({
@@ -406,6 +522,34 @@ export const getAgentDataHandler: RequestHandler<
 
   return response.ok({ body });
 };
+
+interface IncomingDataResult {
+  items: Array<Record<string, { data: boolean }>>;
+  dataPreview: unknown[];
+}
+
+/**
+ * Combines the identity-free OTel answer with the identity-based answer for a mixed
+ * package's non-OTel streams. Either source reporting data is enough to report data overall,
+ * since a mixed package can deliver a healthy signal through only one of its stream groups.
+ */
+function combineIncomingDataResults(
+  agentId: string,
+  identityFreeResult: IncomingDataResult,
+  identityResult: IncomingDataResult
+): IncomingDataResult {
+  const hasData =
+    (identityFreeResult.items[0]?.[agentId]?.data ?? false) ||
+    (identityResult.items[0]?.[agentId]?.data ?? false);
+
+  return {
+    items: [{ [agentId]: { data: hasData } }],
+    dataPreview: [...identityFreeResult.dataPreview, ...identityResult.dataPreview].slice(
+      0,
+      AgentService.MAX_AGENT_DATA_PREVIEW_SIZE
+    ),
+  };
+}
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
