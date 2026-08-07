@@ -18,6 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import { ChipRow, CHIP_OTHER } from './chip_row';
 import { CommentBox } from './comment_box';
 
@@ -38,9 +39,9 @@ const labels = {
 
 interface FeedbackModalProps {
   vote: 'up' | 'down';
-  chips: string[];
+  chips: FeedbackChipId[];
   comment: string;
-  onToggleChip: (chip: string) => void;
+  onToggleChip: (chip: FeedbackChipId) => void;
   onCommentChange: (value: string) => void;
   onSubmit: () => void;
   onClose: () => void;

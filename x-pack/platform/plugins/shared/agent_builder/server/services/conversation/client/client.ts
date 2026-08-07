@@ -12,6 +12,7 @@ import type {
   ConversationOrigin,
   ConversationWithoutRounds,
   ConversationRoundFeedback,
+  FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
@@ -75,7 +76,7 @@ export interface ConversationClient {
   updateRoundFeedback(
     conversationId: string,
     roundId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string }
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
@@ -314,7 +315,7 @@ class ConversationClientImpl implements ConversationClient {
   async updateRoundFeedback(
     conversationId: string,
     roundId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string }
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void> {
     return this._updateRoundFeedbackWithRetry(conversationId, roundId, feedback, false);
   }
@@ -322,10 +323,13 @@ class ConversationClientImpl implements ConversationClient {
   private async _updateRoundFeedbackWithRetry(
     conversationId: string,
     roundId: string,
-    userFeedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string },
+    userFeedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string },
     isRetry: boolean
   ): Promise<void> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const document = await this.getDocumentWithAccess({
+      conversationId,
+      access: 'owner',
+    });
     const rounds = document._source!.conversation_rounds ?? [];
     const roundIndex = rounds.findIndex((r) => r.id === roundId);
 
@@ -335,6 +339,15 @@ class ConversationClientImpl implements ConversationClient {
 
     const round = rounds[roundIndex];
     const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+    const existingFeedback = round.feedback;
+    const voteHistory: ConversationRoundFeedback['vote_history'] = existingFeedback?.vote
+      ? [
+          ...(existingFeedback.vote_history ?? []),
+          { vote: existingFeedback.vote, changed_at: existingFeedback.submitted_at },
+        ]
+      : existingFeedback?.vote_history;
+
     const updatedRound =
       userFeedback.vote === null
         ? roundWithoutFeedback
@@ -348,14 +361,11 @@ class ConversationClientImpl implements ConversationClient {
               connector_id: round.model_usage?.connector_id,
               model: round.model_usage?.model,
               trace_id: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
+              ...(voteHistory?.length ? { vote_history: voteHistory } : {}),
             } satisfies ConversationRoundFeedback,
           };
 
-    const updatedRounds = [
-      ...rounds.slice(0, roundIndex),
-      updatedRound,
-      ...rounds.slice(roundIndex + 1),
-    ];
+    const updatedRounds = rounds.map((r, i) => (i === roundIndex ? updatedRound : r));
 
     try {
       await this.storage.getClient().index({

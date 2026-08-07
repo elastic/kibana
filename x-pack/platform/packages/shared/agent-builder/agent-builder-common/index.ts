@@ -158,6 +158,7 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type ConversationRoundFeedback,
+  type FeedbackChipId,
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,

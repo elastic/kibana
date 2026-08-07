@@ -361,23 +361,59 @@ export enum ConversationDisplayStatus {
 }
 
 /**
+ * Stable identifier for a feedback chip. These values are stored in Elasticsearch;
+ * the display label is resolved at render time via i18n so feedback data is
+ * locale-independent and safe to use in cross-locale analytics.
+ */
+export type FeedbackChipId =
+  | 'inaccurate'
+  | 'incomplete'
+  | 'didnt_follow_instructions'
+  | 'other'
+  | 'accurate'
+  | 'useful'
+  | 'well_explained';
+
+/**
  * User feedback submitted for a conversation round.
+ *
+ * Note: each new submission overwrites the previous one — there is no full
+ * per-submission history. Prior vote values are tracked in `vote_history`
+ * so you can detect whether the user changed their mind.
  */
 export interface ConversationRoundFeedback {
   /** Thumbs up or thumbs down */
   vote: 'up' | 'down';
-  /** Optional chip labels selected by the user */
-  chips?: string[];
+  /**
+   * Stable chip IDs selected by the user. Stored as IDs (not display labels)
+   * so they are locale-independent and safe to use in cross-locale analytics.
+   */
+  chips?: FeedbackChipId[];
   /** Optional free-text comment */
   comment?: string;
-  /** ISO timestamp when the feedback was submitted */
+  /** ISO timestamp when the feedback was (most recently) submitted */
   submitted_at: string;
-  /** Connector ID from the round's model_usage at submission time */
+  /**
+   * Connector ID from the round's model_usage at submission time.
+   * Present whenever model_usage is available on the round.
+   */
   connector_id?: string;
-  /** Model identifier from the round's model_usage at submission time */
+  /**
+   * Model identifier. Only populated when the LLM provider returns the model
+   * in its response — many connectors omit it.
+   */
   model?: string;
-  /** Trace ID from the round at submission time */
+  /**
+   * OpenTelemetry trace ID. Only set when Kibana-level tracing is enabled
+   * (`telemetry.tracing.enabled: true`). Absent in most deployments.
+   */
   trace_id?: string;
+  /**
+   * Prior vote values, oldest first. Each entry records the vote that was
+   * overwritten and the `submitted_at` timestamp of that overwritten submission.
+   * Empty (or absent) when the vote has never been changed.
+   */
+  vote_history?: Array<{ vote: 'up' | 'down'; changed_at: string }>;
 }
 
 /**
@@ -415,7 +451,11 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  /** User feedback for this round, if submitted */
+  /**
+   * User feedback for this round, if submitted.
+   * Only the most recent submission is stored; prior vote values are tracked
+   * in `feedback.vote_history`.
+   */
   feedback?: ConversationRoundFeedback;
 }
 

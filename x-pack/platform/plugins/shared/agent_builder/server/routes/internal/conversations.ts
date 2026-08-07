@@ -113,7 +113,19 @@ export function registerInternalConversationRoutes({
         }),
         body: schema.object({
           vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
-          chips: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }))),
+          chips: schema.maybe(
+            schema.arrayOf(
+              schema.oneOf([
+                schema.literal('inaccurate'),
+                schema.literal('incomplete'),
+                schema.literal('didnt_follow_instructions'),
+                schema.literal('other'),
+                schema.literal('accurate'),
+                schema.literal('useful'),
+                schema.literal('well_explained'),
+              ])
+            )
+          ),
           comment: schema.maybe(schema.string({ maxLength: 5000 })),
         }),
       },
