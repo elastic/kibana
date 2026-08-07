@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type React from 'react';
-import { useMemo } from 'react';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useRouteBreadcrumb } from '../components/contexts/route_breadcrumbs_context/use_route_breadcrumb';
 
@@ -22,14 +21,10 @@ export const RouteBreadcrumb = ({
     start: { core },
   } = useProfilingDependencies();
 
-  const breadcrumb = useMemo(() => {
-    return {
-      title,
-      href: core.http.basePath.prepend('/app/profiling/' + href),
-    };
-  }, [core.http.basePath, href, title]);
-
-  useRouteBreadcrumb(breadcrumb);
+  useRouteBreadcrumb({
+    title,
+    href: core.http.basePath.prepend('/app/profiling/' + href),
+  });
 
   return children;
 };

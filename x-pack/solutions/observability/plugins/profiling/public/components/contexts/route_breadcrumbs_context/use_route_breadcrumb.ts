@@ -10,10 +10,6 @@ import { useContext, useEffect, useRef } from 'react';
 import type { Breadcrumb } from '.';
 import { RouteBreadcrumbsContext } from '.';
 
-/**
- * Registers a breadcrumb for the current route. The `breadcrumb` value should be
- * memoised to avoid unnecessary re-registrations on every render.
- */
 export function useRouteBreadcrumb(breadcrumb: Breadcrumb) {
   const api = useContext(RouteBreadcrumbsContext);
 
@@ -25,6 +21,10 @@ export function useRouteBreadcrumb(breadcrumb: Breadcrumb) {
 
   const matchedRoute = useRef(match?.route);
 
+  // Destructure the breadcrumb object to avoid the useEffect dependency array from changing on every render due to object reference changes.
+  // This way callers don't need to memoize the object they pass to this hook, and we can still ensure the effect only runs when the breadcrumb values actually change.
+  const { title, href } = breadcrumb;
+
   useEffect(() => {
     if (matchedRoute.current && matchedRoute.current !== match?.route) {
       api.unset(matchedRoute.current);
@@ -33,7 +33,7 @@ export function useRouteBreadcrumb(breadcrumb: Breadcrumb) {
     matchedRoute.current = match?.route;
 
     if (matchedRoute.current) {
-      api.set(matchedRoute.current, [breadcrumb]);
+      api.set(matchedRoute.current, [{ title, href }]);
     }
 
     return () => {
@@ -41,5 +41,5 @@ export function useRouteBreadcrumb(breadcrumb: Breadcrumb) {
         api.unset(matchedRoute.current);
       }
     };
-  }, [match?.route, breadcrumb, api]);
+  }, [match?.route, title, href, api]);
 }
