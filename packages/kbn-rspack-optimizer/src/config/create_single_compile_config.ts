@@ -458,10 +458,6 @@ export async function createSingleCompileConfig(
                 new RsdoctorRspackPlugin({
                   // Don't auto-open browser - user can run CLI command manually
                   disableClientServer: true,
-                  supports: {
-                    // Enable bundle analysis
-                    bundleAnalyze: true,
-                  },
                 }),
               ];
             } catch (e: any) {
