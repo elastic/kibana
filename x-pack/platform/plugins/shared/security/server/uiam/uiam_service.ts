@@ -278,6 +278,13 @@ export interface UiamServicePublic {
   ): Promise<OAuthClientResponse>;
 
   /**
+   * Permanently deletes an OAuth client, and all of its connections, via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client to delete.
+   */
+  deleteOAuthClient(accessToken: string, clientId: string): Promise<void>;
+
+  /**
    * Lists OAuth connections via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
@@ -318,6 +325,14 @@ export interface UiamServicePublic {
     connectionId: string,
     reason?: string
   ): Promise<OAuthConnectionResponse>;
+
+  /**
+   * Permanently deletes an OAuth connection via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to delete.
+   */
+  deleteOAuthConnection(accessToken: string, clientId: string, connectionId: string): Promise<void>;
 
   /**
    * Resolves one or more user IDs into basic user information via the UIAM service.
@@ -787,6 +802,38 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.deleteOAuthClient}.
+   */
+  async deleteOAuthClient(accessToken: string, clientId: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to delete OAuth client: ${clientId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(clientId)}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully deleted OAuth client: ${clientId}`);
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to delete OAuth client ${clientId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
    * See {@link UiamServicePublic.listOAuthConnections}.
    */
   async listOAuthConnections(
@@ -909,6 +956,47 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       this.#logger.error(
         () => `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.deleteOAuthConnection}.
+   */
+  async deleteOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string
+  ): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to delete OAuth connection: ${connectionId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(
+            clientId
+          )}/connections/${encodeURIComponent(connectionId)}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully deleted OAuth connection: ${connectionId}`);
+    } catch (err) {
+      this.#logger.error(
+        () =>
+          `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+            err
+          )}`
       );
       throw err;
     }
