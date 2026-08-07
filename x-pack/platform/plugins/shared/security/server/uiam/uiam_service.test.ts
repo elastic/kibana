@@ -504,7 +504,7 @@ describe('UiamService', () => {
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure' }
+        { outcome: 'failure', errorType: 'KIBANA.AUDIENCE_MISMATCH' }
       );
     });
 
@@ -519,7 +519,30 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure' }
+        { outcome: 'failure', errorType: 'UNKNOWN' }
+      );
+    });
+
+    it('records the UIAM error type when the exchange fails with a classified error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: async () => ({
+          request_id: '2f26103be7be5483ef70f099ca9d5567',
+          error: {
+            message: 'Authentication failed',
+            type: 'AUTHENTICATION.TOKEN',
+            resource: 'ba6ab8be-9c98-43ec-a5f9-7b163af9e432',
+            code: '0x7E0116',
+          },
+        }),
+        headers: new Headers(),
+      });
+
+      await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
+      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
+        expect.any(Number),
+        { outcome: 'failure', errorType: 'AUTHENTICATION.TOKEN' }
       );
     });
   });
@@ -1286,6 +1309,54 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#deleteOAuthClient', () => {
+    it('properly calls UIAM service to delete an OAuth client', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(
+        uiamService.deleteOAuthClient('access-token', 'client-id')
+      ).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deletion fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'OAuth client not found' } }),
+      });
+
+      await expect(uiamService.deleteOAuthClient('access-token', 'client-id')).rejects.toThrowError(
+        'OAuth client not found'
+      );
+    });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.deleteOAuthClient('access-token', 'weird/id?x#y');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
+
   describe('#listOAuthConnections', () => {
     it('properly calls UIAM service to list OAuth connections', async () => {
       const mockResponse = { connections: [] };
@@ -1504,6 +1575,54 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith(
         'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx/_revoke',
         expect.objectContaining({ method: 'POST' })
+      );
+    });
+  });
+
+  describe('#deleteOAuthConnection', () => {
+    it('properly calls UIAM service to delete an OAuth connection', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(
+        uiamService.deleteOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deletion fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.deleteOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).rejects.toThrowError('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.deleteOAuthConnection('access-token', 'client/id#y', 'conn/id?x');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx',
+        expect.objectContaining({ method: 'DELETE' })
       );
     });
   });

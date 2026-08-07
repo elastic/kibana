@@ -14,6 +14,11 @@ import {
   MAX_TEXT_LENGTH,
   NO_RAW_SENSITIVE_VALUES_RULE,
   MAX_ARRAY_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './constants';
 import { detectionSchema } from './detections';
 
@@ -134,9 +139,13 @@ const signalBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Human-readable account of what was observed and what it means. Required format for detection signals — do not use alternative shapes: 
-        
-        "Testing: [hypothesis]. Expected if true: [pattern]. Found: [N rows — failing upstream target/endpoint from the row, e.g. service, host:port, or DNS name]. Why: [causal link visible in the row — name the failing upstream and how it is failing, e.g. "api-service cannot reach db-primary:5432 — connection refused"; do not infer beyond what the row shows]. Verdict: confirms | refutes | inconclusive — who/what is blocked."
+        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
+
+        Confirms: "Found: [signature, target, or endpoint from the row]. Impact: [who/what is blocked or degraded]. Verdict: confirms."
+        Refutes/inconclusive: "Found: [signature or absence]. Impact: [none or why inconclusive]. Verdict: refutes | inconclusive."
+        Omit Impact only for zero-row refutes: "Found: no match. Verdict: refutes."
+
+        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),
@@ -144,7 +153,7 @@ const signalBaseSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Whether verified evidence supports this record’s failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified.'
+      "Whether verified evidence supports this record's failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified."
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -158,18 +167,24 @@ const signalBaseSchema = z.object({
     ),
 });
 
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSchema.omit({
+const detectionSignalMetadataSchema = detectionSchema
+  .omit({
     '@timestamp': true,
     alert_index: true,
     workflow_execution_id: true,
     processed: true,
     stream_name: true,
-  }),
+  })
+  .describe(
+    'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
+  );
+
+const detectionSignalSchema = signalBaseSchema.extend({
+  type: z.literal('detection'),
+  metadata: detectionSignalMetadataSchema,
 });
 
-/** Extensible discriminated union of signal sources. Only `detection` is implemented for now. */
+/** Extensible discriminated union of signal sources accepted from agents. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 
@@ -178,11 +193,12 @@ export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'
 
 /** Canonical sortable severity used by storage, APIs, and tools. */
 export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
-    Sortable severity keyword. Judge impact from what the evidence shows — confirmed failure rows, whether the affected operation still completes, scope from topology and counts, and confirmation status:
+    Sortable severity keyword. Judge impact from what the evidence shows — confirmed failure rows, whether the affected operation still completes, scope from topology and counts, and confirmation status. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; judge that event only from the row’s error signature and impact.
     "80-critical" = the most severe. Any ONE qualifies independently:
       - a site-wide/global outage affecting all or most customers;
       - a confirmed failure that fully blocks a customer-facing operation for everyone who reaches it (no successful completions on the affected path);
-      - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, tokens.
+      - multiple current rows directly confirming blocked paths for distinct core operations;
+      - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
       A single mandatory service, dependency, or endpoint can establish this when its failure blocks the operation end-to-end; unrelated services do not also need to fail.
     "60-high" = confirmed and severe but not global: the operation still completes for some users while broadly degraded, intermittent, or partially failing, or the confirmed impact reaches a significant customer subset.
     "40-medium" = meaningful but bounded: minor confirmed degradation with limited reach, or plausible customer impact that is not yet confirmed (incomplete evidence, telemetry gap, unverified).
@@ -238,8 +254,11 @@ export const significantEventBaseSchema = z.object({
     .optional()
     .describe(
       dedent`
-        Provisional, evidence-grounded technical explanation of the observed signals. In one sentence, start with the deepest root cause first, often present in causal_features, then describe how it propagates downstream through blast_radius and finally the impacted flows, clients or users. 
+        Provisional, evidence-grounded technical mechanism for this incident. Max ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} chars.
+        In one sentence, name the deepest supported failing component or dependency, its concrete failure signature or mechanism, and how it propagates to the affected operation.
 
+        ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
+        Do not restate the title or summary. Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
     ),
@@ -248,14 +267,13 @@ export const significantEventBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Objective, self-contained account of the problem and potential impact. Lead with the affected operation and observed condition, not the investigation process. Include:
-          (1) the problem and current state;
-          (2) the affected flow and whether user impact is confirmed, possible, or not established;
-          (3) magnitude, onset, and current or recovery state when known.
+        Objective, self-contained account of the observed state and potential impact. Max ${MAX_SUMMARY_LENGTH} chars.
+        Lead with the normalized observed error signature — including the error type or code, operation, protocol, endpoint, port, and relevant non-sensitive address — and the affected component or dependency path, then state whether impact is confirmed, possible, or not established. When no failure signature is observed, lead with the concise observed success, health, or off-topic signature instead. Include onset, magnitude, and current or recovery state only when known.
 
-        Possible impact may come from matched query KI descriptions or resolved dependency paths, but must be conditional and scoped.
-          
-        Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, or unsupported impact claims.
+        ${SUMMARY_ROLE_RULE}
+        Use matched query KI descriptions or resolved feature metadata to name the observed component or dependency path when it clarifies the failure for an operator. Possible impact may come from the same context, but must be conditional and scoped.
+
+        Do not repeat the title or symptom_hypothesis narrative. Preserve decisive technical details from the canonical error signature when they identify the observed state. Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, detection artifacts (p_value or severity_score), memory-page presence, or unsupported impact claims.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),
@@ -266,7 +284,7 @@ export const significantEventBaseSchema = z.object({
     .min(0)
     .max(1)
     .describe(
-      'Symptom-hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
+      'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
         'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'
     ),
   stream_names: z
