@@ -16,6 +16,7 @@ import React, {
   useCallback,
 } from 'react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { ConsoleApi } from '../../types';
 import type { ConsoleProps } from '../..';
 import {
   useSaveInputHistoryToStorage,
@@ -93,10 +94,10 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
     }, [isMounted, state.consoleApi]);
 
     useMemo(() => {
-      if (isMounted() && apiRef) {
-        Object.assign((apiRef.current = apiRef.current ?? {}), state.consoleApi);
+      if (apiRef) {
+        Object.assign((apiRef.current = apiRef.current ?? ({} as ConsoleApi)), state.consoleApi);
       }
-    }, [apiRef, isMounted, state.consoleApi]);
+    }, [apiRef, state.consoleApi]);
 
     // Anytime `state` changes AND the console is under ConsoleManager's control, then
     // store the console's state to ConsoleManager. This is what enables a console to be

@@ -405,7 +405,7 @@ export interface ConsoleProps extends CommonProps {
    * If provided, it will add the console's API to the `current` property. The API returned
    * allows for interacting with the console from outside the component.
    */
-  apiRef?: MutableRefObject<ConsoleApi>;
+  apiRef?: MutableRefObject<ConsoleApi | undefined>;
 
   /**
    * If defined, certain console data (ex. command input history) will be persisted to localstorage
