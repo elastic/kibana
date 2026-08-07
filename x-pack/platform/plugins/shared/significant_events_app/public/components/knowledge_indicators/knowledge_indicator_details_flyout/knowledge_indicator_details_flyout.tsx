@@ -31,17 +31,17 @@ import type { Streams } from '@kbn/streams-schema';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { buildFeatureDiscoverParams } from '../../../pages/significant_events/utils/discover_helpers';
-import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorTitle } from '../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
 import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
-import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
+import { useRulesDemote } from '../hooks/use_rules_demote';
 import {
   useKnowledgeIndicatorActions,
   DELETE_LABEL,
@@ -88,13 +88,6 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
-
-  // Reset transient UI (popover/delete modal) when navigating to another indicator.
-  const knowledgeIndicatorItemId = getKnowledgeIndicatorItemId(knowledgeIndicator);
-  useEffect(() => {
-    setShowDeleteModal(false);
-    setIsActionsMenuOpen(false);
-  }, [knowledgeIndicatorItemId]);
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
@@ -258,10 +251,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     ];
   }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
 
-  const title =
-    knowledgeIndicator.kind === 'feature'
-      ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
-      : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
+  const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
 
   const hasPagination =
     pageCount !== undefined &&

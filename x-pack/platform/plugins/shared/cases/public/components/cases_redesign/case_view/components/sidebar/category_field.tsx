@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { MAX_CATEGORY_LENGTH } from '../../../../../../common/constants';
@@ -17,7 +17,6 @@ import {
   EMPTY_CATEGORY_VALIDATION_MSG,
   MAX_LENGTH_ERROR,
 } from '../../../../category/translations';
-import { InlineFieldActions } from '../../../../templates_v2/field_types/controls/inline_field_actions';
 import { usePendingFieldValue } from './hooks/use_pending_field_value';
 
 export interface CategoryFieldProps {
@@ -49,18 +48,26 @@ export const CategoryField: React.FC<CategoryFieldProps> = ({ category, onSubmit
     [onSubmit]
   );
 
-  const { currentValue, hasPendingChange, validationError, setPendingValue, onConfirm, onCancel } =
+  const { currentValue, hasPendingChange, validationError, setPendingValue, onConfirm } =
     usePendingFieldValue<string | null>({
       committedValue: category ?? null,
       onSubmit: onSubmitTrimmed,
       validate,
     });
 
+  // A valid selection persists on change; an invalid one is held locally so the error shows against
+  // the value the reader typed rather than being silently dropped.
   const onChange = (value: string | null) => {
     // The combo box reports an empty selection as `undefined`; normalize it to `null`, a valid
     // committed value, so it isn't confused with "no pending change".
     setPendingValue(value ?? null);
   };
+
+  useEffect(() => {
+    if (hasPendingChange && validationError == null) {
+      onConfirm();
+    }
+  }, [hasPendingChange, validationError, onConfirm]);
 
   return (
     <EuiFlexItem grow={false} data-test-subj="cases-categories">
@@ -79,9 +86,6 @@ export const CategoryField: React.FC<CategoryFieldProps> = ({ category, onSubmit
           availableCategories={availableCategories}
         />
       </EuiFormRow>
-      {hasPendingChange && !isLoadingAll && (
-        <InlineFieldActions name="category" onConfirm={onConfirm} onCancel={onCancel} />
-      )}
     </EuiFlexItem>
   );
 };
