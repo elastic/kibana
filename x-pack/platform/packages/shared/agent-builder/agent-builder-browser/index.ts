@@ -36,7 +36,6 @@ export type {
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
-  OpenConversationMetadataOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
   ConversationBriefCardProps,

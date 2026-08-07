@@ -45,9 +45,7 @@ export const ConversationsList = () => {
               conversationId={conversation.id}
               type={conversation.template_id ?? ''}
               metadata={conversation.metadata as Record<string, string> | undefined}
-              onClick={() =>
-                agentBuilder.openConversationMetadata({ conversationId: conversation.id })
-              }
+              onClick={() => {}}
             />
           ))}
       </div>
