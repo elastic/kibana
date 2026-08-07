@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import {
+  buildAlertingV1RuleTemplateEngineFilter,
   buildConsumersFilter,
   buildFilter,
   buildRuleTypeIdsFilter,
@@ -433,6 +434,14 @@ describe('filters', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('buildAlertingV1RuleTemplateEngineFilter', () => {
+    it('matches engine v1 or missing engine', () => {
+      expect(toKqlExpression(buildAlertingV1RuleTemplateEngineFilter())).toBe(
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *)'
+      );
     });
   });
 

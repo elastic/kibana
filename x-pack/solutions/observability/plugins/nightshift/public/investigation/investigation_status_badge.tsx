@@ -205,7 +205,7 @@ function InvestigationCompleteStatus({
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const completeStatusLabel = i18n.translate(
-    'xpack.observability.nightshift.investigation.completeStatusAriaLabel',
+    'xpack.nightshift.investigation.completeStatusAriaLabel',
     {
       defaultMessage: 'Investigation complete',
     }

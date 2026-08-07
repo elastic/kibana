@@ -2588,6 +2588,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         agentPolicies.map((p) => p.id),
         {
           user: options?.user,
+          asyncDeploy: options?.asyncDeploy,
           removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
         }
       );
