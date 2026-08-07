@@ -338,6 +338,25 @@ export const ALERTING_LOG_CODES = {
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
 
+  // ─────────────────────────── Agent Builder ─────────────────────────
+  /** Episode attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
+  /** Episode attachment isStale check failed; returns false. */
+  AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
+  /** Rule attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_RULE_RESOLVE_FAILED: 'AGENT_BUILDER_RULE_RESOLVE_FAILED',
+  /** Rule attachment isStale check failed; returns false. */
+  AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED',
+  /** Action policy attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED: 'AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED',
+  /** Action policy attachment isStale check failed; returns false. */
+  AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED:
+    'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
+  /** `manage_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `manage_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+
   // ─────────────────────────────── Tasks ─────────────────────────────
   /**
    * A telemetry task run failed. Usage data for the interval is lost; the

@@ -24,6 +24,10 @@ import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_st
 import { EpisodesClient } from '../lib/episodes_client';
 import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../lib/services/logger_service/logger_service';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -53,30 +57,30 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  */
 export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createRuleAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
   );
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createActionPolicyAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
   );
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createEpisodeAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getEpisodesClient: (context) =>
           resolveRequestScoped(injection, context.request, EpisodesClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
   );
 
   bind(OnSetup).toConstantValue((container) => {
@@ -139,8 +143,10 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     }
 
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
+    const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
     try {
       registerSkills(agentBuilder, {
+        logger: agentBuilderLogger,
         getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
         getAvailableConnectors: (sid, req) =>
           workflowsManagementApi.getAvailableConnectors(sid, req),

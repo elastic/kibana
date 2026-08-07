@@ -5,13 +5,32 @@
  * 2.0.
  */
 
+jest.mock('uuid', () => ({
+  v4: () => '00000000-0000-4000-8000-000000000001',
+}));
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
-const createDeps = (): ManageActionPolicyToolDeps => ({
+const createLogger = (): jest.Mocked<
+  Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
+> => ({
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  forSubsystem: jest.fn(),
+});
+
+const createDeps = (
+  logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
+): ManageActionPolicyToolDeps => ({
+  logger,
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
 });
@@ -226,7 +245,8 @@ describe('manageActionPolicyTool', () => {
 
   describe('logger severity', () => {
     it('logs validation errors at debug level', async () => {
-      const deps = createDeps();
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
 
@@ -242,14 +262,16 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
-      expect(ctx.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('manage_action_policy tool: invalid input')
-      );
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith({
+        message: expect.stringContaining('manage_action_policy tool: invalid input'),
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs unexpected errors at warn level', async () => {
-      const deps = createDeps();
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.add.mockRejectedValueOnce(new Error('ES exploded'));
@@ -267,10 +289,13 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
-      expect(ctx.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Error in manage_action_policy tool')
-      );
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage action policy',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+        labels: { space_id: ctx.spaceId },
+        error: expect.any(Error),
+      });
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 });

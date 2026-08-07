@@ -19,6 +19,8 @@ import {
   executeRuleOperations,
   RuleOperationValidationError,
 } from './operations';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 
 const manageRuleSchema = z.object({
   ruleAttachmentId: z
@@ -30,7 +32,13 @@ const manageRuleSchema = z.object({
   operations: z.array(ruleOperationSchema).min(1),
 });
 
-export const manageRuleTool = (): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
+export interface ManageRuleToolDeps {
+  logger: LoggerServiceContract;
+}
+
+export const manageRuleTool = ({
+  logger,
+}: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 rule in the conversation.
@@ -56,7 +64,7 @@ Use operations[] to:
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { logger, attachments, esClient }
+    { attachments, esClient, spaceId }
   ) => {
     try {
       const currentAttachment = previousAttachmentId
@@ -101,9 +109,9 @@ Use operations[] to:
         throw new Error(`Failed to persist rule attachment "${attachmentId}".`);
       }
 
-      logger.debug(
-        `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`
-      );
+      logger.debug({
+        message: `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`,
+      });
 
       return {
         results: [
@@ -128,9 +136,14 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.debug(`manage_rule tool: invalid input — ${message}`);
+        logger.debug({ message: `manage_rule tool: invalid input — ${message}` });
       } else {
-        logger.warn(`Error in manage_rule tool: ${message}`);
+        logger.warn({
+          message: 'Failed to manage rule',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+          labels: { space_id: spaceId },
+          error,
+        });
       }
       return {
         results: [

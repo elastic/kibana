@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
@@ -66,16 +67,17 @@ const buildVersionedAttachment = (
 });
 
 describe('createEpisodeAttachmentType', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let getEpisode: jest.Mock;
   let definition: AttachmentTypeDefinition<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>;
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
+    ({ loggerService, mockLogger } = createLoggerService());
     getEpisode = jest.fn();
     const episodesClient = { get: getEpisode } as unknown as EpisodesClient;
     definition = createEpisodeAttachmentType({
-      logger,
+      logger: loggerService,
       getEpisodesClient: () => episodesClient,
     });
   });
@@ -149,8 +151,19 @@ describe('createEpisodeAttachmentType', () => {
       const result = await definition.resolve!('ep-missing', createResolveContext());
 
       expect(result).toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to resolve episode attachment for origin "ep-missing"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to resolve episode attachment',
+        expect.objectContaining({
+          labels: {
+            episode_id: 'ep-missing',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
     });
   });
@@ -236,8 +249,19 @@ describe('createEpisodeAttachmentType', () => {
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to check staleness for episode attachment "ep-1"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to check episode attachment staleness',
+        expect.objectContaining({
+          labels: {
+            episode_id: 'ep-1',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
     });
   });

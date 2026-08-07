@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+jest.mock('uuid', () => ({
+  v4: () => '00000000-0000-4000-8000-000000000001',
+}));
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageRuleTool } from './manage_rule';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
@@ -36,8 +42,24 @@ const createContext = (): ToolHandlerContextMock => {
   return ctx;
 };
 
+const createLogger = (): jest.Mocked<
+  Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
+> => ({
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  forSubsystem: jest.fn(),
+});
+
 describe('manageRuleTool', () => {
-  const tool = manageRuleTool();
+  let logger: ReturnType<typeof createLogger>;
+  let tool: ReturnType<typeof manageRuleTool>;
+
+  beforeEach(() => {
+    logger = createLogger();
+    tool = manageRuleTool({ logger: logger as unknown as LoggerServiceContract });
+  });
 
   describe('handler', () => {
     it('creates a new rule attachment with valid operations', async () => {
@@ -278,11 +300,11 @@ describe('manageRuleTool', () => {
 
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
-      expect(ctx.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('manage_rule tool: invalid input')
-      );
-      expect(ctx.logger.warn).not.toHaveBeenCalled();
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith({
+        message: expect.stringContaining('manage_rule tool: invalid input'),
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs unexpected errors at warn level (not error)', async () => {
@@ -296,10 +318,13 @@ describe('manageRuleTool', () => {
         ctx
       );
 
-      expect(ctx.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Error in manage_rule tool')
-      );
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        labels: { space_id: ctx.spaceId },
+        error: expect.any(Error),
+      });
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 });

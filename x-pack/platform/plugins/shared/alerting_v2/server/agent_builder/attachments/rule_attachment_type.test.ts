@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
@@ -63,17 +64,25 @@ const buildVersionedAttachment = (
   ...overrides,
 });
 
+const SPACE_ID = 'default';
+
+const createResolveContext = (spaceId: string = SPACE_ID) => ({
+  ...agentBuilderMocks.attachments.createResolveContextMock(),
+  spaceId,
+});
+
 describe('createRuleAttachmentType', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let getRule: jest.Mock;
   let definition: AttachmentTypeDefinition<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
+    ({ loggerService, mockLogger } = createLoggerService());
     getRule = jest.fn();
     const rulesClient = { getRule } as unknown as RulesClient;
     definition = createRuleAttachmentType({
-      logger,
+      logger: loggerService,
       getRulesClient: () => rulesClient,
     });
   });
@@ -117,7 +126,7 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.resolve!(
         'rule-1',
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
@@ -129,12 +138,23 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.resolve!(
         'rule-missing',
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to resolve rule attachment for origin "rule-missing"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to resolve rule attachment',
+        expect.objectContaining({
+          labels: {
+            rule_id: 'rule-missing',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'not found',
+            type: 'Error',
+          }),
+        })
       );
     });
   });
@@ -145,7 +165,7 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.isStale!(
         attachment,
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBe(false);
@@ -157,7 +177,7 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.isStale!(
         buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBe(false);
@@ -168,7 +188,7 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.isStale!(
         buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBe(false);
@@ -179,7 +199,7 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.isStale!(
         buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBe(true);
@@ -200,7 +220,7 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.isStale!(
         attachment,
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBe(false);
@@ -211,12 +231,23 @@ describe('createRuleAttachmentType', () => {
 
       const result = await definition.isStale!(
         buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
+        createResolveContext()
       );
 
       expect(result).toBe(false);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to check staleness for rule attachment "rule-1"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to check rule attachment staleness',
+        expect.objectContaining({
+          labels: {
+            rule_id: 'rule-1',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
     });
   });

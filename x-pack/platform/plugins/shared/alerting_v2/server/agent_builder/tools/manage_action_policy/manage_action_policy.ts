@@ -20,6 +20,8 @@ import {
   ActionPolicyOperationValidationError,
 } from './operations';
 import { validateDestinations } from './validate_destinations';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 
 const manageActionPolicySchema = z.object({
   actionPolicyAttachmentId: z
@@ -32,6 +34,7 @@ const manageActionPolicySchema = z.object({
 });
 
 export interface ManageActionPolicyToolDeps {
+  logger: LoggerServiceContract;
   getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
   getAvailableConnectors: (
     spaceId: string,
@@ -42,6 +45,7 @@ export interface ManageActionPolicyToolDeps {
 }
 
 export const manageActionPolicyTool = ({
+  logger,
   getWorkflow,
   getAvailableConnectors,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
@@ -63,7 +67,7 @@ Use operations[] to:
   schema: manageActionPolicySchema,
   handler: async (
     { actionPolicyAttachmentId: previousAttachmentId, operations },
-    { logger, attachments, spaceId, request }
+    { attachments, spaceId, request }
   ) => {
     try {
       const currentAttachment = previousAttachmentId
@@ -126,9 +130,9 @@ Use operations[] to:
         throw new Error(`Failed to persist action policy attachment "${attachmentId}".`);
       }
 
-      logger.debug(
-        `Action policy attachment ${isNew ? 'created' : 'updated'}: "${updatedData.name}"`
-      );
+      logger.debug({
+        message: `Action policy attachment ${isNew ? 'created' : 'updated'}: "${updatedData.name}"`,
+      });
 
       return {
         results: [
@@ -153,9 +157,14 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof ActionPolicyOperationValidationError) {
-        logger.debug(`manage_action_policy tool: invalid input — ${message}`);
+        logger.debug({ message: `manage_action_policy tool: invalid input — ${message}` });
       } else {
-        logger.warn(`Error in manage_action_policy tool: ${message}`);
+        logger.warn({
+          message: 'Failed to manage action policy',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+          labels: { space_id: spaceId },
+          error,
+        });
       }
       return {
         results: [

@@ -15,12 +15,13 @@ import {
   episodeAttachmentDataSchema,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
-import type { Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 
 interface CreateEpisodeAttachmentTypeOptions {
-  logger: Logger;
+  logger: LoggerServiceContract;
   getEpisodesClient: (context: AttachmentResolveContext) => EpisodesClient;
 }
 
@@ -88,7 +89,12 @@ export const createEpisodeAttachmentType = ({
       }
       return episodeAttachmentDataSchema.parse(alertEpisodeToEpisodeAttachment(episode));
     } catch (error) {
-      logger.warn(`Failed to resolve episode attachment for origin "${episodeId}": ${error}`);
+      logger.warn({
+        message: 'Failed to resolve episode attachment',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
+        labels: { episode_id: episodeId, space_id: context.spaceId },
+        error,
+      });
       return undefined;
     }
   },
@@ -109,9 +115,12 @@ export const createEpisodeAttachmentType = ({
       if (!latestVersion) return true;
       return episode.last_timestamp !== latestVersion.data.last_timestamp;
     } catch (error) {
-      logger.warn(
-        `Failed to check staleness for episode attachment "${attachment.origin}": ${error}`
-      );
+      logger.warn({
+        message: 'Failed to check episode attachment staleness',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
+        labels: { episode_id: attachment.origin, space_id: context.spaceId },
+        error,
+      });
       return false;
     }
   },
