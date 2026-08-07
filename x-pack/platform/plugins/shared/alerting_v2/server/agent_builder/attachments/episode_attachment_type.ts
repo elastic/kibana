@@ -7,9 +7,11 @@
 
 import type {
   AttachmentTypeDefinition,
+  AttachmentFormatContext,
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import {
   EPISODE_ATTACHMENT_TYPE,
   episodeAttachmentDataSchema,
@@ -18,13 +20,27 @@ import {
 import type { Logger } from '@kbn/core/server';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
+import type { RulesClient } from '../../lib/rules_client';
+import { getRuleTool, getRuleToolId } from '../tools/get_rule';
+import { refreshEpisodeTool, refreshEpisodeToolId } from '../tools/refresh_episode';
 
 interface CreateEpisodeAttachmentTypeOptions {
   logger: Logger;
-  getEpisodesClient: (context: AttachmentResolveContext) => EpisodesClient;
+  getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
+  getRulesClient: (context: AttachmentFormatContext) => RulesClient;
 }
 
-const formatEpisodeDescription = (attachmentId: string, data: EpisodeAttachmentData): string => {
+const formatEpisodeDescription = ({
+  attachmentId,
+  data,
+  refreshToolId,
+  getRuleToolId: ruleToolId,
+}: {
+  attachmentId: string;
+  data: EpisodeAttachmentData;
+  refreshToolId: string;
+  getRuleToolId: string;
+}): string => {
   const lines = [
     `Alert episode "${data['episode.id']}" (episodeAttachment.id: "${attachmentId}")`,
     `Status: ${data['episode.status']}`,
@@ -57,12 +73,20 @@ const formatEpisodeDescription = (attachmentId: string, data: EpisodeAttachmentD
     lines.push(`Tags: ${data.last_tags.join(', ')}`);
   }
 
+  lines.push(
+    `Use the ${refreshToolId} tool to refresh this episode with the latest state from Elasticsearch.`
+  );
+  lines.push(
+    `Use the ${ruleToolId} tool to fetch the rule associated with this episode. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
+  );
+
   return lines.join('\n');
 };
 
 export const createEpisodeAttachmentType = ({
   logger,
   getEpisodesClient,
+  getRulesClient,
 }: CreateEpisodeAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof EPISODE_ATTACHMENT_TYPE,
   EpisodeAttachmentData
@@ -116,15 +140,42 @@ export const createEpisodeAttachmentType = ({
     }
   },
 
-  format: (attachment) => ({
-    getRepresentation: () => ({
-      type: 'text',
-      value: formatEpisodeDescription(attachment.id, attachment.data),
-    }),
-  }),
+  format: (attachment) => {
+    const episodeId = attachment.origin ?? attachment.data['episode.id'];
+    const ruleId = attachment.data['rule.id'];
+    const refreshToolId = refreshEpisodeToolId(attachment.id);
+    const ruleToolId = getRuleToolId(attachment.id);
+
+    return {
+      getRepresentation: () => ({
+        type: 'text',
+        value: formatEpisodeDescription({
+          attachmentId: attachment.id,
+          data: attachment.data,
+          refreshToolId,
+          getRuleToolId: ruleToolId,
+        }),
+      }),
+      getBoundedTools: () => [
+        refreshEpisodeTool({
+          attachmentId: attachment.id,
+          episodeId,
+          logger,
+          getEpisodesClient,
+        }),
+        getRuleTool({
+          attachmentId: attachment.id,
+          episodeId,
+          ruleId,
+          logger,
+          getRulesClient,
+        }),
+      ],
+    };
+  },
 
   getAgentDescription: () =>
-    `An episode attachment represents an alert episode — a stateful lifecycle of related alert events for a rule and group. It is read-only context: use it to reason about status, timing, severity, tags, assignee, and snooze state of the alert episode the user is viewing.`,
+    `An alert episode attachment — a stateful lifecycle of related alert events for a rule and group. It is read-only snapshot context. Use the attachment-scoped refresh_episode tool when you need the latest episode state, and get_rule to fetch the associated rule. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
 
   isReadonly: true,
 
