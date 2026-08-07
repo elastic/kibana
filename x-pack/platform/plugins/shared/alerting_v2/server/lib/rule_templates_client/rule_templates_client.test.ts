@@ -45,7 +45,9 @@ const validTemplateAttributes = {
   },
 };
 
-const createClient = (savedObjectsClient: SavedObjectsClientContract = savedObjectsClientMock.create()) => {
+const createClient = (
+  savedObjectsClient: SavedObjectsClientContract = savedObjectsClientMock.create()
+) => {
   const { loggerService, mockLogger } = createLoggerService();
   const client = new RuleTemplatesClient(savedObjectsClient, loggerService);
   return { client, savedObjectsClient, loggerService, mockLogger };

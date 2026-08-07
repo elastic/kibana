@@ -23,9 +23,7 @@ export const ACTION_POLICY_TAG_MAX_LENGTH = 128;
 
 export { RULE_TEMPLATE_MAX_PER_PAGE as RULE_TEMPLATE_PER_PAGE_MAX } from '@kbn/alerting-v2-schemas';
 
-export {
-  MAX_TAGS as RULE_TEMPLATE_TAGS_MAX_COUNT,
-} from '@kbn/alerting-v2-constants';
+export { MAX_TAGS as RULE_TEMPLATE_TAGS_MAX_COUNT } from '@kbn/alerting-v2-constants';
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
   ALERTING_V2_ALERT_API_PATH as ALERT_API_PATH,
