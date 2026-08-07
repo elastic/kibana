@@ -323,6 +323,15 @@ const configSchema = schema.object(
         }
       }
 
+      if (
+        rawConfig.selfHttp.ssl.certificateAuthorities !== undefined &&
+        (rawConfig.selfHttp.target !== 'auto' ||
+          !rawConfig.publicBaseUrl ||
+          new URL(rawConfig.publicBaseUrl).protocol !== 'https:')
+      ) {
+        return '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS';
+      }
+
       if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
         return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
       }

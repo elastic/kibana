@@ -257,9 +257,10 @@ describe('selfHttp', () => {
     expect(config.schema.validate({ selfHttp: { target: 'local' } }).selfHttp.target).toBe('local');
   });
 
-  test('accepts outbound certificate authorities', () => {
+  test('accepts outbound certificate authorities for an automatic HTTPS public target', () => {
     expect(
       config.schema.validate({
+        publicBaseUrl: 'https://kibana.example.com',
         selfHttp: {
           ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
         },
@@ -268,6 +269,36 @@ describe('selfHttp', () => {
       target: 'auto',
       ssl: { certificateAuthorities: ['/path/to/ca.pem'] },
     });
+  });
+
+  test.each([
+    {
+      name: 'local target',
+      value: {
+        publicBaseUrl: 'https://kibana.example.com',
+        selfHttp: {
+          target: 'local' as const,
+          ssl: { certificateAuthorities: '/path/to/ca.pem' },
+        },
+      },
+    },
+    {
+      name: 'missing public base URL',
+      value: {
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+    {
+      name: 'HTTP public target',
+      value: {
+        publicBaseUrl: 'http://kibana.example.com',
+        selfHttp: { ssl: { certificateAuthorities: '/path/to/ca.pem' } },
+      },
+    },
+  ])('rejects outbound certificate authorities with $name', ({ value }) => {
+    expect(() => config.schema.validate(value)).toThrow(
+      '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS'
+    );
   });
 
   test('rejects unsupported targets', () => {
