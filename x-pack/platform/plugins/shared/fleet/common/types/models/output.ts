@@ -110,6 +110,8 @@ interface OtlpExporterTlsConfig {
   tpm?: {
     enabled?: boolean;
     path?: string;
+    owner_auth?: string;
+    auth?: string;
   };
 }
 

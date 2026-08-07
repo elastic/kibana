@@ -388,6 +388,8 @@ const OtlpExporterTlsSchema = schema.object({
     schema.object({
       enabled: schema.maybe(schema.boolean()),
       path: schema.maybe(schema.string({ maxLength: 4096 })),
+      owner_auth: schema.maybe(schema.string({ maxLength: 256 })),
+      auth: schema.maybe(schema.string({ maxLength: 256 })),
     })
   ),
 });
