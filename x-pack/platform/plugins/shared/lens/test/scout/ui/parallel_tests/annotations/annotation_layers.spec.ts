@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../../fixtures';
 
 const ANNOTATIONS_PANEL = 'lnsXY_xAnnotationsPanel';
 
