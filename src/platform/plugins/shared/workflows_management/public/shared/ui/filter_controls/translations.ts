@@ -19,7 +19,7 @@ export const PENDING_CHANGES_REMINDER = i18n.translate(
 export const EDIT_CONTROLS = i18n.translate(
   'workflowsManagement.filterControls.contextMenu.editControls',
   {
-    defaultMessage: 'Edit Controls',
+    defaultMessage: 'Edit controls',
   }
 );
 
@@ -66,14 +66,14 @@ export const FILTER_GROUP_BANNER_MESSAGE = i18n.translate(
 export const CONTEXT_MENU_RESET_TOOLTIP = i18n.translate(
   'workflowsManagement.filterControls.contextMenu.resetTooltip',
   {
-    defaultMessage: 'Reset Controls to factory settings',
+    defaultMessage: 'Reset controls to factory settings',
   }
 );
 
 export const CONTEXT_MENU_RESET = i18n.translate(
   'workflowsManagement.filterControls.contextMenu.reset',
   {
-    defaultMessage: 'Reset Controls',
+    defaultMessage: 'Reset controls',
   }
 );
 
