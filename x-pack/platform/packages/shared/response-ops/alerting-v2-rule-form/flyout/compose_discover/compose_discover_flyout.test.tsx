@@ -103,6 +103,19 @@ jest.mock('./compose_discover_form', () => {
           >
             Set form time field
           </button>
+          <button
+            data-test-subj="mockSetNonRepresentableQuery"
+            onClick={() =>
+              setValue(
+                'query',
+                { format: 'standalone', breach: { query: 'FROM logs-*' } },
+                { shouldDirty: true }
+              )
+            }
+            type="button"
+          >
+            Set non-representable query
+          </button>
         </div>
       );
     },
@@ -1507,6 +1520,67 @@ describe('ComposeDiscoverFlyout', () => {
       clickEditMode('form');
 
       expect(getLatestFormProps().state.step).toBe(2);
+    });
+  });
+
+  describe('YAML lock for a non-representable live form state', () => {
+    const toggleToFormWith = (values: FormValues) => {
+      renderFlyout({ mode: 'create' });
+      clickEditMode('yaml');
+      mockParseYamlToFormValues = () => ({ values, error: null });
+      clickEditMode('form');
+    };
+
+    it('stays in YAML mode and disables the toggle for alert + standalone', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+      });
+
+      expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+    });
+
+    it('stays in YAML mode and disables the toggle for signal + composed', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'signal',
+        query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE a > 1' } },
+      });
+
+      expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+    });
+
+    it('returns to Form view for a representable alert + composed state', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE a > 1' } },
+      });
+
+      expect(screen.queryByTestId('composeDiscoverYamlBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('does not lock the toggle when a non-representable query is set from Form mode', () => {
+      // Not reachable via any real UI path today (Form-mode controls always keep kind/query.format
+      // paired) — this pins the escape hatch in case that ever changes.
+      renderFlyout({ mode: 'create' });
+
+      fireEvent.click(screen.getByTestId('mockSetNonRepresentableQuery'));
+
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).not.toBeDisabled());
     });
   });
 

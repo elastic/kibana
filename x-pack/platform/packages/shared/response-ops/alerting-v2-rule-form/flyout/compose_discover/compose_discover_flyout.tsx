@@ -36,7 +36,10 @@ import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/t
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
-import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
+import {
+  isNonRepresentableRule,
+  isNonRepresentableFormState,
+} from '../../form/utils/is_non_representable';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -483,6 +486,15 @@ export function ComposeDiscoverFlyout({
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+  const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
+  const watchedNoDataStrategy = useWatch({ control: methods.control, name: 'noDataStrategy' });
+
+  const isFormStateNonRepresentable = isNonRepresentableFormState({
+    kind: isAlert ? 'alert' : 'signal',
+    query: watchedQuery,
+    recoveryStrategy: watchedRecoveryStrategy,
+    noDataStrategy: watchedNoDataStrategy,
+  });
 
   const timeFieldResolutionQuery = useMemo(
     () =>
@@ -815,8 +827,14 @@ export function ComposeDiscoverFlyout({
           }
         }
 
+        const currentValues = methods.getValues();
+        if (isNonRepresentableFormState(currentValues)) {
+          /* Stay in YAML mode — the Form view has no editor for this shape. */
+          return;
+        }
+
         /* Make sure step is realigned when switching back to the rule form from the yaml form */
-        const currentKindIsAlert = methods.getValues('kind') === 'alert';
+        const currentKindIsAlert = currentValues.kind === 'alert';
         const stepCount = (
           builderType ? getBuilderStepIds(currentKindIsAlert) : getStepIds(currentKindIsAlert)
         ).length;
@@ -1161,10 +1179,15 @@ export function ComposeDiscoverFlyout({
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
   // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
   const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
-  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked;
+  /*
+   * Only traps the toggle while already in YAML mode — a non-representable
+   * form state reached from Form mode must still be able to open YAML to fix it.
+   */
+  const yamlLockedByFormState = uiState.yamlMode && isFormStateNonRepresentable;
+  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked || yamlLockedByFormState;
 
   const getModeToggleTooltip = (): string | undefined => {
-    if (forceYamlMode) return YAML_ONLY_TOOLTIP;
+    if (forceYamlMode || yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
     if (modeToggleSandboxLocked) return SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP;
     return undefined;
   };
