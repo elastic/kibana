@@ -15,13 +15,6 @@ const engineField = z
   .literal('v2')
   .describe('The alerting engine this template targets. Always "v2" for v2 templates.');
 
-/**
- * Alerting v2 rule template attributes.
- *
- * Create-rule fields are nested under `rule` so template storage can evolve
- * independently of top-level SO metadata (`engine`). Uses the full create-rule
- * schema (including cross-field refines), not only the base object shape.
- */
 export const ruleTemplateDataSchema = z
   .object({
     engine: engineField,
@@ -32,11 +25,6 @@ export const ruleTemplateDataSchema = z
 
 export type RuleTemplateData = z.infer<typeof ruleTemplateDataSchema>;
 
-/**
- * A rule template as returned by the read APIs: the stored attributes plus the
- * saved-object `id`. Templates are installed by Fleet packages rather than
- * created through the API, so there is no created/updated audit metadata.
- */
 export const ruleTemplateResponseSchema = z
   .object({
     id: z.string().describe('The identifier for the rule template.'),
@@ -49,11 +37,9 @@ export const ruleTemplateResponseSchema = z
 
 export type RuleTemplateResponse = z.infer<typeof ruleTemplateResponseSchema>;
 
-/** Sort field for the find rule templates API. */
 export const findRuleTemplatesSortFieldSchema = z.enum(['name', 'tags']);
 export type FindRuleTemplatesSortField = z.infer<typeof findRuleTemplatesSortFieldSchema>;
 
-/** Query parameters for the find rule templates (list) API. */
 export const findRuleTemplatesRequestSchema = z.object({
   page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   per_page: z.coerce
@@ -82,7 +68,6 @@ export const findRuleTemplatesRequestSchema = z.object({
 
 export type FindRuleTemplatesRequest = z.infer<typeof findRuleTemplatesRequestSchema>;
 
-/** Paginated list response for the find rule templates API. */
 export const findRuleTemplatesResponseSchema = z
   .object({
     items: z.array(ruleTemplateResponseSchema).describe('The list of rule templates.'),
@@ -94,14 +79,12 @@ export const findRuleTemplatesResponseSchema = z
 
 export type FindRuleTemplatesResponse = z.infer<typeof findRuleTemplatesResponseSchema>;
 
-/** Path parameters for the single rule template API. */
 export const ruleTemplateIdParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule template.'),
 });
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;
 
-/** Query parameters for the rule template tags API. */
 export const ruleTemplateTagsRequestSchema = z.object({
   search: z
     .string()
@@ -114,7 +97,6 @@ export const ruleTemplateTagsRequestSchema = z.object({
 
 export type RuleTemplateTagsRequest = z.infer<typeof ruleTemplateTagsRequestSchema>;
 
-/** Rule template tags response schema. */
 export const ruleTemplateTagsResponseSchema = z
   .object({
     tags: z.array(z.string()).describe('The list of unique rule template tags.'),
