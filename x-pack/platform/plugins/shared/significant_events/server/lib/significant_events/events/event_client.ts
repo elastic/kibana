@@ -234,8 +234,6 @@ export class EventClient {
 
       if (options.status?.length) {
         query.where`${esql.col('status')} IN (${options.status.map((status) => esql.str(status))})`;
-      } else if (!options.eventIds?.length) {
-        query.where`${esql.col('status')} != ${esql.str('pending')}`;
       }
       if (options.severity?.length) {
         query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
@@ -278,11 +276,10 @@ export class EventClient {
   }
 
   /**
-   * Returns the latest version per event_id for all active events (status IN pending/open)
-   * within the given time range, optionally narrowed to candidate stream/rule identities so the
-   * scan stays proportional to the write batch instead of the whole space. The status and
-   * candidate filters are applied after grouping so a closed/dismissed event whose earlier
-   * version was pending is correctly excluded.
+   * Returns the latest version per event_id for all active (status "open") events within the
+   * given time range, optionally narrowed to candidate stream/rule identities so the scan stays
+   * proportional to the write batch instead of the whole space. The status and candidate filters
+   * are applied after grouping so a closed/dismissed event is correctly excluded.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With stream+rule narrowing the result
    * set is proportional to the write batch, so this limit is never approached in practice.

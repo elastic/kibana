@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ADD_PANEL_TRIGGER,
-  ON_OPEN_PANEL_MENU,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DashboardStartDependencies } from '../plugin';
 import {
   ACTION_ADD_SECTION,
@@ -22,7 +18,7 @@ import {
   ACTION_EXPORT_CSV,
   ACTION_EXPORT_JSON,
   ACTION_UNLINK_FROM_LIBRARY,
-  BADGE_FILTERS_NOTIFICATION,
+  ACTION_FILTERS_NOTIFICATION,
 } from './constants';
 
 export const registerActions = async (plugins: DashboardStartDependencies) => {
@@ -40,11 +36,11 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPAND_PANEL);
 
-  uiActions.registerActionAsync(BADGE_FILTERS_NOTIFICATION, async () => {
+  uiActions.registerActionAsync(ACTION_FILTERS_NOTIFICATION, async () => {
     const { FiltersNotificationAction } = await import('../dashboard_renderer/dashboard_module');
     return new FiltersNotificationAction();
   });
-  uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
+  uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_FILTERS_NOTIFICATION);
 
   uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
     const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');

@@ -40,14 +40,27 @@ import {
   SELECT_URGENCY,
 } from '../screens/edit_connector';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { CASES_URL } from '../urls/navigation';
+import { visit } from './navigation';
 
 export const backToCases = () => {
-  cy.get(BACK_TO_CASES_BTN).click({ force: true });
+  cy.get('body').then(($body) => {
+    if ($body.find(BACK_TO_CASES_BTN).length > 0) {
+      cy.get(BACK_TO_CASES_BTN).click();
+    } else {
+      visit(CASES_URL);
+    }
+  });
 };
 
 export const filterStatusOpen = () => {
   cy.get(ALL_CASES_STATUS_FILTER).click();
   cy.get(ALL_CASES_OPEN_FILTER).click();
+  // The status filter is a multi-select popover that stays open after picking an option and can
+  // cover the case rows below, blocking later clicks (e.g. on the case title link). Toggle it
+  // closed and wait for the option list to unmount before moving on.
+  cy.get(ALL_CASES_STATUS_FILTER).click();
+  cy.get(ALL_CASES_OPEN_FILTER).should('not.exist');
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
