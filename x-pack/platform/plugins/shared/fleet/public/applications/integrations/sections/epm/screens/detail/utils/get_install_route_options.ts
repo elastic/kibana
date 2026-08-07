@@ -90,5 +90,11 @@ export const getInstallPkgRouteOptions = ({
     onCancelUrl: currentPath,
   };
 
+  // Design prototype (kk/aws-onboarding-prototype): the top-level AWS package
+  // opens the guided AWS onboarding flow instead of the raw policy form.
+  if (/^aws(-\d|$)/.test(pkgkey) && !integration) {
+    return [INTEGRATIONS_PLUGIN_ID, { path: '/aws-onboarding', state }];
+  }
+
   return [PLUGIN_ID, { path, state }];
 };

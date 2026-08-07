@@ -16,6 +16,7 @@ import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } fr
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
 
 import { EPMHomePage } from './screens/home';
+import { AwsOnboardingPage } from './screens/aws_onboarding';
 import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
@@ -29,6 +30,9 @@ export const EPMApp: React.FunctionComponent = () => {
 
   return (
     <Routes>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_aws_onboarding}>
+        <AwsOnboardingPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
       </Route>
