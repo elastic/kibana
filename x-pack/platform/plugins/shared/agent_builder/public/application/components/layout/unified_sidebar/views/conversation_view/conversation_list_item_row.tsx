@@ -20,8 +20,6 @@ import {
   EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
-  type EuiContextMenuItemProps,
-  type EuiDisabledProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -41,16 +39,6 @@ import {
 import { BaseDeleteConversationModal } from '../../../../conversations/delete_conversation_modal';
 import { BaseRenameConversationModal } from '../../../../conversations/rename_conversation_modal';
 import { ConversationStatusIndicator } from './conversation_status_indicator';
-
-/**
- * `EuiContextMenuItem` supports `hasAriaDisabled` at runtime — keeping a disabled item focusable so
- * its `toolTipContent` stays reachable — but does not declare the prop yet, so widen its props with
- * EUI's own `EuiDisabledProps`.
- *
- * Delete once https://github.com/elastic/eui/pull/9870 ships and Kibana picks up that EUI release.
- */
-const AriaDisabledContextMenuItem: React.FC<EuiContextMenuItemProps & EuiDisabledProps> =
-  EuiContextMenuItem;
 
 const ACTIONS_CLASS = 'agentBuilderSidebarConversationListRowActions';
 const STATUS_INDICATOR_CLASS = 'agentBuilderSidebarConversationListRowStatusIndicator';
@@ -82,12 +70,6 @@ const labels = {
   }),
   deleteError: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteError', {
     defaultMessage: 'Failed to delete conversation',
-  }),
-  renameNotAllowed: i18n.translate('xpack.agentBuilder.sidebar.conversationList.renameNotAllowed', {
-    defaultMessage: 'You do not have permission to rename this conversation.',
-  }),
-  deleteNotAllowed: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteNotAllowed', {
-    defaultMessage: 'You do not have permission to delete this conversation.',
   }),
 };
 
@@ -238,24 +220,25 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
   const menuItems = useMemo(
     () => [
-      <AriaDisabledContextMenuItem
-        key="rename"
-        icon="pencil"
-        disabled={!canRename}
-        hasAriaDisabled={!canRename}
-        toolTipContent={canRename ? undefined : labels.renameNotAllowed}
-        data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
-        onClick={() => {
-          closePopover();
-          setIsRenameModalOpen(true);
-        }}
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.sidebar,
-          action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
-        })}
-      >
-        {labels.rename}
-      </AriaDisabledContextMenuItem>,
+      ...(canRename
+        ? [
+            <EuiContextMenuItem
+              key="rename"
+              icon="pencil"
+              data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
+              onClick={() => {
+                closePopover();
+                setIsRenameModalOpen(true);
+              }}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
+              })}
+            >
+              {labels.rename}
+            </EuiContextMenuItem>,
+          ]
+        : []),
       <EuiContextMenuItem
         key="read-status"
         icon={isUnread ? 'eyeClosed' : 'eye'}
@@ -296,31 +279,28 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       >
         {isPinned ? labels.unpin : labels.pin}
       </EuiContextMenuItem>,
-      <AriaDisabledContextMenuItem
-        key="delete"
-        icon={<EuiIcon type="trash" color={canDelete ? 'danger' : 'subdued'} aria-hidden={true} />}
-        disabled={!canDelete}
-        hasAriaDisabled={!canDelete}
-        toolTipContent={canDelete ? undefined : labels.deleteNotAllowed}
-        data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
-        css={
-          canDelete
-            ? css`
+      ...(canDelete
+        ? [
+            <EuiContextMenuItem
+              key="delete"
+              icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+              data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
+              css={css`
                 color: ${euiTheme.colors.danger};
-              `
-            : undefined
-        }
-        onClick={() => {
-          closePopover();
-          setIsDeleteModalOpen(true);
-        }}
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.sidebar,
-          action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
-        })}
-      >
-        {labels.delete}
-      </AriaDisabledContextMenuItem>,
+              `}
+              onClick={() => {
+                closePopover();
+                setIsDeleteModalOpen(true);
+              }}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
+              })}
+            >
+              {labels.delete}
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ],
     [
       canDelete,

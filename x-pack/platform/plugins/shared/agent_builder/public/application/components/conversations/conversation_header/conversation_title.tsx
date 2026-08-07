@@ -13,8 +13,6 @@ import {
   EuiIcon,
   EuiPopover,
   useEuiTheme,
-  type EuiContextMenuItemProps,
-  type EuiDisabledProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -28,28 +26,12 @@ import {
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
-/**
- * `EuiContextMenuItem` supports `hasAriaDisabled` at runtime — keeping a disabled item focusable so
- * its `toolTipContent` stays reachable — but does not declare the prop yet, so widen its props with
- * EUI's own `EuiDisabledProps`.
- *
- * Delete once https://github.com/elastic/eui/pull/9870 ships and Kibana picks up that EUI release.
- */
-const AriaDisabledContextMenuItem: React.FC<EuiContextMenuItemProps & EuiDisabledProps> =
-  EuiContextMenuItem;
-
 const labels = {
   rename: i18n.translate('xpack.agentBuilder.conversationTitle.rename', {
     defaultMessage: 'Rename',
   }),
   delete: i18n.translate('xpack.agentBuilder.conversationTitle.delete', {
     defaultMessage: 'Delete',
-  }),
-  renameNotAllowed: i18n.translate('xpack.agentBuilder.conversationTitle.renameNotAllowed', {
-    defaultMessage: 'You do not have permission to rename this conversation.',
-  }),
-  deleteNotAllowed: i18n.translate('xpack.agentBuilder.conversationTitle.deleteNotAllowed', {
-    defaultMessage: 'You do not have permission to delete this conversation.',
   }),
   newConversation: i18n.translate('xpack.agentBuilder.conversationTitle.newConversation', {
     defaultMessage: 'New conversation',
@@ -75,8 +57,54 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
 
-  // No popover for unsaved conversations — just show the title
-  if (!hasPersistedConversation) {
+  const menuItems = [
+    ...(canRename
+      ? [
+          <EuiContextMenuItem
+            key="rename"
+            icon="pencil"
+            onClick={() => {
+              setIsPopoverOpen(false);
+              setIsRenameModalOpen(true);
+            }}
+            data-test-subj="agentBuilderConversationRenameButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
+              detail: 'conversation',
+            })}
+          >
+            {labels.rename}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(canDelete
+      ? [
+          <EuiContextMenuItem
+            key="delete"
+            icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+            onClick={() => {
+              setIsPopoverOpen(false);
+              setIsDeleteModalOpen(true);
+            }}
+            css={css`
+              color: ${euiTheme.colors.danger};
+            `}
+            data-test-subj="agentBuilderConversationDeleteButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
+              detail: 'conversation',
+            })}
+          >
+            {labels.delete}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
+
+  // Nothing to open the popover for: an unsaved conversation, or one the user may not act on.
+  if (!hasPersistedConversation || menuItems.length === 0) {
     return (
       <h4
         id={ariaLabelledBy}
@@ -89,54 +117,6 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       </h4>
     );
   }
-
-  const menuItems = [
-    <AriaDisabledContextMenuItem
-      key="rename"
-      icon="pencil"
-      disabled={!canRename}
-      hasAriaDisabled={!canRename}
-      toolTipContent={canRename ? undefined : labels.renameNotAllowed}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setIsRenameModalOpen(true);
-      }}
-      data-test-subj="agentBuilderConversationRenameButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
-        detail: 'conversation',
-      })}
-    >
-      {labels.rename}
-    </AriaDisabledContextMenuItem>,
-    <AriaDisabledContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" color={canDelete ? 'danger' : 'subdued'} aria-hidden={true} />}
-      disabled={!canDelete}
-      hasAriaDisabled={!canDelete}
-      toolTipContent={canDelete ? undefined : labels.deleteNotAllowed}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setIsDeleteModalOpen(true);
-      }}
-      css={
-        canDelete
-          ? css`
-              color: ${euiTheme.colors.danger};
-            `
-          : undefined
-      }
-      data-test-subj="agentBuilderConversationDeleteButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
-        detail: 'conversation',
-      })}
-    >
-      {labels.delete}
-    </AriaDisabledContextMenuItem>,
-  ];
 
   const titleButtonStyles = css`
     max-width: 100%;

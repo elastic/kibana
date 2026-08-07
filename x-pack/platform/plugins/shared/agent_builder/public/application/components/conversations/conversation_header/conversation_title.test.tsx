@@ -22,21 +22,6 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationPermissions: jest.fn(),
 }));
 
-/**
- * Mirrors EUI's `focusEuiToolTipTrigger` test helper, which its type declarations do not export
- * yet: plain `fireEvent.focus` does not set `:focus-visible` in jsdom, so the tooltip never shows.
- *
- * Delete once https://github.com/elastic/eui/pull/9870 ships and Kibana picks up that EUI release,
- * then import it from `@elastic/eui/lib/test/rtl`.
- */
-const focusEuiToolTipTrigger = (element: HTMLElement) => {
-  const spy = jest
-    .spyOn(element, 'matches')
-    .mockImplementation((selector) => selector === ':focus-visible');
-  fireEvent.focus(element);
-  return () => spy.mockRestore();
-};
-
 jest.mock('../rename_conversation_modal', () => ({
   RenameConversationModal: () => null,
 }));
@@ -59,58 +44,39 @@ const renderTitle = (permissions: ConversationPermissions) => {
       <ConversationTitle />
     </IntlProvider>
   );
-
-  fireEvent.click(screen.getByTestId('agentBuilderConversationTitleButton'));
 };
+
+const openTitleMenu = () =>
+  fireEvent.click(screen.getByTestId('agentBuilderConversationTitleButton'));
 
 describe('ConversationTitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('enables rename and delete when both are permitted', () => {
+  it('offers rename and delete when both are permitted', () => {
     renderTitle({ rename: true, delete: true });
+    openTitleMenu();
 
-    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeEnabled();
-    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeEnabled();
+    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeInTheDocument();
   });
 
-  // Denied items are disabled via `aria-disabled` (`hasAriaDisabled`), which keeps them focusable
-  // so the tooltip explaining the denial remains reachable — see `AriaDisabledContextMenuItem`.
-  it('disables rename and delete when neither is permitted', () => {
-    renderTitle({ rename: false, delete: false });
-
-    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-  });
-
-  it('explains why rename and delete are unavailable', async () => {
-    renderTitle({ rename: false, delete: false });
-
-    const cleanup = focusEuiToolTipTrigger(
-      screen.getByTestId('agentBuilderConversationRenameButton')
-    );
-
-    expect(
-      await screen.findByText('You do not have permission to rename this conversation.')
-    ).toBeInTheDocument();
-
-    cleanup();
-  });
-
-  it('gates rename and delete independently', () => {
+  it('offers only the permitted action', () => {
     renderTitle({ rename: true, delete: false });
+    openTitleMenu();
 
-    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeEnabled();
-    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toHaveAttribute(
-      'aria-disabled',
-      'true'
+    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderConversationDeleteButton')).not.toBeInTheDocument();
+  });
+
+  // The menu holds nothing else, so an empty popover would be a dead end.
+  it('renders a plain title with no menu when neither action is permitted', () => {
+    renderTitle({ rename: false, delete: false });
+
+    expect(screen.queryByTestId('agentBuilderConversationTitleButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationTitle')).toHaveTextContent(
+      'My conversation'
     );
   });
 });
