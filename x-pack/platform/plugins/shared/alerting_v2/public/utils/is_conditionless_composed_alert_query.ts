@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Query } from '@kbn/alerting-v2-schemas';
+
 /**
  * True when a submitted query is composed with an empty/whitespace breach
  * segment — the temporary save-fail shape until empty segments are allowed.
@@ -12,7 +14,9 @@
  * Signal rules cannot be composed (API requires standalone), so kind does not
  * need to be checked.
  */
-export const isConditionlessComposedAlertQuery = (query?: {
-  format?: string;
-  breach?: { segment?: string };
-}): boolean => query?.format === 'composed' && (query.breach?.segment ?? '').trim().length === 0;
+export const isConditionlessComposedAlertQuery = (query?: Query): boolean => {
+  if (!query || query.format !== 'composed') {
+    return false;
+  }
+  return query.breach.segment.trim().length === 0;
+};

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/alerting-v2-schemas';
 
 export const CREATE_RULE_ERROR_TITLE = i18n.translate(
   'xpack.alertingV2.hooks.useCreateRule.errorMessage',
@@ -32,20 +33,14 @@ export const UPDATE_RULE_ERROR_TITLE = i18n.translate(
 export type OnRuleMutationErrorToast = (
   error: Error,
   showDefaultToast: () => void,
-  query?: {
-    format?: string;
-    breach?: { segment?: string };
-  }
+  query?: Query
 ) => void;
 
 export const runRuleMutationErrorToast = (
   onErrorToast: OnRuleMutationErrorToast | undefined,
   error: Error,
   showDefaultToast: () => void,
-  query?: {
-    format?: string;
-    breach?: { segment?: string };
-  }
+  query?: Query
 ): void => {
   if (onErrorToast) {
     onErrorToast(error, showDefaultToast, query);

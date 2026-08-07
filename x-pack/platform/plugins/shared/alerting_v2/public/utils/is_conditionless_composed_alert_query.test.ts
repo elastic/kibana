@@ -12,6 +12,7 @@ describe('isConditionlessComposedAlertQuery', () => {
     expect(
       isConditionlessComposedAlertQuery({
         format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*)',
         breach: { segment: '' },
       })
     ).toBe(true);
@@ -21,6 +22,7 @@ describe('isConditionlessComposedAlertQuery', () => {
     expect(
       isConditionlessComposedAlertQuery({
         format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*)',
         breach: { segment: '   ' },
       })
     ).toBe(true);
@@ -30,6 +32,7 @@ describe('isConditionlessComposedAlertQuery', () => {
     expect(
       isConditionlessComposedAlertQuery({
         format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*)',
         breach: { segment: 'WHERE count > 0' },
       })
     ).toBe(false);
@@ -39,7 +42,7 @@ describe('isConditionlessComposedAlertQuery', () => {
     expect(
       isConditionlessComposedAlertQuery({
         format: 'standalone',
-        breach: { segment: '' },
+        breach: { query: 'FROM logs-* | LIMIT 10' },
       })
     ).toBe(false);
   });

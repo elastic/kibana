@@ -145,7 +145,7 @@ export function discoverQueryToComposed(inlinedQuery: string): {
  * Outcome of splitting a unified query for the form summary:
  *
  * - 'success'            — base and alert condition both identified
- * - 'no_alert_condition' — base defined, no alert condition (every row is a breach)
+ * - 'no_alert_condition' — base defined, no alert condition
  * - 'split_failed'       — heuristic could not isolate a base (empty base)
  * - 'empty'              — no query entered
  */
@@ -157,16 +157,12 @@ export interface SplitRuleQueryResult {
 }
 
 /**
- * Maps a unified ES|QL query into the rule query shape for an alert rule,
- * alongside an outcome that drives the form summary copy/callouts.
+ * Maps a unified ES|QL query into a composed alert query and an outcome for
+ * the form summary.
  *
- * Always returns `composed`. A missing alert condition is an empty
- * `breach.segment` — the schema rejects that at save, so alert queries keep
- * a distinct structure from signal's `standalone` format.
- *
- * - `success` (base + alert condition) → composed with both filled.
- * - `no_alert_condition` (base only, no WHERE) → composed with empty segment.
- * - `split_failed` / `empty` → composed so the summary can flag the state.
+ * - `success` — base and breach segment both set.
+ * - `no_alert_condition` — base set, empty breach segment.
+ * - `split_failed` / `empty` — incomplete split; summary flags the state.
  */
 export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult {
   const { base, alertBlock } = splitQuery(fullQuery);

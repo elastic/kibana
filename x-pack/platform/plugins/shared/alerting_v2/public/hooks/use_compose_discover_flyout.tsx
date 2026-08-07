@@ -11,7 +11,7 @@ import type {
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
-import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery, getRecoverEsqlQuery, type Query } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -87,15 +87,7 @@ export const useComposeDiscoverFlyout = ({
    * `query` comes from the mutation variables (the payload that just failed).
    */
   const showBadRequestReviewQueryToast = useCallback(
-    (
-      title: string,
-      error: Error,
-      showDefaultToast: () => void,
-      query?: {
-        format?: string;
-        breach?: { segment?: string };
-      }
-    ) => {
+    (title: string, error: Error, showDefaultToast: () => void, query?: Query) => {
       if (!isBadRequestError(error) || !isConditionlessComposedAlertQuery(query)) {
         showDefaultToast();
         return;
