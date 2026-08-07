@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
+export {
+  getAlertingV2AutomationNavItems,
+  getAlertingV2ManagementNavPanel,
+} from './get_management_nav_panel';
+export type { AlertingV2AutomationNavMode } from './get_management_nav_panel';
+
 export {
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,

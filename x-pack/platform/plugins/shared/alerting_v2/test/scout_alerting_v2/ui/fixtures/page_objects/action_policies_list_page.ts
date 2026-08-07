@@ -36,11 +36,11 @@ export class ActionPoliciesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/action_policies');
+    await this.page.gotoApp('management/insightsAndAlerting/action_policies');
   }
 
   async gotoEdit(policyId: string) {
-    await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
+    await this.page.gotoApp(`management/insightsAndAlerting/action_policies/edit/${policyId}`);
   }
 
   detailsLink(policyName: string) {

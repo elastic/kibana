@@ -12,10 +12,15 @@ export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 
 export const ALERTING_V2_SECTION_ID = 'alertingV2';
+/** Classic SM section that owns Action policies + Execution history (Automation and reporting). */
+export const ALERTING_V2_AUTOMATION_SECTION_ID = 'insightsAndAlerting';
 export const ALERTING_V2_RULES_APP_ID = 'rules';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
 export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
 export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
+
+export const ALERTING_V2_ACTION_POLICIES_BASE_PATH = `/app/management/${ALERTING_V2_AUTOMATION_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
+export const ALERTING_V2_EXECUTION_HISTORY_BASE_PATH = `/app/management/${ALERTING_V2_AUTOMATION_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const ALERTING_V2_RULE_API_PATH = '/api/alerting/v2/rules' as const;
 export const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts' as const;

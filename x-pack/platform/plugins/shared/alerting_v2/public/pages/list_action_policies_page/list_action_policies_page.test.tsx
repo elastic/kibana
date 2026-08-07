@@ -83,7 +83,7 @@ describe('ListActionPoliciesPage', () => {
     await user.click(screen.getByTestId('createActionPolicyButton'));
 
     expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/action_policies/create'
+      '/app/management/insightsAndAlerting/action_policies/create'
     );
   });
 

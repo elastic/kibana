@@ -257,7 +257,59 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
+              visibleIn: ['projectSideNav', 'globalSearch'],
+            },
+          ],
+          status: AppStatus.accessible,
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
+        });
+      });
+
+      it('exposes classic Alerts as Inbox via alerts_inbox deep link', () => {
+        const capabilities = {
+          logs: { show: false },
+          observabilityAlerts: { show: true },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const deepLinks = [
+          {
+            id: 'alerts_inbox',
+            title: 'Inbox',
+            order: 8001,
+            path: '/alerts/inbox',
+            visibleIn: [],
+          },
+          {
+            id: 'alerting_rules_hub',
+            title: 'Rules',
+            order: 8003,
+            path: '/alerts/rules-hub',
+            visibleIn: [],
+          },
+        ];
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
+
+        expect(callback).toHaveBeenCalledWith({
+          deepLinks: [
+            {
+              id: 'alerts_inbox',
+              title: 'Alerts',
+              order: 8001,
+              path: '/alerts/inbox',
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+            },
+            {
+              id: 'alerting_rules_hub',
+              title: 'Rules',
+              order: 8003,
+              path: '/alerts/rules-hub',
+              visibleIn: ['projectSideNav', 'globalSearch'],
             },
           ],
           status: AppStatus.accessible,
@@ -297,7 +349,7 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+              visibleIn: ['projectSideNav', 'globalSearch'],
             },
           ],
           status: AppStatus.accessible,
@@ -335,7 +387,7 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+              visibleIn: ['projectSideNav', 'globalSearch'],
             },
           ],
           status: AppStatus.accessible,

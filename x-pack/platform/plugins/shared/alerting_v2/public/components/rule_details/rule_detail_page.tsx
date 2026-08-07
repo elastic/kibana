@@ -147,9 +147,14 @@ const getRuleDetailMenu = ({
   ],
 });
 
-export const RuleDetailPage: React.FunctionComponent = () => {
+export const RuleDetailPage: React.FunctionComponent<{
+  /** When set (Observability hub), back navigation stays under Observability. */
+  rulesListHref?: string;
+  /** Skip management page template / breadcrumbs when nested under Observability. */
+  embedded?: boolean;
+}> = ({ rulesListHref, embedded = false }) => {
   const rule = useRule();
-  useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
+  useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name }, { enabled: !embedded });
   const { euiTheme } = useEuiTheme();
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
@@ -254,6 +259,127 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     ]
   );
 
+  const header = (
+    <AppHeader
+      title={rule.metadata.name}
+      back={{
+        href: rulesListHref ?? paths.ruleList,
+        label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
+          defaultMessage: 'Rules',
+        }),
+      }}
+      badges={badges}
+      metadata={headerMetadata}
+      menu={canWrite ? menu : undefined}
+      spacing="flush"
+      sticky={false}
+    />
+  );
+
+  const layout = (
+    <EuiSplitPanel.Outer
+      direction="row"
+      hasBorder={false}
+      hasShadow={false}
+      data-test-subj="ruleDetailLayout"
+      css={css`
+        ${largeMediaQuery} {
+          height: 100%;
+        }
+      `}
+    >
+      <EuiSplitPanel.Inner grow paddingSize="none" data-test-subj="ruleDetailOverviewColumn">
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="l"
+          css={css`
+            ${smallMediaQuery} {
+              ${logicalCSS('padding-horizontal', '0')}
+            }
+            ${largeMediaQuery} {
+              height: 100%;
+              overflow-y: auto;
+              ${logicalCSS('padding-left', '0')}
+            }
+          `}
+        >
+          <RuleOverviewSection />
+        </EuiPanel>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner
+        grow={false}
+        paddingSize="none"
+        data-test-subj="ruleDetailSidebarColumn"
+        css={css`
+          min-height: 0;
+          ${logicalCSS('padding-top', euiTheme.size.l)}
+
+          ${largeMediaQuery} {
+            ${logicalCSS('padding-top', '0')}
+            flex-shrink: 0;
+            flex-basis: 400px;
+            min-width: 40px;
+            max-width: 500px;
+            height: 100%;
+            overflow-y: auto;
+            padding: ${euiTheme.size.l};
+            ${logicalCSS('padding-right', '0')}
+            border-left: ${euiTheme.border.thin};
+          }
+        `}
+      >
+        <RuleSidebar />
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
+  );
+
+  const overlays = (
+    <>
+      {showDeleteConfirmation && (
+        <DeleteConfirmationModal
+          onConfirm={handleRuleDelete}
+          onCancel={() => setShowDeleteConfirmation(false)}
+          ruleName={rule.metadata?.name ?? ''}
+          isLoading={isDeleting}
+        />
+      )}
+      {flyout}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div
+        data-test-subj="alertingV2RuleDetailsPage"
+        css={css`
+          ${largeMediaQuery} {
+            display: flex;
+            flex-direction: column;
+            block-size: calc(var(--kbn-application--content-height, 100vh) - ${euiTheme.size.l} * 2);
+          }
+        `}
+      >
+        {header}
+        <div
+          css={css`
+            min-height: 0;
+            margin-block-start: ${euiTheme.border.width.thin};
+            ${largeMediaQuery} {
+              flex: 1 1;
+              display: flex;
+              flex-direction: column;
+              min-height: 0;
+            }
+          `}
+        >
+          {layout}
+        </div>
+        {overlays}
+      </div>
+    );
+  }
+
   return (
     <KibanaPageTemplate
       paddingSize="none"
@@ -267,20 +393,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         }
       `}
     >
-      <AppHeader
-        title={rule.metadata.name}
-        back={{
-          href: paths.ruleList,
-          label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
-            defaultMessage: 'Rules',
-          }),
-        }}
-        badges={badges}
-        metadata={headerMetadata}
-        menu={canWrite ? menu : undefined}
-        spacing="flush"
-        sticky={false}
-      />
+      {header}
       <KibanaPageTemplate.Section
         paddingSize="none"
         grow
@@ -296,72 +409,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           `,
         }}
       >
-        <EuiSplitPanel.Outer
-          direction="row"
-          hasBorder={false}
-          hasShadow={false}
-          data-test-subj="ruleDetailLayout"
-          css={css`
-            ${largeMediaQuery} {
-              height: 100%;
-            }
-          `}
-        >
-          <EuiSplitPanel.Inner grow paddingSize="none" data-test-subj="ruleDetailOverviewColumn">
-            <EuiPanel
-              hasBorder={false}
-              hasShadow={false}
-              paddingSize="l"
-              css={css`
-                ${smallMediaQuery} {
-                  ${logicalCSS('padding-horizontal', '0')}
-                }
-                ${largeMediaQuery} {
-                  height: 100%;
-                  overflow-y: auto;
-                  ${logicalCSS('padding-left', '0')}
-                }
-              `}
-            >
-              <RuleOverviewSection />
-            </EuiPanel>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner
-            grow={false}
-            paddingSize="none"
-            data-test-subj="ruleDetailSidebarColumn"
-            css={css`
-              min-height: 0;
-              ${logicalCSS('padding-top', euiTheme.size.l)}
-
-              ${largeMediaQuery} {
-                ${logicalCSS('padding-top', '0')}
-                flex-shrink: 0;
-                flex-basis: 400px;
-                min-width: 40px;
-                max-width: 500px;
-                height: 100%;
-                overflow-y: auto;
-                padding: ${euiTheme.size.l};
-                ${logicalCSS('padding-right', '0')}
-                border-left: ${euiTheme.border.thin};
-              }
-            `}
-          >
-            <RuleSidebar />
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
+        {layout}
       </KibanaPageTemplate.Section>
-
-      {showDeleteConfirmation && (
-        <DeleteConfirmationModal
-          onConfirm={handleRuleDelete}
-          onCancel={() => setShowDeleteConfirmation(false)}
-          ruleName={rule.metadata?.name ?? ''}
-          isLoading={isDeleting}
-        />
-      )}
-      {flyout}
+      {overlays}
     </KibanaPageTemplate>
   );
 };

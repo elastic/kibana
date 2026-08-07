@@ -20,6 +20,9 @@ import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { RulePage } from '../pages/rules/rule';
 import {
   ALERT_DETAIL_PATH,
+  ALERTS_INBOX_PATH,
+  ALERTING_RULES_HUB_PATH,
+  ALERTING_RULES_HUB_RULE_DETAIL_PATH,
   ALERTS_PATH,
   ANNOTATIONS_PATH,
   CASES_PATH,
@@ -36,10 +39,17 @@ import {
   OVERVIEW_PATH,
   ROOT_PATH,
   RULE_DETAIL_PATH,
+  RULES_LIBRARY_PATH,
   RULES_LOGS_PATH,
   RULES_PATH,
+  SLO_MANAGE_REDIRECT_PATH,
+  SLO_SETTINGS_REDIRECT_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
+import { RulesHubPage } from '../pages/alerting_ia/rules_hub/rules_hub_page';
+import { RulesHubRuleDetailPage } from '../pages/alerting_ia/rules_hub/rules_hub_rule_detail_page';
+import { RulesLibraryPage } from '../pages/alerting_ia/rules_library/rules_library_page';
+import { InboxPage } from '../pages/alerting_ia/inbox/inbox_page';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -128,6 +138,48 @@ const routes: Record<RoutePath, RouteDefinition> = {
     exact: true,
   },
 
+  [ALERTS_INBOX_PATH]: {
+    handler: () => {
+      return <InboxPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [ALERTING_RULES_HUB_PATH]: {
+    handler: () => {
+      return <RulesHubPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [ALERTING_RULES_HUB_RULE_DETAIL_PATH]: {
+    handler: () => {
+      return <RulesHubRuleDetailPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [RULES_LIBRARY_PATH]: {
+    handler: () => {
+      return <RulesLibraryPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [SLO_MANAGE_REDIRECT_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/management" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
+  [SLO_SETTINGS_REDIRECT_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/settings" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
   [ALERTS_PATH]: {
     handler: () => {
       return <AlertsPage />;

@@ -78,6 +78,7 @@ import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -88,6 +89,11 @@ import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
+  ALERTS_INBOX_PATH,
+  ALERTING_RULES_HUB_PATH,
+  RULES_LIBRARY_PATH,
+  SLO_MANAGE_REDIRECT_PATH,
+  SLO_SETTINGS_REDIRECT_PATH,
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
@@ -192,6 +198,7 @@ export interface ObservabilityPublicPluginsStart {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   cps?: CPSPluginStart;
   ingestHub?: IngestHubStart;
+  alertingVTwo?: AlertingV2PublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -213,14 +220,61 @@ export class Plugin
   // in the global navigation will happen in `updateGlobalNavigation`.
   private readonly deepLinks: AppDeepLink[] = [
     {
+      id: 'alerts_inbox',
+      title: i18n.translate('xpack.observability.alertsInboxLinkTitle', {
+        defaultMessage: 'Inbox',
+      }),
+      order: 8001,
+      path: ALERTS_INBOX_PATH,
+      visibleIn: ['projectSideNav'],
+      keywords: ['alerts', 'inbox', 'episodes'],
+    },
+    {
       id: 'alerts',
       title: i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
       }),
-      order: 8001,
+      order: 8002,
       path: ALERTS_PATH,
       visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'alerting_rules_hub',
+      title: i18n.translate('xpack.observability.alertingRulesHubLinkTitle', {
+        defaultMessage: 'Rules',
+      }),
+      order: 8003,
+      path: ALERTING_RULES_HUB_PATH,
+      visibleIn: ['projectSideNav'],
+      keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'rules_library',
+      title: i18n.translate('xpack.observability.rulesLibraryLinkTitle', {
+        defaultMessage: 'Rules Library',
+      }),
+      path: RULES_LIBRARY_PATH,
+      visibleIn: ['projectSideNav'],
+      keywords: ['alerts', 'rules', 'library'],
+    },
+    {
+      id: 'slo_manage',
+      title: i18n.translate('xpack.observability.sloManageLinkTitle', {
+        defaultMessage: 'Manage SLOs',
+      }),
+      path: SLO_MANAGE_REDIRECT_PATH,
+      visibleIn: ['projectSideNav'],
+      keywords: ['slo', 'slos'],
+    },
+    {
+      id: 'slo_settings',
+      title: i18n.translate('xpack.observability.sloSettingsLinkTitle', {
+        defaultMessage: 'Settings',
+      }),
+      path: SLO_SETTINGS_REDIRECT_PATH,
+      visibleIn: ['projectSideNav'],
+      keywords: ['slo', 'slos', 'settings'],
     },
   ];
 
@@ -241,14 +295,13 @@ export class Plugin
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
-    const startServicesPromise = coreSetup.getStartServices();
     if (pluginsSetup.cases) {
       this.deepLinks.push(
         getCasesDeepLinks({
           basePath: CASES_PATH,
           extend: {
             [CasesDeepLinkId.cases]: {
-              order: 8003,
+              order: 8005,
               visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
@@ -283,7 +336,11 @@ export class Plugin
 
       const { pathname, search } = params.history.location;
 
-      if (pathname.startsWith(RULES_PATH)) {
+      // Exact `/alerts/rules` or `/alerts/rules/...` only — do not match
+      // `/alerts/rules-hub` or `/alerts/rules-library` (startsWith(RULES_PATH) would).
+      const isLegacyRulesPath =
+        pathname === RULES_PATH || pathname.startsWith(`${RULES_PATH}/`);
+      if (isLegacyRulesPath) {
         let suffix = pathname.slice(RULES_PATH.length) || '/';
         const isTopLevelRoute =
           suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
@@ -414,112 +471,171 @@ export class Plugin
                 coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
               return chatExperience$.pipe(
-                map((chatExperience) => {
-                  const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+                switchMap((chatExperience) =>
+                  pluginsStart.streams.navigationStatus$.pipe(
+                    map(({ status: streamsStatus }) => {
+                      const showAiAssistant = chatExperience !== AIChatExperience.Agent;
 
-                  const aiAssistantLink =
-                    isAiAssistantEnabled &&
-                    !Boolean(pluginsSetup.serverless) &&
-                    Boolean(pluginsSetup.observabilityAIAssistant) &&
-                    showAiAssistant
-                      ? [
-                          {
-                            label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
-                              defaultMessage: 'AI Assistant',
-                            }),
-                            app: 'observabilityAIAssistant',
-                            path: '/conversations/new',
-                          },
-                        ]
-                      : [];
+                      const aiAssistantLink =
+                        isAiAssistantEnabled &&
+                        !Boolean(pluginsSetup.serverless) &&
+                        Boolean(pluginsSetup.observabilityAIAssistant) &&
+                        showAiAssistant
+                          ? [
+                              {
+                                label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+                                  defaultMessage: 'AI Assistant',
+                                }),
+                                app: 'observabilityAIAssistant',
+                                path: '/conversations/new',
+                              },
+                            ]
+                          : [];
 
-                  const sloLink = coreStart.application.capabilities.slo?.read
-                    ? [
-                        {
-                          label: i18n.translate('xpack.observability.sloLinkTitle', {
-                            defaultMessage: 'SLOs',
-                          }),
-                          app: 'slo',
-                          path: '',
-                        },
-                      ]
-                    : [];
+                      const streamsLink =
+                        streamsStatus === 'enabled'
+                          ? [
+                              {
+                                label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
+                                  defaultMessage: 'Streams',
+                                }),
+                                app: 'streams',
+                                path: '/',
+                                matchPath(currentPath: string) {
+                                  return ['/', ''].some((testPath) =>
+                                    currentPath.startsWith(testPath)
+                                  );
+                                },
+                              },
+                            ]
+                          : [];
 
-                  // Reformat the visible links to be NavigationEntry objects instead of
-                  // AppDeepLink objects.
-                  //
-                  // In our case the deep links and sections being registered are the
-                  // same, and the logic to hide them based on flags or capabilities is
-                  // the same, so we just want to make a new list with the properties
-                  // needed by `registerSections`, which are different than the
-                  // properties used by the deepLinks.
-                  //
-                  // See https://github.com/elastic/kibana/issues/103325.
-                  const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-                  const alertsLinks: NavigationEntry[] = otherLinks
-                    .filter((link) => link.id === 'alerts')
-                    .map((link) => ({
-                      app: observabilityAppId,
-                      label: link.title,
-                      path: link.path ?? '',
-                    }));
+                      const sloLink = coreStart.application.capabilities.slo?.read
+                        ? [
+                            {
+                              label: i18n.translate('xpack.observability.sloLinkTitle', {
+                                defaultMessage: 'SLOs',
+                              }),
+                              app: 'slo',
+                              path: '',
+                            },
+                          ]
+                        : [];
 
-                  const casesLink: NavigationEntry[] = otherLinks
-                    .filter((link) => link.id === 'cases' && pluginsStart.cases)
-                    .map((link) => ({
-                      app: observabilityAppId,
-                      label: link.title,
-                      path: link.path ?? '',
-                    }));
+                      // Reformat visible deep links to NavigationEntry objects for PageTemplate.
+                      // See https://github.com/elastic/kibana/issues/103325.
+                      const otherLinks = deepLinks.filter(
+                        (link) => (link.visibleIn ?? []).length > 0
+                      );
 
-                  return [
-                    {
-                      label: '',
-                      sortKey: 100,
-                      entries: [
-                        ...overviewLink,
-                        ...alertsLinks,
+                      const toObsEntry = (link: (typeof otherLinks)[number]) => ({
+                        app: observabilityAppId,
+                        label: link.title,
+                        path: link.path ?? '',
+                      });
+
+                      const casesLink: NavigationEntry[] = otherLinks
+                        .filter((link) => link.id === 'cases' && pluginsStart.cases)
+                        .map(toObsEntry);
+
+                      // Classic PageTemplate: Alerts section = Inbox, Alerts, Rules, SLOs.
+                      // Chrome category shows only Alerts→Inbox + SLOs (via deep link visibility).
+                      // Action policies / Maintenance windows stay under Stack Management only.
+                      // Hardcode labels so alerts_inbox chrome title override ("Alerts") does not
+                      // rename the Inbox row here.
+                      const hasAlertsAccess = otherLinks.some(
+                        (link) =>
+                          link.id === 'alerts_inbox' ||
+                          link.id === 'alerts' ||
+                          link.id === 'alerting_rules_hub'
+                      );
+                      const alertsSectionEntries: NavigationEntry[] = [
+                        ...(hasAlertsAccess
+                          ? [
+                              {
+                                app: observabilityAppId,
+                                label: i18n.translate('xpack.observability.alertsInboxLinkTitle', {
+                                  defaultMessage: 'Inbox',
+                                }),
+                                path: ALERTS_INBOX_PATH,
+                              },
+                              {
+                                app: observabilityAppId,
+                                label: i18n.translate('xpack.observability.alertsLinkTitle', {
+                                  defaultMessage: 'Alerts',
+                                }),
+                                path: ALERTS_PATH,
+                                // `/alerts` is a prefix of `/alerts/rules-hub`, `/alerts/inbox`, etc.
+                                // Only select the classic Alerts list (and /alerts/:alertId details).
+                                matchPath: (path: string) => {
+                                  if (path === ALERTS_PATH || path === `${ALERTS_PATH}/`) {
+                                    return true;
+                                  }
+                                  const nested = path.match(/^\/alerts\/([^/?#]+)/);
+                                  if (!nested) {
+                                    return false;
+                                  }
+                                  const reserved = new Set([
+                                    'inbox',
+                                    'rules-hub',
+                                    'rules-library',
+                                    'rules',
+                                    'slos',
+                                  ]);
+                                  return !reserved.has(nested[1]);
+                                },
+                              },
+                              {
+                                app: observabilityAppId,
+                                label: i18n.translate(
+                                  'xpack.observability.alertingRulesHubLinkTitle',
+                                  {
+                                    defaultMessage: 'Rules',
+                                  }
+                                ),
+                                path: ALERTING_RULES_HUB_PATH,
+                                matchPath: (path: string) =>
+                                  path === ALERTING_RULES_HUB_PATH ||
+                                  path.startsWith(`${ALERTING_RULES_HUB_PATH}/`) ||
+                                  // Classic (v1) rules list + rule details under /alerts/rules
+                                  path === RULES_PATH ||
+                                  path.startsWith(`${RULES_PATH}/`),
+                              },
+                            ]
+                          : []),
                         ...sloLink,
-                        ...casesLink,
-                        ...aiAssistantLink,
-                      ],
-                    },
-                  ];
-                })
+                      ];
+
+                      return [
+                        {
+                          label: '',
+                          sortKey: 100,
+                          entries: [
+                            ...overviewLink,
+                            ...casesLink,
+                            ...streamsLink,
+                            ...aiAssistantLink,
+                          ],
+                        },
+                        ...(alertsSectionEntries.length
+                          ? [
+                              {
+                                label: i18n.translate(
+                                  'xpack.observability.navigation.alertsSectionLabel',
+                                  {
+                                    defaultMessage: 'Alerts',
+                                  }
+                                ),
+                                sortKey: 105,
+                                entries: alertsSectionEntries,
+                              },
+                            ]
+                          : []),
+                      ];
+                    })
+                  )
+                )
               );
-            })
-          )
-        )
-      )
-    );
-
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      from(startServicesPromise).pipe(
-        switchMap(([_, pluginsStart]) =>
-          pluginsStart.streams.navigationStatus$.pipe(
-            map(({ status }) => {
-              if (status !== 'enabled') {
-                return [];
-              }
-
-              return [
-                {
-                  label: '',
-                  sortKey: 101,
-                  entries: [
-                    {
-                      label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
-                        defaultMessage: 'Streams',
-                      }),
-                      app: 'streams',
-                      path: '/',
-                      matchPath(currentPath: string) {
-                        return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                      },
-                    },
-                  ],
-                },
-              ];
             })
           )
         )
@@ -548,6 +664,12 @@ export class Plugin
       return pluginsStart.navigation.addSolutionNavigation(
         createDefinition(coreStart, pluginsStart)
       );
+    });
+
+    // POC: start Alerting IA tour whenever solution Obs chrome is active
+    // (not only when the Observability app is mounted).
+    import('./pages/alerting_ia/alerting_ia_tour').then(({ initAlertingIaTour }) => {
+      initAlertingIaTour(coreStart);
     });
 
     return {

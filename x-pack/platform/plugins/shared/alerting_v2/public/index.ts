@@ -52,6 +52,45 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
+const LazyEmbeddedRulesList = React.lazy(() =>
+  import('./pages/rules_list_page/embedded_rules_list').then((m) => ({
+    default: m.EmbeddedRulesList,
+  }))
+);
+
+const EmbeddedRulesList = (props: React.ComponentProps<typeof LazyEmbeddedRulesList>) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyEmbeddedRulesList, props)
+  );
+
+const LazyEmbeddedEpisodesList = React.lazy(() =>
+  import('./pages/alert_episodes_list_page/embedded_episodes_list').then((m) => ({
+    default: m.EmbeddedEpisodesList,
+  }))
+);
+
+const EmbeddedEpisodesList = () =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyEmbeddedEpisodesList)
+  );
+
+const LazyEmbeddedRuleDetails = React.lazy(() =>
+  import('./pages/rules_list_page/embedded_rule_details').then((m) => ({
+    default: m.EmbeddedRuleDetails,
+  }))
+);
+
+const EmbeddedRuleDetails = (props: React.ComponentProps<typeof LazyEmbeddedRuleDetails>) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyEmbeddedRuleDetails, props)
+  );
+
 export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
@@ -65,6 +104,9 @@ const pluginModule = new ContainerModule(({ bind }) => {
     .inSingletonScope();
   bind(Start).toConstantValue({
     CreateRuleOptionsFlyout,
+    EmbeddedRulesList,
+    EmbeddedRuleDetails,
+    EmbeddedEpisodesList,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
@@ -81,11 +123,14 @@ const pluginModule = new ContainerModule(({ bind }) => {
       tip: 'Start exploring our latest alerts experience',
       order: 1,
     });
+    const automationSection = management.sections.section.insightsAndAlerting;
 
     alertingSection.registerApp({
       id: ALERTING_V2_RULES_APP_ID,
       title: 'Rules',
       order: 1,
+      // Rules live under Observability Alerts / PageTemplate; hide SM duplicate.
+      hideFromSidebar: true,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountAlertingV2App } = await import('./application/mount');
@@ -103,6 +148,8 @@ const pluginModule = new ContainerModule(({ bind }) => {
         defaultMessage: 'Alerts',
       }),
       order: 2,
+      // Inbox lives under Observability category / PageTemplate nav; hide SM duplicate.
+      hideFromSidebar: true,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountEpisodesApp } = await import('./application/mount');
@@ -114,7 +161,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
       },
     });
 
-    alertingSection.registerApp({
+    automationSection.registerApp({
       id: ALERTING_V2_ACTION_POLICIES_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.actionPoliciesNavTitle', {
         defaultMessage: 'Action Policies',
@@ -131,7 +178,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
       },
     });
 
-    alertingSection.registerApp({
+    automationSection.registerApp({
       id: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.executionHistoryNavTitle', {
         defaultMessage: 'Execution history',

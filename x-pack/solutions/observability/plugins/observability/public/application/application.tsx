@@ -22,6 +22,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import PageNotFound from '../pages/404';
+import { AlertingIaTour } from '../pages/alerting_ia/alerting_ia_tour';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { useAppRoutes } from '../routes/routes';
@@ -33,6 +34,7 @@ export function App() {
   const allRoutes = useAppRoutes();
   return (
     <>
+      <AlertingIaTour />
       <Routes enableExecutionContextTracking={true}>
         {Object.keys(allRoutes).map((key) => {
           const path = key;

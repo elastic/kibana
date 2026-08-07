@@ -43,12 +43,12 @@ export class ActionPolicyFormPage {
   }
 
   async gotoCreate() {
-    await this.page.gotoApp('management/alertingV2/action_policies/create');
+    await this.page.gotoApp('management/insightsAndAlerting/action_policies/create');
     await this.container.waitFor({ state: 'visible' });
   }
 
   async gotoEdit(policyId: string) {
-    await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
+    await this.page.gotoApp(`management/insightsAndAlerting/action_policies/edit/${policyId}`);
     await this.container.waitFor({ state: 'visible' });
   }
 

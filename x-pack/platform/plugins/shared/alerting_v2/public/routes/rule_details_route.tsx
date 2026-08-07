@@ -9,6 +9,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { lazy, Suspense } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useFetchRule } from '../hooks/use_fetch_rule';
 import { Skeleton } from '../components/rule_details/skeleton';
 import { RuleProvider } from '../components/rule_details/rule_context';
@@ -18,10 +19,14 @@ const LazyRuleDetailPage = lazy(async () => {
   return { default: module.RuleDetailPage };
 });
 
-export const RuleDetailsRoute: React.FunctionComponent = () => {
+export const RuleDetailsRoute: React.FunctionComponent<{
+  /** When set (embedded Obs hub), back/error navigation stays under Observability. */
+  rulesListHref?: string;
+}> = ({ rulesListHref }) => {
   const { ruleId } = useParams<{ ruleId: string }>();
   const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const history = useHistory();
+  const { navigateToUrl } = useService(CoreStart('application'));
 
   if (isLoading) {
     return <Skeleton />;
@@ -50,7 +55,13 @@ export const RuleDetailsRoute: React.FunctionComponent = () => {
           <EuiButton
             color="primary"
             fill
-            onClick={() => history.push('/')}
+            onClick={() => {
+              if (rulesListHref) {
+                navigateToUrl(rulesListHref);
+              } else {
+                history.push('/');
+              }
+            }}
             data-test-subj="ruleDetailsErrorBackButton"
           >
             {i18n.translate('xpack.alertingV2.ruleDetails.backToRules', {
@@ -66,7 +77,7 @@ export const RuleDetailsRoute: React.FunctionComponent = () => {
   return (
     <RuleProvider rule={rule}>
       <Suspense fallback={<Skeleton />}>
-        <LazyRuleDetailPage />
+        <LazyRuleDetailPage rulesListHref={rulesListHref} embedded={Boolean(rulesListHref)} />
       </Suspense>
     </RuleProvider>
   );

@@ -76,6 +76,11 @@ export type InventoryLinkId = 'datastreams';
 
 export type ObservabilityOverviewLinkId =
   | 'alerts'
+  | 'alerts_inbox'
+  | 'alerting_rules_hub'
+  | 'rules_library'
+  | 'slo_manage'
+  | 'slo_settings'
   | 'cases'
   | 'cases_configure'
   | 'cases_create'

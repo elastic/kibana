@@ -337,6 +337,8 @@ export class Plugin
         title: featureTitle,
         capabilitiesId: RULES_CAPABILITY_ID,
         order: 1,
+        // Classic Observability category nav owns Rules; keep route, hide SM sidebar duplicate.
+        hideFromSidebar: true,
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
@@ -448,6 +450,8 @@ export class Plugin
         title: alertsFeatureTitle,
         capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
+        // Classic Observability category nav owns Alerts; keep route, hide SM sidebar duplicate.
+        hideFromSidebar: true,
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [

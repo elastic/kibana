@@ -24,6 +24,7 @@ import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_poli
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
+import { ActionPoliciesEmptyPrompt } from './action_policies_empty_prompt';
 import { ENABLED_FILTER_ID, useActionPoliciesDataSource } from '../action_policies_data_source';
 import {
   ActionPoliciesTableContent,
@@ -114,6 +115,10 @@ export const ActionPoliciesTable = () => {
     [navigateToUrl, basePath]
   );
 
+  const navigateToCreate = useCallback(() => {
+    navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
+  }, [navigateToUrl, basePath]);
+
   const clonePolicy = useCallback(
     (policy: ActionPolicyResponse) => {
       const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
@@ -175,7 +180,11 @@ export const ActionPoliciesTable = () => {
           fields: FEATURES_FIELDS,
         }}
       >
-        <ContentList>
+        <ContentList
+          emptyState={
+            <ActionPoliciesEmptyPrompt canWrite={canWrite} onCreate={navigateToCreate} />
+          }
+        >
           <ActionPoliciesTableContent
             canWrite={canWrite}
             isEnabling={isEnabling}

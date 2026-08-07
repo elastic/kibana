@@ -34,6 +34,7 @@ export interface RulesListTableContainerProps {
   isLoading: boolean;
   /** When false, write affordances (create/edit/clone/delete/enable/bulk) are hidden. */
   canWrite: boolean;
+  getRuleDetailsHref?: (ruleId: string) => string;
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
   onEditInFlyout: (rule: RuleApiResponse) => void;
   onCloneInFlyout: (rule: RuleApiResponse) => void;
@@ -51,6 +52,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   sortDirection,
   isLoading,
   canWrite,
+  getRuleDetailsHref,
   onTableChange,
   onEditInFlyout,
   onCloneInFlyout,
@@ -164,7 +166,13 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkEnable={handleBulkEnable}
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
-        onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
+        onNavigateToDetails={(r) =>
+          navigateToUrl(
+            getRuleDetailsHref
+              ? getRuleDetailsHref(r.id)
+              : basePath.prepend(paths.ruleDetails(r.id))
+          )
+        }
         onExpand={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
         onEdit={(r) => onEditInFlyout(r)}
@@ -182,6 +190,11 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         <RuleSummaryFlyout
           rule={expandedRule}
           canWrite={canWrite}
+          detailsHref={
+            getRuleDetailsHref
+              ? getRuleDetailsHref(expandedRule.id)
+              : undefined
+          }
           onClose={() => setExpandedRuleId(null)}
           onQuickEdit={(r) => {
             setExpandedRuleId(null);

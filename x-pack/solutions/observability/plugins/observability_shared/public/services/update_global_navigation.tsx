@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
@@ -71,20 +72,36 @@ export function updateGlobalNavigation({
             };
           }
           return null;
-        case 'alerts':
-          // Observability feature access only — cases-only users do not get alerts/rules nav.
+        case 'alerts_inbox':
+          // Classic chrome Observability category: single "Alerts" entry opens Inbox
+          // (title overridden to "Alerts" below). Solution Obs panel keeps its own
+          // "Inbox" title via navigation_tree; it still needs projectSideNav visibility.
           if (hasObsCapabilities) {
             return {
               ...link,
+              title: i18n.translate('xpack.observabilityShared.alertsClassicLinkTitle', {
+                defaultMessage: 'Alerts',
+              }),
               visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
-        case 'rules':
+        case 'alerts':
+        case 'alerting_rules_hub':
+          // Not in classic chrome (Alerts→Inbox covers entry). Used by solution / PageTemplate paths.
           if (hasObsCapabilities) {
             return {
               ...link,
-              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+              visibleIn: ['projectSideNav', 'globalSearch'],
+            };
+          }
+          return null;
+        case 'rules':
+          // Legacy rules deep link — keep out of classic chrome (Rules lives under PageTemplate).
+          if (hasObsCapabilities) {
+            return {
+              ...link,
+              visibleIn: ['projectSideNav', 'globalSearch'],
             };
           }
           return null;

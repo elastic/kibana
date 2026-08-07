@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export { RESOLVE_ACTION_REASON } from '@kbn/alerting-v2-episodes-ui/components/actions/translations';
 
 export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episodes.listPageTitle', {
-  defaultMessage: 'Alert episodes',
+  defaultMessage: 'Alerts inbox',
 });
 
 export const EPISODES_LIST_MANAGE_RULES = i18n.translate(

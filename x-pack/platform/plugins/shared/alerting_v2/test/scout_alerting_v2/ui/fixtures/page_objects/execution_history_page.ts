@@ -19,10 +19,10 @@ export class ExecutionHistoryPage {
   async goto(spaceId?: string) {
     if (spaceId) {
       await this.page.goto(
-        this.kbnUrl.app('management/alertingV2/execution_history', { space: spaceId })
+        this.kbnUrl.app('management/insightsAndAlerting/execution_history', { space: spaceId })
       );
       return;
     }
-    await this.page.gotoApp('management/alertingV2/execution_history');
+    await this.page.gotoApp('management/insightsAndAlerting/execution_history');
   }
 }

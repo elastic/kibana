@@ -92,7 +92,7 @@ export class SLOPlugin
     const app: App = {
       id: sloAppId,
       title: PLUGIN_NAME,
-      order: 8002,
+      order: 8004,
       updater$: appUpdater$,
       euiIconType: 'logoObservability',
       appRoute: SLOS_BASE_PATH,

@@ -36,7 +36,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
     await pageObjects.executionHistory.goto(SPACE_ID);
 
     await test.step('URL is the execution_history app path', async () => {
-      expect(page.url()).toContain(`/s/${SPACE_ID}/app/management/alertingV2/execution_history`);
+      expect(page.url()).toContain(`/s/${SPACE_ID}/app/management/insightsAndAlerting/execution_history`);
     });
 
     await test.step('page header is visible', async () => {

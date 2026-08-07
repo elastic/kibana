@@ -45,7 +45,7 @@ describe('CentralizedActionPoliciesPanel', () => {
     expect(createButton).toHaveAttribute('target', '_blank');
     expect(createButton).toHaveAttribute(
       'href',
-      '/mock/app/management/alertingV2/action_policies/create'
+      '/mock/app/management/insightsAndAlerting/action_policies/create'
     );
   });
 

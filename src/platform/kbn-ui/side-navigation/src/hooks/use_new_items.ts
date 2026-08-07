@@ -14,7 +14,37 @@ const MAX_NEW_PRIMARY_ITEMS = 2;
 const MAX_NEW_SECONDARY_ITEMS_PER_PARENT = 2;
 const NEW_ITEMS_STORAGE_KEY = 'core.chrome.sidenav.newItems';
 
+/**
+ * POC: Alerting IA demo badges must stay visible across visits/sessions.
+ * IDs matching this pattern are never marked visited.
+ * Remove when the Alerting IA prototype ships for real.
+ */
+const POC_PERSISTENT_NEW_BADGE_ID =
+  /^(alerts_inbox|alerts_action_policies|alerts_execution_history)(_|$)/;
+
 const isNew = (item: { badgeType?: string }) => item.badgeType === 'new';
+
+const isPocPersistentNewBadge = (id: string) => POC_PERSISTENT_NEW_BADGE_ID.test(id);
+
+const readVisitedItems = (): string[] => {
+  try {
+    const stored = localStorage.getItem(NEW_ITEMS_STORAGE_KEY);
+    const parsed: unknown = stored ? JSON.parse(stored) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    // Drop any previously recorded POC badge visits so demos stay clean.
+    const filtered = parsed.filter(
+      (id): id is string => typeof id === 'string' && !isPocPersistentNewBadge(id)
+    );
+    if (filtered.length !== parsed.length) {
+      localStorage.setItem(NEW_ITEMS_STORAGE_KEY, JSON.stringify(filtered));
+    }
+    return filtered;
+  } catch {
+    return [];
+  }
+};
 
 const getPrimaryItemById = (items: MenuItem[], id: string) => items.find((item) => item.id === id);
 
@@ -50,10 +80,7 @@ const getNewItemsIds = (item: MenuItem) => {
  */
 
 export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
-  const [visitedItems, setVisitedItems] = useState<string[]>(() => {
-    const stored = localStorage.getItem(NEW_ITEMS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [visitedItems, setVisitedItems] = useState<string[]>(() => readVisitedItems());
 
   // Recalculate new items on each render to account for potential changes in the navigation tree
   const newItems = useMemo(() => {
@@ -81,17 +108,25 @@ export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
 
   // Mark items as visited and persist to localStorage
   const markAsVisited = useCallback((itemId: string, parentItemId?: string) => {
+    // POC: never dismiss Alerting IA demo NEW badges
+    if (isPocPersistentNewBadge(itemId)) {
+      return;
+    }
+
     setVisitedItems((prev) => {
       const hasBeenVisited = (id: string) => prev.includes(id);
 
       const shouldUpdateVisitedItem = !hasBeenVisited(itemId);
-      const shouldUpdateVisitedParentItem = parentItemId && !hasBeenVisited(parentItemId);
+      const shouldUpdateVisitedParentItem =
+        parentItemId &&
+        !isPocPersistentNewBadge(parentItemId) &&
+        !hasBeenVisited(parentItemId);
 
       if (!shouldUpdateVisitedItem && !shouldUpdateVisitedParentItem) return prev;
 
       const updated = [...prev];
       if (shouldUpdateVisitedItem) updated.push(itemId);
-      if (shouldUpdateVisitedParentItem) updated.push(parentItemId);
+      if (shouldUpdateVisitedParentItem && parentItemId) updated.push(parentItemId);
 
       try {
         localStorage.setItem(NEW_ITEMS_STORAGE_KEY, JSON.stringify(updated));

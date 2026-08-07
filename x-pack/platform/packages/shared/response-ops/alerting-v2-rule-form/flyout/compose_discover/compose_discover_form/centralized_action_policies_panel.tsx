@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { EuiImage } from '@elastic/eui';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
+import { ALERTING_V2_ACTION_POLICIES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import illustration from '../../../assets/centralized_action_policies.svg';
 
-// TODO: replace with paths.actionPolicyCreate from x-pack/platform/plugins/shared/alerting_v2/public/constants.ts
-// once that constant is exported from the plugin or moved to a shared package.
-const ACTION_POLICY_CREATE_PATH = '/app/management/alertingV2/action_policies/create';
+const ACTION_POLICY_CREATE_PATH = `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`;
 
 // TODO: replace with docLinks.links.alerting.actionPolicies once a dedicated
 // key is added to kbn-doc-links/src/get_doc_links.ts.

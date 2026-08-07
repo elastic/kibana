@@ -11,7 +11,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 export function HideableReactQueryDevTools() {
-  const [isHidden, setIsHidden] = useState(false);
+  // Hidden by default — the open panel covers IA demos / tours.
+  const [isHidden, setIsHidden] = useState(true);
 
   return !isHidden && process.env.NODE_ENV === 'development' ? (
     <div>
@@ -34,7 +35,7 @@ export function HideableReactQueryDevTools() {
           )}
         />
       </EuiToolTip>
-      <ReactQueryDevtools />
+      <ReactQueryDevtools initialIsOpen={false} />
     </div>
   ) : null;
 }

@@ -10,13 +10,6 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { registerFeaturePrivileges } from './privileges';
 import { ALERTING_V2_FEATURES } from '../../../common/feature_privileges';
-import {
-  ALERTING_V2_ACTION_POLICIES_APP_ID,
-  ALERTING_V2_EPISODES_APP_ID,
-  ALERTING_V2_EXECUTION_HISTORY_APP_ID,
-  ALERTING_V2_RULES_APP_ID,
-  ALERTING_V2_SECTION_ID,
-} from '@kbn/alerting-v2-constants';
 
 describe('registerFeaturePrivileges', () => {
   const getRegisteredFeature = (id: string): KibanaFeatureConfig => {
@@ -63,13 +56,13 @@ describe('registerFeaturePrivileges', () => {
     // leaks the "Stack Management" navlink to unrelated read-only roles.
     // See feature_controls/*_security.ts.
     it.each([
-      [ALERTING_V2_FEATURES.rules.id, ALERTING_V2_RULES_APP_ID],
-      [ALERTING_V2_FEATURES.alerts.id, ALERTING_V2_EPISODES_APP_ID],
-      [ALERTING_V2_FEATURES.actionPolicies.id, ALERTING_V2_ACTION_POLICIES_APP_ID],
-      [ALERTING_V2_FEATURES.executionHistory.id, ALERTING_V2_EXECUTION_HISTORY_APP_ID],
-    ])('gates the "%s" feature behind the "%s" management app', (featureId, expectedApp) => {
+      [ALERTING_V2_FEATURES.rules.id, ALERTING_V2_FEATURES.rules],
+      [ALERTING_V2_FEATURES.alerts.id, ALERTING_V2_FEATURES.alerts],
+      [ALERTING_V2_FEATURES.actionPolicies.id, ALERTING_V2_FEATURES.actionPolicies],
+      [ALERTING_V2_FEATURES.executionHistory.id, ALERTING_V2_FEATURES.executionHistory],
+    ])('gates the "%s" feature behind its management section/app', (featureId, feature) => {
       const registered = getRegisteredFeature(featureId);
-      const expectedManagement = { [ALERTING_V2_SECTION_ID]: [expectedApp] };
+      const expectedManagement = { [feature.managementSection]: [feature.managementApp] };
 
       expect(registered.management).toEqual(expectedManagement);
       expect(registered.privileges?.all.management).toEqual(expectedManagement);

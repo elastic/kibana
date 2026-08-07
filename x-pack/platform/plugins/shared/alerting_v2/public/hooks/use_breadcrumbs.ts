@@ -17,12 +17,17 @@ export interface UseBreadcrumbsOptions {
 
 export function useBreadcrumbs(
   page: AlertingV2BreadcrumbPage,
-  options: UseBreadcrumbsOptions = {}
+  options: UseBreadcrumbsOptions = {},
+  { enabled = true }: { enabled?: boolean } = {}
 ) {
   const setBreadcrumbs = useSetBreadcrumbs();
   const chrome = useService(CoreStart('chrome'));
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const rootBreadcrumb: ChromeBreadcrumb = {
       ...getAlertingV2Breadcrumb('root'),
     };
@@ -97,5 +102,5 @@ export function useBreadcrumbs(
 
     const docTitle = [...breadcrumbs].reverse().map((b) => (b.text as string) ?? '');
     chrome.docTitle.change(docTitle);
-  }, [page, options.ruleName, setBreadcrumbs, chrome]);
+  }, [page, options.ruleName, setBreadcrumbs, chrome, enabled]);
 }

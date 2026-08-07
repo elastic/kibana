@@ -56,6 +56,7 @@ import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
+import { AlertsInboxDeprecationCallout } from './components/alerts_inbox_deprecation_callout';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -307,6 +308,9 @@ function InternalAlertsPage() {
         />
         <EuiSpacer size="l" />
         <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <AlertsInboxDeprecationCallout />
+          </EuiFlexItem>
           {authorizedToReadAnyRules && (
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center" wrap>

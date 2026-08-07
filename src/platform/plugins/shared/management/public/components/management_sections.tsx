@@ -27,11 +27,11 @@ const dataTip = i18n.translate('management.sections.dataTip', {
 });
 
 const insightsAndAlertingTitle = i18n.translate('management.sections.insightsAndAlertingTitle', {
-  defaultMessage: 'Alerts and Insights',
+  defaultMessage: 'Automation and reporting',
 });
 
 const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAlertingTip', {
-  defaultMessage: 'Manage how to detect changes in your data',
+  defaultMessage: 'Manage connectors, reporting, and automation utilities',
 });
 
 const machineLearningTitle = i18n.translate('management.sections.machineLearningTitle', {

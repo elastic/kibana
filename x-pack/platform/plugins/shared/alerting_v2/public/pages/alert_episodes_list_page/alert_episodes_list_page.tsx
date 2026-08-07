@@ -56,13 +56,14 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
-import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
+import { AlertingV2IntroBanner } from './components/alerting_v2_intro_banner';
+import { AlertingIaTour } from './components/alerting_ia_tour';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
@@ -126,7 +127,7 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const AlertEpisodesListPage = () => {
+export const AlertEpisodesListPage = ({ embedded = false }: { embedded?: boolean }) => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
@@ -136,7 +137,7 @@ export const AlertEpisodesListPage = () => {
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
-  useBreadcrumbs('episodes_list');
+  useBreadcrumbs('episodes_list', {}, { enabled: !embedded });
 
   const {
     filterState,
@@ -403,7 +404,10 @@ export const AlertEpisodesListPage = () => {
   const episodesMenu = useMemo(
     () =>
       getEpisodesListMenu({
-        manageRulesHref: services.http.basePath.prepend(paths.ruleList),
+        // POC: Manage Rules opens the combined Rules hub under Observability Alerts IA
+        manageRulesHref: services.http.basePath.prepend(
+          '/app/observability/alerts/rules-hub'
+        ),
       }),
     [services.http.basePath]
   );
@@ -427,6 +431,9 @@ export const AlertEpisodesListPage = () => {
         menu={episodesMenu}
       />
       <EuiSpacer size="m" />
+      <AlertingV2IntroBanner />
+      {/* Embedded Inbox already mounts the tour from Observability App. */}
+      {!embedded ? <AlertingIaTour /> : null}
 
       <EuiFlexGroup
         direction="column"

@@ -12,9 +12,11 @@ import type {
 } from '@kbn/features-plugin/common';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
+  ALERTING_V2_AUTOMATION_SECTION_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_SECTION_ID,
 } from '@kbn/alerting-v2-constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_object_types';
 
@@ -120,6 +122,8 @@ export interface AlertingV2FeatureDefinition {
   readonly id: string;
   readonly name: string;
   readonly managementApp: string;
+  /** Management section that owns this app in Stack Management. Defaults to Alerting V2 Preview. */
+  readonly managementSection: typeof ALERTING_V2_SECTION_ID | typeof ALERTING_V2_AUTOMATION_SECTION_ID;
   readonly privileges: {
     readonly all: AlertingV2FeaturePrivilege;
     readonly read: AlertingV2FeaturePrivilege;
@@ -132,6 +136,7 @@ export const ALERTING_V2_FEATURES = {
     id: 'alerting_v2_rules',
     name: 'Rules',
     managementApp: ALERTING_V2_RULES_APP_ID,
+    managementSection: ALERTING_V2_SECTION_ID,
     privileges: {
       all: {
         api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],
@@ -156,6 +161,7 @@ export const ALERTING_V2_FEATURES = {
     id: 'alerting_v2_alerts',
     name: 'Alerts',
     managementApp: ALERTING_V2_EPISODES_APP_ID,
+    managementSection: ALERTING_V2_SECTION_ID,
     privileges: {
       all: {
         alerts: { read: true },
@@ -182,6 +188,7 @@ export const ALERTING_V2_FEATURES = {
     id: 'alerting_v2_action_policies',
     name: 'Action Policies',
     managementApp: ALERTING_V2_ACTION_POLICIES_APP_ID,
+    managementSection: ALERTING_V2_AUTOMATION_SECTION_ID,
     privileges: {
       all: {
         api: [
@@ -212,6 +219,7 @@ export const ALERTING_V2_FEATURES = {
     id: 'alerting_v2_execution_history',
     name: 'Execution history',
     managementApp: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+    managementSection: ALERTING_V2_AUTOMATION_SECTION_ID,
     privileges: {
       all: {
         api: [ALERTING_V2_API_PRIVILEGES.executionHistory.read],

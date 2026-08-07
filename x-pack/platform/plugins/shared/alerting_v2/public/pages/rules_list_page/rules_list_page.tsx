@@ -121,8 +121,24 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
   Object.entries(SORT_FIELD_TO_TABLE_FIELD).map(([api, table]) => [table, api])
 ) as Partial<Record<string, FindRulesSortField>>;
 
-export const RulesListPage = () => {
-  useBreadcrumbs('rules_list');
+export interface RulesListPageProps {
+  /** When true, omit page chrome and surface create actions via onHeaderMenuChange. */
+  embedded?: boolean;
+  /** Report the Create rule AppHeader menu to a parent (Rules hub). */
+  onHeaderMenuChange?: (menu: AppHeaderMenu | undefined) => void;
+  /**
+   * Override rule-details navigation (Observability Rules hub). When omitted,
+   * navigates to the Stack Management rule details path.
+   */
+  getRuleDetailsHref?: (ruleId: string) => string;
+}
+
+export const RulesListPage = ({
+  embedded = false,
+  onHeaderMenuChange,
+  getRuleDetailsHref,
+}: RulesListPageProps = {}) => {
+  useBreadcrumbs('rules_list', {}, { enabled: !embedded });
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
 
@@ -217,19 +233,16 @@ export const RulesListPage = () => {
   };
 
   const showHeaderMenu = (hasRules || hasActiveFilters) && canWrite;
-  const headerMenu = useMemo(
+  const createMenu = useMemo(
     () =>
-      showHeaderMenu
-        ? getRulesListMenu({
-            onCreateRule: openCreateOptionsFlyout,
-            onCreateEsqlRule: openCreateFlyout,
-            onCreateWithAgent: navigateToAgentBuilder,
-            createWithAgentDisabled: !isRuleManagementABSkillAvailable,
-            createWithAgentTooltipText,
-          })
-        : undefined,
+      getRulesListMenu({
+        onCreateRule: openCreateOptionsFlyout,
+        onCreateEsqlRule: openCreateFlyout,
+        onCreateWithAgent: navigateToAgentBuilder,
+        createWithAgentDisabled: !isRuleManagementABSkillAvailable,
+        createWithAgentTooltipText,
+      }),
     [
-      showHeaderMenu,
       openCreateOptionsFlyout,
       openCreateFlyout,
       navigateToAgentBuilder,
@@ -237,17 +250,62 @@ export const RulesListPage = () => {
       createWithAgentTooltipText,
     ]
   );
+  // Standalone management page: hide create in header on empty (panel owns CTA).
+  const headerMenu = showHeaderMenu ? createMenu : undefined;
+
+  // Hub parent owns the Rules AppHeader — lift create menu whenever the user can write.
+  useEffect(() => {
+    if (!embedded || !onHeaderMenuChange) {
+      return;
+    }
+    onHeaderMenuChange(canWrite ? createMenu : undefined);
+    return () => {
+      onHeaderMenuChange(undefined);
+    };
+  }, [embedded, onHeaderMenuChange, canWrite, createMenu]);
+
+  // POC: IA tabs point back to Observability Rules hub (never leave for Stack Management).
+  // When embedded in the hub, the parent AppHeader owns the tabs and create actions.
+  const rulesIaTabs = useMemo(() => {
+    if (embedded) {
+      return undefined;
+    }
+    return [
+      {
+        id: 'v2',
+        label: i18n.translate('xpack.alertingV2.rulesList.iaTab.v2', {
+          defaultMessage: 'ES|QL rules',
+        }),
+        href: '/app/observability/alerts/rules-hub',
+        isSelected: true,
+        'data-test-subj': 'alertingV2RulesIaTabV2',
+      },
+      {
+        id: 'v1',
+        label: i18n.translate('xpack.alertingV2.rulesList.iaTab.v1', {
+          defaultMessage: 'Classic rules',
+        }),
+        href: '/app/observability/alerts/rules-hub?tab=v1',
+        'data-test-subj': 'alertingV2RulesIaTabV1',
+      },
+    ];
+  }, [embedded]);
 
   return (
-    <div>
-      <AppHeader
-        sticky={false}
-        title={RULES_LIST_PAGE_TITLE}
-        badges={[experimentalBadge]}
-        spacing="bleed"
-        menu={headerMenu}
-      />
-      <EuiSpacer size="m" />
+    <div data-test-subj={embedded ? 'alertingV2RulesListEmbedded' : undefined}>
+      {!embedded ? (
+        <>
+          <AppHeader
+            sticky={false}
+            title={RULES_LIST_PAGE_TITLE}
+            badges={[experimentalBadge]}
+            spacing="bleed"
+            menu={headerMenu}
+            tabs={rulesIaTabs}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       {isInitialLoad ? (
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -345,6 +403,7 @@ export const RulesListPage = () => {
             sortDirection={sortDirection}
             isLoading={isLoading}
             canWrite={canWrite}
+            getRuleDetailsHref={getRuleDetailsHref}
             onTableChange={onTableChange}
             onEditInFlyout={openEditFlyout}
             onCloneInFlyout={openCloneFlyout}

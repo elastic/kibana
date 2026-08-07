@@ -16,6 +16,7 @@ import {
   type EuiSelectableOption,
 } from '@elastic/eui';
 import type { MatchedActionPolicyCategory } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_ACTION_POLICIES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -43,9 +44,7 @@ const errorTitle = i18n.translate(
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
-// TODO: replace with paths.actionPolicyEdit from alerting_v2/public/constants.ts
-//       once exported from the plugin or moved to a shared package.
-const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit';
+const ACTION_POLICY_EDIT_BASE = `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit`;
 
 const SECTION_CONFIG: Array<{
   category: MatchedActionPolicyCategory;

@@ -60,7 +60,8 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significantEvents"
+      "significantEvents",
+      "alertingVTwo"
     ],
     "requiredBundles": [
       "aiops",

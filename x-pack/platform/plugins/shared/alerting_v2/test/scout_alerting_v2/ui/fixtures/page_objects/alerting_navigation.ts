@@ -30,12 +30,12 @@ export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
     heading: /alert episodes/i,
   },
   actionPolicies: {
-    path: 'management/alertingV2/action_policies',
+    path: 'management/insightsAndAlerting/action_policies',
     featureId: 'alerting_v2_action_policies',
     heading: /action policies/i,
   },
   executionHistory: {
-    path: 'management/alertingV2/execution_history',
+    path: 'management/insightsAndAlerting/execution_history',
     featureId: 'alerting_v2_execution_history',
     heading: /execution history/i,
   },

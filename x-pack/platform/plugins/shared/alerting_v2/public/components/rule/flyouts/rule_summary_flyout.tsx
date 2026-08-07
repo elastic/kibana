@@ -48,6 +48,8 @@ export interface RuleSummaryFlyoutProps {
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
   hasAnimation?: EuiFlyoutProps['hasAnimation'];
+  /** Absolute href for "View details"; defaults to Stack Management path. */
+  detailsHref?: string;
 }
 
 export const RuleSummaryFlyout = ({
@@ -63,9 +65,10 @@ export const RuleSummaryFlyout = ({
   session,
   ownFocus = true,
   hasAnimation = true,
+  detailsHref: detailsHrefProp,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
-  const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
+  const detailsHref = detailsHrefProp ?? basePath.prepend(paths.ruleDetails(rule.id));
 
   return (
     <RuleProvider rule={rule}>

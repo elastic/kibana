@@ -140,7 +140,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/action_policies'
+      '/app/management/insightsAndAlerting/action_policies'
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'target',

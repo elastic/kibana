@@ -10,6 +10,12 @@ export const ROOT_PATH = '/' as const;
 export const LANDING_PATH = '/landing' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ALERTS_PATH = '/alerts' as const;
+export const ALERTS_INBOX_PATH = '/alerts/inbox' as const;
+export const ALERTING_RULES_HUB_PATH = '/alerts/rules-hub' as const;
+export const ALERTING_RULES_HUB_RULE_DETAIL_PATH = '/alerts/rules-hub/:ruleId' as const;
+export const RULES_LIBRARY_PATH = '/alerts/rules-library' as const;
+export const SLO_MANAGE_REDIRECT_PATH = '/alerts/slos/management' as const;
+export const SLO_SETTINGS_REDIRECT_PATH = '/alerts/slos/settings' as const;
 export const ALERT_DETAIL_PATH = '/alerts/:alertId' as const;
 export const EXPLORATORY_VIEW_PATH = '/exploratory-view' as const; // has been moved to its own app. Keeping around for redirecting purposes.
 export const RULES_PATH = '/alerts/rules' as const;
@@ -39,6 +45,9 @@ export const paths = {
     annotations: `${OBSERVABILITY_BASE_PATH}${ANNOTATIONS_PATH}`,
     alertDetails: (alertId: string) =>
       `${OBSERVABILITY_BASE_PATH}${ALERTS_PATH}/${encodeURIComponent(alertId)}`,
+    rulesHub: `${OBSERVABILITY_BASE_PATH}${ALERTING_RULES_HUB_PATH}`,
+    rulesHubRuleDetails: (ruleId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${ALERTING_RULES_HUB_PATH}/${encodeURIComponent(ruleId)}`,
     rules: RULES_APP_BASE_PATH,
     ruleDetails: (ruleId: string) => `${RULES_APP_BASE_PATH}/rule/${encodeURIComponent(ruleId)}`,
     createRule: (ruleTypeId: string) =>

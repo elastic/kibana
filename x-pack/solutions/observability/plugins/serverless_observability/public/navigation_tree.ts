@@ -14,8 +14,8 @@ import type {
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { getAlertingV2AutomationNavItems } from '@kbn/alerting-v2-utils';
 import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 export function filterForFeatureAvailability<
@@ -83,10 +83,154 @@ export const createNavigationTree = ({
       },
       ...getWorkflowsNavPanel(core),
       {
-        link: 'observability-overview:alerts',
+        id: 'alerts',
+        title: i18n.translate('xpack.serverlessObservability.nav.alerts', {
+          defaultMessage: 'Alerts',
+        }),
         icon: 'warning',
+        renderAs: 'panelOpener',
         getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
+          pathNameSerialized.startsWith(prepend('/app/management/alertingV2')) ||
+          pathNameSerialized.startsWith(
+            prepend('/app/management/insightsAndAlerting/action_policies')
+          ) ||
+          pathNameSerialized.startsWith(
+            prepend('/app/management/insightsAndAlerting/execution_history')
+          ) ||
+          pathNameSerialized.startsWith(prepend('/app/observability/alerts')) ||
+          pathNameSerialized.startsWith(prepend('/app/slos')) ||
+          pathNameSerialized.startsWith(
+            prepend('/app/management/insightsAndAlerting/maintenanceWindows')
+          ),
+        children: [
+          {
+            id: 'alerts_primary',
+            children: [
+              {
+                id: 'alerts_inbox_demo',
+                link: 'observability-overview:alerts_inbox',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.inbox', {
+                  defaultMessage: 'Inbox',
+                }),
+                badgeType: 'new',
+              },
+              {
+                link: 'observability-overview:alerts',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.alertsList', {
+                  defaultMessage: 'Alerts',
+                }),
+                // `/alerts` prefixes rules-hub, rules, inbox, etc. — only the alerts
+                // list and `/alerts/:alertId` details should select this item.
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  const alertsBase = prepend('/app/observability/alerts');
+                  if (
+                    pathNameSerialized === alertsBase ||
+                    pathNameSerialized === `${alertsBase}/`
+                  ) {
+                    return true;
+                  }
+                  const nested = pathNameSerialized
+                    .slice(alertsBase.length)
+                    .match(/^\/([^/?#]+)/);
+                  if (!nested) {
+                    return false;
+                  }
+                  const reserved = new Set([
+                    'inbox',
+                    'rules-hub',
+                    'rules-library',
+                    'rules',
+                    'slos',
+                  ]);
+                  return !reserved.has(nested[1]);
+                },
+              },
+            ],
+          },
+          {
+            id: 'rule_management',
+            title: i18n.translate('xpack.serverlessObservability.nav.alerts.ruleManagement', {
+              defaultMessage: 'Rule Management',
+            }),
+            children: [
+              {
+                link: 'observability-overview:alerting_rules_hub',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.rules', {
+                  defaultMessage: 'Rules',
+                }),
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  const rulesHub = prepend('/app/observability/alerts/rules-hub');
+                  const classicRules = prepend('/app/observability/alerts/rules');
+                  return (
+                    pathNameSerialized.startsWith(rulesHub) ||
+                    pathNameSerialized === classicRules ||
+                    pathNameSerialized.startsWith(`${classicRules}/`)
+                  );
+                },
+              },
+              {
+                link: 'observability-overview:rules_library',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.rulesLibrary', {
+                  defaultMessage: 'Rules Library',
+                }),
+              },
+            ],
+          },
+          {
+            id: 'slos_section',
+            title: i18n.translate('xpack.serverlessObservability.nav.alerts.slosSection', {
+              defaultMessage: 'SLOs',
+            }),
+            children: [
+              {
+                link: 'slo',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.slos', {
+                  defaultMessage: 'SLOs',
+                }),
+              },
+              {
+                link: 'observability-overview:slo_manage',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.manageSlos', {
+                  defaultMessage: 'Manage SLOs',
+                }),
+              },
+              {
+                link: 'observability-overview:slo_settings',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.sloSettings', {
+                  defaultMessage: 'Settings',
+                }),
+              },
+            ],
+          },
+          {
+            id: 'notifications_suppressions',
+            title: i18n.translate(
+              'xpack.serverlessObservability.nav.alerts.notificationsSuppressions',
+              {
+                defaultMessage: 'Notifications & Suppressions',
+              }
+            ),
+            children: [
+              {
+                id: 'alerts_action_policies_demo',
+                link: 'management:action_policies',
+                title: i18n.translate('xpack.serverlessObservability.nav.alerts.actionPolicies', {
+                  defaultMessage: 'Action Policies',
+                }),
+                badgeType: 'new',
+              },
+              {
+                link: 'management:maintenanceWindows',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.alerts.maintenanceWindow',
+                  {
+                    defaultMessage: 'Maintenance Window',
+                  }
+                ),
+              },
+            ],
+          },
+        ],
       },
       ...filterForFeatureAvailability(
         {
@@ -103,13 +247,6 @@ export const createNavigationTree = ({
         },
         isCasesAvailable
       ),
-      {
-        title: i18n.translate('xpack.serverlessObservability.nav.slo', {
-          defaultMessage: 'SLOs',
-        }),
-        link: 'slo',
-        icon: 'chartGauge',
-      },
       ...filterForFeatureAvailability(
         {
           link: 'streams' as const,
@@ -517,21 +654,20 @@ export const createNavigationTree = ({
               },
             ],
           },
-          ...getAlertingV2ManagementNavPanel(core),
+          // POC: Alerting surfaces live under Alerts primary nav (no SM Alerts/Rules).
+          // Remaining v2 Preview item (Execution history) folds into this section.
           {
             id: 'alerts_and_insights',
             title: i18n.translate(
               'xpack.serverlessObservability.nav.projectSettings.alertsAndInsights',
               {
-                defaultMessage: 'Alerts and insights',
+                defaultMessage: 'Automation and reporting',
               }
             ),
             breadcrumbStatus: 'hidden',
             children: [
-              { link: 'management:triggersActionsAlerts' },
-              { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
-              { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
+              ...getAlertingV2AutomationNavItems(core, 'stackRemainder'),
             ],
           },
           {
