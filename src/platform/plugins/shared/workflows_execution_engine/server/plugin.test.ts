@@ -148,7 +148,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -226,7 +229,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
             total: { value: 1, relation: 'eq' },
           },
         } as any);
-        workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+        workflowExecutionsDataClient.bulk.mockResolvedValue({
+          errors: false,
+          items: [{ id: 'mock-id', index: '.mock' }],
+        } as any);
 
         const result = await checkAndSkipIfExistingScheduledExecution(
           workflow,
@@ -347,7 +353,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -395,7 +404,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       // Use attempts > 1 to indicate this is a retry/recovery
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
@@ -487,7 +499,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       // Use attempts = 1 (first attempt)
       const firstAttemptTaskInstance = createMockTaskInstance({ attempts: 1 });
@@ -535,7 +550,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -582,7 +600,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -626,7 +647,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const taskInstanceWithoutRunAt = createMockTaskInstance({ runAt: undefined as any });
 
@@ -673,7 +697,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       // Use attempts > 1 to indicate this is a retry/recovery
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
@@ -722,7 +749,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -778,7 +808,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -873,7 +906,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -924,7 +960,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDataClient.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,

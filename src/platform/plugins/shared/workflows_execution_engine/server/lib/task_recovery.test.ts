@@ -36,6 +36,10 @@ const createRecoveryTestHarness = () => {
   const repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
   const stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataClient);
   jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+  workflowExecutionsDataClient.bulk.mockResolvedValue({
+    errors: false,
+    items: [{ id: 'mock-id', index: '.mock' }],
+  });
   return { workflowExecutionsDataClient, repository, stepExecutionRepository };
 };
 
@@ -591,6 +595,10 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     jest.spyOn(logger, 'warn').mockImplementation(() => {});
     jest.spyOn(logger, 'error').mockImplementation(() => {});
+    workflowExecutionsDataClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [{ id: 'mock-id', index: '.mock' }],
+    });
   });
 
   afterEach(() => {

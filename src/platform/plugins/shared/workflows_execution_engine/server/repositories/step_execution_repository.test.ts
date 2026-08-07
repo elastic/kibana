@@ -149,6 +149,28 @@ describe('StepExecutionRepository', () => {
         sourceExcludes: ['error'],
       });
     });
+
+    it('normalizes missing output to null when output was requested', async () => {
+      stepExecutionsDataClient.getByIds.mockResolvedValue({
+        items: [{ document: { id: 's1' } as any, index: '.workflows-step-executions' }],
+        missing: [],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['s1'], ['output']);
+
+      expect(result[0].output).toBeNull();
+    });
+
+    it('does not normalize output when output was not requested', async () => {
+      stepExecutionsDataClient.getByIds.mockResolvedValue({
+        items: [{ document: { id: 's1' } as any, index: '.workflows-step-executions' }],
+        missing: [],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['s1']);
+
+      expect(result[0].output).toBeUndefined();
+    });
   });
 
   describe('searchStepExecutionsByExecutionId', () => {

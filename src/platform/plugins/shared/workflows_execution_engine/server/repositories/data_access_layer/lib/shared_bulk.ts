@@ -99,15 +99,15 @@ export async function sharedBulk<TExecution extends { id: string }>(
   response.items.forEach((item) => {
     const result = item.create ?? item.update;
     if (!result?._id) {
-      return;
+      throw new Error(`Unexpected bulk response item without _id: ${JSON.stringify(item)}`);
     }
 
     items.push({
-      id: result?._id,
-      error: result?.error,
-      index: result?._index,
-      seqNo: result?._seq_no,
-      primaryTerm: result?._primary_term,
+      id: result._id,
+      error: result.error,
+      index: result._index,
+      seqNo: result._seq_no,
+      primaryTerm: result._primary_term,
     });
   });
 

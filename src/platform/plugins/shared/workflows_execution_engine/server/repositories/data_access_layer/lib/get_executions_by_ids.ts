@@ -18,7 +18,7 @@ import type {
 
 export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
-  ids: (string | { id: string; index: string | string[] })[];
+  ids: (string | { id: string; index: string })[];
   defaultIndex: string;
   options?: GetExecutionsByIdsOptions<TExecution>;
   logger: Logger;
@@ -50,12 +50,11 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
         }
       : {};
 
-  const docs = ids.flatMap((item) => {
+  const docs = ids.map((item) => {
     if (typeof item === 'string') {
       return { _index: defaultIndex, _id: item, ...sourceFilter };
     }
-    const indices = Array.isArray(item.index) ? item.index : [item.index];
-    return indices.map((index) => ({ _index: index, _id: item.id, ...sourceFilter }));
+    return { _index: item.index, _id: item.id, ...sourceFilter };
   });
   const response = await retryTransientEsErrors(() => esClient.mget<TExecution>({ docs }), {
     logger,
