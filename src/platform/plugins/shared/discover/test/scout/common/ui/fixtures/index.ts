@@ -33,6 +33,7 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../../../../common/constants';
+import { LookupIndexEditor } from './page_objects';
 import * as testData from './constants';
 
 type DiscoverSessionCreateClassicTab = Partial<DiscoverSessionApiClassicTab> &
@@ -60,6 +61,7 @@ export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
 export type DiscoverPageObjects = PageObjects & {
   inspector: Inspector;
   unifiedFieldList: UnifiedFieldList;
+  lookupIndexEditor: LookupIndexEditor;
   docViewer: DocViewer;
 };
 
@@ -74,6 +76,7 @@ const extendWithDiscoverPageObjects = (
   ...pageObjects,
   inspector: createLazyPageObject(Inspector, page),
   unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
+  lookupIndexEditor: createLazyPageObject(LookupIndexEditor, page, pageObjects.dataGrid),
   docViewer: createLazyPageObject(DocViewer, page),
 });
 

@@ -12,7 +12,7 @@
 - We decided to load the data view patternList and fields on demand, we know that will only have to load this data view
   on default and timeline scope. We will use two conditions to see if we need to fetch and initialize the data view
   selected. First, we will make sure that we did not already fetch them by using `searchedIds` and then we will init
-  them if `selectedPatterns` and `missingPatterns` are empty.
+  them if `selectedPatterns` is empty.
 - onSignalIndexUpdated
     - called when signal index first has data in order to add it to the defaultDataView and refresh the index fields
 
@@ -42,23 +42,10 @@ interface SelectedDataView {
 }
 ```
 
-### `useDataView`
-
-- called to get `indexFieldSearch`, which gets the fields and formats them in `getDataViewStateFromIndexFields` in
-  `use_data_view.tsx`
-- `indexFieldSearch` calls the `IndexFieldsStrategyRequest` in the `timelines` plugin. This request takes an argument of
-  either `dataViewId` or `indices` to get the fields.
-    - Our app uses `dataViewId`, getting the fields from a Data View that includes runtime fields. No matter what the
-      sourcerer indices are set to, we will get the same fields always from the Data View. If we only requested
-      `indices`, we would get just the fields for those indices (not all like Data View) and therefore would not get the
-      runtime fields. So even when we are in `PageScope.alerts` narrowed down to just
-      `.alerts-security.alerts-default`, we get all the fields from the entire Security Solution Data View.
-
 ### `useSignalHelpers`
 
 - called on from detections and timelines scopes
-- `signalIndexNeedsInit` - when defined, signal index has been initiated but does not exist
-- `pollForSignalIndex` - when false, signal index has been initiated
+- `signalIndexNeedsInit` - when true, signal index has been initiated but does not exist yet
 
 ### Adding sourcerer to a new page
 
