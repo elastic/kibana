@@ -61,7 +61,8 @@ describe('significant events fair batch selection', () => {
     expect(selection.type).toBe('elasticsearch.esql.query');
     expect(query).toContain('INLINE STATS processed_count');
     expect(query).toContain('INLINE STATS recent_detection_count');
-    expect(query).toContain('INLINE STATS latest_timestamp');
+    expect(query).toContain('INLINE STATS oldest_unprocessed');
+    expect(query).toContain('latest_timestamp = MAX(@timestamp)');
     expect(query).toContain('suppressed_age_minutes');
     expect(query).toContain('staleness_minutes');
     expect(query).toContain('recent_detection_count < ?2');

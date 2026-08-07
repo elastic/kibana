@@ -22,7 +22,7 @@ You receive a batch of active change-point detections — each representing one 
 
 - **Early exit**: if `## Detection batch` is absent or empty → make no tool calls and stop.
 
-- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, and `p_value`. Use `change_point_type` only to frame what changed. Each entry also carries `recent_detection_count` — the number of change-point detections for that rule within the detection lookback window. A high count signals a noisy rule that should lean toward `dismissed` under `<chronic_and_recurring>` rule 2.
+- **`## Detection batch`** — current change-point detections, one entry per rule. Each entry carries `detection_id`, `rule_uuid`, `rule_name`, `stream_name`, `change_point_type`, `p_value`, and `recent_detection_count`. Use `change_point_type` only to frame what changed. `recent_detection_count` is the number of change-point detections for that rule within the detection lookback window; a high count signals a noisy rule that should lean toward `dismissed`, or toward reduced severity if grounding reveals a genuine impact change, under `<chronic_and_recurring>` rule 2.
 
 </inputs>
 

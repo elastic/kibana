@@ -71,8 +71,7 @@ steps:
         | WHERE change_point_type IS NOT NULL
         | INLINE STATS recent_detection_count = COUNT(*) BY rule_uuid
         | WHERE processed_count == 0
-        | INLINE STATS oldest_unprocessed = MIN(@timestamp) BY rule_uuid
-        | INLINE STATS latest_timestamp = MAX(@timestamp) BY rule_uuid
+        | INLINE STATS oldest_unprocessed = MIN(@timestamp), latest_timestamp = MAX(@timestamp) BY rule_uuid
         | WHERE @timestamp == latest_timestamp
         | INLINE STATS latest_id = MAX(_id) BY rule_uuid
         | WHERE _id == latest_id
@@ -115,8 +114,7 @@ steps:
         | WHERE change_point_type IS NOT NULL
         | INLINE STATS recent_detection_count = COUNT(*) BY rule_uuid
         | WHERE processed_count == 0
-        | INLINE STATS oldest_unprocessed = MIN(@timestamp) BY rule_uuid
-        | INLINE STATS latest_timestamp = MAX(@timestamp) BY rule_uuid
+        | INLINE STATS oldest_unprocessed = MIN(@timestamp), latest_timestamp = MAX(@timestamp) BY rule_uuid
         | WHERE @timestamp == latest_timestamp
         | INLINE STATS latest_id = MAX(_id) BY rule_uuid
         | WHERE _id == latest_id

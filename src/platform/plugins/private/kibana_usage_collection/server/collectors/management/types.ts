@@ -219,6 +219,9 @@ export interface UsageStats {
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
