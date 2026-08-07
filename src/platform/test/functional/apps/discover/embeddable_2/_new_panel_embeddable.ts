@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Integration test across multiple apps.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
@@ -25,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
   ]);
 
-  describe('add new discover panel embeddable', () => {
+  describe('add new discover panel from dashboard', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -79,39 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
       });
 
-      it('can save a new session from an existing By-Value panel to a dashboard without overriding the original', async () => {
-        const existingDashboardName = 'Existing Target Dashboard 3';
-
-        await dashboard.navigateToApp();
-        await dashboard.gotoDashboardLandingPage();
-        await dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickAddDiscoverPanel();
-        await header.waitUntilLoadingHasFinished();
-        await discover.clickSaveSearchButton();
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.saveDashboard(existingDashboardName);
-        await dashboard.switchToEditMode();
-
-        await dashboardPanelActions.clickEdit();
-        await header.waitUntilLoadingHasFinished();
-        await queryBar.setQuery('test');
-        await queryBar.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-        await discover.saveSearchToDashboard(
-          'Session for not Overridding panels',
-          {
-            existing: existingDashboardName,
-          },
-          { saveAsNew: true }
-        );
-        await dashboard.waitForRenderComplete();
-        await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
-          '4,633 documents',
-          '13 documents',
-        ]);
-      });
-
       it('can cancel adding a new Discover session panel', async () => {
         await dashboardAddPanel.clickAddDiscoverPanel();
         await header.waitUntilLoadingHasFinished();
@@ -126,25 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.verifyNoRenderErrors();
 
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql([]);
-      });
-    });
-
-    describe('Save Discover Table Button', () => {
-      it('can save to a new Dashboard from Discover', async () => {
-        await discover.navigateToApp();
-        await discover.clickNewSearchButton();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
-
-        await queryBar.setQuery('test');
-        await queryBar.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-
-        await discover.clickSaveDiscoverTableToDashboard('By-Value Table');
-
-        await dashboard.waitForRenderComplete();
-        await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
       });
     });
   });
