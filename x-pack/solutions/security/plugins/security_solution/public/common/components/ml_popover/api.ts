@@ -44,14 +44,20 @@ export const checkRecognizer = async ({
   );
 
 /**
- * Returns ML Module for given moduleId. Returns all modules if no moduleId specified
+ * Returns ML Module for given moduleId. Returns all modules if no moduleId specified.
+ * Matches Machine Learning → Supplied configurations when called without a filter.
  *
  * @param moduleId id of the module to retrieve
+ * @param filter optional tag filter (e.g. `security`)
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> =>
+export const getModules = async ({
+  moduleId = '',
+  filter,
+  signal,
+}: GetModulesProps): Promise<Module[]> =>
   KibanaServices.get().http.fetch<Module[]>(
     `/internal/ml/modules/get_module/${encodeURIComponent(moduleId)}`,
     {
@@ -59,9 +65,34 @@ export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Pr
       version: '1',
       asSystemRequest: true,
       signal,
-      query: { filter: 'security' },
+      query: {
+        ...(filter ? { filter } : {}),
+      },
     }
   );
+
+/**
+ * Returns ML modules installed via Fleet packages (`ml-module` saved objects).
+ * These are the integration-packaged configs — distinct from file-based stack modules.
+ */
+export const getFleetMlModules = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+} = {}): Promise<Module[]> => {
+  const response = await KibanaServices.get().http.fetch<{
+    saved_objects: Array<{ attributes: Module }>;
+  }>('/api/saved_objects/_find', {
+    method: 'GET',
+    signal,
+    query: {
+      type: 'ml-module',
+      per_page: 10000,
+    },
+  });
+
+  return response.saved_objects.map((savedObject) => savedObject.attributes);
+};
 
 /**
  * Creates ML Jobs + Datafeeds for the given configTemplate + indexPatternName

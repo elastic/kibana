@@ -7,29 +7,13 @@
 
 import React from 'react';
 
-import styled from 'styled-components';
-import {
-  EuiButton,
-  EuiPopoverTitle,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 
-const PopoverContentsDiv = styled.div`
-  width: 384px;
-`;
-
-PopoverContentsDiv.displayName = 'PopoverContentsDiv';
-
 export const UpgradeContentsComponent = () => (
-  <PopoverContentsDiv data-test-subj="ml-popover-upgrade-contents">
-    <EuiPopoverTitle>{i18n.UPGRADE_TITLE}</EuiPopoverTitle>
+  <div data-test-subj="ml-popover-upgrade-contents">
     <EuiText size="s">
       <FormattedMessage
         id="xpack.securitySolution.components.mlPopup.upgradeDescription"
@@ -68,7 +52,7 @@ export const UpgradeContentsComponent = () => (
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </PopoverContentsDiv>
+  </div>
 );
 
 export const UpgradeContents = React.memo(UpgradeContentsComponent);

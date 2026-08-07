@@ -19,27 +19,18 @@ describe('JobsTableFilters', () => {
     securityJobs = cloneDeep(mockSecurityJobs);
   });
 
-  test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
+  test('defaults to Elastic jobs filter selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper
-      .find('button[data-test-subj="show-elastic-jobs-filter-button"]')
-      .first()
-      .simulate('click');
-    wrapper.update();
-
     expect(
-      wrapper
-        .find('[data-test-subj="show-elastic-jobs-filter-button"]')
-        .first()
-        .prop('hasActiveFilters')
-    ).toEqual(true);
+      wrapper.find('[data-test-subj="prebuilt-jobs-filter-button-group"]').first().prop('idSelected')
+    ).toEqual('elastic');
   });
 
-  test('when you click Custom Jobs filter, state is updated and it is selected', () => {
+  test('when you select Custom jobs, filter selection changes', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
@@ -52,68 +43,7 @@ describe('JobsTableFilters', () => {
     wrapper.update();
 
     expect(
-      wrapper
-        .find('[data-test-subj="show-custom-jobs-filter-button"]')
-        .first()
-        .prop('hasActiveFilters')
-    ).toEqual(true);
-  });
-
-  test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and  selected changed', () => {
-    const onFilterChanged = jest.fn();
-    const wrapper = mount(
-      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
-    );
-
-    wrapper
-      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
-    wrapper.update();
-
-    wrapper
-      .find('button[data-test-subj="show-elastic-jobs-filter-button"]')
-      .first()
-      .simulate('click');
-    wrapper.update();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="show-custom-jobs-filter-button"]')
-        .first()
-        .prop('hasActiveFilters')
-    ).toEqual(false);
-    expect(
-      wrapper
-        .find('[data-test-subj="show-elastic-jobs-filter-button"]')
-        .first()
-        .prop('hasActiveFilters')
-    ).toEqual(true);
-  });
-
-  test('when you click Custom Jobs filter twice, state is updated and it is revert', () => {
-    const onFilterChanged = jest.fn();
-    const wrapper = mount(
-      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
-    );
-
-    wrapper
-      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
-    wrapper.update();
-
-    wrapper
-      .find('button[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
-    wrapper.update();
-
-    expect(
-      wrapper
-        .find('[data-test-subj="show-custom-jobs-filter-button"]')
-        .first()
-        .prop('hasActiveFilters')
-    ).toEqual(false);
+      wrapper.find('[data-test-subj="prebuilt-jobs-filter-button-group"]').first().prop('idSelected')
+    ).toEqual('custom');
   });
 });
