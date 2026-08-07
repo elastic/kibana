@@ -13,6 +13,17 @@ import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
 
+const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
+  try {
+    return { response: await generateEsql(params), noDataError: undefined };
+  } catch (err) {
+    if (err instanceof GenerateEsqlNoDataError) {
+      return { response: undefined, noDataError: err };
+    }
+    throw err;
+  }
+};
+
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
   index: z
@@ -75,33 +86,23 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
-      let esqlResponse;
-      try {
-        esqlResponse = await generateEsql({
-          nlQuery,
-          index,
-          additionalContext: context,
-          executeQuery,
-          disableNamedParams,
-          timeRange,
-          includeDatasets: experimentalFeatures.datasets,
-          modelProvider,
-          esClient: esClient.asCurrentUser,
-          logger,
-          events,
-        });
-      } catch (err) {
-        if (err instanceof GenerateEsqlNoDataError) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: { message: err.message },
-              },
-            ],
-          };
-        }
-        throw err;
+      const { response: esqlResponse, noDataError } = await callGenerateEsql({
+        nlQuery,
+        index,
+        additionalContext: context,
+        executeQuery,
+        disableNamedParams,
+        timeRange,
+        includeDatasets: experimentalFeatures.datasets,
+        modelProvider,
+        esClient: esClient.asCurrentUser,
+        logger,
+        events,
+      });
+      if (noDataError) {
+        return {
+          results: [{ type: ToolResultType.error, data: { message: noDataError.message } }],
+        };
       }
 
       const toolResults: ToolHandlerResult[] = [];
