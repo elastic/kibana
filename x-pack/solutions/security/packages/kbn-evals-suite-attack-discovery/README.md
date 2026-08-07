@@ -114,7 +114,7 @@ ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME=alerts-snapshot \
 ```
 
 The restore uses the shared `GCS_CREDENTIALS` service account (automatically set via the vault config when using `node scripts/evals`).
-See `src/data_generators/restore_alerts_snapshot.ts`.
+See `@kbn/security-evals-alerts-snapshot` (`x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot/src/restore.ts`).
 
 #### Dataset registry (Dataplex)
 

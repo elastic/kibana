@@ -1073,7 +1073,6 @@ x-pack/platform/packages/shared/kbn-es-snapshot-loader @elastic/nightshift-conte
 x-pack/platform/packages/shared/kbn-evals @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
 x-pack/platform/packages/shared/kbn-evals-common @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
 x-pack/platform/packages/shared/kbn-evals-extensions @elastic/nightshift-context-and-research-team @elastic/security-genai-research-and-development
-x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-evals-runner @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2 @elastic/rna-project-team
 x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/obs-sig-events-team
@@ -1396,6 +1395,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/se
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
+x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -2781,7 +2781,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
-/x-pack/platform/test/reindex_service @elastic/kibana-management
 /x-pack/platform/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-data-discovery
@@ -3498,6 +3497,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-threat-hunting
