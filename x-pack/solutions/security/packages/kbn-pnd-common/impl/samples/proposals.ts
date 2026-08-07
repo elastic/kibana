@@ -188,8 +188,10 @@ export const getMockProposalsByInvestigationId = (investigationId: string): Prop
 export const getMockProposalById = (id: string): Proposal | undefined =>
   MOCK_PROPOSALS.find((proposal) => proposal.id === id);
 
-
-export const CONVERSATION_CATEGORY_COLORS: Record<RecommendedAction, 'danger' | 'warning' | 'primary' | 'accent'> = {
+export const CONVERSATION_CATEGORY_COLORS: Record<
+  RecommendedAction,
+  'danger' | 'warning' | 'primary' | 'accent'
+> = {
   contain: 'danger',
   escalate: 'warning',
   investigate: 'primary',
