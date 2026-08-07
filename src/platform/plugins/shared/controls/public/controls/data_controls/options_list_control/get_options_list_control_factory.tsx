@@ -35,6 +35,8 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   type PublishingSubject,
+  getViewModeSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
@@ -354,6 +356,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
             key,
             showOnlySelected,
           }),
+        viewMode$: getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
       };

@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from './constants';
 
 export const OptionsListStrings = {
@@ -277,11 +278,16 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.footer.partialResultsTitle', {
         defaultMessage: 'Some values may be missing.',
       }),
-    getPartialResultsTooltip: () =>
-      i18n.translate('controls.optionsList.popover.footer.partialResultsTooltip', {
-        defaultMessage:
-          'This control is configured to load values fast and can show partial results if it relies on a large data set. To ensure it shows all values, edit the control to "Always load all results". All valid values will show but will take longer to load.',
-      }),
+    getPartialResultsTooltip: (viewMode: ViewMode) =>
+      viewMode === 'edit'
+        ? i18n.translate('controls.optionsList.popover.footer.partialResultsTooltip.edit', {
+            defaultMessage:
+              'This control is configured to load values fast and can show partial results if it relies on a large data set. To ensure it shows all values, edit the control to "Always load all results". All valid values will show but will take longer to load.',
+          })
+        : i18n.translate('controls.optionsList.popover.footer.partialResultsTooltip.view', {
+            defaultMessage:
+              'This control is configured to load values fast and can show partial results if it relies on a large data set.',
+          }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>

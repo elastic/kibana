@@ -21,7 +21,7 @@ import {
   useEuiPaddingSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type ViewMode } from '@kbn/presentation-publishing';
 
 import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -43,8 +43,11 @@ const aggregationToggleButtons = [
 export const OptionsListPopoverFooter = () => {
   const { componentApi } = useOptionsListContext();
 
-  const [exclude, loading, isPartial] = useBatchedPublishingSubjects(
+  const [exclude, viewMode, loading, isPartial] = useBatchedPublishingSubjects(
     isDSLOptionsListApi(componentApi) ? componentApi.exclude$ : new BehaviorSubject(false),
+    isDSLOptionsListApi(componentApi)
+      ? componentApi.viewMode$
+      : new BehaviorSubject('view' as ViewMode),
     componentApi.dataLoading$,
     componentApi.isPartial$
   );
@@ -96,7 +99,7 @@ export const OptionsListPopoverFooter = () => {
                 type="partial"
                 title={OptionsListStrings.popover.getPartialResultsTitle()}
                 aria-label={OptionsListStrings.popover.getPartialResultsTitle()}
-                content={OptionsListStrings.popover.getPartialResultsTooltip()}
+                content={OptionsListStrings.popover.getPartialResultsTooltip(viewMode)}
               />
             </EuiFlexItem>
           )}
