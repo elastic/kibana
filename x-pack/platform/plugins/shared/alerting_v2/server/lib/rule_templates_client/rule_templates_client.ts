@@ -41,11 +41,15 @@ const DEFAULT_PER_PAGE = 20;
  */
 @injectable()
 export class RuleTemplatesClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(RuleTemplateSavedObjectsClientToken)
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) logger: LoggerServiceContract
+  ) {
+    this.logger = logger.forSubsystem('ruleTemplateClient');
+  }
 
   public async findRuleTemplates(
     params: FindRuleTemplatesArgs = {}
@@ -81,6 +85,7 @@ export class RuleTemplatesClient {
         this.logger.error({
           error: e instanceof Error ? e : new Error(String(e)),
           code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+          labels: { rule_template_id: so.id },
         });
         return [];
       }
@@ -108,6 +113,7 @@ export class RuleTemplatesClient {
       this.logger.error({
         error: e instanceof Error ? e : new Error(String(e)),
         code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+        labels: { rule_template_id: id },
       });
       throw this.ruleTemplateNotFound(id);
     }

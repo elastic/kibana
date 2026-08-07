@@ -17,6 +17,7 @@ import type { AlertingV2LogCode } from '../../errors/error_codes';
 export type AlertingLabels = Partial<{
   rule_id: string;
   rule_kind: RuleKind;
+  rule_template_id: string;
   space_id: string;
   policy_id: string;
   group_id: string;
@@ -37,6 +38,7 @@ export type AlertingLabels = Partial<{
 export type AlertingSubsystemName =
   | 'routes'
   | 'rulesClient'
+  | 'ruleTemplateClient'
   | 'actionPolicyClient'
   | 'ruleExecutor'
   | 'director'

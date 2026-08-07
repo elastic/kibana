@@ -169,7 +169,10 @@ describe('RuleTemplatesClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          labels: { code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED },
+          labels: {
+            code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+            rule_template_id: 'invalid',
+          },
         })
       );
     });
@@ -244,7 +247,10 @@ describe('RuleTemplatesClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
-          labels: { code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED },
+          labels: {
+            code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+            rule_template_id: 'classic-template',
+          },
         })
       );
     });
