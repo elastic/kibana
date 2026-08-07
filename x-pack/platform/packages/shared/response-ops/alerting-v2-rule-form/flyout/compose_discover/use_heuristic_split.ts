@@ -188,9 +188,9 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
 }
 
 /**
- * After a create-mode unified-editor Apply, merges heuristic split output with
- * any recovery block from the sandbox when the query format is unchanged.
- * A format change (e.g. signal standalone → composed after switching to alert) drops recovery.
+ * Merges `splitResult` (heuristic split output, always `composed`) with
+ * `sandboxQuery.recovery` when `sandboxQuery` is also `composed`; otherwise
+ * returns `splitResult` unchanged.
  */
 export function resolveUnifiedAlertApplyQuery(
   sandboxQuery: RuleQuery,
@@ -199,13 +199,6 @@ export function resolveUnifiedAlertApplyQuery(
   if (
     splitResult.format === 'composed' &&
     sandboxQuery.format === 'composed' &&
-    sandboxQuery.recovery
-  ) {
-    return { ...splitResult, recovery: sandboxQuery.recovery };
-  }
-  if (
-    splitResult.format === 'standalone' &&
-    sandboxQuery.format === 'standalone' &&
     sandboxQuery.recovery
   ) {
     return { ...splitResult, recovery: sandboxQuery.recovery };

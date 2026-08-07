@@ -14,18 +14,6 @@ import { getBreachQuery } from '../../../form/utils/query_helpers';
 import { QueryBlock, QuerySummary } from '../query_summary';
 import { splitResultToRuleQuery } from '../use_heuristic_split';
 
-/**
- * Read-only summary of the applied ES|QL query on step 1. The heuristic split
- * is no longer shown in the editor (unified create flow) — it is surfaced here,
- * read-only, with copy + an edit CTA. A successful split is a `composed` query
- * (base + alert segment); a base-only query is still `composed` with an empty
- * segment (save rejects it until a condition is added — surfaced via toast).
- *
- * Signal rules always render as a single query block — we never display a
- * guessed base/condition split for signal, even if the in-progress query is
- * still composed during authoring. Alert-condition guidance (subtitle + callout)
- * is also hidden for signal; a conditionless query is the normal signal shape.
- */
 export type EsqlSummaryState =
   | 'before_apply'
   | 'success'
@@ -37,10 +25,6 @@ export type EsqlSummaryState =
  * Derives the summary state from the committed query. Callout priority is
  * encoded by the branch order: empty → split failed → no alert condition.
  *
- * When `forceUnified` is set (signal rules), state is derived from the assembled
- * breach query text via the same heuristic — used only for guidance callouts,
- * never to render a split UI.
- *
  * For standalone queries the outcome is derived by running the same heuristic
  * split on the breach query text. A standalone rule whose query already contains
  * an alert condition returns 'success' so that no false "No alert condition"
@@ -48,14 +32,12 @@ export type EsqlSummaryState =
  */
 export const getEsqlSummaryState = (
   queryCommitted: boolean,
-  query: RuleQuery,
-  { forceUnified = false }: { forceUnified?: boolean } = {}
+  query: RuleQuery
 ): EsqlSummaryState => {
   if (!queryCommitted) return 'before_apply';
 
-  if (forceUnified || query.format === 'standalone') {
-    const text = query.format === 'standalone' ? query.breach.query : getBreachQuery(query);
-    return splitResultToRuleQuery(text).outcome;
+  if (query.format === 'standalone') {
+    return splitResultToRuleQuery(query.breach.query).outcome;
   }
 
   const hasBase = query.base.trim().length > 0;
@@ -154,7 +136,7 @@ const getDescription = (state: EsqlSummaryState, kind: RuleKind): string | null 
 interface EsqlQuerySummarySectionProps {
   query: RuleQuery;
   queryCommitted: boolean;
-  /** When `signal`, always render a single query block (never a guessed split). */
+  /** Used to hide alert-condition guidance (subtitle + callout) for signal rules. */
   kind: RuleKind;
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
@@ -186,10 +168,9 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   isEditorOpen,
   onOpenEditor,
 }) => {
-  const forceUnified = kind === 'signal';
-  const state = getEsqlSummaryState(queryCommitted, query, { forceUnified });
+  const state = getEsqlSummaryState(queryCommitted, query);
   const showBlocks = state !== 'before_apply';
-  const showUnifiedBlock = forceUnified || query.format === 'standalone';
+  const showUnifiedBlock = query.format === 'standalone';
   const callout = getSummaryCallout(state, kind);
   const description = getDescription(state, kind);
 

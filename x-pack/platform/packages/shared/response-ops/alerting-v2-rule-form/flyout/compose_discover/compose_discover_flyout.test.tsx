@@ -1487,6 +1487,27 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(getLatestFormProps().state.step).toBe(2);
     });
+
+    it('still clamps when the buffer is unparseable at the moment of toggling back to Form', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'SET_STEP', step: 3 });
+      });
+      expect(getLatestFormProps().state.step).toBe(3);
+
+      // Enabling YAML mode's own parse succeeds and applies kind: 'signal' to RHF.
+      clickEditMode('yaml');
+
+      // The buffer is now broken (e.g. a mid-edit typo) at the exact moment the
+      // user toggles back to Form — this parse attempt fails, but RHF's kind is
+      // already 'signal' from the successful parse above.
+      mockParseYamlToFormValues = () => ({ values: null, error: 'bad yaml' });
+
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.step).toBe(2);
+    });
   });
 
   describe('recovery_strategy removal on update', () => {

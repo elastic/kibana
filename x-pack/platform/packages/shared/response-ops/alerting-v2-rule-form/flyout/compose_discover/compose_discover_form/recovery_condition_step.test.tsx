@@ -72,10 +72,6 @@ const CUSTOM_RECOVERY_QUERY: RuleQuery = {
   recovery: { segment: RECOVERY_SEGMENT },
 };
 
-const renderEsqlRecovery = (props: React.ComponentProps<typeof EsqlRecoveryContent>) => (
-  <EsqlRecoveryContent {...props} />
-);
-
 const renderRecoveryStep = (
   stateOverrides: Partial<ComposeDiscoverState> = {},
   queryOverride?: RuleQuery
@@ -93,7 +89,7 @@ const renderRecoveryStep = (
       state={state}
       dispatch={dispatch}
       onRecoveryTypeChange={onRecoveryTypeChange}
-      renderCustomRecovery={renderEsqlRecovery}
+      renderCustomRecovery={EsqlRecoveryContent}
     />,
     { wrapper: createComposeFormWrapper(queryOverride, services) }
   );
@@ -153,23 +149,26 @@ describe('RecoveryConditionStep', () => {
     });
   });
 
-  it('toggles custom recovery content without a hooks-order crash', () => {
+  it('toggles custom recovery content without a hooks-order warning', () => {
+    // React reports a mismatched hook count as a console.error, not a thrown
+    // exception — assert on the former; `.not.toThrow()` would pass either way.
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const { view, dispatch, onRecoveryTypeChange } = renderRecoveryStep(
       { recoveryType: 'default' },
       CUSTOM_RECOVERY_QUERY
     );
 
-    expect(() => {
-      view.rerender(
-        <RecoveryConditionStep
-          state={createState({ queryCommitted: true, recoveryType: 'custom' })}
-          dispatch={dispatch}
-          onRecoveryTypeChange={onRecoveryTypeChange}
-          renderCustomRecovery={renderEsqlRecovery}
-        />
-      );
-    }).not.toThrow();
+    view.rerender(
+      <RecoveryConditionStep
+        state={createState({ queryCommitted: true, recoveryType: 'custom' })}
+        dispatch={dispatch}
+        onRecoveryTypeChange={onRecoveryTypeChange}
+        renderCustomRecovery={EsqlRecoveryContent}
+      />
+    );
 
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
+    consoleErrorSpy.mockRestore();
   });
 });

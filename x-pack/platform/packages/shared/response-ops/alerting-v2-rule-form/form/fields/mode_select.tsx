@@ -100,14 +100,14 @@ export const ModeSelect = ({
   const options = readOnly ? MODE_OPTIONS.filter((option) => option.value === value) : MODE_OPTIONS;
 
   return (
-    <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        role="radiogroup"
-        aria-label={LABEL_TEXT}
-        id={radioGroupId}
-      >
+    <EuiFormRow
+      label={LABEL_TEXT}
+      labelType="legend"
+      aria-label={LABEL_TEXT}
+      fullWidth
+      data-test-subj={dataTestSubj}
+    >
+      <EuiFlexGroup direction="column" gutterSize="s">
         {options.map((option) => {
           const optionId = `${radioGroupId}-${option.value}`;
           return (

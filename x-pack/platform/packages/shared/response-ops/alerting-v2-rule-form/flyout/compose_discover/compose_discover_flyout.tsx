@@ -621,7 +621,7 @@ export function ComposeDiscoverFlyout({
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
         const currentNoData = methods.getValues('noDataStrategy');
-        const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, alertQuery.format);
+        const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData);
         if (resolvedNoData !== currentNoData) {
           methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
         }
@@ -813,25 +813,16 @@ export function ComposeDiscoverFlyout({
           if (yamlWasDirty) {
             hasBeenEditedRef.current = true;
           }
-          /*
-           * YAML editing bypasses the KIND_CHANGE action, so a kind edited in the
-           * buffer can leave `step` pointing past the new kind's step count (e.g.
-           * alert's Notifications step has no signal equivalent) — clamp it.
-           */
-          const stepCount = (
-            builderType
-              ? getBuilderStepIds(composed.kind === 'alert')
-              : getStepIds(composed.kind === 'alert')
-          ).length;
-          if (uiState.step > stepCount - 1) {
-            dispatch({ type: 'SET_STEP', step: stepCount - 1 });
-          }
         }
-        /*
-         * No apply on parse-failure path: the debounced parse always calls
-         * applyYamlValuesToFormAndSandbox together, so RHF and sandbox state are already in
-         * sync at the last valid parse state. The current yamlText simply can't be applied.
-         */
+
+        /* Make sure step is realigned when switching back to the rule form from the yaml form */
+        const currentKindIsAlert = methods.getValues('kind') === 'alert';
+        const stepCount = (
+          builderType ? getBuilderStepIds(currentKindIsAlert) : getStepIds(currentKindIsAlert)
+        ).length;
+        if (uiState.step > stepCount - 1) {
+          dispatch({ type: 'SET_STEP', step: stepCount - 1 });
+        }
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
@@ -875,7 +866,7 @@ export function ComposeDiscoverFlyout({
     methods.setValue('query', queryToCommit, { shouldDirty: true });
     if (isAlert && queryToCommit.format === 'composed') {
       const currentNoData = methods.getValues('noDataStrategy');
-      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'composed');
+      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData);
       if (resolvedNoData !== currentNoData) {
         methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
       }

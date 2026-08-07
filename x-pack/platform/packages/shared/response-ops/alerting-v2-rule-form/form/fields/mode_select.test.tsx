@@ -52,4 +52,10 @@ describe('ModeSelect', () => {
     expect(screen.queryByTestId('ruleV2ModeSelect-signal')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleV2ModeSelect-alert').querySelector('input')).toBeDisabled();
   });
+
+  it('associates the goal label with the option group via a fieldset/legend', () => {
+    render(<ModeSelect value="alert" onChange={jest.fn()} />);
+
+    expect(screen.getByRole('group', { name: "What's your goal?" })).toBeInTheDocument();
+  });
 });

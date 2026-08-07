@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import type { NoDataStrategy, RuleQuery } from '../../form/types';
+import type { NoDataStrategy } from '../../form/types';
 
 /** Form-representable no-data strategies for a composed alert query. */
 const COMPOSED_VALID_STRATEGIES = new Set<NoDataStrategy>(['none', 'last_known_status', 'recover']);
 
 /**
- * Returns the no-data strategy to use for an alert query of the given format.
- * Preserves the current value when it is still valid; otherwise returns the
- * format-appropriate default. Callers should skip `setValue` when the result
+ * Returns the no-data strategy to use for a composed alert query — the only
+ * shape the form authors alert queries as. Preserves the current value when
+ * it is still valid; otherwise defaults to `'last_known_status'`
+ * (`emit` is YAML-only). Callers should skip `setValue` when the result
  * equals the current value to avoid dirtying an unchanged form.
- *
- * - composed: `'none' | 'last_known_status' | 'recover'` are valid; default
- *   `'last_known_status'` when missing/invalid (`emit` is YAML-only)
- * - standalone: only `'none'` is valid — kept as a defensive branch for
- *   signal→alert transitions before the heuristic rewrite lands; alert +
- *   standalone rules are YAML-only and never authored by the form
  */
 export const resolveNoDataStrategyForQuery = (
-  current: NoDataStrategy | undefined,
-  queryFormat: RuleQuery['format']
+  current: NoDataStrategy | undefined
 ): NoDataStrategy => {
-  if (queryFormat === 'standalone') {
-    return 'none';
-  }
   if (current != null && COMPOSED_VALID_STRATEGIES.has(current)) {
     return current;
   }

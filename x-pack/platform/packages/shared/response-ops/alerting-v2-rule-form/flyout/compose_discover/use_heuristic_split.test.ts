@@ -356,22 +356,6 @@ describe('resolveUnifiedAlertApplyQuery', () => {
     });
   });
 
-  it('preserves standalone recovery when split stays standalone', () => {
-    const sandbox = {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-*' },
-      recovery: recoveryQuery,
-    };
-    const split = {
-      format: 'standalone' as const,
-      breach: { query: 'FROM logs-*' },
-    };
-    expect(resolveUnifiedAlertApplyQuery(sandbox, split)).toEqual({
-      ...split,
-      recovery: recoveryQuery,
-    });
-  });
-
   it('drops recovery when format changes from standalone to composed', () => {
     const sandbox = {
       format: 'standalone' as const,
