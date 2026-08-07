@@ -10,10 +10,6 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { AlertEventsClientApi } from '../../../types';
 import { getCreateAlertEventStepDefinition } from './steps/create_alert_event_step';
 
-/**
- * Registers all alerting-v2 server-side workflow step definitions.
- * Called once during plugin setup.
- */
 export function registerStepDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
   getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>

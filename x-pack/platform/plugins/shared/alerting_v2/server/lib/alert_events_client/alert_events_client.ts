@@ -27,10 +27,7 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-/**
- * Dotted path lookup within an object (e.g. nested keys under `data`).
- * Examples on `data`: `monitor_id`, `labels.env`.
- */
+/** Path format: dotted keys, e.g. `monitor_id`, `labels.env`. */
 export function getValueByDottedPath(obj: unknown, path: string): unknown {
   if (!path) return undefined;
   let cur: unknown = obj;
@@ -44,13 +41,12 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
 }
 
 /**
- * Computes `group_hash` in a single sha256, in priority order:
+ * Computes `group_hash` in priority order:
  *   1. Explicit `fingerprint`
  *   2. `fingerprint_fields` — keys/paths resolved only under `data` (missing → "")
  *   3. `rule_id` (schema guarantees one of the three)
  *
- * Always includes `spaceId` and `source` so series keys cannot collide across
- * spaces or vendors.
+ * Always includes `spaceId` and `source` so series keys cannot collide across spaces or sources.
  */
 export function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
   const { source } = event;
@@ -82,11 +78,6 @@ export class AlertEventsClient {
     @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
-  /**
-   * Ingests an external alert event into `.rule-events` (no backing rule SO).
-   * Shared by POST /api/alerting/v2/alerts and POST /api/alerting/v2/alerts/:source.
-   * Callers must pass a normalized payload with `source` already set.
-   */
   public async createAlertEvent(
     event: CreateAlertEventData,
     { abortSignal }: { abortSignal?: AbortSignal } = {}
@@ -111,8 +102,7 @@ export class AlertEventsClient {
         ? 1
         : undefined;
 
-    // No `rule` object — external alerts have no saved object. Display name /
-    // backlink live in data.rule_name / data.alert_url when the caller provides them.
+    // No `rule` object — no backing rule saved object.
     const doc: AlertEvent = {
       '@timestamp': atTimestamp,
       scheduled_timestamp: atTimestamp,
