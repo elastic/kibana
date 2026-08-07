@@ -2038,7 +2038,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/kibana-d3-color@npm:@elastic/kibana-d3-color@2.0.1":
+"@elastic/kibana-d3-color@npm:@elastic/kibana-d3-color@2.0.1", "d3-color@1 - 2", "d3-color@npm:@elastic/kibana-d3-color@2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@elastic/kibana-d3-color/-/kibana-d3-color-2.0.1.tgz#f83b9c2fea09273a918659de04d5e8098c82f65c"
   integrity sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==
@@ -10382,49 +10382,55 @@
     node-addon-api "^8.5.0"
     prebuild-install "^7.1.3"
 
-"@moonrepo/cli@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-2.1.0.tgz#d0dec3344fd1e8f062508351e2f3da6a7b7bf623"
-  integrity sha512-QLqn0H0OGEehUzjAqPuu+vh0TnaN0wqHp8ODTv4CvHMwBARYIOi5YDge/6xtK2aAkGFjWsjs5cwFLIdQgyhWiw==
+"@moonrepo/cli@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-2.4.5.tgz#f2f1ed962839c085e17546e5f63b507e96730227"
+  integrity sha512-AYdIBRpdTwhzfDgGcFzHexiIMEDxiQoUUmlwcajA64NaLglFM3D4pRv5ZmbR1cK+qMm+szwYCK6lnFJ1l57hOw==
   dependencies:
     detect-libc "^2.1.2"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "2.1.0"
-    "@moonrepo/core-linux-arm64-musl" "2.1.0"
-    "@moonrepo/core-linux-x64-gnu" "2.1.0"
-    "@moonrepo/core-linux-x64-musl" "2.1.0"
-    "@moonrepo/core-macos-arm64" "2.1.0"
-    "@moonrepo/core-windows-x64-msvc" "2.1.0"
+    "@moonrepo/core-linux-arm64-gnu" "2.4.5"
+    "@moonrepo/core-linux-arm64-musl" "2.4.5"
+    "@moonrepo/core-linux-x64-gnu" "2.4.5"
+    "@moonrepo/core-linux-x64-musl" "2.4.5"
+    "@moonrepo/core-macos-arm64" "2.4.5"
+    "@moonrepo/core-macos-x64" "2.4.5"
+    "@moonrepo/core-windows-x64-msvc" "2.4.5"
 
-"@moonrepo/core-linux-arm64-gnu@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-2.1.0.tgz#69c5a157593f9e0156f4643410229ee0537deab4"
-  integrity sha512-MEMlF7aAssTh1XtZDXFqmQB9tZa5fo6a0itjMQ0rumFOnNSQbTUrm9Sp3JzMOHKIBIZa9/eFfvB5ifuNFfENVw==
+"@moonrepo/core-linux-arm64-gnu@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-2.4.5.tgz#ec4f599dcb16ae348dceae9132ea53636f7d217e"
+  integrity sha512-pvcANFo5cYvRlT4pFkwd3qaB536mLoTkaXH+PQeGj+Ox0be3Nfk3xZ9tlisD/OENLsy17vLHifqbJaRY28kkTQ==
 
-"@moonrepo/core-linux-arm64-musl@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-2.1.0.tgz#8e422c43e19b26fe2b24434cda945b7336172608"
-  integrity sha512-smYA3gdnxcaF4K3pnMiYdtjmfDEYZGrWVibDv4Qrhva/gN5NhYSfxdkq3bxrNAS/fv5a1iQgoVBt5AM8p1Z3+w==
+"@moonrepo/core-linux-arm64-musl@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-2.4.5.tgz#de69fd79a89b6ea5dd5c2c494e24f7946d32f1f6"
+  integrity sha512-s+HIrTMgUt6ekQSmOSJRzDguTxWWYmceMZOGe01wEx6U5a/cka8qJKWjKet2Wgs3sub0GGHguLZcCCVyPW79LA==
 
-"@moonrepo/core-linux-x64-gnu@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-2.1.0.tgz#49684efb4be2a3d65fe873a4b784001e64daf3a1"
-  integrity sha512-cVwbtcxJJ3zL2/1DZQvmdCDzZwIe/wc4yuTGtVpDG7yqAy24WqlXovkMIJNlxdNJ/5irhC8UGCVfitAN1CPgyQ==
+"@moonrepo/core-linux-x64-gnu@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-2.4.5.tgz#cf2520b9619e3a9132871e773928090e94b40960"
+  integrity sha512-ZOR9EbKuFA40xZeJ4wIAAJRpjin/Vz9uxNDAywYvPw3Uzx1K+m4VeZVuc/0V8x/jWd+UeXB4yKUCDPZG/7UPnQ==
 
-"@moonrepo/core-linux-x64-musl@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-2.1.0.tgz#75bf2b67df8dc6d1175513417918dc21398964c3"
-  integrity sha512-d76Um8UCgJQxIQrrNawE+RA71vkK1Ui2woGcoQ20iBvJbRBwzZreJ8m1UDqzZs9F7OaPNBWLuXL8mZUIx26R8Q==
+"@moonrepo/core-linux-x64-musl@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-2.4.5.tgz#e09b9b7979899f3ab8e57a9a1141f6efd4bfc625"
+  integrity sha512-ocJQvGay5A47pxnM+gY9u//UQWHuLVh1h+mQwOU6gFIY49vyJvPuth6e7Tz3kxnnzTE7Fq1N7AbUV5XpN59JTA==
 
-"@moonrepo/core-macos-arm64@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-2.1.0.tgz#dfa41fc8329b0a14773cae55486ebad43542ece1"
-  integrity sha512-mh3qv/edP4KhvlkshvReIK6tXfcbmliFXWHoFATOpdVmbmGbWoTTHwFMHGD9t+1XS9GXVfSRhV824OPDIK90MA==
+"@moonrepo/core-macos-arm64@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-2.4.5.tgz#ceab32aae69f99c7145779b3116344657c1a60a0"
+  integrity sha512-D4EBmxvISKzeR42wzLFfU9Kl0Eg3f8XDxRo9IdQn7cwFx3s4IMhEdoIm0MWmy9w9hYvRCwNIDTZT7U+fuFqOVg==
 
-"@moonrepo/core-windows-x64-msvc@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-2.1.0.tgz#445257be046b67105d298292a8a0846600458fe2"
-  integrity sha512-TquSwZd6wbprddrNnrH4+pRvn52PBVdIi18uWAlsXXIZfKdw+laBAFtxcD8Qg+QWOZ7pXR5OyDIvLE6M3WaELQ==
+"@moonrepo/core-macos-x64@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-2.4.5.tgz#54a036cd9ea8da7d4d19a7f279a873f0cd8c662b"
+  integrity sha512-Ovt7YFiTLWdy+s3RL/PEQxVOMsMgk+f8AIKoJT++aA3HiyM+R46jJ9LgGVq0IjcMOlgAoI07bKRRS0Gd2YFeMQ==
+
+"@moonrepo/core-windows-x64-msvc@2.4.5":
+  version "2.4.5"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-2.4.5.tgz#3445b469cc394a398467c974ec8eac2990389b96"
+  integrity sha512-4GS+vVCpBuOCAai+G2vIOM13AmIHAMJ7rFRhodanYBuZqfQgPzxEJd1q4nGac25gsbtv85kGy2idaf93D2v6Jg==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -19252,11 +19258,6 @@ d3-collection@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/d3-collection/-/d3-collection-1.0.7.tgz#349bd2aa9977db071091c13144d5e4f16b5b310e"
   integrity sha512-ii0/r5f4sjKNTfh84Di+DpztYwqKhEyUlKoPrzUFfeSkWxjW49xU2QzO9qrPrNkpdI0XJkfzvmTu8V2Zylln6A==
-
-"d3-color@1 - 2", "d3-color@npm:@elastic/kibana-d3-color@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/kibana-d3-color/-/kibana-d3-color-2.0.1.tgz#f83b9c2fea09273a918659de04d5e8098c82f65c"
-  integrity sha512-YZ8hV2bWNyYi833Yj3UWczmTxdHzmo/Xc2IVkNXr/ZqtkrTDlTLysCyJm7SfAt9iBy6EVRGWTn8cPz8QOY6Ixw==
 
 "d3-color@1 - 3", d3-color@^3.1.0:
   version "3.1.0"
@@ -32952,7 +32953,7 @@ string-length@^4.0.1:
     char-regex "^1.0.2"
     strip-ansi "^6.0.0"
 
-"string-width-cjs@npm:string-width@^4.2.0":
+"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -32969,15 +32970,6 @@ string-width@^1.0.1:
     code-point-at "^1.0.0"
     is-fullwidth-code-point "^1.0.0"
     strip-ansi "^3.0.0"
-
-string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
-  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
-  dependencies:
-    emoji-regex "^8.0.0"
-    is-fullwidth-code-point "^3.0.0"
-    strip-ansi "^6.0.1"
 
 string-width@^5.0.1, string-width@^5.1.2:
   version "5.1.2"
@@ -33087,14 +33079,7 @@ stringify-object@^3.2.1:
     is-obj "^1.0.1"
     is-regexp "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
-  dependencies:
-    ansi-regex "^5.0.1"
-
-strip-ansi@6.0.1, strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@6.0.1, strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -35946,7 +35931,7 @@ workerpool@^6.5.1:
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.5.1.tgz#060f73b39d0caf97c6db64da004cd01b4c099544"
   integrity sha512-Fs4dNYcsdpYSAfVxhnl1L5zTksjvOJxtC5hzMNl+1t9B8hTJTdKDyZ5ju7ztgPy+ft9tBFXoOlDNiOT9WUXZlA==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -35967,15 +35952,6 @@ wrap-ansi@^6.0.1, wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
-  dependencies:
-    ansi-styles "^4.0.0"
-    string-width "^4.1.0"
-    strip-ansi "^6.0.0"
-
-wrap-ansi@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
-  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
