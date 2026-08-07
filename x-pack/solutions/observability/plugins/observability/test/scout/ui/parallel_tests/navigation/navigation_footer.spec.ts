@@ -70,10 +70,10 @@ test.describe(
       });
     });
 
-    test('Stack Management panel children navigate and update breadcrumbs', async ({
+    test('Stack Management panel children navigate to the correct destinations', async ({
       pageObjects,
     }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       await test.step('stack_management → Tags', async () => {
         await nav.navItemInFooterById('stack_management').click();
@@ -83,7 +83,7 @@ test.describe(
           .sidePanel('stack_management')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+        await expect(chrome.pageTitle).toContainText('Tags');
       });
 
       await test.step('stack_management → Maintenance Windows', async () => {
@@ -94,7 +94,7 @@ test.describe(
           .sidePanel('stack_management')
           .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Maintenance Windows' })).toBeVisible();
+        await expect(chrome.pageTitle).toContainText('Maintenance Windows');
       });
     });
 
@@ -113,7 +113,7 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       await nav.navItemInFooterById('stack_management').click();
       await expect(nav.sidePanel('stack_management')).toBeVisible();
@@ -122,7 +122,7 @@ test.describe(
         .sidePanel('stack_management')
         .locator('[data-test-subj~="nav-item-id-management:tags"]')
         .click();
-      await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+      await expect(chrome.pageTitle).toContainText('Tags');
 
       await page.reload();
       await nav.waitForLoad();

@@ -49,14 +49,17 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type {
-  DatasetExample,
-  EvaluationExperimentSummary,
-  EvaluationScoreDocument,
+import {
+  MAX_DATASET_DESCRIPTION_LENGTH,
+  type DatasetExample,
+  type DatasetMaturity,
+  type EvaluationExperimentSummary,
+  type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import {
   useAddExamples,
   useDataset,
+  useDatasetTagSuggestions,
   useDeleteExample,
   useEvalsTraceFetcher,
   useExampleScores,
@@ -66,6 +69,7 @@ import {
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import { DatasetTagsFields, DatasetTagsSummary } from '../../components/dataset_tags';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -126,7 +130,10 @@ export const DatasetDetailPage: React.FC = () => {
   const deleteExample = useDeleteExample();
 
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
+  const suggestedTags = useDatasetTagSuggestions({ enabled: isMetadataModalOpen });
   const [metadataDescription, setMetadataDescription] = useState('');
+  const [metadataTags, setMetadataTags] = useState<string[]>([]);
+  const [metadataMaturity, setMetadataMaturity] = useState<DatasetMaturity | null>(null);
   const [selectedExample, setSelectedExample] = useState<DatasetExample | null>(null);
   const [isEditingExample, setIsEditingExample] = useState(false);
   const [editInput, setEditInput] = useState('');
@@ -159,6 +166,8 @@ export const DatasetDetailPage: React.FC = () => {
 
   const openMetadataModal = () => {
     setMetadataDescription(dataset?.description ?? '');
+    setMetadataTags(dataset?.tags ?? []);
+    setMetadataMaturity(dataset?.maturity ?? null);
     setFormError(null);
     setIsMetadataModalOpen(true);
   };
@@ -214,9 +223,15 @@ export const DatasetDetailPage: React.FC = () => {
     if (!dataset) return;
     try {
       setFormError(null);
+      const isDescriptionEdited = metadataDescription !== (dataset.description ?? '');
+
       await updateDataset.mutateAsync({
         datasetId: dataset.id,
-        updates: { description: metadataDescription },
+        updates: {
+          ...(isDescriptionEdited ? { description: metadataDescription } : {}),
+          tags: metadataTags,
+          maturity: metadataMaturity,
+        },
       });
       setIsMetadataModalOpen(false);
     } catch (error) {
@@ -662,13 +677,13 @@ export const DatasetDetailPage: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={i18n.EDIT_DESCRIPTION_BUTTON} disableScreenReaderOutput>
+                  <EuiToolTip content={i18n.EDIT_DATASET_BUTTON} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType="pencil"
                       display="base"
                       size="m"
                       onClick={openMetadataModal}
-                      aria-label={i18n.EDIT_DESCRIPTION_BUTTON}
+                      aria-label={i18n.EDIT_DATASET_BUTTON}
                       data-test-subj="editDatasetMetadataButton"
                     />
                   </EuiToolTip>
@@ -690,7 +705,7 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
 
         {runsError ? (
           <EuiText color="danger" size="s">
@@ -714,6 +729,12 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiText size="s" color="subdued">
                   <p>{dataset.description}</p>
                 </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+            {dataset.maturity || dataset.tags?.length ? (
+              <>
+                <DatasetTagsSummary maturity={dataset.maturity} tags={dataset.tags} />
                 <EuiSpacer size="s" />
               </>
             ) : null}
@@ -1090,10 +1111,10 @@ export const DatasetDetailPage: React.FC = () => {
 
       {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
-        <EuiModal onClose={closeModals} aria-labelledby="editDescriptionModalTitle">
+        <EuiModal onClose={closeModals} aria-labelledby="editDatasetModalTitle">
           <EuiModalHeader>
-            <EuiModalHeaderTitle id="editDescriptionModalTitle">
-              {i18n.EDIT_DESCRIPTION_MODAL_TITLE}
+            <EuiModalHeaderTitle id="editDatasetModalTitle">
+              {i18n.EDIT_DATASET_MODAL_TITLE}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
@@ -1106,12 +1127,21 @@ export const DatasetDetailPage: React.FC = () => {
               </>
             ) : null}
             <EuiForm component="form">
-              <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL}>
+              <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL} fullWidth>
                 <EuiTextArea
                   value={metadataDescription}
                   onChange={(event) => setMetadataDescription(event.target.value)}
+                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
+                  fullWidth
                 />
               </EuiFormRow>
+              <DatasetTagsFields
+                tags={metadataTags}
+                maturity={metadataMaturity}
+                onTagsChange={setMetadataTags}
+                onMaturityChange={setMetadataMaturity}
+                suggestedTags={suggestedTags}
+              />
             </EuiForm>
           </EuiModalBody>
           <EuiModalFooter>
