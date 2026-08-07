@@ -40,7 +40,7 @@ Response shape: `{ "knowledge_indicators": [...], "page": 1, "per_page": 100, "r
 Example: platform_core_execute_esql call (with required modifications applied)
 ```json
 {
-  "query": "FROM logs.otel | WHERE @timestamp >= \"2026-07-06T20:00:00Z\" AND @timestamp <= NOW() | WHERE body.text : \"failed to charge card\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
+  "query": "FROM logs | WHERE @timestamp >= \"2026-07-06T20:00:00Z\" AND @timestamp <= NOW() | WHERE body.text : \"failed to charge card\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
 }
 ```
 Response when rows found:
@@ -128,11 +128,12 @@ Never retry completed checks or run a third wave. Note any checks skipped becaus
 
 **One `signals` entry per rule — never two**, regardless of how many calls you made for it. When a contradiction follow-up ran, the single entry narrates both attempts and its `evidence.esql_query`/`evidence.result` reflect the resolving (second) call. Each signal entry combines the detection metadata and the query result into one object. See `<output_format>` for the exact format.
 
-1. **Write the Signal Verdict** using the Testing / Expected / Found / Why / Verdict format. The **upstream target you name in the Found clause** (evidence extracted from the row) is the primary signal the grouping step uses to decide whether rules belong to the same incident — name it precisely. `feature.name`, `feature.description`, `feature.meta`, `feature.properties`, and `feature.evidence[]` provide useful information to enrich the description; use only what helps explain the problem. Concretely:
-   - **Confirmed**: `"Testing: api-service failing to reach the database. Expected if true: TCP connection errors to a database host. Found: 1 row — query failed, dial tcp db-primary:5432 connection refused. Why: api-service cannot reach db-primary at :5432 — connection refused (nothing accepting). Verdict: confirms — all db-dependent requests blocked."`
-   - **Inconclusive (signature mismatch)**: `"Testing: metrics-exporter failing to push metrics. Expected if true: export timeout or connection errors to the metrics endpoint. Found: 1 row — content is an unrelated upstream API error, not a metrics export failure; hypothesis unconfirmed. Verdict: inconclusive."`
-   - **Inconclusive (off-topic match)**: `"Testing: <KI hypothesis>. Expected if true: <expected signature>. Found: 1 row — content describes a different service or failure unrelated to this hypothesis; query matched via substring but the row is not on-topic. Verdict: inconclusive."`
-   - **Refutes (healthy rows)**: `"Testing: elevated error rate on orders service. Expected if true: error-signature rows. Found: 1 row — healthy transaction log, no error signature. Verdict: refutes."`
+1. **Write the Signal Verdict** using the compact **Found / Impact / Verdict** format (keep under 350 chars). **Found** names the row signature and failing target from the query result. **Impact** names who or what is blocked, degraded, or unaffected — outcome language only. **Verdict** is the label: `confirms`, `refutes`, or `inconclusive`. Do not put dependency chains, upstream causes, or topology in the description — record those in Step 5 `causal_features` and `blast_radius`. Budget order when over limit: shorten Found first; never omit Impact on `confirms`. Concretely:
+   - **Confirmed**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked. Verdict: confirms."`
+   - **Inconclusive (signature mismatch)**: `"Found: upstream API error, not a metrics export failure. Impact: unrelated to metrics export. Verdict: inconclusive."`
+   - **Inconclusive (off-topic match)**: `"Found: different service/failure; substring match only. Verdict: inconclusive."`
+   - **Refutes (healthy rows)**: `"Found: healthy transaction log, no error signature. Impact: none. Verdict: refutes."`
+   - **Refutes (no match)**: `"Found: no match. Verdict: refutes."`
 
    `result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`. The calling agent sets `confirmed: false` when verified evidence does not support its final event grouping.
 
@@ -154,12 +155,12 @@ Identifies the evidence-supported main contributor features for the potential is
 1. **Scope candidates**: resolve the exact-match query KI's `query.features[]`.
 2. **Resolve the feature KI**:
    - Traverse each matched query KI's `query.features[]`, find feature KIs matching query KI's `query.feature[].id` with feature KI's `feature.id`. with `type: "entity"` or `type: "infrastructure`".
-   - Fallback: scan `query.evidence[]`
-3. **Apply caller filter before deciding**: if a candidate entity appears ONLY as `source` in blast_radius dependency entries and the Signal Verdict confirms a connectivity error (connection refused, dial timeout, i/o timeout, etc.), **exclude it — it is the caller, not the cause**. The unreachable `target` of that dependency edge is the cause; treat it as the causal entity candidate instead.
-4. **Decide the most likely features that support the Signal Verdict cause**
+   - Scan `query.evidence[]` for additional insights.
+3. **Decide the `query.features[]` that best support the Signal Verdict root cause**
    - **From `feature.type: "entity"`**: Signal Verdict names a specific service as the failing component → entity KI enters `causal_features`. Read `query.evidence[]`, `feature.meta`, and `feature.properties` holistically to scope the hypothesis.
    - **From `feature.type: "infrastructure"`**: Signal Verdict points to a shared infrastructure component (e.g. a node, cluster, or host) affecting one or multiple services, Read `query.evidence[]`, `feature.properties`, `feature.evidence[] holistically to scope the hypothesis.
-   - Select at lest one with the strongest match to the Signal Verdict and corroborating evidence. Every feature from `query.features[]` not promoted here is a blast_radius candidate — carry it forward to 5.2; never discard it.
+   - At least one entry from `query.features[]` must be in `causal_features`
+   - Every feature from `query.features[]` not promoted here is a blast_radius candidate — carry it forward to 5.2; never discard it.
 
 Entry: `{ feature_id, name, stream_name? }`.
 
@@ -169,16 +170,16 @@ Topology edges affected by the potential issue, with evidenced propagation path.
 
 Derive candidates separately per detection. Every feature from the matched query KI's `features[]` not promoted to `causal_features` belongs here by default — include it unless current evidence explicitly contradicts its involvement. For features outside `query.features[]`, the Signal Verdict must show the active condition affects this relationship; shared stream or topology adjacency alone is insufficient.
 
-1. **From `feature.type: "dependency"`**: include only when the edge connects the selected cause to an evidenced affected feature or propagation path, and current evidence shows the active condition affects this relationship. `evidence[]` and `meta` are strong hypothesis seeds — read before querying. `meta.downstream_services`, query KI `evidence`, and service-reference properties may explain a relationship, but cannot create a `blast_radius` dependency entry without a qualifying dependency KI and current evidence of impact.
+1. **From `feature.type: "dependency"`**: include only when the edge connects the selected cause to an evidenced affected feature or propagation path, and current evidence shows the active condition affects this relationship. Preserve the fetched `source` → `target` edge when that evidence supports it, even when `target` is the causal_features. `query.evidence[]` and `feature.meta` are strong hypothesis seeds — read before querying. `meta.downstream_services`, query KI `evidence`, and service-reference properties may explain a relationship, but cannot create a `blast_radius` dependency entry without a qualifying dependency KI and current evidence of impact.
    Entry: `{ type: "dependency", feature_id, source, target, protocol?, stream_name? }`.
 
 2. **From `feature.type: "infrastructure"`**: include only when current evidence, interpreted through the exact-query KI, shows the active condition affects the infrastructure component or its workloads. Hosting the failing service alone is insufficient.
    Entry: `{ type: "infrastructure", feature_id, title?, workloads, stream_name? }`.
 
-3. **From `feature.type: "entity"`** (lost the cause decision — entity is affected by, not the cause of, the failure): include only when current evidence, interpreted through the exact-query KI, shows the active condition affects this entity.
+3. **From `feature.type: "entity"`** (lost the cause decision — entity is affected by, not the cause of, the failure): include only when current evidence, interpreted through the exact-query KI, shows the active condition affects this entity. When the Signal Verdict names a connection failure to a specific host/port, the named target is the causal entity — exclude candidates that appear only as `source` in dependency edges for this connectivity failure (they are callers, not causes).
    Entry: `{ type: "entity", feature_id, name, stream_name }`.
 
-4. **From `feature.type: "technology"`**: include only when the Signal Verdict is `confirms` and the confirmed failure type (connection failure, protocol error, etc.) is the specific concern the technology KI documents (e.g., a connection-pool KI when the verdict confirms a connectivity failure). Derive the owning service from `meta`, `evidence[]`, or the matched query KI's context. Use that service as `source` and the technology KI's `id` as `target`.
+4. **From `feature.type: "technology"`**: include only when the Signal Verdict is `confirms` and the confirmed failure type (connection failure, protocol error, etc.) is the specific concern the technology KI documents (e.g., a connection-pool KI when the verdict confirms a connectivity failure). Derive the owning service from `feature.meta`, `query.evidence[]`, or the matched query KI's context. Use that service as `source` and the technology KI's `id` as `target`.
    Entry: `{ type: "dependency", feature_id: <technology id>, source: <owning service>, target: <technology id>, stream_name? }`.
 
 5. **Cross-rule error evidence**: when the Signal Verdict is `inconclusive` because the query result is off-topic (the row does not match the rule's expected signature), but the row contains a clear error signal — connection error, HTTP 5xx, exception, or I/O timeout — naming a specific service, and that service matches a fetched feature KI (entity or dependency endpoint), add that service as a `type: entity` blast_radius entry. Do not promote it to `causal_features` — the matched rule did not confirm it as the cause. Gate: the service name must match a feature KI fetched anywhere in this batch invocation (any detection's ki_search results); do not infer services from noisy or ambiguous log text.
@@ -198,7 +199,7 @@ Each entry:
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
 - `evidence`: `{ esql_query, result }` when a query ran; omit for quiet rules. `result`: `"found"` | `"empty"` | `"error"`
 - `metadata`: detection input
-- `causal_feature`: array with Causal Features entries, emit [] when empty
+- `causal_features`: array with Causal Features entries; emit `[]` when empty
 - `blast_radius`: array with Blast Radius entries, emit [] when empty
 
 </output_format>

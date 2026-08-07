@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -13,6 +12,7 @@ import {
   convertToEsqlViaModal,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
+  test,
   testData,
 } from '../fixtures';
 
@@ -72,7 +72,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
     await expect(page.getByText('ES|QL Query Results')).toBeVisible();
-    await expect(lens.getApplyFlyoutButton()).toBeDisabled();
+    await expect(lens.applyFlyoutButton).toBeDisabled();
 
     // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
   });
@@ -103,7 +103,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     );
     await expect(panel).toContainText('Converted metric');
 
-    await lens.getSecondaryFlyoutBackButton().click();
+    await lens.secondaryFlyoutBackButton.click();
 
     await applyLensInlineEditorAndWaitClosed({ lens });
 
@@ -113,7 +113,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
     await expect(page.getByText('ES|QL Query Results')).toBeVisible();
-    await expect(lens.getApplyFlyoutButton()).toBeDisabled();
+    await expect(lens.applyFlyoutButton).toBeDisabled();
   });
 
   test('should correctly cancel the conversion and close the flyout', async ({
@@ -136,7 +136,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
-    await expect(lens.getConvertToEsqlButton()).toBeEnabled();
+    await expect(lens.convertToEsqlButton).toBeEnabled();
     await expect(page.getByTestId('ESQLEditor')).toBeHidden();
   });
 
@@ -147,6 +147,6 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.SAVED_METRIC
     );
-    await expect(pageObjects.lens.getConvertToEsqlButton()).toBeDisabled();
+    await expect(pageObjects.lens.convertToEsqlButton).toBeDisabled();
   });
 });

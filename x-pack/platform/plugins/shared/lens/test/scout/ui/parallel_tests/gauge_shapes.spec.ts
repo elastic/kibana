@@ -6,9 +6,8 @@
  */
 
 import { BulletSubtype } from '@elastic/charts';
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({

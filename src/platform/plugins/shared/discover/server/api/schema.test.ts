@@ -115,6 +115,9 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.sort).toEqual([]);
     expect(tab.filters).toEqual([]);
     expect(tab.view_mode).toBe('documents');
+    expect(tab.density).toBeUndefined();
+    expect(tab.header_row_height).toBeUndefined();
+    expect(tab.control_panels).toBeUndefined();
   });
 
   it('validates vis_context with opaque Lens attributes', () => {

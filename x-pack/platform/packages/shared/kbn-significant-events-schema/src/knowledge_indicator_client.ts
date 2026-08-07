@@ -14,7 +14,7 @@ import type { Feature } from './feature';
  * This contract lives in the schema package so streams-core can depend on it
  * type-only, without importing the concrete `KnowledgeIndicatorClient`
  * implementation — which keeps the dependency one-way once that implementation
- * moves into the significant_events plugin. The concrete client is structurally
+ * moves into the significantEvents plugin. The concrete client is structurally
  * assignable to this contract.
  */
 export interface KnowledgeIndicatorClientContract {

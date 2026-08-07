@@ -26,22 +26,8 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
-    id: 'evidence_description_is_hypothesis_test',
-    text: 'Every signal where the agent set `confirmed` to true or false must document its verification using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Signals without a confirmed value were not verified and are exempt.',
-    score: 1,
-  },
-  ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
-];
-
-/**
- * Judge-authored descriptions follow the plain-sentence contract from the judge instructions
- * (`<communication>`); carried entries keep whatever format they arrived with, including the
- * legacy four-part template still written by the discovery agent.
- */
-export const JUDGE_EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
-  {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every signal the judge verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must describe the check in one to three plain sentences covering what was checked, what the data showed, and what that means for the event. The four-part template ("Testing: … Expected if true: … Found: … Verdict: …") is not acceptable for these judge-authored entries. Entries carried forward unchanged from the input (older `collected_at`) are acceptable in any format, including the four-part template. Signals without a confirmed value were not verified and are exempt.',
+    text: 'Every signal the agent verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must describe the check in one to three plain sentences covering what was checked, what the data showed, and what that means for the event. The four-part template ("Testing: … Expected if true: … Found: … Verdict: …") is not acceptable for these agent-authored entries. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format, including the four-part template. Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
