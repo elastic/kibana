@@ -40,6 +40,13 @@ export const checkoutEvent: SignificantEvent = {
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
+    // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
+    {
+      type: 'entity',
+      feature_id: 'inventory-service',
+      name: 'inventory-service',
+      stream_name: 'logs.inventory-service',
+    },
   ],
 };
 

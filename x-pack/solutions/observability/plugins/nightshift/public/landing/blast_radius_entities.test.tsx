@@ -79,6 +79,24 @@ describe('BlastRadiusEntities', () => {
     renderState({ isError: true, onRetry });
 
     expect(screen.getByText('Unable to load impacted services')).toBeInTheDocument();
+    expect(screen.queryByTestId('blast-radius-failed-streams')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('blast-radius-retry'));
+    expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('names the unreachable streams while keeping the chips that did resolve', () => {
+    const onRetry = jest.fn();
+    renderState({
+      entities: buildEntities(2),
+      failedStreamNames: ['logs.payments', 'logs.checkout'],
+      onRetry,
+    });
+
+    expect(screen.getByText('Some impacted services could not be loaded')).toBeInTheDocument();
+    expect(screen.getByTestId('blast-radius-failed-streams')).toHaveTextContent(
+      'No response from logs.payments, logs.checkout.'
+    );
+    expect(screen.getAllByTestId('blast-radius-chip')).toHaveLength(2);
     fireEvent.click(screen.getByTestId('blast-radius-retry'));
     expect(onRetry).toHaveBeenCalled();
   });

@@ -16,6 +16,8 @@ import { useFetchStreamFeatures } from './use_fetch_stream_features';
 
 export interface ImpactedServicesResult {
   services: ImpactedService[];
+  /** Streams that could not be reached, so `services` is known to be incomplete. */
+  failedStreamNames: string[];
   isInitialLoading: boolean;
   isFetching: boolean;
   isError: boolean;

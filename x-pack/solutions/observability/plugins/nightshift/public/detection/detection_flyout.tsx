@@ -73,11 +73,13 @@ export function DetectionFlyout({
 
   const {
     services: associatedEntities,
+    failedStreamNames: failedStreamFeatureNames,
     isInitialLoading: isLoadingStreamFeatures,
     isFetching: isFetchingStreamFeatures,
     isError: isStreamFeaturesError,
     refetch: refetchStreamFeatures,
   } = useImpactedServices(event);
+  const hasStreamFeatureFailures = isStreamFeaturesError || failedStreamFeatureNames.length > 0;
   const selectedEntityFeature = selectedEntity?.feature;
 
   useEffect(() => {
@@ -203,7 +205,9 @@ export function DetectionFlyout({
             </>
           )}
 
-          {(isLoadingStreamFeatures || isStreamFeaturesError || associatedEntities.length > 0) && (
+          {(isLoadingStreamFeatures ||
+            hasStreamFeatureFailures ||
+            associatedEntities.length > 0) && (
             <>
               <FlyoutSectionTitle>
                 {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
@@ -218,15 +222,35 @@ export function DetectionFlyout({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-              {isStreamFeaturesError && (
+              {hasStreamFeatureFailures && (
                 <EuiCallOut
                   announceOnMount
                   color="warning"
                   iconType="warning"
                   size="s"
-                  title={i18n.translate('xpack.nightshift.detectionFlyout.entitiesErrorTitle', {
-                    defaultMessage: 'Unable to load impacted services',
-                  })}
+                  title={
+                    isStreamFeaturesError
+                      ? i18n.translate('xpack.nightshift.detectionFlyout.entitiesErrorTitle', {
+                          defaultMessage: 'Unable to load impacted services',
+                        })
+                      : i18n.translate(
+                          'xpack.nightshift.detectionFlyout.entitiesPartialErrorTitle',
+                          { defaultMessage: 'Some impacted services could not be loaded' }
+                        )
+                  }
+                  text={
+                    isStreamFeaturesError ? undefined : (
+                      <p data-test-subj="nightshiftDetectionFlyoutEntitiesFailedStreams">
+                        {i18n.translate(
+                          'xpack.nightshift.detectionFlyout.entitiesPartialErrorDescription',
+                          {
+                            defaultMessage: 'No response from {streamNames}.',
+                            values: { streamNames: failedStreamFeatureNames.join(', ') },
+                          }
+                        )}
+                      </p>
+                    )
+                  }
                 >
                   <EuiButtonEmpty
                     color="warning"
@@ -243,26 +267,24 @@ export function DetectionFlyout({
                   </EuiButtonEmpty>
                 </EuiCallOut>
               )}
-              {!isLoadingStreamFeatures &&
-                !isStreamFeaturesError &&
-                associatedEntities.length > 0 && (
-                  <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-                    {associatedEntities.map((entity) => (
-                      <EuiFlexItem grow={false} key={entity.key}>
-                        <EntityChip
-                          ebt={{
-                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ENTITY,
-                            element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT_ENTITIES,
-                          }}
-                          label={entity.name}
-                          onClick={() => setSelectedEntity(entity)}
-                          testSubj="nightshiftDetectionFlyoutEntityChip"
-                          size="compact"
-                        />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                )}
+              {!isLoadingStreamFeatures && associatedEntities.length > 0 && (
+                <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+                  {associatedEntities.map((entity) => (
+                    <EuiFlexItem grow={false} key={entity.key}>
+                      <EntityChip
+                        ebt={{
+                          action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ENTITY,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT_ENTITIES,
+                        }}
+                        label={entity.name}
+                        onClick={() => setSelectedEntity(entity)}
+                        testSubj="nightshiftDetectionFlyoutEntityChip"
+                        size="compact"
+                      />
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              )}
               <EuiSpacer size="l" />
             </>
           )}

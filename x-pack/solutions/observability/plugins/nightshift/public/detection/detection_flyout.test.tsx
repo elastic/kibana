@@ -129,6 +129,7 @@ describe('DetectionFlyout', () => {
     mockOpenChat.mockClear();
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature],
+      failedStreamNames: [],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -235,6 +236,7 @@ describe('DetectionFlyout', () => {
   it('hides the impacted services section when no entry resolves to a service', () => {
     mockStreamFeatures.mockReturnValue({
       features: [],
+      failedStreamNames: [],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
@@ -243,6 +245,24 @@ describe('DetectionFlyout', () => {
     renderFlyout();
 
     expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+  });
+
+  it('names the unreachable streams while keeping the services that did resolve', () => {
+    mockStreamFeatures.mockReturnValue({
+      features: [webFrontendFeature],
+      failedStreamNames: ['logs.payments', 'logs.checkout'],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    renderFlyout();
+
+    expect(screen.getByText('Some impacted services could not be loaded')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionFlyoutEntitiesFailedStreams')).toHaveTextContent(
+      'No response from logs.payments, logs.checkout.'
+    );
+    expect(screen.getAllByTestId('nightshiftDetectionFlyoutEntityChip').length).toBeGreaterThan(0);
   });
 
   it('renders the Lens occurrence chart in the trend section', () => {

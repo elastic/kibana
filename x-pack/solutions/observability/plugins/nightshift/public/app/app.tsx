@@ -199,6 +199,7 @@ export function NightshiftApp(): React.ReactElement {
   // appears in resolved events is still reachable.
   const {
     features,
+    failedStreamNames: blastRadiusFailedStreamNames,
     isInitialLoading: isLoadingBlastRadius,
     isError: isBlastRadiusError,
     refetch: refetchBlastRadius,
@@ -484,6 +485,7 @@ export function NightshiftApp(): React.ReactElement {
 
           <BlastRadiusEntities
             entities={blastRadius}
+            failedStreamNames={blastRadiusFailedStreamNames}
             isError={isBlastRadiusError}
             isLoading={isLoadingBlastRadius}
             onRetry={refetchBlastRadius}

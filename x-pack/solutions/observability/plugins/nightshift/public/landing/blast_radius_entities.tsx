@@ -128,6 +128,9 @@ function BlastRadiusEntityButton({
 
 export interface BlastRadiusEntitiesProps {
   entities: BlastRadiusChip[];
+  /** Streams that could not be reached, so `entities` is known to be incomplete. */
+  failedStreamNames?: string[];
+  /** Every stream failed, so nothing could be resolved at all. */
   isError?: boolean;
   isLoading?: boolean;
   onRetry?: () => void;
@@ -135,8 +138,11 @@ export interface BlastRadiusEntitiesProps {
   selectedEntityKey?: string;
 }
 
+const NO_STREAM_NAMES: string[] = [];
+
 export function BlastRadiusEntities({
   entities,
+  failedStreamNames = NO_STREAM_NAMES,
   isError = false,
   isLoading = false,
   onRetry,
@@ -172,8 +178,10 @@ export function BlastRadiusEntities({
   }, [entities, expanded, hasOverflow, selectedEntityKey]);
   const hiddenCount = Math.max(entities.length - visibleEntities.length, 0);
 
+  const hasFailures = isError || failedStreamNames.length > 0;
+
   // A failed lookup must not read as "nothing was impacted", so the panel stays up to explain it.
-  if (entities.length === 0 && !isLoading && !isError) {
+  if (entities.length === 0 && !isLoading && !hasFailures) {
     return null;
   }
 
@@ -211,16 +219,32 @@ export function BlastRadiusEntities({
           </EuiFlexGroup>
         )}
 
-        {isError && !isLoading && (
+        {hasFailures && !isLoading && (
           <EuiCallOut
             announceOnMount
             color="warning"
             data-test-subj="blast-radius-error"
             iconType="warning"
             size="s"
-            title={i18n.translate('xpack.nightshift.blastRadiusErrorTitle', {
-              defaultMessage: 'Unable to load impacted services',
-            })}
+            title={
+              isError
+                ? i18n.translate('xpack.nightshift.blastRadiusErrorTitle', {
+                    defaultMessage: 'Unable to load impacted services',
+                  })
+                : i18n.translate('xpack.nightshift.blastRadiusPartialErrorTitle', {
+                    defaultMessage: 'Some impacted services could not be loaded',
+                  })
+            }
+            text={
+              isError ? undefined : (
+                <p data-test-subj="blast-radius-failed-streams">
+                  {i18n.translate('xpack.nightshift.blastRadiusPartialErrorDescription', {
+                    defaultMessage: 'No response from {streamNames}.',
+                    values: { streamNames: failedStreamNames.join(', ') },
+                  })}
+                </p>
+              )
+            }
           >
             <EuiButtonEmpty
               color="warning"
@@ -237,7 +261,7 @@ export function BlastRadiusEntities({
           </EuiCallOut>
         )}
 
-        {!isLoading && !isError && (
+        {!isLoading && entities.length > 0 && (
           <EuiFlexGroup
             alignItems="center"
             gutterSize="none"
