@@ -21,8 +21,8 @@ import {
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type {
-  GetConversationResponse,
-  ConversationListItem,
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
@@ -59,7 +59,7 @@ import {
 } from './converters';
 
 export interface ConversationClient {
-  get(conversationId: string): Promise<GetConversationResponse>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
@@ -75,7 +75,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<ConversationListItem[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
 }
 
@@ -123,7 +123,9 @@ class ConversationClientImpl implements ConversationClient {
     this.logger = logger;
   }
 
-  async list(options: ConversationListOptions = {}): Promise<ConversationListItem[]> {
+  async list(
+    options: ConversationListOptions = {}
+  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
     const { agentId } = options;
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
@@ -164,7 +166,7 @@ class ConversationClientImpl implements ConversationClient {
     );
   }
 
-  async get(conversationId: string): Promise<GetConversationResponse> {
+  async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
     return this.toResponseConversation(document);
@@ -325,7 +327,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  private toResponseConversation(document: Document): GetConversationResponse {
+  private toResponseConversation(document: Document): ConversationWithPermissions {
     return {
       ...fromEs(document),
       permissions: getConversationPermissions({
@@ -335,7 +337,9 @@ class ConversationClientImpl implements ConversationClient {
     };
   }
 
-  private toResponseConversationWithoutRounds(document: Document): ConversationListItem {
+  private toResponseConversationWithoutRounds(
+    document: Document
+  ): ConversationWithoutRoundsWithPermissions {
     return {
       ...fromEsWithoutRounds(document),
       permissions: getConversationPermissions({

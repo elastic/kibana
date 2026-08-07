@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
-  ConversationListItem,
+  ListConversationsResponseItem,
   GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
@@ -30,7 +30,7 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions): Promise<ConversationListItem[]> {
+  async list({ agentId }: ConversationListOptions): Promise<ListConversationsResponseItem[]> {
     const response = await this.http.get<ListConversationsResponse>(
       `${publicApiPath}/conversations`,
       {

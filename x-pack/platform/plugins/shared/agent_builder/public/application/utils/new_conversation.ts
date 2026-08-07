@@ -8,7 +8,7 @@
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { GetConversationResponse } from '../../../common/http_api/conversations';
+import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 
 export const createNewConversation = ({
   id,
@@ -16,7 +16,7 @@ export const createNewConversation = ({
 }: {
   id: string;
   agentId: string;
-}): GetConversationResponse => {
+}): ConversationWithPermissions => {
   const now = new Date().toISOString();
   return {
     id,

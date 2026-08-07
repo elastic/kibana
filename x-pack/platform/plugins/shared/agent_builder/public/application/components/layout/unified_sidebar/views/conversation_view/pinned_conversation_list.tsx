@@ -11,7 +11,7 @@ import { EuiDroppable, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import type { ConversationListItem } from '../../../../../../../common/http_api/conversations';
+import type { ListConversationsResponseItem } from '../../../../../../../common/http_api/conversations';
 import { DROPPABLE_IDS } from './droppable_ids';
 import { DraggableConversationItem } from './draggable_conversation_item';
 
@@ -22,7 +22,7 @@ const dragToPinLabel = i18n.translate('xpack.agentBuilder.sidebar.pinned.dragToP
 interface PinnedConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
-  pinnedConversations: ConversationListItem[];
+  pinnedConversations: ListConversationsResponseItem[];
   isDropDisabled?: boolean;
   backgroundColor?: string;
   onItemClick?: (id: string) => void;

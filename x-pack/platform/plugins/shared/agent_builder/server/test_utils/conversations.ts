@@ -6,7 +6,7 @@
  */
 
 import { type ConversationRound, ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { GetConversationResponse } from '../../common/http_api/conversations';
+import type { ConversationWithPermissions } from '../../common/http_api/conversations';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {
@@ -15,8 +15,8 @@ export type ConversationServiceMock = jest.Mocked<ConversationService> & {
 export type ConversationClientMock = jest.Mocked<ConversationClient>;
 
 export const createEmptyConversation = (
-  parts: Partial<GetConversationResponse> = {}
-): GetConversationResponse => {
+  parts: Partial<ConversationWithPermissions> = {}
+): ConversationWithPermissions => {
   return {
     id: 'id',
     title: 'New conversation',

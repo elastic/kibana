@@ -7,7 +7,7 @@
 
 import type { QueryClient } from '@kbn/react-query';
 
-import type { ConversationListItem } from '../../../common/http_api/conversations';
+import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
 import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 
@@ -17,7 +17,7 @@ const buildSidebarConversationListRow = (p: {
   id: string;
   agent_id: string;
   title: string;
-}): ConversationListItem => {
+}): ListConversationsResponseItem => {
   const t = new Date().toISOString();
   return {
     id: p.id,
@@ -52,7 +52,7 @@ export const insertSidebarConversationListRow = async ({
 
   // Ensure the server list is in cache before we prepend — otherwise `cancelQueries`
   // below kills the in-flight GET and the sidebar ends up showing only the new row.
-  if (queryClient.getQueryData<ConversationListItem[]>(key) === undefined) {
+  if (queryClient.getQueryData<ListConversationsResponseItem[]>(key) === undefined) {
     try {
       await queryClient.fetchQuery({
         queryKey: key,
@@ -67,7 +67,7 @@ export const insertSidebarConversationListRow = async ({
   await queryClient.cancelQueries({ queryKey: key });
 
   let inserted = false;
-  queryClient.setQueryData<ConversationListItem[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
     if (prev?.some((c) => c.id === row.id)) {
       return prev;
     }
@@ -88,7 +88,7 @@ export const removeSidebarConversationListRow = ({
   conversationId: string;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ConversationListItem[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
     if (!prev?.length) {
       return prev;
     }
@@ -105,15 +105,15 @@ export const patchConversationList = ({
   queryClient: QueryClient;
   agentId: string;
   conversationId: string;
-  values: Partial<ConversationListItem>;
+  values: Partial<ListConversationsResponseItem>;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ConversationListItem[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
     if (!prev?.length) return prev;
     let changed = false;
     const next = prev.map((c) => {
       if (c.id !== conversationId) return c;
-      const hasChanges = (Object.keys(values) as Array<keyof ConversationListItem>).some(
+      const hasChanges = (Object.keys(values) as Array<keyof ListConversationsResponseItem>).some(
         (k) => values[k] !== c[k]
       );
       if (!hasChanges) return c;
