@@ -58,7 +58,6 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
             esClient,
             logger: this.deps.logger,
             indexName: WORKFLOWS_EXECUTIONS_INDEX,
-            mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
           })
       )
     );
@@ -76,7 +75,6 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
             esClient,
             logger: this.deps.logger,
             indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-            mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
           })
       )
     );

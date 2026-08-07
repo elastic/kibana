@@ -19,7 +19,6 @@ describe('PlainIndexDataClient', () => {
     const dataAccess = new PlainIndexDataClient<{ id: string }>({
       esClient,
       indexName: '.workflows-executions',
-      mappings: { properties: {} },
       logger,
     });
     return { esClient, logger, dataAccess };

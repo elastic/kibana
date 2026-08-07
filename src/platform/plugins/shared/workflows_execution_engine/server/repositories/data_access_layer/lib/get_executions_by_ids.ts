@@ -21,10 +21,6 @@ export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   ids: (string | { id: string; index: string | string[] })[];
   defaultIndex: string;
   options?: GetExecutionsByIdsOptions<TExecution>;
-  normalizeExecutionOnGet?: (
-    execution: TExecution,
-    options?: GetExecutionsByIdsOptions<TExecution>
-  ) => TExecution;
   logger: Logger;
 }
 

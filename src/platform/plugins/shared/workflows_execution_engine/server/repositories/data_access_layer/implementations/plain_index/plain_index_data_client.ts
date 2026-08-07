@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
@@ -31,7 +30,6 @@ import type {
 export interface PlainIndexDataClientDeps {
   esClient: ElasticsearchClient;
   indexName: string;
-  mappings: MappingTypeMapping;
   logger: Logger;
 }
 
