@@ -1507,4 +1507,307 @@ describe('create', () => {
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('server-side global field defaults', () => {
+    const makeGlobalDef = (
+      name: string,
+      defaultValue?: unknown,
+      { required = false }: { required?: boolean } = {}
+    ) => ({
+      fieldDefinitionId: `fd-${name}`,
+      name,
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition: yamlStringify({
+        name,
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        label: name,
+        ...(required ? { validation: { required: true } } : {}),
+        ...(defaultValue !== undefined ? { metadata: { default: defaultValue } } : {}),
+      }),
+    });
+
+    const createClientArgs = ({ templatesEnabled = true } = {}) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: templatesEnabled } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      return clientArgs;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('applies global field defaults when the request has no extended_fields', async () => {
+      // FAILURE SCENARIO (before fix): the create-case UI injects global-field defaults
+      // client-side, so only UI-created cases persisted them — API / workflow-step creation
+      // left every global field empty.
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high'), makeGlobalDef('notes')],
+        total: 2,
+      });
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      // Only fields that declare a YAML default are injected. A field without one would
+      // produce '' — a value-free key that (for required fields) would fail its own
+      // validation — so `notes` must not appear.
+      expect(createArgs.attributes.extended_fields).toEqual({
+        risk_score_as_keyword: 'high',
+      });
+      expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_OWNER,
+        { isGlobal: true }
+      );
+      // Parity with UI-created cases: without a template no extended_fields user action
+      // is emitted (that audit path is template-scoped).
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).not.toHaveBeenCalled();
+    });
+
+    it('caller-sent values win over global defaults', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high')],
+        total: 1,
+      });
+
+      await create(
+        { ...theCase, extended_fields: { risk_score_as_keyword: 'low' } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: 'low' });
+    });
+
+    it('a caller-sent empty string wins over a global default', async () => {
+      // An explicit empty value is a caller decision — the default must not resurrect it.
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high')],
+        total: 1,
+      });
+
+      await create(
+        { ...theCase, extended_fields: { risk_score_as_keyword: '' } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: '' });
+    });
+
+    it('global defaults win over template defaults on a storage-key collision; caller wins over both', async () => {
+      // The global definition is authoritative on a storage-key collision (see
+      // resolveApplicableFields), mirroring the create form, which preserves global values
+      // over a selected template's defaults.
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('priority', 'global-default')],
+        total: 1,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        id: 'so-tpl',
+        type: 'cases-templates',
+        references: [],
+        attributes: {
+          templateId: 'tmpl-collision',
+          name: 'Collision Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          definition: yamlStringify({
+            name: 'Collision Template',
+            fields: [
+              {
+                name: 'priority',
+                type: 'keyword',
+                control: 'INPUT_TEXT',
+                label: 'Priority',
+                metadata: { default: 'template-default' },
+              },
+              {
+                name: 'summary',
+                type: 'keyword',
+                control: 'INPUT_TEXT',
+                label: 'Summary',
+                metadata: { default: 'template-summary' },
+              },
+            ],
+          }),
+          templateVersion: 1,
+          deletedAt: null,
+          isLatest: true,
+        },
+      });
+
+      const minimalRequest = omit(theCase, ['severity', 'assignees']);
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-collision', version: 1 } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({
+        priority_as_keyword: 'global-default',
+        summary_as_keyword: 'template-summary',
+      });
+
+      jest.clearAllMocks();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-collision', version: 1 },
+          extended_fields: { priority_as_keyword: 'caller-value' },
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[secondCreateArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(secondCreateArgs.attributes.extended_fields).toEqual({
+        priority_as_keyword: 'caller-value',
+        summary_as_keyword: 'template-summary',
+      });
+    });
+
+    it('does not write extended_fields when no global field definitions exist', async () => {
+      // Guard: the injection must not materialize an empty extended_fields map.
+      const clientArgs = createClientArgs();
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toBeUndefined();
+    });
+
+    it('does not fetch or apply global defaults when the templates feature is disabled', async () => {
+      const clientArgs = createClientArgs({ templatesEnabled: false });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high')],
+        total: 1,
+      });
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toBeUndefined();
+      expect(
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+      ).not.toHaveBeenCalled();
+    });
+
+    describe('required global fields', () => {
+      // Defaults injection must be invisible to callers that never engaged with
+      // extended_fields: a request without extended_fields that succeeded before injection
+      // existed must keep succeeding after it, even when a REQUIRED global field has no
+      // default (required stays a UI submit-time gate there, exactly like v1 required
+      // customFields). Full create-time `required` enforcement only applies when the caller —
+      // or a pinned template — actually produced an extended_fields map, which is the
+      // pre-injection behavior. These tests lock both sides in so the inject/validate steps
+      // can't silently become a breaking change (or silently drop the existing enforcement).
+      it('creates the case when a required global field has no default and no caller value (no extended_fields sent)', async () => {
+        // Regression guard for the v1 mirror: required legacy customFields are mirrored into
+        // required global definitions with no default, so rejecting here would 400 every
+        // customFields-only create in such a space.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+          total: 1,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        // Nothing to inject (no default) — the field is simply left unset.
+        expect(createArgs.attributes.extended_fields).toBeUndefined();
+      });
+
+      it('injected defaults do not trigger required enforcement of other global fields', async () => {
+        // The injection materializes an extended_fields map the caller never sent; validating
+        // that map with full create semantics would enforce `required` on the no-default field
+        // and reject a request that succeeded before injection existed.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            makeGlobalDef('notes', 'default notes'),
+            makeGlobalDef('risk_score', undefined, { required: true }),
+          ],
+          total: 2,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({
+          notes_as_keyword: 'default notes',
+        });
+      });
+
+      it('still rejects when the caller sends extended_fields but omits a required global field', async () => {
+        // Pre-injection behavior preserved: a caller that engages with extended_fields gets
+        // full create-time validation, including `required` on absent fields.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            makeGlobalDef('risk_score', undefined, { required: true }),
+            makeGlobalDef('notes'),
+          ],
+          total: 2,
+        });
+
+        await expect(
+          create(
+            { ...theCase, extended_fields: { notes_as_keyword: 'some notes' } },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Field "risk_score" is required');
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      });
+
+      it('creates the case when a required global field has a default', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', 'high', { required: true })],
+          total: 1,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: 'high' });
+      });
+
+      it('creates the case when the caller sends a value for a required global field without a default', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+          total: 1,
+        });
+
+        await create(
+          { ...theCase, extended_fields: { risk_score_as_keyword: 'caller-value' } },
+          clientArgs,
+          casesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({
+          risk_score_as_keyword: 'caller-value',
+        });
+      });
+    });
+  });
 });

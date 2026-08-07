@@ -51,7 +51,7 @@ export async function getConnectorSpecAsJsonSchema({
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,
-      isTestable: Boolean(spec.test?.enabled),
+      isTestable: Boolean(spec.test.enabled),
       actions: Object.entries(spec.actions).map(([name, def]) => ({
         name,
         isTool: Boolean(def.isTool),
