@@ -370,14 +370,14 @@ describe('BaseAlertingRoute', () => {
       expect(jsonExamples(oas.responses?.[500])?.internalServerError).toEqual(
         expect.objectContaining({
           value: expect.objectContaining({
-            code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+            code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
           }),
         })
       );
       expect(jsonExamples(oas.responses?.[503])?.alertingDisabled).toEqual(
         expect.objectContaining({
           value: expect.objectContaining({
-            code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
+            code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
           }),
         })
       );

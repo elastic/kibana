@@ -7,7 +7,7 @@
 
 import type { RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
 
 type OASOperationObject = Exclude<
   Awaited<ReturnType<NonNullable<RouteConfigOptions<RouteMethod>['oasOperationObject']>>>,
@@ -41,12 +41,12 @@ export const getCommonErrorOasOperationObject = (): OASOperationObject => ({
       message: 'The current user does not have the required privileges for this request.',
     }),
     500: jsonExample('internalServerError', 'Unexpected server-side error', {
-      code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+      code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
       error: 'Internal Server Error',
       message: 'An unexpected error occurred.',
     }),
     503: jsonExample('alertingDisabled', 'Alerting engine is disabled', {
-      code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
+      code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
       error: 'Service Unavailable',
       message: 'Alerting is disabled.',
     }),
