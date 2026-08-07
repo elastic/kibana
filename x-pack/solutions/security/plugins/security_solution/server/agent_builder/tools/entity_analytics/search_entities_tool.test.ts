@@ -24,9 +24,9 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { buildRenderAttachmentTag } from './attachment_utils';
 import {
   buildListEntityAttachmentId,
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
 } from './entity_attachment_utils';
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
@@ -1204,7 +1204,7 @@ describe('searchEntitiesTool', () => {
 
       // FROM includes both entity index and snapshot index
       expect(query).toContain('entities-latest-default');
-      expect(query).toContain('.entities.v2.history.security_default*');
+      expect(query).toContain('.entities.v2.history.security_default.*');
 
       // Risk score IS NOT NULL and timestamp range filters
       expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');

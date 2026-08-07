@@ -45,21 +45,11 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
-  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
-  'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/agent_builder_smoke/stateful/classic.stateful.config.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/yaml_rule_form.test.tsx',
   'x-pack/platform/plugins/shared/agent_builder/server/services/plugins/utils/parsing/parse_skill_file.ts',
-  'x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_list_page/components/add_collector_flyout.tsx',
-  'x-pack/platform/plugins/shared/fleet/public/components/otel_ui/collector_config_view/component_detail/component_config_tab.tsx',
-  'x-pack/platform/plugins/shared/fleet/public/components/otel_ui/collector_config_view/yaml_viewer.test.tsx',
-  'x-pack/platform/plugins/shared/fleet/public/components/otel_ui/collector_config_view/yaml_viewer.tsx',
-  'x-pack/platform/plugins/shared/fleet/server/services/agent_policies/otel_collector.ts',
   'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
@@ -452,6 +442,18 @@ module.exports = {
      * EUI Team rules
      */
 
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
     '@elastic/eui/no-restricted-eui-imports': [
       'warn',
       {
@@ -477,6 +479,7 @@ module.exports = {
     '@elastic/eui/tooltip-button-icon-wrap': 'error',
     '@elastic/eui/tooltip-focusable-anchor': 'error',
     '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [
