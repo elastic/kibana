@@ -534,7 +534,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the agent policy filter on the **Agents** list returning no agents for version-specific policies [#281195]({{kib-pull}}281195).
 * Fix the **Add Fleet Server** onboarding continuing to show after the Fleet Server agent moves to a version-specific policy [#281092]({{kib-pull}}281092).
 * Fix preconfigured Fleet proxies being rewritten on every setup, which needlessly bumped every dependent agent policy [#281059]({{kib-pull}}281059).
-* Fix package policy deletion always recompiling and deploying the full agent policy synchronously, ignoring the `asyncDeploy` option that bulk create and update already honor [#282580]({{kib-pull}}282580).
 
 **Data management**:
 * Fix **ILM Explain** in Index Management not returning results for hidden and system indices [#282137]({{kib-pull}}282137).
@@ -543,7 +542,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **Discover**:
 * Fix the Short Dots field formatter dropping single-character path segments [#281930]({{kib-pull}}281930).
 * Fix null date values in server-generated exports showing `-` instead of the `(null)` label used by the client [#281367]({{kib-pull}}281367).
-* Fix the Base64 Decode field formatter on the server and for multi-byte UTF-8 values [#281366]({{kib-pull}}281366).
 * Fix the Date Nanos field formatter ignoring the configured date format for numeric values [#281343]({{kib-pull}}281343).
 * Fix the geo point degrees, minutes, seconds field format distorting coordinates very close to zero [#281336]({{kib-pull}}281336).
 
@@ -558,7 +556,6 @@ For the Elastic Security 9.4.5 release information, refer to [Elastic Security S
 * Reject query rule, ruleset, and synonym set IDs that contain characters outside `[a-zA-Z0-9_-]` in the Query Rules and Synonyms APIs [#276710]({{kib-pull}}276710).
 
 **Machine learning and inference**:
-* Fix special tokens in prompts causing the Kibana AI Agent to error or crash [#281546]({{kib-pull}}281546).
 * Fix the trained model ID check for the infer, update, and stop deployment APIs allowing access to a different model than the one requested [#280511]({{kib-pull}}280511).
 * Fix the checkbox for applying an annotation to a single series not resetting when you edit an existing annotation [#279875]({{kib-pull}}279875).
 * Fix the annotation and anomaly results APIs not enforcing job-level space access [#277197]({{kib-pull}}277197).
