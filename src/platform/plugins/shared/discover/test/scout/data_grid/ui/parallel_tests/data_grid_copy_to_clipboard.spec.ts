@@ -35,7 +35,7 @@ const clickCopyColumnValues = async (page: ScoutPage, dataGrid: DataGridPage, fi
 };
 
 const expectSingleToastThenDismiss = async (page: ScoutPage) => {
-  const toastList = page.components.globalToastList();
+  const toastList = page.components.toast();
 
   await expect(toastList.toasts).toHaveCount(1);
 

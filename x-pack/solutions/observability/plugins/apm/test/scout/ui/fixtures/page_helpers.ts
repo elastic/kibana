@@ -44,5 +44,5 @@ export async function waitForSearchBarReady(page: ScoutPage): Promise<void> {
  * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
  */
 export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
-  await page.components.globalToastList().closeAll();
+  await page.components.toast().closeAll();
 }

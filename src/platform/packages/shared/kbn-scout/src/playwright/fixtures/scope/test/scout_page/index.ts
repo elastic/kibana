@@ -155,8 +155,11 @@ export type ScoutPage = Page & {
     comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
     dataGrid: (testSubj: string, scope?: ObjectScope) => EuiDataGridObject;
     superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
-    /** `testSubj` defaults to `globalToastList`, the subj Kibana core sets on the list. */
-    globalToastList: (testSubj?: string, scope?: ObjectScope) => EuiGlobalToastListObject;
+    /**
+     * Drives the global toast list (`EuiGlobalToastListObject`); `testSubj`
+     * defaults to `globalToastList`, the subj Kibana core sets on the list.
+     */
+    toast: (testSubj?: string, scope?: ObjectScope) => EuiGlobalToastListObject;
   };
 };
 
