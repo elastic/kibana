@@ -10,6 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorAttributes,
@@ -43,6 +44,7 @@ import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
+import { resolveMaintenanceWindowsOrThrow } from '../../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -169,7 +171,8 @@ export class AddEditMonitorAPI {
   async normalizeMonitor(
     requestPayload: CreateMonitorPayLoad,
     monitorPayload: CreateMonitorPayLoad,
-    prevLocations?: MonitorFields['locations']
+    prevLocations?: MonitorFields['locations'],
+    maintenanceWindows: MaintenanceWindow[] = []
   ) {
     const { syntheticsMonitorClient, request } = this.routeContext;
     const internal = Boolean((request.query as { internal?: boolean })?.internal);
@@ -190,6 +193,15 @@ export class AddEditMonitorAPI {
     }
 
     const defaultFields = DEFAULT_FIELDS[monitorType];
+
+    const maintenanceWindowRefs = monitor[ConfigKey.MAINTENANCE_WINDOWS];
+    let resolvedMaintenanceWindows = maintenanceWindowRefs;
+    if (maintenanceWindowRefs && maintenanceWindowRefs.length > 0) {
+      resolvedMaintenanceWindows = resolveMaintenanceWindowsOrThrow(
+        maintenanceWindowRefs,
+        maintenanceWindows
+      );
+    }
 
     let locationsVal: MonitorFields['locations'] = [];
 
@@ -240,6 +252,8 @@ export class AddEditMonitorAPI {
       [ConfigKey.SCHEDULE]: getMonitorSchedule(schedule ?? defaultFields[ConfigKey.SCHEDULE]),
       [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(retestOnFailure, monitor[ConfigKey.MAX_ATTEMPTS]),
       [ConfigKey.LOCATIONS]: locationsVal,
+      [ConfigKey.MAINTENANCE_WINDOWS]:
+        resolvedMaintenanceWindows ?? defaultFields?.[ConfigKey.MAINTENANCE_WINDOWS] ?? [],
     } as MonitorFields;
   }
 
