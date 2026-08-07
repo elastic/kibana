@@ -165,11 +165,12 @@ describe('KibanaConfigWriter', () => {
           serviceAccountToken: { name: 'some-token', value: 'some-value' },
         })
       ).rejects.toMatchInlineSnapshot(`
-        [YAMLException: duplicated mapping key (2:1)
+        [YAMLParseError: Map keys must be unique at line 2, column 1:
 
-         1 | foo: bar
-         2 | foo: baz
-        -----^]
+        foo: bar
+        foo: baz
+        ^
+        ]
       `);
 
       expect(mockWriteFile).not.toHaveBeenCalled();

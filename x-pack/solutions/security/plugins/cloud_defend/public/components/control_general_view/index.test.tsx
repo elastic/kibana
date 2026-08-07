@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
@@ -45,7 +45,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
@@ -70,7 +70,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
     } catch (err) {
@@ -92,7 +92,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
     } catch (err) {
@@ -114,7 +114,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.process.responses.length).toBe(
         getAllByTestId('cloud-defend-process-response').length
@@ -167,7 +167,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.responses[0].match).toHaveLength(1);
     } catch (err) {
@@ -206,7 +206,7 @@ describe.skip('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.load(configuration);
+      const json = parse(configuration);
 
       expect(json.file.selectors).toHaveLength(4);
       expect(json.file.selectors[3].name).toEqual(json.file.selectors[0].name + '1');

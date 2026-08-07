@@ -39,23 +39,12 @@ const exactFilePathMatcher = (relativePath) =>
  * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
  */
 const JS_YAML_LEGACY_CONSUMERS = [
-  'packages/kbn-rspack-optimizer/src/limits.ts',
-  'src/platform/kbn-ui/_tooling/affected_packages.ts',
-  'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
-  'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
-  'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/yaml_rule_form.test.tsx',
-  'x-pack/platform/plugins/shared/agent_builder/server/services/plugins/utils/parsing/parse_skill_file.ts',
-  'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
   'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/read_kibana_config.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
 ].map(exactFilePathMatcher);
 
 const USES_ELASTIC_APM_AGENT = [
