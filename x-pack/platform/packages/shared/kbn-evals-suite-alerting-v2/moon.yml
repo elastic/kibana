@@ -25,6 +25,8 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/scout'
   - '@kbn/data-forge'
+  - '@kbn/workflows'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package

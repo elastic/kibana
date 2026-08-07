@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -960,7 +961,7 @@
         "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
-        "eslint-plugin-node",
+        "eslint-plugin-n",
         "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",

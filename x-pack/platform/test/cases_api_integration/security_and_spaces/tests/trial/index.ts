@@ -27,6 +27,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Trial
     loadTestFile(require.resolve('./cases/import_export_templates'));
+    loadTestFile(require.resolve('./cases/public_template_crud'));
     loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
