@@ -49,6 +49,7 @@ import {
   crossPanelActionsComparators,
   initializeCrossPanelActions,
 } from './initialize_cross_panel_actions';
+import { cancelAllInFlightRequests } from '../actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
@@ -178,6 +179,9 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
 
     api = finalizeApi({
       dataLoading$,
+      cancelRequests: () => {
+        savedMap.getStore().dispatch<any>(cancelAllInFlightRequests());
+      },
       defaultTitle$,
       defaultDescription$,
       ...stateApi,
