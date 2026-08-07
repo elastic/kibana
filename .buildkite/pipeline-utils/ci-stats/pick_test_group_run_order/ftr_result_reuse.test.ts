@@ -10,10 +10,27 @@
 import type { FtrConfigResultRecord } from './ftr_result_reuse';
 import {
   classifyChangedFile,
+  getFtrResultReuseMode,
   isUnderFtrTestRoot,
   mergeRecords,
   resolveReusableConfigs,
 } from './ftr_result_reuse';
+
+describe('getFtrResultReuseMode', () => {
+  it('defaults to shadow when unset or unrecognized', () => {
+    expect(getFtrResultReuseMode(undefined)).toBe('shadow');
+    expect(getFtrResultReuseMode('')).toBe('shadow');
+    expect(getFtrResultReuseMode('banana')).toBe('shadow');
+  });
+
+  it('parses on and off', () => {
+    expect(getFtrResultReuseMode('true')).toBe('on');
+    expect(getFtrResultReuseMode('on')).toBe('on');
+    expect(getFtrResultReuseMode('false')).toBe('off');
+    expect(getFtrResultReuseMode('off')).toBe('off');
+    expect(getFtrResultReuseMode('shadow')).toBe('shadow');
+  });
+});
 
 const pass = (config: string, sourceBuildNumber = 100): FtrConfigResultRecord => ({
   config,
@@ -38,6 +55,7 @@ const baseInput = {
   changedFiles: [] as string[] | null,
   sameDist: true,
   sameEsSnapshot: true,
+  samePrLabels: true,
 };
 
 describe('isUnderFtrTestRoot', () => {
@@ -63,9 +81,12 @@ describe('isUnderFtrTestRoot', () => {
 
 describe('classifyChangedFile', () => {
   it('aborts on FTR-critical paths, including inside .buildkite', () => {
-    expect(classifyChangedFile('.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml')).toEqual(
-      { kind: 'abort', file: '.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml' }
-    );
+    expect(
+      classifyChangedFile('.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml')
+    ).toEqual({
+      kind: 'abort',
+      file: '.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml',
+    });
     expect(classifyChangedFile('yarn.lock').kind).toBe('abort');
   });
 
@@ -78,6 +99,21 @@ describe('classifyChangedFile', () => {
     expect(classifyChangedFile('x-pack/platform/test/functional/services/some_service.ts')).toEqual(
       { kind: 'abort', file: 'x-pack/platform/test/functional/services/some_service.ts' }
     );
+  });
+
+  it('aborts on FTR fixtures that match the irrelevant list (test root wins)', () => {
+    // Screenshot baselines match `**/*.png` but directly determine outcomes.
+    expect(
+      classifyChangedFile('src/platform/test/functional/screenshots/baseline/area_chart.png')
+    ).toEqual({
+      kind: 'abort',
+      file: 'src/platform/test/functional/screenshots/baseline/area_chart.png',
+    });
+    expect(
+      classifyChangedFile('x-pack/platform/test/fleet_api_integration/apis/fixtures/pkg/icon.svg')
+        .kind
+    ).toBe('abort');
+    expect(classifyChangedFile('x-pack/platform/test/functional/README.md').kind).toBe('abort');
   });
 
   it('ignores Jest-only files outside test roots', () => {
@@ -94,13 +130,15 @@ describe('classifyChangedFile', () => {
       'abort'
     );
     expect(classifyChangedFile('some_random_root_file.sh').kind).toBe('abort');
-    // Plugin-internal test dirs are not FTR roots; Scout specs are not
-    // .test.* files, so they fall through to abort rather than invalidating
-    // a bogus root. (Scout-only diffs never reach reuse anyway — the
+  });
+
+  it('ignores Scout specs, consistent with shouldSkipFtrTests', () => {
+    // Scout (Playwright) trees can never affect FTR — FTR_IRRELEVANT_PATHS
+    // matches them. (Scout-only diffs rarely reach reuse anyway: the
     // scout-tests-only fast path returns first.)
     expect(
       classifyChangedFile('x-pack/platform/plugins/shared/lens/test/scout/ui/foo.spec.ts').kind
-    ).toBe('abort');
+    ).toBe('ignore');
   });
 });
 
@@ -132,6 +170,15 @@ describe('resolveReusableConfigs', () => {
     });
     expect(reusable.size).toBe(0);
     expect(abortReason).toContain('ES snapshot');
+  });
+
+  it('aborts when PR labels differ (label-driven env changes outcomes)', () => {
+    const { reusable, abortReason } = resolveReusableConfigs({
+      ...baseInput,
+      samePrLabels: false,
+    });
+    expect(reusable.size).toBe(0);
+    expect(abortReason).toContain('labels');
   });
 
   it('aborts when the diff cannot be computed', () => {
@@ -178,23 +225,18 @@ describe('mergeRecords', () => {
     commit: 'abc',
     effectiveDistId: 'build-1',
     esSnapshotManifest: 'https://storage/manifest.json',
+    prLabels: '',
     records,
   });
 
   it('lets a pass win over a fail across job retries', () => {
-    const merged = mergeRecords([
-      artifact([fail(CONFIG_A)]),
-      artifact([pass(CONFIG_A, 101)]),
-    ]);
+    const merged = mergeRecords([artifact([fail(CONFIG_A)]), artifact([pass(CONFIG_A, 101)])]);
     expect(merged.get(CONFIG_A)?.result).toBe('pass');
     expect(merged.get(CONFIG_A)?.sourceBuildNumber).toBe(101);
   });
 
   it('keeps a pass even if a later artifact reports a fail', () => {
-    const merged = mergeRecords([
-      artifact([pass(CONFIG_A)]),
-      artifact([fail(CONFIG_A)]),
-    ]);
+    const merged = mergeRecords([artifact([pass(CONFIG_A)]), artifact([fail(CONFIG_A)])]);
     expect(merged.get(CONFIG_A)?.result).toBe('pass');
   });
 });

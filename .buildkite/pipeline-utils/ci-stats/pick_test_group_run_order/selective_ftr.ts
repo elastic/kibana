@@ -58,7 +58,18 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
 export const FTR_CRITICAL_PATHS: readonly string[] = [
   '.buildkite/ftr-manifests/**',
   '.buildkite/scripts/steps/test/ftr_configs.sh',
+  '.buildkite/scripts/steps/test/ftr_smart_retry.sh',
   '.buildkite/scripts/steps/functional/**',
+  // The rest of the FTR job execution chain: job env hooks, bootstrap, and
+  // the dist/ES download scripts that decide what the tests actually run on.
+  '.buildkite/hooks/**',
+  '.buildkite/scripts/lifecycle/**',
+  '.buildkite/scripts/common/**',
+  '.buildkite/scripts/bootstrap.sh',
+  '.buildkite/scripts/download_build_artifacts.sh',
+  '.buildkite/scripts/setup_es_snapshot_cache.sh',
+  // Defines the FTR step env (FTR_EXTRA_ARGS, retries, queues) on PR builds.
+  '.buildkite/pipelines/pull_request/base.yml',
   '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/**',
   '.buildkite/pipeline-utils/affected-packages/**',
   'scripts/functional_tests.js',

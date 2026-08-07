@@ -13,6 +13,7 @@ import * as Fs from 'fs';
 import { Minimatch } from 'minimatch';
 
 import type { BuildkiteClient } from '../../buildkite';
+import type { Artifact } from '../../buildkite/types/artifact';
 import type { Build } from '../../buildkite/types/build';
 import { FTR_CRITICAL_PATHS, FTR_IRRELEVANT_PATHS } from './selective_ftr';
 
@@ -23,27 +24,48 @@ import { FTR_CRITICAL_PATHS, FTR_IRRELEVANT_PATHS } from './selective_ftr';
  *
  * Every `ftr_configs.sh` job on a PR uploads a `ftr_results_*.json` artifact
  * recording per-config outcomes plus the inputs that could change them (dist
- * id, ES snapshot manifest). The orchestrator reads the previous build's
- * artifacts and drops configs whose green result provably still applies.
- * Anything unrecognized aborts reuse entirely (fail closed).
+ * id, ES snapshot manifest, PR labels driving test env). The orchestrator
+ * reads the previous build's artifacts and drops configs whose green result
+ * provably still applies. Anything unrecognized aborts reuse entirely
+ * (fail closed).
  */
 
 export interface FtrConfigResultRecord {
   config: string;
   result: 'pass' | 'fail';
-  /** Build number where this config actually ran (survives carry-forward chains). */
+  // Build number where this config actually ran (reused results keep pointing at it).
   sourceBuildNumber: number;
 }
 
 export interface FtrResultsArtifact {
   commit: string;
+  // The build id whose dist was actually tested (kibana-effective-build-id).
   effectiveDistId: string;
   esSnapshotManifest: string;
+  // Raw GITHUB_PR_LABELS at run time. Label-driven env (ci:use-chrome-beta,
+  // ci:enable-fips-*, ci:build-with-rspack-optimizer, retry toggles) changes
+  // FTR outcomes without changing the dist id, ES manifest, or the diff.
+  prLabels: string;
   records: FtrConfigResultRecord[];
 }
 
 /** Max age of a previous build to consider for reuse. */
 const REUSE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Rollout mode for FTR result reuse (FTR_RESULT_REUSE env):
+ * - 'off':    don't even evaluate ('false' also accepted, kill switch)
+ * - 'shadow': evaluate and annotate what WOULD be reused, but schedule
+ *             everything — the default, for validating against real traffic
+ * - 'on':     actually drop reusable configs ('true' also accepted)
+ */
+export type FtrResultReuseMode = 'off' | 'shadow' | 'on';
+
+export function getFtrResultReuseMode(env = process.env.FTR_RESULT_REUSE): FtrResultReuseMode {
+  if (env === 'false' || env === 'off') return 'off';
+  if (env === 'true' || env === 'on') return 'on';
+  return 'shadow';
+}
 
 /** Files matching these are Jest-only and cannot affect FTR results. */
 const JEST_ONLY_PATTERNS = [
@@ -57,7 +79,8 @@ const JEST_ONLY_PATTERNS = [
 
 // The installed @types/minimatch exports `Minimatch` as a value only, so rely
 // on inference (same workaround as affected-packages/utils.ts).
-const compile = (patterns: readonly string[]) => patterns.map((p) => new Minimatch(p, { dot: true }));
+const compile = (patterns: readonly string[]) =>
+  patterns.map((p) => new Minimatch(p, { dot: true }));
 const CRITICAL = compile(FTR_CRITICAL_PATHS);
 const IRRELEVANT = compile(FTR_IRRELEVANT_PATHS);
 const JEST_ONLY = compile(JEST_ONLY_PATTERNS);
@@ -88,8 +111,11 @@ export function classifyChangedFile(file: string): ChangedFileClassification {
   // Order matters: ftr-manifests live inside `.buildkite/**`, which is
   // otherwise irrelevant, so critical must win.
   if (matchAny(file, CRITICAL)) return { kind: 'abort', file };
-  if (matchAny(file, IRRELEVANT)) return { kind: 'ignore' };
+  // Test roots must win over the irrelevant list: FTR fixtures (screenshot
+  // baselines, fleet package fixtures) match `**/*.png` / `**/*.md` etc. but
+  // directly determine test outcomes.
   if (isUnderFtrTestRoot(file)) return { kind: 'abort', file };
+  if (matchAny(file, IRRELEVANT)) return { kind: 'ignore' };
   if (matchAny(file, JEST_ONLY)) return { kind: 'ignore' };
   // Unrecognized change: we cannot prove it doesn't affect FTR.
   return { kind: 'abort', file };
@@ -103,6 +129,8 @@ export interface ReuseDecisionInput {
   changedFiles: string[] | null;
   sameDist: boolean;
   sameEsSnapshot: boolean;
+  /** False when label-driven test env (chrome-beta, FIPS, rspack, retries) differs. */
+  samePrLabels: boolean;
 }
 
 export interface ReuseDecision {
@@ -115,6 +143,8 @@ export function resolveReusableConfigs(input: ReuseDecisionInput): ReuseDecision
 
   if (!input.sameDist) return none('kibana dist differs from previous build');
   if (!input.sameEsSnapshot) return none('ES snapshot manifest differs from previous build');
+  if (!input.samePrLabels)
+    return none('PR labels (label-driven test env) differ from previous build');
   if (input.changedFiles === null) return none('unable to diff against previous build commit');
 
   for (const file of input.changedFiles) {
@@ -147,22 +177,35 @@ export function mergeRecords(artifacts: FtrResultsArtifact[]): Map<string, FtrCo
   return merged;
 }
 
-interface ResolvedReuse {
+export interface FtrReuseResolution {
+  /** The build the records came from; null when none was eligible. */
+  prevBuild: Build | null;
   reusable: Map<string, FtrConfigResultRecord>;
-  prevBuild: Build;
+  /** Why reuse was rejected; null when reusable configs were found. */
+  abortReason: string | null;
+  /** Identity of the inputs the reused results were produced under. */
+  source: { effectiveDistId: string; esSnapshotManifest: string } | null;
 }
+
+const noReuse = (abortReason: string, prevBuild: Build | null = null): FtrReuseResolution => ({
+  prevBuild,
+  reusable: new Map(),
+  abortReason,
+  source: null,
+});
 
 /**
  * Query the previous build of this PR branch and decide which FTR configs can
- * be reused. Returns null (run everything) whenever any prerequisite is
- * missing — this function must only ever reduce work, never correctness.
+ * be reused. Returns null only when the feature is off or the buildkite env is
+ * missing; otherwise always returns a resolution (check abortReason). This
+ * function must only ever reduce work, never correctness.
  */
 export async function resolveFtrResultReuse(
   bk: BuildkiteClient,
   candidateConfigs: string[]
-): Promise<ResolvedReuse | null> {
-  if (process.env.FTR_RESULT_REUSE === 'false') {
-    console.log('FTR result reuse: disabled via FTR_RESULT_REUSE=false');
+): Promise<FtrReuseResolution | null> {
+  if (getFtrResultReuseMode() === 'off') {
+    console.log('FTR result reuse: disabled via FTR_RESULT_REUSE=off/false');
     return null;
   }
 
@@ -176,26 +219,37 @@ export async function resolveFtrResultReuse(
   }
 
   const builds = await bk.getBuildsForBranch(pipelineSlug, branch);
-  const prevBuild = builds
+  const candidates = builds
     .filter((b) => b.number < currentBuildNumber)
     .filter((b) => ['passed', 'failed', 'canceled'].includes(b.state))
-    .sort((a, b) => b.number - a.number)[0];
+    .sort((a, b) => b.number - a.number);
+
+  // Walk back to the newest finished build that has FTR result records.
+  // Builds that never ran FTR (empty/skippable pipelines, scout-only fast
+  // path, selective FTR skip, early cancels) must not break the reuse chain.
+  let prevBuild: Build | undefined;
+  let artifacts: Artifact[] = [];
+  for (const build of candidates) {
+    if (Date.now() - new Date(build.created_at).getTime() > REUSE_TTL_MS) {
+      console.log(`FTR result reuse: build #${build.number} is too old, not looking further back`);
+      break;
+    }
+    const found = (await bk.getArtifacts(pipelineSlug, build.number)).filter(
+      (a) => /^ftr_results.*\.json$/.test(a.filename) && a.state === 'finished'
+    );
+    if (found.length) {
+      prevBuild = build;
+      artifacts = found;
+      break;
+    }
+    console.log(
+      `FTR result reuse: build #${build.number} has no FTR result records, looking further back`
+    );
+  }
 
   if (!prevBuild) {
-    console.log('FTR result reuse: no finished previous build for this branch');
-    return null;
-  }
-  if (Date.now() - new Date(prevBuild.created_at).getTime() > REUSE_TTL_MS) {
-    console.log(`FTR result reuse: previous build #${prevBuild.number} is too old`);
-    return null;
-  }
-
-  const artifacts = (await bk.getArtifacts(pipelineSlug, prevBuild.number)).filter(
-    (a) => /^ftr_results.*\.json$/.test(a.filename) && a.state === 'finished'
-  );
-  if (!artifacts.length) {
-    console.log(`FTR result reuse: previous build #${prevBuild.number} has no FTR result records`);
-    return null;
+    console.log('FTR result reuse: no previous build with FTR result records for this branch');
+    return noReuse('no previous build with FTR result records');
   }
 
   const parsed: FtrResultsArtifact[] = [];
@@ -204,23 +258,25 @@ export async function resolveFtrResultReuse(
     parsed.push(JSON.parse(content) as FtrResultsArtifact);
   }
 
-  const currentEffectiveDistId = process.env.KIBANA_BUILD_ID || process.env.BUILDKITE_BUILD_ID || '';
+  const currentEffectiveDistId = getCurrentEffectiveDistId();
   const currentEsSnapshot = getCurrentEsSnapshotManifest();
+  const currentPrLabels = process.env.GITHUB_PR_LABELS || '';
   const prevDistIds = new Set(parsed.map((p) => p.effectiveDistId));
   const prevEsSnapshots = new Set(parsed.map((p) => p.esSnapshotManifest));
+  const prevPrLabels = new Set(parsed.map((p) => p.prLabels));
 
-  // A build has one dist and one pinned ES manifest; conflicting records mean
-  // something is off — fail closed.
-  if (prevDistIds.size !== 1 || prevEsSnapshots.size !== 1) {
+  // A build has one dist, one pinned ES manifest, and one label set;
+  // conflicting records mean something is off — fail closed.
+  if (prevDistIds.size !== 1 || prevEsSnapshots.size !== 1 || prevPrLabels.size !== 1) {
     console.log('FTR result reuse: inconsistent records in previous build, skipping');
-    return null;
+    return noReuse('inconsistent records in previous build', prevBuild);
   }
 
   const sameCommit = prevBuild.commit === currentCommit;
   const sameDist =
     sameCommit || (!!currentEffectiveDistId && prevDistIds.has(currentEffectiveDistId));
-  const sameEsSnapshot =
-    !!currentEsSnapshot && prevEsSnapshots.has(currentEsSnapshot);
+  const sameEsSnapshot = !!currentEsSnapshot && prevEsSnapshots.has(currentEsSnapshot);
+  const samePrLabels = prevPrLabels.has(currentPrLabels);
 
   const changedFiles = sameCommit ? [] : diffAgainst(prevBuild.commit);
 
@@ -230,29 +286,42 @@ export async function resolveFtrResultReuse(
     changedFiles,
     sameDist,
     sameEsSnapshot,
+    samePrLabels,
   });
 
   if (decision.abortReason) {
     console.log(`FTR result reuse: not reusing — ${decision.abortReason}`);
-    return null;
+    return noReuse(decision.abortReason, prevBuild);
   }
 
-  return { reusable: decision.reusable, prevBuild };
+  return {
+    reusable: decision.reusable,
+    prevBuild,
+    abortReason: null,
+    source: {
+      effectiveDistId: [...prevDistIds][0],
+      esSnapshotManifest: [...prevEsSnapshots][0],
+    },
+  };
 }
 
 /**
  * Write the carry-forward artifact so the next build can chain without
  * re-reading older builds: reused configs are recorded as passes pointing at
- * the build where they originally ran.
+ * the build where they originally ran. The dist/manifest identity is copied
+ * from the source records — the pick step runs before the build step, so it
+ * cannot know which dist this build will actually test against.
  */
 export function writeCarriedResults(
   bk: BuildkiteClient,
-  reusable: Map<string, FtrConfigResultRecord>
+  reusable: Map<string, FtrConfigResultRecord>,
+  source: { effectiveDistId: string; esSnapshotManifest: string }
 ): void {
   const artifact: FtrResultsArtifact = {
     commit: process.env.BUILDKITE_COMMIT || '',
-    effectiveDistId: process.env.KIBANA_BUILD_ID || process.env.BUILDKITE_BUILD_ID || '',
-    esSnapshotManifest: getCurrentEsSnapshotManifest() || '',
+    effectiveDistId: source.effectiveDistId,
+    esSnapshotManifest: source.esSnapshotManifest,
+    prLabels: process.env.GITHUB_PR_LABELS || '',
     records: [...reusable.values()],
   };
   Fs.writeFileSync('ftr_results_carried.json', JSON.stringify(artifact, null, 2));
@@ -272,7 +341,21 @@ function getCurrentEsSnapshotManifest(): string | null {
   }
 }
 
+/**
+ * Best-effort dist identity known at pick time. The build step may still
+ * override this (forced fresh build sets the kibana-effective-build-id
+ * meta-data), which is why recorded artifacts use that meta-data instead.
+ * 'false' is a sentinel used by some pipelines to disable dist reuse.
+ */
+function getCurrentEffectiveDistId(): string {
+  const id = process.env.KIBANA_BUILD_ID;
+  return (id && id !== 'false' ? id : process.env.BUILDKITE_BUILD_ID) || '';
+}
+
 function diffAgainst(commit: string): string[] | null {
+  // The commit comes from the Buildkite API; keep it out of the shell if it
+  // isn't a plain SHA.
+  if (!/^[0-9a-f]{7,40}$/i.test(commit)) return null;
   try {
     const out = execSync(`git diff --name-only ${commit}...HEAD`, {
       encoding: 'utf8',
