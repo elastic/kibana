@@ -514,6 +514,36 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: should reject recovery_strategy "query" without a recovery block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'recovery-strategy-no-block' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'query' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
+    'validation: should reject a no_data_strategy without a no_data block (standalone)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'no-data-strategy-no-block' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { no_data_strategy: 'last_known_status' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
     'authorization: should return 200 for a user with full alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(

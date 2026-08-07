@@ -36,6 +36,11 @@ export const ALERTING_V2_ERROR_CODES = {
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
+   * A rule's merged shape has a recovery/no-data query block that is
+   * inconsistent with its `recovery_strategy`/`no_data_strategy`.
+   */
+  INVALID_RULE_QUERY_CONFIG: 'INVALID_RULE_QUERY_CONFIG',
+  /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
    * any resource is mutated so the caller sees an all-or-nothing outcome (no
