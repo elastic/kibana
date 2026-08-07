@@ -24,8 +24,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Create Alert',
   }),
   description: i18n.translate('xpack.alertingV2.workflow.steps.createAlertEvent.description', {
-    defaultMessage:
-      'Ingest an alert event into Elasticsearch without a backing Kibana rule.',
+    defaultMessage: 'Ingest an alert event into Elasticsearch without a backing Kibana rule.',
   }),
   category: StepCategory.Kibana,
   inputSchema: createAlertEventDataSchema,
