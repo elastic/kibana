@@ -57,7 +57,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import type { CPSPluginStart } from '@kbn/cps/public/types';
+import type { CPSPluginSetup, CPSPluginStart } from '@kbn/cps/public/types';
 import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
@@ -133,6 +133,7 @@ export interface MlSetupDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
+  cps: CPSPluginSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -234,6 +235,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           },
           params,
           this.isServerless,
+          pluginsSetup.cps?.cpsEnabled ?? false,
           this.enabledFeatures,
           this.experimentalFeatures,
           this.nlpSettings
@@ -277,6 +279,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 core,
                 { telemetry: telemetryClient, ...deps },
                 this.isServerless,
+                pluginsSetup.cps?.cpsEnabled ?? false,
                 this.enabledFeatures,
                 this.nlpSettings,
                 this.experimentalFeatures,
