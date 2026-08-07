@@ -19,7 +19,7 @@ export interface RemoteCommandOutput {
   stdoutOffset: number;
   stderrOffset: number;
   exitCode: number;
-  /** Content of output.txt written by the script via SCRIPT_OUTPUT= */
+  /** Content of output.txt written by the script via STEP_OUTPUT= */
   output?: string;
 }
 

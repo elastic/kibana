@@ -112,10 +112,10 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
     const { tmpDir, stdoutFile, stderrFile, codeFile, scriptFile } = this.getCommandData(commandId);
 
     const wrappedScript = `#!/bin/bash
-SCRIPT_OUTPUT=''
+STEP_OUTPUT=''
 _capture_output() {
-  if [ -n "$SCRIPT_OUTPUT" ]; then
-    printf '%s' "$SCRIPT_OUTPUT" > "$COMMAND_TMP_DIR/output.txt"
+  if [ -n "$STEP_OUTPUT" ]; then
+    printf '%s' "$STEP_OUTPUT" > "$COMMAND_TMP_DIR/output.txt"
   fi
 }
 trap '_capture_output' EXIT

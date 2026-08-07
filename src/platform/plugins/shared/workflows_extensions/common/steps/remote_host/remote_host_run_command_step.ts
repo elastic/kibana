@@ -48,7 +48,7 @@ export const remoteHostRunCommandStepCommonDefinition: CommonStepDefinition<
     details: `# Run Command
 
 Execute a shell command on a remote host via an SSH Host connector. The script can set
-\`SCRIPT_OUTPUT\` to a string or JSON value — that value becomes the step output.
+\`STEP_OUTPUT\` to a string or JSON value — that value becomes the step output.
 Standard output and stderr are captured to logs.
 
 ## Basic Usage
@@ -60,7 +60,7 @@ Standard output and stderr are captured to logs.
     connector-id: my-ssh-host-connector
   with:
     code: |
-      SCRIPT_OUTPUT=$(hostname -f)
+      STEP_OUTPUT=$(hostname -f)
 \`\`\`
 
 ## Structured Output
@@ -73,7 +73,7 @@ Standard output and stderr are captured to logs.
   with:
     code: |
       AVAILABLE=$(df -BG / | awk 'NR==2{print $4}')
-      SCRIPT_OUTPUT="{\"available\": \"$AVAILABLE\"}"
+      STEP_OUTPUT="{\"available\": \"$AVAILABLE\"}"
 \`\`\`
 
 ## Inputs
@@ -82,9 +82,9 @@ Standard output and stderr are captured to logs.
 
 ## Output
 
-Returns the value of \`SCRIPT_OUTPUT\` set by the script. If the value is valid JSON it is
+Returns the value of \`STEP_OUTPUT\` set by the script. If the value is valid JSON it is
 parsed into an object; otherwise it is returned as a string. Returns \`null\` when
-\`SCRIPT_OUTPUT\` is not set.
+\`STEP_OUTPUT\` is not set.
 `,
   },
   inputSchema: InputSchema,
