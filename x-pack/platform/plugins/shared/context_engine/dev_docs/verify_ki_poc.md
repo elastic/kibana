@@ -81,7 +81,7 @@ steps:
             type: elasticsearch.index
             with:
               index: '{{ consts.aiIndexBackingIndex }}'
-              body: '${{ foreach.item }}'
+              document: '${{ foreach.item }}'
           - name: log_persisted
             type: console
             with:
