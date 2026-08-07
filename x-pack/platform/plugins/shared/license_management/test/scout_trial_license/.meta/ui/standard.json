@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "abc5e8d3b270aa866ad822d0b24dd54ecdb0324c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/license_management/test/scout_trial_license/ui/tests/license_management.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 13,
+        "column": 41
       }
     },
     {
@@ -27,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/license_management/test/scout_trial_license/ui/tests/license_management.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 19,
+        "column": 8
       }
     }
   ]
