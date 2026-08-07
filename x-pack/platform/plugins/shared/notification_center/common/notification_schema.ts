@@ -72,14 +72,16 @@ export const ctaSchema = z
   })
   .strict();
 
+/** Idempotency key; see notification_id.ts for the ID conventions. */
+export const notificationIdSchema = z.string().min(1).max(512);
+
 /**
  * Field shape shared by the write and read schemas. `namespace` and `type` are
  * both drawn from the notification registry
  */
 const notificationObject = z
   .object({
-    /** Idempotency key; see notification_id.ts for the ID conventions. */
-    notification_id: z.string().min(1).max(512),
+    notification_id: notificationIdSchema,
     /** Occurrence time, set by NC for `timeseries` notification kind */
     event_timestamp: z.iso.datetime().optional(),
     /** Registry namespace that owns this notification, e.g. `inference`. */
@@ -130,8 +132,8 @@ export const notificationQueryParamsSchema = z
   .object({
     namespace: z.string().min(1).max(64).optional(),
     type: z.string().min(1).max(64).optional(),
-    // A single query-string value (`?severity=error`) arrives as a string, repeated values as
-    // an array; accept either and normalize to an array so callers don't have to.
+    // accept either a single string or array for the severity param
+    // and normalize to array so callers don't have to.
     severity: z
       .union([z.enum(SEVERITIES), z.array(z.enum(SEVERITIES)).max(SEVERITIES.length)])
       .transform((value) => (Array.isArray(value) ? value : [value]))

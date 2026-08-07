@@ -16,6 +16,7 @@ export {
 } from './feature_flags';
 
 export {
+  notificationIdSchema,
   notificationWriteSchema,
   notificationReadSchema,
   ctaSchema,

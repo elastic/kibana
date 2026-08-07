@@ -11,8 +11,8 @@ import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from '.';
 
 /**
  * `POST /internal/notification_center/notifications/_mark_all_read`
- * Advance the caller's `readAllBefore` marker to now and clear the per-id list. Returns
- * the new marker. Anonymous callers (no `profile_uid`) have no read-state, so forbidden.
+ * Updates user's `readAllBefore` to now and clears their per-id `read` list.
+ * Anonymous users (no `profile_uid`) have no read-state, so the call isforbidden.
  */
 export const registerMarkAllReadRoute = ({ router, core }: NotificationRouteDeps) => {
   router.versioned

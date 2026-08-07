@@ -23,10 +23,9 @@ export interface NotificationRouteDeps {
 }
 
 /**
- * v1 has no per-notification authorization: notifications are broadcast to every
- * authenticated user, and read-state reads/writes are scoped to the caller's own
- * profile via `core.userStorage.asScoped`, so a user can only ever touch their own
- * state. There is no Kibana feature privilege to gate on yet — revisit if one is added.
+ * v1 has no per-notification authorization, notifications are broadcast to every
+ * authenticated user, and read-state reads/writes are scoped to the user's own
+ * profile via `core.userStorage.asScoped`. There is no Kibana feature privilege to gate on yet.
  */
 export const NC_AUTHZ_OPT_OUT_REASON =
   'Notification Center v1 broadcasts to every authenticated user with no per-notification ' +

@@ -13,9 +13,7 @@ import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from '.';
 
 /**
  * `GET /internal/notification_center/notifications`
- * Returns the caller's collapsed, horizon-filtered notification list. Read-state
- * annotation is layered on by the query function in a follow-up (search-team#14979);
- * this route wires the current `{ items, truncated }` contract.
+ * Validates the query params and calls the internal queryNotifications function.
  */
 export const registerGetNotificationsRoute = ({ router, core, logger }: NotificationRouteDeps) => {
   router.versioned

@@ -75,10 +75,10 @@ export type Severity = Notification['severity'];
 
 export type Cta = z.infer<typeof ctaSchema>;
 
-/** Read-path query params as accepted at the boundary (`severity` may be one value or many). */
+/** Params sent to internal query function, validated by the same schema as the HTTP GET route. */
 export type NotificationQueryParams = z.input<typeof notificationQueryParamsSchema>;
 
-/** Query params after parsing — `severity` normalized to an array. */
+/** Parsed params for the internal query function (after applying some normalization) */
 export type NotificationQueryParamsParsed = z.output<typeof notificationQueryParamsSchema>;
 
 /** The full collapsed, filtered notification set the client paginates over. */
