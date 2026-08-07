@@ -60,7 +60,11 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       fieldSpec,
     }: OptionsListRequestBody) => {
       const hasSearchString = searchString && searchString.length > 0;
-      if (!hasSearchString || fieldSpec?.type === 'date') return undefined;
+      if (!hasSearchString || fieldSpec?.type === 'date') {
+        // we can assume that this is only ever called with a search string, and date fields are not
+        // currently searchable; so, if any of these things is true, this is invalid.
+        return undefined;
+      }
 
       return {
         [(searchTechnique ?? getDefaultSearchTechnique(fieldSpec?.type ?? 'string')) as string]: {

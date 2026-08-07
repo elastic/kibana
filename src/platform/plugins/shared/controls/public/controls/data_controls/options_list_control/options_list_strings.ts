@@ -273,6 +273,15 @@ export const OptionsListStrings = {
         defaultMessage: 'Bulk selection is only available for fewer than {maxOptions} options',
         values: { maxOptions: MAX_OPTIONS_LIST_BULK_SELECT_SIZE },
       }),
+    getPartialResultsTitle: () =>
+      i18n.translate('controls.optionsList.popover.footer.partialResultsTitle', {
+        defaultMessage: 'Some values may be missing.',
+      }),
+    getPartialResultsTooltip: () =>
+      i18n.translate('controls.optionsList.popover.footer.partialResultsTooltip', {
+        defaultMessage:
+          'This control is configured to load values fast and can show partial results if it relies on a large data set. To ensure it shows all values, edit the control to "Always load all results". All valid values will show but will take longer to load.',
+      }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>

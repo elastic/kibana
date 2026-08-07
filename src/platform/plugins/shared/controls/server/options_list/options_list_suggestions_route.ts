@@ -29,7 +29,6 @@ import type {
 import { esqlColumnValuesToOptionsListResponse } from './options_list_esql_response';
 import { getValidationAggregationBuilder } from './options_list_validation_queries';
 import { getSuggestionAggregationBuilder } from './suggestion_queries';
-import { omit } from 'lodash';
 
 const searchTechniqueSchema = schema.maybe(
   schema.oneOf([schema.literal('exact'), schema.literal('prefix'), schema.literal('wildcard')])
