@@ -31,7 +31,9 @@ test.describe('Enrich policies access', { tag: tags.deploymentAgnostic }, () => 
 
   test('no access hides the enrich policies tab', async ({ browserAuth, page, pageObjects }) => {
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.monitorOnly);
-    await pageObjects.indexManagement.goto();
+    // Anchor on a tab this role does get: otherwise the assertion below also passes while the
+    // role is still propagating and the app has no tabs at all.
+    await pageObjects.indexManagement.navigateToIndexManagementTab('indices');
 
     await expect(page.testSubj.locator('enrich_policiesTab')).toBeHidden();
   });

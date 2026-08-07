@@ -91,9 +91,6 @@ export class IndexManagement extends AbstractPageObject {
   async navigateToIndexManagementTab(
     tab: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
   ) {
-    // Deep-link straight to the tab's route so we don't load the default Indices
-    // list and then click the tab: that click raced app bootstrap and timed out.
-    await this.page.gotoApp(`management/data/index_management/${tab}`);
     const tabMap = {
       indices: 'indicesTab',
       data_streams: 'data_streamsTab',
@@ -101,7 +98,11 @@ export class IndexManagement extends AbstractPageObject {
       component_templates: 'component_templatesTab',
       enrich_policies: 'enrich_policiesTab',
     };
-    await expect(this.page.testSubj.locator(tabMap[tab])).toBeVisible();
+    // A freshly created custom role can take a moment to apply, giving a 403 and no tabs.
+    await expect(async () => {
+      await this.page.gotoApp(`management/data/index_management/${tab}`);
+      await expect(this.page.testSubj.locator(tabMap[tab])).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 60_000 });
   }
 
   async clickNextButton() {
