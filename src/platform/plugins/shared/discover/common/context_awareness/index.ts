@@ -21,5 +21,7 @@ export {
   EXAMPLE_PROFILE_STATE_DEF,
   type ExampleProfileState,
 } from './profile_state_definitions/example_profile_state';
-export { METRICS_GRID_SETTINGS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
-export { METRICS_GRID_SORT_STATE_DEF } from './profile_state_definitions/metrics_grid_sort_profile_state';
+export {
+  METRICS_GRID_SETTINGS_STATE_DEF,
+  type MetricsGridState,
+} from './profile_state_definitions/metrics_grid_profile_state';

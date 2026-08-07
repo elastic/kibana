@@ -8,28 +8,31 @@
  */
 
 import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
-import { METRICS_GRID_SORT_STATE_DEF } from './metrics_grid_sort_profile_state';
+import { METRICS_GRID_SETTINGS_STATE_DEF } from './metrics_grid_profile_state';
 
-const KEY = METRICS_GRID_SORT_STATE_DEF.key;
+const KEY = METRICS_GRID_SETTINGS_STATE_DEF.key;
 
 const createRegistry = () => {
   const registry = new ProfileStateRegistry();
-  registry.registerDefinition(METRICS_GRID_SORT_STATE_DEF);
+  registry.registerDefinition(METRICS_GRID_SETTINGS_STATE_DEF);
   return registry;
 };
 
-describe('METRICS_GRID_SORT_STATE_DEF', () => {
+describe('METRICS_GRID_SETTINGS_STATE_DEF', () => {
   it('registers the definition', () => {
     const registry = createRegistry();
 
-    expect(registry.hasDefinition(METRICS_GRID_SORT_STATE_DEF)).toBe(true);
+    expect(registry.hasDefinition(METRICS_GRID_SETTINGS_STATE_DEF)).toBe(true);
     // The key is a storage contract: it is persisted inside users' local tab
-    // storage with no migration path, so renaming it orphans persisted sort state.
-    expect(METRICS_GRID_SORT_STATE_DEF.key).toBe('metricsGridSort');
+    // storage with no migration path, so renaming it orphans persisted state.
+    expect(METRICS_GRID_SETTINGS_STATE_DEF.key).toBe('metricsGridSettings');
   });
 
-  it('types both fields as Persistent so the host persists them locally across reloads', () => {
-    expect(METRICS_GRID_SORT_STATE_DEF.descriptor).toEqual({
+  it('types all fields as Persistent so the host persists them locally across reloads', () => {
+    expect(METRICS_GRID_SETTINGS_STATE_DEF.descriptor).toEqual({
+      counterAggregation: { type: ProfileStateType.Persistent },
+      gaugeAggregation: { type: ProfileStateType.Persistent },
+      histogramPercentile: { type: ProfileStateType.Persistent },
       field: { type: ProfileStateType.Persistent },
       direction: { type: ProfileStateType.Persistent },
     });
@@ -44,14 +47,22 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
       defaultsHandling: 'expand',
     });
 
-    expect(expanded).toEqual({ [KEY]: { field: 'recency', direction: 'asc' } });
+    expect(expanded[KEY]).toMatchObject({ field: 'recency', direction: 'asc' });
   });
 
   it('strips an all-default sort on read so it falls back to the default', () => {
     const registry = createRegistry();
 
     const stripped = registry.pickStateByType({
-      profileStateMap: { [KEY]: { field: 'alphabetically', direction: 'asc' } },
+      profileStateMap: {
+        [KEY]: {
+          counterAggregation: 'sum',
+          gaugeAggregation: 'avg',
+          histogramPercentile: 'p95',
+          field: 'alphabetically',
+          direction: 'asc',
+        },
+      },
       stateTypes: [ProfileStateType.Persistent],
       defaultsHandling: 'strip',
     });

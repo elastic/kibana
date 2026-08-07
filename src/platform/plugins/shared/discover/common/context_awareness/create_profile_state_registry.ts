@@ -10,7 +10,6 @@
 import { ProfileStateRegistry } from './profile_state';
 import { EXAMPLE_PROFILE_STATE_DEF } from './profile_state_definitions/example_profile_state';
 import { METRICS_GRID_SETTINGS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
-import { METRICS_GRID_SORT_STATE_DEF } from './profile_state_definitions/metrics_grid_sort_profile_state';
 
 /** Creates the Discover profile state registry with all supported definitions registered. */
 export const createProfileStateRegistry = () => {
@@ -18,7 +17,6 @@ export const createProfileStateRegistry = () => {
 
   registry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
   registry.registerDefinition(METRICS_GRID_SETTINGS_STATE_DEF);
-  registry.registerDefinition(METRICS_GRID_SORT_STATE_DEF);
 
   return registry;
 };
