@@ -10,42 +10,24 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
-import type { IBasePath } from '@kbn/core/public';
-import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
-import { PLUGIN_ID } from '../../common';
 
 export interface ExampleLink {
   title: string;
+  href: string;
   path: string;
 }
 
 interface NavProps {
   exampleLinks: ExampleLink[];
-  basePath: IBasePath;
-  navigateToPath: (path: string) => void;
 }
 
-const SideNav: React.FC<NavProps> = ({ exampleLinks, basePath, navigateToPath }: NavProps) => {
+const SideNav: React.FC<NavProps> = ({ exampleLinks }: NavProps) => {
   const navItems = exampleLinks.map((example) => {
-    if (example.path.startsWith('http')) {
-      return {
-        id: example.path,
-        name: example.title,
-        'data-test-subj': example.path,
-        href: example.path,
-      };
-    }
-
     return {
       id: example.path,
       name: example.title,
       'data-test-subj': example.path,
-      href: basePath.prepend(`/app/${PLUGIN_ID}${example.path}`),
-      onClick: (event: React.MouseEvent<HTMLAnchorElement>) => {
-        if (hasActiveModifierKey(event)) return;
-        event.preventDefault();
-        navigateToPath(example.path);
-      },
+      href: example.href,
     };
   });
 
@@ -64,20 +46,16 @@ const SideNav: React.FC<NavProps> = ({ exampleLinks, basePath, navigateToPath }:
 
 interface Props {
   exampleLinks: ExampleLink[];
-  basePath: IBasePath;
-  navigateToPath: (path: string) => void;
 }
 
 export const SearchExamplePage: React.FC<PropsWithChildren<Props>> = ({
   children,
   exampleLinks,
-  basePath,
-  navigateToPath,
 }) => {
   return (
     <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Sidebar>
-        <SideNav exampleLinks={exampleLinks} basePath={basePath} navigateToPath={navigateToPath} />
+        <SideNav exampleLinks={exampleLinks} />
       </EuiPageTemplate.Sidebar>
       {children}
     </EuiPageTemplate>
