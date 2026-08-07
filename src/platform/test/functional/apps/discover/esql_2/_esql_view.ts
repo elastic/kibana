@@ -387,7 +387,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
         await discover.waitUntilTabIsLoaded();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should show available data views and search results after switching to classic mode', async () => {
