@@ -66,7 +66,7 @@ describe('getWorkflowsNavPanel', () => {
     ]);
   });
 
-  it('returns a panel opener with list, library, and executions children when both are enabled', () => {
+  it('returns a panel opener with list, executions, and library children when both are enabled', () => {
     expect(
       getWorkflowsNavPanel(createCore({ libraryEnabled: true, executionsViewEnabled: true }))
     ).toEqual([
@@ -76,11 +76,11 @@ describe('getWorkflowsNavPanel', () => {
         renderAs: 'panelOpener',
         children: [
           { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.list}`, breadcrumbStatus: 'hidden' },
-          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}`, breadcrumbStatus: 'hidden' },
           {
             link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.executions}`,
             breadcrumbStatus: 'hidden',
           },
+          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}`, breadcrumbStatus: 'hidden' },
         ],
       },
     ]);
