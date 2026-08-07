@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { createOrUpdateIndex } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
@@ -27,7 +28,8 @@ import { DeferredDataClient } from '../deferred_data_client';
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
   private initPromise!: Promise<ElasticsearchClient>;
-  private started: boolean = false;
+  private started = false;
+  private stopped = false;
 
   constructor(private readonly deps: CreateDataClientDeps) {}
 
@@ -39,6 +41,10 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
 
     this.initPromise = this.init(esClient, logger);
     this.started = true;
+  }
+
+  async stop(): Promise<void> {
+    this.stopped = true;
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -77,8 +83,9 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   }
 
   private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
-    const initAttempts = 10;
-    for (let attempt = 1; attempt <= initAttempts; attempt++) {
+    let attempt = 0;
+
+    while (!this.stopped) {
       try {
         await Promise.all([
           createOrUpdateIndex({
@@ -96,12 +103,15 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
         ]);
         return esClient;
       } catch (error) {
-        logger.error('Failed to create or update index', { error });
-        // Wait for a short delay before retrying
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (!isRetryableEsClientError(error)) {
+          throw error;
+        }
+        attempt++;
+        const ms = Math.min(1000 * Math.pow(2, attempt), 30_000);
+        logger.warn(`Transient error during index init, retrying in ${ms}ms`, { error });
+        await new Promise((resolve) => setTimeout(resolve, ms));
       }
     }
-
-    throw new Error('Failed to initialize data client bundle after multiple attempts');
+    throw new Error('Index initialization aborted: plugin stopped');
   }
 }

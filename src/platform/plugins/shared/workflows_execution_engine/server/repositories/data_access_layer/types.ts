@@ -88,6 +88,7 @@ export type StepExecutionsDataClient = DataClient<EsWorkflowStepExecution>;
 export interface DataClientBundle {
   initSetup: (coreSetup: CoreSetup) => Promise<void>;
   initStart: (coreStart: CoreStart) => Promise<void>;
+  stop: () => Promise<void>;
   createWorkflowDataClient: () => WorkflowExecutionsDataClient;
   createStepDataClient: () => StepExecutionsDataClient;
 }

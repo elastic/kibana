@@ -9,6 +9,7 @@
 
 export const mockDataClientBundleInitSetup = jest.fn().mockResolvedValue(undefined);
 export const mockDataClientBundleInitStart = jest.fn().mockResolvedValue(undefined);
+export const mockDataClientBundleStop = jest.fn().mockResolvedValue(undefined);
 
 export const createDataClientJestMock = () => {
   const { createMockStepDataClient, createMockWorkflowDataClient } = jest.requireActual(
@@ -18,6 +19,7 @@ export const createDataClientJestMock = () => {
   return {
     initSetup: mockDataClientBundleInitSetup,
     initStart: mockDataClientBundleInitStart,
+    stop: mockDataClientBundleStop,
     createWorkflowDataClient: jest.fn(() => createMockWorkflowDataClient()),
     createStepDataClient: jest.fn(() => createMockStepDataClient()),
   };

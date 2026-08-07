@@ -1698,7 +1698,9 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    void this.dataClientBundle.stop();
+  }
 
   /**
    * Reused local wrapper for evaluating the concurrency group key for a workflow execution.
