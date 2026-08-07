@@ -12,6 +12,7 @@ import type { CoreTheme } from '@kbn/core/public';
 import { transparentize } from '@elastic/eui';
 import { getEuiThemeVars } from '@kbn/ui-theme';
 import type { Color, Gradient } from 'vega';
+import { easing } from 'ts-easing';
 import { normalizeObject } from '../vega_view/utils';
 
 function normalizeAndStringify(value: unknown) {
@@ -100,17 +101,19 @@ export function getVegaThemeColors<T extends 'grid' | 'title' | 'label' | 'defau
 /** Default area fill gradient aligned with Lens styling. */
 export function getDefaultAreaGradientFill(defaultColor: string | string[]): Gradient {
   const color = Array.isArray(defaultColor) ? defaultColor[0] : defaultColor;
+  const startOpacity = 0.15;
+  const stopCount = 10;
+
   return {
     gradient: 'linear',
     x1: 0,
     y1: 1,
     x2: 0,
     y2: 0,
-    stops: [
-      { offset: 0, color: transparentize(color, 0) },
-      { offset: 0.2, color: transparentize(color, 0.1) },
-      { offset: 0.8, color: transparentize(color, 0.9) },
-      { offset: 1, color: transparentize(color, 1) },
-    ],
+    stops: Array.from({ length: stopCount }, (_, i) => {
+      const offset = i / (stopCount - 1);
+      const opacity = startOpacity + (1 - startOpacity) * easing.inOutCubic(offset);
+      return { offset, color: transparentize(color, opacity) };
+    }),
   };
 }

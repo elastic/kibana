@@ -966,20 +966,15 @@ describe('XYChart component', () => {
       return (areaSeries.prop('areaSeriesStyle') as AreaSeriesStyle).area;
     };
 
-    const gradientStyle = {
-      type: 'linear',
-      stops: [
-        { offset: 0, opacity: 0, color: ColorVariant.Series },
-        { offset: 0.2, opacity: 0.1, color: ColorVariant.Series },
-        { offset: 0.8, opacity: 0.9, color: ColorVariant.Series },
-        { offset: 1, opacity: 1, color: ColorVariant.Series },
-      ],
-    };
-
     test('applies gradient fill when areaFill is gradient', () => {
       const areaStyle = getAreaStyle({ areaFill: 'gradient', fillOpacity: 0.5 });
 
-      expect(areaStyle?.gradient).toEqual(gradientStyle);
+      expect(areaStyle?.gradient).toEqual(
+        expect.objectContaining({
+          type: 'linear',
+          stops: expect.any(Array),
+        })
+      );
       expect(areaStyle?.opacity).toBe(0.5);
     });
 

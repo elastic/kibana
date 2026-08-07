@@ -19,6 +19,7 @@ import type {
   LinearGradient,
 } from '@elastic/charts';
 import { ColorVariant, ScaleType } from '@elastic/charts';
+import { easing } from 'ts-easing';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -538,14 +539,15 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       areaFill === AreaFillOptions.GRADIENT &&
       (style.opacity === undefined || style.opacity > 0)
     ) {
+      const startOpacity = 0.15;
+      const stopCount = 10;
       const gradient: LinearGradient = {
         type: 'linear',
-        stops: [
-          { offset: 0, opacity: 0, color: ColorVariant.Series },
-          { offset: 0.2, opacity: 0.1, color: ColorVariant.Series },
-          { offset: 0.8, opacity: 0.9, color: ColorVariant.Series },
-          { offset: 1, opacity: 1, color: ColorVariant.Series },
-        ],
+        stops: Array.from({ length: stopCount }, (_, i) => ({
+          offset: i / (stopCount - 1),
+          opacity: startOpacity + (1 - startOpacity) * easing.inOutCubic(i / (stopCount - 1)),
+          color: ColorVariant.Series,
+        })),
       };
       style.gradient = gradient;
     }
