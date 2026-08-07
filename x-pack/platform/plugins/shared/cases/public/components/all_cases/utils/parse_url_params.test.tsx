@@ -6,6 +6,10 @@
  */
 
 import { encode } from '@kbn/rison';
+import {
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+} from '../../../../common/constants';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
 
 import { parseUrlParams } from './parse_url_params';
@@ -80,6 +84,20 @@ describe('parseUrlParams', () => {
         ],
       }
     `);
+  });
+
+  it('preserves Field Library filters that exceed legacy custom field limits', () => {
+    const extendedFieldFilters = [
+      {
+        label: 'l'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1),
+        value: 'v'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
+      },
+    ];
+    const params = new URLSearchParams({
+      cases: encode({ extendedFieldFilters, page: 2 }),
+    });
+
+    expect(parseUrlParams(params)).toEqual({ extendedFieldFilters, page: 2 });
   });
 
   it('protects against prototype attacks', () => {

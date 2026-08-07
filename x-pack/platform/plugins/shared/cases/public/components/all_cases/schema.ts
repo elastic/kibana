@@ -9,8 +9,8 @@ import { isLeft } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
 import {
-  MAX_CUSTOM_FIELD_LABEL_LENGTH,
-  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
 } from '../../../common/constants';
 import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
@@ -30,12 +30,12 @@ export const AllCasesURLQueryParamsRt = rt.exact(
           label: limitedStringSchema({
             fieldName: 'extendedFieldFilters.label',
             min: 1,
-            max: MAX_CUSTOM_FIELD_LABEL_LENGTH,
+            max: MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
           }),
           value: limitedStringSchema({
             fieldName: 'extendedFieldFilters.value',
             min: 1,
-            max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+            max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
           }),
         })
       ),

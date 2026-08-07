@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { useEffect, useMemo } from 'react';
 import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { mergeWith, isEqual, isEmpty } from 'lodash';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { useGlobalToggleFieldsFilterConfig } from './use_global_toggle_fields_filter_config';
 import { deflattenCustomFieldKey, isFlattenCustomField, isFlattenExtendedField } from '../utils';
+
+const VALID_TOGGLE_FILTER_VALUES = new Set(['true', 'false']);
 
 const hasCustomFieldFilterValues = (customFields: FilterOptions['customFields']): boolean =>
   Object.values(customFields ?? {}).some((field) => !isEmpty(field?.options));
@@ -176,17 +180,15 @@ const mergeEmptyOptions = ({
   };
 };
 
-const deactivateNonExistingFilters = ({
+const getNonExistingFiltersCleanup = ({
   prevFilterConfigs,
   currentFilterConfigs,
-  onFilterOptionsChange,
   filterOptions,
 }: {
   prevFilterConfigs: Map<string, FilterConfig>;
   currentFilterConfigs: Map<string, FilterConfig>;
-  onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
   filterOptions: FilterOptions;
-}) => {
+}): Partial<FilterOptions> | undefined => {
   const removedConfigs: FilterConfig[] = [];
   const emptyOptions: Array<Partial<FilterOptions>> = [];
 
@@ -198,9 +200,7 @@ const deactivateNonExistingFilters = ({
   });
 
   if (emptyOptions.length > 0) {
-    onFilterOptionsChange(
-      mergeEmptyOptions({ emptyOptions, deactivatedConfigs: removedConfigs, filterOptions })
-    );
+    return mergeEmptyOptions({ emptyOptions, deactivatedConfigs: removedConfigs, filterOptions });
   }
 };
 
@@ -211,6 +211,7 @@ export const useFilterConfig = ({
   filterOptions,
   customFields,
   globalInlineFields = [],
+  areGlobalFieldsLoaded = false,
   templatesEnabled = false,
   isLoading,
 }: {
@@ -221,6 +222,7 @@ export const useFilterConfig = ({
   filterOptions: FilterOptions;
   customFields: CasesConfigurationUI['customFields'];
   globalInlineFields?: InlineField[];
+  areGlobalFieldsLoaded?: boolean;
   templatesEnabled?: boolean;
 }) => {
   /**
@@ -246,15 +248,15 @@ export const useFilterConfig = ({
     ? globalToggleFieldsFilterConfig
     : customFieldsFilterConfig;
 
-  // Drop the inactive filter family so URL/state leftovers cannot keep narrowing
-  // results after templatesEnabled flips (or on a deep link with the wrong family).
-  if (templatesEnabled && hasCustomFieldFilterValues(filterOptions.customFields)) {
-    onFilterOptionsChange({
-      customFields: clearCustomFieldFilterValues(filterOptions.customFields),
-    });
-  } else if (!templatesEnabled && (filterOptions.extendedFieldFilters ?? []).length > 0) {
-    onFilterOptionsChange({ extendedFieldFilters: [] });
-  }
+  const validGlobalToggleFilterLabels = useMemo(
+    () =>
+      new Set(
+        globalInlineFields
+          .filter((field) => field.control === FieldType.TOGGLE)
+          .map((field) => (field.label ?? field.name).toLowerCase())
+      ),
+    [globalInlineFields]
+  );
 
   const activeFieldFilterConfig = fieldFilterConfig.map((fieldFilter) => {
     if (isFlattenCustomField(fieldFilter.key)) {
@@ -291,14 +293,54 @@ export const useFilterConfig = ({
     filterConfigs,
   });
 
-  const prevFilterConfigs = usePrevious(filterConfigs) ?? new Map();
+  const previousFilterConfigs = usePrevious(filterConfigs);
 
-  deactivateNonExistingFilters({
-    prevFilterConfigs,
-    currentFilterConfigs: filterConfigs,
-    onFilterOptionsChange,
+  useEffect(() => {
+    const cleanupOptions: Array<Partial<FilterOptions>> = [];
+    const nonExistingFiltersCleanup = getNonExistingFiltersCleanup({
+      prevFilterConfigs: previousFilterConfigs ?? new Map(),
+      currentFilterConfigs: filterConfigs,
+      filterOptions,
+    });
+
+    if (nonExistingFiltersCleanup != null) {
+      cleanupOptions.push(nonExistingFiltersCleanup);
+    }
+
+    if (templatesEnabled) {
+      if (hasCustomFieldFilterValues(filterOptions.customFields)) {
+        cleanupOptions.push({
+          customFields: clearCustomFieldFilterValues(filterOptions.customFields),
+        });
+      }
+
+      if (areGlobalFieldsLoaded) {
+        const validExtendedFieldFilters = (filterOptions.extendedFieldFilters ?? []).filter(
+          ({ label, value }) =>
+            validGlobalToggleFilterLabels.has(label.toLowerCase()) &&
+            VALID_TOGGLE_FILTER_VALUES.has(value)
+        );
+
+        if (!isEqual(validExtendedFieldFilters, filterOptions.extendedFieldFilters)) {
+          cleanupOptions.push({ extendedFieldFilters: validExtendedFieldFilters });
+        }
+      }
+    } else if ((filterOptions.extendedFieldFilters ?? []).length > 0) {
+      cleanupOptions.push({ extendedFieldFilters: [] });
+    }
+
+    if (cleanupOptions.length > 0) {
+      onFilterOptionsChange(mergeWith({}, ...cleanupOptions, replaceArrayMerge));
+    }
+  }, [
+    areGlobalFieldsLoaded,
+    filterConfigs,
     filterOptions,
-  });
+    onFilterOptionsChange,
+    previousFilterConfigs,
+    templatesEnabled,
+    validGlobalToggleFilterLabels,
+  ]);
 
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
     const newActiveByFilterKey = [...(activeByFilterKey || [])];

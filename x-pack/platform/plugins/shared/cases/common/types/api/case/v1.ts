@@ -23,8 +23,8 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-  MAX_CUSTOM_FIELD_LABEL_LENGTH,
-  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
   CASE_EXTENDED_FIELDS,
 } from '../../../constants';
@@ -463,12 +463,12 @@ const ExtendedFieldFilterRt = rt.strict({
   label: limitedStringSchema({
     fieldName: 'extendedFieldFilters.label',
     min: 1,
-    max: MAX_CUSTOM_FIELD_LABEL_LENGTH,
+    max: MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
   }),
   value: limitedStringSchema({
     fieldName: 'extendedFieldFilters.value',
     min: 1,
-    max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   }),
 });
 

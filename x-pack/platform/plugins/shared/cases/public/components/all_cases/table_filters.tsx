@@ -68,9 +68,11 @@ const CasesTableFiltersComponent = ({
     isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
   const { templatesEnabled } = useCasesConfig();
-  const { globalInlineFields, isLoading: isLoadingGlobalFields } = useGlobalInlineFields({
-    enabled: templatesEnabled,
-  });
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -116,6 +118,7 @@ const CasesTableFiltersComponent = ({
     filterOptions,
     customFields,
     globalInlineFields,
+    areGlobalFieldsLoaded,
     templatesEnabled,
     isLoading: isLoadingFilters,
   });

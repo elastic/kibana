@@ -92,9 +92,11 @@ const CasesTableFiltersComponent = ({
 
   const { euiTheme } = useEuiTheme();
   const { templatesEnabled } = useCasesConfig();
-  const { globalInlineFields, isLoading: isLoadingGlobalFields } = useGlobalInlineFields({
-    enabled: templatesEnabled,
-  });
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
   const { showInfoToast } = useCasesToast();
   const hasShownHiddenFieldsSearchToast = useRef(false);
 
@@ -151,6 +153,7 @@ const CasesTableFiltersComponent = ({
     filterOptions,
     customFields,
     globalInlineFields,
+    areGlobalFieldsLoaded,
     templatesEnabled,
     isLoading: isLoadingFilters,
   });

@@ -11,6 +11,7 @@ import { useFilterConfig } from './use_filter_config';
 import type { FilterOptions } from '../../../../common/ui';
 import { CUSTOM_FIELD_KEY_PREFIX, EXTENDED_FIELD_KEY_PREFIX } from '../constants';
 import { CustomFieldTypes } from '../../../../common/types/domain';
+import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from '../../../containers/constants';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
@@ -251,6 +252,82 @@ describe('useFilterConfig', () => {
     );
   });
 
+  it('preserves unknown deep-linked filters until global fields finish loading', () => {
+    renderHook(useFilterConfig, {
+      initialProps: {
+        systemFilterConfig: filters,
+        onFilterOptionsChange,
+        isSelectorView: false,
+        filterOptions: {
+          ...emptyFilterOptions,
+          extendedFieldFilters: [{ label: 'Deleted field', value: 'true' }],
+        },
+        customFields: [],
+        globalInlineFields: [],
+        areGlobalFieldsLoaded: false,
+        templatesEnabled: true,
+        isLoading: true,
+      },
+    });
+
+    expect(onFilterOptionsChange).not.toHaveBeenCalled();
+  });
+
+  it('removes unsupported deep-linked filters after global fields load', () => {
+    renderHook(useFilterConfig, {
+      initialProps: {
+        systemFilterConfig: filters,
+        onFilterOptionsChange,
+        isSelectorView: false,
+        filterOptions: {
+          ...emptyFilterOptions,
+          extendedFieldFilters: [
+            { label: 'Requires postmortem', value: 'true' },
+            { label: 'Deleted field', value: 'true' },
+            { label: 'Requires postmortem', value: 'unsupported' },
+          ],
+        },
+        customFields: [],
+        globalInlineFields: [
+          {
+            name: 'requires_postmortem',
+            label: 'Requires postmortem',
+            type: 'boolean',
+            control: FieldType.TOGGLE,
+          },
+        ],
+        areGlobalFieldsLoaded: true,
+        templatesEnabled: true,
+        isLoading: false,
+      },
+    });
+
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({
+      extendedFieldFilters: [{ label: 'Requires postmortem', value: 'true' }],
+    });
+  });
+
+  it('clears deep-linked filters after successfully loading an empty global field list', () => {
+    renderHook(useFilterConfig, {
+      initialProps: {
+        systemFilterConfig: filters,
+        onFilterOptionsChange,
+        isSelectorView: false,
+        filterOptions: {
+          ...emptyFilterOptions,
+          extendedFieldFilters: [{ label: 'Deleted field', value: 'true' }],
+        },
+        customFields: [],
+        globalInlineFields: [],
+        areGlobalFieldsLoaded: true,
+        templatesEnabled: true,
+        isLoading: false,
+      },
+    });
+
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({ extendedFieldFilters: [] });
+  });
+
   it('clears legacy customFields when templates become enabled', () => {
     const customFieldKey = 'legacy_toggle';
 
@@ -273,7 +350,7 @@ describe('useFilterConfig', () => {
             label: 'Legacy toggle',
           },
         ],
-        globalInlineFields: [],
+        globalInlineFields: [] as InlineField[],
         templatesEnabled: false,
         isLoading: false,
       },

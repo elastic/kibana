@@ -200,8 +200,6 @@ export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
-/** Cap for `extendedFieldFilters` on find/search and All Cases URL state. */
-export const MAX_EXTENDED_FIELD_FILTERS = 50 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connector-generated case ids are 64-char SHA-256 digests and bulk_create accepts arbitrary ids
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
@@ -235,6 +233,14 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
  * non-ASCII input) so this maps directly onto Lucene's limit.
  */
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
+/**
+ * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
+ * Field Library definitions and values can legitimately occupy the full template/value payload,
+ * and each of the 200 fields can contribute both values of a TOGGLE filter.
+ */
+export const MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH = MAX_TEMPLATE_DEFINITION_LENGTH;
+export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_BYTES;
+export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
