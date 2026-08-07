@@ -183,10 +183,7 @@ const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => 
   },
 });
 
-const buildNestedSavedObjectClause = (
-  type: string,
-  ids: string[]
-): QueryDslQueryContainer => ({
+const buildNestedSavedObjectClause = (type: string, ids: string[]): QueryDslQueryContainer => ({
   nested: {
     path: 'kibana.saved_objects',
     query: {

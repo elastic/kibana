@@ -155,7 +155,6 @@ export class EventLogService implements EventLogServiceContract {
       perPage: query.perPage,
     };
   }
-
 }
 
 /**
