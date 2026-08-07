@@ -6,7 +6,7 @@
  */
 
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
-import { READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
+import { MAX_READ_IDS, READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
 import { markRead, markAllRead } from './read_state';
 
 const createClient = (initial: { read?: string[]; readAllBefore?: string } = {}) => {
@@ -38,6 +38,17 @@ describe('markRead', () => {
     await markRead(client, 'a');
     expect(store[READ_KEY]).toEqual(['a']);
     expect(client.set).not.toHaveBeenCalled();
+  });
+
+  it('caps the list at MAX_READ_IDS, dropping the oldest ids', async () => {
+    const read = Array.from({ length: MAX_READ_IDS }, (_, i) => `id-${i}`);
+    const { client, store } = createClient({ read });
+    await markRead(client, 'newest');
+
+    const stored = store[READ_KEY] as string[];
+    expect(stored).toHaveLength(MAX_READ_IDS);
+    expect(stored[0]).toBe('id-1');
+    expect(stored[stored.length - 1]).toBe('newest');
   });
 });
 

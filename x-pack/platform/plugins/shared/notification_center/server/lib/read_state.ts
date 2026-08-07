@@ -6,11 +6,10 @@
  */
 
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
-import { READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
+import { MAX_READ_IDS, READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
 
 /**
- * Append a notification id to the users's individually-read list.
-
+ * Append a notification id to the user's individually-read list.
  */
 export const markRead = async (client: IUserStorageClient, id: string): Promise<void> => {
   const read = await client.get<string[]>(READ_KEY);
@@ -20,7 +19,9 @@ export const markRead = async (client: IUserStorageClient, id: string): Promise<
   // userStorage doesn't have consistency guarantee, so two concurrent marks from separate tabs
   // can lose one of the ids. This is a risk only for a single id, and will resolve itself
   // by the next mark-all-read or retry by the client.
-  await client.set(READ_KEY, [...read, id]);
+  // Cap at the newest MAX_READ_IDS (the schema's ceiling), silently dropping the oldest ids so
+  // the write stays valid; a mark-all-read clears the list entirely.
+  await client.set(READ_KEY, [...read, id].slice(-MAX_READ_IDS));
 };
 
 /**

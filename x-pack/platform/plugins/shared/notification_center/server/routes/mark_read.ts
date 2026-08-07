@@ -12,7 +12,7 @@ import { MARK_READ_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/ro
 import { markRead } from '../lib/read_state';
 import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from '.';
 
-const markReadBodySchema = z.object({ id: notificationIdSchema }).strict();
+const markReadBodySchema = z.object({ notification_id: notificationIdSchema }).strict();
 
 /**
  * `POST /internal/notification_center/notifications/_mark_read`
@@ -39,7 +39,8 @@ export const registerMarkReadRoute = ({ router, core }: NotificationRouteDeps) =
             body: { message: 'A user profile is required to modify read state.' },
           });
         }
-        await markRead(client, request.body.id);
+        const { notification_id: notificationId } = request.body;
+        await markRead(client, notificationId);
         return response.ok({ body: { success: true } });
       }
     );

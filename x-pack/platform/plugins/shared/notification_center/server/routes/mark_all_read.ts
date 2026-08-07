@@ -32,7 +32,7 @@ export const registerMarkAllReadRoute = ({ router, core }: NotificationRouteDeps
           });
         }
         const readAllBefore = await markAllRead(client);
-        return response.ok({ body: { success: true, readAllBefore } });
+        return response.ok({ body: { success: true, read_all_before: readAllBefore } });
       }
     );
 };
