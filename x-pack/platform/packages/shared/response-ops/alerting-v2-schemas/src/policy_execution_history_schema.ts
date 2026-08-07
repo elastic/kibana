@@ -128,6 +128,7 @@ export const policyExecutionHistoryItemSchema = z.object({
   episodes: z
     .array(episodeRefSchema)
     .max(MAX_EMBEDDED_EPISODES_PER_ITEM)
+    .optional()
     .describe(
       'Episode ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `episode_count` for the true total.'
     ),
