@@ -1,5 +1,5 @@
 {
-  "sha1": "292edf334dd6010365d8b5a1b6997483b64738b7",
+  "sha1": "40309bd9ddc040a97ba9c75480a00644b1625885",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -313,6 +313,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/drag_and_drop/keyboard_drag_and_drop.spec.ts",
         "line": 15,
         "column": 22
+      }
+    },
+    {
+      "id": "a67f0ea6f9cf137-1e72371abd9e4eb",
+      "title": "Dashboard with ES|QL Lens panel cancels the search request when navigating away cancels the ES|QL request when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/embedded_lens_search_cancellation.spec.ts",
+        "line": 88,
+        "column": 20
       }
     },
     {
