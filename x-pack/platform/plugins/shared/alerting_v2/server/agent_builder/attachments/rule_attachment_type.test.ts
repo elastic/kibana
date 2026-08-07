@@ -218,10 +218,7 @@ describe('createRuleAttachmentType', () => {
     it('returns false without logging when getRule returns 404', async () => {
       getRule.mockRejectedValueOnce(Boom.notFound('not found'));
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
       expect(mockLogger.warn).not.toHaveBeenCalled();
