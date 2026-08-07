@@ -19,6 +19,7 @@ export interface EnabledFeatures {
   isDFAEnabled: boolean;
   isNLPEnabled: boolean;
   showRuleFormV2: boolean;
+  isCPSEnabled: boolean;
 }
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   showLogsSuppliedConfigurationsInfo: true,
@@ -30,10 +31,12 @@ export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   isDFAEnabled: true,
   isNLPEnabled: true,
   showRuleFormV2: true,
+  isCPSEnabled: false,
 });
 
 interface Props {
   isServerless: boolean;
+  isCPSEnabled: boolean;
   mlFeatures: MlFeatures;
   showMLNavMenu?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
@@ -45,6 +48,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   showMLNavMenu = true,
   mlFeatures,
   experimentalFeatures,
+  isCPSEnabled,
 }) => {
   const features: EnabledFeatures = {
     showLogsSuppliedConfigurationsInfo: !isServerless,
@@ -56,6 +60,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     isDFAEnabled: mlFeatures.dfa,
     isNLPEnabled: mlFeatures.nlp,
     showRuleFormV2: experimentalFeatures?.ruleFormV2 ?? false,
+    isCPSEnabled,
   };
 
   return (
