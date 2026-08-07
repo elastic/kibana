@@ -1,5 +1,5 @@
 {
-  "sha1": "786808c065220058449fa52be828980dfcbffecc",
+  "sha1": "ee7b0714ff79d2019d6beeebadeff2e4513867b9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -644,8 +644,8 @@
       }
     },
     {
-      "id": "1bd51040dfd96ad-a966b4d2472039f",
-      "title": "Discover data grid sample size - saved search and Dashboard saves a custom sample size with a search",
+      "id": "1bd51040dfd96ad-4165cd5e8ccb60d",
+      "title": "Discover data grid sample size - saved search and Dashboard saves and restores a custom sample size",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -653,6 +653,32 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "1bd51040dfd96ad-02edc36d356bb8c",
+      "title": "Discover data grid sample size - saved search and Dashboard new Discover sessions use the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 94,
+        "column": 14
+      }
+    },
+    {
+      "id": "1bd51040dfd96ad-2e6bba352dc2c66",
+      "title": "Discover data grid sample size - saved search and Dashboard loading an archived saved search uses the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 114,
         "column": 14
       }
     },
@@ -665,7 +691,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 112,
+        "line": 133,
         "column": 14
       }
     },
@@ -678,7 +704,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 125,
+        "line": 146,
         "column": 14
       }
     },
