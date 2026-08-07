@@ -29,14 +29,12 @@ import type { RuleContentListItem } from './rules_data_source';
 import { toRulesQueryParams } from './rules_query_params';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
-/** Maps Content List / API sort fields onto the EuiBasicTable column fields. */
 const API_SORT_TO_TABLE_FIELD: Record<string, RulesListTableSortField> = {
   name: 'metadata',
   kind: 'kind',
   enabled: 'enabled',
 };
 
-/** Maps EuiBasicTable sort column fields onto Content List / API sort fields. */
 const TABLE_FIELD_TO_API_SORT_FIELD: Partial<Record<string, string>> = {
   metadata: 'name',
   kind: 'kind',

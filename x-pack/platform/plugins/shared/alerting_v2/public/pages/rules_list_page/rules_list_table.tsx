@@ -68,7 +68,6 @@ export interface RulesListTableProps {
   totalItemCount: number;
   page: number;
   perPage: number;
-  /** Page-size choices for the EUI pagination control. */
   pageSizeOptions?: number[];
   search: string;
   hasActiveFilters: boolean;
