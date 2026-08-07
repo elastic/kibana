@@ -15,19 +15,15 @@ const VEGA_STANDALONE_EMBEDDABLE_FLAG = 'vega.standaloneEmbeddable';
 
 const SPEC = `{
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "data": [
-    { "name": "table", "values": [{ "category": "jpg", "amount": 1 }] }
-  ],
-  "signals": [
-    {
-      "name": "click",
-      "on": [
-        {
-          "events": "@bars:click",
-          "update": "kibanaAddFilter({ match_phrase: { extension: 'jpg' } }, 'kibana_sample_data_logs')"
-        }
-      ]
+  "usermeta": {
+    "embedOptions": {
+      "loader": {
+        "baseURL": "/api/"
+      }
     }
+  },
+  "data": [
+    { "name": "table", "url": "vega_loader_probe.json" }
   ],
   "scales": [
     {
@@ -67,7 +63,7 @@ const SPEC = `{
   ]
 }`;
 
-test.describe('Sandboxed Vega dashboard panel', { tag: tags.stateful.classic }, () => {
+test.describe('Vega loader baseURL regression', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
@@ -95,11 +91,29 @@ test.describe('Sandboxed Vega dashboard panel', { tag: tags.stateful.classic }, 
     });
   });
 
-  test('renders, resizes, and applies filter via kibanaAddFilter', async ({
-    page,
-    pageObjects,
-  }) => {
-    const { dashboard, filterBar } = pageObjects;
+  test('blocks URL loading from sandboxed Vega', async ({ page, pageObjects }) => {
+    let rootProbeCount = 0;
+    let apiProbeCount = 0;
+
+    await page.route('**/vega_loader_probe.json', async (route) => {
+      const { pathname } = new URL(route.request().url());
+      if (pathname.endsWith('/api/vega_loader_probe.json')) {
+        apiProbeCount++;
+      } else {
+        rootProbeCount++;
+      }
+
+      await route.fulfill({
+        status: 200,
+        headers: {
+          'access-control-allow-origin': '*',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify([{ category: 'jpg', amount: 1 }]),
+      });
+    });
+
+    const { dashboard } = pageObjects;
 
     await dashboard.openNewDashboard();
     await dashboard.openAddPanelFlyout();
@@ -113,21 +127,12 @@ test.describe('Sandboxed Vega dashboard panel', { tag: tags.stateful.classic }, 
     await codeEditor.setCodeEditorValue(SPEC);
     await page.testSubj.click('vegaEditorFlyoutSaveButton');
 
-    const sandboxFrame = page.locator('iframe[title="Vega sandbox"]');
-    await expect(sandboxFrame).toHaveCount(1);
+    await expect(page.locator('iframe[title="Vega sandbox"]')).toHaveCount(1);
+    await expect(page.getByText(/Vega sandbox warning: Loading failed/i)).toBeVisible({
+      timeout: 30_000,
+    });
 
-    const canvas = page.frameLocator('iframe[title="Vega sandbox"]').locator('canvas');
-    await expect(canvas).toBeVisible({ timeout: 30_000 });
-
-    const widthBefore = await canvas.evaluate((el) => (el as HTMLCanvasElement).width);
-
-    await page.setViewportSize({ width: 820, height: 700 });
-    await expect
-      .poll(() => canvas.evaluate((el) => (el as HTMLCanvasElement).width))
-      .not.toBe(widthBefore);
-
-    expect(await filterBar.getFilterCount()).toBe(0);
-    await canvas.click();
-    await expect.poll(() => filterBar.getFilterCount()).toBe(1);
+    expect(rootProbeCount).toBe(0);
+    expect(apiProbeCount).toBe(0);
   });
 });

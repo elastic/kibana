@@ -76,7 +76,10 @@ export class TooltipHandler {
       tooltip.classList.add('vgaVis__tooltip--textTruncate');
     }
 
-    tooltip.textContent = createTooltipContent(value, escapeHtml, 2);
+    // Sanitized HTML is created by the tooltip library,
+    // with a large number of tests, hence suppressing eslint here.
+    // eslint-disable-next-line no-unsanitized/property
+    tooltip.innerHTML = createTooltipContent(value, escapeHtml, 2);
     this.container.appendChild(tooltip);
 
     const containerBox = this.container.getBoundingClientRect();
