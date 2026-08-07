@@ -21,7 +21,7 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataGridDensity, isLegacySort, type SortOrder } from '@kbn/discover-utils/server';
+import { isLegacySort, type SortOrder } from '@kbn/discover-utils/server';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
