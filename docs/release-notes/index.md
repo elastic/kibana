@@ -512,48 +512,40 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 ### Fixes [kibana-9.4.5-fixes]
 
-**Agent Builder**:
-* Prevent conversation overwrite via auto-create [#280189]({{kib-pull}}280189).
+**Elastic Agent Builder**:
+* Fix auto-created conversations overwriting an existing conversation that shares the same ID [#280189]({{kib-pull}}280189).
 
-**Alerting**:
-* Fixes AIOps charts in cases [#281157]({{kib-pull}}281157).
-* Fixes relative time mismatch in CSV exports [#278305]({{kib-pull}}278305).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixes CSV exports covering a different time window than what was shown in Discover for relative time ranges. For scheduled reports, the corrected behavior applies only to reports created or re-saved after upgrading; existing schedules keep their previous time-window behavior until they are recreated.
-* Don't lower alerts-as-data total_fields.limit below the already-set value [#277402]({{kib-pull}}277402).
+**Alerting and cases**:
+* Fix attaching AIOps charts (change point, pattern analysis, log rate analysis) to a case failing with an "Attachment type is not registered" error [#281157]({{kib-pull}}281157).
+* Fix CSV exports covering a different time window than what was shown in Discover for relative time ranges. For scheduled reports, the corrected behavior applies only to reports created or re-saved after upgrading; existing schedules keep their previous time-window behavior until they are recreated [#278305]({{kib-pull}}278305).
+* Fix the alerts-as-data setup overriding an index's total fields limit that was already set to a higher value [#277402]({{kib-pull}}277402).
 
 **Dashboards and Visualizations**:
-* Generate unique ad hoc Data View IDs from full spec [#281786]({{kib-pull}}281786).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixed an issue where duplicating a Lens panel backed by a form-based ad hoc Data View and then modifying the Data View (e.g. renaming it or adding a runtime field) could cause the panel to fail to load, due to colliding ad hoc Data View IDs.
-* Fixes ad hoc data view resolution for XY annotation layers [#281079]({{kib-pull}}281079).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixed an issue where Visualizations with annotation layers backed by an ad hoc data view could not be read back through the new Visualization API.
-* Preserve custom name for ad-hoc form based dataviews [#280546]({{kib-pull}}280546).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixes the Lens as-code API path dropping the custom display name of inline (ad-hoc) data views. The name is now preserved end-to-end.
-* Fixes PDF export uses stale state after dashboard interactions [#278262]({{kib-pull}}278262).
+* Fix duplicated Lens panels backed by a form-based ad hoc data view failing to load after you rename the data view or add a runtime field, caused by colliding ad hoc data view IDs [#281786]({{kib-pull}}281786).
+* Fix ad hoc data view resolution for **Lens** XY annotation layers created through the Visualizations API [#281079]({{kib-pull}}281079).
+* Fix the Lens as-code API dropping the custom display name of inline (ad hoc) data views on round trip [#280546]({{kib-pull}}280546).
+* Fix dashboard PDF exports using a stale time range after you change the time picker when the dashboard does not save the time range [#278262]({{kib-pull}}278262).
 
 **Data ingestion and Fleet**:
-* Increase output hosts maxSize from 10 to 100 [#282397]({{kib-pull}}282397).
-* Don't allow proxy config in Kafka outputs [#282313]({{kib-pull}}282313).
-* Pass existing expiration field in POST /enrollment_api_keys to security APIs [#281324]({{kib-pull}}281324).
-* Default OTel metrics data streams to time_series index mode [#281295]({{kib-pull}}281295).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixes Fleet-managed OpenTelemetry metrics data streams so they use time series index mode (`time_series`) by default for integration packages.
-* Fixes agent policy filter: use policy_base_id for versioned policy lookup [#281195]({{kib-pull}}281195).
-* Fixes hasFleetServersForPolicies to match versioned policy_id variants [#281092]({{kib-pull}}281092).
-* Fix(fleet): fix hasChanged() in fleet_proxies.ts always returning truthy [#281059]({{kib-pull}}281059).
+* Fix Fleet output edits failing with a validation error when more than 10 hosts were configured, by raising the host limit from 10 to 100 for Elasticsearch, remote Elasticsearch, Logstash, and Kafka outputs [#282397]({{kib-pull}}282397).
+* Fix Kafka outputs showing and accepting a proxy configuration, which Kafka outputs don't support [#282313]({{kib-pull}}282313).
+* Fix the `expiration` parameter on `POST /enrollment_api_keys` being silently dropped, and add an **Expiration** field to the **Create enrollment token** form in Fleet [#281324]({{kib-pull}}281324).
+* Fix OpenTelemetry integration metrics not defaulting to the `time_series` index mode [#281295]({{kib-pull}}281295).
+* Fix the agent policy filter on the **Agents** list returning no agents for version-specific policies [#281195]({{kib-pull}}281195).
+* Fix the **Add Fleet Server** onboarding continuing to show after the Fleet Server agent moves to a version-specific policy [#281092]({{kib-pull}}281092).
+* Fix preconfigured Fleet proxies being rewritten on every setup, which needlessly bumped every dependent agent policy [#281059]({{kib-pull}}281059).
+* Fix package policy deletion always recompiling and deploying the full agent policy synchronously, ignoring the `asyncDeploy` option that bulk create and update already honor [#282580]({{kib-pull}}282580).
 
 **Data management**:
-* ILM Explain for hidden indices support [#282137]({{kib-pull}}282137).
+* Fix **ILM Explain** in Index Management not returning results for hidden and system indices [#282137]({{kib-pull}}282137).
+* Fix follower index selections not clearing after you pause, resume, or unfollow an index in **Cross-Cluster Replication** [#273576]({{kib-pull}}273576).
 
 **Discover**:
-* Fixes Short Dots transform dropping single-character segments [#281930]({{kib-pull}}281930).
-* Align server date converters' null label with the client [#281367]({{kib-pull}}281367).
-* Fixes Base64 Decode transform on server and for UTF-8 [#281366]({{kib-pull}}281366).
-* Fixes Date Nanos formatter ignoring dateFormat for numeric values [#281343]({{kib-pull}}281343).
-* Fixes Geo point DMS output mangling near-zero coordinates [#281336]({{kib-pull}}281336).
+* Fix the Short Dots field formatter dropping single-character path segments [#281930]({{kib-pull}}281930).
+* Fix null date values in server-generated exports showing `-` instead of the `(null)` label used by the client [#281367]({{kib-pull}}281367).
+* Fix the Base64 Decode field formatter on the server and for multi-byte UTF-8 values [#281366]({{kib-pull}}281366).
+* Fix the Date Nanos field formatter ignoring the configured date format for numeric values [#281343]({{kib-pull}}281343).
+* Fix the geo point degrees, minutes, seconds field format distorting coordinates very close to zero [#281336]({{kib-pull}}281336).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.4.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -562,22 +554,18 @@ For the Elastic Observability 9.4.5 release information, refer to [Elastic Obser
 For the Elastic Security 9.4.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Elasticsearch solution**:
-* Fixes (null) filter labels on connector View logs [#281155]({{kib-pull}}281155).
-* Filter Query Rules name [#276710]({{kib-pull}}276710).
+* Fix connector **View logs** filter pills showing `(null)` instead of the connector or agent ID [#281155]({{kib-pull}}281155).
+* Reject query rule, ruleset, and synonym set IDs that contain characters outside `[a-zA-Z0-9_-]` in the Query Rules and Synonyms APIs [#276710]({{kib-pull}}276710).
 
 **Machine learning and inference**:
-* Fixes special tokens in prompts causing Kibana AI Agent to error out or crashing [#281546]({{kib-pull}}281546).
-* Improving trained model ID check [#280511]({{kib-pull}}280511).
-* Fixing apply annotation to series checkbox [#279875]({{kib-pull}}279875).
-* Hardening annotation and anomaly search APIs [#277197]({{kib-pull}}277197).
-* Fixes ML saved objects API privileges [#276936]({{kib-pull}}276936).
+* Fix special tokens in prompts causing the Kibana AI Agent to error or crash [#281546]({{kib-pull}}281546).
+* Fix the trained model ID check for the infer, update, and stop deployment APIs allowing access to a different model than the one requested [#280511]({{kib-pull}}280511).
+* Fix the checkbox for applying an annotation to a single series not resetting when you edit an existing annotation [#279875]({{kib-pull}}279875).
+* Fix the annotation and anomaly results APIs not enforcing job-level space access [#277197]({{kib-pull}}277197).
+* Fix the anomaly detection, data frame analytics, and trained model saved object APIs denying access to users who hold only a subset of the required privileges [#276936]({{kib-pull}}276936).
 
 **Workflows**:
-* Warn instead of error for unprovable foreach collection types [#283360]({{kib-pull}}283360).
-* Update capabilities for SIEM migrations link [#278775]({{kib-pull}}278775).
-* Fix(ccr): clear follower index selection after a manage action [#273576]({{kib-pull}}273576).
-% !!TODO!! The above PR had a lengthy release note description:
-% CCR now clears selected follower indices after pause, resume, or unfollow actions so the Manage menu reflects the updated state.
+* Warn instead of block enabling a workflow when the editor can't statically prove a `foreach` collection is an array, deferring the check to runtime [#283360]({{kib-pull}}283360).
 
 ## 9.4.4 [kibana-9.4.4-release-notes]
 
