@@ -627,6 +627,28 @@ describe('getColumnsWithTimeField', () => {
     ).toEqual(['@timestamp', 'bytes']);
   });
 
+  it('should not prepend when time field is user-added at end of columns', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension', '@timestamp'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual(['bytes', 'extension', '@timestamp']);
+  });
+
+  it('should not prepend when time field is user-added in middle of columns', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', '@timestamp', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { language: 'kuery', query: '*' },
+      })
+    ).toEqual(['bytes', '@timestamp', 'extension']);
+  });
+
   it('should not prepend for a classic query when columns are empty', () => {
     expect(
       getColumnsWithTimeField({

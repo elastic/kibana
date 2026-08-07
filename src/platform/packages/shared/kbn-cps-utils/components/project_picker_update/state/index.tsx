@@ -8,18 +8,27 @@
  */
 
 import { once } from 'lodash';
-import React, { useMemo, useContext, createContext, type PropsWithChildren } from 'react';
+import React, {
+  useMemo,
+  useContext,
+  createContext,
+  type PropsWithChildren,
+  useEffect,
+} from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import { createStoreReducers } from './reducers';
 import { type ProjectPickerState } from './reducers';
+import { projectPickerDerivatives } from './derivatives';
+import { type CPSProject } from '../../../types';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
-  actions: ActionsFromReducers<ReturnType<typeof createStoreReducers>>;
+  actions: Omit<ActionsFromReducers<ReturnType<typeof createStoreReducers>>, '_setStoreState'>;
 }
 
-interface ProjectPickerProviderProps {
+export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState, 'isReadOnly'> {
   children: React.ReactNode;
+  availableProjects: CPSProject[];
 }
 
 export const createProjectPickerContext = once(() =>
@@ -44,19 +53,36 @@ export const useProjectPickerState = () => {
   return ctx.state;
 };
 
-export const ProjectPickerProvider = ({
+export const ProjectPickerStateProvider = ({
   children,
-}: PropsWithChildren<ProjectPickerProviderProps>) => {
+  availableProjects,
+  isReadOnly,
+}: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
+      isReadOnly,
+      filterExpressions: new Map(),
+      filteringDimensions: [],
+      availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
+      excludedOverrides: [],
+      filteredProjectIds: [],
+      visibleProjectIds: [],
       selectedProjects: [],
-      availableProjects: [],
     },
     reducers: projectPickerReducers,
+    derivatives: [...projectPickerDerivatives],
   });
+
+  useEffect(() => {
+    store.actions._setStoreState({
+      isReadOnly,
+      availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
+      filterExpressions: [],
+    });
+  }, [availableProjects, isReadOnly, store.actions]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };

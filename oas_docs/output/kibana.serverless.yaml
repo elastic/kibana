@@ -1067,6 +1067,14 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    ai_indices:
+                      description: Array of AI indices to associate with the agent.
+                      items:
+                        description: AI indices to associate with the agent.
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1577,6 +1585,14 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    ai_indices:
+                      description: Array of AI indices to associate with the agent.
+                      items:
+                        description: AI indices to associate with the agent.
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -42409,7 +42425,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -42484,7 +42501,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -81869,8 +81887,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
