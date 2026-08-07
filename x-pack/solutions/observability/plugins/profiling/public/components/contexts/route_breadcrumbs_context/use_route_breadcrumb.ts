@@ -10,6 +10,10 @@ import { useContext, useEffect, useRef } from 'react';
 import type { Breadcrumb } from '.';
 import { RouteBreadcrumbsContext } from '.';
 
+/**
+ * Registers a breadcrumb for the current route. The `breadcrumb` value should be
+ * memoised to avoid unnecessary re-registrations on every render.
+ */
 export function useRouteBreadcrumb(breadcrumb: Breadcrumb) {
   const api = useContext(RouteBreadcrumbsContext);
 
