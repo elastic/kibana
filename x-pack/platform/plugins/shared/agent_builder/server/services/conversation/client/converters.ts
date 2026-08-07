@@ -27,7 +27,7 @@ import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
-  ConversationUpdateRequest,
+  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -40,10 +40,10 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 
-export type Document = Pick<
-  GetResponse<ConversationProperties>,
-  '_source' | '_id' | '_seq_no' | '_primary_term'
->;
+export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
+
+export type VersionedDocument = Document &
+  Required<Pick<GetResponse<ConversationProperties>, '_seq_no' | '_primary_term'>>;
 
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
@@ -254,7 +254,7 @@ export const updateConversation = ({
   updateDate,
 }: {
   conversation: Conversation;
-  update: ConversationUpdateRequest;
+  update: ConversationUpdatableFields;
   space: string;
   updateDate: Date;
 }) => {

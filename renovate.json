@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -148,7 +149,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
+      "matchDepNames": ["simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:nightshift-context-and-research"],
@@ -960,7 +961,7 @@
         "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
-        "eslint-plugin-node",
+        "eslint-plugin-n",
         "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",
@@ -2113,7 +2114,7 @@
     {
       "groupName": "hdr-histogram-js",
       "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-presentation-team"],
+      "reviewers": ["team:obs-signals-metrics-team"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true

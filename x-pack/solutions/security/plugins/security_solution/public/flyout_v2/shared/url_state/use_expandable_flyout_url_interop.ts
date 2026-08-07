@@ -294,7 +294,6 @@ const docLeftToToolDescriptor = (
           documentId,
           indexName,
           scopeId: scopeId ?? '',
-          isRulePreview: false,
         };
       // 'entity' or no subTab → entities
       return { kind: 'documentEntities', documentId, indexName, scopeId };

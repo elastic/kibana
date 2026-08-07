@@ -90,10 +90,10 @@ export function TruncatableSummary({
           `}
         >
           {expanded
-            ? i18n.translate('xpack.observability.nightshift.flyout.showLessButtonText', {
+            ? i18n.translate('xpack.nightshift.flyout.showLessButtonText', {
                 defaultMessage: 'Show less',
               })
-            : i18n.translate('xpack.observability.nightshift.flyout.showMoreButtonText', {
+            : i18n.translate('xpack.nightshift.flyout.showMoreButtonText', {
                 defaultMessage: 'Show more',
               })}
         </EuiLink>
