@@ -113,15 +113,16 @@ describe('UserStorageClient', () => {
       expect(api.set).not.toHaveBeenCalled();
     });
 
-    it('does not emit an update event for a rejected write', async () => {
+    it('does not re-emit on get$ for a rejected write', async () => {
       const { client } = buildClient({}, false);
-      const updates = jest.fn();
-      client.getUpdate$().subscribe(updates);
+      const emissions: unknown[] = [];
+      client.get$('key', 'fallback').subscribe((v) => emissions.push(v));
 
       await expect(client.set('key', 'value')).rejects.toThrow();
       await expect(client.remove('key')).rejects.toThrow();
 
-      expect(updates).not.toHaveBeenCalled();
+      // Only the initial default emission; neither failed write notified subscribers.
+      expect(emissions).toEqual(['fallback']);
     });
   });
 
@@ -283,21 +284,17 @@ describe('UserStorageClient', () => {
   });
 
   describe('set', () => {
-    it('updates cache and emits on update$ after a successful HTTP call', async () => {
+    it('updates cache and re-emits on get$ after a successful HTTP call', async () => {
       const { client, api } = buildClient({ key: 'old' });
       api.set.mockResolvedValue('new');
 
-      const updates = firstValueFrom(client.getUpdate$());
+      const emissions: unknown[] = [];
+      client.get$<string>('key').subscribe((v) => emissions.push(v));
 
       await client.set('key', 'new');
 
       expect(client.peek('key')).toBe('new');
-      await expect(updates).resolves.toEqual({
-        type: 'set',
-        key: 'key',
-        newValue: 'new',
-        oldValue: 'old',
-      });
+      expect(emissions).toEqual(['old', 'new']);
     });
 
     it('caches the server-validated value rather than the raw input', async () => {
@@ -312,15 +309,16 @@ describe('UserStorageClient', () => {
       expect(client.peek('key')).toBe('trimmed');
     });
 
-    it('update$ emits the server-validated newValue, not the raw input', async () => {
+    it('get$ re-emits the server-validated value, not the raw input', async () => {
       const { client, api } = buildClient({});
       api.set.mockResolvedValue('normalised');
 
-      const updates = firstValueFrom(client.getUpdate$());
+      const emissions: unknown[] = [];
+      client.get$<string>('key').subscribe((v) => emissions.push(v));
 
       await client.set('key', 'raw input');
 
-      await expect(updates).resolves.toEqual(expect.objectContaining({ newValue: 'normalised' }));
+      expect(emissions.at(-1)).toBe('normalised');
     });
 
     it('does not mutate cache or emit when the HTTP call fails, and rejects', async () => {
@@ -336,16 +334,17 @@ describe('UserStorageClient', () => {
   });
 
   describe('remove', () => {
-    it('clears cache and emits on update$ after a successful HTTP call', async () => {
+    it('clears cache and re-emits the default on get$ after a successful HTTP call', async () => {
       const { client, api } = buildClient({ key: 'old' });
       api.remove.mockResolvedValue(undefined);
 
-      const updates = firstValueFrom(client.getUpdate$());
+      const emissions: unknown[] = [];
+      client.get$<string>('key', 'registered-default').subscribe((v) => emissions.push(v));
 
       await client.remove('key');
 
       expect(client.peek('key')).toBeUndefined();
-      await expect(updates).resolves.toEqual({ type: 'remove', key: 'key', oldValue: 'old' });
+      expect(emissions).toEqual(['old', 'registered-default']);
     });
 
     it('rejects and emits on getHttpError$ when the HTTP call fails', async () => {
@@ -472,16 +471,17 @@ describe('UserStorageClient', () => {
   });
 
   describe('done$', () => {
-    it('completes update$ and getHttpError$ when done$ completes', async () => {
-      const { client, done$ } = buildClient({});
+    it('completes getHttpError$ and every get$ subscription when done$ completes', async () => {
+      const { client, done$ } = buildClient({ key: 'seed' });
 
-      const update$ = client.getUpdate$();
       const errors$ = client.getHttpError$();
+      const completed = jest.fn();
+      client.get$<string>('key').subscribe({ complete: completed });
 
       done$.complete();
 
-      await expect(lastValueFrom(update$, { defaultValue: 'done' })).resolves.toBe('done');
       await expect(lastValueFrom(errors$, { defaultValue: 'done' })).resolves.toBe('done');
+      expect(completed).toHaveBeenCalled();
     });
   });
 });

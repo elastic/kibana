@@ -10,28 +10,14 @@
 import type { Observable } from 'rxjs';
 
 /**
- * An update emission published when a stored value changes.
- *
- * Use the `type` discriminant to distinguish a value write (`'set'`) from a
- * user-override removal (`'remove'`). The `'remove'` variant has no `newValue`
- * because the effective value reverts to the registered default — callers
- * should read the post-removal state via `get()` if needed.
- *
- * @public
- */
-export type UserStorageUpdate<T = unknown> =
-  | { type: 'set'; key: string; newValue: T; oldValue: T | undefined }
-  | { type: 'remove'; key: string; oldValue: T | undefined };
-
-/**
  * Browser-side user storage client, backed by an in-memory cache that is
  * seeded from preloaded (server-injected) metadata at first paint and
  * refreshed by `set` / `remove` after the corresponding HTTP write completes.
  *
  * `peek` is the only purely synchronous read (cache-only, no side effects).
- * `get`, `get$`, and `update` may trigger a lazy HTTP fetch for keys that were
- * not preloaded; `get` and `update` are `Promise`-based so they can await that
- * fetch, while `get$` surfaces it reactively.
+ * `get` and `get$` may trigger a lazy HTTP fetch for keys that were not
+ * preloaded; `get` is `Promise`-based so it can await that fetch, while `get$`
+ * surfaces it reactively.
  *
  * Distinct from the server-side `IUserStorageClient` (in
  * `@kbn/core-user-storage-common`), which is fully Promise-based for every
@@ -75,7 +61,7 @@ export interface IUserStorageClient {
    * already-triggered) lazy HTTP fetch and resolves once it completes. Rejects
    * if the fetch fails — callers should not build subsequent writes on a failed
    * read. Use this (not `peek`) as the read half of any read-modify-write
-   * sequence, or prefer {@link update} which does this for you.
+   * sequence — see {@link set}.
    */
   get<T = unknown>(key: string): Promise<T | undefined>;
   get<T = unknown>(key: string, defaultValue: T): Promise<T>;
@@ -118,12 +104,6 @@ export interface IUserStorageClient {
    * Rejects without issuing a request when `isAvailable()` is `false`.
    */
   remove(key: string): Promise<void>;
-
-  /**
-   * Stream of every successful key update (write or remove).
-   * Does **not** emit for lazy-fetch cache hydrations.
-   */
-  getUpdate$(): Observable<UserStorageUpdate>;
 
   /**
    * Stream of HTTP errors raised by `set`, `remove`, or lazy-fetch calls.

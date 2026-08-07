@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs';
 
-import type { IUserStorageClient, UserStorageUpdate } from '@kbn/core-user-storage-browser';
+import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 import type { UserStorageApi } from './user_storage_api';
 
 export interface UserStorageClientParams {
@@ -35,7 +35,7 @@ export interface UserStorageClientParams {
  * - Fetch failures go to `getHttpError$` and leave the cache absent so the next
  *   read retries. `get()` rejects; `get$` neither errors nor completes, so a
  *   subscriber stays on its default until a later read succeeds.
- * - `getUpdate$()` emits for `set`/`remove` only, never for lazy hydration.
+ * - `get$` re-emits on `set`/`remove` and on lazy hydration.
  * - When `isAvailable()` is `false` nothing is injected and every route answers
  *   403, so no request is made: reads resolve to `defaultValue`, writes reject.
  *
@@ -45,7 +45,8 @@ export class UserStorageClient implements IUserStorageClient {
   private cache: Record<string, unknown>;
   private readonly api: UserStorageApi;
   private readonly available: boolean;
-  private readonly update$ = new Subject<UserStorageUpdate>();
+  /** Emits the key of every successful `set`/`remove`, so `get$` re-emits for it. */
+  private readonly writes$ = new Subject<string>();
   private readonly httpErrors$ = new Subject<Error>();
   /** Emits whenever the cache is hydrated by a lazy fetch. */
   private readonly loaded$ = new Subject<{ key: string; value: unknown }>();
@@ -59,7 +60,7 @@ export class UserStorageClient implements IUserStorageClient {
 
     done$.subscribe({
       complete: () => {
-        this.update$.complete();
+        this.writes$.complete();
         this.httpErrors$.complete();
         this.loaded$.complete();
       },
@@ -102,9 +103,9 @@ export class UserStorageClient implements IUserStorageClient {
       }),
       // Merge explicit writes and lazy-fetch hydrations for this key.
       new Observable<T | undefined>((subscriber) => {
-        const writeSub = this.update$
+        const writeSub = this.writes$
           .pipe(
-            filter((u) => u.key === key),
+            filter((written) => written === key),
             map(() => getCurrent())
           )
           .subscribe(subscriber);
@@ -137,11 +138,10 @@ export class UserStorageClient implements IUserStorageClient {
       throw err;
     }
 
-    const oldValue = this.cache[key];
     this.cache[key] = stored;
     // Invalidate any in-flight GET so its stale outcome can't clobber this write.
     this.fetchesInFlight.delete(key);
-    this.update$.next({ type: 'set', key, newValue: stored, oldValue });
+    this.writes$.next(key);
     return stored;
   }
 
@@ -156,15 +156,10 @@ export class UserStorageClient implements IUserStorageClient {
       throw err;
     }
 
-    const oldValue = this.cache[key];
     delete this.cache[key];
     // Invalidate any in-flight GET so a stale outcome can't resurrect the value.
     this.fetchesInFlight.delete(key);
-    this.update$.next({ type: 'remove', key, oldValue });
-  }
-
-  public getUpdate$(): Observable<UserStorageUpdate> {
-    return this.update$.asObservable();
+    this.writes$.next(key);
   }
 
   public getHttpError$(): Observable<Error> {

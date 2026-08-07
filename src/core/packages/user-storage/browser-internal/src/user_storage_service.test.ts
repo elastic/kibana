@@ -63,13 +63,14 @@ describe('UserStorageService', () => {
     const service = new UserStorageService();
     const client = service.setup(buildDeps());
 
-    const update$ = client.getUpdate$();
     const errors$ = client.getHttpError$();
+    const completed = jest.fn();
+    client.get$('key').subscribe({ complete: completed });
 
     service.stop();
 
-    await expect(lastValueFrom(update$, { defaultValue: 'done' })).resolves.toBe('done');
     await expect(lastValueFrom(errors$, { defaultValue: 'done' })).resolves.toBe('done');
+    expect(completed).toHaveBeenCalled();
   });
 
   it('emits the seeded value as the first observable emission', async () => {
