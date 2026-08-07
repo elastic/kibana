@@ -42,8 +42,6 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   initialMetadata?: MetaData;
   initialEditStep?: RuleFormStepId;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
-  /** The id of the rule template this rule is being created from, when known. Telemetry only. */
-  templateId?: string;
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -69,7 +67,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     initialMetadata,
     initialEditStep,
     focusTrapProps,
-    templateId,
   } = props;
 
   const {
@@ -153,7 +150,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           initialValues={initialValues}
           initialMetadata={initialMetadata}
           focusTrapProps={focusTrapProps}
-          templateId={templateId}
         />
       );
     }
@@ -205,7 +201,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
-    templateId,
   ]);
 
   return (

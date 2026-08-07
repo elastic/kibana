@@ -26,12 +26,10 @@ export const transformCreateRuleBody: RewriteResponseCase<CreateRuleBody> = ({
   actions = [],
   alertDelay,
   flapping,
-  templateId,
   ...res
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  ...(templateId ? { template_id: templateId } : {}),
   actions: actions.map((action) => {
     const { id, params } = action;
     return {

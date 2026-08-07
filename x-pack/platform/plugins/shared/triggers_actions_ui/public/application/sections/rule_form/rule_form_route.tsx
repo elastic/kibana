@@ -112,7 +112,6 @@ export const RuleFormRoute = () => {
         initialValues={ruleTemplate}
         id={id}
         ruleTypeId={ruleTypeId}
-        templateId={templateId}
         onCancel={() => {
           history.push(returnPath || '/');
         }}
