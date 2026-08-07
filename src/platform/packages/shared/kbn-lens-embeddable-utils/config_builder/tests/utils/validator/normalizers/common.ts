@@ -13,7 +13,6 @@ import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/colori
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
-  AvgIndexPatternColumn,
   CountIndexPatternColumn,
   CardinalityIndexPatternColumn,
   DataType,
@@ -21,11 +20,7 @@ import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
   LastValueIndexPatternColumn,
-  MaxIndexPatternColumn,
-  MedianIndexPatternColumn,
-  MinIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
-  StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
   TextBasedPersistedState,
@@ -641,42 +636,26 @@ const isEmptyAsNullSupportedColumn = (
   col.operationType === 'sum' ||
   col.operationType === 'unique_count';
 
-// Metric operations without the "Hide zero values" (`emptyAsNull`) option — i.e. the non-`hideZeroOption`
-// field metrics. For these, `emptyAsNull` is a dead param the transform never round-trips.
-type EmptyAsNullUnsupportedColumn =
-  | AvgIndexPatternColumn
-  | MaxIndexPatternColumn
-  | MinIndexPatternColumn
-  | MedianIndexPatternColumn
-  | StandardDeviationIndexPatternColumn
-  | LastValueIndexPatternColumn;
-
-const isEmptyAsNullUnsupportedColumn = (
-  col: GenericIndexPatternColumn
-): col is EmptyAsNullUnsupportedColumn =>
-  col.operationType === 'average' ||
-  col.operationType === 'max' ||
-  col.operationType === 'min' ||
-  col.operationType === 'median' ||
-  col.operationType === 'standard_deviation' ||
-  col.operationType === 'last_value';
-
+/**
+ * Canonicalize `emptyAsNull` on the ORIGINAL side.
+ *
+ * - `count`/`sum`/`unique_count` (`hideZeroOption`): real render param; transform round-trips as
+ *   `Boolean(...)`, so a missing value becomes an explicit `false`.
+ * - Every other operation: dead residue (only reaches the aggregation for `hideZeroOption` ops).
+ */
 const normalizeEmptyAsNull = (col: GenericIndexPatternColumn): void => {
-  // `count`/`sum`/`unique_count`: `emptyAsNull` is a real render param (`hideZeroOption`). The transform
-  // round-trips it as `Boolean(...)` in both directions, so a missing value is injected as an explicit
-  // `false`.
   if (isEmptyAsNullSupportedColumn(col)) {
     col.params = { ...col.params, emptyAsNull: Boolean(col.params?.emptyAsNull) };
     return;
   }
 
-  // `average`/`max`/`min`/`median`/`standard_deviation`/`last_value`: `emptyAsNull` is a dead param — it
-  // only reaches the aggregation for `hideZeroOption` ops, so the transform neither reads nor emits it
-  if (isEmptyAsNullUnsupportedColumn(col) && col.params && 'emptyAsNull' in col.params) {
-    delete col.params.emptyAsNull;
-    if (Object.keys(col.params).length === 0) {
-      delete col.params;
-    }
+  if (!('params' in col) || !col.params || !('emptyAsNull' in col.params)) {
+    return;
+  }
+
+  delete col.params.emptyAsNull;
+  if (Object.keys(col.params).length === 0) {
+    delete col.params;
   }
 };
 
