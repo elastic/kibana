@@ -31,6 +31,21 @@
       ]
     },
     {
+      "id": "ml",
+      "name": "ML Agent Builder Skills",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "ml",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:ml"
+      ]
+    },
+    {
       "id": "alerting-v2",
       "name": "Alerting V2",
       "slackChannel": "#rna-program-notify",
@@ -151,6 +166,35 @@
       ]
     },
     {
+      "id": "security-persona-matrix",
+      "name": "Security Persona Matrix",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix"
+      ],
+      "serverConfigSet": "evals_security_persona_matrix"
+    },
+    {
+      "id": "security-persona-matrix-attack-discovery",
+      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix-attack-discovery"
+      ],
+      "serverConfigSet": "evals_tracing"
+    },
+    {
       "id": "endpoint",
       "name": "Endpoint (Elastic Defend)",
       "slackChannel": "#security-defend-workflows-tests",
@@ -201,7 +245,8 @@
       ],
       "ciLabels": [
         "evals:attack-discovery"
-      ]
+      ],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "lead-generation",
@@ -320,8 +365,13 @@
       "name": "Alert Analysis Workflow",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
-      "tags": ["security", "alert-analysis"],
-      "ciLabels": ["evals:security-alert-analysis-workflow"]
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow"
+      ]
     },
     {
       "id": "skill-selection-benchmark",
