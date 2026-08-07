@@ -36,8 +36,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improve the case view, cases list, and field library with a sticky attributes panel, collapsible activity and attachment sections, and clearer cases list filters [#282197]({{kib-pull}}282197).
 * Store assignee usernames, full names, and email addresses on cases so case analytics dashboards can show assignee details without an extra lookup. Available by default in traditional deployments [#281579]({{kib-pull}}281579).
 
-**Connectivity**:
-* Add a `[Elastic Cloud Trial]` prefix to email subjects sent from Elastic Cloud trial deployments through the built-in email connector, so trial traffic can be identified separately [#276705]({{kib-pull}}276705).
 
 **Data management**:
 * Add an **Import from another stream** flow in the Data lifecycle tab to reuse another stream's lifecycle configuration [#275948]({{kib-pull}}275948).
@@ -87,14 +85,14 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.1-f8f63005 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
 * Fix Lens metric trendline breakdown ordering to rank by the trendline's own metric instead of falling back to alphabetical order [#283159]({{kib-pull}}283159).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.1-f8f63005 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-* Fix Lens as-code histogram granularity to preserve the saved bar count instead of resetting to **Auto** above 7 bars. The effective ceiling remains the `histogram:maxBars` advanced setting [#283058]({{kib-pull}}283058).
+* Fix histogram granularity to preserve the saved bar count instead of resetting to **Auto** above 7 bars. The effective ceiling remains the `histogram:maxBars` advanced setting [#283058]({{kib-pull}}283058).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.1-f8f63005 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-* Fix Lens as-code duration format to preserve decimal and compact settings on round-trip, except when using the automatic (`auto-approximate`) duration format [#282815]({{kib-pull}}282815).
-* Fix Lens as-code terms formatting to preserve multi-field grouping and column format on round-trip [#282760]({{kib-pull}}282760).
-* Fix Lens as-code terms include and exclude values to preserve numbers instead of converting them to strings [#282752]({{kib-pull}}282752).
+* Fix duration format to preserve decimal and compact settings on round-trip, except when using the automatic (`auto-approximate`) duration format [#282815]({{kib-pull}}282815).
+* Fix terms formatting to preserve multi-field grouping and column format on round-trip [#282760]({{kib-pull}}282760).
+* Fix terms include and exclude values to preserve numbers instead of converting them to strings [#282752]({{kib-pull}}282752).
 * Fix a Lens panel failing to load after duplicating it and then modifying its ad hoc data view, caused by colliding data view IDs [#281786]({{kib-pull}}281786).
 * Fix a Visualization API error when reading back an XY chart with an annotation layer backed by an ad hoc data view [#281079]({{kib-pull}}281079).
-* Fix Lens as-code dropping the custom name of an ad hoc, form-based data view on round-trip [#280546]({{kib-pull}}280546).
+* Fix the Visualizations API dropping the custom name of an ad hoc, form-based data view on round-trip [#280546]({{kib-pull}}280546).
 * Fix Metric chart values colored by a value outside the configured range to use the default text color instead of blending into the background [#280816]({{kib-pull}}280816).
 * Disable **Fast mode** for Basic and Platinum licenses; approximate results in Discover and Dashboards require an Enterprise license [#279903]({{kib-pull}}279903).
 * Fix the dashboards listing page failing to load when the `savedObjects:listingLimit` advanced setting exceeds 1,000 [#282100]({{kib-pull}}282100).
