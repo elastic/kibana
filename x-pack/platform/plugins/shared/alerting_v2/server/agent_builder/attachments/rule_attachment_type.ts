@@ -101,12 +101,15 @@ export const createRuleAttachmentType = ({
       }
       return false;
     } catch (error) {
-      logger.warn({
-        message: 'Failed to check rule attachment staleness',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED,
-        labels: { rule_id: attachment.origin, space_id: context.spaceId },
-        error,
-      });
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to check rule attachment staleness',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED,
+          labels: { rule_id: attachment.origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return false;
     }
   },

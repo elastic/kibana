@@ -109,12 +109,15 @@ export const createActionPolicyAttachmentType = ({
       }
       return false;
     } catch (error) {
-      logger.warn({
-        message: 'Failed to check action policy attachment staleness',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED,
-        labels: { policy_id: attachment.origin, space_id: context.spaceId },
-        error,
-      });
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to check action policy attachment staleness',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED,
+          labels: { policy_id: attachment.origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return false;
     }
   },

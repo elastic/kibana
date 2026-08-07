@@ -112,8 +112,11 @@ Use operations[] to:
       }
 
       logger.debug({
-        message: () =>
-          `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`,
+        message: () => (isNew ? 'Rule attachment created' : 'Rule attachment updated'),
+        labels: {
+          space_id: spaceId,
+          ...(ruleId != null ? { rule_id: ruleId } : {}),
+        },
       });
 
       return {
@@ -139,7 +142,7 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.debug({ message: () => `manage_rule tool: invalid input — ${message}` });
+        logger.debug({ message: () => `Invalid manage_rule input: ${message}` });
       } else {
         logger.warn({
           message: 'Failed to manage rule',

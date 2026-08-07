@@ -215,6 +215,18 @@ describe('createRuleAttachmentType', () => {
       expect(result).toBe(false);
     });
 
+    it('returns false without logging when getRule returns 404', async () => {
+      getRule.mockRejectedValueOnce(Boom.notFound('not found'));
+
+      const result = await definition.isStale!(
+        buildVersionedAttachment(),
+        createResolveContext()
+      );
+
+      expect(result).toBe(false);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
     it('returns false and logs a warning when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('boom'));
 

@@ -134,7 +134,11 @@ Use operations[] to:
 
       logger.debug({
         message: () =>
-          `Action policy attachment ${isNew ? 'created' : 'updated'}: "${updatedData.name}"`,
+          isNew ? 'Action policy attachment created' : 'Action policy attachment updated',
+        labels: {
+          space_id: spaceId,
+          ...(policyId != null ? { policy_id: policyId } : {}),
+        },
       });
 
       return {
@@ -161,7 +165,7 @@ Use operations[] to:
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof ActionPolicyOperationValidationError) {
         logger.debug({
-          message: () => `manage_action_policy tool: invalid input — ${message}`,
+          message: () => `Invalid manage_action_policy input: ${message}`,
         });
       } else {
         logger.warn({

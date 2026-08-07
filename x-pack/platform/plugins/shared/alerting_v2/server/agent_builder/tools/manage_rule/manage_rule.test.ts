@@ -304,7 +304,7 @@ describe('manageRuleTool', () => {
         message: expect.any(Function),
       });
       const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-      expect(debugMessage()).toContain('manage_rule tool: invalid input');
+      expect(debugMessage()).toContain('Invalid manage_rule input');
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });
