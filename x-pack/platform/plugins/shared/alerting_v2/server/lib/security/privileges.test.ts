@@ -57,6 +57,19 @@ describe('registerFeaturePrivileges', () => {
     expect(rulesFeature.privileges?.read.alerts).toBeUndefined();
   });
 
+  it('grants read access to rule templates on the rules feature (catalog SOs)', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.privileges?.all.savedObject).toEqual({
+      all: ['alerting_rule'],
+      read: ['alerting_rule_template'],
+    });
+    expect(rulesFeature.privileges?.read.savedObject).toEqual({
+      all: [],
+      read: ['alerting_rule', 'alerting_rule_template'],
+    });
+  });
+
   describe('management app gating', () => {
     // Regression: without these declarations Kibana Core treats each
     // alerting_v2 management app as unowned/public within Management, which
