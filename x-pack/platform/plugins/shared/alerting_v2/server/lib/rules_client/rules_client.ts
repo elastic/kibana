@@ -9,6 +9,8 @@ import Boom from '@hapi/boom';
 import {
   BULK_FILTER_MAX_RULES,
   createRuleDataSchema,
+  isSignalQueryBreachOnly,
+  isSignalUsingStandaloneFormat,
   isStateTransitionAllowed,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -363,6 +365,19 @@ export class RulesClient {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
+
+    if (!isSignalUsingStandaloneFormat(nextAttrs)) {
+      throw Boom.badRequest('kind "signal" requires query.format "standalone".', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_SIGNAL_RULE,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
+    }
+    if (!isSignalQueryBreachOnly(nextAttrs)) {
+      throw Boom.badRequest('Signal rules cannot set recovery_strategy or no_data_strategy.', {
+        code: ALERTING_V2_ERROR_CODES.INVALID_SIGNAL_RULE,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
+    }
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,
