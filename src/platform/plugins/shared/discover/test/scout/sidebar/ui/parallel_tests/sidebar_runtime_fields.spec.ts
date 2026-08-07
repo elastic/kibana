@@ -8,35 +8,56 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects, DiscoverScoutSpace } from '../fixtures';
 import { spaceTest, tags, testData } from '../fixtures';
 
+type RuntimeFieldSettings = Record<
+  string,
+  {
+    type: 'keyword' | 'long' | 'double' | 'date' | 'ip' | 'boolean' | 'geo_point';
+    script: string;
+  }
+>;
+
 /**
- * Runtime field CRUD needs an ad-hoc data view: Security editor has Discover but
+ * Runtime field UI actions need an ad-hoc data view: Security editor has Discover but
  * not `indexPatterns`, so "Add a field" is hidden on persisted data views.
- * Create the session via API (`data_view_spec`) instead of the data-view UI.
+ * Seed fields via Discover session `data_view_spec.field_settings` (API) instead of the
+ * field-editor UI; keep UI only for relabel / delete / column interactions.
  */
+const openAdHocSessionWithRuntimeFields = async ({
+  discoverScoutSpace,
+  pageObjects,
+  fieldSettings,
+}: {
+  discoverScoutSpace: DiscoverScoutSpace;
+  pageObjects: DiscoverPageObjects;
+  fieldSettings?: RuntimeFieldSettings;
+}): Promise<void> => {
+  const sessionId = await discoverScoutSpace.createDiscoverSession({
+    title: `sidebar-runtime-fields-${discoverScoutSpace.id}`,
+    tabs: [
+      {
+        id: 'main',
+        label: 'Untitled',
+        data_source: {
+          type: 'data_view_spec',
+          index_pattern: testData.DEFAULT_DATA_VIEW,
+          time_field: '@timestamp',
+          ...(fieldSettings ? { field_settings: fieldSettings } : {}),
+        },
+      },
+    ],
+  });
+
+  await pageObjects.discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
+  await pageObjects.discover.waitUntilTabIsLoaded();
+};
+
 spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     await browserAuth.loginAsPrivilegedUser();
-
-    const sessionId = await discoverScoutSpace.createDiscoverSession({
-      title: `sidebar-runtime-fields-${discoverScoutSpace.id}`,
-      tabs: [
-        {
-          id: 'main',
-          label: 'Untitled',
-          data_source: {
-            type: 'data_view_spec',
-            index_pattern: testData.DEFAULT_DATA_VIEW,
-            time_field: '@timestamp',
-          },
-        },
-      ],
-    });
-
-    await pageObjects.discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
-    await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterEach(async ({ discoverScoutSpace }) => {
@@ -44,15 +65,23 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
   });
 
   spaceTest(
-    'supports ad-hoc data views with runtime field create, relabel, and remove',
-    async ({ pageObjects }) => {
+    'supports ad-hoc data views with runtime field relabel and remove',
+    async ({ discoverScoutSpace, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const fieldName = '_bytes-runtimefield';
       const labeledName = '_bytes-runtimefield2';
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
+      await openAdHocSessionWithRuntimeFields({
+        discoverScoutSpace,
+        pageObjects,
+        fieldSettings: {
+          [fieldName]: {
+            type: 'keyword',
+            script: 'emit((doc["bytes"].value * 2).toString())',
+          },
+        },
+      });
 
-      await discover.createRuntimeField(fieldName, `emit((doc["bytes"].value * 2).toString())`);
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
       await unifiedFieldList.searchField(fieldName);
       await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
@@ -76,12 +105,22 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'keeps the sidebar rendered when document retrieval fails',
-    async ({ page, pageObjects }) => {
+    async ({ discoverScoutSpace, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const invalidField = '_invalid-runtimefield';
 
       // Curly quotes make this an invalid Painless script (matches FTR).
-      await discover.createRuntimeField(invalidField, 'emit(\u2018\u2019);');
+      await openAdHocSessionWithRuntimeFields({
+        discoverScoutSpace,
+        pageObjects,
+        fieldSettings: {
+          [invalidField]: {
+            type: 'keyword',
+            script: 'emit(\u2018\u2019);',
+          },
+        },
+      });
+
       await expect(discover.getErrorCalloutTitle()).toBeVisible();
 
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
@@ -101,13 +140,21 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'removes the data grid column after a runtime field is deleted',
-    async ({ pageObjects }) => {
+    async ({ discoverScoutSpace, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const newField = '_test_field_and_column_removal';
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
+      await openAdHocSessionWithRuntimeFields({
+        discoverScoutSpace,
+        pageObjects,
+        fieldSettings: {
+          [newField]: {
+            type: 'keyword',
+            script: 'emit("hi there")',
+          },
+        },
+      });
 
-      await discover.createRuntimeField(newField, 'emit("hi there")');
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
 
       expect(await unifiedFieldList.isFieldSelected(newField)).toBe(false);
