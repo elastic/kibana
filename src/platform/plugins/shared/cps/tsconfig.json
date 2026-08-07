@@ -17,7 +17,6 @@
     "@kbn/cps-utils",
     "@kbn/es-query",
     "@kbn/cps-common",
-    "@kbn/core-security-server",
   ],
   "exclude": [
     "target/**/*",
