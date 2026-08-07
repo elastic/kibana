@@ -18,8 +18,11 @@ import { RULE_WORKFLOW_TRIGGERS, RuleCreatedTriggerId } from './triggers';
 
 const ruleCreatedEvent: RuleCreatedEvent = {
   type: RULE_CREATED_EVENT_TYPE,
-  payload: { rule: { ruleId: 'rule-1', spaceId: 'my-space' } },
+  payload: { ruleId: 'rule-1', spaceId: 'my-space', correlationId: 'corr-1' },
 };
+
+// Workflows only ever see the projected rule reference, never the full payload.
+const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space' } };
 
 describe('RuleWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
@@ -74,7 +77,7 @@ describe('RuleWorkflowSubscriber', () => {
       // the same credentials/space that changed the rule (RNA #504 requirement 3).
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(RuleCreatedTriggerId, ruleCreatedEvent.payload);
+      expect(mockEmitEvent).toHaveBeenCalledWith(RuleCreatedTriggerId, projectedWorkflowPayload);
     });
 
     it('catches WorkflowService failures, logs them, and does not let the rejection escape the handler', async () => {

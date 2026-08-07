@@ -60,7 +60,7 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significant_events"
+      "significantEvents"
     ],
     "requiredBundles": [
       "aiops",
@@ -71,7 +71,7 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "significant_events",
+      "significantEvents",
       "stackAlerts",
       "observabilityAgentBuilder"
     ],

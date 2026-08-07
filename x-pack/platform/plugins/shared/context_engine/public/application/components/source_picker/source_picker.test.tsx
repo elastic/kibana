@@ -7,6 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -37,10 +38,19 @@ const CONNECTORS = [
   { id: 'connector-slack', name: 'Slack', connector_type_id: '.slack' },
 ];
 
+const SUPPORTED_TYPES = [
+  { id: '.google_drive', name: 'Google Drive', supported_feature_ids: ['contextEngine'] },
+  { id: '.github', name: 'GitHub', supported_feature_ids: ['contextEngine'] },
+];
+
 const createServices = () => {
   const services = coreMock.createStart();
-  services.http.get.mockResolvedValue(CONNECTORS);
-  return services;
+  (services.http.get as jest.Mock).mockImplementation((path: string) => {
+    if (path === '/api/actions/connector_types') return Promise.resolve(SUPPORTED_TYPES);
+    if (path === '/api/actions/connectors') return Promise.resolve(CONNECTORS);
+    return Promise.resolve(undefined);
+  });
+  return { ...services, triggersActionsUi: triggersActionsUiMock.createStart() };
 };
 
 const Harness = ({ initialSources = [] }: { initialSources?: SelectedSource[] }) => {

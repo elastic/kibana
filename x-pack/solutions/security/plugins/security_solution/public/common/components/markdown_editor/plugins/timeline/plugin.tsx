@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import type { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { EuiCodeBlock, EuiModalBody, EuiModalHeader } from '@elastic/eui';
+import {
+  CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+} from '@kbn/cases-plugin/common';
 
 import { SelectTimelineModalBody } from '../../../../../cases/attachments/timeline/select_timeline_modal_body';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';
+import { useKibana } from '../../../../lib/kibana';
 
 import { ID } from './constants';
 import * as i18n from './translations';
@@ -23,6 +28,16 @@ interface TimelineEditorProps {
 
 const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover, onInsert }) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
+  const { analytics } = useKibana().services;
+
+  // Reports when the Timeline plugin is opened via the markdown toolbar. The timeline markdown
+  // plugin is injected exclusively by Security Solution, so the owner is always securitySolution.
+  useEffect(() => {
+    analytics.reportEvent(CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE, {
+      owner: SECURITY_SOLUTION_OWNER,
+      plugin_type: 'timeline',
+    });
+  }, [analytics]);
 
   const handleTimelineChange = useCallback(
     (timelineTitle: string, timelineId: string | null) => {

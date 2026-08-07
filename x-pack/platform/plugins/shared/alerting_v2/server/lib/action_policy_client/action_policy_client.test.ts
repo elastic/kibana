@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
@@ -25,6 +25,7 @@ import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
 jest.mock('@kbn/eval-kql', () => ({
@@ -42,6 +43,7 @@ describe('ActionPolicyClient', () => {
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
   let loggerService: LoggerService;
+  let mockLogger: jest.Mocked<Logger>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
 
@@ -63,7 +65,7 @@ describe('ActionPolicyClient', () => {
     });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
-    ({ loggerService } = createLoggerService());
+    ({ loggerService, mockLogger } = createLoggerService());
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
       if (id === 'policy-id-update-key-1') return { apiKey: 'old-api-key', createdByUser: false };
@@ -135,11 +137,9 @@ describe('ActionPolicyClient', () => {
           description: 'my-policy description',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          auth: {
-            apiKey: 'encoded-es-api-key',
-            owner: 'test-user',
-            createdByUser: false,
-          },
+          apiKey: 'encoded-es-api-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -201,11 +201,9 @@ describe('ActionPolicyClient', () => {
           description: 'my-policy description',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
-          auth: {
-            apiKey: 'encoded-es-api-key',
-            owner: 'test-user',
-            createdByUser: false,
-          },
+          apiKey: 'encoded-es-api-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
           createdBy: 'elastic_profile_uid',
           updatedBy: 'elastic_profile_uid',
         }),
@@ -342,11 +340,9 @@ describe('ActionPolicyClient', () => {
         description: 'test-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        auth: {
-          apiKey: 'encrypted-api-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
+        apiKey: 'encrypted-api-key',
+        apiKeyOwner: 'test-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -395,11 +391,9 @@ describe('ActionPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         throttle: { strategy: 'on_status_change', interval: '5m' }, // stale pre-fix state
-        auth: {
-          apiKey: 'encrypted-api-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
+        apiKey: 'encrypted-api-key',
+        apiKeyOwner: 'test-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -426,11 +420,9 @@ describe('ActionPolicyClient', () => {
         description: 'policy-two description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
-        auth: {
-          apiKey: 'secret-key-2',
-          owner: 'user-2',
-          createdByUser: false,
-        },
+        apiKey: 'secret-key-2',
+        apiKeyOwner: 'user-2',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -441,11 +433,9 @@ describe('ActionPolicyClient', () => {
         description: 'policy-one description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
-        auth: {
-          apiKey: 'secret-key-1',
-          owner: 'user-1',
-          createdByUser: false,
-        },
+        apiKey: 'secret-key-1',
+        apiKeyOwner: 'user-1',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -493,11 +483,9 @@ describe('ActionPolicyClient', () => {
         description: 'policy-found-one description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
-        auth: {
-          apiKey: 'key-1',
-          owner: 'user-1',
-          createdByUser: false,
-        },
+        apiKey: 'key-1',
+        apiKeyOwner: 'user-1',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -508,11 +496,9 @@ describe('ActionPolicyClient', () => {
         description: 'policy-found-three description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
-        auth: {
-          apiKey: 'key-3',
-          owner: 'user-3',
-          createdByUser: false,
-        },
+        apiKey: 'key-3',
+        apiKeyOwner: 'user-3',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -565,11 +551,9 @@ describe('ActionPolicyClient', () => {
         description: 'policy-valid description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
-        auth: {
-          apiKey: 'valid-key',
-          owner: 'valid-user',
-          createdByUser: false,
-        },
+        apiKey: 'valid-key',
+        apiKeyOwner: 'valid-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -637,11 +621,9 @@ describe('ActionPolicyClient', () => {
       description: 'find-policy description',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'find-workflow' }],
-      auth: {
-        apiKey: 'secret-find-key',
-        owner: 'find-user',
-        createdByUser: false,
-      },
+      apiKey: 'secret-find-key',
+      apiKeyOwner: 'find-user',
+      apiKeyCreatedByUser: false,
       createdBy: 'elastic_profile_uid',
       createdAt: '2025-01-01T00:00:00.000Z',
       updatedBy: 'elastic_profile_uid',
@@ -851,11 +833,9 @@ describe('ActionPolicyClient', () => {
       const secondAttributes: ActionPolicySavedObjectAttributes = {
         ...policyAttributes,
         name: 'find-policy-2',
-        auth: {
-          apiKey: 'another-secret-key',
-          owner: 'another-user',
-          createdByUser: true,
-        },
+        apiKey: 'another-secret-key',
+        apiKeyOwner: 'another-user',
+        apiKeyCreatedByUser: true,
       };
 
       mockSavedObjectsClient.find.mockResolvedValueOnce(
@@ -895,11 +875,9 @@ describe('ActionPolicyClient', () => {
         matcher: 'event.severity: critical',
         groupBy: ['host.name'],
         throttle: { interval: '1h' },
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -959,11 +937,9 @@ describe('ActionPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         groupingMode: 'per_episode',
         throttle: { strategy: 'per_status_interval', interval: '10m' },
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1011,11 +987,9 @@ describe('ActionPolicyClient', () => {
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         groupingMode: 'per_episode',
         throttle: { strategy: 'on_status_change', interval: null },
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1061,11 +1035,9 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1103,11 +1075,9 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
-          auth: {
-            apiKey: 'encoded-es-api-key',
-            owner: 'test-user',
-            createdByUser: false,
-          },
+          apiKey: 'encoded-es-api-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
           createdBy: 'creator_profile_uid',
@@ -1143,11 +1113,9 @@ describe('ActionPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         tags: ['production', 'critical'],
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1190,11 +1158,9 @@ describe('ActionPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'wf-1' }],
         tags: ['production'],
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1236,11 +1202,9 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: true,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: true,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1265,7 +1229,9 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-update-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
-          auth: { apiKey: 'old-api-key', createdByUser: true, owner: 'test-user' },
+          apiKey: 'old-api-key',
+          apiKeyCreatedByUser: true,
+          apiKeyOwner: 'test-user',
         },
         references: [],
       });
@@ -1287,11 +1253,9 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1310,7 +1274,9 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-update-throw',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
-          auth: { apiKey: 'old-api-key', createdByUser: false, owner: 'test-user' },
+          apiKey: 'old-api-key',
+          apiKeyCreatedByUser: false,
+          apiKeyOwner: 'test-user',
         },
         references: [],
       });
@@ -1334,10 +1300,8 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        auth: {
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1362,7 +1326,8 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-update-no-key',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
-          auth: { createdByUser: false, owner: 'test-user' },
+          apiKeyCreatedByUser: false,
+          apiKeyOwner: 'test-user',
         },
         references: [],
       });
@@ -1416,11 +1381,9 @@ describe('ActionPolicyClient', () => {
         description: 'original-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'creator_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'updater_profile_uid',
@@ -1491,11 +1454,9 @@ describe('ActionPolicyClient', () => {
           expect.objectContaining({
             name: 'upsert-policy',
             enabled: true,
-            auth: {
-              apiKey: 'encoded-es-api-key',
-              owner: 'test-user',
-              createdByUser: false,
-            },
+            apiKey: 'encoded-es-api-key',
+            apiKeyOwner: 'test-user',
+            apiKeyCreatedByUser: false,
             createdBy: 'elastic_profile_uid',
             createdAt: '2025-01-01T00:00:00.000Z',
             updatedBy: 'elastic_profile_uid',
@@ -1545,11 +1506,9 @@ describe('ActionPolicyClient', () => {
         matcher: 'env: production',
         groupBy: ['host.name'],
         snoozedUntil: '2099-01-01T00:00:00.000Z',
-        auth: {
-          apiKey: 'old-api-key',
-          owner: 'old-user',
-          createdByUser: false,
-        },
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'previous_creator_uid',
         createdAt: '2024-06-01T00:00:00.000Z',
         updatedBy: 'previous_updater_uid',
@@ -1608,11 +1567,9 @@ describe('ActionPolicyClient', () => {
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
             // API key is the freshly minted one.
-            auth: {
-              apiKey: 'encoded-es-api-key',
-              owner: 'test-user',
-              createdByUser: false,
-            },
+            apiKey: 'encoded-es-api-key',
+            apiKeyOwner: 'test-user',
+            apiKeyCreatedByUser: false,
           }),
           { version: 'WzEsMV0=' }
         );
@@ -1678,11 +1635,9 @@ describe('ActionPolicyClient', () => {
       description: 'existing-policy description',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'existing-workflow' }],
-      auth: {
-        apiKey: 'old-api-key',
-        owner: 'old-user',
-        createdByUser: false,
-      },
+      apiKey: 'old-api-key',
+      apiKeyOwner: 'old-user',
+      apiKeyCreatedByUser: false,
       createdBy: 'creator_profile_uid',
       createdAt: '2024-12-01T00:00:00.000Z',
       updatedBy: 'updater_profile_uid',
@@ -1706,11 +1661,9 @@ describe('ActionPolicyClient', () => {
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-update-key-1',
         expect.objectContaining({
-          auth: {
-            apiKey: 'encoded-es-api-key',
-            owner: 'test-user',
-            createdByUser: false,
-          },
+          apiKey: 'encoded-es-api-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         }),
@@ -1735,11 +1688,9 @@ describe('ActionPolicyClient', () => {
         version: 'WzEsMV0=',
         attributes: {
           ...existingAttributes,
-          auth: {
-            apiKey: 'user-created-key',
-            owner: 'old-user',
-            createdByUser: true,
-          },
+          apiKey: 'user-created-key',
+          apiKeyOwner: 'old-user',
+          apiKeyCreatedByUser: true,
         },
       });
 
@@ -1814,11 +1765,9 @@ describe('ActionPolicyClient', () => {
       description: 'snoozed-policy description',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      auth: {
-        apiKey: 'some-key',
-        owner: 'test-user',
-        createdByUser: false,
-      },
+      apiKey: 'some-key',
+      apiKeyOwner: 'test-user',
+      apiKeyCreatedByUser: false,
       createdBy: 'elastic_profile_uid',
       createdAt: '2024-12-01T00:00:00.000Z',
       updatedBy: 'elastic_profile_uid',
@@ -1917,11 +1866,9 @@ describe('ActionPolicyClient', () => {
         description: 'active-policy description',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        auth: {
-          apiKey: 'some-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
+        apiKey: 'some-key',
+        apiKeyOwner: 'test-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -1983,11 +1930,9 @@ describe('ActionPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         snoozedUntil: '2025-06-01T12:00:00.000Z',
-        auth: {
-          apiKey: 'some-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
+        apiKey: 'some-key',
+        apiKeyOwner: 'test-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -2321,35 +2266,40 @@ describe('ActionPolicyClient', () => {
       ]);
     });
 
-    it('invalidates API keys for successfully bulk-deleted policies', async () => {
+    /**
+     * Wires the PIT finder to return a decrypted auth block per id so the
+     * bulk-delete path has keys to queue for invalidation.
+     */
+    const mockDecryptedAuthFor = (
+      policies: Array<{ id: string; apiKey: string; createdByUser?: boolean }>
+    ) => {
       const esoClient = mockEncryptedSavedObjects.getClient();
       (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
         {
           async *find() {
             yield {
-              saved_objects: [
-                {
-                  id: 'policy-del-1',
-                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                  attributes: {
-                    auth: { apiKey: 'key-1', createdByUser: false, owner: 'test-user' },
-                  },
-                  references: [],
+              saved_objects: policies.map(({ id, apiKey, createdByUser = false }) => ({
+                id,
+                type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+                attributes: {
+                  apiKey,
+                  apiKeyCreatedByUser: createdByUser,
+                  apiKeyOwner: 'test-user',
                 },
-                {
-                  id: 'policy-del-2',
-                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                  attributes: {
-                    auth: { apiKey: 'key-2', createdByUser: false, owner: 'test-user' },
-                  },
-                  references: [],
-                },
-              ],
+                references: [],
+              })),
             };
           },
           close: jest.fn(),
         }
       );
+    };
+
+    it('invalidates API keys for bulk-deleted policies in a single batched call', async () => {
+      mockDecryptedAuthFor([
+        { id: 'policy-del-1', apiKey: 'key-1' },
+        { id: 'policy-del-2', apiKey: 'key-2' },
+      ]);
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [
           { id: 'policy-del-1', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
@@ -2362,32 +2312,131 @@ describe('ActionPolicyClient', () => {
       });
 
       expect(res).toEqual({ affected_count: 2, errors: [] });
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(2);
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1']);
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-2']);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1', 'key-2']);
+    });
+
+    it('queues API keys for invalidation before deleting the saved objects', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-order', apiKey: 'key-order' }]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-order', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await client.bulkDeleteActionPolicies({ ids: ['policy-del-order'] });
+
+      const invalidationOrder =
+        apiKeyService.markApiKeysForInvalidation.mock.invocationCallOrder[0];
+      const deleteOrder = mockSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0];
+      expect(invalidationOrder).toBeLessThan(deleteOrder);
+    });
+
+    it('leaves a policy in place when its API key cannot be queued for invalidation', async () => {
+      mockDecryptedAuthFor([
+        { id: 'policy-del-ok', apiKey: 'key-ok' },
+        { id: 'policy-del-stuck', apiKey: 'key-stuck' },
+      ]);
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: true },
+        { success: false, message: 'index is read-only' },
+      ]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [{ id: 'policy-del-ok', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
+      });
+
+      const res = await client.bulkDeleteActionPolicies({
+        ids: ['policy-del-ok', 'policy-del-stuck'],
+      });
+
+      // The blocked policy never reaches the delete phase, so its still-valid
+      // API key keeps a saved object referencing it.
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-del-ok' },
+      ]);
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toEqual([
+        {
+          id: 'policy-del-stuck',
+          error: {
+            code: 'API_KEY_INVALIDATION_FAILED',
+            message:
+              'Action policy with id "policy-del-stuck" was not deleted because its API key could not be queued for invalidation: index is read-only',
+          },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Skipped deleting action policy(ies) [policy-del-stuck]'),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+          }),
+        })
+      );
+    });
+
+    it('skips the delete round-trip entirely when every invalidation fails', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-stuck', apiKey: 'key-stuck' }]);
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: false, message: 'index is read-only' },
+      ]);
+
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-stuck'] });
+
+      expect(mockSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toHaveLength(1);
+    });
+
+    it('logs divergence when keys were queued but the delete failed', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-diverged', apiKey: 'key-diverged' }]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'policy-del-diverged',
+            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+            success: false,
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      });
+
+      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-diverged'] });
+
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toEqual([
+        {
+          id: 'policy-del-diverged',
+          error: { code: 'ACTION_POLICY_VERSION_CONFLICT', message: 'version conflict' },
+        },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Queued API key(s) for action policy(ies) [policy-del-diverged] for invalidation but failed to delete them'
+        ),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+          }),
+        })
+      );
+    });
+
+    it('does not log divergence when the delete succeeds', async () => {
+      mockDecryptedAuthFor([{ id: 'policy-del-clean', apiKey: 'key-clean' }]);
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'policy-del-clean', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await client.bulkDeleteActionPolicies({ ids: ['policy-del-clean'] });
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('skips API key invalidation for bulk-deleted policies with createdByUser: true', async () => {
-      const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
-        {
-          async *find() {
-            yield {
-              saved_objects: [
-                {
-                  id: 'policy-del-user',
-                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                  attributes: {
-                    auth: { apiKey: 'user-key', createdByUser: true, owner: 'test-user' },
-                  },
-                  references: [],
-                },
-              ],
-            };
-          },
-          close: jest.fn(),
-        }
-      );
+      mockDecryptedAuthFor([{ id: 'policy-del-user', apiKey: 'user-key', createdByUser: true }]);
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [{ id: 'policy-del-user', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
       });
@@ -2420,7 +2469,9 @@ describe('ActionPolicyClient', () => {
       description: 'existing-policy description',
       enabled: true,
       destinations: [{ type: 'workflow', id: 'existing-workflow' }],
-      auth: { apiKey: 'old-api-key', owner: 'old-user', createdByUser: false },
+      apiKey: 'old-api-key',
+      apiKeyOwner: 'old-user',
+      apiKeyCreatedByUser: false,
       createdBy: 'creator_profile_uid',
       createdAt: '2024-12-01T00:00:00.000Z',
       updatedBy: 'updater_profile_uid',
@@ -2588,11 +2639,9 @@ describe('ActionPolicyClient', () => {
         description: 'policy-to-delete description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
-        auth: {
-          apiKey: 'some-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
+        apiKey: 'some-key',
+        apiKeyOwner: 'test-user',
+        apiKeyCreatedByUser: false,
         createdBy: 'elastic_profile_uid',
         createdAt: '2025-01-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
@@ -2613,6 +2662,88 @@ describe('ActionPolicyClient', () => {
         'policy-id-del-1'
       );
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['some-key']);
+      expect(apiKeyService.markApiKeysForInvalidation.mock.invocationCallOrder[0]).toBeLessThan(
+        mockSavedObjectsClient.delete.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not delete the policy when its API key cannot be queued for invalidation', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-del-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'policy-to-delete',
+          description: '',
+          destinations: [],
+          apiKey: 'some-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
+          createdBy: 'elastic_profile_uid',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      });
+      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
+        { success: false, message: 'index is read-only' },
+      ]);
+
+      await expect(client.deleteActionPolicy({ id: 'policy-id-del-1' })).rejects.toMatchObject({
+        output: { statusCode: 500 },
+        data: {
+          code: 'API_KEY_INVALIDATION_FAILED',
+          details: { action_policy_id: 'policy-id-del-1' },
+        },
+      });
+
+      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Skipped deleting action policy(ies) [policy-id-del-1]'),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+          }),
+        })
+      );
+    });
+
+    it('logs divergence when the key was queued but the delete failed', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-del-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'policy-to-delete',
+          description: '',
+          destinations: [],
+          apiKey: 'some-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
+          createdBy: 'elastic_profile_uid',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      });
+      mockSavedObjectsClient.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(client.deleteActionPolicy({ id: 'policy-id-del-1' })).rejects.toThrow(
+        'delete failed'
+      );
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Queued API key(s) for action policy(ies) [policy-id-del-1] for invalidation but failed to delete them'
+        ),
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+          }),
+        })
+      );
     });
 
     it('throws 404 when action policy is not found', async () => {
@@ -2636,7 +2767,9 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-del-user',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
-          auth: { apiKey: 'user-created-key', createdByUser: true, owner: 'test-user' },
+          apiKey: 'user-created-key',
+          apiKeyCreatedByUser: true,
+          apiKeyOwner: 'test-user',
         },
         references: [],
       });
@@ -2649,7 +2782,9 @@ describe('ActionPolicyClient', () => {
           name: 'user-policy',
           description: '',
           destinations: [],
-          auth: { apiKey: 'user-created-key', owner: 'test-user', createdByUser: true },
+          apiKey: 'user-created-key',
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: true,
           createdBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic_profile_uid',
@@ -2676,7 +2811,8 @@ describe('ActionPolicyClient', () => {
           name: 'policy-no-key',
           description: '',
           destinations: [],
-          auth: { owner: 'test-user', createdByUser: false },
+          apiKeyOwner: 'test-user',
+          apiKeyCreatedByUser: false,
           createdBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedBy: 'elastic_profile_uid',
@@ -2688,7 +2824,8 @@ describe('ActionPolicyClient', () => {
         id: 'policy-id-del-no-key',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
-          auth: { createdByUser: false, owner: 'test-user' },
+          apiKeyCreatedByUser: false,
+          apiKeyOwner: 'test-user',
         },
         references: [],
       });
@@ -2783,7 +2920,9 @@ describe('ActionPolicyClient', () => {
           description: 'original description',
           enabled: true,
           destinations: [{ type: 'workflow', id: 'w' }],
-          auth: { apiKey: 'old-api-key', owner: 'old-user', createdByUser: false },
+          apiKey: 'old-api-key',
+          apiKeyOwner: 'old-user',
+          apiKeyCreatedByUser: false,
           createdBy: 'creator_profile_uid',
           createdByUsername: 'creator',
           createdAt: '2024-12-01T00:00:00.000Z',
@@ -2860,7 +2999,9 @@ describe('ActionPolicyClient', () => {
       enabled: true,
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: null,
-      auth: { apiKey: 'key', owner: 'user', createdByUser: false },
+      apiKey: 'key',
+      apiKeyOwner: 'user',
+      apiKeyCreatedByUser: false,
       createdBy: 'user',
       createdAt: '2025-01-01T00:00:00.000Z',
       updatedBy: 'user',
@@ -2891,7 +3032,7 @@ describe('ActionPolicyClient', () => {
       expect(result.total).toBe(0);
     });
 
-    it('returns global APs for policies with no matcher, along with the space-wide total', async () => {
+    it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
       jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
         id: 'rule-1',
         attributes: ruleAttributes as never,

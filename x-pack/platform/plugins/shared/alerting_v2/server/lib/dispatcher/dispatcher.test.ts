@@ -10,10 +10,8 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../resources/datastreams/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import type {
   ActionPolicySavedObjectAttributes,
   RuleSavedObjectAttributes,
@@ -88,7 +86,9 @@ function mockNpFindAllDecrypted(
           description: `Description for ${id}`,
           enabled: true,
           destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-          auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
+          apiKey: 'test-api-key',
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
           createdBy: null,
           updatedBy: null,
           createdAt: '2026-01-01T00:00:00.000Z',
