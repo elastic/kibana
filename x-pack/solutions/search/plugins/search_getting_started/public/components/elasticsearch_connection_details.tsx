@@ -64,6 +64,7 @@ export const ElasticsearchConnectionDetails = () => {
             <div>
               <EuiButtonEmpty
                 data-test-subj="viewConnectionDetailsLink"
+                size="s"
                 iconType="plugs"
                 iconSide="left"
                 target="_blank"
