@@ -9,7 +9,13 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import isPlainObject from 'lodash/isPlainObject';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import type { VisualizeByValueState } from '@kbn/visualizations-plugin/common';
+import {
+  isVisualizeByReferenceState,
+  isVisualizeByValueState,
+} from '@kbn/visualizations-plugin/common';
 import type {
   PanelTypeMigrationErrorResult,
   PanelTypeMigrationPanel,
@@ -17,13 +23,11 @@ import type {
   PanelTypeMigrationSuccessResult,
 } from '@kbn/embeddable-plugin/server';
 
-type LegacyVisPanelConfig = Record<string, unknown>;
-
 interface LegacyVisualizationSavedObjectAttributes {
   visState?: string;
 }
 
-const getVegaPanelBaseConfig = (sourceConfig: LegacyVisPanelConfig) => {
+const getVegaPanelBaseConfig = (sourceConfig: Record<string, unknown>) => {
   const { title, description, hide_title, hide_border, time_range, drilldowns } = sourceConfig;
 
   return omitUndefined({
@@ -50,21 +54,16 @@ export async function migrateLegacyVegaPanels(
 
   for (const panel of panels) {
     const config = panel.config;
-    if (!isRecord(config)) {
-      continue;
-    }
-
     const byValueResult = getByValueVegaResult(panel.id, config);
     if (byValueResult) {
       results.push(byValueResult);
       continue;
     }
 
-    const savedObjectId = config.savedObjectId;
-    if (typeof savedObjectId === 'string') {
+    if (isVisualizeByReferenceState(config)) {
       byRefCandidates.push({
         panelId: panel.id,
-        savedObjectId,
+        savedObjectId: config.savedObjectId,
         baseConfig: getVegaPanelBaseConfig(config),
       });
     }
@@ -136,11 +135,13 @@ export async function migrateLegacyVegaPanels(
       continue;
     }
 
-    if (!isRecord(visState) || visState.type !== 'vega') {
+    if (!isPlainObject(visState) || (visState as any).type !== 'vega') {
       continue;
     }
 
-    const spec = isRecord(visState.params) ? visState.params.spec : undefined;
+    const spec = isPlainObject((visState as any).params)
+      ? (visState as any).params.spec
+      : undefined;
     if (typeof spec !== 'string') {
       results.push({
         panelId: candidate.panelId,
@@ -163,14 +164,17 @@ export async function migrateLegacyVegaPanels(
 
 function getByValueVegaResult(
   panelId: string,
-  config: LegacyVisPanelConfig
+  config: Record<string, unknown>
 ): PanelTypeMigrationResult | undefined {
-  const savedVis = config.savedVis;
-  if (!isRecord(savedVis) || savedVis.type !== 'vega') {
+  if (!isVisualizeByValueState(config)) {
     return undefined;
   }
 
-  const spec = isRecord(savedVis.params) ? savedVis.params.spec : undefined;
+  if (config.savedVis.type !== 'vega') {
+    return undefined;
+  }
+
+  const spec = getVegaSpecFromSavedVis(config.savedVis);
   if (typeof spec !== 'string') {
     return { panelId, error: new Error('By-value Vega visualization is missing spec') };
   }
@@ -184,14 +188,19 @@ function getByValueVegaResult(
   };
 }
 
+function getVegaSpecFromSavedVis(savedVis: VisualizeByValueState['savedVis']): string | undefined {
+  if (!isPlainObject(savedVis.params)) {
+    return undefined;
+  }
+
+  const spec = (savedVis.params as any).spec;
+  return typeof spec === 'string' ? spec : undefined;
+}
+
 function omitUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
   return Object.fromEntries(
     Object.entries(obj).filter(([, value]) => value !== undefined)
   ) as Partial<T>;
-}
-
-function isRecord(value: unknown): value is Record<string, any> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
 function toError(e: unknown): Error {
