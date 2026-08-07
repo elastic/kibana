@@ -82,8 +82,26 @@ export class DocViewer {
     return this.page.testSubj.locator(`fieldDescription-${fieldName}`);
   }
 
+  /** Inner doc-viewer content. Present only while the flyout is open. */
   getFlyout() {
     return this.page.testSubj.locator('kbnDocViewer');
+  }
+
+  /**
+   * Outer `EuiFlyoutResizable` element wrapping {@link getFlyout}. This is the
+   * element carrying the dialog a11y attributes (`role`, `tabindex`,
+   * `aria-describedby`, `data-no-focus-lock`) and the keyboard handler.
+   */
+  getFlyoutContainer(): Locator {
+    return this.page.testSubj.locator('docViewerFlyout');
+  }
+
+  /**
+   * Visually hidden description announced by screen readers. Only rendered for
+   * the push flyout, where focus is not trapped.
+   */
+  getScreenReaderDescription(): Locator {
+    return this.page.testSubj.locator('unifiedDocViewerScreenReaderDescription');
   }
 
   getTab(tabId: string) {

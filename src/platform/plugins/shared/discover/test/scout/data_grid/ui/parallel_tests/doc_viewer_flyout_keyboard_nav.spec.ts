@@ -50,11 +50,17 @@ spaceTest.describe(
     // fresh context and `doc_view_table` is the first registered tab, so no
     // warm-up is needed here.
 
+    // The flyout takes focus a tick after `kbnDocViewer` becomes visible. Keys
+    // sent before that go to the grid's expand toggle, which sits outside the
+    // flyout and so never reaches its key handler — hence the focus assertion
+    // before the first key press in every test that doesn't click first.
+
     spaceTest('navigates between documents with arrow keys', async ({ page, pageObjects }) => {
       const { docViewer } = pageObjects;
 
       await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
       await expect(docViewer.getNavigationPage(0)).toBeVisible();
+      await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
       await page.keyboard.press('ArrowRight');
       await expect(docViewer.getNavigationPage(1)).toBeVisible();
@@ -76,6 +82,7 @@ spaceTest.describe(
 
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await expect(docViewer.getNavigationPage(0)).toBeVisible();
+        await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(1)).toBeVisible();
@@ -98,6 +105,7 @@ spaceTest.describe(
 
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await expect(docViewer.getNavigationPage(0)).toBeVisible();
+        await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(1)).toBeVisible();
@@ -119,6 +127,7 @@ spaceTest.describe(
 
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await expect(docViewer.getNavigationPage(0)).toBeVisible();
+        await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(1)).toBeVisible();
@@ -136,6 +145,7 @@ spaceTest.describe(
 
         await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await expect(docViewer.getNavigationPage(0)).toBeVisible();
+        await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(1)).toBeVisible();
@@ -150,7 +160,7 @@ spaceTest.describe(
       const { docViewer } = pageObjects;
 
       await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-      await expect(docViewer.getFlyout()).toBeVisible();
+      await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
       await page.keyboard.press('Escape');
       await expect(docViewer.getFlyout()).toBeHidden();
