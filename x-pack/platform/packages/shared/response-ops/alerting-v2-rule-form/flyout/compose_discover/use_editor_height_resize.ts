@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { INITIAL_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, MIN_EDITOR_HEIGHT } from './constants';
 
 const KEYBOARD_RESIZE_STEP = 16;
@@ -18,28 +18,25 @@ export const useEditorHeightResize = () => {
   const [editorHeight, setEditorHeight] = useState(INITIAL_EDITOR_HEIGHT);
   const dragRef = useRef<{ startY: number; startHeight: number } | null>(null);
 
-  const onResizePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      event.preventDefault();
-      dragRef.current = {
-        startY: event.clientY,
-        startHeight: editorHeight,
-      };
-      event.currentTarget.setPointerCapture(event.pointerId);
-    },
-    [editorHeight]
-  );
+  const onResizePointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    dragRef.current = {
+      startY: event.clientY,
+      startHeight: editorHeight,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
 
-  const onResizePointerMove = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+  const onResizePointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
     const drag = dragRef.current;
     if (!drag) {
       return;
     }
     const nextHeight = drag.startHeight + (event.clientY - drag.startY);
     setEditorHeight(Math.min(MAX_EDITOR_HEIGHT, Math.max(MIN_EDITOR_HEIGHT, nextHeight)));
-  }, []);
+  };
 
-  const onResizePointerUp = useCallback((event: React.PointerEvent<HTMLButtonElement>) => {
+  const onResizePointerUp = (event: React.PointerEvent<HTMLButtonElement>) => {
     if (!dragRef.current) {
       return;
     }
@@ -47,9 +44,9 @@ export const useEditorHeightResize = () => {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-  }, []);
+  };
 
-  const onResizeKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const onResizeKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       setEditorHeight((height) => Math.max(MIN_EDITOR_HEIGHT, height - KEYBOARD_RESIZE_STEP));
@@ -57,7 +54,7 @@ export const useEditorHeightResize = () => {
       event.preventDefault();
       setEditorHeight((height) => Math.min(MAX_EDITOR_HEIGHT, height + KEYBOARD_RESIZE_STEP));
     }
-  }, []);
+  };
 
   return {
     editorHeight,
