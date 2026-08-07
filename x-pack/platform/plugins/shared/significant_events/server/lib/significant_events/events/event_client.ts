@@ -11,6 +11,7 @@ import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   SignificantEvent,
+  SignificantEventResponse,
   Severity,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -191,13 +192,13 @@ export class EventClient {
 
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
-  ): Promise<PaginatedResponse<SignificantEvent>> {
+  ): Promise<PaginatedResponse<SignificantEventResponse>> {
     return this.findLatestByCurrentStatePaginated(options);
   }
 
   async findLatestByCurrentStatePaginated(
     options: EventsPaginatedSearchOptions
-  ): Promise<PaginatedResponse<SignificantEvent>> {
+  ): Promise<PaginatedResponse<SignificantEventResponse>> {
     const page = options.page ?? 1;
     const perPage = options.perPage ?? 25;
 
@@ -213,12 +214,14 @@ export class EventClient {
     const topologyWhere = topologyFeatureFilter(options.topologyFeatureIds);
 
     const buildBaseQuery = (): ComposerQuery => {
-      const query = applyTimeRange({
-        query: fromIndexForSpace({
-          index: EVENTS_DATA_STREAM,
-          space: this.clients.space,
-          columns: ['_id', '_source'],
-        }),
+      let query = fromIndexForSpace({
+        index: EVENTS_DATA_STREAM,
+        space: this.clients.space,
+        columns: ['_id', '_source'],
+      }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
+
+      query = applyTimeRange({
+        query,
         from: options.from,
         to: options.to,
       });
@@ -227,41 +230,47 @@ export class EventClient {
       // post-latest so stale versions cannot make a closed episode appear open.
       const searchWhere = this.buildWhere({ search: options.search });
       if (searchWhere) {
-        query.where`${searchWhere}`;
+        query = query.where`${searchWhere}`;
       }
 
-      pickLatestPerGroup(query, FIELD_EVENT_ID);
+      query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
       if (options.status?.length) {
-        query.where`${esql.col('status')} IN (${options.status.map((status) => esql.str(status))})`;
+        query = query.where`${esql.col('status')} IN (${options.status.map((status) =>
+          esql.str(status)
+        )})`;
       }
       if (options.severity?.length) {
-        query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
+        query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
           esql.str(severity)
         )})`;
       }
       if (candidateWhere) {
-        query.where`${candidateWhere}`;
+        query = query.where`${candidateWhere}`;
       }
       if (eventIdWhere) {
-        query.where`${eventIdWhere}`;
+        query = query.where`${eventIdWhere}`;
       }
       if (topologyWhere) {
-        query.where`${topologyWhere}`;
+        query = query.where`${topologyWhere}`;
       }
 
       return query;
     };
 
     const dataQuery = buildBaseQuery()
-      .sort(['@timestamp', 'DESC'])
+      .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
       .limit(page * perPage)
-      .keep('_source');
+      .keep('_source', 'created_at');
     const countQuery = buildBaseQuery().pipe`STATS total = COUNT(*)`.keep('total');
 
     const [total, hits] = await Promise.all([
       executeCountQuery({ esClient: this.clients.esClient, query: countQuery }),
-      executeEsqlQuery<SignificantEvent>({ esClient: this.clients.esClient, query: dataQuery }),
+      executeEsqlQuery<SignificantEventResponse>({
+        esClient: this.clients.esClient,
+        query: dataQuery,
+        fields: ['created_at'],
+      }),
     ]);
 
     const start = (page - 1) * perPage;
@@ -287,7 +296,7 @@ export class EventClient {
   async findLatestActive(
     options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
-    const query = applyTimeRange({
+    let query = applyTimeRange({
       query: fromIndexForSpace({
         index: EVENTS_DATA_STREAM,
         space: this.clients.space,
@@ -297,10 +306,10 @@ export class EventClient {
       to: options.to,
     });
 
-    pickLatestPerGroup(query, FIELD_EVENT_ID);
+    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((s) =>
-      esql.str(s)
+    query = query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
+      (s) => esql.str(s)
     )})`;
 
     const candidateWhere = continuationCandidateFilter({
@@ -308,7 +317,7 @@ export class EventClient {
       ruleUuids: options.ruleUuids,
     });
     if (candidateWhere) {
-      query.where`${candidateWhere}`;
+      query = query.where`${candidateWhere}`;
     }
 
     const hits = await executeEsqlQuery<SignificantEvent>({
@@ -329,15 +338,22 @@ export class EventClient {
     return { hits: result.hits };
   }
 
-  async findByEventId(eventId: string): Promise<{ hits: SignificantEvent[] }> {
-    const result = await runFindByIdEsqlQuery<SignificantEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
+  async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
+    const query = fromIndexForSpace({
       index: EVENTS_DATA_STREAM,
-      idField: FIELD_EVENT_ID,
-      idValue: eventId,
+      space: this.clients.space,
+      columns: ['_source'],
+    }).where`${esql.col(FIELD_EVENT_ID)} == ${esql.str(eventId)}`
+      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`
+      .sort(['@timestamp', 'ASC'])
+      .keep('_source', 'created_at');
+
+    const hits = await executeEsqlQuery<SignificantEventResponse>({
+      esClient: this.clients.esClient,
+      query,
+      fields: ['created_at'],
     });
-    return { hits: result.hits };
+    return { hits };
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {

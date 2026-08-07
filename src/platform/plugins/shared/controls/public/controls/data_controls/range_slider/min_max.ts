@@ -41,9 +41,13 @@ export function minMax$({
   esqlQuery$: PublishingSubject<string | undefined>;
   valuesSource$: PublishingSubject<ControlValuesSource | undefined>;
   setIsLoading: (isLoading: boolean) => void;
-}) {
+}): {
+  minMax$: Observable<{ error?: Error; min: number | undefined; max: number | undefined }>;
+  cancelRequests: () => void;
+} {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([
+
+  const observable = combineLatest([
     controlFetch$,
     dataViews$,
     fieldName$,
@@ -111,6 +115,16 @@ export function minMax$({
       setIsLoading(false);
     })
   );
+
+  return {
+    minMax$: observable,
+    cancelRequests: () => {
+      if (prevRequestAbortController) {
+        prevRequestAbortController.abort();
+        prevRequestAbortController = undefined;
+      }
+    },
+  };
 }
 
 export async function getMinMax({
