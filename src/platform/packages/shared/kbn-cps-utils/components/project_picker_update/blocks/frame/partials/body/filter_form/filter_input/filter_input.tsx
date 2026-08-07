@@ -191,6 +191,14 @@ export function FilterSelectionInput({
 
   const [customFilterValues, setCustomFilterValues] = useState<string[]>([]);
 
+  useEffect(() => {
+    if (errors.tagValue) {
+      setCustomFilterValues((prevCustomFilterValues) =>
+        prevCustomFilterValues.filter((value) => value !== filteringTagValue)
+      );
+    }
+  }, [filteringTagValue, errors.tagValue]);
+
   const filterValues = useMemo(() => {
     return toSelectableOptions(
       ([] as string[]).concat(
@@ -348,7 +356,10 @@ export function FilterSelectionInput({
         placeholder={i18n.translate('cpsUtils.projectPicker.filterBox.selectDimension', {
           defaultMessage: 'Select a tag',
         })}
-        popoverProps={{ anchorPosition: 'downLeft' }}
+        popoverProps={{
+          anchorPosition: 'downLeft',
+          panelMinWidth: calculateWidthFromEntries(filteringDimensionsOptions, ['label']),
+        }}
         compressed
         fullWidth
       />
@@ -358,7 +369,10 @@ export function FilterSelectionInput({
         options={filterOperators}
         disabled={!anchoringFilteringTagName}
         fullWidth={false}
-        popoverProps={{ anchorPosition: 'downRight' }}
+        popoverProps={{
+          anchorPosition: 'downLeft',
+          panelMinWidth: calculateWidthFromEntries(filterOperators, ['label']),
+        }}
         compressed
       />
       <Controller

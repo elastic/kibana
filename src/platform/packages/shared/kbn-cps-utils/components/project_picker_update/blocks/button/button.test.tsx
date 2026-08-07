@@ -9,15 +9,16 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { createContext } from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { ProjectPickerButton } from './button';
 import type { ProjectPickerState } from '../../state/reducers';
 
-const mockUseProjectPickerState = jest.fn();
+// Create  a minimal mock context that can be used to render the button
+const MockProjectPickerContext = createContext<{ state: unknown } | null>(null);
 
 jest.mock('../../state', () => ({
-  useProjectPickerState: () => mockUseProjectPickerState(),
+  createProjectPickerContext: () => MockProjectPickerContext,
 }));
 
 const createState = (
@@ -50,13 +51,13 @@ const renderButton = (
     totalProjectsCount: 10000,
   }
 ) => {
-  mockUseProjectPickerState.mockReturnValue(
-    createState(counts.filteredProjectsCount, counts.totalProjectsCount)
-  );
-
   return render(
     <EuiThemeProvider>
-      <ProjectPickerButton {...defaultProps} {...props} />
+      <MockProjectPickerContext.Provider
+        value={{ state: createState(counts.filteredProjectsCount, counts.totalProjectsCount) }}
+      >
+        <ProjectPickerButton {...defaultProps} {...props} />
+      </MockProjectPickerContext.Provider>
     </EuiThemeProvider>
   );
 };

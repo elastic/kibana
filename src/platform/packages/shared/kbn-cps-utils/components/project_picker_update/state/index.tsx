@@ -128,8 +128,8 @@ export const ProjectPickerStateProvider = ({
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: createInitialPickerState({
       availableProjects,
-      currentProjectRouting: currentProjectRoutingGetter() ?? '',
-      defaultProjectRouting: defaultProjectRoutingGetter() ?? '',
+      currentProjectRouting: currentProjectRoutingGetter() ?? defaultProjectRoutingGetter(),
+      defaultProjectRouting: defaultProjectRoutingGetter(),
       isReadOnly,
       originProjectId,
       projectRoutingStrategy,
@@ -142,7 +142,7 @@ export const ProjectPickerStateProvider = ({
     const currentProjectRouting = currentProjectRoutingGetter() ?? '';
     const defaultProjectRouting = defaultProjectRoutingGetter() ?? '';
     const parsed = parseDefaultProjectRouting(
-      currentProjectRouting,
+      currentProjectRouting || defaultProjectRouting,
       availableProjects.map((project) => project._id)
     );
 
