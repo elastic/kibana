@@ -9,7 +9,7 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 ## What a KI is
 
 A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream.
-Use `.ai-index-ds-*` for timeseries KIs, `.ai-index-idx-*` otherwise.
+Use `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise.
 See the index templates for those prefixes for field details.
 
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
@@ -28,12 +28,7 @@ Apply these when deciding what KIs to generate and what each one should contain.
 
 1. **Choose the right granularity.** A KI can represent an index, a theme, an entity class,
    a single document, or even something else. Prefer the coarsest granularity that still answers a whole class of
-   questions. A few high-leverage KIs beat many thin ones. **Signal to roll up:** if a Bottom-Up pass yields many
-   near-identically-titled entries — e.g. security detection rules named "Unusual Remote File Extension", "Unusual
-   Remote File Size", "Unusual Remote File Directory" — emit one KI per logical cluster (package, module, or
-   category such as a MITRE tactic) and enumerate the individual entries inside that KI's `content`, rather than
-   one KI per rule. This is a variant of the Bottom-Up strategy at a coarser granularity — treat the
-   package, module, or tactic as the document unit rather than the individual rule.
+   questions. A few high-leverage KIs beat many thin ones.
 
 2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins,
    and query templates. The agent traverses at ask-time for fresh values. Materialize a literal
@@ -85,8 +80,6 @@ Keep example queries cheap: end with a small `| LIMIT n`.
 **ES|QL rules:** For detection KIs the full query is materialized, not parameterised, so these forms are allowed and expected:
 - `FROM <index> METADATA _id, _source` — carry document identity/source through the pipeline so detections can point back to the originating docs.
 - The full-text `field : "value"` (`: match`) operator — e.g. `WHERE message : "connection refused"` — for text-matching detection conditions in addition to `==`/`STATS`.
-- `attributes` is a `flattened` mapping, so its sub-fields are **not** reliably accessible via dot-notation in ES|QL — behavior is undefined or mode-dependent (may error, return the wrong type, or be silently absent). Read them with `FIELD_EXTRACT(attributes, "<key>")` (returns `keyword`; requires ES 9.5+, Preview) and wrap in the appropriate cast for comparisons: `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))`, `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))`, etc.
-
 **Connector sources — execute_connector_sub_action call:**
 ```
 Access patterns:
@@ -255,13 +248,13 @@ The AI Index schema has these base fields (all required unless noted):
 |---|---|---|
 | `type` | keyword | The **KI kind** — the top-level discriminator agents and queries filter on. Set it to the kind of KI this doc represents, e.g. `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value (see the per-strategy mapping under "Workflow shapes for each strategy"). **Not** the same as `query_type` (`match`/`stats`, a detection attribute) or `subtype` (a feature's `entity`/`dependency`/… class). |
 | `title` | text + semantic | Short display name; primary semantic surface |
-| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins. When sibling KIs share a similar `title` (e.g. rules from the same ML package), the description **must** carry the differentiating signal: the ML job ID, package name, MITRE technique, or specific behavior class. `title` alone will not separate near-duplicates for the retriever. |
+| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins. When sibling KIs share a similar `title` (e.g. support tickets all categorized as "Billing inquiry"), the description **must** carry the differentiating signal: the sub-category, product name, or time window. `title` alone will not separate near-duplicates for the retriever. |
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on. Also holds every quality, grounding, and lifecycle field (`confidence`, `coverage`, `evidence`, `expires_at`, `excluded`, …) — see below. |
-| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Required top-level field for `.ai-index-ds-*` datastreams. |
+| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Required top-level field for `ai-index-ds-*` datastreams. |
 
-**Everything else lives inside `attributes`.** The AI Index templates declare only the base fields above and use `dynamic: strict`, so any *other* top-level field is rejected at index time. Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
+**Everything else lives inside `attributes`.** Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
 
 | Field (under `attributes`) | Type | Purpose |
 |---|---|---|
@@ -401,6 +394,8 @@ key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` 
 Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
 and access_patterns into `content`.
+
+**Signal to roll up:** if a Bottom-Up pass yields many near-identically-titled entries — e.g. support tickets all titled "Billing inquiry — subscription", "Billing inquiry — refund", "Billing inquiry — upgrade" — emit one KI per logical cluster (category, product area, or status class) and enumerate the individual entries inside that KI's `content`, rather than one KI per record. This is a variant of Bottom-Up at a coarser granularity — treat the category or cluster as the document unit rather than the individual record.
 
 **Selective / Outlier:**
 An `elasticsearch.esql.query` pulling candidate docs filtered to notable records
