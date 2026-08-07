@@ -523,7 +523,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **Dashboards and Visualizations**:
 * Fix duplicated Lens panels backed by a form-based ad hoc data view failing to load after you rename the data view or add a runtime field, caused by colliding ad hoc data view IDs [#281786]({{kib-pull}}281786).
 * Fix ad hoc data view resolution for **Lens** XY annotation layers created through the Visualizations API [#281079]({{kib-pull}}281079).
-* Fix the Lens as-code API dropping the custom display name of inline (ad hoc) data views on round trip [#280546]({{kib-pull}}280546).
+* Fix the Visualizations API dropping the custom display name of inline (ad hoc) data views on round trip [#280546]({{kib-pull}}280546).
 * Fix dashboard PDF exports using a stale time range after you change the time picker when the dashboard does not save the time range [#278262]({{kib-pull}}278262).
 
 **Data ingestion and Fleet**:
