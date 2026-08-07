@@ -49,12 +49,14 @@ export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[
 
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
+
+/**
+ * Provenance stamp identifying which engine created an entity. Written once - never overwritten afterwards by dual-write updates.
+ */
 export const ENTITY_CREATED_BY_FIELD = 'entity.created_by';
 
 /**
- * Provenance stamp identifying which engine created an entity. Written once, on create, by
- * logs extraction (`customFieldEvalLogic`) or by the risk score maintainer's create-if-missing
- * path (`createEntitiesFromSource`) — never overwritten afterwards by dual-write updates.
+ * Accepted values for the {@link ENTITY_CREATED_BY_FIELD}.
  */
 export const ENTITY_CREATED_BY = {
   LogsExtraction: 'logs_extraction',
@@ -63,7 +65,6 @@ export const ENTITY_CREATED_BY = {
 
 export type EntityCreatedBy = (typeof ENTITY_CREATED_BY)[keyof typeof ENTITY_CREATED_BY];
 
-// Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
 ): EntityField[] => [

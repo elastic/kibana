@@ -8,12 +8,13 @@
 import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
 import { getEntityDefinitionWithoutId } from './registry';
 
+/**
+ * Tests that all entity definitions parse against the entitySchema (does not throw errors)
+ */
 describe('entitiesDefinitionRegistry', () => {
   it.each(ALL_ENTITY_TYPES)('%s definition parses against entitySchema', (entityType) => {
     const definition = getEntityDefinitionWithoutId(entityType);
 
-    // `entitySchema` requires `id`, which `EntityDefinitionWithoutId` omits — every other field,
-    // including the `creatableFromDocument` requires/rejectionReason pairing, is exercised here.
     expect(() => entitySchema.parse({ ...definition, id: entityType })).not.toThrow();
   });
 });

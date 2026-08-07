@@ -38,25 +38,15 @@ export type EntityCreationCandidate = EntityCreationAccepted | EntityCreationRej
 /**
  * Whether {@link getEntityCreationCandidate} can ever accept `entityType` — i.e. whether its
  * definition declares `creatableFromDocument` at all (currently every type except `generic`).
- * Lets callers skip fetching a representative document entirely for types that would always be
- * rejected with `entity_type_not_creatable`, rather than issuing a query whose result is
- * guaranteed to be discarded.
  */
 export function isEntityTypeCreatableFromDocument(entityType: EntityType): boolean {
   return getEntityDefinitionWithoutId(entityType).creatableFromDocument !== undefined;
 }
 
 /**
- * Evaluates whether one entity type is creatable from one source document (typically a
- * representative alert `_source`), per the type's own `creatableFromDocument` definition (see
- * `entity_schema.ts`). Returns the EUID and identity fields to seed a new entity document when
- * accepted, or a rejection reason otherwise.
- *
- * A type with no `creatableFromDocument` (currently `generic`) is never creatable this way.
- *
- * `event.outcome: failure` is rejected for every creatable type, regardless of whether its own
- * `documentsFilter` also encodes it. Missing/`unknown` outcome is allowed, which keeps ML
- * anomaly-based alerts (e.g. PAD jobs, which never carry `event.outcome`) eligible for creation.
+ * Evaluates whether one entity type is creatable from one source document (i.e a
+ * representative alert `_source`), per the entity type's own `creatableFromDocument` definition.
+ *  Returns the EUID and identity fields to seed a new entity document when accepted, or a rejection reason otherwise.
  */
 export function getEntityCreationCandidate(
   entityType: EntityType,

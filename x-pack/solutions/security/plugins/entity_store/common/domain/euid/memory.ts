@@ -20,8 +20,7 @@ import {
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
- * Applies the calculated-identity evaluation pipeline (`fieldEvaluations`, then
- * `whenConditionTrueSetFieldsPreAgg`, then `whenConditionTrueSetFieldsAfterStats`) to a document,
+ * Applies the calculated-identity evaluation pipeline to a document,
  * returning a fresh object — `doc` itself is never mutated. Shared by {@link getEuidFromObject}
  * and {@link getEntityIdentifiersFromDocument}, and by callers (e.g. the creation gate) that need
  * to evaluate a `requires` condition against fields derived at identity-evaluation time

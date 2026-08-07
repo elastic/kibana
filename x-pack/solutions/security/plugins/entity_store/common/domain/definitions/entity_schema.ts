@@ -152,10 +152,8 @@ export const setFieldsByConditionSchema = z.object({
 });
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 
-// Closed set of rejection reasons a definition can attach to its own `creatableFromDocument.requires`
-// gate. Kept separate from the shared, non-definitional reasons (e.g. `no_identity`,
-// `event_outcome_failure`, `entity_type_not_creatable`) so each definition can only report a reason
-// it actually owns.
+// Rejection reasons a definition can attach to its own `creatableFromDocument.requires` gate.
+// Kept separate from the shared, non-definitional reasons so each definition can only report a reason it actually owns.
 export const creationRejectionReasonSchema = z.enum([
   'user_not_local_namespace',
   'host_missing_host_id',
@@ -163,11 +161,9 @@ export const creationRejectionReasonSchema = z.enum([
 export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
 
 /**
- * Opt-in gate for out-of-band creation from a single representative document (e.g.
- * `createEntitiesFromSource`, seeded from a representative document `_source`). A type with no
- * `creatableFromDocument` is never created this way — this is the only place that decides it.
- * The union shape is to enforce that when both `requires` and `rejectionReason` are present, when
- * a conditional logic is needed, when not needed it must be empty.
+ * Opt-in gate for creation from a single representative document (i.e a representative document `_source`).
+ * The union enforces that both `requires` and `rejectionReason` are present, when a conditional logic is needed
+ * or empty when no conditional logic is needed.
  */
 const creatableFromDocumentSchema = z.union([
   z.strictObject({
@@ -196,7 +192,7 @@ export const entitySchema = z.object({
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
-  // Opt-in gate for creation from a single representative document. See `creatableFromDocumentSchema`.
+  // Opt-in gate for creation from a single representative document.
   creatableFromDocument: z.optional(creatableFromDocumentSchema),
 });
 
