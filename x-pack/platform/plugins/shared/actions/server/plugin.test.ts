@@ -73,6 +73,10 @@ function getConfig(overrides = {}) {
         },
       },
     },
+    inboundEvents: {
+      enabled: false,
+      maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    },
     ...overrides,
   };
 }
@@ -130,6 +134,10 @@ describe('Actions Plugin', () => {
               callback: { lookbackWindow: '1h', limit: 100 },
             },
           },
+        },
+        inboundEvents: {
+          enabled: false,
+          maxBodyBytes: new ByteSizeValue(1024 * 1024),
         },
       });
       plugin = new ActionsPlugin(context);
@@ -542,6 +550,10 @@ describe('Actions Plugin', () => {
               callback: { lookbackWindow: '1h', limit: 100 },
             },
           },
+        },
+        inboundEvents: {
+          enabled: false,
+          maxBodyBytes: new ByteSizeValue(1024 * 1024),
         },
       });
       plugin = new ActionsPlugin(context);
