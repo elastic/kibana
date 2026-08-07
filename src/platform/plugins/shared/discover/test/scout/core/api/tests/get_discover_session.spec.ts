@@ -52,6 +52,7 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       data: {
         title: 'ESQL control unlink test',
         description: '',
+        tags: [],
         tabs: [
           expect.objectContaining({
             id: 'bdf27597-150b-445e-90ca-ce1b52b0b5af',
