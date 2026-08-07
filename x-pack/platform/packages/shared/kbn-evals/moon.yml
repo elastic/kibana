@@ -17,7 +17,6 @@ project:
   owner: '@elastic/appex-ai-infra'
   sourceRoot: x-pack/platform/packages/shared/kbn-evals
 dependsOn:
-  - '@kbn/dev-cli-runner'
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
   - '@kbn/scout'
