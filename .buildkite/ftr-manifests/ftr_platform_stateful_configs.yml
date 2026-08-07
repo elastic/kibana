@@ -107,9 +107,13 @@ enabled:
   - src/platform/test/functional/apps/visualize/group9/config.ts
   - src/platform/test/functional/apps/visualize/group10/config.ts
   - src/platform/test/functional/apps/visualize/group11/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
+  # Legacy agg-based Visualize XY / Timelion (post-vislib). Low churn vs Lens; run daily.
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts:
+      testChannels: ['ci-batch-daily']
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts:
+      testChannels: ['ci-batch-daily']
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
