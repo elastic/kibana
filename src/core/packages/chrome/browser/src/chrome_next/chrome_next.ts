@@ -291,7 +291,12 @@ export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome Next feature flag is enabled. */
+  /**
+   * Whether the Chrome Next feature flag is enabled.
+   *
+   * This does not indicate that the current layout renders Chrome Next. Before replacing or hiding
+   * fallback UI, also require `chrome.getChromeStyle() === 'project'`.
+   */
   readonly isEnabled: boolean;
   aiButton: {
     /**
