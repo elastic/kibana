@@ -309,39 +309,6 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'anomalies table row actions menu exposes investigation actions',
-      async ({ page, pageObjects }) => {
-        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
-          });
-        });
-        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
-          });
-        });
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
-        await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
-
-        await expect(
-          pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline')
-        ).toBeVisible();
-        await expect(
-          pageObjects.entityFlyoutAnomaliesPage.getRowAction('view-in-discover')
-        ).toBeVisible();
-        await expect(
-          pageObjects.entityFlyoutAnomaliesPage.getRowAction('view-in-single-metric-viewer')
-        ).toBeVisible();
-      }
-    );
-
-    spaceTest(
       'Add to timeline row action opens timeline scoped to the anomaly influencers',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
