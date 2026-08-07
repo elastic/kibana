@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { ScoutLogger } from '@kbn/scout';
+import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../constants';
-
-const DEFAULT_SPACE_ID = 'default';
-
-const SAVED_OBJECT_ES_HEADERS = {
-  'x-elastic-product-origin': 'kibana',
-};
-
-/** Earliest model version that accepts the `engine: "v2"` template shape. */
-const TYPE_MIGRATION_VERSION = '10.4.0';
 
 export interface SeedRuleTemplateParams {
   id: string;
@@ -31,46 +20,38 @@ export interface RuleTemplatesApiService {
   cleanUp: () => Promise<void>;
 }
 
+/**
+ * Seeds and cleans `alerting_rule_template` saved objects via the FTR SO client
+ * (`/internal/ftr/kbn_client_so`). Templates are normally installed by Fleet
+ * packages, so the specs seed them here rather than through a public write API.
+ *
+ * Prefer this over direct ES writes: `.kibana_alerting_cases` is a restricted
+ * index, and serverless rejects `delete_by_query` from the default test
+ * superuser even with the Kibana product-origin header.
+ */
 export const getRuleTemplatesApiService = ({
   log,
-  esClient,
+  kbnClient,
 }: {
   log: ScoutLogger;
-  esClient: EsClient;
+  kbnClient: KbnClient;
 }): RuleTemplatesApiService => {
-  const client = esClient.child({ headers: SAVED_OBJECT_ES_HEADERS });
-
   return {
-    create: ({ id, attributes, spaceId = DEFAULT_SPACE_ID }) =>
+    create: ({ id, attributes, spaceId }) =>
       measurePerformanceAsync(log, 'ruleTemplates.create', async () => {
-        const now = new Date().toISOString();
-
-        await client.index({
-          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          id: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}:${id}`,
-          document: {
-            [RULE_TEMPLATE_SAVED_OBJECT_TYPE]: attributes,
-            type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-            references: [],
-            managed: false,
-            namespaces: [spaceId],
-            coreMigrationVersion: '8.8.0',
-            typeMigrationVersion: TYPE_MIGRATION_VERSION,
-            created_at: now,
-            updated_at: now,
-          },
-          refresh: 'wait_for',
+        await kbnClient.savedObjects.create({
+          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          id,
+          attributes,
+          overwrite: true,
+          ...(spaceId ? { space: spaceId } : {}),
         });
       }),
 
     cleanUp: () =>
       measurePerformanceAsync(log, 'ruleTemplates.cleanUp', async () => {
-        await client.deleteByQuery({
-          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          query: { term: { type: RULE_TEMPLATE_SAVED_OBJECT_TYPE } },
-          refresh: true,
-          wait_for_completion: true,
-          conflicts: 'proceed',
+        await kbnClient.savedObjects.clean({
+          types: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         });
       }),
   };

@@ -84,7 +84,7 @@ export const buildAlertingApiServices = ({
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
-    ruleTemplates: getRuleTemplatesApiService({ esClient, log }),
+    ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
