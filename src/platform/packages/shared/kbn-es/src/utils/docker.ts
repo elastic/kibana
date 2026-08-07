@@ -39,6 +39,7 @@ import {
 
 import { initializeUiamContainers, runUiamContainer, getUiamContainers } from './docker_uiam';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
+import { loadEsConfigEsArgs, loadEsDevConfigEsArgs } from './es_config';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -639,13 +640,30 @@ export function resolveEsArgs(
   options: ServerlessOptions | DockerOptions,
   projectIdOverride?: string
 ) {
-  const { esArgs: customEsArgs, password, ssl } = options;
+  const { esArgs: customEsArgs, password, ssl, devConfig } = options;
   const esArgs = new Map(defaultEsArgs);
 
   if (ssl) {
     DEFAULT_SSL_ESARGS.forEach((arg) => {
       esArgs.set(arg[0], arg[1]);
     });
+  }
+
+  // config/es.yml, if present, overrides the defaults (and ssl defaults) above.
+  // It's the checked-in, shared base config (mirrors config/kibana.yml).
+  for (const arg of loadEsConfigEsArgs()) {
+    const [key, ...value] = arg.split('=');
+    esArgs.set(key.trim(), value.join('=').trim());
+  }
+
+  // config/es.dev.yml, if present, overrides config/es.yml above. It's the
+  // git-ignored, local-only dev config (mirrors config/kibana.dev.yml), and is
+  // itself overridden by explicit customEsArgs (-E/--env flags) below
+  if (devConfig !== false) {
+    for (const arg of loadEsDevConfigEsArgs()) {
+      const [key, ...value] = arg.split('=');
+      esArgs.set(key.trim(), value.join('=').trim());
+    }
   }
 
   if (customEsArgs) {
@@ -1564,6 +1582,23 @@ async function runDockerContainerInSnapshotMode(
   });
 
   const esArgsMap = new Map<string, string>(DEFAULT_DOCKER_SNAPSHOT_ESARGS);
+
+  // config/es.yml, if present, overrides the defaults above. It's the
+  // checked-in, shared base config (mirrors config/kibana.yml).
+  for (const arg of loadEsConfigEsArgs(log)) {
+    const [key, ...value] = arg.split('=');
+    esArgsMap.set(key.trim(), value.join('=').trim());
+  }
+
+  // config/es.dev.yml, if present, overrides config/es.yml above. It's the
+  // git-ignored, local-only dev config (mirrors config/kibana.dev.yml), and is
+  // itself overridden by --license/--password and explicit -E settings below
+  if (options.devConfig !== false) {
+    for (const arg of loadEsDevConfigEsArgs(log)) {
+      const [key, ...value] = arg.split('=');
+      esArgsMap.set(key.trim(), value.join('=').trim());
+    }
+  }
 
   if (options.license === 'trial') {
     esArgsMap.set('xpack.license.self_generated.type', 'trial');

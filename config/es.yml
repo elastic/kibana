@@ -1,0 +1,238 @@
+# ======================== Elasticsearch Configuration Reference ========================
+#
+# This file is checked into git and auto-loaded by every `es` run mode (source, snapshot,
+# archive, docker, serverless) — analogous to `config/kibana.yml` for Kibana. Every line
+# below is commented out, so this file has zero effect on `yarn es`/`node scripts/es` as
+# shipped.
+#
+# To actually apply settings:
+#   - Uncomment the lines you need right here, if you want them to become the shared
+#     default for everyone who runs `es` (only do this via a PR, since it's checked in), or
+#   - Copy them into `config/es.dev.yml` instead (git-ignored, also auto-loaded by every
+#     run mode, analogous to `config/kibana.dev.yml`) to apply them only on your own
+#     machine, or
+#   - Pass them on the command line with `-E key=value` (or `--env key=value` for
+#     docker/serverless), for a single run.
+#
+# Precedence (lowest to highest): built-in @kbn/es defaults < config/es.yml (this file) <
+# config/es.dev.yml < explicit -E/--env flags (see
+# src/platform/packages/shared/kbn-es/README.mdx).
+#
+# This is a curated list of the most relevant settings for local development, not an
+# exhaustive list of every Elasticsearch setting that exists (ES has hundreds, including
+# many dynamic cluster settings that don't belong in a static config file at all). For the
+# full reference, see:
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html
+#
+# ---------------------------------- Cluster -----------------------------------
+#
+# Use a descriptive name for your cluster:
+#
+#cluster.name: my-application
+#
+# Disable the low-disk-space allocation threshold (useful on CI/dev machines with
+# limited free disk space). @kbn/es sets this to 'false' by default already.
+#
+#cluster.routing.allocation.disk.threshold_enabled: false
+#
+# Disk watermarks that control when shard allocation is throttled/blocked:
+#
+#cluster.routing.allocation.disk.watermark.low: 85%
+#cluster.routing.allocation.disk.watermark.high: 90%
+#cluster.routing.allocation.disk.watermark.flood_stage: 95%
+#
+# Bootstrap the cluster using an initial set of master-eligible nodes (multi-node only):
+#
+#cluster.initial_master_nodes: ["node-1", "node-2"]
+#
+# Configure a remote cluster connection (for cross-cluster search/replication):
+#
+#cluster.remote.my_remote_cluster.seeds: ["127.0.0.1:9300"]
+#
+# ------------------------------------ Node ------------------------------------
+#
+# Use a descriptive name for the node:
+#
+#node.name: node-1
+#
+# Restrict which roles this node performs (e.g. for dedicated master/data/ingest nodes):
+#
+#node.roles: ["master", "data", "ingest"]
+#
+# Add custom attributes to the node:
+#
+#node.attr.rack: r1
+#
+# Override the number of processors ES thinks are available (affects thread pool sizing):
+#
+#node.processors: 4
+#
+# ----------------------------------- Paths ------------------------------------
+#
+# Path to directory where to store the data (separate multiple locations by comma):
+#
+#path.data: /path/to/data
+#
+# Path to log files:
+#
+#path.logs: /path/to/logs
+#
+# Shared filesystem repository location(s) for snapshot/restore (comma-separated list of
+# allowed root paths; a repository must still be registered under one of these):
+#
+#path.repo: ["/tmp/es-repo-1", "/tmp/es-repo-2"]
+#
+# ----------------------------------- Memory -----------------------------------
+#
+# Lock the memory on startup (requires OS-level ulimit configuration):
+#
+#bootstrap.memory_lock: true
+#
+# Elasticsearch performs poorly when the system is swapping the memory. Make sure that
+# the heap size (see ES_JAVA_OPTS / -Xms/-Xmx) is set to about half the memory available
+# on the system and that the owner of the process is allowed to use this limit.
+#
+# ---------------------------------- Network -----------------------------------
+#
+# By default Elasticsearch is only accessible on localhost. Set a different address here
+# to expose this node on the network:
+#
+#network.host: 192.168.0.1
+#
+# By default Elasticsearch listens for HTTP traffic on the first free port it finds
+# starting at 9200. Set a specific HTTP port here (useful to run alongside another local
+# ES instance, or to match config/kibana.dev.yml's elasticsearch.hosts):
+#
+#http.port: 9200
+#
+# Set a specific transport (node-to-node) port:
+#
+#transport.port: 9300
+#
+# Enable CORS support for the HTTP layer (useful when hitting ES directly from a browser):
+#
+#http.cors.enabled: true
+#http.cors.allow-origin: "*"
+#
+# Maximum size of an HTTP request body:
+#
+#http.max_content_length: 100mb
+#
+# For more information, consult the network module documentation.
+#
+# --------------------------------- Discovery ----------------------------------
+#
+# Run as a single-node "cluster" with no discovery/bootstrapping required. This is the
+# simplest option for local development with a single node.
+#
+#discovery.type: single-node
+#
+# Pass an initial list of hosts to perform discovery when this node is started
+# (multi-node only). The default list of hosts is ["127.0.0.1", "[::1]"]:
+#
+#discovery.seed_hosts: ["host1", "host2"]
+#
+# For more information, consult the discovery and cluster formation module documentation.
+#
+# ------------------------------ Snapshot & Restore -----------------------------
+#
+# Allow registering "url" repositories pointing at these URL prefixes (used by some
+# snapshot/restore workflows and by kbn-es's custom snapshot pinning):
+#
+#repositories.url.allowed_urls: ["https://storage.googleapis.com/*"]
+#
+# ------------------------------------ Security ----------------------------------
+#
+# Enable/disable the security features (authentication, authorization, TLS, etc.):
+#
+#xpack.security.enabled: true
+#
+# Enable TLS on the HTTP layer:
+#
+#xpack.security.http.ssl.enabled: true
+#xpack.security.http.ssl.keystore.path: certs/http.p12
+#
+# Enable TLS on the transport (node-to-node) layer:
+#
+#xpack.security.transport.ssl.enabled: true
+#xpack.security.transport.ssl.verification_mode: certificate
+#xpack.security.transport.ssl.keystore.path: certs/transport.p12
+#
+# Enable the token service (used for OAuth2-style access/refresh tokens):
+#
+#xpack.security.authc.token.enabled: true
+#
+# Enable API keys:
+#
+#xpack.security.authc.api_key.enabled: true
+#
+# Enable native role mappings (off by default in Serverless):
+#
+#xpack.security.authc.native_role_mappings.enabled: true
+#
+# Configure an authentication realm, e.g. a SAML realm (see @kbn/mock-idp-utils for the
+# realm kbn-es configures automatically for local SAML testing):
+#
+#xpack.security.authc.realms.saml.my-realm.order: 0
+#xpack.security.authc.realms.saml.my-realm.idp.entity_id: "urn:my-idp"
+#
+# Enable operator privileges (used by Serverless):
+#
+#xpack.security.operator_privileges.enabled: true
+#
+# -------------------------------------- License ----------------------------------
+#
+# Self-generate a license of a given type on first start (basic or trial):
+#
+#xpack.license.self_generated.type: trial
+#
+# ---------------------------------- Machine Learning -------------------------------
+#
+# Enable/disable machine learning:
+#
+#xpack.ml.enabled: true
+#
+# Percentage of the node's total memory ML is allowed to use:
+#
+#xpack.ml.max_machine_memory_percent: 30
+#
+# ------------------------------- Monitoring & Alerting ------------------------------
+#
+# Enable/disable the Watcher alerting feature:
+#
+#xpack.watcher.enabled: true
+#
+# Enable/disable monitoring data collection:
+#
+#xpack.monitoring.collection.enabled: false
+#
+# ------------------------------------- Search -------------------------------------
+#
+# Fail requests that aren't fully compatible with cross-cluster search, surfacing
+# compatibility problems early. @kbn/es sets this to 'true' by default already.
+#
+#search.check_ccs_compatibility: true
+#
+# Maximum number of buckets a single aggregation request may create:
+#
+#search.max_buckets: 65536
+#
+# ------------------------------------- Ingest -------------------------------------
+#
+# Disable the automatic GeoIP database downloader (avoids network calls on startup,
+# useful offline). @kbn/es sets this to 'false' by default already.
+#
+#ingest.geoip.downloader.enabled: false
+#
+# ---------------------------------- Action / Safety ---------------------------------
+#
+# Require an explicit index name for destructive actions like `_delete_by_query` on
+# wildcards/`_all` (protects against accidental data loss). @kbn/es sets this to 'true'
+# by default already.
+#
+#action.destructive_requires_name: true
+#
+# Automatically create an index (and its data stream, if applicable) when a document is
+# indexed into a index/data stream that doesn't exist yet:
+#
+#action.auto_create_index: true

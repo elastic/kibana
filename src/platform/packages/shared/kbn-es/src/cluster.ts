@@ -25,6 +25,8 @@ import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import type { DockerOptions, ServerlessOptions } from './utils';
 import {
   extractConfigFiles,
+  loadEsConfigEsArgs,
+  loadEsDevConfigEsArgs,
   log as defaultLog,
   NativeRealm,
   parseEsLog,
@@ -400,6 +402,23 @@ export class Cluster {
 
     if (options.port) {
       esArgs.set('http.port', String(options.port));
+    }
+
+    // config/es.yml, if present, overrides the default esArg values above.
+    // It's the checked-in, shared base config (mirrors config/kibana.yml).
+    for (const arg of loadEsConfigEsArgs(this.log)) {
+      const [key, ...value] = arg.split('=');
+      esArgs.set(key.trim(), value.join('=').trim());
+    }
+
+    // config/es.dev.yml, if present, overrides config/es.yml above. It's the
+    // git-ignored, local-only dev config (mirrors config/kibana.dev.yml), and
+    // is itself overridden by explicit options.esArgs (-E flags) below
+    if (options.devConfig !== false) {
+      for (const arg of loadEsDevConfigEsArgs(this.log)) {
+        const [key, ...value] = arg.split('=');
+        esArgs.set(key.trim(), value.join('=').trim());
+      }
     }
 
     // options.esArgs overrides the default esArg values

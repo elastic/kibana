@@ -50,6 +50,14 @@ import {
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+import { loadEsConfigEsArgs, loadEsDevConfigEsArgs } from './es_config';
+
+jest.mock('./es_config', () => ({
+  loadEsConfigEsArgs: jest.fn(() => []),
+  loadEsDevConfigEsArgs: jest.fn(() => []),
+}));
+const loadEsConfigEsArgsMock = loadEsConfigEsArgs as jest.Mock;
+const loadEsDevConfigEsArgsMock = loadEsDevConfigEsArgs as jest.Mock;
 
 /**
  * This is set to 'true' on CI, and it causes some docker behaviours to differ.
@@ -115,6 +123,8 @@ const createMockIdpMetadataMock = jest.spyOn(mockIdpPluginUtil, 'createMockIdpMe
 
 beforeEach(() => {
   jest.resetAllMocks();
+  loadEsConfigEsArgsMock.mockReturnValue([]);
+  loadEsDevConfigEsArgsMock.mockReturnValue([]);
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 
@@ -756,6 +766,67 @@ describe('resolveEsArgs()', () => {
     const esArgs = resolveEsArgs([], { esArgs: `ES_JAVA_OPTS=${existingOptions}` });
 
     expect(findEnvValue(esArgs, 'ES_JAVA_OPTS')).toBe(existingOptions);
+  });
+
+  test('should merge in config/es.dev.yml settings, overriding defaults', () => {
+    loadEsDevConfigEsArgsMock.mockReturnValue(['foo=from-dev-config', 'newkey=from-dev-config']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, {});
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('from-dev-config');
+    expect(findEnvValue(esArgs, 'qux')).toBe('zip');
+    expect(findEnvValue(esArgs, 'newkey')).toBe('from-dev-config');
+  });
+
+  test('explicit esArgs should override config/es.dev.yml settings', () => {
+    loadEsDevConfigEsArgsMock.mockReturnValue(['foo=from-dev-config']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=from-cli' });
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('from-cli');
+  });
+
+  test('should not load config/es.dev.yml when devConfig is false', () => {
+    loadEsDevConfigEsArgsMock.mockReturnValue(['foo=from-dev-config']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, { devConfig: false });
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('bar');
+  });
+
+  test('should merge in config/es.yml settings, overriding defaults', () => {
+    loadEsConfigEsArgsMock.mockReturnValue(['foo=from-es-yml', 'newkey=from-es-yml']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, {});
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('from-es-yml');
+    expect(findEnvValue(esArgs, 'qux')).toBe('zip');
+    expect(findEnvValue(esArgs, 'newkey')).toBe('from-es-yml');
+  });
+
+  test('config/es.dev.yml settings should override config/es.yml settings', () => {
+    loadEsConfigEsArgsMock.mockReturnValue(['foo=from-es-yml']);
+    loadEsDevConfigEsArgsMock.mockReturnValue(['foo=from-dev-config']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, {});
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('from-dev-config');
+  });
+
+  test('explicit esArgs should override config/es.yml settings', () => {
+    loadEsConfigEsArgsMock.mockReturnValue(['foo=from-es-yml']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, { esArgs: 'foo=from-cli' });
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('from-cli');
+  });
+
+  test('config/es.yml is loaded even when devConfig is false', () => {
+    loadEsConfigEsArgsMock.mockReturnValue(['foo=from-es-yml']);
+
+    const esArgs = resolveEsArgs(defaultEsArgs, { devConfig: false });
+
+    expect(findEnvValue(esArgs, 'foo')).toBe('from-es-yml');
   });
 });
 

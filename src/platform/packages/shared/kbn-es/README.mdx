@@ -24,6 +24,33 @@ If running elasticsearch serverless or a docker container, there is some require
 1. Increase OS virtual memory limits. More info in the [ES docs](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites).
 
 
+### Config
+
+Two optional YAML files let you persist Elasticsearch settings instead of passing `-E`/`--env` flags every time, mirroring how `config/kibana.yml` and `config/kibana.dev.yml` work for Kibana itself. Both accept the same flat (`cluster.name: test`) or nested (`cluster:\n  name: test`) YAML syntax as `elasticsearch.yml`, and are optional — if neither exists, nothing changes.
+
+- `config/es.yml` — checked into git, shared with everyone who runs `es` (analogous to `config/kibana.yml`). Ships as a fully commented-out reference of commonly used settings; uncomment/add entries here only for settings you want as the new default for all contributors.
+- `config/es.dev.yml` — git-ignored, local-only overrides (analogous to `config/kibana.dev.yml`). Use this for your own machine-specific settings.
+
+```yaml
+# config/es.dev.yml
+cluster.name: my-dev-cluster
+path.repo:
+  - /tmp/es-repo-1
+  - /tmp/es-repo-2
+xpack:
+  security:
+    enabled: false
+```
+
+Both files are loaded automatically by every run mode (`source`, `snapshot`, `archive`, `docker`, `serverless`), with the following precedence, lowest to highest:
+
+1. Built-in defaults
+2. `config/es.yml`
+3. `config/es.dev.yml`
+4. Explicit `-E`/`--env` flags (and other explicit CLI options like `--license`/`--password`)
+
+Pass `--no-dev-config` to skip loading `config/es.dev.yml` for a single run. `config/es.yml` has no equivalent opt-out flag, since `config/kibana.yml` doesn't have one either — it's always loaded.
+
 ### Examples
 
 Run a snapshot install with a trial license

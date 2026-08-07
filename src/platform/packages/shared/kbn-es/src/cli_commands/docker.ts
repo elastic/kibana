@@ -35,6 +35,7 @@ export const docker: Command = {
       -E                  Additional key=value settings to pass to Elasticsearch
       -D                  Override Docker command
       -F                  Absolute paths for files to mount into container
+      --no-dev-config     Prevents loading the config/es.dev.yml file, if present
 
       Snapshot mode (--snapshot):
 
@@ -75,12 +76,13 @@ export const docker: Command = {
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
         transportPort: 'transport-port',
+        devConfig: 'dev-config',
       },
 
       string: ['tag', 'image', 'D', 'version', 'license', 'name', 'ready-timeout'],
       boolean: ['ssl', 'kill', 'snapshot', 'background', 'skip-ready-check'],
 
-      default: defaults,
+      default: { ...defaults, devConfig: true },
     });
 
     const cluster = new Cluster();
