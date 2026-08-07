@@ -76,7 +76,7 @@ export class DynamicConnectorsPoller {
       Rx.map(this.handleInferenceEndpointsResponse.bind(this)),
       Rx.map(filterPreconfiguredEndpoints),
       Rx.map(this.resolveDynamicConnectorSync.bind(this)),
-      Rx.tap(this.applyDynamicConnectorSync.bind(this)),
+      Rx.concatMap((sync) => Rx.from(this.applyDynamicConnectorSync(sync))),
       Rx.delay(this.pollingIntervalMs),
       Rx.repeat(),
       Rx.catchError(this.handleError.bind(this)),
@@ -122,10 +122,10 @@ export class DynamicConnectorsPoller {
     };
   }
 
-  private applyDynamicConnectorSync({
+  private async applyDynamicConnectorSync({
     connectorsToAdd,
     connectorIdsToRemove,
-  }: DynamicConnectorSync) {
+  }: DynamicConnectorSync): Promise<void> {
     if (connectorsToAdd.length > 0) {
       this.logger.debug(
         `Found ${connectorsToAdd.length} preconfigured EIS endpoints to register as inMemoryConnectors`
@@ -139,7 +139,7 @@ export class DynamicConnectorsPoller {
         `Found ${connectorIdsToRemove.length} stale dynamic connectors to unregister`
       );
       for (const connectorId of connectorIdsToRemove) {
-        this.actions.unregisterDynamicConnector(connectorId);
+        await this.actions.unregisterDynamicConnector(connectorId);
       }
     }
   }
