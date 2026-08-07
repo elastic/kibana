@@ -34,6 +34,8 @@ const ebtAction = {
     DELETE_CONVERSATION: 'delete_conversation',
     MARK_AS_READ: 'mark_as_read',
     MARK_AS_UNREAD: 'mark_as_unread',
+    PIN_CONVERSATION: 'pin_conversation',
+    UNPIN_CONVERSATION: 'unpin_conversation',
   },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',

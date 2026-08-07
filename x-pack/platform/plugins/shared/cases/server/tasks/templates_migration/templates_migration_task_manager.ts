@@ -33,7 +33,11 @@ import {
 } from './types';
 import type { MigrationTaskState } from './types';
 import { findAllConfigurations, migrateOneConfigure } from './migrate_configuration';
-import { hasPendingCaseBackfill, runCaseBackfillPhase } from './run_case_backfill';
+import {
+  configureNeedsCaseBackfill,
+  hasPendingCaseBackfill,
+  runCaseBackfillPhase,
+} from './run_case_backfill';
 
 /**
  * Registers and schedules the one-shot task that migrates legacy (v1) templates and custom fields
@@ -186,7 +190,7 @@ export class TemplatesMigrationTaskManager {
           so.attributes.legacyTemplatesMigrated && so.attributes.legacyCustomFieldsMigrated;
 
         if (fieldsAndTemplatesDone) {
-          if (so.attributes.legacyCasesMigrated) {
+          if (!configureNeedsCaseBackfill(so)) {
             totals.skipped++;
             this.migrationUsageCounter?.incrementCounter({
               counterName: 'configureMigrationSkipped',

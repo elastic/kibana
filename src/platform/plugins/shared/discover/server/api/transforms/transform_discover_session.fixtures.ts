@@ -256,6 +256,7 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
 export const discoverSessionApiData: DiscoverSessionApiData = {
   title: 'all_props',
   description: 'A Discover Session with as many props as I can get.',
+  tags: [],
   tabs: [
     {
       id: 'fe157f5f-1ad8-47c9-9cb0-f9fff059aa48',

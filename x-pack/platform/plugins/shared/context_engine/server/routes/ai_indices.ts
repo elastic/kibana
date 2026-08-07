@@ -42,6 +42,7 @@ import {
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -186,17 +187,20 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { id, ...properties } = request.body;
         try {
-          const { id, ...properties } = request.body;
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
             request,
           });
           await getAiIndexService().create(id, properties);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
           return handleAiIndexError(error, response);
         }
       })
@@ -227,16 +231,24 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
         try {
           await validateConnectorSources({
             sources: request.body.sources,
             actions: await getActions(),
             request,
           });
-          const status = await getAiIndexService().put(request.params.aiIndexId, request.body);
+          const status = await getAiIndexService().put(aiIndexId, request.body);
+          const putAction =
+            status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
+          auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })
@@ -265,10 +277,16 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
         try {
-          const body: GetAiIndexResponse = await getAiIndexService().get(request.params.aiIndexId);
+          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })
@@ -292,11 +310,18 @@ export const registerAiIndexRoutes = ({
         version: AI_INDEX_API_VERSION,
         validate: false,
       },
-      withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const body: ListAiIndexResponse = {
-          ai_indices: await getAiIndexService().list(),
-        };
-        return response.ok({ body });
+      withContextEngineFeatureFlag(async (ctx, _request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        try {
+          const body: ListAiIndexResponse = {
+            ai_indices: await getAiIndexService().list(),
+          };
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
+          return handleAiIndexError(error, response);
+        }
       })
     );
 
@@ -324,11 +349,17 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
         try {
-          await getAiIndexService().delete(request.params.aiIndexId);
+          await getAiIndexService().delete(aiIndexId);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });
         } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })

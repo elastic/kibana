@@ -23,6 +23,7 @@ import type {
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Sha256 } from '@kbn/crypto-browser';
+import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
@@ -156,17 +157,46 @@ function normalizeWhitespace(str: string): string {
 }
 
 export function generateAdHocDataViewId(
-  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
+  dataView: Pick<
+    APIAdHocDataView,
+    | 'index'
+    | 'timeFieldName'
+    | 'esqlQuery'
+    | 'dataSourceType'
+    | 'name'
+    | 'allowHidden'
+    | 'fieldSettings'
+  >
 ): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
   // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
   // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
-  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
-    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
+  if (dataView.dataSourceType === 'esql') {
+    return !dataView.timeFieldName && dataView.esqlQuery
+      ? `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`
+      : base;
   }
-  return base;
+
+  // For form-based ad hoc data views, two over the same index+timeField can
+  // still differ in specifications (custom name, allowHidden, or runtime/scripted
+  // field settings). Always append a hash of the canonical specification fields so
+  // that identical specs map to the same id and different specs get distinct ids.
+  // Mirrors the ES|QL `base-<hash>` pattern above.
+  //
+  // `stableStringify` sorts keys and omits `undefined` values, so key order and
+  // absent/optional field settings can't perturb the hash.
+  const canonical = {
+    name: dataView.name ?? dataView.index,
+    allowHidden: dataView.allowHidden ? true : undefined, // treat false as undefined
+    fieldSettings:
+      dataView.fieldSettings && Object.keys(dataView.fieldSettings).length > 0
+        ? dataView.fieldSettings
+        : undefined,
+  };
+
+  return `${base}-${sha256Sync(stableStringify(canonical))}`;
 }
 
 export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -571,30 +601,28 @@ export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
   config: GenericIndexPatternColumn | GenericIndexPatternColumn[],
-  first = false,
-  postfix = ''
+  first = false
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
-  const name = columnName + postfix;
 
   layer.columns = {
     ...layer.columns,
-    [name]: column,
+    [columnName]: column,
   };
 
-  const referenceColumnId = `${name}_reference`;
+  const referenceColumnId = `${columnName}_reference`;
   if (referenceColumn && 'references' in column) {
     column.references = [referenceColumnId];
     layer.columns[referenceColumnId] = referenceColumn;
   }
 
   if (first) {
-    layer.columnOrder.unshift(name);
+    layer.columnOrder.unshift(columnName);
     if (referenceColumn) {
       layer.columnOrder.unshift(referenceColumnId);
     }
   } else {
-    layer.columnOrder.push(name);
+    layer.columnOrder.push(columnName);
     if (referenceColumn) {
       layer.columnOrder.push(referenceColumnId);
     }
