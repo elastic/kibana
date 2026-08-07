@@ -16,11 +16,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
-import {
-  createMLTestDashboard,
-  cleanupDfaTest,
-  waitForTrainingDocs,
-} from '../fixtures/helpers/dfa';
+import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
 
 // ── Test data ────────────────────────────────────────────────────────────────
 
@@ -264,11 +260,11 @@ test.describe('classification creation', { tag: '@local-stateful-classic' }, () 
     await test.step('runs the analytics job and displays it correctly in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
-      await waitForTrainingDocs(apiServices, testData.jobId);
+      await apiServices.ml.dataFrameAnalytics.waitForTrainingDocs(testData.jobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(testData.jobId);
 
-      // Navigate to the job list and verify key table elements
-      await dataFrameAnalytics.gotoJobList();
+      // Already on the job list from createAndStartJob; wait for the table to finish loading.
+      await dataFrameAnalytics.waitForTableLoaded();
       await expect(page.testSubj.locator('~mlAnalyticsTable')).toBeVisible();
       await expect(page.testSubj.locator('mlAnalyticsStatsBar')).toBeVisible();
 

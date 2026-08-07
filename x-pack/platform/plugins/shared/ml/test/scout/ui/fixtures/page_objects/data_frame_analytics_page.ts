@@ -33,16 +33,37 @@ export class DataFrameAnalyticsPage {
     );
   }
 
+  private async waitForJobListResponses(timeoutMs = 60_000): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.ok() &&
+          new URL(response.url()).pathname.endsWith('/internal/ml/data_frame/analytics'),
+        { timeout: timeoutMs }
+      ),
+      this.page.waitForResponse(
+        (response) =>
+          response.request().method() === 'GET' &&
+          response.ok() &&
+          new URL(response.url()).pathname.endsWith('/internal/ml/data_frame/analytics/_stats'),
+        { timeout: timeoutMs }
+      ),
+    ]);
+  }
+
   // ── Navigation ────────────────────────────────────────────────────────────
 
   async gotoJobList(): Promise<void> {
+    const jobListResponses = this.waitForJobListResponses(60_000);
     await this.page.goto(
       this.kbnUrl.app('management/ml/analytics?_g=(refreshInterval:(pause:!t,value:30000))')
     );
-    // List renders null until the first ML API fetch completes; 60 s covers cold-start CI.
+    await jobListResponses;
+    // Short settle for React to mount after both APIs succeed; do not restack a second 60s budget.
     await this.page.testSubj
       .locator('mlAnalyticsJobList')
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   // ── Creation wizard ───────────────────────────────────────────────────────
@@ -117,7 +138,6 @@ export class DataFrameAnalyticsPage {
     await this.page.testSubj.locator('mlDataFrameAnalyticsRuntimeMappingsApplyButton').click();
     if (runtimeMappingsExplainResponse !== undefined) {
       await runtimeMappingsExplainResponse;
-      await this.waitForExplainResponse();
     }
   }
 

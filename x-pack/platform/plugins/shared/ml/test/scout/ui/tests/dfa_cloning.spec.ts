@@ -21,7 +21,7 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
-import { cleanupDfaCloningTest, waitForTrainingDocs } from '../fixtures/helpers/dfa';
+import { cleanupDfaCloningTest } from '../fixtures/helpers/dfa';
 
 // ── Shared timestamp ensures unique job IDs per test run ─────────────────────
 
@@ -333,7 +333,7 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the clone job and verifies it in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
-      await waitForTrainingDocs(apiServices, CLASSIFICATION.cloneJobId);
+      await apiServices.ml.dataFrameAnalytics.waitForTrainingDocs(CLASSIFICATION.cloneJobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(CLASSIFICATION.cloneJobId);
 
       await dataFrameAnalytics.gotoJobList();
@@ -426,7 +426,7 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the clone job and verifies it in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
-      await waitForTrainingDocs(apiServices, OUTLIER.cloneJobId);
+      await apiServices.ml.dataFrameAnalytics.waitForTrainingDocs(OUTLIER.cloneJobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(OUTLIER.cloneJobId);
 
       await dataFrameAnalytics.gotoJobList();
@@ -537,7 +537,7 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
     await test.step('runs the clone job and verifies it in the job list', async () => {
       await dataFrameAnalytics.createAndStartJob();
 
-      await waitForTrainingDocs(apiServices, REGRESSION.cloneJobId);
+      await apiServices.ml.dataFrameAnalytics.waitForTrainingDocs(REGRESSION.cloneJobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(REGRESSION.cloneJobId);
 
       await dataFrameAnalytics.gotoJobList();
