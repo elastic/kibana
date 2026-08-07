@@ -8,20 +8,14 @@
 import type { ChangeEvent, FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiFieldNumber,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldNumber } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
@@ -62,33 +56,21 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
     };
   }, [jobBucketSpan]);
 
-  const onQueryChange = useCallback(
-    (query: string) => {
-      setDatafeed({ datafeedQuery: query });
-    },
-    [setDatafeed]
-  );
+  const onQueryChange = (query: string) => {
+    setDatafeed({ datafeedQuery: query });
+  };
 
-  const onQueryDelayChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setDatafeed({ datafeedQueryDelay: e.target.value });
-    },
-    [setDatafeed]
-  );
+  const onQueryDelayChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDatafeed({ datafeedQueryDelay: e.target.value });
+  };
 
-  const onFrequencyChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setDatafeed({ datafeedFrequency: e.target.value });
-    },
-    [setDatafeed]
-  );
+  const onFrequencyChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDatafeed({ datafeedFrequency: e.target.value });
+  };
 
-  const onScrollSizeChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setDatafeed({ datafeedScrollSize: +e.target.value });
-    },
-    [setDatafeed]
-  );
+  const onScrollSizeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDatafeed({ datafeedScrollSize: +e.target.value });
+  };
 
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
@@ -102,24 +84,24 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
 
   const projects = useFetchProjects(fetchProjects, datafeedProjectRouting);
 
-  const onProjectRoutingChange = useCallback(
-    (projectRouting: ProjectRouting) => {
-      setDatafeed({ datafeedProjectRouting: projectRouting });
-    },
-    [setDatafeed]
-  );
+  const onProjectRoutingChange = (projectRouting: ProjectRouting) => {
+    setDatafeed({ datafeedProjectRouting: projectRouting });
+  };
 
   return (
     <>
       <EuiSpacer size="m" />
       {datafeedRunning && (
         <>
-          <EuiCallOut announceOnMount color="warning">
-            <FormattedMessage
-              id="xpack.ml.jobsList.editJobFlyout.datafeed.readOnlyCalloutText"
-              defaultMessage="Datafeed settings cannot be edited while the datafeed is running. Please stop the job if you wish to edit these settings."
-            />
-          </EuiCallOut>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ml.jobsList.editJobFlyout.datafeed.readOnlyCalloutText"
+                defaultMessage="Datafeed settings cannot be edited while the datafeed is running. Please stop the job if you wish to edit these settings."
+              />
+            }
+          />
           <EuiSpacer size="l" />
         </>
       )}

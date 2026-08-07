@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -20,6 +21,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -96,9 +98,10 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'confirmModalTitle' });
-  const [jobScopeChangeCounts, setJobScopeChangeCounts] = useState<
-    Map<string, { added: number; removed: number }>
-  >(new Map());
+  const [jobScopeChangeCounts, setJobScopeChangeCounts] = useState<Map<
+    string,
+    { added: number; removed: number }
+  > | null>(null);
 
   const cpsManager = countsDependencies?.cpsManager;
   const selectedProjectRouting = countsDependencies?.selectedProjectRouting;
@@ -121,13 +124,19 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
     [originProject, linkedProjects]
   );
 
+  const isMounted = useMountedState();
+
   useEffect(() => {
     async function fetchData() {
       if (!countsDependencies || isSelectedProjectsLoading) {
         return;
       }
+      setJobScopeChangeCounts(null);
       const { jobIds, getJobs } = countsDependencies;
       const jobs = await getJobs(jobIds);
+      if (!isMounted()) {
+        return;
+      }
 
       const jobScopesEntries = await Promise.all(
         jobs.map(async (job): Promise<[string, string[]]> => {
@@ -139,6 +148,9 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
           return [job.job_id, getProjectAliasesFromProjectsData(projectsData)];
         })
       );
+      if (!isMounted()) {
+        return;
+      }
 
       const changeCounts = new Map<string, { added: number; removed: number }>();
       for (const [jobId, currentScope] of jobScopesEntries) {
@@ -147,8 +159,8 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
       setJobScopeChangeCounts(changeCounts);
     }
 
-    fetchData();
-  }, [countsDependencies, fetchProjects, isSelectedProjectsLoading, selectedProjects]);
+    void fetchData();
+  }, [countsDependencies, fetchProjects, isMounted, isSelectedProjectsLoading, selectedProjects]);
 
   const modalTitle = useMemo(() => {
     if (!countsDependencies) {
@@ -222,31 +234,43 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
               color="subdued"
               css={{ maxHeight: '250px', overflowY: 'auto' }}
             >
-              {countsDependencies.jobIds.map((jobId, index) => {
-                const counts = jobScopeChangeCounts.get(jobId) ?? { added: 0, removed: 0 };
+              <EuiSkeletonText
+                lines={Math.min(countsDependencies.jobIds.length, 5) as 1 | 2 | 3 | 4 | 5}
+                isLoading={jobScopeChangeCounts === null}
+              >
+                {jobScopeChangeCounts
+                  ? countsDependencies.jobIds.map((jobId, index) => {
+                      const counts = jobScopeChangeCounts.get(jobId) ?? {
+                        added: 0,
+                        removed: 0,
+                      };
 
-                return (
-                  <React.Fragment key={jobId}>
-                    <EuiFlexGroup
-                      responsive={false}
-                      gutterSize="s"
-                      alignItems="center"
-                      data-test-subj={`mlUpdateAdJobsProjectRoutingConfirmModalJob-${jobId}`}
-                    >
-                      <EuiFlexItem>
-                        <EuiText size="s">{jobId}</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <ScopeChangeCount count={counts.added} type="added" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <ScopeChangeCount count={counts.removed} type="removed" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    {index < countsDependencies.jobIds.length - 1 ? <EuiSpacer size="s" /> : null}
-                  </React.Fragment>
-                );
-              })}
+                      return (
+                        <React.Fragment key={jobId}>
+                          <EuiFlexGroup
+                            responsive={false}
+                            gutterSize="s"
+                            alignItems="center"
+                            data-test-subj={`mlUpdateAdJobsProjectRoutingConfirmModalJob-${jobId}`}
+                          >
+                            <EuiFlexItem>
+                              <EuiText size="s">{jobId}</EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <ScopeChangeCount count={counts.added} type="added" />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <ScopeChangeCount count={counts.removed} type="removed" />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          {index < countsDependencies.jobIds.length - 1 ? (
+                            <EuiSpacer size="s" />
+                          ) : null}
+                        </React.Fragment>
+                      );
+                    })
+                  : null}
+              </EuiSkeletonText>
             </EuiPanel>
           </>
         ) : null}
