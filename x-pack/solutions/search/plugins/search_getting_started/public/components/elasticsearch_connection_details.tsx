@@ -48,7 +48,7 @@ export const ElasticsearchConnectionDetails = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
             <FormInfoField
               value={elasticsearchUrl}
