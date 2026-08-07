@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -148,7 +149,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
+      "matchDepNames": ["simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:nightshift-context-and-research"],
