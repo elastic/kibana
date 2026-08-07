@@ -79,6 +79,8 @@ const configSchema = schema.object(
       target: schema.oneOf([schema.literal('auto'), schema.literal('local')], {
         defaultValue: 'auto' as const,
       }),
+      // Keep an eye on existing validation in src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts
+      // If this SSL validation starts becoming more complex we may want to share validation
       ssl: schema.object({
         certificateAuthorities: schema.maybe(
           schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
