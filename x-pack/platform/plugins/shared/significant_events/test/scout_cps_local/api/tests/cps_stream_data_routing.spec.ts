@@ -94,7 +94,11 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, streamsTest, esClient, linkedProject }) => {
-      const credentials = await samlAuth.asStreamsAdmin();
+      // Use the built-in admin role (same as entity_store CPS). This suite proves space-based
+      // stream-data routing, not Streams RBAC. Custom `streamsAdmin` roles repeatedly fail on
+      // serverless when resolving query-stream ES|QL views (`$.logs…`) even with matching
+      // index privileges — identify returns 403 on `indices:data/read/esql/resolve_fields`.
+      const credentials = await samlAuth.asInteractiveUser('admin');
       cookieHeader = credentials.cookieHeader;
 
       await streamsTest.enableQueryStreams();
@@ -158,10 +162,13 @@ apiTest.describe(
           }
         );
 
-        expect(statusCode).toBe(200);
+        expect(statusCode, `identify/computed failed: ${JSON.stringify(body)}`).toBe(200);
 
         const response = body as IdentifyComputedResponse;
-        expect(response.computedFeaturesCount).toBeGreaterThan(0);
+        expect(
+          response.computedFeaturesCount,
+          `expected computed features from linked CPS data; got ${JSON.stringify(response)}`
+        ).toBeGreaterThan(0);
 
         const serializedFeatures = JSON.stringify(response.computedFeatures);
         expect(serializedFeatures).toContain(markerValue);
