@@ -64,6 +64,7 @@ plugins:
     - painless_lab
     - profiling
     - rollup
+    - reindex_service
     - saved_objects_management
     - saved_objects_tagging
     - search_getting_started
