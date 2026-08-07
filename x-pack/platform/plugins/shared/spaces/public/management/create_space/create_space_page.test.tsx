@@ -7,15 +7,16 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
+import { CoreScopedHistory, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { coreMock, notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { CreateSpacePage } from './create_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
@@ -28,16 +29,6 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
     EuiOverlayMask: (props: any) => <div>{props.children}</div>,
   };
 });
-
-jest.mock('@kbn/unsaved-changes-prompt', () => ({
-  useUnsavedChangesPrompt: jest.fn(),
-}));
-
-/** Whether the form currently considers itself to have unsaved changes. */
-const hasUnsavedChanges = () => {
-  const { calls } = jest.mocked(useUnsavedChangesPrompt).mock;
-  return calls[calls.length - 1][0].hasUnsavedChanges;
-};
 
 const space: Space = {
   id: 'my-space',
@@ -576,18 +567,31 @@ describe('ManageSpacePage', () => {
   }, 10000);
 
   describe('unsaved changes', () => {
+    // A real ScopedHistory, rather than `scopedHistoryMock`: the prompt works by installing a
+    // `history.block` handler, which the mock does not implement, so a mocked history cannot tell
+    // whether the user would have been asked to confirm.
+    let realHistory: CoreScopedHistory;
+    let openConfirm: jest.Mocked<OverlayStart>['openConfirm'];
+
     const renderCreateSpacePage = async () => {
       const spacesManager = spacesManagerMock.create();
       spacesManager.createSpace = jest.fn(spacesManager.createSpace);
       spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+      realHistory = new CoreScopedHistory(
+        createMemoryHistory({ initialEntries: ['/mock/create'] }),
+        '/mock'
+      );
+      openConfirm = jest.fn().mockResolvedValue(false);
 
       renderWithIntl(
         <CreateSpacePage
           spacesManager={spacesManager as unknown as SpacesManager}
           getFeatures={featuresStart.getFeatures}
           notifications={notificationServiceMock.createStartContract()}
-          history={history}
+          history={realHistory}
           {...navigationServices}
+          overlays={{ ...navigationServices.overlays, openConfirm }}
           capabilities={{
             navLinks: {},
             management: {},
@@ -606,51 +610,74 @@ describe('ManageSpacePage', () => {
       });
     };
 
-    beforeEach(() => {
-      jest.mocked(useUnsavedChangesPrompt).mockClear();
-    });
-
-    it('does not prompt when the form has not been touched', async () => {
+    it('does not prompt when leaving an untouched form', async () => {
       await renderCreateSpacePage();
 
-      expect(hasUnsavedChanges()).toBe(false);
+      realHistory.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(realHistory.location.pathname).toBe('/');
     });
 
-    it('prompts once the form has been edited', async () => {
+    it('prompts when leaving an edited form', async () => {
       await renderCreateSpacePage();
 
       fireEvent.change(screen.getByTestId('addSpaceName'), {
         target: { value: 'New Space Name' },
       });
 
-      expect(hasUnsavedChanges()).toBe(true);
+      realHistory.push('/');
+
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      // navigation stays blocked until the user confirms
+      expect(realHistory.location.pathname).toBe('/create');
     });
 
-    it('stops prompting when the edit is reverted', async () => {
+    it('does not prompt when the edit has been reverted', async () => {
       await renderCreateSpacePage();
 
       fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
         target: { value: 'some description' },
       });
-      expect(hasUnsavedChanges()).toBe(true);
-
       fireEvent.change(screen.getByTestId('descriptionSpaceText'), { target: { value: '' } });
 
-      expect(hasUnsavedChanges()).toBe(false);
+      realHistory.push('/');
+
+      expect(openConfirm).not.toHaveBeenCalled();
+      expect(realHistory.location.pathname).toBe('/');
     });
 
-    it('clears its unsaved changes when the form is cancelled', async () => {
+    it('does not prompt when the form is cancelled', async () => {
       await renderCreateSpacePage();
 
       fireEvent.change(screen.getByTestId('addSpaceName'), {
         target: { value: 'New Space Name' },
       });
-      expect(hasUnsavedChanges()).toBe(true);
 
       await userEvent.click(screen.getByTestId('cancel-space-button'));
 
-      expect(hasUnsavedChanges()).toBe(false);
-      expect(history.push).toHaveBeenCalledWith('/');
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('does not prompt after the space has been saved', async () => {
+      await renderCreateSpacePage();
+
+      fireEvent.change(screen.getByTestId('addSpaceName'), {
+        target: { value: 'New Space Name' },
+      });
+      await updateSolutionView('oblt');
+
+      await userEvent.click(screen.getByTestId('save-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(openConfirm).not.toHaveBeenCalled();
     });
   });
 });

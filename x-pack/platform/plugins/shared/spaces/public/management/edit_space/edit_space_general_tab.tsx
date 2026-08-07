@@ -22,7 +22,7 @@ import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
-import { ConfirmDeleteModal, SpacesUnsavedChangesPrompt } from '../components';
+import { ConfirmDeleteModal, NavigateOnLeave, SpacesUnsavedChangesPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeCps } from '../components/customize_cps';
@@ -63,6 +63,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   };
 
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
+  const [isLeaving, setIsLeaving] = useState(false); // track if the user has chosen to leave the form
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
@@ -74,6 +75,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const initialFeatureVisibilityRef = useRef<string[]>(space.disabledFeatures ?? []);
   const storedFeatureVisibilityRef = useRef<string[] | undefined>(undefined);
+  const requiresReloadRef = useRef(false);
 
   useEffect(() => {
     let unmounted = false;
@@ -149,14 +151,15 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     [onChangeSpaceSettings]
   );
 
-  const backToSpacesList = useCallback(() => {
-    history.push('/');
-  }, [history]);
+  // Once the user has chosen to leave — by saving, deleting, or cancelling — their changes are
+  // either persisted or deliberately discarded, so the unsaved changes prompt must not fire on the
+  // way back to the spaces list. `isDirty` cannot tell the difference on its own: it compares
+  // against the space as it was loaded, and saving does not change what was loaded.
+  const backToSpacesList = useCallback(() => setIsLeaving(true), []);
 
   const onClickCancel = useCallback(() => {
     setShowAlteringActiveSpaceDialog(false);
     setShowUserImpactWarning(false);
-    setIsDirty(false);
     backToSpacesList();
   }, [backToSpacesList]);
 
@@ -239,11 +242,10 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
         updateProjectPicker(spaceClone);
 
-        setIsDirty(false);
+        // the reload is deferred along with the navigation, so that the window reloads on the
+        // spaces list rather than on the space that was just left
+        requiresReloadRef.current = requiresReload;
         backToSpacesList();
-        if (requiresReload) {
-          props.reloadWindow();
-        }
       } catch (error) {
         logger.error('Could not save changes to space!', error);
         const message = error?.body?.message ?? error.toString();
@@ -257,15 +259,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         setIsLoading(false);
       }
     },
-    [
-      backToSpacesList,
-      notifications.toasts,
-      formValues,
-      spacesManager,
-      logger,
-      props,
-      updateProjectPicker,
-    ]
+    [backToSpacesList, notifications.toasts, formValues, spacesManager, logger, updateProjectPicker]
   );
 
   const validator = useMemo(() => new SpaceValidator(), []);
@@ -347,11 +341,20 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   return (
     <>
       <SpacesUnsavedChangesPrompt
-        hasUnsavedChanges={isDirty}
+        hasUnsavedChanges={isDirty && !isLeaving}
         http={http}
         overlays={overlays}
         navigateToUrl={navigateToUrl}
         history={history}
+      />
+      <NavigateOnLeave
+        isLeaving={isLeaving}
+        history={history}
+        onNavigated={() => {
+          if (requiresReloadRef.current) {
+            props.reloadWindow();
+          }
+        }}
       />
 
       {doShowAlteringActiveSpaceDialog()}

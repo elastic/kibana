@@ -7,8 +7,10 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { CoreScopedHistory } from '@kbn/core/public';
 import {
   httpServiceMock,
   i18nServiceMock,
@@ -535,6 +537,83 @@ describe('EditSpaceSettings', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('unsaved changes prompt', () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    // A real ScopedHistory, rather than `scopedHistoryMock`: the prompt works by installing a
+    // `history.block` handler, which the mock does not implement, so a mocked history cannot tell
+    // whether the user would have been asked to confirm.
+    let realHistory: CoreScopedHistory;
+
+    const renderDirtyTab = async () => {
+      realHistory = new CoreScopedHistory(
+        createMemoryHistory({ initialEntries: ['/mock/edit/existing-space'] }),
+        '/mock'
+      );
+      overlays.openConfirm.mockClear();
+
+      render(
+        <TestComponent>
+          <EditSpaceSettingsTab
+            space={spaceToUpdate}
+            history={realHistory}
+            features={[]}
+            allowFeatureVisibility={false}
+            allowSolutionVisibility={true}
+            reloadWindow={reloadWindow}
+          />
+        </TestComponent>
+      );
+
+      fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
+        target: { value: 'a new description' },
+      });
+      expect(await screen.findByTestId('save-space-button')).toBeInTheDocument();
+    };
+
+    it('prompts when navigating away with unsaved changes', async () => {
+      await renderDirtyTab();
+
+      realHistory.push('/');
+
+      await waitFor(() => {
+        expect(overlays.openConfirm).toHaveBeenCalled();
+      });
+      // navigation stays blocked until the user confirms
+      expect(realHistory.location.pathname).toBe('/edit/existing-space');
+    });
+
+    it('does not prompt when the form is cancelled', async () => {
+      await renderDirtyTab();
+
+      await userEvent.click(screen.getByTestId('cancel-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(overlays.openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('does not prompt when the changes are saved', async () => {
+      await renderDirtyTab();
+
+      await userEvent.click(screen.getByTestId('save-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(overlays.openConfirm).not.toHaveBeenCalled();
     });
   });
 

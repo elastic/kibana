@@ -40,7 +40,7 @@ import type { EventTracker } from '../../analytics';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
-import { SpacesUnsavedChangesPrompt, UnauthorizedPrompt } from '../components';
+import { NavigateOnLeave, SpacesUnsavedChangesPrompt, UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeCps } from '../components/customize_cps';
@@ -78,6 +78,7 @@ interface State {
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
   isDirty: boolean;
+  isLeaving: boolean;
   isLoading: boolean;
   saveInProgress: boolean;
   formError?: {
@@ -95,6 +96,7 @@ export class CreateSpacePage extends Component<Props, State> {
     this.state = {
       isLoading: true,
       isDirty: false,
+      isLeaving: false,
       showAlteringActiveSpaceDialog: false,
       saveInProgress: false,
       space: {
@@ -195,17 +197,26 @@ export class CreateSpacePage extends Component<Props, State> {
       );
     }
 
-    if (this.state.isLoading) {
-      return this.getLoadingIndicator();
-    }
-
     return (
-      <EuiPageSection restrictWidth>
-        <EuiPageHeader pageTitle={this.getTitle()} description={getSpacesFeatureDescription()} />
-        <EuiSpacer size="l" />
+      <>
+        {/* rendered outside of the form, which is unmounted while loading, because loading the
+            space can itself fail and send the user back to the list */}
+        <NavigateOnLeave isLeaving={this.state.isLeaving} history={this.props.history} />
 
-        {this.getForm()}
-      </EuiPageSection>
+        {this.state.isLoading ? (
+          this.getLoadingIndicator()
+        ) : (
+          <EuiPageSection restrictWidth>
+            <EuiPageHeader
+              pageTitle={this.getTitle()}
+              description={getSpacesFeatureDescription()}
+            />
+            <EuiSpacer size="l" />
+
+            {this.getForm()}
+          </EuiPageSection>
+        )}
+      </>
     );
   }
 
@@ -221,13 +232,13 @@ export class CreateSpacePage extends Component<Props, State> {
   );
 
   public getForm = () => {
-    const { showAlteringActiveSpaceDialog, isDirty, saveInProgress } = this.state;
+    const { showAlteringActiveSpaceDialog, isDirty, isLeaving } = this.state;
     const { http, overlays, navigateToUrl, history } = this.props;
 
     return (
       <div data-test-subj="spaces-create-page">
         <SpacesUnsavedChangesPrompt
-          hasUnsavedChanges={isDirty && !saveInProgress}
+          hasUnsavedChanges={isDirty && !isLeaving}
           http={http}
           overlays={overlays}
           navigateToUrl={navigateToUrl}
@@ -376,7 +387,9 @@ export class CreateSpacePage extends Component<Props, State> {
   public onSpaceChange = (updatedSpace: CustomizeSpaceFormValues) => {
     this.setState((state) => ({
       space: updatedSpace,
-      isDirty: haveFormValuesChanged(state.initialSpace ?? {}, updatedSpace),
+      // `initialSpace` is captured once the space has loaded, which is also when the form the user
+      // is changing here is first rendered
+      isDirty: state.initialSpace ? haveFormValuesChanged(state.initialSpace, updatedSpace) : false,
     }));
   };
 
@@ -528,11 +541,9 @@ export class CreateSpacePage extends Component<Props, State> {
       });
   };
 
-  private backToSpacesList = () => {
-    // the form is being abandoned or has been saved, so stop warning about its changes. Matches
-    // `onClickCancel` on the edit space form, and keeps the prompt from firing a second time once
-    // the user has confirmed that they want to leave.
-    this.setState({ isDirty: false });
-    this.props.history.push('/');
-  };
+  // Once the user has chosen to leave — by saving or cancelling — their changes are either
+  // persisted or deliberately discarded, so the unsaved changes prompt must not fire on the way
+  // back to the spaces list. `isDirty` cannot tell the difference on its own: it compares against
+  // the form as it was first rendered, and saving does not change that.
+  private backToSpacesList = () => this.setState({ isLeaving: true });
 }
