@@ -152,9 +152,6 @@ test.describe('Data streams index mode', { tag: tags.deploymentAgnostic }, () =>
     await expect(dataStreamIndexMode(page)).toHaveText(INDEX_MODE.STANDARD);
   });
 
-  // The origin mode is only asserted on the template: the details flyout reports "Standard" for a time
-  // series data stream (https://github.com/elastic/kibana/issues/283371). The destination is asserted
-  // on both.
   test('allows to upgrade data stream from time series to logsdb index mode', async ({
     page,
     esClient,
