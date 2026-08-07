@@ -76,7 +76,6 @@ export {
   type Detection,
   type ChangePointType,
   CHANGE_POINT_TYPES,
-  type Discovery,
   type KnowledgeIndicator,
   type SignificantEvent,
   type SignificantEventStatus,
@@ -88,10 +87,12 @@ export {
   type InvestigationHypothesis,
   type InvestigationState,
   type SignificantEventUpdate,
-  type SignificantEventUpdateEvidence,
+  type InvestigationEvidence,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_HYPOTHESIS_EVIDENCE,
   MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
   MAX_SIGNIFICANT_EVENT_UPDATES,
   significantEventUpdateSchema,
@@ -103,7 +104,6 @@ export {
   SEVERITY_OPTIONS,
   getSeverityLabel,
   detectionSchema,
-  discoverySchema,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
@@ -117,6 +117,14 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './src/significant_events';
 
 export type {
@@ -138,7 +146,6 @@ export {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 

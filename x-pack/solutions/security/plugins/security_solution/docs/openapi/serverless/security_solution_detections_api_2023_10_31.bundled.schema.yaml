@@ -6291,6 +6291,41 @@ components:
     ItemsPerSearch:
       minimum: 1
       type: integer
+    KillProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the
+            command field. Example: "command": "kill-process"'
+          enum:
+            - kill-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find
+            your comment in the response actions history log. Example:
+            "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of `process.pid`
+              maxLength: 2000
+              type: string
+            kill_descendants:
+              description: Whether to also terminate the descendant processes of the targeted
+                process.
+              type: boolean
+              x-state: Added in 9.6.0
+            overwrite:
+              default: true
+              description: Whether to overwrite field with `process.pid`
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     KqlQueryLanguage:
       enum:
         - kuery
@@ -7465,35 +7500,14 @@ components:
         - error
         - message
     ProcessesParams:
-      type: object
-      properties:
-        command:
-          description: 'To run an endpoint response action, specify a value for the
-            command field. Example: "command": "isolate"'
-          enum:
-            - kill-process
-            - suspend-process
-          type: string
-        comment:
-          description: 'Add a note that explains or describes the action. You can find
-            your comment in the response actions history log. Example:
-            "comment": "Check processes"'
-          type: string
-        config:
-          type: object
-          properties:
-            field:
-              description: Field to use instead of process.pid
-              type: string
-            overwrite:
-              default: true
-              description: Whether to overwrite field with process.pid
-              type: boolean
-          required:
-            - field
-      required:
-        - command
-        - config
+      discriminator:
+        mapping:
+          kill-process: '#/components/schemas/KillProcessParams'
+          suspend-process: '#/components/schemas/SuspendProcessParams'
+        propertyName: command
+      oneOf:
+        - $ref: '#/components/schemas/KillProcessParams'
+        - $ref: '#/components/schemas/SuspendProcessParams'
     QueryAlertsBodyParams:
       type: object
       properties:
@@ -9622,6 +9636,36 @@ components:
         - asc
         - desc
       type: string
+    SuspendProcessParams:
+      type: object
+      properties:
+        command:
+          description: 'To run an endpoint response action, specify a value for the
+            command field. Example: "command": "suspend-process"'
+          enum:
+            - suspend-process
+          type: string
+        comment:
+          description: 'Add a note that explains or describes the action. You can find
+            your comment in the response actions history log. Example:
+            "comment": "Check processes"'
+          type: string
+        config:
+          type: object
+          properties:
+            field:
+              description: Field to use instead of process.pid
+              maxLength: 2000
+              type: string
+            overwrite:
+              default: true
+              description: Whether to overwrite field with process.pid
+              type: boolean
+          required:
+            - field
+      required:
+        - command
+        - config
     Threat:
       description: >
         > info

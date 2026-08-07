@@ -431,6 +431,43 @@ describe('UserActionPersister', () => {
       });
     });
 
+    it('suppresses the customFields user action when templates v2 mirrors the edit into extended_fields', () => {
+      // Reproduces the reported bug: replace_custom_field.ts / bulk_update.ts write customFields
+      // and its mirrored extended_fields value in the same patch when templates are enabled.
+      // Both keys land in updatedAttributes, but only one activity-log entry should surface —
+      // extended_fields is what templates v2 renders and already reflects the customFields value.
+      const combinedRequest = {
+        cases: [
+          {
+            ...patchUpdateCustomFieldsCasesRequest.cases[0],
+            updatedAttributes: {
+              ...patchUpdateCustomFieldsCasesRequest.cases[0].updatedAttributes,
+              extended_fields: { risk_score: 'high' },
+            },
+          },
+        ],
+      };
+
+      expect(
+        persister.buildUserActions({
+          updatedCases: combinedRequest,
+          user: testUser,
+        })
+      ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+    });
+
+    it('still creates the customFields user action when extended_fields did not also change', () => {
+      // customFields-only updates (templates disabled, or a field with no migrated global-field
+      // counterpart) must be unaffected — extended_fields is absent from the patch in that case.
+      const result = persister.buildUserActions({
+        updatedCases: patchUpdateCustomFieldsCasesRequest,
+        user: testUser,
+      });
+
+      expect(result['1']).toHaveLength(1);
+      expect(result['1'][0].parameters.attributes.type).toBe('customFields');
+    });
+
     describe('template', () => {
       it('creates a user action when a template is applied', () => {
         expect(

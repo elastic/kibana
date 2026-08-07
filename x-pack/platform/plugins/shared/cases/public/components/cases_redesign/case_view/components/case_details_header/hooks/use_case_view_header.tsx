@@ -86,8 +86,14 @@ export const useCaseViewHeader = ({
 
   // Metadata
   const metadata = useMemo((): AppHeaderMetadataItems => {
+    // Same precedence as `getUserDisplayName` (used for the participant avatars next to this
+    // header) so both surfaces show the same name — e.g. serverless operator users have an email
+    // but no full name.
     const reporterName =
-      caseData.createdBy.fullName || caseData.createdBy.username || UNKNOWN_REPORTER;
+      caseData.createdBy.fullName ||
+      caseData.createdBy.email ||
+      caseData.createdBy.username ||
+      UNKNOWN_REPORTER;
     const formattedDate = moment.tz(caseData.createdAt, timeZone).format(dateFormat);
 
     const reportedByItem = {
