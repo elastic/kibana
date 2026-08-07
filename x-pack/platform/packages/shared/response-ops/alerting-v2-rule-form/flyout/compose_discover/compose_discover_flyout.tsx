@@ -173,28 +173,22 @@ export interface ComposeDiscoverFlyoutProps {
   /**
    * Called with the create payload when the user submits in create mode. When the user
    * enables the notifications step, `notifications` carries the captured action draft list;
-   * otherwise it is `undefined`. May return a promise; rejection leaves the flyout mounted.
+   * otherwise it is `undefined`.
    */
   onCreateRule: (
     payload: ReturnType<typeof composeFormToCreateRequest>,
     notifications?: RuleNotificationsValue
-  ) => void | Promise<void>;
+  ) => void;
   /**
    * Called with id + update payload when the user submits in edit mode. When the user
    * configures simple actions, `notifications` carries the captured action draft list so
    * the caller can create linked action policies; otherwise it is `undefined`.
-   * May return a promise; rejection leaves the flyout mounted.
    */
   onUpdateRule?: (
     id: string,
     payload: ReturnType<typeof composeFormToUpdateRequest>,
     notifications?: RuleNotificationsValue
-  ) => void | Promise<void>;
-  /**
-   * Registers a navigator that moves the still-mounted flyout to the query step.
-   * Used by the host to attach a "Review query" action on save 400 toasts.
-   */
-  onProvideQueryStepNavigator?: (navigate: () => void) => void;
+  ) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
@@ -256,7 +250,6 @@ export function ComposeDiscoverFlyout({
   services,
   onCreateRule,
   onUpdateRule,
-  onProvideQueryStepNavigator,
   isSaving = false,
   builderType,
   initialBuilderState,
@@ -326,13 +319,6 @@ export function ComposeDiscoverFlyout({
     }
     wasChildOpenRef.current = uiState.childOpen;
   }, [uiState.childOpen]);
-
-  useEffect(() => {
-    onProvideQueryStepNavigator?.(() => {
-      dispatch({ type: 'SET_STEP', step: 0 });
-      dispatch({ type: 'CLOSE_CHILD' });
-    });
-  }, [dispatch, onProvideQueryStepNavigator]);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
@@ -888,7 +874,7 @@ export function ComposeDiscoverFlyout({
     cancelYamlParse,
   ]);
 
-  const handleSubmit = methods.handleSubmit(async (values) => {
+  const handleSubmit = methods.handleSubmit((values) => {
     if (hasValidationErrors) {
       return;
     }
@@ -898,19 +884,10 @@ export function ComposeDiscoverFlyout({
         return;
       }
     }
-    try {
-      if (isCreate) {
-        await onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
-      } else if (ruleId && onUpdateRule) {
-        await onUpdateRule(
-          ruleId,
-          composeFormToUpdateRequest(values, builderType),
-          values.notifications
-        );
-      }
-    } catch {
-      // Caller owns the error toast. Leave the flyout mounted so the host can
-      // navigate back to the query step from a 400 action.
+    if (isCreate) {
+      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+    } else if (ruleId && onUpdateRule) {
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
     }
   });
 

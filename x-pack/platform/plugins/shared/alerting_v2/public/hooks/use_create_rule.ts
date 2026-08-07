@@ -13,17 +13,8 @@ import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
-import {
-  CREATE_RULE_ERROR_TITLE,
-  runRuleMutationErrorToast,
-  type OnRuleMutationErrorToast,
-} from './rule_mutation_error_toast';
 
-interface UseCreateRuleOptions {
-  onErrorToast?: OnRuleMutationErrorToast;
-}
-
-export const useCreateRule = ({ onErrorToast }: UseCreateRuleOptions = {}) => {
+export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
@@ -40,17 +31,13 @@ export const useCreateRule = ({ onErrorToast }: UseCreateRuleOptions = {}) => {
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
     },
-    onError: (error: Error, variables: CreateRuleData) => {
-      runRuleMutationErrorToast(
-        onErrorToast,
-        error,
-        () =>
-          toasts.addError(enrichHttpErrorMessage(error), {
-            title: CREATE_RULE_ERROR_TITLE,
-            toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
-          }),
-        variables.query
-      );
+    onError: (error: Error) => {
+      toasts.addError(enrichHttpErrorMessage(error), {
+        title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
+          defaultMessage: 'Rule not created',
+        }),
+        toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
+      });
     },
   });
 };

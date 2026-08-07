@@ -13,17 +13,8 @@ import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
-import {
-  UPDATE_RULE_ERROR_TITLE,
-  runRuleMutationErrorToast,
-  type OnRuleMutationErrorToast,
-} from './rule_mutation_error_toast';
 
-interface UseUpdateRuleOptions {
-  onErrorToast?: OnRuleMutationErrorToast;
-}
-
-export const useUpdateRule = ({ onErrorToast }: UseUpdateRuleOptions = {}) => {
+export const useUpdateRule = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
@@ -42,17 +33,13 @@ export const useUpdateRule = ({ onErrorToast }: UseUpdateRuleOptions = {}) => {
       queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
     },
-    onError: (error: Error, variables: { id: string; payload: UpdateRuleData }) => {
-      runRuleMutationErrorToast(
-        onErrorToast,
-        error,
-        () =>
-          toasts.addError(enrichHttpErrorMessage(error), {
-            title: UPDATE_RULE_ERROR_TITLE,
-            toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
-          }),
-        variables.payload.query
-      );
+    onError: (error: Error) => {
+      toasts.addError(enrichHttpErrorMessage(error), {
+        title: i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
+          defaultMessage: 'Edits not saved',
+        }),
+        toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
+      });
     },
   });
 };

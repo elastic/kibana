@@ -148,46 +148,4 @@ describe('useCreateRule', () => {
       });
     });
   });
-
-  it('should let onErrorToast override the default toast and call showDefaultToast when asked', async () => {
-    const error = new Error('bad request');
-    mockCreateRule.mockRejectedValue(error);
-    const onErrorToast = jest.fn((_error: Error, showDefaultToast: () => void, _query: unknown) => {
-      showDefaultToast();
-    });
-    const { result } = renderHook(() => useCreateRule({ onErrorToast }), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate(mockCreatePayload);
-
-    await waitFor(() => {
-      expect(onErrorToast).toHaveBeenCalledWith(
-        error,
-        expect.any(Function),
-        mockCreatePayload.query
-      );
-      expect(mockAddError).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('should skip the default toast when onErrorToast handles the error alone', async () => {
-    const error = new Error('bad request');
-    mockCreateRule.mockRejectedValue(error);
-    const onErrorToast = jest.fn();
-    const { result } = renderHook(() => useCreateRule({ onErrorToast }), {
-      wrapper: createWrapper(),
-    });
-
-    result.current.mutate(mockCreatePayload);
-
-    await waitFor(() => {
-      expect(onErrorToast).toHaveBeenCalledWith(
-        error,
-        expect.any(Function),
-        mockCreatePayload.query
-      );
-      expect(mockAddError).not.toHaveBeenCalled();
-    });
-  });
 });

@@ -37,7 +37,6 @@ const TIMESTAMP_ONLY_BREACH_SEGMENT = 'WHERE count > 100';
 const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
 const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
 const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
-const CONDITIONLESS_SAVE_RULE_NAME = 'scout-compose-discover-conditionless-save';
 const YAML_ONLY_STANDALONE_RULE_NAME = 'scout-compose-discover-yaml-only-standalone';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
 /**
@@ -477,47 +476,6 @@ test.describe(
             { timeout: 30_000 }
           )
           .toBe('event.ingested');
-      });
-    });
-
-    test('create flow: conditionless alert save 400s and Review query returns to step 0', async ({
-      page,
-      pageObjects,
-    }) => {
-      await test.step('open create flyout and apply a base-only query', async () => {
-        await pageObjects.composeDiscover.openCreateFlyout();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await pageObjects.composeDiscover.openSandbox();
-        await pageObjects.composeDiscover.applySandboxBaseQueryOnly(BASE_QUERY);
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
-        await expect(
-          pageObjects.composeDiscover.summarySection('no_alert_condition')
-        ).toBeVisible();
-        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-      });
-
-      await test.step('advance through Outcome and Details, then submit', async () => {
-        await pageObjects.composeDiscover.clickNext(); // Outcome
-        await pageObjects.composeDiscover.clickNext(); // Details
-        await pageObjects.composeDiscover.setRuleName(CONDITIONLESS_SAVE_RULE_NAME);
-        await pageObjects.composeDiscover.clickNext(); // Actions
-        await pageObjects.composeDiscover.clickSubmit();
-      });
-
-      await test.step('400 toast offers Review query; flyout stays open', async () => {
-        const reviewQuery = page.testSubj.locator('composeDiscoverReviewQueryToastAction');
-        await expect(reviewQuery).toBeVisible({ timeout: 30_000 });
-        await expect(page.getByText('Rule not created')).toBeVisible();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await reviewQuery.click();
-      });
-
-      await test.step('Review query returns to the Alert Condition step', async () => {
-        await expect(
-          pageObjects.composeDiscover.summarySection('no_alert_condition')
-        ).toBeVisible();
-        await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
-        await expect(pageObjects.composeDiscover.timeFieldSelector).toBeVisible();
       });
     });
 

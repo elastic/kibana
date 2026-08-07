@@ -58,6 +58,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
     }
+    if (token === 'i18n' || token === 'theme') {
+      return {};
+    }
     if (
       token === 'data' ||
       token === 'dataViews' ||
@@ -110,6 +113,10 @@ jest.mock('../../hooks/use_create_rule', () => ({
 const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
+}));
+
+jest.mock('../../hooks/use_setup_rule_notifications', () => ({
+  useSetupRuleNotifications: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
