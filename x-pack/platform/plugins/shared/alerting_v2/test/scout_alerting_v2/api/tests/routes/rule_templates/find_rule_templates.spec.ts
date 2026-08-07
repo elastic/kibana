@@ -186,10 +186,10 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
         { name: 'c-template', tags: ['development'] },
       ];
 
-      for (const { name, tags } of templates) {
+      for (const { name, tags: templateTags } of templates) {
         await apiServices.alertingV2.ruleTemplates.create({
           id: name,
-          attributes: buildRuleTemplateData({ metadata: { name, tags } }),
+          attributes: buildRuleTemplateData({ metadata: { name, tags: templateTags } }),
         });
       }
 
@@ -342,9 +342,12 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
   );
 
   apiTest('validation: should reject more tags than the maximum', async ({ apiClient }) => {
-    const tags = Array.from({ length: RULE_TEMPLATE_TAGS_MAX_COUNT + 1 }, (_, i) => `tag-${i}`);
+    const tooManyTags = Array.from(
+      { length: RULE_TEMPLATE_TAGS_MAX_COUNT + 1 },
+      (_, i) => `tag-${i}`
+    );
 
-    const response = await apiClient.get(getFindRuleTemplatesUrl({ tags }), {
+    const response = await apiClient.get(getFindRuleTemplatesUrl({ tags: tooManyTags }), {
       headers: adminHeaders,
     });
 
