@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MonoTypeOperatorFunction, OperatorFunction } from 'rxjs';
+import type { MonoTypeOperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
-import type { ChatCompletionEvent } from '@kbn/inference-common';
+import type { ChatCompletionEvent, ChatCompletionTokenCountEvent } from '@kbn/inference-common';
 import {
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
@@ -30,7 +30,7 @@ import { retryWithExponentialBackoff } from '../../../common/utils/retry_with_ex
  * the message event drops the held token counts, since nothing can be emitted
  * once the downstream has unsubscribed.
  */
-export function retryHoldingTokenCountEvents<T extends ChatCompletionEvent>({
+export function retryHoldingTokenCountEvents({
   maxRetry = 3,
   initialDelay,
   backoffMultiplier,
@@ -40,7 +40,7 @@ export function retryHoldingTokenCountEvents<T extends ChatCompletionEvent>({
   initialDelay?: number;
   backoffMultiplier?: number;
   errorFilter?: (error: Error) => boolean;
-} = {}): MonoTypeOperatorFunction<T> {
+} = {}): MonoTypeOperatorFunction<ChatCompletionEvent> {
   return (source$) => {
     let errorCount = 0;
     const willBeRetried = (error: Error) => {
@@ -49,8 +49,8 @@ export function retryHoldingTokenCountEvents<T extends ChatCompletionEvent>({
     };
 
     return source$.pipe(
-      holdTokenCountEventsUntilMessage<T>({ discardHeldOnError: willBeRetried }),
-      retryWithExponentialBackoff<T>({ maxRetry, initialDelay, backoffMultiplier, errorFilter })
+      holdTokenCountEventsUntilMessage({ discardHeldOnError: willBeRetried }),
+      retryWithExponentialBackoff({ maxRetry, initialDelay, backoffMultiplier, errorFilter })
     );
   };
 }
@@ -59,16 +59,18 @@ export function retryHoldingTokenCountEvents<T extends ChatCompletionEvent>({
  * Withholds token-count events until the message event is emitted; on error,
  * `discardHeldOnError` decides whether held events are dropped (the error will
  * be retried) or flushed ahead of the error (the failure is terminal). Events
- * held when the source completes without a message event are flushed.
+ * held when the source completes without a message event are flushed. The hold
+ * is per subscription, so a retrying re-subscription starts with an empty
+ * buffer and held events always belong to the current attempt.
  */
-export function holdTokenCountEventsUntilMessage<T extends ChatCompletionEvent>({
+export function holdTokenCountEventsUntilMessage({
   discardHeldOnError,
 }: {
   discardHeldOnError: (error: Error) => boolean;
-}): OperatorFunction<T, T> {
+}): MonoTypeOperatorFunction<ChatCompletionEvent> {
   return (source$) =>
-    new Observable<T>((subscriber) => {
-      let held: T[] = [];
+    new Observable<ChatCompletionEvent>((subscriber) => {
+      let held: ChatCompletionTokenCountEvent[] = [];
 
       const flush = () => {
         held.forEach((tokenEvent) => subscriber.next(tokenEvent));

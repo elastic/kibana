@@ -99,7 +99,7 @@ describe('retryHoldingTokenCountEvents', () => {
       attempt++;
       if (attempt === 1) {
         return concat(
-          of<ChatCompletionEvent>(failedTokens),
+          of(failedTokens),
           throwError(() => new Error('attempt 1 failed'))
         );
       }
@@ -115,7 +115,7 @@ describe('retryHoldingTokenCountEvents', () => {
 
   it('flushes token counts before a non-retryable error', async () => {
     const source$ = concat(
-      of<ChatCompletionEvent>(failedTokens),
+      of(failedTokens),
       throwError(() => new Error('non retryable'))
     );
 
@@ -144,7 +144,7 @@ describe('retryHoldingTokenCountEvents', () => {
       attempt++;
       const tokens = attempt === 1 ? failedTokens : successTokens;
       return concat(
-        of<ChatCompletionEvent>(tokens),
+        of(tokens),
         throwError(() => new Error(`attempt ${attempt} failed`))
       );
     });
