@@ -112,7 +112,7 @@ Auto-generated from \`groupingModeSchema\` in \`@kbn/alerting-v2-schemas\`.
 - \`all\`: a single notification for all matching episodes
 - \`per_field\`: group by specified \`groupBy\` fields
 
-Throttle strategy must be compatible with the grouping mode — see [throttle-strategies](./throttle-strategies.md)."
+Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-strategies](./action-policy-throttle-strategies.md)."
 `;
 
 exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -251,7 +251,7 @@ Auto-generated from \`throttleStrategySchema\` and compatibility sets in \`@kbn/
 - \`time_interval\`: notify at regular intervals regardless of status (default for \`all\` / \`per_field\`)
 - \`every_time\`: notify on every evaluation cycle (high volume)
 
-Compatibility with grouping modes (see [grouping-modes](./grouping-modes.md)):
+Compatibility with grouping modes (see [action-policy-grouping-modes](./action-policy-grouping-modes.md)):
 - For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
 - For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
 - \`per_status_interval\`, \`time_interval\` require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`)."

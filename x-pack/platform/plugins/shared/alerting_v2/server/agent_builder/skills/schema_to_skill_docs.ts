@@ -370,6 +370,8 @@ export const generateMatcherContextDoc = (): string => {
   return [
     '# Matcher Context Fields',
     '',
+    'Auto-generated from `MATCHER_CONTEXT_FIELDS` in `@kbn/alerting-v2-schemas`.',
+    '',
     "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
     '',
     '| Field | Type | Description |',
@@ -394,7 +396,7 @@ export const generateGroupingModesDoc = (): string => {
     '',
     ...bullets,
     '',
-    'Throttle strategy must be compatible with the grouping mode — see [throttle-strategies](./throttle-strategies.md).',
+    'Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-strategies](./action-policy-throttle-strategies.md).',
   ].join('\n');
 };
 
@@ -420,7 +422,7 @@ export const generateThrottleStrategiesDoc = (): string => {
     '',
     ...bullets,
     '',
-    'Compatibility with grouping modes (see [grouping-modes](./grouping-modes.md)):',
+    'Compatibility with grouping modes (see [action-policy-grouping-modes](./action-policy-grouping-modes.md)):',
     `- For \`per_episode\`: ${formatSet(PER_EPISODE_STRATEGIES)}.`,
     `- For \`all\` / \`per_field\`: ${formatSet(AGGREGATE_STRATEGIES)}.`,
     `- ${intervalStrategies} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,

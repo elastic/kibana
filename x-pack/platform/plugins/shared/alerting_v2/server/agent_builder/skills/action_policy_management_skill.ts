@@ -33,22 +33,22 @@ export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDe
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {
-        name: 'matchers',
+        name: 'action-policy-matchers',
         relativePath: './references',
         content: generateMatcherContextDoc(),
       },
       {
-        name: 'grouping-modes',
+        name: 'action-policy-grouping-modes',
         relativePath: './references',
         content: generateGroupingModesDoc(),
       },
       {
-        name: 'throttle-strategies',
+        name: 'action-policy-throttle-strategies',
         relativePath: './references',
         content: generateThrottleStrategiesDoc(),
       },
       {
-        name: 'workflows',
+        name: 'workflow-destinations',
         relativePath: './references',
         content: `# Workflows
 
@@ -112,10 +112,10 @@ Do **not** use this skill for:
 ## Domain Knowledge
 
 For questions about matchers, grouping, throttling, workflows, or the dispatch flow:
-- Matchers — consult the [matchers reference](./references/matchers.md).
-- Grouping modes — consult the [grouping-modes reference](./references/grouping-modes.md).
-- Throttle strategies — consult the [throttle-strategies reference](./references/throttle-strategies.md).
-- Workflows — consult the [workflows reference](./references/workflows.md). For connectors (types, discovery, \`connector-id\` usage), load the \`workflow-authoring\` skill.
+- Matchers — consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
+- Grouping modes — consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
+- Throttle strategies — consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
+- Workflows — consult the [workflow-destinations reference](./references/workflow-destinations.md). For connectors (types, discovery, \`connector-id\` usage), load the \`workflow-authoring\` skill.
 - End-to-end dispatch path — consult the [dispatch-flow reference](./references/dispatch-flow.md).
 
 ---
@@ -126,9 +126,9 @@ An action policy is a **space-scoped saved object** that controls how alert epis
 
 Key characteristics:
 - **Not embedded in a rule.** One policy can match episodes from many rules.
-- **Matcher**: optional KQL query evaluated against episode context. An empty matcher is a catch-all that matches all episodes in the space. See the [matchers reference](./references/matchers.md).
+- **Matcher**: optional KQL query evaluated against episode context. An empty matcher is a catch-all that matches all episodes in the space. See the [action-policy-matchers reference](./references/action-policy-matchers.md).
 - **Only processes \`kind: alert\` episodes.** Signal events are excluded from the dispatcher pipeline — they never reach action policy evaluation.
-- Grouping and throttling details: [grouping-modes](./references/grouping-modes.md), [throttle-strategies](./references/throttle-strategies.md).
+- Grouping and throttling details: [action-policy-grouping-modes](./references/action-policy-grouping-modes.md), [action-policy-throttle-strategies](./references/action-policy-throttle-strategies.md).
 - End-to-end path: [dispatch-flow reference](./references/dispatch-flow.md).
 
 ## Action Policy Discovery
@@ -143,17 +143,17 @@ When a user asks about existing action policies:
 
 Build the request for ${ALERTING_TOOL_IDS.manageActionPolicy} as an ordered \`operations\` array. Operations run in sequence.
 
-For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`. Destination workflows are covered in the [workflows reference](./references/workflows.md).
+For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`. Destination workflows are covered in the [workflow-destinations reference](./references/workflow-destinations.md).
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-Refer to the [action-policy-operations-schema reference](./references/action-policy-operations-schema.md) for every operation's fields, types, and constraints. Grouping modes and throttle strategies are summarized in the [grouping-modes reference](./references/grouping-modes.md) and [throttle-strategies reference](./references/throttle-strategies.md).
+Refer to the [action-policy-operations-schema reference](./references/action-policy-operations-schema.md) for every operation's fields, types, and constraints. Grouping modes and throttle strategies are summarized in the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md) and [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
 
-Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the [matchers reference](./references/matchers.md).
+Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the [action-policy-matchers reference](./references/action-policy-matchers.md).
 
 ### Throttle / Grouping Compatibility
 
-The throttle strategy must be compatible with the grouping mode (see [grouping-modes reference](./references/grouping-modes.md) and [throttle-strategies reference](./references/throttle-strategies.md)):
+The throttle strategy must be compatible with the grouping mode (see [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md) and [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md)):
 - For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
 - For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
 - \`per_status_interval\` and \`time_interval\` require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).
@@ -189,7 +189,7 @@ The email connector lookup and workflow YAML below are **examples only** for the
 
 ## Step 1 — Create a Default Workflow
 
-1. Load the \`workflow-authoring\` skill via \`filestore.read\` (path: \`skills/platform/workflows\`). That skill also covers connectors in depth. See also the [workflows reference](./references/workflows.md).
+1. Load the \`workflow-authoring\` skill via \`filestore.read\` (path: \`skills/platform/workflows\`). That skill also covers connectors in depth. See also the [workflow-destinations reference](./references/workflow-destinations.md).
 2. Find an available connector for the chosen channel. **Example** for email: call \`platform.workflows.get_connectors\` with \`actionTypeId: ".email"\`.
    - If no suitable connector exists, tell the user (example for email): "No email connector is configured. You can set one up under Stack Management → Connectors, then come back to add notifications."
 3. Generate a unique \`workflowId\` — a UUID (e.g. \`550e8400-e29b-41d4-a716-446655440000\`). Pass it as the \`workflowId\` parameter when calling \`platform.core.generate_workflow\`. This same ID will be used as the persisted workflow ID and must be referenced in the action policy destination. **Do NOT use a human-readable slug** — it would collide across conversations.
@@ -247,7 +247,7 @@ steps:
 
 ## Step 2 — Create a Default Action Policy
 
-Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order (see [matchers](./references/matchers.md), [grouping-modes](./references/grouping-modes.md), and [throttle-strategies](./references/throttle-strategies.md) for details):
+Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order (see [action-policy-matchers](./references/action-policy-matchers.md), [action-policy-grouping-modes](./references/action-policy-grouping-modes.md), and [action-policy-throttle-strategies](./references/action-policy-throttle-strategies.md) for details):
 
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
@@ -275,7 +275,7 @@ The end-to-end path from rule evaluation to notification delivery is described i
 
 After creating the defaults, briefly mention:
 - They can switch connector type (Slack, PagerDuty, email, etc.) — offer to use \`platform.workflows.get_connectors\` to explore, or consult the \`workflow-authoring\` skill for connector details. The email path above is only an example.
-- They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle ([throttle-strategies reference](./references/throttle-strategies.md)).
+- They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle ([action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md)).
 - They can broaden the policy to cover multiple rules by removing the \`rule.id\` matcher or replacing it with a broader matcher.`,
     getInlineTools: () => [manageActionPolicyTool(deps)],
   });

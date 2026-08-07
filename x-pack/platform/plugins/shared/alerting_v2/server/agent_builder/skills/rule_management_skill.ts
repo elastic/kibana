@@ -132,6 +132,7 @@ For questions about alerting concepts:
 - Rule kinds (alert vs signal) — consult the [rule-kind reference](./references/rule-kind.md).
 - Episode lifecycle — consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
 - How notifications relate to rules — consult the [notifications-overview reference](./references/notifications-overview.md).
+- Alert event severity — also covered in the [notifications-overview reference](./references/notifications-overview.md).
 
 ---
 
@@ -188,7 +189,7 @@ State transition is only allowed on \`kind: alert\` rules ([rule-kind reference]
 
 ## Severity
 
-When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [concepts reference](./references/concepts.md) for valid values, the extraction model, and literal vs conditional patterns.
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [notifications-overview reference](./references/notifications-overview.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ## Recovery Strategy
 

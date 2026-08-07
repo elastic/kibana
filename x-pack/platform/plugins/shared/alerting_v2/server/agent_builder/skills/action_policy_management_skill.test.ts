@@ -59,16 +59,16 @@ describe('createActionPolicyManagementSkill', () => {
       (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
     );
 
-    expect(byName.matchers).toContain('Auto-generated from `MATCHER_CONTEXT_FIELDS`');
-    expect(byName.matchers).toContain('`episode_status`');
-    expect(byName.matchers).toContain('`rule.id`');
+    expect(byName['action-policy-matchers']).toContain('Auto-generated from `MATCHER_CONTEXT_FIELDS`');
+    expect(byName['action-policy-matchers']).toContain('`episode_status`');
+    expect(byName['action-policy-matchers']).toContain('`rule.id`');
 
-    expect(byName['grouping-modes']).toContain('Auto-generated from `groupingModeSchema`');
-    expect(byName['grouping-modes']).toContain('`per_episode`');
+    expect(byName['action-policy-grouping-modes']).toContain('Auto-generated from `groupingModeSchema`');
+    expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
 
-    expect(byName['throttle-strategies']).toContain('Auto-generated from `throttleStrategySchema`');
-    expect(byName['throttle-strategies']).toContain('`on_status_change`');
-    expect(byName['throttle-strategies']).toContain('Compatibility with grouping modes');
+    expect(byName['action-policy-throttle-strategies']).toContain('Auto-generated from `throttleStrategySchema`');
+    expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
+    expect(byName['action-policy-throttle-strategies']).toContain('Compatibility with grouping modes');
   });
 
   it('exposes the generated workflow dispatch payload schema as referenced content', () => {
@@ -90,10 +90,10 @@ describe('createActionPolicyManagementSkill', () => {
 
     expect(refNames).toEqual(
       expect.arrayContaining([
-        'matchers',
-        'grouping-modes',
-        'throttle-strategies',
-        'workflows',
+        'action-policy-matchers',
+        'action-policy-grouping-modes',
+        'action-policy-throttle-strategies',
+        'workflow-destinations',
         'dispatch-flow',
       ])
     );
@@ -101,10 +101,10 @@ describe('createActionPolicyManagementSkill', () => {
     expect(refNames).not.toContain('connectors');
     expect(refNames).not.toContain('action-policy-overview');
     expect(skill.content).toContain('space-scoped saved object');
-    expect(skill.content).toContain('./references/matchers.md');
-    expect(skill.content).toContain('./references/grouping-modes.md');
-    expect(skill.content).toContain('./references/throttle-strategies.md');
-    expect(skill.content).toContain('./references/workflows.md');
+    expect(skill.content).toContain('./references/action-policy-matchers.md');
+    expect(skill.content).toContain('./references/action-policy-grouping-modes.md');
+    expect(skill.content).toContain('./references/action-policy-throttle-strategies.md');
+    expect(skill.content).toContain('./references/workflow-destinations.md');
     expect(skill.content).toContain('./references/dispatch-flow.md');
     expect(skill.content).toContain('workflow-authoring');
     expect(skill.description).not.toContain('(notification policies)');
