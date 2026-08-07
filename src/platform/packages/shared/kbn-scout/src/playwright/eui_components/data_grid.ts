@@ -15,9 +15,8 @@ import { resolveSelector, type SelectorInput } from '../utils';
 
 /**
  * @deprecated Use `page.components.dataGrid(testSubj)` (EuiDataGridObject) instead.
- * Do not add new usages; this wrapper is removed once all consumers are migrated
- * (https://github.com/elastic/apps-dx/issues/43).
- * https://eui.elastic.co/docs/components/tables/data-grid/
+ * Do not add new usages; this wrapper is removed once all consumers are migrated.
+ * https://eui.elastic.co/docs/components/data-grid
  */
 export class EuiDataGridWrapper {
   private readonly page: ScoutPage;

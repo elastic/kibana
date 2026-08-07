@@ -12,7 +12,7 @@ import type { Locator } from '@playwright/test';
 
 /**
  * Playwright Component Object for
- * {@link https://eui.elastic.co/docs/components/tables/data-grid/ EuiDataGrid}.
+ * {@link https://eui.elastic.co/docs/components/data-grid EuiDataGrid}.
  *
  * Prototype for `@elastic/eui-test-helpers` (see the package CONTRIBUTING guide);
  * lives in kbn-scout until it is ported and published.

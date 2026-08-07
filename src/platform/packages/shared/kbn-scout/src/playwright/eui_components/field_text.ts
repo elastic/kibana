@@ -13,8 +13,7 @@ import { resolveSelector, type SelectorInput } from '../utils';
 
 /**
  * @deprecated Use native locators instead, e.g. `page.testSubj.locator(subj).locator('input').fill(value)`.
- * Do not add new usages; this wrapper is removed once all consumers are migrated
- * (https://github.com/elastic/apps-dx/issues/43).
+ * Do not add new usages; this wrapper is removed once all consumers are migrated.
  * https://eui.elastic.co/docs/components/forms/text/#text-field
  */
 export class EuiFieldTextWrapper {

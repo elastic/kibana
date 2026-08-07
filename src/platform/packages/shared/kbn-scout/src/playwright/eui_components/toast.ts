@@ -14,9 +14,8 @@ import { resolveSelector, type SelectorInput } from '../utils';
 
 /**
  * @deprecated Use `page.components.globalToastList()` (EuiGlobalToastListObject) or the `toasts` page object instead.
- * Do not add new usages; this wrapper is removed once all consumers are migrated
- * (https://github.com/elastic/apps-dx/issues/43).
- * https://eui.elastic.co/next/docs/display/toast/
+ * Do not add new usages; this wrapper is removed once all consumers are migrated.
+ * https://eui.elastic.co/docs/components/display/toast/
  */
 export class EuiToastWrapper {
   private readonly toastWrapper: Locator;
