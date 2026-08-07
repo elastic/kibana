@@ -118,16 +118,17 @@ export function ProjectPickerFilterForm({
         filterId
       );
 
+      // check if draft expression is a duplicate of an existing filter expression
+      if (isDuplicateFilterExpressionDraft(state.filterExpressions, input, filterId)) {
+        return i18n.translate('cpsUtils.projectPicker.filterBox.duplicateFilterHelpText', {
+          defaultMessage: 'This filter already exists. Change the filter or edit the existing one.',
+        });
+      }
+
       if (matchingIds !== null && matchingIds.length === 0) {
         return i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
           defaultMessage:
             'No projects match this filter. Adjust so at least one project is included in your search.',
-        });
-      }
-
-      if (isDuplicateFilterExpressionDraft(state.filterExpressions, input, filterId)) {
-        return i18n.translate('cpsUtils.projectPicker.filterBox.duplicateFilterHelpText', {
-          defaultMessage: 'This filter already exists. Change the filter or edit the existing one.',
         });
       }
 
