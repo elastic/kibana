@@ -55,8 +55,8 @@ function toErrorMessage(error: unknown): string {
       error.cause instanceof Error
         ? error.cause.message
         : error.cause != null
-          ? String(error.cause)
-          : '';
+        ? String(error.cause)
+        : '';
     const causeCode: string = (error.cause as any)?.code ?? '';
     const extras = [causeMsg, causeCode].filter(Boolean).join(' ');
     return extras ? `${error.message} (${extras})` : error.message;

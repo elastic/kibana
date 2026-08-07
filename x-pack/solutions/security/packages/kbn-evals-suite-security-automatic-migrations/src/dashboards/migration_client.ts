@@ -34,7 +34,7 @@ export interface MigrationResult {
 }
 
 export class DashboardMigrationClient {
-  constructor(private readonly fetch: KbnEvalsHttpHandler, private readonly log: ToolingLog) { }
+  constructor(private readonly fetch: KbnEvalsHttpHandler, private readonly log: ToolingLog) {}
 
   public async migrateDashboard(
     input: DashboardInput,
