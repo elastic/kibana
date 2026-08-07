@@ -5245,6 +5245,18 @@ This is the type of text _investigation guides_ will contain.`;
       );
     });
 
+    test('rejects templateId longer than the HTTP create maxLength', async () => {
+      mockSuccessfulCreate();
+
+      await expect(
+        rulesClient.create({ data: getMockData(), templateId: 'x'.repeat(1025) })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+      });
+      expect(rulesClientParams.analytics!.reportEvent).not.toHaveBeenCalled();
+    });
+
     test('does not fail rule creation when reportEvent throws', async () => {
       mockSuccessfulCreate();
       (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
