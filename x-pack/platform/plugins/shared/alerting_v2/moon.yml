@@ -140,7 +140,6 @@ dependsOn:
   - '@kbn/security-authorization-core'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
-  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod
