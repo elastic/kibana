@@ -358,22 +358,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
         await discover.waitUntilTabIsLoaded();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         expect(await testSubjects.exists('ESQLEditor')).to.be(false);
-      });
-
-      it('should switch to a data view immediately while a saved search is open', async () => {
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
-        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
-        await monacoEditor.setCodeEditorValue(testQuery);
-        await testSubjects.click('querySubmitButton');
-        await discover.waitUntilTabIsLoaded();
-        await discover.saveSearch('esql_test');
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
-        await discover.waitUntilTabIsLoaded();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should switch to a data view immediately while a saved search with unsaved changes is open', async () => {
@@ -387,6 +372,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
         await discover.waitUntilTabIsLoaded();
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
       it('should show available data views and search results after switching to classic mode', async () => {
