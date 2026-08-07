@@ -180,7 +180,10 @@ export const ALERTING_LOG_CODES = {
   EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
 
   // ──────────────── Rule templates (graceful degradation) ────────────────
-  /** A stored rule template failed schema validation and was omitted from the list. */
+  /**
+   * A stored rule template failed schema validation. Find omits it from the
+   * page; get maps it to not-found. Operator should investigate package drift.
+   */
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
   /**
    * Action-policy id resolution failed while building the search filter for

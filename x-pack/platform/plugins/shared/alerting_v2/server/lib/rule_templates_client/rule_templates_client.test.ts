@@ -166,8 +166,8 @@ describe('RuleTemplatesClient', () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('valid');
       expect(result.total).toBe(2);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.any(String),
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Rule template failed schema validation',
         expect.objectContaining({
           labels: {
             code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
@@ -244,8 +244,8 @@ describe('RuleTemplatesClient', () => {
           details: { rule_template_id: 'classic-template' },
         },
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.any(String),
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Rule template failed schema validation',
         expect.objectContaining({
           labels: {
             code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,

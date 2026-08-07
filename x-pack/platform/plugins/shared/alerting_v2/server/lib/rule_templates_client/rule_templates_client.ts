@@ -75,26 +75,12 @@ export class RuleTemplatesClient {
     });
 
     const items = res.saved_objects.flatMap((so) => {
-      try {
-        return [transformRuleTemplateSoAttributesToApiResponse(so.id, so.attributes)];
-      } catch (e) {
-        // Fleet validates templates at install time, so a parse failure here
-        // means stored content drifted from the schema. Drop the offending
-        // template rather than failing the whole page, and log so the bad
-        // content is discoverable.
-        this.logger.error({
-          error: e instanceof Error ? e : new Error(String(e)),
-          code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
-          labels: { rule_template_id: so.id },
-        });
-        return [];
-      }
+      const item = this.tryTransformRuleTemplate(so.id, so.attributes);
+      return item ? [item] : [];
     });
 
     return {
       items,
-      // `total` counts what Elasticsearch matched, so it can exceed
-      // `items.length` when a template on this page failed to parse.
       total: res.total,
       page,
       perPage,
@@ -103,20 +89,13 @@ export class RuleTemplatesClient {
 
   public async getRuleTemplate({ id }: GetRuleTemplateArgs): Promise<RuleTemplateResponse> {
     const so = await this.getRuleTemplateSo(id);
-
-    try {
-      return transformRuleTemplateSoAttributesToApiResponse(so.id, so.attributes);
-    } catch (e) {
-      // The saved object exists but is not usable by the v2 engine — either it
-      // belongs to alerting v1 or its payload drifted from the schema. Both are
-      // "no such v2 template" as far as this API is concerned.
-      this.logger.error({
-        error: e instanceof Error ? e : new Error(String(e)),
-        code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
-        labels: { rule_template_id: id },
-      });
+    const item = this.tryTransformRuleTemplate(so.id, so.attributes);
+    if (!item) {
+      // Exists but unusable by the v2 engine (classic alerting template or
+      // schema drift) — treat as not found.
       throw this.ruleTemplateNotFound(id);
     }
+    return item;
   }
 
   private async getRuleTemplateSo(id: string) {
@@ -130,6 +109,27 @@ export class RuleTemplatesClient {
         throw this.ruleTemplateNotFound(id);
       }
       throw e;
+    }
+  }
+
+  /**
+   * Transforms stored attributes into the API response. Returns null and logs
+   * when validation fails so callers can omit the item (find) or map to 404 (get).
+   */
+  private tryTransformRuleTemplate(
+    id: string,
+    attributes: RuleTemplateSavedObjectAttributes
+  ): RuleTemplateResponse | null {
+    try {
+      return transformRuleTemplateSoAttributesToApiResponse(id, attributes);
+    } catch (e) {
+      this.logger.warn({
+        message: 'Rule template failed schema validation',
+        code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+        labels: { rule_template_id: id },
+        error: e,
+      });
+      return null;
     }
   }
 
