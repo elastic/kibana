@@ -31,10 +31,13 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
+import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
+
+export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
 export type AlertingServerSetup = void;
 
@@ -50,6 +53,8 @@ export interface AlertingServerStart {
     request: KibanaRequest,
     spaceId: string
   ): Promise<ActionPolicyClientApi>;
+
+  getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

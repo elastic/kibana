@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { AlertEventsClientApi } from '../../../types';
 import { getCreateAlertEventStepDefinition } from './steps/create_alert_event_step';
 
 /**
@@ -15,7 +16,9 @@ import { getCreateAlertEventStepDefinition } from './steps/create_alert_event_st
  */
 export function registerStepDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  logger: Logger
+  getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>
 ): void {
-  workflowsExtensions.registerStepDefinition(getCreateAlertEventStepDefinition(() => logger));
+  workflowsExtensions.registerStepDefinition(
+    getCreateAlertEventStepDefinition(getAlertEventsClient)
+  );
 }

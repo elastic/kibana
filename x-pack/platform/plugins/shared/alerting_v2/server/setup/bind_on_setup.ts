@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type {
+  AlertingServerSetupDependencies,
+  AlertingServerStartDependencies,
+  AlertingServerStart,
+} from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
@@ -65,7 +71,12 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     registerTriggerDefinitions(workflowsExtensionsSetup);
-    registerStepDefinitions(workflowsExtensionsSetup, logger);
+
+    const getAlertEventsClient = (request: KibanaRequest) =>
+      (container.get(Start as ServiceToken<AlertingServerStart>)).getAlertEventsClientWithRequest(
+        request
+      );
+    registerStepDefinitions(workflowsExtensionsSetup, getAlertEventsClient);
 
     // Usage collection is optional. The telemetry task that feeds this collector
     // is registered unconditionally via the `TaskDefinition` registry in

@@ -7,44 +7,26 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import { createAlertEventStepCommonDefinition } from '../../../../common/workflows/steps/create_alert_event_step_common';
-import { AlertEventsClient } from '../../alert_events_client';
-import { StorageService } from '../../services/storage_service/storage_service';
-import { QueryService } from '../../services/query_service/query_service';
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import type { AlertEventsClientApi } from '../../../../types';
 
-function toLoggerService(logger: Logger): LoggerServiceContract {
-  return {
-    debug: ({ message }) => logger.debug(message),
-    info: ({ message }) => logger.info(message),
-    warn: ({ message }) => logger.warn(message),
-    error: ({ error }) => logger.error(error),
-  };
-}
-
-export function getCreateAlertEventStepDefinition(getLogger: () => Logger) {
+export function getCreateAlertEventStepDefinition(
+  getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>
+) {
   return createServerStepDefinition({
     ...createAlertEventStepCommonDefinition,
     handler: async (context) => {
-      const esClient = context.contextManager.getScopedEsClient();
-      const { workflow } = context.contextManager.getContext();
-      const loggerService = toLoggerService(getLogger());
-
-      const storageService = new StorageService(esClient, loggerService);
-      const queryService = new QueryService(esClient, loggerService);
-      const alertEventsClient = new AlertEventsClient(
-        storageService,
-        queryService,
-        workflow.spaceId
-      );
+      const client = await getAlertEventsClient(context.contextManager.getFakeRequest());
 
       try {
-        const result = await alertEventsClient.ingestAlertEvent(context.input, {
+        const result = await client.ingestAlertEvent(context.input, {
           abortSignal: context.abortSignal,
         });
         return { output: result };
       } catch (error) {
+        if (error instanceof ExecutionError) throw error;
+        if (error instanceof Error && error.name === 'AbortError') throw error;
         throw new ExecutionError({
           type: 'ApiError',
           message: error instanceof Error ? error.message : 'Failed to create alert event',
