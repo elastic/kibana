@@ -832,6 +832,9 @@ def add_impacted_service_features() -> None:
     }
     for entries in BLAST_RADIUS_BY_EVENT_ID.values():
         for entry in entries:
+            # Only entity rows are derived: Nightshift no longer filters on the row type, but the
+            # infrastructure rows seeded here (pods, an Elasticsearch data tier) really are
+            # infrastructure, so giving them a "service" indicator would be fabricated data.
             if (
                 entry["type"] != "entity"
                 or entry["feature_id"] in seeded
