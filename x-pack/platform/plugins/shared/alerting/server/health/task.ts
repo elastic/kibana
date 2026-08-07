@@ -59,6 +59,7 @@ function registerAlertingHealthCheckTask(
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
       stateSchemaByVersion,
+      taskTypeGroup: 'alerting',
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },
   });

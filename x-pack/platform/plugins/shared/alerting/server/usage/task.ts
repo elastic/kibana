@@ -52,6 +52,7 @@ function registerAlertingTelemetryTask(
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
+      // TODO task mentions actions_telemetry, this is alerting_telemetry. Exclude this too?
       title: 'Alerting usage fetch task',
       timeout: '5m',
       stateSchemaByVersion,

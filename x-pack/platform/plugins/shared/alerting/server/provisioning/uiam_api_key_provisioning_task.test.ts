@@ -227,6 +227,7 @@ describe('UiamApiKeyProvisioningTask', () => {
           [API_KEY_PROVISIONING_TASK_TYPE]: expect.objectContaining({
             title: 'UIAM API key provisioning task',
             timeout: '5m',
+            taskTypeGroup: 'alerting',
             createTaskRunner: expect.any(Function),
           }),
         })

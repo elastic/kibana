@@ -78,6 +78,7 @@ export class AlertDeletionClient {
       [ALERT_DELETION_TASK_TYPE]: {
         title: 'Alert deletion task',
         maxAttempts: 1,
+        taskTypeGroup: 'alerting',
         createTaskRunner: ({
           taskInstance,
           signal,

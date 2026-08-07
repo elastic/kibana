@@ -62,6 +62,7 @@ function registerApiKeyInvalidatorTaskDefinition(
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
       stateSchemaByVersion,
+      taskTypeGroup: 'alerting',
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });

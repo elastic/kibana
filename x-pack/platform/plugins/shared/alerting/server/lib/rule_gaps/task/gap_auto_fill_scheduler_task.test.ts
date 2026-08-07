@@ -243,6 +243,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
         [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
           title: 'Gap Auto Fill Scheduler',
           timeout: DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
+          taskTypeGroup: 'alerting',
           createTaskRunner: expect.any(Function),
         },
       });

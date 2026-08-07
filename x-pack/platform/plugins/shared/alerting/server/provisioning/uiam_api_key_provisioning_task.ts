@@ -98,6 +98,7 @@ export class UiamApiKeyProvisioningTask {
         title: 'UIAM API key provisioning task',
         timeout: TASK_TIMEOUT,
         stateSchemaByVersion,
+        taskTypeGroup: 'alerting',
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {

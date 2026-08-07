@@ -74,6 +74,7 @@ export class ConnectorUsageReportingTask {
       [CONNECTOR_USAGE_REPORTING_TASK_TYPE]: {
         title: 'Connector usage reporting task',
         timeout: '1m',
+        taskTypeGroup: 'actions',
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => this.runTask(taskInstance, core),

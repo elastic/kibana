@@ -229,6 +229,7 @@ export class ActionTypeRegistry {
           title: actionType.name,
           maxAttempts,
           cost: TaskCost.Tiny,
+          taskTypeGroup: 'actions',
           createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
         },
       });

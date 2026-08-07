@@ -316,6 +316,7 @@ export class RuleTypeRegistry {
         priority: ruleType.priority,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
+        taskTypeGroup: 'alerting',
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,

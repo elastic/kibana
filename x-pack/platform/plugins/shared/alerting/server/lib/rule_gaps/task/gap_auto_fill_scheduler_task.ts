@@ -386,6 +386,7 @@ export function registerGapAutoFillSchedulerTask({
     [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
       title: 'Gap Auto Fill Scheduler',
       timeout: schedulerConfig?.timeout ?? DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
+      taskTypeGroup: 'alerting',
       createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
         return {
           async run() {
