@@ -149,6 +149,7 @@ export type SkillInvocationOrigin = 'builtin' | 'custom' | 'plugin';
 export type SkillSolutionArea =
   | 'security'
   | 'observability'
+  | 'ml'
   | 'search'
   | 'platform'
   | 'custom'

@@ -34,7 +34,7 @@ export const getKBUserFilter = (user: AuthenticatedUser | null) => {
 };
 
 export const isGlobalEntry = (entry: KnowledgeBaseEntryResponse | KnowledgeBaseEntryCreateProps) =>
-  entry.global ?? (isArray(entry.users) && !entry.users.length);
+  Boolean(entry.global) || (isArray(entry.users) && entry.users.length === 0);
 
 export const validateDocumentsModification = async (
   kbDataClient: AIAssistantKnowledgeBaseDataClient | null,
