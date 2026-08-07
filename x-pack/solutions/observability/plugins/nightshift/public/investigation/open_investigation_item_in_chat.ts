@@ -18,14 +18,11 @@ export const buildBlindSpotChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
-  initialMessage: i18n.translate(
-    'xpack.observability.nightshift.investigation.blindSpotChatPrompt',
-    {
-      defaultMessage: 'Tell me about this blind spot: {title}',
-      values: { title: blindSpot.title },
-    }
-  ),
+  autoSendInitialMessage: false,
+  initialMessage: i18n.translate('xpack.nightshift.investigation.blindSpotChatPrompt', {
+    defaultMessage: 'Tell me about this blind spot: {title}',
+    values: { title: blindSpot.title },
+  }),
   attachments: [
     {
       id: attachmentId,
@@ -43,14 +40,11 @@ export const buildHypothesisChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
-  initialMessage: i18n.translate(
-    'xpack.observability.nightshift.investigation.hypothesisChatPrompt',
-    {
-      defaultMessage: 'Tell me about this hypothesis: {candidate}',
-      values: { candidate: hypothesis.candidate },
-    }
-  ),
+  autoSendInitialMessage: false,
+  initialMessage: i18n.translate('xpack.nightshift.investigation.hypothesisChatPrompt', {
+    defaultMessage: 'Tell me about this hypothesis: {candidate}',
+    values: { candidate: hypothesis.candidate },
+  }),
   attachments: [
     {
       id: attachmentId,
@@ -68,14 +62,11 @@ export const buildRecommendationChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
-  initialMessage: i18n.translate(
-    'xpack.observability.nightshift.investigation.recommendationChatPrompt',
-    {
-      defaultMessage: 'Tell me about this recommendation: {title}',
-      values: { title: recommendation.title },
-    }
-  ),
+  autoSendInitialMessage: false,
+  initialMessage: i18n.translate('xpack.nightshift.investigation.recommendationChatPrompt', {
+    defaultMessage: 'Tell me about this recommendation: {title}',
+    values: { title: recommendation.title },
+  }),
   attachments: [
     {
       id: attachmentId,
