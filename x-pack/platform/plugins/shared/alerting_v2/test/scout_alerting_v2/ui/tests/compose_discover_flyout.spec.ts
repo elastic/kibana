@@ -256,8 +256,9 @@ test.describe(
 
       await test.step('rule name is pre-populated', async () => {
         // In edit mode, step 0 shows the alert condition with queryCommitted: true.
-        // Navigate to Details step to see the name input.
-        await pageObjects.composeDiscover.clickNext();
+        // Navigate through Outcome (read-only mode selector for signal rules) to Details.
+        await pageObjects.composeDiscover.clickNext(); // Outcome
+        await pageObjects.composeDiscover.clickNext(); // Details
         await expect(pageObjects.composeDiscover.ruleNameInput).toHaveValue(EDIT_RULE_NAME);
         await expect(pageObjects.composeDiscover.flyout.getByText(RUNBOOK_TEXT)).toBeVisible();
         await expect(pageObjects.composeDiscover.relatedDashboardsSelector).toBeVisible();
