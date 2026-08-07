@@ -124,15 +124,46 @@ describe('forced-GC monitor control', () => {
     expect(results[0].error).toBeUndefined();
   });
 
-  it('rejects a matching result that omits required probe fields', async () => {
+  it('accepts a result that omits diagnostics but includes the decision-critical heap sample', async () => {
     const pid = 12345;
     const responder = setInterval(async () => {
       const requestPath = path.join(tempDir, 'forced_gc_request.json');
       if (!fs.existsSync(requestPath)) return;
       clearInterval(responder);
       const request = JSON.parse(await fs.promises.readFile(requestPath, 'utf8'));
-      const { postForcedGcHeapStatistics, ...incomplete } = makeForcedGcResult({ ...request, pid });
-      expect(postForcedGcHeapStatistics).toBeDefined();
+      const {
+        postForcedGcHeapStatistics,
+        postForcedGcHeapSpaceStatistics,
+        preForcedGcHeapUsage,
+        postForcedGcHeapUsage,
+        ...partial
+      } = makeForcedGcResult({ ...request, pid });
+      await fs.promises.writeFile(
+        path.join(tempDir, `${pid}.forced_gc.json`),
+        JSON.stringify(partial),
+        'utf8'
+      );
+    }, 5);
+
+    const [result] = await requestForcedGcHeapStats({
+      monitorDir: tempDir,
+      expectedPids: [pid],
+      timeoutMs: 1_000,
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.postForcedGcHeapUsed).toBe(50);
+  });
+
+  it('rejects a matching result that omits the decision-critical heap sample', async () => {
+    const pid = 12345;
+    const responder = setInterval(async () => {
+      const requestPath = path.join(tempDir, 'forced_gc_request.json');
+      if (!fs.existsSync(requestPath)) return;
+      clearInterval(responder);
+      const request = JSON.parse(await fs.promises.readFile(requestPath, 'utf8'));
+      const { postForcedGcHeapUsed, ...incomplete } = makeForcedGcResult({ ...request, pid });
+      expect(postForcedGcHeapUsed).toBe(50);
       await fs.promises.writeFile(
         path.join(tempDir, `${pid}.forced_gc.json`),
         JSON.stringify(incomplete),
@@ -149,7 +180,7 @@ describe('forced-GC monitor control', () => {
     expect(result.error).toEqual(
       expect.objectContaining({
         name: 'ForcedGcHeapStatsValidationError',
-        message: expect.stringContaining('postForcedGcHeapStatistics'),
+        message: expect.stringContaining('postForcedGcHeapUsed'),
       })
     );
   });

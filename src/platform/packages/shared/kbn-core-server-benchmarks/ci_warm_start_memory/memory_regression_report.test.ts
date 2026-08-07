@@ -24,11 +24,9 @@ const report: WarmStartMemoryRegressionReport = {
     postReadySettlingMs: 30_000,
     tailSampleCount: 8,
     forcedGcTimeoutMs: 30_000,
-    confidence: 0.99,
     thresholdBytes: 5 * 1024 * 1024,
   },
   comparison: {
-    seed: 'test',
     requestedPairs: 8,
     attemptedPairs: 1,
     validPairs: 0,

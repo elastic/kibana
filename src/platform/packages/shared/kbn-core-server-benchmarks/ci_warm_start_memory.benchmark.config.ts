@@ -12,12 +12,13 @@ import { compareWarmStartMemory } from './ci_warm_start_memory/compare_warm_star
 
 const config: InitialBenchConfig = {
   name: 'kibana_ci_warm_start_memory',
-  // Six pairs provide twelve starts within the initial ~15-minute CI budget.
-  runs: 6,
+  // Four pairs provide eight starts. Post-forced-GC paired SD is ~0.5-1.5 MiB
+  // against a 5 MiB threshold, so four pairs give a wide decision margin.
+  runs: 4,
   comparisonRun: {
-    mode: 'randomized_paired',
-    pairs: 6,
-    maxAttempts: 9,
+    mode: 'paired',
+    pairs: 4,
+    maxAttempts: 6,
   },
   monitorInterval: 250,
   profile: false,

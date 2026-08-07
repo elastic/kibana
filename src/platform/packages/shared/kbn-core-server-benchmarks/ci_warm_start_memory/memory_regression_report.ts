@@ -30,13 +30,11 @@ export interface WarmStartMemoryRegressionReport {
     readonly postReadySettlingMs: number;
     readonly tailSampleCount: number;
     readonly forcedGcTimeoutMs: number;
-    readonly confidence: number;
     readonly thresholdBytes: number;
   };
   readonly comparison: {
     readonly baselineIdentity?: string;
     readonly targetIdentity?: string;
-    readonly seed?: string;
     readonly requestedPairs: number;
     readonly attemptedPairs: number;
     readonly validPairs: number;

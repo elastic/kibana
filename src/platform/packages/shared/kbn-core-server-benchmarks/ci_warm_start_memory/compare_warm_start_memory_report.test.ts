@@ -106,7 +106,7 @@ const makeContext = ({
   const config = {
     monitorInterval: 250,
     comparisonRun: {
-      mode: 'randomized_paired',
+      mode: 'paired',
       pairs: 8,
       maxAttempts: 12,
     },
@@ -123,8 +123,7 @@ const makeContext = ({
     rightSummary: { name: 'right', benchmarks: [] },
     comparison: { benchmarks: [] },
     pairedComparison: {
-      mode: 'randomized_paired',
-      seed: 'darwin-ab',
+      mode: 'paired',
       baselineIdentity: 'A',
       targetIdentity: 'B',
       benchmarks: [
@@ -163,7 +162,6 @@ describe('post-forced-GC warm-start report', () => {
       expect.objectContaining({
         meanBytes: 10 * MIB,
         sampleStandardDeviationBytes: 0,
-        lowerConfidenceBoundBytes: 10 * MIB,
       })
     );
     expect(report.diagnostics.forcedGcDurationMs).toEqual(

@@ -77,7 +77,7 @@ const config: LoadedBenchConfig = {
   tracing: false,
   grep: undefined,
   comparisonRun: {
-    mode: 'randomized_paired',
+    mode: 'paired',
     pairs: 2,
     maxAttempts: 3,
   },
@@ -130,7 +130,6 @@ describe('runPairedConfig', () => {
       config,
       leftContext: createContext('baseline-build'),
       rightContext: createContext('target-build'),
-      seed: 'paired-seed',
       baselineIdentity: 'baseline',
       targetIdentity: 'target',
     });

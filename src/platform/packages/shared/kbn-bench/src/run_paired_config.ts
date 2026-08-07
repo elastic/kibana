@@ -27,53 +27,13 @@ const REQUIRED_METRICS = ['tailHeapUsed', 'tailRss', 'rssMax'] as const;
 type Side = 'baseline' | 'target';
 type PairOrder = 'baseline-target' | 'target-baseline';
 
-// Matches Java's String.hashCode multiplier; this is only a stable,
-// non-cryptographic conversion of the caller-provided seed string to an integer.
-// Reference: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#hashCode()
-const SEED_HASH_MULTIPLIER = 31;
-
-// Parameters for a Lehmer pseudo-random number generator.
-// Reference: https://en.wikipedia.org/wiki/Lehmer_random_number_generator#Parameters_in_common_use
-const LEHMER_MODULUS = 2_147_483_647;
-const LEHMER_MULTIPLIER = 48_271;
-
-const toSeed = (seed: string): number => {
-  let value = 0;
-  for (const char of seed) {
-    value = (value * SEED_HASH_MULTIPLIER + char.charCodeAt(0)) % LEHMER_MODULUS;
-  }
-  return value || 1;
-};
-
-const createPrng = (seed: string): (() => number) => {
-  let state = toSeed(seed);
-  return () => {
-    state = (state * LEHMER_MULTIPLIER) % LEHMER_MODULUS;
-    return state / LEHMER_MODULUS;
-  };
-};
-
-export const createPairedOrder = ({
-  pairs,
-  seed,
-}: {
-  pairs: number;
-  seed: string;
-}): PairOrder[] => {
-  const order: PairOrder[] = Array.from({ length: pairs }, (_, index) =>
+// Deterministic AB/BA alternation balances within-pair order across the run,
+// which is what controls order bias in the paired delta; the mean of paired
+// deltas does not model autocorrelation, so shuffling buys nothing over this.
+export const createPairedOrder = ({ pairs }: { pairs: number }): PairOrder[] =>
+  Array.from({ length: pairs }, (_, index) =>
     index % 2 === 0 ? 'baseline-target' : 'target-baseline'
   );
-  const random = createPrng(seed);
-
-  // Fisher-Yates shuffle using the seeded PRNG above.
-  // Reference: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-  for (let index = order.length - 1; index > 0; index--) {
-    const swapIndex = Math.floor(random() * (index + 1));
-    [order[index], order[swapIndex]] = [order[swapIndex], order[index]];
-  }
-
-  return order;
-};
 
 const isValidStart = (start: PairedComparisonStart): boolean => {
   if (start.result.status !== 'completed' || start.result.stats.length === 0) {
@@ -111,35 +71,27 @@ export async function runPairedConfig({
   config,
   leftContext,
   rightContext,
-  seed,
   baselineIdentity,
   targetIdentity,
 }: {
   config: LoadedBenchConfig;
   leftContext: GlobalRunContext;
   rightContext: GlobalRunContext;
-  seed: string;
   baselineIdentity: string;
   targetIdentity: string;
 }): Promise<{ left: ConfigResult; right: ConfigResult; pairedComparison: PairedComparisonResult }> {
-  if (!config.comparisonRun || config.comparisonRun.mode !== 'randomized_paired') {
-    throw new Error(`Config ${config.name} does not request randomized paired comparison`);
+  if (!config.comparisonRun || config.comparisonRun.mode !== 'paired') {
+    throw new Error(`Config ${config.name} does not request paired comparison`);
   }
   if (config.profile) {
-    throw new Error('Randomized paired comparison does not support CPU profiling');
+    throw new Error('Paired comparison does not support CPU profiling');
   }
 
   const leftBenchmarks: BenchmarkResult[] = [];
   const rightBenchmarks: BenchmarkResult[] = [];
   const pairedBenchmarks: PairedBenchmarkComparison[] = [];
   const { pairs, maxAttempts } = config.comparisonRun;
-  const order = [
-    ...createPairedOrder({ pairs, seed }),
-    ...createPairedOrder({
-      pairs: maxAttempts - pairs,
-      seed: `${seed}|replacement-attempts`,
-    }),
-  ];
+  const order = createPairedOrder({ pairs: maxAttempts });
 
   for (const benchmark of config.benchmarks) {
     const [leftRunnable, rightRunnable] = await Promise.all([
@@ -210,7 +162,7 @@ export async function runPairedConfig({
     pairedBenchmarks.push({
       benchmarkName: benchmark.name,
       requestedPairs: pairs,
-      attemptedPairs: Math.min(maxAttempts, starts.length / 2),
+      attemptedPairs: starts.length / 2,
       validPairs,
       starts,
       order,
@@ -218,8 +170,7 @@ export async function runPairedConfig({
   }
 
   const pairedComparison: PairedComparisonResult = {
-    mode: 'randomized_paired',
-    seed,
+    mode: 'paired',
     baselineIdentity,
     targetIdentity,
     benchmarks: pairedBenchmarks,

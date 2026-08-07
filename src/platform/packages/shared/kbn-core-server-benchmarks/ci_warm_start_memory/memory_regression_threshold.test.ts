@@ -24,19 +24,21 @@ describe('evaluatePairedMemoryRule', () => {
     });
   });
 
-  it('calculates a lower confidence bound at the threshold', () => {
+  it('reports the paired mean and spread at the minimum pair count', () => {
     const result = evaluatePairedMemoryRule({
       deltas: Array(MIN_VALID_WARM_START_MEMORY_PAIRS).fill(WARM_START_MEMORY_THRESHOLD_BYTES),
     });
 
-    expect(result.lowerConfidenceBoundBytes).toBe(WARM_START_MEMORY_THRESHOLD_BYTES);
+    expect(result.meanBytes).toBe(WARM_START_MEMORY_THRESHOLD_BYTES);
+    expect(result.sampleStandardDeviationBytes).toBe(0);
+    expect(result.standardErrorBytes).toBe(0);
   });
 
-  it('keeps a noisy sample below its mean', () => {
+  it('reports spread for a noisy sample', () => {
     const result = evaluatePairedMemoryRule({
       deltas: [70, -30, 70, -30, 70, -30].map((value) => value * 1024 * 1024),
     });
     expect(result.meanBytes).toBe(20 * 1024 * 1024);
-    expect(result.lowerConfidenceBoundBytes).toBeLessThan(result.meanBytes ?? 0);
+    expect(result.sampleStandardDeviationBytes).toBeGreaterThan(0);
   });
 });

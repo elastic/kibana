@@ -24,7 +24,6 @@ import {
 import {
   evaluatePairedMemoryRule,
   MIN_VALID_WARM_START_MEMORY_PAIRS,
-  WARM_START_MEMORY_CONFIDENCE,
   WARM_START_MEMORY_THRESHOLD_BYTES,
 } from './paired_memory_rule';
 import {
@@ -152,7 +151,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
   const inconclusive = postForcedGcHeapRule.pairCount < MIN_VALID_WARM_START_MEMORY_PAIRS;
   const regression =
     !inconclusive &&
-    (postForcedGcHeapRule.lowerConfidenceBoundBytes ?? Number.NEGATIVE_INFINITY) >
+    (postForcedGcHeapRule.meanBytes ?? Number.NEGATIVE_INFINITY) >
       WARM_START_MEMORY_THRESHOLD_BYTES;
   const outcome = inconclusive ? 'inconclusive' : regression ? 'regression' : 'observed';
 
@@ -165,13 +164,11 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       postReadySettlingMs: SETTLING_MS,
       tailSampleCount: TAIL_SAMPLE_COUNT,
       forcedGcTimeoutMs: FORCED_GC_TIMEOUT_MS,
-      confidence: WARM_START_MEMORY_CONFIDENCE,
       thresholdBytes: WARM_START_MEMORY_THRESHOLD_BYTES,
     },
     comparison: {
       baselineIdentity: pairedComparison?.baselineIdentity,
       targetIdentity: pairedComparison?.targetIdentity,
-      seed: pairedComparison?.seed,
       requestedPairs: pairedBenchmark?.requestedPairs ?? comparisonRun?.pairs ?? 0,
       attemptedPairs: pairedBenchmark?.attemptedPairs ?? 0,
       validPairs: validPairs.length,
@@ -210,16 +207,16 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
 
   log.info(`
 Warm-start paired heap growth: ${formatBytes(
-    postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
-  )} 99% LCB. ${formatBytes(WARM_START_MEMORY_THRESHOLD_BYTES)} threshold ${
+    postForcedGcHeapRule.meanBytes ?? 0
+  )} mean. ${formatBytes(WARM_START_MEMORY_THRESHOLD_BYTES)} threshold ${
     regression ? 'exceeded' : 'not exceeded'
   }.
 
 Warm-start paired heap results:
-post-forced-GC 99% LCB: ${formatBytes(postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0)}
 post-forced-GC mean: ${formatBytes(postForcedGcHeapRule.meanBytes ?? 0)}
-natural 99% LCB: ${formatBytes(rule.lowerConfidenceBoundBytes ?? 0)}
+post-forced-GC SD: ${formatBytes(postForcedGcHeapRule.sampleStandardDeviationBytes ?? 0)}
 natural mean: ${formatBytes(rule.meanBytes ?? 0)}
+natural SD: ${formatBytes(rule.sampleStandardDeviationBytes ?? 0)}
 Report: ${reportPath}`);
 
   if (regression) {

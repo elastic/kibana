@@ -52,10 +52,9 @@ export interface ScriptBenchmark extends BenchmarkBase {
 export type Benchmark = ModuleBenchmark | ScriptBenchmark;
 
 export interface PairedComparisonRun {
-  readonly mode: 'randomized_paired';
+  readonly mode: 'paired';
   readonly pairs: number;
   readonly maxAttempts: number;
-  readonly seed?: string;
 }
 
 export interface PairedComparisonStart {
@@ -82,8 +81,7 @@ export interface PairedBenchmarkComparison {
 }
 
 export interface PairedComparisonResult {
-  readonly mode: 'randomized_paired';
-  readonly seed: string;
+  readonly mode: 'paired';
   readonly baselineIdentity: string;
   readonly targetIdentity: string;
   readonly benchmarks: readonly PairedBenchmarkComparison[];

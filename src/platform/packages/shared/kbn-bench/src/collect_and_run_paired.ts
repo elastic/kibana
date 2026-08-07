@@ -70,15 +70,10 @@ export async function collectAndRunPaired({
   for (const config of configs) {
     const baselineIdentity = leftContext.buildDir ?? (await leftContext.workspace.getCommitLine());
     const targetIdentity = rightContext.buildDir ?? (await rightContext.workspace.getCommitLine());
-    const seed =
-      process.env.KIBANA_CI_WARM_START_MEMORY_SEED ??
-      config.comparisonRun!.seed ??
-      `${baselineIdentity}|${targetIdentity}`;
     const result = await runPairedConfig({
       config,
       leftContext,
       rightContext,
-      seed,
       baselineIdentity,
       targetIdentity,
     });

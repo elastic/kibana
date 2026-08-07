@@ -74,38 +74,16 @@ const toMonitorControlError = (name: string, message: string): ForcedGcHeapStats
   };
 };
 
-const heapUsageSchema = z.object({
-  usedSize: z.number().finite(),
-  totalSize: z.number().finite(),
-  embedderHeapUsedSize: z.number().finite(),
-  backingStorageSize: z.number().finite(),
-});
-
-const forcedGcResultSchema = z.object({
-  requestedAt: z.string().min(1),
-  argv: z.array(z.string()).min(1),
-  startedAt: z.string().min(1),
-  completedAt: z.string().min(1),
-  nodeVersion: z.string().min(1),
-  v8Version: z.string().min(1),
-  inspectorConnectionDurationMs: z.number().finite(),
-  forcedGcDurationMs: z.number().finite(),
-  preForcedGcHeapUsed: z.number().finite(),
-  postForcedGcHeapUsed: z.number().finite(),
-  forcedGcHeapReduction: z.number().finite(),
-  preForcedGcHeapUsage: heapUsageSchema,
-  postForcedGcHeapUsage: heapUsageSchema,
-  postForcedGcMemoryUsage: z
-    .record(z.string(), z.unknown())
-    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
-  postForcedGcHeapStatistics: z
-    .record(z.string(), z.unknown())
-    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
-  // init_monitoring serializes V8's heap-space array as a record keyed by space_name.
-  postForcedGcHeapSpaceStatistics: z
-    .record(z.string(), z.record(z.string(), z.unknown()))
-    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
-});
+// Only the decision-critical field and the request identity are required.
+// Diagnostics (heap spaces, durations, versions) vary across Node versions —
+// e.g. Node 22 lacks Runtime.getHeapUsage — and a missing diagnostic must not
+// discard an otherwise valid sample. Unknown extra fields are ignored.
+const forcedGcResultSchema = z
+  .object({
+    requestedAt: z.string().min(1),
+    postForcedGcHeapUsed: z.number().finite(),
+  })
+  .loose();
 
 const validateForcedGcResult = (result: ForcedGcHeapStats, request: ForcedGcRequest): string[] => {
   if (result.error) return [];

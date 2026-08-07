@@ -61,10 +61,9 @@ const benchmarkSchema = z.union([moduleBenchmarkSchema, scriptBenchmarkSchema]);
 
 const pairedComparisonRunSchema = z
   .object({
-    mode: z.literal('randomized_paired'),
+    mode: z.literal('paired'),
     pairs: z.number().int().positive(),
     maxAttempts: z.number().int().positive(),
-    seed: z.string().optional(),
   })
   .refine(({ maxAttempts, pairs }) => maxAttempts >= pairs, {
     message: 'maxAttempts must be greater than or equal to pairs',

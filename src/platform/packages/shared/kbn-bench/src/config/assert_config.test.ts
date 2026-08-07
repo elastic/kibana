@@ -48,7 +48,7 @@ describe('assertConfig', () => {
       assertConfig({
         name: 'memory-check',
         comparisonRun: {
-          mode: 'randomized_paired',
+          mode: 'paired',
           pairs: 8,
           maxAttempts: 7,
         },

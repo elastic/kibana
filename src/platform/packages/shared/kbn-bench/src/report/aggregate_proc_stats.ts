@@ -63,16 +63,12 @@ export function aggregateProcStatSamples(samples: ProcStatSample[]): ProcStats {
 export function aggregateForcedGcHeapStats(
   stats: readonly ForcedGcHeapStats[]
 ): RunForcedGcHeapStats | undefined {
+  // Only postForcedGcHeapUsed feeds the regression decision; the remaining
+  // fields are diagnostics that may be absent on older Node/V8 versions and
+  // must not invalidate an otherwise usable sample.
   if (
     !stats.length ||
-    stats.some(
-      (stat) =>
-        stat.error ||
-        stat.preForcedGcHeapUsed === undefined ||
-        stat.postForcedGcHeapUsed === undefined ||
-        stat.forcedGcHeapReduction === undefined ||
-        stat.forcedGcDurationMs === undefined
-    )
+    stats.some((stat) => stat.error || !Number.isFinite(stat.postForcedGcHeapUsed))
   ) {
     return;
   }
