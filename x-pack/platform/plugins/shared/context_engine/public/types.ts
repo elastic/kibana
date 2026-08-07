@@ -8,6 +8,7 @@
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
@@ -15,8 +16,9 @@ export interface ContextEnginePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEngineSetupDependencies {}
+export interface ContextEngineSetupDependencies {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface ContextEngineStartDependencies {
   share: SharePluginStart;

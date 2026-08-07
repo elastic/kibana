@@ -30,6 +30,7 @@
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/esql",
+    "@kbn/esql-language",
     "@kbn/es-query",
     "@kbn/share-plugin",
     "@kbn/triggers-actions-ui-plugin",
@@ -40,6 +41,9 @@
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-management",
     "@kbn/code-editor",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/zod"
   ]
 }

@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
+import { registerWorkflowSteps } from './step_types';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -48,8 +49,13 @@ export class ContextEnginePlugin
 {
   constructor(_context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+  setup(
+    core: CoreSetup<ContextEngineStartDependencies>,
+    setupDeps: ContextEngineSetupDependencies
+  ): ContextEnginePluginSetup {
     const startServices = core.getStartServices();
+
+    registerWorkflowSteps(setupDeps.workflowsExtensions);
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,

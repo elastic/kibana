@@ -15,6 +15,7 @@ import type {
   ContextEngineStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import { registerWorkflowSteps } from './step_types';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
@@ -41,6 +42,8 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+
+    registerWorkflowSteps(setupDeps.workflowsExtensions);
 
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
