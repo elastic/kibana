@@ -25,7 +25,7 @@ import { getTeamByGithubHandle } from './teams';
  */
 const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   platform: [
-    'elastic/appex-ai-infra',
+    'elastic/search-ml-ux',
     'elastic/appex-qa',
     'elastic/appex-sharedux',
     'elastic/context-eng',
@@ -46,7 +46,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/kibana-tech-leads',
     'elastic/kibana-visualizations',
     'elastic/logstash',
-    'elastic/ml-ui',
+    'elastic/search-ml-ux',
     'elastic/platform-docs',
     'elastic/response-ops',
     'elastic/rna-project-team',

@@ -141,7 +141,7 @@
         "keyv",
         "@types/cache-manager-fs-hash"
       ],
-      "reviewers": ["team:appex-ai-infra"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:AI Infra"],
       "enabled": true,
@@ -462,7 +462,7 @@
         "icalendar",
         "react-popper-tooltip"
       ],
-      "reviewers": ["team:ml-ui"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ML", ":ml"],
       "enabled": true,
@@ -2297,7 +2297,7 @@
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
-        "team:appex-ai-infra",
+        "team:search-ml-ux",
         "team:kibana-core",
         "team:kibana-security",
         "team:stack-monitoring"
