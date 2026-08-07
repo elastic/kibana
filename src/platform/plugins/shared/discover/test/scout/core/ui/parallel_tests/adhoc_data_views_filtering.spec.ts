@@ -29,61 +29,88 @@ spaceTest.describe(
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
-    spaceTest('supports query and filtering on ad hoc data view', async ({ page, pageObjects }) => {
-      const { discover, filterBar, queryBar } = pageObjects;
+    spaceTest(
+      'supports query and filtering on ad hoc data view',
+      async ({ discoverScoutSpace, page, pageObjects }) => {
+        const { discover, filterBar, queryBar } = pageObjects;
 
-      await spaceTest.step('creates ad hoc data view', async () => {
-        await discover.createDataViewFromSearchBar({ name: 'logstash', adHoc: true });
-        await discover.waitUntilSearchingHasFinished();
-      });
-
-      await spaceTest.step('filters by nested field value and checks hit count', async () => {
-        await filterBar.addFilter({
-          field: 'nestedField.child',
-          operator: 'is',
-          value: 'nestedValue',
+        await spaceTest.step('creates ad hoc data view', async () => {
+          await discoverScoutSpace.createDiscoverSession({
+            title: 'logstash-adhoc-query-test',
+            tabs: [
+              {
+                id: 'main',
+                label: 'Untitled',
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logstash*',
+                  time_field: '@timestamp',
+                },
+              },
+            ],
+          });
+          await discover.loadSavedSearch('logstash-adhoc-query-test');
         });
-        await discover.waitUntilSearchingHasFinished();
 
-        expect(
-          await filterBar.hasFilter({ field: 'nestedField.child', value: 'nestedValue' })
-        ).toBe(true);
-        expect(await discover.getHitCount()).toBe('1');
+        await spaceTest.step('filters by nested field value and checks hit count', async () => {
+          await filterBar.addFilter({
+            field: 'nestedField.child',
+            operator: 'is',
+            value: 'nestedValue',
+          });
+          await discover.waitUntilSearchingHasFinished();
 
-        await filterBar.removeFilter('nestedField.child');
-        await discover.waitUntilSearchingHasFinished();
-      });
+          expect(
+            await filterBar.hasFilter({ field: 'nestedField.child', value: 'nestedValue' })
+          ).toBe(true);
+          expect(await discover.getHitCount()).toBe('1');
 
-      await spaceTest.step('searches with a text query and verifies hit count', async () => {
-        await queryBar.setQuery('test');
-        await page.keyboard.press('Enter');
-        await discover.waitUntilSearchingHasFinished();
-        expect(await discover.getHitCount()).toBe('22');
+          await filterBar.removeFilter('nestedField.child');
+          await discover.waitUntilSearchingHasFinished();
+        });
 
-        await queryBar.clearQuery();
-        await page.keyboard.press('Enter');
-        await discover.waitUntilSearchingHasFinished();
-      });
-    });
+        await spaceTest.step('searches with a text query and verifies hit count', async () => {
+          await queryBar.setQuery('test');
+          await page.keyboard.press('Enter');
+          await discover.waitUntilSearchingHasFinished();
+          expect(await discover.getHitCount()).toBe('22');
+
+          await queryBar.clearQuery();
+          await page.keyboard.press('Enter');
+          await discover.waitUntilSearchingHasFinished();
+        });
+      }
+    );
 
     spaceTest(
       'preserves runtime field column in saved search after navigating through context view',
-      async ({ page, pageObjects }) => {
-        const { discover, unifiedFieldList, dashboard, dataGrid } = pageObjects;
+      async ({ discoverScoutSpace, page, pageObjects }) => {
+        const { discover, dashboard, dataGrid } = pageObjects;
 
         await spaceTest.step(
           'creates ad hoc data view with runtime field and saves search',
           async () => {
-            await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
-            await discover.waitUntilSearchingHasFinished();
-
-            await discover.createRuntimeField(
-              '_bytes-runtimefield',
-              `emit(doc["bytes"].value.toString())`
-            );
-            await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
-            await discover.saveSearch('logst-ctx-runtimefield');
-            await discover.waitUntilTabIsLoaded();
+            await discoverScoutSpace.createDiscoverSession({
+              title: 'logst-ctx-runtimefield',
+              tabs: [
+                {
+                  id: 'main',
+                  label: 'Untitled',
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logst*',
+                    time_field: '@timestamp',
+                    field_settings: {
+                      '_bytes-runtimefield': {
+                        type: 'keyword',
+                        script: 'emit(doc["bytes"].value.toString())',
+                      },
+                    },
+                  },
+                  column_order: ['_bytes-runtimefield'],
+                },
+              ],
+            });
           }
         );
 
