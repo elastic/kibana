@@ -363,6 +363,9 @@ const OtlpExporterTlsSchema = schema.object({
   ca_pem: schema.maybe(schema.string({ maxLength: 65536 })),
   cert_pem: schema.maybe(schema.string({ maxLength: 65536 })),
   key_pem: schema.maybe(schema.string({ maxLength: 65536 })),
+  ca_file: schema.maybe(schema.string({ maxLength: 4096 })),
+  cert_file: schema.maybe(schema.string({ maxLength: 4096 })),
+  key_file: schema.maybe(schema.string({ maxLength: 4096 })),
   include_system_ca_certs_pool: schema.maybe(schema.boolean()),
   include_insecure_cipher_suites: schema.maybe(schema.boolean()),
   min_version: schema.maybe(schema.string({ maxLength: 10 })),
@@ -380,6 +383,12 @@ const OtlpExporterTlsSchema = schema.object({
       ]),
       { maxSize: 4 }
     )
+  ),
+  tpm: schema.maybe(
+    schema.object({
+      enabled: schema.maybe(schema.boolean()),
+      path: schema.maybe(schema.string({ maxLength: 4096 })),
+    })
   ),
 });
 
@@ -496,6 +505,12 @@ const OtlpSecretsSchema = schema.maybe(
         tls: schema.maybe(
           schema.object({
             key_pem: schema.maybe(secretRefSchema),
+            tpm: schema.maybe(
+              schema.object({
+                owner_auth: schema.maybe(secretRefSchema),
+                auth: schema.maybe(secretRefSchema),
+              })
+            ),
           })
         ),
       })

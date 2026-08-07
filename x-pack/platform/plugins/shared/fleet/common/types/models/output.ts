@@ -96,6 +96,9 @@ interface OtlpExporterTlsConfig {
   ca_pem?: string;
   cert_pem?: string;
   key_pem?: string;
+  ca_file?: string;
+  cert_file?: string;
+  key_file?: string;
   include_system_ca_certs_pool?: boolean;
   include_insecure_cipher_suites?: boolean;
   min_version?: string;
@@ -104,6 +107,10 @@ interface OtlpExporterTlsConfig {
   server_name_override?: string;
   cipher_suites?: string[];
   curve_preferences?: OtlpTlsCurvePreference[];
+  tpm?: {
+    enabled?: boolean;
+    path?: string;
+  };
 }
 
 interface OtlpExporterSendingQueueConfig {
@@ -193,6 +200,10 @@ interface OtlpOutputSecrets {
   otlp_exporter?: {
     tls?: {
       key_pem?: SOSecret;
+      tpm?: {
+        owner_auth?: SOSecret;
+        auth?: SOSecret;
+      };
     };
   };
 }

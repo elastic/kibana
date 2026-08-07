@@ -290,6 +290,10 @@ export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
     otlp_exporter?: {
       tls?: {
         key_pem?: { id: string };
+        tpm?: {
+          owner_auth?: { id: string };
+          auth?: { id: string };
+        };
       };
     };
   };
