@@ -228,12 +228,12 @@ export interface PluginStartContract {
    * Remove a previously registered dynamic InMemoryConnector from the inMemoryConnectors list.
    * Only connectors flagged as dynamic (via registerDynamicConnector) can be removed this way;
    * preconfigured or system connectors are left untouched.
-   * Awaits client-pool eviction so the same id can be re-registered without reusing a stale client
-   * (in-memory connectors share one revision sentinel).
+   * Triggers client-pool eviction (fire-and-forget); cache keys are dropped before return so a
+   * re-register of the same id cannot reuse a stale pooled client.
    * @param connectorId id of the dynamic connector to remove
    * @returns boolean indicating whether the connector was removed or not
    */
-  unregisterDynamicConnector: (connectorId: string) => Promise<boolean>;
+  unregisterDynamicConnector: (connectorId: string) => boolean;
   getRelayClient: () => RelayClientContract | undefined;
 }
 
@@ -1144,7 +1144,7 @@ export class ActionsPlugin
     return false;
   };
 
-  private unregisterDynamicConnector = async (connectorId: string): Promise<boolean> => {
+  private unregisterDynamicConnector = (connectorId: string): boolean => {
     const index = this.inMemoryConnectors.findIndex(
       (c) => c.id === connectorId && c.isDynamic === true
     );
@@ -1152,7 +1152,9 @@ export class ActionsPlugin
       return false;
     }
     this.inMemoryConnectors.splice(index, 1);
-    await this.clientLeasePool.evict(connectorId);
+    // Fire-and-forget: LeasePool.evict deletes cache keys synchronously before its first await,
+    // so a same-id re-register cannot hit a stale entry. Remote terminate may still be in flight.
+    void this.clientLeasePool.evict(connectorId);
     this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
     return true;
   };

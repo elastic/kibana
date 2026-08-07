@@ -929,7 +929,7 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
         });
 
-        it('should allow removing a previously registered dynamic connector', async () => {
+        it('should allow removing a previously registered dynamic connector', () => {
           const newDynamicConnector: InMemoryConnector = {
             id: 'dynamic-connector-id',
             actionTypeId: '.inference',
@@ -944,9 +944,7 @@ describe('Actions Plugin', () => {
           pluginStart.registerDynamicConnector(newDynamicConnector);
           expect(pluginStart.inMemoryConnectors.length).toEqual(2);
 
-          await expect(
-            pluginStart.unregisterDynamicConnector(newDynamicConnector.id)
-          ).resolves.toEqual(true);
+          expect(pluginStart.unregisterDynamicConnector(newDynamicConnector.id)).toEqual(true);
           expect(pluginStart.inMemoryConnectors.length).toEqual(1);
           expect(
             pluginStart.inMemoryConnectors.find((c) => c.id === newDynamicConnector.id)
@@ -969,7 +967,7 @@ describe('Actions Plugin', () => {
 
           // A dynamic connector's ID can be re-registered with different config, and in-memory
           // connectors share one revision sentinel, so the lease key alone cannot invalidate a
-          // stale client. Unregistering has to await eviction before returning.
+          // stale client. Unregistering has to evict.
           const pool = pluginSetup.getClientLeasePool();
           const terminate = jest.fn().mockResolvedValue(undefined);
           await pool.lease(
@@ -978,12 +976,13 @@ describe('Actions Plugin', () => {
             terminate
           );
 
-          await pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+          await new Promise(process.nextTick);
 
           expect(terminate).toHaveBeenCalledTimes(1);
         });
 
-        it('should mutate the inMemoryConnectors array in place when removing a dynamic connector', async () => {
+        it('should mutate the inMemoryConnectors array in place when removing a dynamic connector', () => {
           const newDynamicConnector: InMemoryConnector = {
             id: 'dynamic-connector-id',
             actionTypeId: '.inference',
@@ -998,26 +997,22 @@ describe('Actions Plugin', () => {
           pluginStart.registerDynamicConnector(newDynamicConnector);
           const liveReference = pluginStart.inMemoryConnectors;
 
-          await pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
 
           expect(pluginStart.inMemoryConnectors).toBe(liveReference);
           expect(liveReference.length).toEqual(1);
         });
 
-        it('should return false when removing a dynamic connector that does not exist', async () => {
-          await expect(pluginStart.unregisterDynamicConnector('non-existent-id')).resolves.toEqual(
-            false
-          );
+        it('should return false when removing a dynamic connector that does not exist', () => {
+          expect(pluginStart.unregisterDynamicConnector('non-existent-id')).toEqual(false);
           expect(pluginStart.inMemoryConnectors.length).toEqual(1);
         });
 
-        it('should not allow removing a non-dynamic preconfigured connector', async () => {
+        it('should not allow removing a non-dynamic preconfigured connector', () => {
           const existingConnector = pluginStart.inMemoryConnectors[0];
           expect(existingConnector.isDynamic).not.toEqual(true);
 
-          await expect(
-            pluginStart.unregisterDynamicConnector(existingConnector.id)
-          ).resolves.toEqual(false);
+          expect(pluginStart.unregisterDynamicConnector(existingConnector.id)).toEqual(false);
 
           expect(pluginStart.inMemoryConnectors.length).toEqual(1);
           expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
