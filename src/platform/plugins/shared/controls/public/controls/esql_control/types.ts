@@ -57,7 +57,7 @@ export type ESQLOptionsListComponentState = Pick<
    * being impacted by default embeddable title handling, we switch to `label` for the implementation
    */
   label: string;
-} & Omit<TemporaryState<string>, 'requestSize'>;
+} & Omit<TemporaryState<string>, 'requestSize' | 'isPartial'>;
 
 export type ESQLOptionsListComponentApi = HasType &
   HasUniqueId &
@@ -67,7 +67,7 @@ export type ESQLOptionsListComponentApi = HasType &
   SettersOf<
     Omit<
       TemporaryState<string>,
-      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality'
+      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality' | 'isPartial'
     >
   > &
   OptionsListSelectionsApi & {
