@@ -6,7 +6,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createRuleDataBaseSchema, createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  createRuleDataBaseSchema,
+  createActionPolicyDataSchema,
+  alertEventSeveritySchema,
+  ALERT_EPISODE_STATUS,
+  MATCHER_CONTEXT_FIELDS,
+  groupingModeSchema,
+  throttleStrategySchema,
+  PER_EPISODE_STRATEGIES,
+  AGGREGATE_STRATEGIES,
+  STRATEGIES_REQUIRING_INTERVAL,
+} from '@kbn/alerting-v2-schemas';
+import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
@@ -292,6 +304,8 @@ export const generateRuleOperationsDoc = (): string =>
     schema: ruleOperationSchema,
   });
 
+export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
+
 /**
  * Generates concise markdown documentation from the create-action-policy Zod schema.
  */
@@ -310,6 +324,108 @@ export const generateActionPolicyOperationsDoc = (): string =>
     source: 'the `manage_action_policy` tool Zod schemas',
     schema: actionPolicyOperationSchema,
   });
+
+/** Agent-facing descriptions keyed by grouping mode — drift-guards new enum values. */
+const GROUPING_MODE_DOC: Record<GroupingMode, string> = {
+  per_episode: 'one notification per alert episode lifecycle (default)',
+  all: 'a single notification for all matching episodes',
+  per_field: 'group by specified `groupBy` fields',
+};
+
+/** Agent-facing descriptions keyed by throttle strategy — drift-guards new enum values. */
+const THROTTLE_STRATEGY_DOC: Record<ThrottleStrategy, string> = {
+  on_status_change: 'notify only on episode status transitions (default for `per_episode`)',
+  per_status_interval: 'notify on transitions and at regular intervals',
+  time_interval:
+    'notify at regular intervals regardless of status (default for `all` / `per_field`)',
+  every_time: 'notify on every evaluation cycle (high volume)',
+};
+
+const EPISODE_STATUS_VALUES = Object.values(ALERT_EPISODE_STATUS);
+const SEVERITY_VALUES = alertEventSeveritySchema.options;
+
+function formatMatcherFieldType(path: string, type: string): string {
+  if (path === 'episode_status') {
+    return EPISODE_STATUS_VALUES.map((v) => `\`${v}\``).join(', ');
+  }
+  if (path === 'severity') {
+    return SEVERITY_VALUES.map((v) => `\`${v}\``).join(', ');
+  }
+  if (path === 'data') {
+    return '`data.*` object';
+  }
+  return type;
+}
+
+/**
+ * Generates markdown for KQL matcher context fields from `MATCHER_CONTEXT_FIELDS`,
+ * enriching enum fields from `ALERT_EPISODE_STATUS` / `alertEventSeveritySchema`.
+ */
+export const generateMatcherContextDoc = (): string => {
+  const rows = MATCHER_CONTEXT_FIELDS.map((field) => {
+    const typeCell = escapeTableCell(formatMatcherFieldType(field.path, field.type));
+    return `| \`${field.path}\` | ${typeCell} | ${escapeTableCell(field.description)} |`;
+  });
+
+  return [
+    '# Matcher Context Fields',
+    '',
+    "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
+    '',
+    '| Field | Type | Description |',
+    '|---|---|---|',
+    ...rows,
+    '',
+    'An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use `rule.id: "<ruleId>"`.',
+  ].join('\n');
+};
+
+/**
+ * Generates markdown for action-policy grouping modes from `groupingModeSchema`.
+ */
+export const generateGroupingModesDoc = (): string => {
+  const modes = groupingModeSchema.options as GroupingMode[];
+  const bullets = modes.map((mode) => `- \`${mode}\`: ${GROUPING_MODE_DOC[mode]}`);
+
+  return [
+    '# Grouping Modes',
+    '',
+    'Auto-generated from `groupingModeSchema` in `@kbn/alerting-v2-schemas`.',
+    '',
+    ...bullets,
+    '',
+    'Throttle strategy must be compatible with the grouping mode — see [throttle-strategies](./throttle-strategies.md).',
+  ].join('\n');
+};
+
+/**
+ * Generates markdown for throttle strategies and grouping-mode compatibility from
+ * `throttleStrategySchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `STRATEGIES_REQUIRING_INTERVAL`.
+ */
+export const generateThrottleStrategiesDoc = (): string => {
+  const strategies = throttleStrategySchema.options as ThrottleStrategy[];
+  const bullets = strategies.map(
+    (strategy) => `- \`${strategy}\`: ${THROTTLE_STRATEGY_DOC[strategy]}`
+  );
+
+  const formatSet = (set: Set<string>) => [...set].map((v) => `\`${v}\``).join(', ');
+
+  const intervalStrategies = formatSet(STRATEGIES_REQUIRING_INTERVAL);
+
+  return [
+    '# Throttle Strategies',
+    '',
+    'Auto-generated from `throttleStrategySchema` and compatibility sets in `@kbn/alerting-v2-schemas`.',
+    '',
+    ...bullets,
+    '',
+    'Compatibility with grouping modes (see [grouping-modes](./grouping-modes.md)):',
+    `- For \`per_episode\`: ${formatSet(PER_EPISODE_STRATEGIES)}.`,
+    `- For \`all\` / \`per_field\`: ${formatSet(AGGREGATE_STRATEGIES)}.`,
+    `- ${intervalStrategies} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
+  ].join('\n');
+};
 
 /**
  * Generates concise markdown documentation for the action-policy → workflow dispatch payload.

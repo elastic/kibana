@@ -7,14 +7,20 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
+import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
+import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateActionPolicySchemaDoc,
+  getSeverityValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
+  generateMatcherContextDoc,
+  generateGroupingModesDoc,
+  generateThrottleStrategiesDoc,
 } from './schema_to_skill_docs';
 
 /**
@@ -40,6 +46,21 @@ const episodeKeyGuard: Record<keyof AlertEpisode, true> = {
   episode_status: true,
   severity: true,
   data: true,
+};
+
+/** Drift-guard: new grouping modes must update generateGroupingModesDoc coverage. */
+const groupingModeGuard: Record<GroupingMode, true> = {
+  per_episode: true,
+  all: true,
+  per_field: true,
+};
+
+/** Drift-guard: new throttle strategies must update generateThrottleStrategiesDoc coverage. */
+const throttleStrategyGuard: Record<ThrottleStrategy, true> = {
+  on_status_change: true,
+  per_status_interval: true,
+  time_interval: true,
+  every_time: true,
 };
 
 describe('schema_to_skill_docs', () => {
@@ -198,6 +219,14 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('getSeverityValues', () => {
+    it('matches the snapshot', () => {
+      expect(getSeverityValues().join(', ')).toMatchInlineSnapshot(
+        `"info, low, medium, high, critical"`
+      );
+    });
+  });
+
   describe('generateActionPolicySchemaDoc', () => {
     /**
      * Snapshot of the generated skill markdown for the action policy create API
@@ -288,6 +317,54 @@ describe('schema_to_skill_docs', () => {
     it('documents the inputs.payload Liquid access pattern', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('inputs.payload');
+    });
+  });
+
+  describe('generateMatcherContextDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateMatcherContextDoc()).toMatchSnapshot();
+    });
+
+    it('documents every MATCHER_CONTEXT_FIELDS path', () => {
+      const doc = generateMatcherContextDoc();
+      for (const { path } of MATCHER_CONTEXT_FIELDS) {
+        expect(doc).toContain(`\`${path}\``);
+      }
+    });
+
+    it('enriches episode_status and severity with schema enums', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('`inactive`');
+      expect(doc).toContain('`recovering`');
+      expect(doc).toContain('`critical`');
+    });
+  });
+
+  describe('generateGroupingModesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateGroupingModesDoc()).toMatchSnapshot();
+    });
+
+    it('documents every grouping mode', () => {
+      const doc = generateGroupingModesDoc();
+      for (const mode of Object.keys(groupingModeGuard)) {
+        expect(doc).toContain(`\`${mode}\``);
+      }
+    });
+  });
+
+  describe('generateThrottleStrategiesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateThrottleStrategiesDoc()).toMatchSnapshot();
+    });
+
+    it('documents every throttle strategy and compatibility sets', () => {
+      const doc = generateThrottleStrategiesDoc();
+      for (const strategy of Object.keys(throttleStrategyGuard)) {
+        expect(doc).toContain(`\`${strategy}\``);
+      }
+      expect(doc).toContain('per_episode');
+      expect(doc).toContain('interval');
     });
   });
 });

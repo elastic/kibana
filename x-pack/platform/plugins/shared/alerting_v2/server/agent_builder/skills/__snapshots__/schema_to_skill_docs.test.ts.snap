@@ -103,6 +103,40 @@ Rule names: \`{{ inputs.payload.rules[ep.rule_id].name }}\`.
 | \`data\` | object | optional | Data of the alert episode |"
 `;
 
+exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Grouping Modes
+
+Auto-generated from \`groupingModeSchema\` in \`@kbn/alerting-v2-schemas\`.
+
+- \`per_episode\`: one notification per alert episode lifecycle (default)
+- \`all\`: a single notification for all matching episodes
+- \`per_field\`: group by specified \`groupBy\` fields
+
+Throttle strategy must be compatible with the grouping mode — see [throttle-strategies](./throttle-strategies.md)."
+`;
+
+exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Matcher Context Fields
+
+Auto-generated from \`MATCHER_CONTEXT_FIELDS\` in \`@kbn/alerting-v2-schemas\`.
+
+When the dispatcher evaluates a policy's KQL matcher, these fields are available:
+
+| Field | Type | Description |
+|---|---|---|
+| \`episode_id\` | string | The episode UUID |
+| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, \`recovering\` | Episode lifecycle status |
+| \`group_hash\` | string | Hash of the grouping fields |
+| \`last_event_timestamp\` | string | Timestamp of the most recent event |
+| \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Episode severity when present |
+| \`rule.id\` | string | The rule's saved object ID |
+| \`rule.name\` | string | The rule's display name |
+| \`rule.tags\` | string[] | The rule's tags array |
+| \`data\` | \`data.*\` object | Rule-specific ES\\\\|QL output columns (query as \`data.*\`, e.g. \`data.host.name\`, \`data.error_count\`) |
+
+An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use \`rule.id: \\"<ruleId>\\"\`."
+`;
+
 exports[`schema_to_skill_docs generateRuleOperationsDoc matches the snapshot 1`] = `
 "# Rule Operations Schema Reference
 
@@ -205,4 +239,20 @@ Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth fo
 | \`breach\` | object | required | Breach detection configuration (required). |
 | \`recovery\` | object | optional | Recovery query. Required when recovery_strategy is \\"query\\". |
 | \`no_data\` | object | optional | No-data detection query. Required when no_data_strategy is not \\"none\\". |"
+`;
+
+exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Throttle Strategies
+
+Auto-generated from \`throttleStrategySchema\` and compatibility sets in \`@kbn/alerting-v2-schemas\`.
+
+- \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`)
+- \`per_status_interval\`: notify on transitions and at regular intervals
+- \`time_interval\`: notify at regular intervals regardless of status (default for \`all\` / \`per_field\`)
+- \`every_time\`: notify on every evaluation cycle (high volume)
+
+Compatibility with grouping modes (see [grouping-modes](./grouping-modes.md)):
+- For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
+- For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
+- \`per_status_interval\`, \`time_interval\` require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`)."
 `;

@@ -13,7 +13,11 @@ import {
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
-import { generateRuleSchemaDoc, generateRuleOperationsDoc } from './schema_to_skill_docs';
+import {
+  generateRuleSchemaDoc,
+  generateRuleOperationsDoc,
+  getSeverityValues,
+} from './schema_to_skill_docs';
 
 export const createRuleManagementSkill = () =>
   defineSkillType({
@@ -70,9 +74,31 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
         relativePath: './references',
         content: `# Notifications via Action Policies
 
-Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-scoped saved objects that send matched episodes to workflow destinations.
+Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.
 
-When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
+
+---
+
+## Alert Event Severity
+
+Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
+
+- **Valid values**: ${getSeverityValues()
+          .map((v) => `\`${v}\``)
+          .join(', ')} (case-insensitive).
+- If the breach query does not produce a \`severity\` column, alert events have no severity.
+- Different groups can produce different severities in the same rule execution (the value comes from each row).
+- Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).
+
+### Setting Severity in ES|QL
+
+Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`:
+
+- **Literal severity** — all alerts from the rule share the same severity:
+  \`| EVAL severity = "critical"\`
+- **Conditional severity** — severity varies per group based on data:
+  \`| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")\``,
       },
       {
         name: 'rule-schema',
@@ -85,16 +111,7 @@ When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${
         content: generateRuleOperationsDoc(),
       },
     ],
-    content: `## Domain Knowledge
-
-For questions about alerting concepts:
-- Rule kinds (alert vs signal) — consult the [rule-kind reference](./references/rule-kind.md).
-- Episode lifecycle — consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
-- How notifications relate to rules — consult the [notifications-overview reference](./references/notifications-overview.md).
-
----
-
-## When to Use This Skill
+    content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing alerting V2 rules.
@@ -102,10 +119,19 @@ Use this skill when:
 - A user asks to change a rule's query, schedule, thresholds, or metadata.
 
 Do **not** use this skill for:
-- Creating, inspecting, or modifying action policies (notification policies) — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill instead.
+- Creating, inspecting, or modifying action policies — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill instead.
 - Classic (V1) stack, Observability or Security detection rules.
 - Action connector configuration (connectors are managed separately).
 - Querying or analyzing data — use data exploration skills for that.
+
+---
+
+## Domain Knowledge
+
+For questions about alerting concepts:
+- Rule kinds (alert vs signal) — consult the [rule-kind reference](./references/rule-kind.md).
+- Episode lifecycle — consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+- How notifications relate to rules — consult the [notifications-overview reference](./references/notifications-overview.md).
 
 ---
 
@@ -159,6 +185,10 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 - \`recovering_timeframe\` — optional time window for the recovering evaluation.
 
 State transition is only allowed on \`kind: alert\` rules ([rule-kind reference](./references/rule-kind.md)). Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
+
+## Severity
+
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [concepts reference](./references/concepts.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ## Recovery Strategy
 
@@ -232,7 +262,8 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 
 ## Offering Notifications After Rule Compose
 
-After composing a complete **alert** rule (has name, query, schedule, and \`kind: alert\`), proactively ask the user:
+After composing a complete **alert** rule (has name, query, schedule, and \`kind: alert\`), proactively ask the user about notifications. Email is only an **example** default channel — use it when the user has not named one. If they already asked for Slack, PagerDuty, etc., offer that channel instead.
+Example offer when no channel was specified:
 **"Would you like to set up email notifications for this rule?"**
 
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
