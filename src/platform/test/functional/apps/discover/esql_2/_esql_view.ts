@@ -353,7 +353,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      it('should switch to a data view immediately without a modal', async () => {
+      it('should switch to a data view immediately', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
