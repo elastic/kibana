@@ -23,4 +23,6 @@ const TavilyIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default (props: ConnectorIconProps) => <EuiIcon type={TavilyIcon} {...props} />;
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={TavilyIcon} {...props} />;
+};

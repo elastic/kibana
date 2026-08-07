@@ -42,7 +42,7 @@ import { TriggerIcon } from '../../../widgets/worflows_triggers_list/worflows_tr
 // Covers StepIcon and TriggerIcon together: the workflow list renders both side by
 // side, and a regression in either shows up as a plugs glyph in the same column.
 export default {
-  title: 'Workflow icons',
+  title: 'Workflows Icons/Catalog',
   decorators: [kibanaReactDecorator],
 };
 
@@ -299,25 +299,25 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
         title={`Triggers (${BUILT_IN_TRIGGER_TYPES.length} built-in + ${triggerDefs.length} custom)`}
         subtitle="Rendered by TriggerIcon. cases.* are local fixtures — see CASES_TRIGGER_FIXTURES."
       />
-      <IconRowGrid rows={triggerRows} columns={4} />
+      <IconRowGrid rows={triggerRows} columns={3} />
 
       <SectionHeader
         title="Built-in step types"
         subtitle="Resolved by getStepIconType / HardcodedIcons, no extension lookup."
       />
-      <IconRowGrid rows={builtInRows} columns={4} />
+      <IconRowGrid rows={builtInRows} columns={3} />
 
       <SectionHeader
         title={`Extension step definitions (${extensionRows.length} from @kbn/workflows-extensions)`}
         subtitle="Only the defs that package ships. cases.* and ai.agent are registered at runtime by Cases / Agent Builder."
       />
-      <IconRowGrid rows={extensionRows} columns={4} />
+      <IconRowGrid rows={extensionRows} columns={3} />
 
       <SectionHeader
         title={`Connector specs (${connectorRows.length} from @kbn/connector-specs)`}
         subtitle="Bare base types, as the workflow list shows them (`aws_lambda` for `.aws_lambda`)."
       />
-      <IconRowGrid rows={connectorRows} columns={4} />
+      <IconRowGrid rows={connectorRows} columns={3} />
     </EuiFlexGroup>
   );
 };

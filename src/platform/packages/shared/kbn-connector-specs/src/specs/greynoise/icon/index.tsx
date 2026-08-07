@@ -31,4 +31,6 @@ const GreyNoiseIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default (props: ConnectorIconProps) => <EuiIcon type={GreyNoiseIcon} {...props} />;
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={GreyNoiseIcon} {...props} />;
+};

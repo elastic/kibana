@@ -43,4 +43,6 @@ const GoogleDriveIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default (props: ConnectorIconProps) => <EuiIcon type={GoogleDriveIcon} {...props} />;
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={GoogleDriveIcon} {...props} />;
+};

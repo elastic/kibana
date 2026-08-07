@@ -62,4 +62,6 @@ const BraveSearchIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default (props: ConnectorIconProps) => <EuiIcon type={BraveSearchIcon} {...props} />;
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={BraveSearchIcon} {...props} />;
+};

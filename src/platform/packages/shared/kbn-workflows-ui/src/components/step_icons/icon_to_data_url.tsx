@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
+import type { EuiThemeColorModeStandard, IconType } from '@elastic/eui';
+import { EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
@@ -33,13 +34,24 @@ async function resolveLazyComponent(lazyComponent: LazyImageComponent): Promise<
   return module.default;
 }
 
+/**
+ * Renders an icon component to a data URL for a CSS `background-image` / `mask-image`.
+ *
+ * `colorMode` is explicit because this renders outside the React tree, where a brand
+ * icon's `useEuiTheme()` would read EUI's default context and bake the light fill into
+ * every URL. Callers that aren't theme-aware keep the light default.
+ */
 export function getDataUrlFromReactComponent(
-  component: ImageComponent,
-  fallbackUrl: string
+  Component: ImageComponent,
+  fallbackUrl: string,
+  colorMode: EuiThemeColorModeStandard = 'LIGHT'
 ): string {
   try {
-    const element = React.createElement(component, { width: 16, height: 16 });
-    let htmlString = renderToStaticMarkup(element);
+    let htmlString = renderToStaticMarkup(
+      <EuiThemeProvider colorMode={colorMode}>
+        <Component width={16} height={16} />
+      </EuiThemeProvider>
+    );
     if (htmlString.includes('<img')) {
       const srcMatch = htmlString.match(/src="([^"]+)"/);
       if (srcMatch?.[1]) {
@@ -48,12 +60,10 @@ export function getDataUrlFromReactComponent(
       return fallbackUrl;
     }
     // A glyph whose root is `fill="none"` paints nothing as a data URL, so drop the
-    // `none`s and let everything inherit `currentColor` from the root.
-    //
-    // Skipped when the root already carries a real fill: there the children's
-    // `fill="none"` is deliberate (a stroked shape that becomes a blob if filled),
-    // and adding a second root `fill` is a fatal XML parse error in
-    // `image/svg+xml` — the browser drops the icon with no warning.
+    // `none`s and inherit `currentColor` from the root instead. Skipped when the root
+    // already has a real fill: there a child's `fill="none"` is deliberate, and a second
+    // root `fill` is a fatal `image/svg+xml` parse error — the browser drops the icon
+    // with no warning.
     const rootHasPaintableFill = /<svg[^>]*\sfill="(?!none)[^"]+"/i.test(htmlString);
     if (!rootHasPaintableFill && /fill="none"/i.test(htmlString)) {
       htmlString = htmlString
@@ -68,7 +78,8 @@ export function getDataUrlFromReactComponent(
 
 export async function resolveIconToDataUrl(
   icon: IconType | undefined,
-  fallbackUrl: string
+  fallbackUrl: string,
+  colorMode: EuiThemeColorModeStandard = 'LIGHT'
 ): Promise<string> {
   if (!icon) {
     return fallbackUrl;
@@ -78,10 +89,10 @@ export async function resolveIconToDataUrl(
   }
   if (isLazyExoticComponent(icon)) {
     const Component = await resolveLazyComponent(icon);
-    return getDataUrlFromReactComponent(Component, fallbackUrl);
+    return getDataUrlFromReactComponent(Component, fallbackUrl, colorMode);
   }
   if (typeof icon === 'function') {
-    return getDataUrlFromReactComponent(icon as ImageComponent, fallbackUrl);
+    return getDataUrlFromReactComponent(icon as ImageComponent, fallbackUrl, colorMode);
   }
   return fallbackUrl;
 }

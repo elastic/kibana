@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
@@ -94,7 +94,7 @@ const decorator: Decorator = (story) => {
 };
 
 export default {
-  title: 'Use Dynamic Type Icons',
+  title: 'Workflows Icons/Editor',
   decorators: [decorator],
 };
 
@@ -113,7 +113,7 @@ const withHardcodedIcons = allTypes.filter((t) => hasHardcodedIcon(t.actionTypeI
 const withConnectorIcons = allTypes.filter((t) => !hasHardcodedIcon(t.actionTypeId));
 
 const SectionHeading = ({ children, first }: { children: string; first?: boolean }) => (
-  <EuiText size="xs" color="subdued" style={{ margin: first ? '0 0 4px' : '16px 0 4px' }}>
+  <EuiText size="xs" color="subdued" style={{ margin: first ? '0 0 12px' : '16px 0 12px' }}>
     <strong>{children}</strong>
   </EuiText>
 );
@@ -129,21 +129,33 @@ const DynamicTypeIconsDemo = () => {
   return (
     <div className="monaco-editor" style={{ fontFamily: 'monospace', fontSize: 13 }}>
       <GlobalWorkflowEditorStyles />
-      <div
-        className="view-line"
-        style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}
-      >
-        <SectionHeading first>{'Hardcoded icons (bundled SVGs)'}</SectionHeading>
+      <SectionHeading first>{'Hardcoded icons (bundled SVGs)'}</SectionHeading>
+      <EuiFlexGrid columns={3} gutterSize="s">
         {withHardcodedIcons.map((t) => (
-          <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
+          <EuiFlexItem key={t.actionTypeId}>
+            <div css={{ position: 'relative', height: '20px' }}>
+              <div className="view-line">
+                <TypeChip actionTypeId={t.actionTypeId} />
+              </div>
+            </div>
+          </EuiFlexItem>
         ))}
-        <SectionHeading>
-          {`Connector icons from the action type registry (${withConnectorIcons.length})`}
-        </SectionHeading>
+      </EuiFlexGrid>
+
+      <SectionHeading>
+        {`Connector icons from the action type registry (${withConnectorIcons.length})`}
+      </SectionHeading>
+      <EuiFlexGrid columns={3} gutterSize="s">
         {withConnectorIcons.map((t) => (
-          <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
+          <EuiFlexItem key={t.actionTypeId}>
+            <div css={{ position: 'relative', height: '20px' }}>
+              <div className="view-line">
+                <TypeChip actionTypeId={t.actionTypeId} />
+              </div>
+            </div>
+          </EuiFlexItem>
         ))}
-      </div>
+      </EuiFlexGrid>
     </div>
   );
 };
