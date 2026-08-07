@@ -28,8 +28,8 @@ import { TableFieldValue } from './table_field_value';
 import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { useGetFormattedDateTime } from '../use_formatted_date';
 
-const MIN_NAME_COLUMN_WIDTH = 120;
-const MAX_NAME_COLUMN_WIDTH = 300;
+const MIN_NAME_COLUMN_WIDTH = 220;
+const MAX_NAME_COLUMN_WIDTH = 360;
 
 interface JSONDataTableRecord {
   field: string;

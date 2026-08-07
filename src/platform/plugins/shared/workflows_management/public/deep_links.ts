@@ -57,6 +57,8 @@ export function getDeepLinks({
         defaultMessage: 'Executions',
       }),
       path: '/executions',
+      // Without projectSideNav, solution nav strips this node (DEFAULT_LINK_VISIBILITY is globalSearch-only).
+      visibleIn: sideNavVisibleIn,
     });
   }
 

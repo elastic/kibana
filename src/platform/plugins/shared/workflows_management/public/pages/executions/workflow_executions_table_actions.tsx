@@ -26,7 +26,7 @@ import { getWorkflowExecutionActionContextFromDto } from './workflow_executions_
 import { useKibana } from '../../hooks/use_kibana';
 
 export const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_ID = 'actions';
-const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 64;
+const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 56;
 
 export interface WorkflowExecutionActionContext {
   executionId?: string;
@@ -181,7 +181,7 @@ export const WorkflowExecutionActionsMenu = ({
   });
 
   const anchorPosition: EuiPopoverProps['anchorPosition'] =
-    variant === 'takeAction' ? 'upRight' : 'upCenter';
+    variant === 'takeAction' ? 'upRight' : 'downLeft';
 
   if (!listItems?.length) {
     return null;

@@ -66,8 +66,11 @@ describe('WorkflowExecutionsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
-    expect(screen.getByText('Experimental')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionsExperimentalBadge')).toBeInTheDocument();
     expect(screen.getByTestId('workflowExecutionsPageContent')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Browse and filter workflow executions across your space.')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('searchBarStub')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId('workflowExecutionsFilters')).toBeInTheDocument();

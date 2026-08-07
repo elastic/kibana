@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
@@ -102,7 +102,7 @@ describe('WorkflowExecutionsTable', () => {
     expect(screen.queryByTestId('workflowExecutionsTableError')).not.toBeInTheDocument();
   });
 
-  it('shows a pagination limit callout when total exceeds the result window', async () => {
+  it('does not show a persistent pagination-limit callout when total exceeds the result window', async () => {
     const services = createStartServicesMock();
 
     jest.mocked(services.http.get).mockResolvedValue({
@@ -135,17 +135,55 @@ describe('WorkflowExecutionsTable', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('workflowExecutionsTablePaginationLimit')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionsTable')).toBeInTheDocument();
     });
 
-    expect(jest.mocked(services.http.get).mock.calls[0][1]).toEqual(
-      expect.objectContaining({
-        query: expect.objectContaining({
-          page: 1,
-          size: 25,
-        }),
-      })
+    expect(screen.queryByTestId('workflowExecutionsTablePaginationLimit')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionsTableEndOfResults')).not.toBeInTheDocument();
+  });
+
+  it('shows the end-of-results strip on the last reachable page when total exceeds the window', async () => {
+    const services = createStartServicesMock();
+
+    jest.mocked(services.http.get).mockResolvedValue({
+      results: [
+        {
+          id: 'exec-1',
+          spaceId: 'default',
+          workflowId: 'wf-1',
+          status: 'completed',
+          isTestRun: false,
+          startedAt: '2024-01-01T10:00:00Z',
+          finishedAt: '2024-01-01T10:00:03Z',
+          duration: 3000,
+          error: null,
+        },
+      ],
+      page: 1,
+      size: 25,
+      total: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW + 500,
+    });
+
+    render(
+      <WorkflowExecutionsTable
+        filters={[]}
+        query={defaultQuery}
+        spaceId="default"
+        timeRange={defaultTimeRange}
+      />,
+      { wrapper: getTestProvider({ services }) }
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('workflowExecutionsTable')).toBeInTheDocument();
+    });
+
+    // Jump to the last reachable page (page 400 → index 399 at 25 rows/page).
+    fireEvent.click(screen.getByTestId('pagination-button-399'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('executionsTableEndOfResults')).toBeInTheDocument();
+    });
   });
 
   it('shows a generic error prompt for non-index errors', async () => {

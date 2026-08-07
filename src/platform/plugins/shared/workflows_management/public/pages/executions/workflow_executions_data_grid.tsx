@@ -14,16 +14,26 @@ import type {
   EuiDataGridSorting,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import { EuiCheckbox, EuiDataGrid, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import type { UseWorkflowExecutionsGridSelectionResult } from './use_workflow_executions_grid_selection';
+import { WorkflowExecutionsFullscreenButton } from './workflow_executions_fullscreen_button';
 import {
   useWorkflowExecutionsGridContext,
   WorkflowExecutionsGridProvider,
 } from './workflow_executions_grid_context';
+import type { ExecutionsGroupBy } from './workflow_executions_group_by';
+import { WorkflowExecutionsGroupByControl } from './workflow_executions_group_by_control';
 import type { ExecutionTableSortOrder } from './workflow_executions_page_constants';
 import { WorkflowExecutionsSelectionBar } from './workflow_executions_selection_bar';
 import { useWorkflowExecutionsTrailingControlColumns } from './workflow_executions_table_actions';
@@ -38,6 +48,7 @@ import {
   buildWorkflowExecutionsGridColumns,
   type WorkflowExecutionsGridCellContext,
 } from './workflow_executions_table_config';
+import { WorkflowExecutionsTableResultCount } from './workflow_executions_table_result_count';
 
 const SELECTION_COLUMN_ID = 'selection';
 const SELECTION_COLUMN_WIDTH = 36;
@@ -49,6 +60,18 @@ const gridStyle = {
   fontSize: 'm' as const,
   cellPadding: 'm' as const,
 };
+
+const hideGridBodyCss = css`
+  .euiDataGrid__content,
+  .euiDataGrid__pagination,
+  .euiDataGridHeader {
+    display: none !important;
+  }
+
+  .euiDataGrid {
+    border: none;
+  }
+`;
 
 const SelectionHeaderCell = () => {
   const { getVisibleSelectionState, selectAllVisibleExecutions, deselectVisibleExecutions } =
@@ -169,6 +192,17 @@ export interface WorkflowExecutionsDataGridProps {
   sort: ExecutionTableSortOrder;
   selectedExecutionId?: string;
   selectionState: UseWorkflowExecutionsGridSelectionResult;
+  pageIndex: number;
+  pageSize: number;
+  totalHits: number;
+  showToolbar?: boolean;
+  /** When true, hide the grid body so only the toolbar remains (used with grouped view). */
+  toolbarOnly?: boolean;
+  groupBy?: ExecutionsGroupBy;
+  onGroupByChange?: (value: ExecutionsGroupBy) => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+  fullscreenButtonRef?: React.Ref<HTMLButtonElement>;
   onOpenExecution: (execution: WorkflowExecutionListItemDto) => void;
   onRefresh: () => void;
   onSetColumns: (columns: string[]) => void;
@@ -186,6 +220,16 @@ export const WorkflowExecutionsDataGrid = ({
   sort,
   selectedExecutionId,
   selectionState,
+  pageIndex,
+  pageSize,
+  totalHits,
+  showToolbar = true,
+  toolbarOnly = false,
+  groupBy = 'none',
+  onGroupByChange,
+  isFullscreen = false,
+  onToggleFullscreen,
+  fullscreenButtonRef,
   onOpenExecution,
   onRefresh,
   onSetColumns,
@@ -228,21 +272,66 @@ export const WorkflowExecutionsDataGrid = ({
     [cellContext]
   );
 
-  const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
-    () => ({
+  const rightControls = useMemo(() => {
+    if (!showToolbar || (!onGroupByChange && !onToggleFullscreen)) {
+      return undefined;
+    }
+
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {onGroupByChange ? (
+          <EuiFlexItem grow={false}>
+            <WorkflowExecutionsGroupByControl value={groupBy} onChange={onGroupByChange} />
+          </EuiFlexItem>
+        ) : null}
+        {onToggleFullscreen ? (
+          <EuiFlexItem grow={false}>
+            <WorkflowExecutionsFullscreenButton
+              isFullscreen={isFullscreen}
+              onToggle={onToggleFullscreen}
+              buttonRef={fullscreenButtonRef}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
+  }, [
+    fullscreenButtonRef,
+    groupBy,
+    isFullscreen,
+    onGroupByChange,
+    onToggleFullscreen,
+    showToolbar,
+  ]);
+
+  const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions | boolean>(() => {
+    if (!showToolbar) {
+      return false;
+    }
+
+    return {
       showColumnSelector: { allowHide: false },
       showSortSelector: true,
-      showDisplaySelector: false,
+      showDisplaySelector: true,
+      // Shell-level fullscreen wraps pagination + end-of-results; keep grid built-in off.
       showFullScreenSelector: false,
-      showKeyboardShortcuts: false,
+      showKeyboardShortcuts: true,
       additionalControls: {
         left: {
+          prepend: (
+            <WorkflowExecutionsTableResultCount
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              pageItemCount={executions.length}
+              totalHits={totalHits}
+            />
+          ),
           append: <WorkflowExecutionsSelectionBar onRefresh={onRefresh} executions={executions} />,
         },
+        right: rightControls,
       },
-    }),
-    [executions, onRefresh]
-  );
+    };
+  }, [executions, onRefresh, pageIndex, pageSize, rightControls, showToolbar, totalHits]);
 
   const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(
     () => [
@@ -278,26 +367,30 @@ export const WorkflowExecutionsDataGrid = ({
     };
   }, [executions, selectedExecutionId]);
 
+  const rowCount = toolbarOnly ? 0 : executions.length;
+
   return (
     <WorkflowExecutionsGridProvider value={selectionState}>
-      <EuiDataGrid
-        aria-labelledby={ariaLabelledBy}
-        columns={gridColumns}
-        rowCount={executions.length}
-        renderCellValue={renderCellValue}
-        leadingControlColumns={leadingControlColumns}
-        trailingControlColumns={trailingControlColumns}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns: onSetColumns,
-          canDragAndDropColumns: true,
-        }}
-        sorting={sorting}
-        onColumnResize={({ columnId, width }) => onColumnResize(columnId, width)}
-        gridStyle={gridStyleWithSelection}
-        rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
-        toolbarVisibility={toolbarVisibility}
-      />
+      <div css={toolbarOnly ? hideGridBodyCss : undefined}>
+        <EuiDataGrid
+          aria-labelledby={ariaLabelledBy}
+          columns={gridColumns}
+          rowCount={rowCount}
+          renderCellValue={renderCellValue}
+          leadingControlColumns={leadingControlColumns}
+          trailingControlColumns={trailingControlColumns}
+          columnVisibility={{
+            visibleColumns,
+            setVisibleColumns: onSetColumns,
+            canDragAndDropColumns: true,
+          }}
+          sorting={sorting}
+          onColumnResize={({ columnId, width }) => onColumnResize(columnId, width)}
+          gridStyle={gridStyleWithSelection}
+          rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
+          toolbarVisibility={toolbarVisibility}
+        />
+      </div>
     </WorkflowExecutionsGridProvider>
   );
 };
