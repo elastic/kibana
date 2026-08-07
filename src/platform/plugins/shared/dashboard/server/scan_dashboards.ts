@@ -47,25 +47,29 @@ export async function scanDashboards(
   });
 
   return {
-    dashboards: soResponse.saved_objects.map((so) => {
-      const {
-        dashboardState: { description, tags, title, panels },
-      } = transformDashboardOut(
-        so.attributes,
-        so.references,
-        true, // temporary fix to return old Lens SO panel format,
-        strictValidationSchema
-      );
+    dashboards: await Promise.all(
+      soResponse.saved_objects.map(async (so) => {
+        const {
+          dashboardState: { description, tags, title, panels },
+        } = await transformDashboardOut(
+          so.attributes,
+          so.references,
+          true, // temporary fix to return old Lens SO panel format,
+          strictValidationSchema,
+          undefined,
+          { savedObjectsClient }
+        );
 
-      return {
-        id: so.id,
-        references: so.references,
-        ...(description?.length && { description }),
-        panels: panels ?? [],
-        ...(tags?.length && { tags }),
-        title: title ?? '',
-      };
-    }),
+        return {
+          id: so.id,
+          references: so.references,
+          ...(description?.length && { description }),
+          panels: panels ?? [],
+          ...(tags?.length && { tags }),
+          title: title ?? '',
+        };
+      })
+    ),
     page: soResponse.page,
     total: soResponse.total,
   };

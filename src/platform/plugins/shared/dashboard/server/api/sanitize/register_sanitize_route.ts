@@ -60,7 +60,12 @@ export function registerSanitizeRoute(
     },
     async (ctx, req, res) => {
       try {
-        const result = await sanitize(getCachedDashboardStateSchema(), req.body);
+        const { core } = await ctx.resolve(['core']);
+        const result = await sanitize(
+          getCachedDashboardStateSchema(),
+          req.body,
+          core.savedObjects.client
+        );
         return res.ok({ body: result });
       } catch (e) {
         const message = e.stack ?? e.message;
