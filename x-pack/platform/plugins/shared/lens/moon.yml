@@ -155,6 +155,7 @@ dependsOn:
   - '@kbn/use-observable'
   - '@kbn/zod'
   - '@kbn/app-header'
+  - '@kbn/managed-content-badge'
 tags:
   - plugin
   - prod
