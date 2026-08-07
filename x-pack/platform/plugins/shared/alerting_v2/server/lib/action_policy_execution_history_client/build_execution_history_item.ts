@@ -88,7 +88,7 @@ export function getRelevantRuleIdsFromLogEvent(
   allRuleIds: string[],
   matchingSearchIds?: ResolvedSearchIds,
   mandatoryRuleIds?: string[]
-): string[] {
+): string[] | null {
   const searchNarrows =
     matchingSearchIds !== undefined && !matchingSearchIds.policyIds.includes(policyId);
   const mandatoryActive = mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0;
@@ -97,12 +97,13 @@ export function getRelevantRuleIdsFromLogEvent(
     return allRuleIds;
   }
 
-  const relevantRuleIds = new Set<string>([
+  const relevantSet = new Set<string>([
     ...(searchNarrows ? matchingSearchIds.ruleIds : []),
     ...(mandatoryActive ? mandatoryRuleIds : []),
   ]);
 
-  return allRuleIds.filter((id) => relevantRuleIds.has(id));
+  const filtered = allRuleIds.filter((id) => relevantSet.has(id));
+  return filtered.length === 0 ? null : filtered;
 }
 
 /**
@@ -147,12 +148,7 @@ export function buildExecutionHistoryItem(
     matchingSearchIds,
     mandatoryRuleIds
   );
-  // Only drop if a narrowing filter (search or explicit ruleIds) is active.
-  // Failures for policies with no matched rules are still valid events.
-  const isNarrowingActive =
-    (matchingSearchIds !== undefined && !matchingSearchIds.policyIds.includes(policyId)) ||
-    (mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0);
-  if (relevantRuleIds.length === 0 && isNarrowingActive) return null;
+  if (relevantRuleIds === null) return null;
 
   const totalRuleCount = relevantRuleIds.length;
   const rules = relevantRuleIds
@@ -179,7 +175,7 @@ export function buildExecutionHistoryItem(
     rules,
     totalRuleCount,
     workflows,
-    ...(failureReason !== undefined ? { failure_reason: failureReason as DispatchFailureReason } : {}),
-    ...(errorMessage !== undefined ? { error: { message: errorMessage } } : {}),
+    failure_reason: failureReason as DispatchFailureReason | undefined,
+    error: errorMessage !== undefined ? { message: errorMessage } : undefined,
   };
 }

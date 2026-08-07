@@ -66,9 +66,6 @@ const createMocks = () => {
       total: 0,
     }),
     findRuleExecutions: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 20 }),
-    findDispatchFailureEvents: jest
-      .fn()
-      .mockResolvedValue({ events: [], total: 0, page: 1, perPage: 20 }),
   };
   const actionPolicyClient = {
     getActionPolicies: jest.fn().mockResolvedValue([]),

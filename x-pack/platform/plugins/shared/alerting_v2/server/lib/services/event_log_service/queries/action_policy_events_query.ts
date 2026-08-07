@@ -173,7 +173,7 @@ const buildIdFilter = (
   return { bool: { should, minimum_should_match: 1 } };
 };
 
-export const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => ({
+const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContainer => ({
   bool: {
     should: [
       buildNestedSavedObjectClause(RULE_SAVED_OBJECT_TYPE, ruleIds),
@@ -183,7 +183,7 @@ export const buildMandatoryRuleClause = (ruleIds: string[]): QueryDslQueryContai
   },
 });
 
-export const buildNestedSavedObjectClause = (
+const buildNestedSavedObjectClause = (
   type: string,
   ids: string[]
 ): QueryDslQueryContainer => ({
