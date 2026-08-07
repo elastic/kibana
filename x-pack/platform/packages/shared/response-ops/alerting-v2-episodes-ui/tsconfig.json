@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/alerting-v2-common-queries",
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-utils",
     "@kbn/datemath",
     "@kbn/core",
     "@kbn/core-application-browser",

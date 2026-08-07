@@ -10,36 +10,18 @@ import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
 interface StreamFeaturesApi {
-  deleteFeature: (id: string) => Promise<void>;
   deleteFeaturesInBulk: (uuids: string[]) => Promise<void>;
   excludeFeaturesInBulk: (uuids: string[]) => Promise<void>;
   restoreFeaturesInBulk: (uuids: string[]) => Promise<void>;
 }
 
 export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   const { signal } = useAbortController();
 
   return useMemo(
     () => ({
-      deleteFeature: async (id: string) => {
-        await significantEventsRepositoryClient.fetch(
-          'DELETE /internal/streams/{name}/features/{id}',
-          {
-            signal,
-            params: {
-              path: { name: streamName, id },
-            },
-          }
-        );
-      },
       deleteFeaturesInBulk: async (ids: string[]) => {
         await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/{name}/features/_bulk',

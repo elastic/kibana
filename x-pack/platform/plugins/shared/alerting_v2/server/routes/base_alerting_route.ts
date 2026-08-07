@@ -17,7 +17,7 @@ import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schema
 import { injectable } from 'inversify';
 import merge from 'lodash/merge';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import { ALERTING_V2_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
 import type { AlertingRouteContext } from './alerting_route_context';
 import { getCommonErrorOasOperationObject } from './common_error_oas_examples';
 import { deepMergeRouteOptions } from './deep_merge_route_options';
@@ -194,7 +194,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
 
     if (!enabled) {
       throw Boom.serverUnavailable('Alerting is disabled.', {
-        code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
+        code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
       });
     }
   }

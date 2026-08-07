@@ -690,6 +690,8 @@ describe('JinaReaderConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = JinaReaderConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         status: 200,
@@ -697,32 +699,18 @@ describe('JinaReaderConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await JinaReaderConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Jina Reader API: \nOK',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       const error: HttpError = new Error('Network error');
       error.response = { status: 500, data: {} };
       mockClient.get.mockRejectedValue(error);
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await JinaReaderConnector.test.handler(mockContext);
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://r.jina.ai');
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
-      expect(result.message).toContain('Network error');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
     it('should use overrideBrowseUrl from config', async () => {
@@ -737,10 +725,7 @@ describe('JinaReaderConnector', () => {
         config: { overrideBrowseUrl: 'https://custom.jina.ai' },
       } as unknown as ActionContext;
 
-      if (!JinaReaderConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      await JinaReaderConnector.test.handler(contextWithConfig);
+      await testSpec.handler(contextWithConfig);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://custom.jina.ai');
     });
