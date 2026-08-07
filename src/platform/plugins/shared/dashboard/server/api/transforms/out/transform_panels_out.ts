@@ -29,6 +29,7 @@ interface WorkingPanel {
   readonly references: SavedObjectReference[];
   readonly sourceType: string;
   readonly sourceConfig: SavedDashboardPanel['embeddableConfig'];
+  readonly panelId: string;
   panel: DashboardPanel;
   migration?: { from: string; to: string };
   dropped?: boolean;
@@ -84,6 +85,7 @@ export async function transformPanelsOut(
         references: panelReferences,
         sourceType: panel.type,
         sourceConfig: panel.embeddableConfig,
+        panelId: panel.panelIndex,
         panel: panelOut,
       });
     } catch (err) {
@@ -98,6 +100,8 @@ export async function transformPanelsOut(
   }
 
   if (migrationContext) {
+    // Order: source transformOut -> batch type migration -> final-type schema validation.
+    // Any per-panel failures fall back to dropped_panel warnings.
     await applyPanelTypeMigrations(workingPanels, migrationContext, warnings);
   }
 
@@ -243,9 +247,9 @@ async function applyPanelTypeMigrations(
     const migrations = embeddableService?.getPanelTypeMigrations(sourceType) ?? [];
     if (migrations.length === 0) continue;
 
-    const panelIds = new Set(sourcePanels.map((p) => p.panel.id));
-    const inputPanels = sourcePanels.map(({ panel }) => ({
-      id: panel.id,
+    const panelIds = new Set(sourcePanels.map((p) => p.panelId));
+    const inputPanels = sourcePanels.map(({ panelId, panel }) => ({
+      id: panelId,
       config: panel.config,
     }));
 
@@ -280,7 +284,7 @@ async function applyPanelTypeMigrations(
     }
 
     for (const working of sourcePanels) {
-      const panelId = working.panel.id;
+      const panelId = working.panelId;
       const error = errorsByPanelId.get(panelId);
       if (error) {
         warnings.push({

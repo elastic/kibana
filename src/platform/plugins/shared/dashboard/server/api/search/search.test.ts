@@ -47,6 +47,7 @@ describe('dashboard search sort options', () => {
           type: 'dashboard',
           attributes: {},
           references: [],
+          score: 0,
           managed: false,
           updated_at: '2026-08-07T00:00:00.000Z',
           version: 'WzEsMV0=',

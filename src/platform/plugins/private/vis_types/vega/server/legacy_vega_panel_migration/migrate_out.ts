@@ -185,7 +185,9 @@ function getByValueVegaResult(
 }
 
 function omitUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
-  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined));
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined)
+  ) as Partial<T>;
 }
 
 function isRecord(value: unknown): value is Record<string, any> {
