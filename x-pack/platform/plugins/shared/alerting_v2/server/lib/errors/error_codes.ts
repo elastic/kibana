@@ -33,6 +33,8 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
+  /** A signal rule's merged shape violates signal constraints. */
+  INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
