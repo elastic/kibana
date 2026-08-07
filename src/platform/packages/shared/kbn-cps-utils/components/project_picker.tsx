@@ -192,6 +192,29 @@ export const ProjectPickerSkeleton = () => (
   <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
 );
 
+export const DisabledProjectPicker = ({
+  totalProjectCount,
+  customTooltipContent,
+}: {
+  totalProjectCount: number;
+  customTooltipContent?: string;
+}) => {
+  if (totalProjectCount <= 1) {
+    return null;
+  }
+
+  return (
+    <ProjectPickerButton
+      // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
+      size="xs"
+      totalProjectsCount={totalProjectCount}
+      onClick={() => {}}
+      customTooltipContent={customTooltipContent}
+      isDisabled
+    />
+  );
+};
+
 const projectPickerStyles = {
   button: ({ euiTheme }: UseEuiTheme) =>
     css({

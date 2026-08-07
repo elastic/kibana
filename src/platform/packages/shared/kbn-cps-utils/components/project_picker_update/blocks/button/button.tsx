@@ -27,7 +27,12 @@ export interface ProjectPickerButtonProps extends Pick<EuiButtonProps, 'size' | 
   customTooltipContent?: string;
 }
 
-export const ProjectPickerButton = ({ onClick, size, isDisabled, customTooltipContent }: ProjectPickerButtonProps) => {
+export const ProjectPickerButton = ({
+  onClick,
+  size,
+  isDisabled,
+  customTooltipContent,
+}: ProjectPickerButtonProps) => {
   const id = useGeneratedHtmlId();
   const ProjectPickerContext = createProjectPickerContext();
   const context = useContext(ProjectPickerContext);
@@ -40,7 +45,7 @@ export const ProjectPickerButton = ({ onClick, size, isDisabled, customTooltipCo
 
   if (isDisabled) {
     return (
-      <EuiToolTip content={strings.projectPickerButtonAriaLabel} id={id}>
+      <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
         <EuiButton
           {...sharedButtonProps}
           color="text"
