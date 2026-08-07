@@ -14,7 +14,7 @@ Removes a release branch (e.g. `9.3`) from CI once the minor is end-of-life. All
 2. **Grep for the branch name** across the repo (`"9.3"`, `'9.3'`, `9.3 ` in lists) to build the full file list — the set below drifts over time. Distinguish CI branch references from product version strings (ECS pins, test fixtures, release notes, package versions): leave the latter alone.
 3. Make the edits (below).
 4. **Validate**: JSON files parse, `cd .buildkite && npx jest --config jest.config.js scripts/pipelines/trigger_version_dependent_jobs && npx tsc --noEmit`.
-5. Open a draft PR (`release_note:skip`, `Team:Operations`) and list the out-of-repo follow-ups in the description.
+5. Open a draft PR (`release_note:skip`, `backport:skip`, `Team:Operations`) and list the out-of-repo follow-ups in the description.
 
 ## Edits on main
 
