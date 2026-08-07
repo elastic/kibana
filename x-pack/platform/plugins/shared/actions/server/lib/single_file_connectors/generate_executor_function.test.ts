@@ -362,6 +362,35 @@ describe('generateExecutorFunction', () => {
         executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }))
       ).resolves.toMatchObject({ status: 'error' });
     });
+
+    it('returns status error with the allowedHosts message and no retry when ctx.client rejects with a policy error', async () => {
+      const policyMessage =
+        'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
+      const policyError = new Error(policyMessage);
+
+      const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
+      mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
+
+      mockHandler.mockImplementation(async (ctx: { client: typeof denyingClient }) => {
+        return ctx.client.get('https://denied.example.com/api');
+      });
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: policyMessage,
+        actionId: connectorId,
+      });
+      expect(result).not.toHaveProperty('retry');
+    });
   });
 
   describe('_test subAction', () => {

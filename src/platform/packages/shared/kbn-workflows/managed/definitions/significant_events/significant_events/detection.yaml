@@ -20,7 +20,7 @@ triggers:
         type: string
         default: "now-40m"
         required: false
-        description: "Time window start for the change_point aggregation (ES date math, e.g. now-40m). Must give the change_point agg >= 22 buckets at the configured bucketInterval and be wide enough for a drop-to-silence to stand out (~40m at 1m buckets => ~41 buckets)."
+        description: "Time window start for the change_point aggregation (ES date math, e.g. now-40m). Must give the change_point agg >= 22 buckets at the configured bucketInterval and be wide enough for a drop-to-silence to stand out (40m at 1m buckets => 40 buckets)."
       - name: bucketInterval
         type: string
         default: "1m"

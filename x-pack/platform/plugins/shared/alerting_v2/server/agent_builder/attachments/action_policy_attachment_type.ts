@@ -114,7 +114,7 @@ export const createActionPolicyAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `An action policy attachment represents an Alerting v2 notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alert episodes are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the rule-management skill.`,
+    `An action policy attachment represents an Alerting v2 notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alert episodes are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the action-policy-management skill.`,
 
   getTools: () => [],
 });

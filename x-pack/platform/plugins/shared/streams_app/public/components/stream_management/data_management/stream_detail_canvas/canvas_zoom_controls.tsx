@@ -71,7 +71,7 @@ function ZoomButton({
         }
       `}
     >
-      <EuiIcon type={iconType} />
+      <EuiIcon type={iconType} aria-hidden={true} />
     </button>
   );
 }

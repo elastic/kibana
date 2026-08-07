@@ -64,6 +64,7 @@ describe('containsScript', () => {
   it('detects a script tag regardless of case or attributes', () => {
     expect(containsScript('<div></div><script>doStuff()</script>')).toBe(true);
     expect(containsScript('<SCRIPT type="application/json">{}</SCRIPT>')).toBe(true);
+    expect(containsScript('<script/>')).toBe(true);
   });
 
   it('returns false for markup with no script tag', () => {

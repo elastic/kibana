@@ -144,6 +144,8 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
               {
                 last_event_timestamp: '2024-01-01T00:00:00Z',
                 rule_id: 'rule-1',
+                source: 'internal',
+                space_id: 'default',
                 group_hash: 'hash-1',
                 episode_id: 'episode-1',
                 episode_status: 'active',
