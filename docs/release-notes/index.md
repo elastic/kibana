@@ -154,7 +154,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
 % !!DEFERRED!! Not yet backported to the 9.5 branch (no backport PR exists; carries a `backport:skip` label that contradicts its v9.5.1 label — confirm intent). Re-verify against the next BC before publishing.
 * Fix the execution highlight in the workflow graph view for branching steps such as `if`, `switch`, and `parallel` [#281696]({{kib-pull}}281696).
-* Fix serverless workflow runs failing with an error when scheduled with an org or global API key [#281474]({{kib-pull}}281474).
 % !!DEFERRED!! Not yet backported to the 9.5 branch (no backport PR exists; carries a `backport:skip` label that contradicts its v9.5.1 label — confirm intent). Re-verify against the next BC before publishing.
 * Fix overlapping nodes in the workflow graph layout for branching scenarios [#281304]({{kib-pull}}281304).
 * Fix custom workflow steps, including `security.enableRule` and `security.disableRule`, calling Kibana APIs in the default space instead of the workflow's own space [#280986]({{kib-pull}}280986).
