@@ -19,6 +19,7 @@ import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type {
   InternalResumeWorkflowExecution,
@@ -201,6 +202,15 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
+
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
   }
 
   await handlePostExecutionLoop({
