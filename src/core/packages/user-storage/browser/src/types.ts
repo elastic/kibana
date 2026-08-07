@@ -10,104 +10,81 @@
 import type { Observable } from 'rxjs';
 
 /**
- * Browser-side user storage client, backed by an in-memory cache that is
- * seeded from preloaded (server-injected) metadata at first paint and
- * refreshed by `set` / `remove` after the corresponding HTTP write completes.
+ * Browser-side user storage client: an in-memory cache seeded from
+ * server-injected values at first paint, with HTTP-backed writes.
  *
- * `peek` is the only purely synchronous read (cache-only, no side effects).
- * `get` and `get$` may trigger a lazy HTTP fetch for keys that were not
- * preloaded; `get` is `Promise`-based so it can await that fetch, while `get$`
- * surfaces it reactively.
+ * Choosing a read:
+ * - `get$` for anything rendered; React should use the `useUserStorage` hook.
+ * - `get` when the value must be resolved before acting on it.
+ * - `peek` for a synchronous snapshot, safe to call during render.
  *
  * Distinct from the server-side `IUserStorageClient` (in
- * `@kbn/core-user-storage-common`), which is fully Promise-based for every
- * method, including single-key reads.
+ * `@kbn/core-user-storage-common`), which is Promise-based for every method.
  *
  * @public
  */
 export interface IUserStorageClient {
   /**
-   * Whether user storage is available for the current user/session: `false` for
-   * anonymous users, users without a `profile_uid`, or when the auth realm denies
-   * access to user-storage saved objects. A single condition gates both read
-   * preloading and writes. A static, page-render-time signal — does not change
-   * over the lifetime of a page load.
+   * Whether user storage is usable for the current user: `false` for anonymous
+   * users, users without a `profile_uid`, or when the auth realm denies access to
+   * user-storage saved objects. Fixed at page render; it never changes afterwards.
    *
-   * Gate save/delete affordances on this rather than querying user profile state
-   * directly. Reads need no guard: when `false` they resolve to their `defaultValue`
-   * without issuing a request.
+   * Gate save/delete affordances on this. Reads need no guard - when `false` they
+   * resolve to their `defaultValue` without issuing a request.
    */
   isAvailable(): boolean;
 
   /**
-   * Pure synchronous read from the local cache with no side effects.
-   * Returns `undefined` when no cached value exists for the key and no
-   * `defaultValue` is provided.
+   * Synchronous cache-only read; never triggers a fetch. Returns `undefined` when
+   * the key has no cached value and no `defaultValue` is given.
    *
-   * Unlike `get`, `peek` never triggers a lazy fetch, making it safe to
-   * call during React render (which may be invoked multiple times before
-   * a commit under concurrent mode). Also useful for `preload: true` keys,
-   * which are always cached at first paint, and for best-effort snapshots
-   * where triggering a fetch is not wanted.
+   * Always correct for `preload: true` keys. For a `preload: false` key it returns
+   * the `defaultValue` until the fetch lands, so never use it as a write base.
    */
   peek<T = unknown>(key: string): T | undefined;
   peek<T = unknown>(key: string, defaultValue: T): T;
 
   /**
-   * Safe, async resolved read: resolves only once the effective value is known.
-   *
-   * If the key is already cached (preloaded, or a prior lazy fetch already
-   * hydrated it), resolves immediately. Otherwise triggers (or awaits an
-   * already-triggered) lazy HTTP fetch and resolves once it completes. Rejects
-   * if the fetch fails — callers should not build subsequent writes on a failed
-   * read. Use this (not `peek`) as the read half of any read-modify-write
-   * sequence — see {@link set}.
+   * Resolves once the effective value is known, awaiting the lazy fetch for a
+   * `preload: false` key. Rejects if that fetch fails.
    */
   get<T = unknown>(key: string): Promise<T | undefined>;
   get<T = unknown>(key: string, defaultValue: T): Promise<T>;
 
   /**
-   * Observable that emits the current cached value followed by every future
-   * value seen for the given key. Emits `undefined` when no cached value
-   * exists and no `defaultValue` is provided. Suitable for React subscriptions.
+   * Emits the current value, then again on every hydration and write.
    *
-   * The first emission is a synchronous cache snapshot (like `peek`) — it may be
-   * a temporary default for a non-preloaded key that hasn't hydrated yet, followed
-   * by the hydrated value once the fetch resolves. A failed fetch neither errors
-   * nor completes the stream; use `get()` when a read failure must be observed.
+   * The first emission is a synchronous cache snapshot, so it may be the
+   * `defaultValue` for a key that has not hydrated. A failed fetch neither errors
+   * nor completes the stream - subscribers stay on the default.
    */
   get$<T = unknown>(key: string): Observable<T | undefined>;
   get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
 
   /**
-   * Persists a new value via `PUT /internal/user_storage/{key}`. Returns the
-   * server-validated form of the value (after any Zod transforms or stripping),
-   * which is also what gets cached locally. On HTTP failure the cache is left
-   * untouched, the error is published to `getHttpError$`, and the promise rejects.
+   * Persists a value and caches the server-validated result (post Zod
+   * transform/strip), which is what this resolves with. On failure the cache is
+   * untouched and the promise rejects. Rejects without a request when
+   * `isAvailable()` is `false`.
    *
-   * Rejects without issuing a request when `isAvailable()` is `false`.
-   *
-   * For a read-modify-write, compute the new value from `await get(key, default)`
-   * and never from `peek(key)`: on a `preload: false` key `peek` returns the
-   * default until the lazy fetch lands, so writing back a `peek`-derived value
-   * overwrites whatever the user already had stored. Note that this is a plain
-   * last-write-wins write with no concurrency control — two tabs writing the same
-   * key will not merge.
+   * Writes are last-write-wins; concurrent tabs do not merge. Build the new value
+   * from `await get(key, default)`, never from `peek(key)`, or an unhydrated read
+   * will overwrite what the user had stored.
    */
   set<T = unknown>(key: string, value: T): Promise<T>;
 
   /**
-   * Removes the user override via `DELETE /internal/user_storage/{key}`.
-   * On success the cached value is deleted (subsequent reads fall back to
-   * `defaultValue`) and subscribers are notified.
-   *
-   * Rejects without issuing a request when `isAvailable()` is `false`.
+   * Removes the user override. The cached value is deleted and `get$` subscribers
+   * re-emit the registered default. Rejects without a request when
+   * `isAvailable()` is `false`.
    */
   remove(key: string): Promise<void>;
 
   /**
-   * Stream of HTTP errors raised by `set`, `remove`, or lazy-fetch calls.
-   * Suitable for centralised toast / telemetry handling.
+   * HTTP errors from `set`, `remove`, or a lazy fetch, for centralised toast or
+   * telemetry handling. The only channel for a fetch failure, since `get$` is
+   * silent on one. A failed `set`/`remove` also rejects its own promise, so report
+   * it in one place or the other.
    */
   getHttpError$(): Observable<Error>;
 }
