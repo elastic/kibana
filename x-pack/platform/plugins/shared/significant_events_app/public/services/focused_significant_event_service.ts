@@ -19,17 +19,13 @@ export class FocusedSignificantEventService {
     this.focusedEventSubject$.next(event);
   }
 
-  public clearFocusedEvent(eventId?: string): void {
+  public clearFocusedEvent(eventId: string): void {
     const focusedEvent = this.focusedEventSubject$.getValue();
 
-    if (eventId && focusedEvent?.event_id !== eventId) {
+    if (focusedEvent?.event_id !== eventId) {
       return;
     }
 
     this.focusedEventSubject$.next(undefined);
-  }
-
-  public getFocusedEvent(): SignificantEvent | undefined {
-    return this.focusedEventSubject$.getValue();
   }
 }

@@ -1,0 +1,63 @@
+title: Template write request
+description: >
+  The body for creating or fully replacing a case template. Server-managed attributes
+  (author, usage statistics, field summaries, version flags) are computed and cannot be set.
+
+
+  Resource limits (enforced on write; a violation returns `400`): an owner may have at most
+  200 templates per space, and a definition may declare at most 200 fields. Version history is
+  intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes.
+  The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update,
+  and `dry_run`).
+type: object
+required:
+  - owner
+  - definition
+properties:
+  name:
+    type: string
+    minLength: 1
+    # Keep in sync with MAX_TEMPLATE_NAME_LENGTH in
+    # x-pack/platform/plugins/shared/cases/common/constants/index.ts.
+    maxLength: 50
+    description: >
+      The template identity name, unique per owner (case-insensitive). May be omitted when the
+      YAML definition provides a case-default title (`name:`), which is then used as the
+      identity name.
+  owner:
+    $ref: 'owner.yaml'
+  definition:
+    type: string
+    # Keep in sync with MAX_TEMPLATE_DEFINITION_LENGTH in
+    # x-pack/platform/plugins/shared/cases/common/constants/index.ts.
+    maxLength: 30000
+    description: >
+      The template definition as a YAML string: case defaults (name, severity, category, tags,
+      assignees, connector, settings) and a `fields` array of inline field definitions or
+      `$ref` entries pointing into the owner's field library. Stored field values appear on
+      cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+    example: |
+      name: Security incident
+      severity: high
+      tags: [security]
+      fields:
+        - name: priority
+          label: Priority
+          type: keyword
+          control: SELECT_BASIC
+          metadata:
+            options: [low, medium, high]
+            default: medium
+        - $ref: risk_score
+  description:
+    type: string
+    # Keep in sync with MAX_TEMPLATE_DESCRIPTION_LENGTH in
+    # x-pack/platform/plugins/shared/cases/common/constants/index.ts.
+    maxLength: 1000
+    description: A description of the template.
+  tags:
+    $ref: 'template_tags.yaml'
+  isEnabled:
+    type: boolean
+    default: true
+    description: Disabled templates are hidden from the case creation flow.
