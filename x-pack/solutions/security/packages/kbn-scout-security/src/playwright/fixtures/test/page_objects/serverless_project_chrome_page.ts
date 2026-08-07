@@ -17,15 +17,11 @@ export class ServerlessProjectChromePage {
   public readonly primaryNav: Locator;
   public readonly morePopover: Locator;
   public readonly moreMenuTrigger: Locator;
-  public readonly breadcrumbs: Locator;
-  public readonly logo: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
-    this.breadcrumbs = this.page.testSubj.locator('breadcrumbs');
-    this.logo = this.page.testSubj.locator('nav-header-logo');
   }
 
   async navigateToSecuritySolutionHomeForChromeNav() {
@@ -35,6 +31,9 @@ export class ServerlessProjectChromePage {
       // securitySolutionUI loads the full SIEM shell; first project chrome render can exceed the default action timeout in CI.
       timeout: 35_000,
     });
+    await this.page
+      .locator('#security-solution-app')
+      .waitFor({ state: 'visible', timeout: 35_000 });
   }
 
   /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyById). */
@@ -53,32 +52,6 @@ export class ServerlessProjectChromePage {
   activeNavItemInBodyByDeepLinkId(deepLinkId: string): Locator {
     const selector = `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"][data-test-subj~="nav-item-isActive"]`;
     return this.primaryNav.locator(selector).or(this.morePopover.locator(selector));
-  }
-
-  /** Breadcrumb matching visible text. */
-  getBreadcrumbByText(text: string): Locator {
-    return this.breadcrumbs.locator('.euiBreadcrumb', { hasText: text });
-  }
-
-  async clickLogo() {
-    await this.logo.click();
-  }
-
-  async openNavSearch() {
-    await this.page.testSubj.click('nav-search-reveal');
-  }
-
-  async searchNav(term: string) {
-    await this.page.testSubj.fill('nav-search-input', term);
-  }
-
-  /** Search-result option whose EUI `url` prop matches `url` exactly. */
-  getNavSearchOptionByUrl(url: string): Locator {
-    return this.page.locator(`[data-test-subj="nav-search-option"][url="${url}"]`);
-  }
-
-  async closeNavSearch() {
-    await this.page.testSubj.click('nav-search-conceal');
   }
 
   /** Agent Builder nav item when present (deep link id `agent_builder`). */

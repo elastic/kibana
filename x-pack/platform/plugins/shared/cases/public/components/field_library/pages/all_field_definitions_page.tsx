@@ -7,18 +7,21 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiButtonIcon,
   EuiConfirmModal,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
+  EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -30,7 +33,10 @@ import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
 import { useCreateFieldDefinition } from '../hooks/use_create_field_definition';
 import { useUpdateFieldDefinition } from '../hooks/use_update_field_definition';
 import { useDeleteFieldDefinition } from '../hooks/use_delete_field_definition';
+import { useReorderGlobalFieldDefinitions } from '../hooks/use_reorder_global_field_definitions';
 import { FieldDefinitionFlyout } from '../components/field_definition_flyout';
+import { GlobalFieldDefinitionsList } from '../components/global_field_definitions_list';
+import { FieldDefinitionRowList } from '../components/field_definition_row_list';
 import * as i18n from '../translations';
 import * as templatesI18n from '../../templates_v2/translations';
 import { CasesAppHeader } from '../../app/cases_app_header';
@@ -60,9 +66,11 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
   const { owner } = useCasesContext();
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [editingFieldDef, setEditingFieldDef] = useState<FieldDefinition | undefined>(undefined);
   const [deletingFieldDef, setDeletingFieldDef] = useState<FieldDefinition | undefined>(undefined);
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const { data, isLoading } = useGetFieldDefinitions({ owner });
   const { mutate: createFieldDef, isLoading: isCreating } = useCreateFieldDefinition({
@@ -77,6 +85,33 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
   const { mutate: deleteFieldDef } = useDeleteFieldDefinition({
     onSuccess: () => setDeletingFieldDef(undefined),
   });
+  const {
+    mutate: reorderGlobalFieldDefinitions,
+    isLoading: isReorderingGlobalFieldDefinitions,
+    isError: hasReorderFailed,
+  } = useReorderGlobalFieldDefinitions();
+
+  const fieldDefinitions = useMemo(() => data?.fieldDefinitions ?? [], [data?.fieldDefinitions]);
+  const globalFieldDefinitions = useMemo(
+    () =>
+      fieldDefinitions
+        .map((fieldDefinition, index) => ({
+          fieldDefinition,
+          index,
+          displayOrder: fieldDefinition.displayOrder ?? index,
+        }))
+        .filter(({ fieldDefinition }) => fieldDefinition.isGlobal === true)
+        .sort((a, b) => a.displayOrder - b.displayOrder || a.index - b.index)
+        .map(({ fieldDefinition }) => fieldDefinition),
+    [fieldDefinitions]
+  );
+  // Only global fields carry an order, so they are the only ones presented in an orderable surface.
+  // Keeping both kinds in a single table forced order controls onto rows that had no order, which
+  // is what left the actions column ragged and the ordering itself unexplained.
+  const templateFieldDefinitions = useMemo(
+    () => fieldDefinitions.filter((fieldDefinition) => fieldDefinition.isGlobal !== true),
+    [fieldDefinitions]
+  );
 
   const handleCreate = useCallback(() => {
     setEditingFieldDef(undefined);
@@ -105,7 +140,14 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
+          fieldDefinition: {
+            name,
+            description,
+            definition,
+            owner: ownerValue,
+            isGlobal,
+            displayOrder: editingFieldDef.displayOrder,
+          },
         });
       } else {
         createFieldDef({
@@ -126,112 +168,43 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
     }
   }, [deletingFieldDef, deleteFieldDef]);
 
-  const columns: Array<EuiBasicTableColumn<FieldDefinition>> = [
-    {
-      field: 'name',
-      name: i18n.NAME_COLUMN,
-      sortable: true,
-      truncateText: true,
-      'data-test-subj': 'fieldDefinitionNameCell',
+  // A drag can cross several positions at once, so the whole resulting order is persisted in one
+  // request. The previous per-swap write meant moving a field from last to first cost one round
+  // trip per row it passed.
+  const handleReorderGlobalFields = useCallback(
+    (reordered: FieldDefinition[]) => {
+      reorderGlobalFieldDefinitions(
+        reordered.map((fieldDefinition, index) => ({ ...fieldDefinition, displayOrder: index }))
+      );
     },
-    {
-      name: i18n.LABEL_COLUMN,
-      truncateText: true,
-      'data-test-subj': 'fieldDefinitionLabelCell',
-      render: (fd: FieldDefinition) => {
-        const label = parseInlineFieldDefinition(fd.definition)?.label;
-        return (
-          <EuiText size="s" color={label ? 'default' : 'subdued'}>
-            {label ?? '—'}
-          </EuiText>
-        );
-      },
-    },
-    {
-      field: 'description',
-      name: i18n.DESCRIPTION_COLUMN,
-      render: (description: string | undefined) => (
-        <EuiText size="s" color="subdued">
-          {description ?? '—'}
-        </EuiText>
-      ),
-    },
-    {
-      name: i18n.REQUIRED_COLUMN,
-      'data-test-subj': 'fieldDefinitionRequiredCell',
-      render: (fd: FieldDefinition) => {
-        const validation = parseInlineFieldDefinition(fd.definition)?.validation;
-        const isRequired = validation?.required === true;
-        const isRequiredOnClose = validation?.required_on_close === true;
-        if (!isRequired && !isRequiredOnClose) {
-          return (
-            <EuiText size="s" color="subdued">
-              {'—'}
-            </EuiText>
-          );
-        }
-        return (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {isRequired && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge data-test-subj="fieldDefinitionRequiredBadge">
-                  {i18n.REQUIRED_BADGE}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {isRequiredOnClose && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge data-test-subj="fieldDefinitionRequiredOnCloseBadge">
-                  {i18n.REQUIRED_ON_CLOSE_BADGE}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
-    },
-    {
-      field: 'isGlobal',
-      name: i18n.APPLY_TO_ALL_CASES_COLUMN,
-      render: (value: boolean | undefined) =>
-        value ? i18n.GLOBAL_FIELD_YES : i18n.GLOBAL_FIELD_NO,
-      'data-test-subj': 'fieldDefinitionApplyToAllCasesCell',
-    },
-    {
-      name: i18n.ACTIONS_COLUMN,
-      actions: [
-        {
-          render: (fd: FieldDefinition) => (
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.EDIT_FIELD_DEFINITION} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="pencil"
-                    aria-label={i18n.EDIT_FIELD_DEFINITION}
-                    onClick={() => handleEdit(fd)}
-                    data-test-subj="fieldDefinitionEditButton"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.DELETE_FIELD_DEFINITION} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    aria-label={i18n.DELETE_FIELD_DEFINITION}
-                    color="danger"
-                    onClick={() => handleDelete(fd)}
-                    data-test-subj="fieldDefinitionDeleteButton"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        },
-      ],
-    },
-  ];
+    [reorderGlobalFieldDefinitions]
+  );
 
-  const fieldDefinitions = data?.fieldDefinitions ?? [];
+  // One search box filters the whole library rather than one group, so a field can be found
+  // without the user first having to know which group it lives in.
+  const matchesSearch = useCallback(
+    (fieldDefinition: FieldDefinition) => {
+      const query = searchQuery.trim().toLowerCase();
+      if (!query) {
+        return true;
+      }
+      const label = parseInlineFieldDefinition(fieldDefinition.definition)?.label ?? '';
+      return [fieldDefinition.name, label, fieldDefinition.description ?? '']
+        .join(' ')
+        .toLowerCase()
+        .includes(query);
+    },
+    [searchQuery]
+  );
+
+  const visibleGlobalFieldDefinitions = useMemo(
+    () => globalFieldDefinitions.filter(matchesSearch),
+    [globalFieldDefinitions, matchesSearch]
+  );
+  const visibleTemplateFieldDefinitions = useMemo(
+    () => templateFieldDefinitions.filter(matchesSearch),
+    [templateFieldDefinitions, matchesSearch]
+  );
 
   const fieldLibraryMenu = useMemo(
     () => ({
@@ -276,13 +249,134 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         {isLoading ? (
           <EuiSkeletonText lines={5} />
         ) : (
-          <EuiBasicTable
-            items={fieldDefinitions}
-            tableCaption={i18n.FIELD_DEFINITIONS_TABLE_CAPTION}
-            rowHeader="name"
-            columns={columns}
-            data-test-subj="fieldDefinitionsTable"
-          />
+          // One list, two labelled groups — not two panels. Both groups hold the same kind of
+          // thing, and splitting them into separate bordered cards made the page read as two
+          // unrelated tools with the reusable fields tucked into the lesser one.
+          <EuiPanel hasBorder paddingSize="l" data-test-subj="fieldDefinitionsList">
+            <EuiFieldSearch
+              fullWidth
+              incremental
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={i18n.SEARCH_FIELD_DEFINITIONS}
+              aria-label={i18n.SEARCH_FIELD_DEFINITIONS}
+              data-test-subj="fieldDefinitionsSearch"
+            />
+            <EuiSpacer size="l" />
+
+            <section data-test-subj="globalFieldDefinitionsSection">
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h2>{i18n.GLOBAL_FIELDS_SECTION_TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiNotificationBadge color="subdued">
+                    {visibleGlobalFieldDefinitions.length}
+                  </EuiNotificationBadge>
+                </EuiFlexItem>
+                {isReorderingGlobalFieldDefinitions ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.SAVING_FIELD_ORDER}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+              {/* States the rule and the gesture up front, so neither the ordering nor the drag
+                  handle has to be inferred from the rows. */}
+              <EuiText size="xs" color="subdued">
+                <p>{i18n.GLOBAL_FIELDS_SECTION_DESCRIPTION}</p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              {searchQuery.trim() ? (
+                // Dragging a filtered list would persist an order the user cannot see, so search
+                // switches the ordered group to a plain list and says why.
+                <>
+                  <EuiText size="xs" color="subdued">
+                    <p>
+                      <em>{i18n.REORDER_DISABLED_WHILE_SEARCHING}</em>
+                    </p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <FieldDefinitionRowList
+                    fieldDefinitions={visibleGlobalFieldDefinitions}
+                    parseInlineField={parseInlineFieldDefinition}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    emptyMessage={i18n.NO_MATCHING_FIELD_DEFINITIONS}
+                    dataTestSubj="globalFieldDefinitionsFiltered"
+                  />
+                </>
+              ) : (
+                <GlobalFieldDefinitionsList
+                  fieldDefinitions={globalFieldDefinitions}
+                  parseInlineField={parseInlineFieldDefinition}
+                  onReorder={handleReorderGlobalFields}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onCreateFieldDefinition={handleCreate}
+                  hasReorderFailed={hasReorderFailed}
+                />
+              )}
+            </section>
+
+            <EuiSpacer size="xl" />
+
+            <section data-test-subj="templateFieldDefinitionsSection">
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h2>{i18n.TEMPLATE_FIELDS_SECTION_TITLE}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiNotificationBadge color="subdued">
+                    {visibleTemplateFieldDefinitions.length}
+                  </EuiNotificationBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiText size="xs" color="subdued">
+                <p>{i18n.TEMPLATE_FIELDS_SECTION_DESCRIPTION}</p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <FieldDefinitionRowList
+                fieldDefinitions={visibleTemplateFieldDefinitions}
+                parseInlineField={parseInlineFieldDefinition}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                emptyMessage={
+                  searchQuery.trim() ? (
+                    i18n.NO_MATCHING_FIELD_DEFINITIONS
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.cases.fieldLibrary.templateFieldsSectionEmpty"
+                      defaultMessage="No reusable fields yet. {createFieldDefinitionLink} to add fields to your templates."
+                      values={{
+                        createFieldDefinitionLink: (
+                          <EuiLink
+                            onClick={handleCreate}
+                            data-test-subj="templateFieldDefinitionsEmptyCreateLink"
+                          >
+                            {i18n.TEMPLATE_FIELDS_SECTION_EMPTY_LINK}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  )
+                }
+                dataTestSubj="fieldDefinitionsTable"
+              />
+            </section>
+          </EuiPanel>
         )}
 
         {flyoutOpen && (
@@ -300,7 +394,9 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
 
         {deletingFieldDef && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.DELETE_CONFIRM_TITLE}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={() => setDeletingFieldDef(undefined)}
             onConfirm={handleConfirmDelete}
             cancelButtonText={i18n.CANCEL}
