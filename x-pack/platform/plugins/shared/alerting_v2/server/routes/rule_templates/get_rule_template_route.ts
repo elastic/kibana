@@ -20,7 +20,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
-import { RULE_TEMPLATE_NOT_FOUND_DESCRIPTION } from './rule_template_response_descriptions';
 
 @injectable()
 export class GetRuleTemplateRoute extends BaseAlertingRoute {
@@ -48,7 +47,7 @@ export class GetRuleTemplateRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: RULE_TEMPLATE_NOT_FOUND_DESCRIPTION,
+        description: 'Indicates no alerting v2 rule template with the given ID exists.',
       },
     },
   };
