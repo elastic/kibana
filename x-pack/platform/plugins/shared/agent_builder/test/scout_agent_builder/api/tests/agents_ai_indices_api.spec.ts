@@ -10,173 +10,92 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
-import { spaceUrl } from '../fixtures/space_paths';
 
-const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
-
-// `contextEngine:enabled` is space-scoped, so the enabled cases run in their own space and the
-// disabled cases use the default space, where the setting keeps its `false` default. Flipping it
-// in the default space would leak into every other spec sharing this Kibana instance —
-// `agents_api.spec.ts` strictly compares a `configuration` object across a GET→PUT round-trip.
-const CONTEXT_ENGINE_SPACE = 'agent-builder-ai-indices';
-
-const mockAgent = (id: string, aiIndices?: string[]) => ({
-  id,
-  name: 'AI Index Test Agent',
-  description: 'Checks ai_indices round-trip and gating',
-  configuration: {
-    instructions: 'You search Kibana assets.',
-    tools: [{ tool_ids: ['platform.core.search'] }],
-    ...(aiIndices === undefined ? {} : { ai_indices: aiIndices }),
-  },
-});
-
+// Covers what the route unit tests structurally cannot: those invoke handlers directly, so they
+// exercise neither the request schema nor persistence. These tests take `ai_indices` through
+// request validation, `createRequestToEs`, the `keyword` mapping in the agents index, and back
+// out via `fromEs`.
+//
+// Everything here runs with the Context Engine **enabled**, the only state reachable in Scout:
+// the `agent_builder` config set pins `--uiSettings.overrides.contextEngine:enabled=true` (see
+// `kbn-scout/src/servers/configs/config_sets/agent_builder/`), and `uiSettings.overrides` are
+// read-only and apply to every space — so the flag can't be turned off for a test, not even in a
+// dedicated space. The disabled behaviour (field absent from responses, 400 on write) is covered
+// by the route unit tests in `server/routes/agents.test.ts`.
 apiTest.describe(
   'Agent Builder — agent ai_indices API',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    const createdAgents: Array<{ agentId: string; spaceId: string }> = [];
-    const enabledPath = (url: string) => spaceUrl(url, CONTEXT_ENGINE_SPACE);
-    const defaultAgentPath = `${API_AGENT_BUILDER}/agents/${agentBuilderDefaultAgentId}`;
+    const createdAgentIds: string[] = [];
 
-    apiTest.beforeAll(async ({ asAdmin, kbnClient }) => {
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/spaces/space',
-        body: { id: CONTEXT_ENGINE_SPACE, name: CONTEXT_ENGINE_SPACE, disabledFeatures: [] },
-      });
-      await kbnClient.uiSettings.update(
-        { [CONTEXT_ENGINE_ENABLED_SETTING]: true },
-        { space: CONTEXT_ENGINE_SPACE }
-      );
-
-      // The setting is cached per Kibana node, so poll on the behaviour it drives rather than
-      // assuming the write is immediately visible to the node serving the next request.
-      await expect
-        .poll(
-          async () => {
-            const response = await asAdmin.get(enabledPath(defaultAgentPath), {
-              responseType: 'json',
-            });
-            return response.body?.configuration?.ai_indices;
-          },
-          { timeout: 30_000, message: 'contextEngine:enabled did not propagate' }
-        )
-        .toBeDefined();
+    const mockAgent = (id: string, aiIndices?: string[]) => ({
+      id,
+      name: 'AI Index Test Agent',
+      description: 'Checks ai_indices round-trip',
+      configuration: {
+        instructions: 'You search Kibana assets.',
+        tools: [{ tool_ids: ['*'] }],
+        ...(aiIndices === undefined ? {} : { ai_indices: aiIndices }),
+      },
     });
 
-    apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       await Promise.allSettled(
-        createdAgents.map(({ agentId, spaceId }) =>
-          asAdmin.delete(
-            spaceUrl(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`, spaceId)
-          )
+        createdAgentIds.map((agentId) =>
+          asAdmin.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`)
         )
       );
-      await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING, {
-        space: CONTEXT_ENGINE_SPACE,
-      });
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/api/spaces/space/${CONTEXT_ENGINE_SPACE}`,
-      });
     });
 
-    apiTest('disabled: GET omits ai_indices entirely', async ({ asAdmin }) => {
-      const response = await asAdmin.get(defaultAgentPath, { responseType: 'json' });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.configuration.ai_indices).toBeUndefined();
-    });
-
-    apiTest('disabled: POST rejects ai_indices with a 400', async ({ asAdmin }) => {
-      const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
-        body: mockAgent('ai-index-rejected-agent', ['my-custom-index', 'another-index']),
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(String(response.body.message)).toContain('ai_indices');
-    });
-
-    apiTest('disabled: PUT rejects ai_indices with a 400', async ({ asAdmin }) => {
-      const agentId = 'ai-index-put-rejected-agent';
-      const createResponse = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
-        body: mockAgent(agentId),
-        responseType: 'json',
-      });
-      expect(createResponse).toHaveStatusCode(200);
-      createdAgents.push({ agentId, spaceId: 'default' });
-
-      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${agentId}`, {
-        body: { configuration: { ai_indices: ['my-custom-index'] } },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(String(response.body.message)).toContain('ai_indices');
-    });
-
-    apiTest('enabled: GET returns ai_indices: [] for the default agent', async ({ asAdmin }) => {
-      const response = await asAdmin.get(enabledPath(defaultAgentPath), { responseType: 'json' });
+    apiTest('GET returns ai_indices: [] for the default agent', async ({ asAdmin }) => {
+      const response = await asAdmin.get(
+        `${API_AGENT_BUILDER}/agents/${agentBuilderDefaultAgentId}`,
+        { responseType: 'json' }
+      );
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.configuration.ai_indices).toStrictEqual([]);
     });
 
-    apiTest('enabled: POST accepts ai_indices and round-trips them', async ({ asAdmin }) => {
+    apiTest('POST accepts ai_indices and round-trips them', async ({ asAdmin }) => {
       const agentId = 'ai-index-test-agent';
       const aiIndices = ['my-custom-index', 'another-index'];
 
-      const createResponse = await asAdmin.post(enabledPath(`${API_AGENT_BUILDER}/agents`), {
+      const createResponse = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: mockAgent(agentId, aiIndices),
         responseType: 'json',
       });
       expect(createResponse).toHaveStatusCode(200);
-      createdAgents.push({ agentId, spaceId: CONTEXT_ENGINE_SPACE });
+      createdAgentIds.push(agentId);
       expect(createResponse.body.configuration.ai_indices).toStrictEqual(aiIndices);
 
-      const getResponse = await asAdmin.get(enabledPath(`${API_AGENT_BUILDER}/agents/${agentId}`), {
+      const getResponse = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${agentId}`, {
         responseType: 'json',
       });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body.configuration.ai_indices).toStrictEqual(aiIndices);
     });
 
-    apiTest('enabled: PUT accepts ai_indices and replaces the stored list', async ({ asAdmin }) => {
-      const agentId = 'ai-index-update-agent';
-      const createResponse = await asAdmin.post(enabledPath(`${API_AGENT_BUILDER}/agents`), {
-        body: mockAgent(agentId, ['initial-index']),
-        responseType: 'json',
-      });
-      expect(createResponse).toHaveStatusCode(200);
-      createdAgents.push({ agentId, spaceId: CONTEXT_ENGINE_SPACE });
-
-      const updateResponse = await asAdmin.put(
-        enabledPath(`${API_AGENT_BUILDER}/agents/${agentId}`),
-        {
-          body: { configuration: { ai_indices: ['replacement-index'] } },
-          responseType: 'json',
-        }
-      );
-
-      expect(updateResponse).toHaveStatusCode(200);
-      expect(updateResponse.body.configuration.ai_indices).toStrictEqual(['replacement-index']);
-    });
-
+    // `updateRequestToEs` merges the update over the stored config, so a partial update from the
+    // agent edit form must not drop a list it never mentions.
     apiTest(
-      'enabled: an agent created without ai_indices reads back as []',
+      'PUT leaves stored ai_indices alone when the update omits them',
       async ({ asAdmin }) => {
-        const agentId = 'ai-index-defaulted-agent';
-
-        const createResponse = await asAdmin.post(enabledPath(`${API_AGENT_BUILDER}/agents`), {
-          body: mockAgent(agentId),
+        const agentId = 'ai-index-partial-update-agent';
+        const createResponse = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: mockAgent(agentId, ['kept-index']),
           responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
-        createdAgents.push({ agentId, spaceId: CONTEXT_ENGINE_SPACE });
+        createdAgentIds.push(agentId);
 
-        expect(createResponse.body.configuration.ai_indices).toStrictEqual([]);
+        const updateResponse = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${agentId}`, {
+          body: { configuration: { instructions: 'Updated instructions.' } },
+          responseType: 'json',
+        });
+
+        expect(updateResponse).toHaveStatusCode(200);
+        expect(updateResponse.body.configuration.ai_indices).toStrictEqual(['kept-index']);
       }
     );
   }
