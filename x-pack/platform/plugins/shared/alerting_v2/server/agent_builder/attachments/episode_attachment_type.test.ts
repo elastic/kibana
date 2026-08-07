@@ -21,6 +21,10 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { EpisodesClient } from '../../lib/episodes_client';
+import type { RulesClient } from '../../lib/rules_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
+import { getRuleToolId } from '../tools/get_rule';
+import { refreshEpisodeToolId } from '../tools/refresh_episode';
 import { createEpisodeAttachmentType } from './episode_attachment_type';
 
 const SPACE_ID = 'default';
@@ -70,15 +74,29 @@ describe('createEpisodeAttachmentType', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let getEpisode: jest.Mock;
+  let getRule: jest.Mock;
+  let canRead: jest.Mock;
   let definition: AttachmentTypeDefinition<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>;
+
+  const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
+    canRead = jest.fn().mockResolvedValue(canReadResult);
+    return {
+      canRead,
+      canWrite: jest.fn().mockResolvedValue(true),
+    } as unknown as PrivilegeChecker;
+  };
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
     getEpisode = jest.fn();
+    getRule = jest.fn();
     const episodesClient = { get: getEpisode } as unknown as EpisodesClient;
+    const rulesClient = { getRule } as unknown as RulesClient;
     definition = createEpisodeAttachmentType({
       logger: loggerService,
       getEpisodesClient: () => episodesClient,
+      getRulesClient: () => rulesClient,
+      getPrivilegeChecker: () => createPrivilegeCheckerMock(true),
     });
   });
 
@@ -165,6 +183,33 @@ describe('createEpisodeAttachmentType', () => {
           }),
         })
       );
+    });
+
+    it('returns undefined without fetching when user lacks Alerts: Read', async () => {
+      const unauthorizedDefinition = createEpisodeAttachmentType({
+        logger: loggerService,
+        getEpisodesClient: () => ({ get: getEpisode } as unknown as EpisodesClient),
+        getRulesClient: () => ({ getRule } as unknown as RulesClient),
+        getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
+      });
+
+      const result = await unauthorizedDefinition.resolve!('ep-1', createResolveContext());
+
+      expect(result).toBeUndefined();
+      expect(getEpisode).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith('Unauthorized to resolve episode attachment', {
+        labels: { episode_id: 'ep-1', space_id: SPACE_ID },
+      });
+    });
+
+    it('resolves episode data when user has Alerts: Read', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+
+      const result = await definition.resolve!('ep-1', createResolveContext());
+
+      expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
+      expect(getEpisode).toHaveBeenCalledWith('ep-1');
+      expect(canRead).toHaveBeenCalledWith('alerts');
     });
   });
 
@@ -296,13 +341,46 @@ describe('createEpisodeAttachmentType', () => {
       expect(value).toContain('Severity: high');
       expect(value).toContain('Tags: ops');
     });
+
+    it('mentions the attachment-scoped refresh and get_rule tools', async () => {
+      const value = await formatValue(baseEpisodeData);
+      expect(value).toContain(refreshEpisodeToolId('attach-1'));
+      expect(value).toContain(getRuleToolId('attach-1'));
+      expect(value).toContain('rule-management');
+    });
+
+    it('exposes refresh_episode and get_rule bounded tools unique to the attachment', async () => {
+      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
+        request: {} as KibanaRequest,
+        spaceId: 'default',
+      });
+      expect(formatted.getBoundedTools).toBeDefined();
+      const tools = await formatted.getBoundedTools!();
+      expect(tools).toHaveLength(2);
+      expect(tools[0]).toEqual(
+        expect.objectContaining({
+          id: refreshEpisodeToolId('attach-1'),
+          description: expect.stringContaining('ep-1'),
+        })
+      );
+      expect(tools[1]).toEqual(
+        expect.objectContaining({
+          id: getRuleToolId('attach-1'),
+          description: expect.stringContaining('rule-1'),
+        })
+      );
+      expect(tools[1].description).toContain('rule-management');
+    });
   });
 
   describe('getAgentDescription', () => {
-    it('describes read-only episode context', () => {
+    it('describes read-only episode context, bounded tools, and rule-management skill', () => {
       const description = definition.getAgentDescription!();
       expect(description).toContain('alert episode');
       expect(description).toContain('read-only');
+      expect(description).toContain('refresh_episode');
+      expect(description).toContain('get_rule');
+      expect(description).toContain('rule-management');
     });
   });
 

@@ -21,6 +21,7 @@ import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { EpisodesClient } from '../lib/episodes_client';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
@@ -78,6 +79,9 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         logger: loggerService.forSubsystem('agentBuilder'),
         getEpisodesClient: (context) =>
           resolveRequestScoped(injection, context.request, EpisodesClient),
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [LoggerServiceToken, CoreStart('injection')]
   );
