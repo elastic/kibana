@@ -16,6 +16,9 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
   MAX_DELETE_IDS_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -278,8 +281,16 @@ const CasesSearchRequestSearchFieldsValues = [
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
 
 const ExtendedFieldFilterSchema = z.object({
-  label: z.string(),
-  value: z.string(),
+  label: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.label',
+    min: 1,
+    max: MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  }),
+  value: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.value',
+    min: 1,
+    max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  }),
 });
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
@@ -289,7 +300,12 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
   searchFields: z
     .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
     .optional(),
-  extendedFieldFilters: z.array(ExtendedFieldFilterSchema).optional(),
+  extendedFieldFilters: limitedArraySchema({
+    codec: ExtendedFieldFilterSchema,
+    fieldName: 'extendedFieldFilters',
+    min: 0,
+    max: MAX_EXTENDED_FIELD_FILTERS,
+  }).optional(),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({

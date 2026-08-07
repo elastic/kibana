@@ -208,4 +208,158 @@ describe('useFilterConfig', () => {
 
     expect(result.current.activeSelectableOptionKeys).toEqual([efKey]);
   });
+
+  it('activates deep-linked extendedFieldFilters even when localStorage tracks other filters', () => {
+    const efKey = `${EXTENDED_FIELD_KEY_PREFIX}requires_postmortem_as_boolean`;
+
+    useCasesLocalStorageMock.mockImplementation(() => [
+      [
+        { key: 'severity', isActive: true },
+        { key: 'tags', isActive: true },
+      ],
+      jest.fn(),
+    ]);
+
+    const { result } = renderHook(useFilterConfig, {
+      initialProps: {
+        systemFilterConfig: filters,
+        onFilterOptionsChange,
+        isSelectorView: false,
+        filterOptions: {
+          ...emptyFilterOptions,
+          extendedFieldFilters: [{ label: 'Requires postmortem', value: 'true' }],
+        },
+        customFields: [],
+        globalInlineFields: [
+          {
+            name: 'requires_postmortem',
+            label: 'Requires postmortem',
+            type: 'boolean',
+            control: FieldType.TOGGLE,
+          },
+        ],
+        templatesEnabled: true,
+        isLoading: false,
+      },
+    });
+
+    expect(result.current.activeSelectableOptionKeys).toEqual(
+      expect.arrayContaining(['severity', 'tags', efKey])
+    );
+    expect(result.current.filters.map((f) => f.key)).toEqual(
+      expect.arrayContaining(['severity', 'tags', efKey])
+    );
+  });
+
+  it('clears legacy customFields when templates become enabled', () => {
+    const customFieldKey = 'legacy_toggle';
+
+    const { rerender } = renderHook(useFilterConfig, {
+      initialProps: {
+        systemFilterConfig: filters,
+        onFilterOptionsChange,
+        isSelectorView: false,
+        filterOptions: {
+          ...emptyFilterOptions,
+          customFields: {
+            [customFieldKey]: { type: CustomFieldTypes.TOGGLE, options: ['on'] },
+          },
+        },
+        customFields: [
+          {
+            key: customFieldKey,
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+            label: 'Legacy toggle',
+          },
+        ],
+        globalInlineFields: [],
+        templatesEnabled: false,
+        isLoading: false,
+      },
+    });
+
+    onFilterOptionsChange.mockClear();
+
+    rerender({
+      systemFilterConfig: filters,
+      onFilterOptionsChange,
+      isSelectorView: false,
+      filterOptions: {
+        ...emptyFilterOptions,
+        customFields: {
+          [customFieldKey]: { type: CustomFieldTypes.TOGGLE, options: ['on'] },
+        },
+      },
+      customFields: [
+        {
+          key: customFieldKey,
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+          label: 'Legacy toggle',
+        },
+      ],
+      globalInlineFields: [
+        {
+          name: 'requires_postmortem',
+          label: 'Requires postmortem',
+          type: 'boolean',
+          control: FieldType.TOGGLE,
+        },
+      ],
+      templatesEnabled: true,
+      isLoading: false,
+    });
+
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({
+      customFields: {
+        [customFieldKey]: { type: CustomFieldTypes.TOGGLE, options: [] },
+      },
+    });
+  });
+
+  it('clears extendedFieldFilters when templates become disabled', () => {
+    const { rerender } = renderHook(useFilterConfig, {
+      initialProps: {
+        systemFilterConfig: filters,
+        onFilterOptionsChange,
+        isSelectorView: false,
+        filterOptions: {
+          ...emptyFilterOptions,
+          extendedFieldFilters: [{ label: 'Requires postmortem', value: 'true' }],
+        },
+        customFields: [],
+        globalInlineFields: [
+          {
+            name: 'requires_postmortem',
+            label: 'Requires postmortem',
+            type: 'boolean',
+            control: FieldType.TOGGLE,
+          },
+        ],
+        templatesEnabled: true,
+        isLoading: false,
+      },
+    });
+
+    onFilterOptionsChange.mockClear();
+
+    rerender({
+      systemFilterConfig: filters,
+      onFilterOptionsChange,
+      isSelectorView: false,
+      filterOptions: {
+        ...emptyFilterOptions,
+        extendedFieldFilters: [{ label: 'Requires postmortem', value: 'true' }],
+      },
+      customFields: [],
+      globalInlineFields: [],
+      templatesEnabled: false,
+      isLoading: false,
+    });
+
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({
+      extendedFieldFilters: [],
+    });
+  });
 });

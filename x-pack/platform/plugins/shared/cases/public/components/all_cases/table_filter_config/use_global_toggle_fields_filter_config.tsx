@@ -15,6 +15,12 @@ import { MultiSelectFilter } from '../multi_select_filter';
 import { flattenExtendedFieldKey } from '../utils';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 
+/**
+ * On and Off are both selectable. Selecting both emits two extendedFieldFilters for the
+ * same label; the server ORs same-label values, so On+Off matches any case where the
+ * field is set (true or false). Labels are matched case-insensitively across global
+ * and template fields that share a display label.
+ */
 const TOGGLE_FILTER_OPTIONS = [
   { key: 'on', label: TOGGLE_FIELD_ON_LABEL, value: 'true' },
   { key: 'off', label: TOGGLE_FIELD_OFF_LABEL, value: 'false' },

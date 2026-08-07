@@ -8,6 +8,12 @@
 import { isLeft } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { CaseSeverityRt, CaseStatusRt } from '../../../common/types/domain';
+import {
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+} from '../../../common/constants';
+import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 
 export const AllCasesURLQueryParamsRt = rt.exact(
   rt.partial({
@@ -18,14 +24,25 @@ export const AllCasesURLQueryParamsRt = rt.exact(
     category: rt.array(rt.string),
     assignees: rt.array(rt.union([rt.string, rt.null])),
     customFields: rt.record(rt.string, rt.array(rt.string)),
-    extendedFieldFilters: rt.array(
-      rt.exact(
+    extendedFieldFilters: limitedArraySchema({
+      codec: rt.exact(
         rt.type({
-          label: rt.string,
-          value: rt.string,
+          label: limitedStringSchema({
+            fieldName: 'extendedFieldFilters.label',
+            min: 1,
+            max: MAX_CUSTOM_FIELD_LABEL_LENGTH,
+          }),
+          value: limitedStringSchema({
+            fieldName: 'extendedFieldFilters.value',
+            min: 1,
+            max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+          }),
         })
-      )
-    ),
+      ),
+      fieldName: 'extendedFieldFilters',
+      min: 0,
+      max: MAX_EXTENDED_FIELD_FILTERS,
+    }),
     from: rt.string,
     to: rt.string,
     sortOrder: rt.union([rt.literal('asc'), rt.literal('desc')]),

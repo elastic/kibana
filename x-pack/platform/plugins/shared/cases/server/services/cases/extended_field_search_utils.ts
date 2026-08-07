@@ -153,7 +153,8 @@ export const resolveExtendedFieldFilters = (
 
   // Group by label (case-insensitive) so multiple values for the same field (e.g. toggle On+Off)
   // land in one group and are OR'd by buildExtendedFieldFilterClauses. Distinct labels stay
-  // as separate groups and are AND'd by the caller.
+  // as separate groups and are AND'd by the caller. Duplicate labels across different
+  // storage keys (global + template, or renamed fields) also OR together under one group.
   const valuesByLabel = new Map<string, string[]>();
   for (const { label, value } of extendedFieldFilters) {
     const labelKey = label.toLowerCase();

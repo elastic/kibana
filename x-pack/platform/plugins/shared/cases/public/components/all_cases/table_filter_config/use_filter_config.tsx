@@ -17,6 +17,19 @@ import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { useGlobalToggleFieldsFilterConfig } from './use_global_toggle_fields_filter_config';
 import { deflattenCustomFieldKey, isFlattenCustomField, isFlattenExtendedField } from '../utils';
 
+const hasCustomFieldFilterValues = (customFields: FilterOptions['customFields']): boolean =>
+  Object.values(customFields ?? {}).some((field) => !isEmpty(field?.options));
+
+const clearCustomFieldFilterValues = (
+  customFields: FilterOptions['customFields']
+): FilterOptions['customFields'] =>
+  Object.fromEntries(
+    Object.entries(customFields ?? {}).map(([key, field]) => [
+      key,
+      { ...field, options: [] as string[] },
+    ])
+  );
+
 const mergeSystemAndFieldConfigs = ({
   systemFilterConfig,
   fieldFilterConfig,
@@ -52,6 +65,30 @@ const hasExtendedFieldFilterValue = ({
   );
 };
 
+const filterConfigHasValue = ({
+  filterKey,
+  filterOptions,
+  filterConfigs,
+}: {
+  filterKey: string;
+  filterOptions: FilterOptions;
+  filterConfigs?: Map<string, FilterConfig>;
+}): boolean => {
+  if (isFlattenCustomField(filterKey)) {
+    return !isEmpty(filterOptions.customFields[deflattenCustomFieldKey(filterKey)]?.options);
+  }
+
+  if (isFlattenExtendedField(filterKey)) {
+    return hasExtendedFieldFilterValue({
+      filter: { key: filterKey, isActive: false },
+      filterOptions,
+      filterConfigs,
+    });
+  }
+
+  return !isEmpty(filterOptions[filterKey as keyof FilterOptions]);
+};
+
 const shouldBeActive = ({
   filter,
   filterOptions,
@@ -60,22 +97,8 @@ const shouldBeActive = ({
   filter: FilterConfigState;
   filterOptions: FilterOptions;
   filterConfigs?: Map<string, FilterConfig>;
-}) => {
-  if (isFlattenCustomField(filter.key)) {
-    return (
-      !filter.isActive &&
-      !isEmpty(filterOptions.customFields[deflattenCustomFieldKey(filter.key)]?.options)
-    );
-  }
-
-  if (isFlattenExtendedField(filter.key)) {
-    return (
-      !filter.isActive && hasExtendedFieldFilterValue({ filter, filterOptions, filterConfigs })
-    );
-  }
-
-  return !filter.isActive && !isEmpty(filterOptions[filter.key as keyof FilterOptions]);
-};
+}) =>
+  !filter.isActive && filterConfigHasValue({ filterKey: filter.key, filterOptions, filterConfigs });
 
 const useActiveByFilterKeyState = ({
   filterOptions,
@@ -223,6 +246,16 @@ export const useFilterConfig = ({
     ? globalToggleFieldsFilterConfig
     : customFieldsFilterConfig;
 
+  // Drop the inactive filter family so URL/state leftovers cannot keep narrowing
+  // results after templatesEnabled flips (or on a deep link with the wrong family).
+  if (templatesEnabled && hasCustomFieldFilterValues(filterOptions.customFields)) {
+    onFilterOptionsChange({
+      customFields: clearCustomFieldFilterValues(filterOptions.customFields),
+    });
+  } else if (!templatesEnabled && (filterOptions.extendedFieldFilters ?? []).length > 0) {
+    onFilterOptionsChange({ extendedFieldFilters: [] });
+  }
+
   const activeFieldFilterConfig = fieldFilterConfig.map((fieldFilter) => {
     if (isFlattenCustomField(fieldFilter.key)) {
       return {
@@ -337,10 +370,24 @@ export const useFilterConfig = ({
   const source =
     activeByFilterKey && activeByFilterKey.length > 0 ? activeByFilterKey : filterConfigArray;
 
-  const activeFilters = source
-    .filter((filter) => filter.isActive && filterConfigs.has(filter.key))
-    .map((filter) => filterConfigs.get(filter.key)) as FilterConfig[];
+  const activeFiltersByKey = new Map(
+    source
+      .filter((filter) => filter.isActive && filterConfigs.has(filter.key))
+      .map((filter) => [filter.key, filterConfigs.get(filter.key) as FilterConfig])
+  );
 
+  // Deep-linked / URL-driven values must surface as chips even when localStorage already
+  // tracks a different active set (otherwise filters apply with no way to clear them).
+  filterConfigs.forEach((config, key) => {
+    if (activeFiltersByKey.has(key)) {
+      return;
+    }
+    if (filterConfigHasValue({ filterKey: key, filterOptions, filterConfigs })) {
+      activeFiltersByKey.set(key, { ...config, isActive: true });
+    }
+  });
+
+  const activeFilters = Array.from(activeFiltersByKey.values());
   const activeFilterKeys = activeFilters.map((filter) => filter.key);
 
   return {
