@@ -14,7 +14,6 @@ import { useLocalStorage } from '../hooks/use_local_storage';
 import {
   BANNER_DISMISSED_KEY,
   HOME_PAGE_BANNER_COPY,
-  HOME_PAGE_BANNER_DATA_TEST_SUBJ,
 } from '../constants';
 import { GETTING_STARTED_DEEP_LINK_ID, VECTORDB_APP_ID } from '../../common/constants';
 
@@ -58,7 +57,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
     <>
       <EuiSpacer size="xxl" />
       <AnnouncementBanner
-        data-test-subj={HOME_PAGE_BANNER_DATA_TEST_SUBJ}
+        data-test-subj="vectordbHomePageBanner"
         title={title}
         text={description}
         media={<EuiIllustration type={cloudRocketDeploy} alt="" />}
@@ -70,8 +69,8 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
             fill: true,
             iconType: 'rocket',
             onClick: handleGetStarted,
-            'data-test-subj': 'homePageBannerGetStartedBtn',
-            'data-telemetry-id': 'serverlessVectordbHomeBannerGetStartedBtnTelemetryId',
+            'data-test-subj': 'vectordbHomePageBannerGetStartedBtn',
+            'data-telemetry-id': 'vectordb-homeBanner-getStartedBtn',
           },
         }}
       />
