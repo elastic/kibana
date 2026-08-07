@@ -32,7 +32,7 @@ export const ScheduledActionsBadge: React.FunctionComponent<{
         color="warning"
         onClick={onClick}
         onClickAriaLabel={i18n.translate('xpack.fleet.agentList.scheduledActionsBadge.ariaLabel', {
-          defaultMessage: 'Open the Agent activity flyout to review scheduled unenrollment',
+          defaultMessage: 'Open the Agent activity flyout to review scheduled unenrollments',
         })}
         iconType="clock"
         data-test-subj="scheduledActionsBadge"
