@@ -406,7 +406,6 @@ export const internalStateSlice = createSlice({
         tab.esqlVariables = action.payload.esqlVariables;
       }),
 
-
     setProfileAppStateDefaultFieldsToReset: {
       prepare: (
         payload: TabActionPayload<Pick<TabState['profileAppStateDefaults'], 'fieldsToReset'>>
