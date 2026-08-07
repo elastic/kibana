@@ -8,12 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBanner, type EuiBannerProps } from '@elastic/eui';
-
-// Prop type for data-telemetry-id
-interface TelemetryIdProp {
-  'data-telemetry-id'?: string;
-}
+import { type DataAttributeProps, EuiBanner, type EuiBannerProps } from '@elastic/eui';
 
 /**
  * Props for the primary action button. Rendered as an `EuiButton`.
@@ -22,7 +17,7 @@ interface TelemetryIdProp {
 export type AnnouncementBannerActionPrimaryProps = NonNullable<
   EuiBannerProps['actionProps']
 >['primary'] &
-  TelemetryIdProp;
+  DataAttributeProps;
 
 /**
  * Props for the secondary action button. Rendered as an `EuiButtonEmpty`.
@@ -33,7 +28,7 @@ export type AnnouncementBannerActionPrimaryProps = NonNullable<
 export type AnnouncementBannerActionSecondaryProps = NonNullable<
   EuiBannerProps['actionProps']
 >['secondary'] &
-  TelemetryIdProp;
+  DataAttributeProps;
 
 export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount' | 'actionProps'> & {
   actionProps?: {
