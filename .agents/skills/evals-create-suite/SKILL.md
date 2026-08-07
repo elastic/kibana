@@ -101,7 +101,7 @@ export default createPlaywrightEvalsConfig({
 Options:
 - `testDir` (required) -- directory containing `.spec.ts` files
 - `timeout` (optional, default `5 * 60_000`) -- per-test timeout in ms
-- `repetitions` (optional, default `1`) -- overridable via `EVALUATION_REPETITIONS` env var
+- `repetitions` (optional, default `1`) -- overridable via `EVAL_REPETITIONS` env var
 
 ### `src/evaluate.ts`
 
