@@ -88,6 +88,7 @@ export {
   type InvestigationState,
   type SignificantEventUpdate,
   type InvestigationEvidence,
+  type InvestigationEvidenceCode,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,

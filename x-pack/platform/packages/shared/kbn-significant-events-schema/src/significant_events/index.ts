@@ -51,6 +51,7 @@ export {
   investigationStateSchema,
   type SignificantEventUpdate,
   type InvestigationEvidence,
+  type InvestigationEvidenceCode,
   type InvestigationHypothesis,
   type InvestigationState,
 } from './investigation_state';
