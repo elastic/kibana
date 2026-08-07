@@ -148,7 +148,9 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         try {
           const { result } = await client.update(req.params.id, data, options);
-          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
+          const responseItem = lensUpdateResponseBodySchema.parse(
+            getLensResponseItem(builder, result.item, useGASchemas)
+          );
 
           if (createdNew) {
             return res.created<LensUpdateResponseBody>({
