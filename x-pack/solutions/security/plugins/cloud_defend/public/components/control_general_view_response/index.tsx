@@ -298,6 +298,7 @@ export const ControlGeneralViewResponse = ({
           )}
           <EuiFlexItem>
             <EuiPopover
+              aria-label={i18n.responseOptions}
               button={
                 <EuiToolTip content="Response options" disableScreenReaderOutput>
                   <EuiButtonIcon

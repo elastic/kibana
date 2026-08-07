@@ -83,6 +83,19 @@ export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
   unifiedAttachmentTypes?: string[];
 };
 
+/**
+ * Fetches unified-only attachments (e.g. `security.entity`) by exact `type`, returning full
+ * unified attributes (unlike {@link GetAllAlertsAttachToCaseArgs}).
+ *
+ * `filter` must only reference `cases-attachments` fields — don't pass
+ * {@link getAttachmentAuthorizationFilter}'s combined filter (it also matches `cases-comments`).
+ */
+export interface GetUnifiedAttachmentsByTypesArgs {
+  caseId: string;
+  types: string[];
+  filter?: KueryNode;
+}
+
 export interface AlertIdsAggsResult {
   alertIds: {
     buckets: Array<{

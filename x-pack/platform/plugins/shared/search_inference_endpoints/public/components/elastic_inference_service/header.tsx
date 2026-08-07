@@ -64,7 +64,7 @@ export const ElasticInferenceServiceModelsHeader = ({
                 id: 'manageRegions',
                 label: i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
-                  { defaultMessage: 'Manage regions' }
+                  { defaultMessage: 'Region preferences' }
                 ),
                 iconType: 'gear' as const,
                 run: onManageRegions,

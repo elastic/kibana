@@ -26,11 +26,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
-::::{important} 
-The 9.4.4 release contains fixes for potential security vulnerabilities. For details, go to [security announcements](https://discuss.elastic.co/c/announcements/security-announcements/31).
-::::
-
-
 ### Features and enhancements [kibana-9.5.0-features-enhancements]
 
 **Elastic Agent Builder**:
@@ -514,6 +509,10 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
 
 ## 9.4.4 [kibana-9.4.4-release-notes]
+
+::::{important} 
+The 9.4.4 release contains fixes for potential security vulnerabilities. For details, go to [security announcements](https://discuss.elastic.co/c/announcements/security-announcements/31).
+::::
 
 ### Features and enhancements [kibana-9.4.4-features-enhancements]
 

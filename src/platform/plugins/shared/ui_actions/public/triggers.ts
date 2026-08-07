@@ -25,7 +25,6 @@ import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
   MULTI_VALUE_CLICK_TRIGGER,
   CELL_VALUE_TRIGGER,
   ESQL_CONTROL_TRIGGER,
@@ -176,15 +175,6 @@ export const triggers: { [key: string]: Trigger } = {
     }),
     description: i18n.translate('uiActions.triggers.panelBadgeTrigger.description', {
       defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
-    }),
-  },
-  [PANEL_NOTIFICATION_TRIGGER]: {
-    id: PANEL_NOTIFICATION_TRIGGER,
-    title: i18n.translate('uiActions.triggers.panelNotificationTrigger.title', {
-      defaultMessage: 'Panel notifications',
-    }),
-    description: i18n.translate('uiActions.triggers.panelNotificationTrigger.description', {
-      defaultMessage: 'Actions appear in top-right corner of a panel.',
     }),
   },
   [MULTI_VALUE_CLICK_TRIGGER]: {

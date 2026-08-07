@@ -49,9 +49,10 @@ describe('isString', () => {
 });
 
 describe('isPolicyOutcome', () => {
-  it('accepts dispatched and throttled', () => {
+  it('accepts dispatched, throttled, and dispatch_failed', () => {
     expect(isPolicyOutcome('dispatched')).toBe(true);
     expect(isPolicyOutcome('throttled')).toBe(true);
+    expect(isPolicyOutcome('dispatch_failed')).toBe(true);
   });
 
   it('rejects unmatched and other strings', () => {
