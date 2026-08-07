@@ -331,7 +331,6 @@ describe('MetricsExperienceStateProvider', () => {
       });
       expect(result.current.currentPage).toBe(3);
 
-      // Re-apply the same (default) sort — page must be preserved.
       act(() => {
         result.current.onMetricsSortChange([
           METRICS_SORT_BY.alphabetically,
@@ -339,7 +338,6 @@ describe('MetricsExperienceStateProvider', () => {
         ]);
       });
       expect(result.current.currentPage).toBe(3);
-      // The change is still forwarded to the host regardless of the page reset.
       expect(onMetricsSortChange).toHaveBeenCalled();
     });
 
