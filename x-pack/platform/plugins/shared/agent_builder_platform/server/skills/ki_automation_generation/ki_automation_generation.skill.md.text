@@ -194,7 +194,7 @@ Ask yourself:
 - Is the output the expected structure?
 - are the access patterns correct?
 - would I, as an Agent, find this context useful?
-- If any two KIs have similar titles, query for one of them specifically and confirm it out-ranks its near-duplicate siblings. If it doesn't, the `description` is not carrying enough differentiating signal — fix that before expanding.
+- If any two KIs have similar titles, query for one of them specifically and confirm it out-ranks its near-duplicate siblings. If it doesn't, the `description` is not carrying enough differentiating signal — fix that before expanding. Only do this query > improve description test once, and move on after.
 
 If not, repeat this step, adjusting the pilot workflow accordingly.
 Use `generate_workflow` with the existing `attachmentId` to edit.
