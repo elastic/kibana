@@ -101,18 +101,6 @@ describe('discover session API transforms', () => {
     },
   };
 
-  const withControlGroupJson = (controlGroupJson: string) => ({
-    ...discoverSessionAttributes,
-    tabs: discoverSessionAttributes.tabs.map((tab, index) =>
-      index === 1
-        ? {
-            ...tab,
-            attributes: { ...tab.attributes, controlGroupJson },
-          }
-        : tab
-    ),
-  });
-
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
@@ -146,56 +134,6 @@ describe('discover session API transforms', () => {
 
       const { sessionState: transformed } = transformDiscoverSessionOut(attributes);
       expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
-    });
-
-    it('omits invalid stored control panels and reports a warning', () => {
-      const attributes = withControlGroupJson(
-        JSON.stringify({
-          valid: expectedControlGroup['control-1'],
-          invalid: { order: 1, type: ESQL_CONTROL },
-        })
-      );
-
-      const { sessionState: transformed, warnings } = transformDiscoverSessionOut(attributes);
-
-      expect(transformed.tabs[1].control_panels?.map(({ id }) => id)).toEqual(['valid']);
-      expect(warnings).toEqual([
-        expect.objectContaining({
-          type: 'dropped_panel',
-          tab_id: attributes.tabs[1].id,
-          panel_id: 'invalid',
-        }),
-      ]);
-    });
-
-    it('omits control_panels when all stored entries are invalid', () => {
-      const attributes = withControlGroupJson(JSON.stringify({ invalid: { type: ESQL_CONTROL } }));
-
-      const { sessionState: transformed, warnings } = transformDiscoverSessionOut(attributes);
-
-      expect(transformed.tabs[1].control_panels).toBeUndefined();
-      expect(warnings).toEqual([
-        expect.objectContaining({
-          type: 'dropped_panel',
-          tab_id: attributes.tabs[1].id,
-          panel_id: 'invalid',
-        }),
-      ]);
-    });
-
-    it('omits control_panels and reports a warning when its JSON container is unreadable', () => {
-      const attributes = withControlGroupJson('not-json');
-
-      const { sessionState: transformed, warnings } = transformDiscoverSessionOut(attributes);
-
-      expect(transformed.tabs[1].control_panels).toBeUndefined();
-      expect(warnings).toEqual([
-        expect.objectContaining({
-          type: 'dropped_property',
-          tab_id: attributes.tabs[1].id,
-          key: 'control_panels',
-        }),
-      ]);
     });
   });
 

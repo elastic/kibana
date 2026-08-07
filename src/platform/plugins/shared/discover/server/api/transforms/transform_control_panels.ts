@@ -11,7 +11,7 @@ import { isObject } from 'lodash';
 import { transformType } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { DiscoverSessionControlPanels, DiscoverSessionWarning } from '../schema';
-import { discoverSessionControlPanelSchema } from '../schema';
+import { discoverSessionControlPanelSchema, discoverSessionControlPanelsSchema } from '../schema';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   isObject(value) && !Array.isArray(value);
@@ -79,7 +79,7 @@ export const transformControlPanelsOut = (
   controlGroupJson: string | undefined,
   tabId: string
 ): { panels: DiscoverSessionControlPanels | undefined; warnings: DiscoverSessionWarning[] } => {
-  if (controlGroupJson === undefined) {
+  if (!controlGroupJson) {
     return { panels: undefined, warnings: [] };
   }
 
@@ -117,7 +117,10 @@ export const transformControlPanelsOut = (
     }
   }
 
-  return { panels: panels.length ? panels : undefined, warnings };
+  return {
+    panels: panels.length ? discoverSessionControlPanelsSchema.parse(panels) : undefined,
+    warnings,
+  };
 };
 
 /*

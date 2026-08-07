@@ -9,7 +9,7 @@
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import type { DiscoverSessionApiTab } from '../schema';
+import type { DiscoverSessionApiTab, DiscoverSessionWarning } from '../schema';
 
 type StoredVisContext = DiscoverSessionTabAttributes['visContext'];
 type ApiVisContext = DiscoverSessionApiTab['vis_context'];
@@ -27,24 +27,54 @@ const isApiSuggestionType = (value: unknown): value is ApiSuggestionType =>
   value === UnifiedHistogramSuggestionType.histogramForESQL ||
   value === UnifiedHistogramSuggestionType.histogramForDataView;
 
-export const transformVisContextOut = (visContext: StoredVisContext): ApiVisContext | undefined => {
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const createDroppedVisContextWarning = (tabId: string): DiscoverSessionWarning => ({
+  type: 'dropped_property',
+  tab_id: tabId,
+  key: 'vis_context',
+  message: 'Unable to transform vis context because the stored value is invalid.',
+});
+
+export const transformVisContextOut = (
+  visContext: StoredVisContext,
+  tabId: string
+): { visContext: ApiVisContext | undefined; warnings: DiscoverSessionWarning[] } => {
+  if (!visContext) {
+    return { visContext: undefined, warnings: [] };
+  }
+
+  if (!isRecord(visContext)) {
+    return {
+      visContext: undefined,
+      warnings: [createDroppedVisContextWarning(tabId)],
+    };
+  }
+
+  if (Object.keys(visContext).length === 0) {
+    return { visContext: undefined, warnings: [] };
+  }
+
   if (
-    !visContext ||
     !('suggestionType' in visContext) ||
     !('attributes' in visContext) ||
     !visContext.suggestionType ||
-    !visContext.attributes
+    !visContext.attributes ||
+    !isApiSuggestionType(visContext.suggestionType)
   ) {
-    return undefined;
-  }
-
-  if (!isApiSuggestionType(visContext.suggestionType)) {
-    return undefined;
+    return {
+      visContext: undefined,
+      warnings: [createDroppedVisContextWarning(tabId)],
+    };
   }
 
   return {
-    suggestion_type: visContext.suggestionType,
-    attributes: visContext.attributes,
+    visContext: {
+      suggestion_type: visContext.suggestionType,
+      attributes: visContext.attributes,
+    },
+    warnings: [],
   };
 };
 

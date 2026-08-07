@@ -221,11 +221,15 @@ export const discoverSessionApiResponseSchema = z
   })
   .strict();
 
+/* Shared context for warnings produced while transforming a Discover session tab. */
 const discoverSessionWarningBaseSchema = z.object({
-  message: z.string().meta({ description: 'Why stored content was omitted.' }),
+  message: z
+    .string()
+    .meta({ description: 'Why the panel or property was dropped from the response.' }),
   tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
 });
 
+/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
 const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_panel'),
@@ -233,13 +237,15 @@ const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchem
   })
   .strict();
 
+/* Reports a tab property that could not be returned as a whole. */
 const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_property'),
-    key: z.literal('control_panels'),
+    key: z.union([z.literal('control_panels'), z.literal('vis_context')]),
   })
   .strict();
 
+/* Allows GET responses to preserve valid session data while reporting what was dropped. */
 export const discoverSessionWarningsSchema = z.array(
   z.union([discoverSessionDroppedPanelWarningSchema, discoverSessionDroppedPropertyWarningSchema])
 );
