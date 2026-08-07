@@ -6,4 +6,4 @@
  */
 
 export * from './use_canvas_state';
-export * from './types';
+export type * from './types';
