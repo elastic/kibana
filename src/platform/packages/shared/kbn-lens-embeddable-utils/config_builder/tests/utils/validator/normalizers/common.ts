@@ -61,6 +61,8 @@ const COMMON_STATE_IGNORE_PATHS = [
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
   'state.datasourceStates.formBased.currentIndexPatternId',
+  // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
+  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.sortField',
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
