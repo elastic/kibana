@@ -23,7 +23,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: { get: jest.fn() },
       agentBuilder: { openChat: mockOpenChat },
     },
   }),

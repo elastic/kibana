@@ -328,6 +328,34 @@ describe('EvalsClient', () => {
     );
   });
 
+  it('upsertDataset sends tags and maturity only when the suite declares them', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({ dataset_id: 'ds-1', added: 0, removed: 0, unchanged: 0 })
+    );
+    const client = new EvalsClient(kbnClient, createLog());
+
+    await client.upsertDataset({
+      name: 'My Dataset',
+      description: 'Test dataset',
+      tags: ['esql', 'golden'],
+      maturity: 'golden',
+      examples: [],
+    });
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
+          name: 'My Dataset',
+          description: 'Test dataset',
+          tags: ['esql', 'golden'],
+          maturity: 'golden',
+          examples: [],
+        },
+      })
+    );
+  });
+
   it('upsertDataset propagates errors', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
