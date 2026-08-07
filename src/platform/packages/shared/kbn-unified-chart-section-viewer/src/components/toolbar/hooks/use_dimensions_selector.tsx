@@ -174,13 +174,7 @@ export const useDimensionsSelector = ({
       debouncedOnChange.cancel();
       debouncedOnChange(newSelection);
     },
-    [
-      onChange,
-      singleSelection,
-      debouncedOnChange,
-      isAtMaxLimit,
-      trackMaxDimensionsReached,
-    ]
+    [onChange, singleSelection, debouncedOnChange, isAtMaxLimit, trackMaxDimensionsReached]
   );
 
   const handleClearAll = useCallback(() => {
