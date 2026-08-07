@@ -52,6 +52,7 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       data: {
         title: 'ESQL control unlink test',
         description: '',
+        tags: [],
         tabs: [
           expect.objectContaining({
             id: 'bdf27597-150b-445e-90ca-ce1b52b0b5af',
@@ -117,7 +118,7 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest(
-    'returns 500 when the stored Discover session fails response validation',
+    'returns 500 when the output transform fails to validate the stored Discover session',
     async ({ apiClient, kbnClient }) => {
       const { attributes, references } =
         await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
