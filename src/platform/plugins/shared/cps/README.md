@@ -10,7 +10,7 @@ Kibana acts as a **transparent orchestrator**. It does not execute cross-project
 
 - **CPSManager**: The central service for managing CPS state in the browser.
   - **Project Routing**: Manages the `projectRouting$` observable (defaults to searching all projects) and allows applications to set/get the current routing.
-  - **Project Fetching**: Fetches and caches project data using `ProjectFetcher`.
+  - **Project Fetching**: Fetches and caches project data using `ProjectFetcher`. The number of reachable projects is exposed both synchronously (`getTotalProjectCount`) and as an observable (`getTotalProjectCount$`). Because linking projects in Cloud takes time to reach Elasticsearch, the list is refetched whenever the browser tab becomes visible again, so the project picker appears without a page reload once a link lands. Refreshes are throttled by the `ProjectFetcher` cache, and a failed refresh keeps the last known projects.
   - **UI Access Control**: Determines if the project picker should be editable, read-only, or disabled based on the current application and location (via `getProjectPickerAccess$`).
 
 

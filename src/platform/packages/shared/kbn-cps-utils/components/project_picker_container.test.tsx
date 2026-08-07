@@ -36,14 +36,19 @@ const mockLinkedProjects: CPSProject[] = [
 ];
 
 describe('ProjectPickerContainer', () => {
-  const renderProjectPicker = async (
-    props: { cpsManager: Partial<ICPSManager> } = { cpsManager: {} }
-  ) => {
+  const renderProjectPicker = async ({
+    cpsManager: cpsManagerOverrides = {},
+    totalProjectCount = 2,
+  }: {
+    cpsManager?: Partial<ICPSManager>;
+    totalProjectCount?: number;
+  } = {}) => {
     const mockProjectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     // Default to EDITABLE access (dashboards app on individual page)
     const mockProjectPickerAccess$ = new BehaviorSubject<ProjectRoutingAccess>(
       ProjectRoutingAccess.EDITABLE
     );
+    const mockTotalProjectCount$ = new BehaviorSubject<number>(totalProjectCount);
     const cpsManager = {
       fetchProjects: jest.fn().mockResolvedValue({
         origin: mockOriginProject,
@@ -55,11 +60,12 @@ describe('ProjectPickerContainer', () => {
       setProjectRouting: jest.fn(),
       getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
       getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
-      getTotalProjectCount: jest.fn(() => 2),
+      getTotalProjectCount: jest.fn(() => mockTotalProjectCount$.value),
+      getTotalProjectCount$: jest.fn(() => mockTotalProjectCount$),
       hasLinkedProjects: jest.fn(() => true),
       updateDefaultProjectRouting: jest.fn(),
       registerAppAccess: jest.fn(),
-      ...props.cpsManager,
+      ...cpsManagerOverrides,
     };
     return await act(async () => {
       const component = <ProjectPickerContainer cpsManager={cpsManager} />;
@@ -113,10 +119,27 @@ describe('ProjectPickerContainer', () => {
             origin: mockOriginProject,
             linkedProjects: [],
           }),
-          getTotalProjectCount: jest.fn(() => 1),
+        },
+        totalProjectCount: 1,
+      });
+      expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
+    });
+
+    it('should render the button when projects are linked after mount', async () => {
+      const totalProjectCount$ = new BehaviorSubject<number>(1);
+      await renderProjectPicker({
+        cpsManager: {
+          getTotalProjectCount: jest.fn(() => totalProjectCount$.value),
+          getTotalProjectCount$: jest.fn(() => totalProjectCount$),
         },
       });
       expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
+
+      await act(async () => {
+        totalProjectCount$.next(2);
+      });
+
+      expect(screen.getByTestId('project-picker-button')).toBeInTheDocument();
     });
   });
 

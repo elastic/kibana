@@ -8,6 +8,7 @@
  */
 
 import { CPSManager } from './cps_manager';
+import { CACHE_TTL_MS } from './project_fetcher';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
@@ -86,6 +87,7 @@ describe('CPSManager', () => {
   });
 
   afterEach(() => {
+    cpsManager.stop();
     jest.useRealTimers();
     jest.clearAllMocks();
   });
@@ -110,6 +112,98 @@ describe('CPSManager', () => {
 
       expect(result!.linkedProjects[0]._alias).toBe('A Project');
       expect(result!.linkedProjects[1]._alias).toBe('B Project');
+    });
+  });
+
+  describe('total project count', () => {
+    const createManager = () =>
+      new CPSManager({
+        http: mockHttp,
+        logger: mockLogger,
+        application: mockApplication,
+      });
+
+    /**
+     * Refreshes are served from the project fetcher cache, so let it expire before simulating
+     * the user returning to the tab.
+     */
+    const returnToTab = async () => {
+      jest.useFakeTimers();
+      await jest.advanceTimersByTimeAsync(CACHE_TTL_MS + 1);
+      document.dispatchEvent(new Event('visibilitychange'));
+      await jest.runAllTimersAsync();
+    };
+
+    it('should emit the count once the initial fetch resolves', async () => {
+      const manager = createManager();
+      const emissions: number[] = [];
+      manager.getTotalProjectCount$().subscribe((count) => emissions.push(count));
+
+      expect(emissions).toEqual([0]);
+
+      await manager.whenReady();
+
+      // origin project plus two linked projects
+      expect(emissions).toEqual([0, 3]);
+      expect(manager.getTotalProjectCount()).toBe(3);
+      expect(manager.hasLinkedProjects()).toBe(true);
+      manager.stop();
+    });
+
+    it('should stay at 0 when the initial fetch fails', async () => {
+      mockHttp.post.mockRejectedValue(new Error('Persistent error'));
+      jest.useFakeTimers();
+
+      const manager = createManager();
+      await Promise.all([manager.whenReady(), jest.runAllTimersAsync()]);
+
+      expect(manager.getTotalProjectCount()).toBe(0);
+      expect(manager.hasLinkedProjects()).toBe(false);
+      manager.stop();
+    });
+
+    it('should pick up projects linked after page load when the user returns to the tab', async () => {
+      // nothing was linked yet when the page loaded
+      mockHttp.post.mockResolvedValue({ origin: mockResponse.origin, linked_projects: {} });
+      const manager = createManager();
+      await manager.whenReady();
+
+      const emissions: number[] = [];
+      manager.getTotalProjectCount$().subscribe((count) => emissions.push(count));
+      expect(emissions).toEqual([1]);
+
+      // the link reaches Elasticsearch while the user is away configuring CPS in Cloud UI
+      mockHttp.post.mockResolvedValue(mockResponse);
+      await returnToTab();
+
+      expect(emissions).toEqual([1, 3]);
+      expect(manager.getTotalProjectCount()).toBe(3);
+      manager.stop();
+    });
+
+    it('should keep the last known count when a refresh fails', async () => {
+      const manager = createManager();
+      await manager.whenReady();
+      expect(manager.getTotalProjectCount()).toBe(3);
+
+      mockHttp.post.mockRejectedValue(new Error('Network error'));
+      await returnToTab();
+
+      expect(manager.getTotalProjectCount()).toBe(3);
+      manager.stop();
+    });
+
+    it('should not refresh once stopped', async () => {
+      mockHttp.post.mockResolvedValue({ origin: mockResponse.origin, linked_projects: {} });
+      const manager = createManager();
+      await manager.whenReady();
+      expect(manager.getTotalProjectCount()).toBe(1);
+
+      manager.stop();
+      mockHttp.post.mockResolvedValue(mockResponse);
+      await returnToTab();
+
+      expect(manager.getTotalProjectCount()).toBe(1);
     });
   });
 

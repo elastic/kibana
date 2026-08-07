@@ -10,7 +10,16 @@
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subscription,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  fromEvent,
+  map,
+  type Observable,
+} from 'rxjs';
 import {
   type CPSAppAccessResolver,
   type ICPSManager,
@@ -19,6 +28,9 @@ import {
   PROJECT_ROUTING,
 } from '@kbn/cps-utils';
 import type { ProjectFetcher } from './project_fetcher';
+
+const countProjects = (projects: ProjectsData | null): number =>
+  projects ? (projects.origin ? 1 : 0) + projects.linkedProjects.length : 0;
 
 /**
  * Central service for managing project routing and project data.
@@ -33,7 +45,9 @@ export class CPSManager implements ICPSManager {
   private readonly application: ApplicationStart;
   private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
   private defaultProjectRouting: ProjectRouting = PROJECT_ROUTING.ALL;
-  private allProjects: ProjectsData | null = null;
+  private readonly allProjects$ = new BehaviorSubject<ProjectsData | null>(null);
+  private readonly totalProjectCount$: Observable<number>;
+  private readonly subscriptions = new Subscription();
   private readonly readyPromise: Promise<void>;
   private readonly appAccessResolvers: Map<string, CPSAppAccessResolver>;
   private currentAppId: string = '';
@@ -55,23 +69,43 @@ export class CPSManager implements ICPSManager {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
     this.application = deps.application;
+    this.totalProjectCount$ = this.allProjects$.pipe(map(countProjects), distinctUntilChanged());
     this.readyPromise = Promise.all([
       this.initializeDefaultProjectRouting(),
       this.fetchAllProjects(),
     ]).then(() => {});
 
     this.appAccessResolvers = deps.appAccessResolvers ?? new Map();
-    combineLatest([this.application.currentAppId$, this.application.currentLocation$])
-      .pipe(
-        map(([appId, location]) => {
-          this.currentAppId = appId ?? '';
-          this.currentLocation = location ?? '';
-          return this.resolveAccess(this.currentAppId, this.currentLocation);
+    this.subscriptions.add(
+      combineLatest([this.application.currentAppId$, this.application.currentLocation$])
+        .pipe(
+          map(([appId, location]) => {
+            this.currentAppId = appId ?? '';
+            this.currentLocation = location ?? '';
+            return this.resolveAccess(this.currentAppId, this.currentLocation);
+          })
+        )
+        .subscribe((access) => {
+          this.applyAccess(access);
         })
-      )
-      .subscribe((access) => {
-        this.applyAccess(access);
-      });
+    );
+    this.subscriptions.add(
+      // Linking projects in Cloud takes a while to reach Elasticsearch, so the count fetched on
+      // page load can already be stale. Refresh whenever the user returns to the tab, which is
+      // what they do after configuring CPS. Throttled by the project fetcher cache.
+      fromEvent(document, 'visibilitychange')
+        .pipe(filter(() => document.visibilityState === 'visible'))
+        .subscribe(() => {
+          void this.fetchAllProjects();
+        })
+    );
+  }
+
+  /**
+   * Releases the manager's subscriptions. Called when the plugin stops.
+   */
+  public stop(): void {
+    this.subscriptions.unsubscribe();
   }
 
   /**
@@ -123,8 +157,9 @@ export class CPSManager implements ICPSManager {
   private async fetchAllProjects(): Promise<void> {
     try {
       const projectsData = await this.fetchProjects(PROJECT_ROUTING.ALL);
-      this.allProjects = projectsData;
+      this.allProjects$.next(projectsData);
     } catch (error) {
+      // Keep the last known projects rather than reporting zero on a transient failure
       this.logger.warn('Failed to fetch total project count', error);
     }
   }
@@ -133,9 +168,15 @@ export class CPSManager implements ICPSManager {
    * Returns the total number of projects (origin + linked) across all project routings.
    */
   public getTotalProjectCount(): number {
-    return this.allProjects
-      ? (this.allProjects?.origin ? 1 : 0) + (this.allProjects?.linkedProjects.length ?? 0)
-      : 0;
+    return countProjects(this.allProjects$.value);
+  }
+
+  /**
+   * Total number of projects as an observable, so consumers update when the projects are
+   * first fetched and whenever they are refreshed. Emits 0 until the initial fetch resolves.
+   */
+  public getTotalProjectCount$(): Observable<number> {
+    return this.totalProjectCount$;
   }
 
   /**
@@ -144,7 +185,7 @@ export class CPSManager implements ICPSManager {
    * `false` until that resolves.
    */
   public hasLinkedProjects(): boolean {
-    return (this.allProjects?.linkedProjects.length ?? 0) > 0;
+    return (this.allProjects$.value?.linkedProjects.length ?? 0) > 0;
   }
 
   /**
