@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable complexity */
+
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -32,11 +34,15 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { StepLogsApi } from '@kbn/workflows-extensions/public';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { StepLogsView } from './step_logs_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 
 interface WorkflowStepExecutionDetailsProps {
@@ -75,6 +81,33 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     parentWorkflowExecution,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const { workflowsExtensions } = useKibana().services;
+    const api = useWorkflowsApi();
+
+    const logsConfig = useMemo(
+      () =>
+        stepExecution?.stepType
+          ? workflowsExtensions.getStepDefinition(stepExecution.stepType)?.logs ?? {
+              enabled: false,
+            }
+          : undefined,
+      [stepExecution?.stepType, workflowsExtensions]
+    );
+
+    const logsApi: StepLogsApi = useMemo(
+      () => ({
+        fetchLogs: async () => {
+          if (!stepExecution?.id) return [];
+          const response = await api.getExecutionLogs(workflowExecutionId, {
+            stepExecutionId: stepExecution.id,
+            sortOrder: 'asc',
+          });
+          return response.logs;
+        },
+      }),
+      [api, workflowExecutionId, stepExecution?.id]
+    );
+
     const workflowNav = useNavigateToExecution(
       childWorkflowExecution
         ? {
@@ -160,7 +193,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         }
         return pseudoTabs;
       }
-      return [
+      const baseTabs = [
         {
           id: 'output',
           name: hasError ? 'Error' : 'Output',
@@ -170,7 +203,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Input',
         },
       ];
-    }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType]);
+      if (logsConfig?.enabled) {
+        baseTabs.push({
+          id: 'logs',
+          name: i18n.translate('workflowsManagement.stepExecutionDetails.logsTab', {
+            defaultMessage: 'Logs',
+          }),
+        });
+      }
+      return baseTabs;
+    }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType, logsConfig]);
 
     const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
@@ -275,7 +317,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ))}
             </EuiTabs>
           </EuiFlexItem>
-          {isFinished ? (
+          {selectedTabId === 'logs' && logsConfig ? (
+            <EuiFlexItem css={{ overflowY: 'auto' }}>
+              <StepLogsView stepExecution={stepExecution} config={logsConfig} logsApi={logsApi} />
+            </EuiFlexItem>
+          ) : isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {isLoadingStepData ? (
                 <EuiPanel hasShadow={false} paddingSize="m">
