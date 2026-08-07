@@ -298,7 +298,7 @@ const detectionWatchBase: Watch = {
   callables: [
     {
       id: 'system-security-rule-tuning',
-      name: 'Rule tuning',
+      name: 'Rule Tuning Worker',
       kind: 'workflow',
       summary: 'Diagnose noisy rules and apply approved query changes',
       gated: true,
@@ -307,7 +307,7 @@ const detectionWatchBase: Watch = {
     },
     {
       id: 'system-security-rule-creation',
-      name: 'Rule creation',
+      name: 'Rule Creation Worker',
       kind: 'workflow',
       summary: 'Draft an ES|QL rule for a detection gap and create it on approval',
       gated: true,

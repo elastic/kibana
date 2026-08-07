@@ -1,5 +1,5 @@
 version: "1"
-name: Detection rule tuning
+name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
   and applies an approved query change.
@@ -166,10 +166,12 @@ steps:
               timeframeEnd: "{{ foreach.item.4 }}"
 
       - name: review_tuning
-        type: waitForInput
+        type: waitForApproval
         if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
         timeout: "72h"
         with:
+          approveLabel: Apply tuning
+          rejectLabel: Dismiss
           message: |-
             Rule tuning proposal for {{ foreach.item.1 }}
             {{ foreach.item.2 }} alerts were closed as false positives.
@@ -205,23 +207,24 @@ steps:
             {% if steps.diagnose_rule.output.conversation_id %}
             Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
             {% endif %}
-          schema:
-            type: object
-            properties:
-              decision:
-                type: string
-                enum: [approve, dismiss]
-            required: [decision]
+
+      # Decided once so the apply and hand-off branches stay exact complements. Grouping
+      # an `or` chain with parentheses is a tokenization error in these expressions.
+      - name: classify_proposal
+        type: data.set
+        with:
+          can_apply: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+              and steps.diagnose_rule.output.structured_output.proposed_query != ''
+              and steps.fetch_rule.output.type == 'query'
+              and steps.preview_proposed_query.output.succeeded == true
+              and steps.preview_proposed_query.output.is_aborted == false }}
 
       - name: apply_query_tuning
         type: kibana.request
         if: >-
-          ${{ steps.review_tuning.output.response.decision == 'approve'
-            and steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query'
-            and steps.preview_proposed_query.output.succeeded == true
-            and steps.preview_proposed_query.output.is_aborted == false }}
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply == true }}
         with:
           method: PATCH
           path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -236,11 +239,8 @@ steps:
       - name: record_manual_tuning
         type: data.set
         if: >-
-          ${{ steps.review_tuning.output.response.decision == 'approve'
-            and (steps.diagnose_rule.output.structured_output.change_type != 'query'
-              or steps.fetch_rule.output.type != 'query'
-              or steps.preview_proposed_query.output.succeeded != true
-              or steps.preview_proposed_query.output.is_aborted == true) }}
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply == false }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.

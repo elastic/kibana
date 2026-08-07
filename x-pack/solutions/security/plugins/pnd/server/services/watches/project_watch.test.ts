@@ -125,6 +125,8 @@ describe('project watch', () => {
     interface NestedStep {
       name: string;
       type: string;
+      if?: string;
+      condition?: string;
       steps?: NestedStep[];
       else?: NestedStep[];
     }
@@ -208,6 +210,30 @@ describe('project watch', () => {
       }
     });
 
+    // Liquid cannot group a condition with parentheses; it raises a tokenization error
+    // that fails the step at runtime, long after the definition installs cleanly.
+    it('groups no step condition with parentheses', () => {
+      const ids = [
+        PND_WATCH_DETECTION_WORKFLOW_ID,
+        PND_RULE_TUNING_WORKFLOW_ID,
+        PND_RULE_CREATION_WORKFLOW_ID,
+        PND_RULE_PREVIEW_WORKFLOW_ID,
+      ];
+
+      for (const id of ids) {
+        const { steps } = parse(getManagedWorkflowDefinition(id)!.yaml!) as WorkflowYaml;
+        const conditions = flattenSteps(steps as unknown as NestedStep[]).flatMap(
+          ({ name, if: stepIf, condition }) =>
+            [stepIf, condition].filter(Boolean).map((expr) => [name, expr] as const)
+        );
+
+        expect(conditions.length).toBeGreaterThan(0);
+        for (const [name, expr] of conditions) {
+          expect({ name, expr }).toEqual({ name, expr: expect.not.stringContaining('(') });
+        }
+      }
+    });
+
     // A legacy `type: array` output is compiled to an array of scalars, so emitting
     // objects through one fails output validation at runtime.
     it('declares no array outputs in the detection workflows', () => {
@@ -237,6 +263,29 @@ describe('project watch', () => {
         expect(lines.length).toBeGreaterThan(0);
         for (const line of lines) {
           expect(line).not.toContain('%:z');
+        }
+      }
+    });
+
+    // Only `waitForApproval` renders the approve/reject buttons; a `waitForInput` gate
+    // makes an analyst hand-author the resume payload as JSON instead.
+    it('gates both workers on an approval step that reads response.approved', () => {
+      for (const id of [PND_RULE_TUNING_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
+        const { steps } = parse(getManagedWorkflowDefinition(id)!.yaml!) as WorkflowYaml;
+        const all = flattenSteps(steps as unknown as NestedStep[]);
+        const gates = all.filter(({ type }) => type === 'waitForApproval');
+
+        expect(gates).toHaveLength(1);
+        expect(all.map(({ type }) => type)).not.toContain('waitForInput');
+
+        const [gate] = gates;
+        const conditions = all
+          .flatMap(({ if: stepIf }) => (stepIf ? [stepIf] : []))
+          .filter((expr) => expr.includes(gate.name));
+
+        expect(conditions.length).toBeGreaterThan(0);
+        for (const expr of conditions) {
+          expect(expr).toContain(`steps.${gate.name}.output.response.approved`);
         }
       }
     });

@@ -1,5 +1,5 @@
 version: "1"
-name: Detection rule creation
+name: Detection Rule Creation Worker
 description: >
   Drafts an ES|QL detection rule for a reported gap, previews it, and creates it
   disabled once an analyst approves.
@@ -134,13 +134,15 @@ steps:
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
   - name: review_creation
-    type: waitForInput
+    type: waitForApproval
     if: >-
       ${{ steps.draft_creation.output.structured_output.query != null
         and steps.draft_creation.output.structured_output.query != ''
         and steps.draft_creation.output.structured_output.attachment_id != null }}
     timeout: "72h"
     with:
+      approveLabel: Create rule
+      rejectLabel: Dismiss
       message: |-
         New ES|QL detection rule: {{ steps.draft_creation.output.structured_output.name }}
 
@@ -158,20 +160,21 @@ steps:
         Risk score: {{ steps.draft_creation.output.structured_output.risk_score }}
 
         Review the draft: /app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }}
-      schema:
-        type: object
-        properties:
-          decision:
-            type: string
-            enum: [approve, dismiss]
-        required: [decision]
+
+  # Decided once so the create and hand-off branches stay exact complements. Grouping an
+  # `or` chain with parentheses is a tokenization error in these expressions.
+  - name: classify_preview
+    type: data.set
+    with:
+      conclusive: >-
+        ${{ steps.preview_creation.output.succeeded == true
+          and steps.preview_creation.output.is_aborted == false }}
 
   - name: create_rule
     type: kibana.request
     if: >-
-      ${{ steps.review_creation.output.response.decision == 'approve'
-        and steps.preview_creation.output.succeeded == true
-        and steps.preview_creation.output.is_aborted == false }}
+      ${{ steps.review_creation.output.response.approved == true
+        and steps.classify_preview.output.conclusive == true }}
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -198,9 +201,8 @@ steps:
   - name: record_inconclusive_creation
     type: data.set
     if: >-
-      ${{ steps.review_creation.output.response.decision == 'approve'
-        and (steps.preview_creation.output.succeeded != true
-          or steps.preview_creation.output.is_aborted == true) }}
+      ${{ steps.review_creation.output.response.approved == true
+        and steps.classify_preview.output.conclusive == false }}
     with:
       note: The rule was not created because its preview was inconclusive.
 
