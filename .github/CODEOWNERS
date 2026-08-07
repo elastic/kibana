@@ -797,6 +797,7 @@ src/platform/packages/shared/shared-ux/file/image/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/flyout/info-blocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
@@ -1395,6 +1396,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/se
 x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
+x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-pnd-common @elastic/security-solution
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -1616,7 +1618,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_document_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_root_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-signals-traces-team
-/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-signals-traces-team 
+/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-signals-traces-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting
 /src/platform/plugins/shared/discover/test/scout/security_experience/ @elastic/security-threat-hunting
 
@@ -1948,7 +1950,6 @@ x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_in
 x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-ai/src/features @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/significant_events_app @elastic/obs-sig-events-team
 # server
 x-pack/platform/plugins/shared/streams/server/routes/utils/resolve_connector_for_feature.ts @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events @elastic/obs-sig-events-team
@@ -3487,6 +3488,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-threat-hunting
@@ -3721,6 +3723,13 @@ docs/reference                                @elastic/ski-docs
 docs/release-notes                            @elastic/ski-docs
 docs/docset.yml                               @elastic/ski-docs
 docs/redirects.yml                            @elastic/ski-docs
+
+# Internal developer docs, published to codex.elastic.dev only. Only the shared scaffolding is
+# owned here; teams adding a subject own its directory and add that entry below, rather than in
+# the generated block, which is rewritten by `node scripts/generate codeowners`.
+docs-dev/docset.yml                           @elastic/kibana-tech-leads
+docs-dev/index.md                             @elastic/kibana-tech-leads
+docs-dev/kbn-ui/                              @elastic/appex-sharedux
 
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/ski-docs
