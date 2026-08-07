@@ -16,7 +16,7 @@ import { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
  */
 export default {
   component: ProjectPickerButton,
-  title: 'ProjectPickerButton',
+  title: 'Project Picker/Blocks/Button',
   argTypes: {
     size: {
       control: 'select',
