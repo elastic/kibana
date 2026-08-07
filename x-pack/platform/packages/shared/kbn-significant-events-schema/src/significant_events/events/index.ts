@@ -83,3 +83,12 @@ export const significantEventSchema = significantEventBaseSchema.extend({
 });
 
 export type SignificantEvent = z.infer<typeof significantEventSchema>;
+
+/**
+ * Read/API event model returned by list and lifecycle endpoints. `created_at` is the earliest
+ * retained lineage `@timestamp` (computed at read time) and is intentionally not part of the
+ * stored Significant Event write schema.
+ */
+export interface SignificantEventResponse extends SignificantEvent {
+  created_at: string;
+}
