@@ -81,7 +81,15 @@ steps:
             type: elasticsearch.index
             with:
               index: '{{ consts.aiIndexBackingIndex }}'
-              document: '${{ foreach.item }}'
+              # document must be a YAML object with templates only at the leaves:
+              # the step's `with` schema is a union, and the workflow validator
+              # cannot suppress a whole-object template (`${{ }}`) inside a union.
+              document:
+                type: '{{ foreach.item.type }}'
+                title: '{{ foreach.item.title }}'
+                description: '{{ foreach.item.description }}'
+                content: '{{ foreach.item.content }}'
+                tags: '${{ foreach.item.tags }}'
           - name: log_persisted
             type: console
             with:
