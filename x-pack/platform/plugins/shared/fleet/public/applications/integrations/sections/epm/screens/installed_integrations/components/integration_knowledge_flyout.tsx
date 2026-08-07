@@ -160,7 +160,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                       ),
                       aiAssistant: (
                         <EuiLink
-                          href="https://www.elastic.co/docs/explore-analyze/ai-features/ai-assistant"
+                          href={docLinks.links.observability.aiAssistant}
                           target="_blank"
                           external
                         >
