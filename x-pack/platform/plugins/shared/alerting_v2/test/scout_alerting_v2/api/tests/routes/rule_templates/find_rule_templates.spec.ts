@@ -297,8 +297,6 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
 
       expect(response).toHaveStatusCode(200);
       expect(getTemplateNames(response.body.items)).toStrictEqual(['valid-template']);
-      // `total` reflects what Elasticsearch matched, so it still counts the
-      // template that failed to parse.
       expect(response.body.total).toBe(2);
     }
   );

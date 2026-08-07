@@ -180,12 +180,7 @@ export const ALERTING_LOG_CODES = {
   EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
 
   // ──────────────── Rule templates (graceful degradation) ────────────────
-  /**
-   * A stored `engine: "v2"` rule template failed to parse as v2 rule template
-   * data while listing templates. Fleet validates templates at install time, so
-   * this signals content that has drifted from the schema. The page is still
-   * returned; the offending template is omitted.
-   */
+  /** A stored rule template failed schema validation and was omitted from the list. */
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
   /**
    * Action-policy id resolution failed while building the search filter for
