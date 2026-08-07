@@ -324,7 +324,7 @@ describe('manageRuleTool', () => {
       expect(logger.warn).toHaveBeenCalledWith({
         message: 'Failed to manage rule',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
-        labels: { space_id: ctx.spaceId },
+        labels: { space_id: ctx.spaceId, rule_id: expect.any(String) },
         error: expect.any(Error),
       });
       expect(logger.error).not.toHaveBeenCalled();
@@ -362,7 +362,7 @@ describe('manageRuleTool', () => {
       });
     });
 
-    it('omits rule_id on unexpected errors when the rule is only in memory', async () => {
+    it('includes rule_id on unexpected errors when the rule is only in memory', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
         versions: [
@@ -388,7 +388,7 @@ describe('manageRuleTool', () => {
       expect(logger.warn).toHaveBeenCalledWith({
         message: 'Failed to manage rule',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
-        labels: { space_id: ctx.spaceId },
+        labels: { space_id: ctx.spaceId, rule_id: 'rule-in-memory-id' },
         error: expect.any(Error),
       });
     });

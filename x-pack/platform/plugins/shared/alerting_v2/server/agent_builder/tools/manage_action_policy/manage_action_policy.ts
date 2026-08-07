@@ -89,6 +89,8 @@ Use operations[] to:
       if (isNew && !updatedData.id) {
         updatedData.id = uuidv4();
       }
+      // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
+      policyId = policyId ?? updatedData.id;
 
       if (updatedData.destinations?.length) {
         const findConnectorById = async (

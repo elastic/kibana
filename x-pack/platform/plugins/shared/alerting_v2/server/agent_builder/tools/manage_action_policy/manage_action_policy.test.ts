@@ -295,7 +295,7 @@ describe('manageActionPolicyTool', () => {
       expect(logger.warn).toHaveBeenCalledWith({
         message: 'Failed to manage action policy',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
-        labels: { space_id: ctx.spaceId },
+        labels: { space_id: ctx.spaceId, policy_id: expect.any(String) },
         error: expect.any(Error),
       });
       expect(logger.error).not.toHaveBeenCalled();
@@ -336,7 +336,7 @@ describe('manageActionPolicyTool', () => {
       });
     });
 
-    it('omits policy_id on unexpected errors when the policy is only in memory', async () => {
+    it('includes policy_id on unexpected errors when the policy is only in memory', async () => {
       const logger = createLogger();
       const deps = createDeps(logger as unknown as LoggerServiceContract);
       const tool = manageActionPolicyTool(deps);
@@ -365,7 +365,7 @@ describe('manageActionPolicyTool', () => {
       expect(logger.warn).toHaveBeenCalledWith({
         message: 'Failed to manage action policy',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
-        labels: { space_id: ctx.spaceId },
+        labels: { space_id: ctx.spaceId, policy_id: 'policy-in-memory-id' },
         error: expect.any(Error),
       });
     });
