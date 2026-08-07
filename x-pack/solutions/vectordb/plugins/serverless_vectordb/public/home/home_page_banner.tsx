@@ -11,10 +11,7 @@ import { cloudRocketDeploy } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { useKibana } from '../hooks/use_kibana';
 import { useLocalStorage } from '../hooks/use_local_storage';
-import {
-  BANNER_DISMISSED_KEY,
-  HOME_PAGE_BANNER_COPY,
-} from '../constants';
+import { BANNER_DISMISSED_KEY, HOME_PAGE_BANNER_COPY } from '../constants';
 import { GETTING_STARTED_DEEP_LINK_ID, VECTORDB_APP_ID } from '../../common/constants';
 
 interface HomePageBannerProps {
