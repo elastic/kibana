@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-server-mocks'
   - '@kbn/config-schema'
-  - '@kbn/logging'
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/pnd-common'
@@ -39,6 +38,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/logging-mocks'
+  - '@kbn/scout-security'
 tags:
   - plugin
   - prod
@@ -50,6 +50,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout_pnd/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

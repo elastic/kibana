@@ -64,9 +64,7 @@ export const AutonomySlider: React.FC<AutonomySliderProps> = ({
       />
       <EuiSpacer size="s" />
       <EuiText size="s">
-        <p>
-          {i18n.selectedAutonomyLevel(LEVEL_LABEL[value])}
-        </p>
+        <p>{i18n.selectedAutonomyLevel(LEVEL_LABEL[value])}</p>
       </EuiText>
     </div>
   );

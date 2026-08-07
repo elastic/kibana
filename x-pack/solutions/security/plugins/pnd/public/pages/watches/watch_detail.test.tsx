@@ -92,11 +92,9 @@ describe('WatchDetailPage', () => {
       error: null,
       refetch: mockRefetch,
     }));
-    mockMutateAsync.mockImplementation(
-      async ({ body }: { body: WatchSettings }) => ({
-        watch: createMockWatch({ ...watch, ...body }),
-      })
-    );
+    mockMutateAsync.mockImplementation(async ({ body }: { body: WatchSettings }) => ({
+      watch: createMockWatch({ ...watch, ...body }),
+    }));
   });
 
   it('preserves a non-preset interval and sends the complete settings body', async () => {
