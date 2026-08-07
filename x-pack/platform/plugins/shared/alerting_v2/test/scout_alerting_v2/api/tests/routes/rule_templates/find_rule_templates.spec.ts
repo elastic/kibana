@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   ALERTING_V2_RULES_READ_ROLE,
@@ -25,12 +26,8 @@ const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>
 /*
  * Rule templates are installed by Fleet packages, so the specs seed the saved
  * objects directly rather than going through a write API.
- *
- * The authorization tests use custom roles, which are not supported on Elastic
- * Cloud Hosted (unsupported roles silently fall back to `viewer` there), so the
- * suite is restricted to local stateful (classic).
  */
-apiTest.describe('Find rule templates API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

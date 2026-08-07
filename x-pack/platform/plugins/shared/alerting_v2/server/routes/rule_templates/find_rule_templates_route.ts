@@ -23,7 +23,6 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { findRuleTemplatesOasExamples } from './find_rule_templates_oas_example';
 
 export const toFindRuleTemplatesArgs = ({
   page,
@@ -59,7 +58,6 @@ export class FindRuleTemplatesRoute extends BaseAlertingRoute {
     summary: 'List rule templates',
     description:
       'Get a paginated list of the rule templates installed for the alerting v2 engine. Templates authored for alerting v1 are never returned.',
-    oasOperationObject: findRuleTemplatesOasExamples,
   } as const;
   static schemas = {
     request: {

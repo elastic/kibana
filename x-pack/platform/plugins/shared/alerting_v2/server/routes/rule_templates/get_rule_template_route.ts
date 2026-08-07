@@ -20,7 +20,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
-import { getRuleTemplateOasExamples } from './get_rule_template_oas_example';
 import { RULE_TEMPLATE_NOT_FOUND_DESCRIPTION } from './rule_template_response_descriptions';
 
 @injectable()
@@ -37,7 +36,6 @@ export class GetRuleTemplateRoute extends BaseAlertingRoute {
     summary: 'Get a rule template',
     description:
       'Get a single rule template installed for the alerting v2 engine. The returned `rule` payload can be submitted to the create rule API as-is.',
-    oasOperationObject: getRuleTemplateOasExamples,
   } as const;
   static schemas = {
     request: {

@@ -14,6 +14,7 @@ import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
+import { TAGS_AGG_SIZE, type TagsAggregationResult } from '../../constants';
 import { convertEveryToSchedulesPerMinute } from '../../duration';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { RuleSavedObjectsClientToken } from './tokens';
@@ -435,7 +436,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }
 
   public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
-    const result = await this.client.find<RuleSavedObjectAttributes>({
+    const result = await this.client.find<RuleSavedObjectAttributes, TagsAggregationResult>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
       ...(filter ? { filter } : {}),
@@ -443,15 +444,13 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         tags: {
           terms: {
             field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
-            size: 10000,
+            size: TAGS_AGG_SIZE,
             order: { _key: 'asc' },
           },
         },
       },
     });
 
-    const aggs = result.aggregations as { tags?: { buckets: Array<{ key: string }> } } | undefined;
-
-    return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
+    return result.aggregations?.tags.buckets.map((bucket) => bucket.key) ?? [];
   }
 }

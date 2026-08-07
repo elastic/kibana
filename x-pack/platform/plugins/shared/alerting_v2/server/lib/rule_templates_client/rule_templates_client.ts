@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { inject, injectable } from 'inversify';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { buildSoSearch } from '../build_so_search';
+import { TAGS_AGG_SIZE, type TagsAggregationResult } from '../constants';
 import { escapeRegex } from '../escape_regex';
 import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { getRuleTemplateNotFoundMessage } from '../errors/rule_template_error_messages';
@@ -38,16 +39,6 @@ import {
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
-
-/**
- * Upper bound on the number of distinct tags the aggregation returns. Matches
- * the rules tag aggregation so both filter UIs behave the same.
- */
-const TAGS_AGG_SIZE = 10000;
-
-interface TagsAggregationResult {
-  tags: { buckets: Array<{ key: string }> };
-}
 
 /**
  * Read-only access to the alerting v2 rule templates installed by Fleet

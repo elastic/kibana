@@ -79,11 +79,7 @@ export const ALERTING_ERROR_CODES = {
   RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
   // ────────────────────── Rule templates ─────────────────────
-  /**
-   * No alerting v2 rule template exists for the given identifier. Also covers a
-   * saved object that exists but does not belong to the v2 engine, or whose
-   * stored payload no longer parses as v2 rule template data.
-   */
+  /** A rule template with the given identifier does not exist. */
   RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
 
   // ────────────────────── Action policies ────────────────────

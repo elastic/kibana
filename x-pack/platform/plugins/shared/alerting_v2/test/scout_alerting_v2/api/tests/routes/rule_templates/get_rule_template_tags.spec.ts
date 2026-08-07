@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   ALERTING_V2_RULES_READ_ROLE,
@@ -17,11 +18,7 @@ import {
   testData,
 } from '../../../fixtures';
 
-/*
- * See `find_rule_templates.spec.ts` for why the suite is restricted to local
- * stateful (classic).
- */
-apiTest.describe('Rule template tags API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Rule template tags API', { tag: tags.deploymentAgnostic }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

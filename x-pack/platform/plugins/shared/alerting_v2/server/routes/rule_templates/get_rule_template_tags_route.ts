@@ -21,7 +21,6 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
-import { ruleTemplateTagsOasExamples } from './get_rule_template_tags_oas_example';
 
 @injectable()
 export class GetRuleTemplateTagsRoute extends BaseAlertingRoute {
@@ -37,7 +36,6 @@ export class GetRuleTemplateTagsRoute extends BaseAlertingRoute {
     summary: 'Get rule template tags',
     description:
       'Aggregate the unique tags across the installed alerting v2 rule templates. Powers the tag filter in the rule library.',
-    oasOperationObject: ruleTemplateTagsOasExamples,
   } as const;
   static schemas = {
     request: {

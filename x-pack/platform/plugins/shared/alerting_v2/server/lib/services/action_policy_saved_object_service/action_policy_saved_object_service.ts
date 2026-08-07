@@ -15,6 +15,7 @@ import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
+import type { TagsAggregationResult } from '../../constants';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import { escapeRegex } from '../../escape_regex';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
@@ -251,7 +252,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     const search = params?.search;
     const result = await this.client.find<
       ActionPolicySavedObjectAttributes,
-      { tags: { buckets: Array<{ key: string }> } }
+      TagsAggregationResult
     >({
       type: ACTION_POLICY_SAVED_OBJECT_TYPE,
       perPage: 0,
