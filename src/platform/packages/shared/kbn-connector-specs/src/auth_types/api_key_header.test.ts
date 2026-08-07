@@ -27,8 +27,8 @@ describe('ApiKeyHeaderAuth', () => {
       if (!getAuthHeaders) throw new Error('ApiKeyHeaderAuth.getAuthHeaders is not defined');
 
       await expect(
-        getAuthHeaders(mockAuthContext, { headerField: 'X-API-Key', apiKey: 'abc123' })
-      ).resolves.toEqual({ headerField: 'X-API-Key', apiKey: 'abc123' });
+        getAuthHeaders(mockAuthContext, { authType: 'api_key_header', 'X-API-Key': 'abc123' })
+      ).resolves.toEqual({ 'X-API-Key': 'abc123' });
     });
   });
 });

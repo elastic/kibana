@@ -20,7 +20,7 @@ export interface ConnectorResponseSettings {
  *
  * These are the same settings the axios path applies via `get_axios_instance`. The framework only
  * makes them reachable; each client type is responsible for applying them through its own
- * library's native options (see the new-client-type review guide). The two `ensure*` methods are
+ * library's native options. The two `ensure*` methods are
  * the exception: they are checks rather than values, because the `allowedHosts` matching logic
  * lives in the Actions plugin and cannot be re-implemented in this package.
  */
