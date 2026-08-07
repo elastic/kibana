@@ -186,8 +186,8 @@ test.describe(
         'true'
       );
 
-      await expect(page).toHaveURL(/flyoutName=/);
-      await expect(page).toHaveURL(/flyoutTab=overview/);
+      await expect(page).toHaveURL(/flyoutName:/);
+      await expect(page).toHaveURL(/flyoutTab:overview/);
 
       const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
 
@@ -195,7 +195,7 @@ test.describe(
 
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
       // Expect the url to have changed, and to have a certain tab value
-      await expect(page).toHaveURL(/flyoutTab=attachments/);
+      await expect(page).toHaveURL(/flyoutTab:attachments/);
     });
 
     test('navigating away from a flyout and back will restore the flyout to its previous state', async ({
@@ -211,11 +211,11 @@ test.describe(
       await pageObjects.discover.goto({ queryMode: 'esql' });
 
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await expect(page).not.toHaveURL(/flyoutTab=attachments/);
+      await expect(page).not.toHaveURL(/flyoutTab:attachments/);
 
       await page.goBack();
 
-      await expect(page).toHaveURL(/flyoutTab=attachments/);
+      await expect(page).toHaveURL(/flyoutTab:attachments/);
       await expect(flyout).toBeVisible();
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
     });
