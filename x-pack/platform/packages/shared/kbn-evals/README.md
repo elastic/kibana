@@ -122,19 +122,6 @@ ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 </details>
 
 <details>
-<summary>Phoenix executor (backward compatibility)</summary>
-
-The Phoenix-backed executor is maintained in [`@kbn/evals-phoenix-executor`](../kbn-evals-phoenix-executor/) for backward compatibility. That package is the source of truth for Phoenix integration.
-
-To switch:
-
-```bash
-KBN_EVALS_EXECUTOR=phoenix node scripts/evals run --suite <id>
-```
-
-</details>
-
-<details>
 <summary>Running directly via Playwright</summary>
 
 Only use this if the CLI doesn't cover your use case. Ensure Scout and EDOT are already running.
@@ -344,6 +331,22 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
   );
 });
 ```
+
+### Tagging datasets
+
+Datasets can declare `tags` and a `maturity` level, which the dataset list in Kibana filters on. Declaring them alongside the examples keeps them current on every run:
+
+```ts
+const dataset = {
+  name: 'my-dataset',
+  description: 'my-description',
+  tags: ['agent-builder', 'esql'],
+  maturity: 'golden', // 'raw' | 'cleaned' | 'golden'
+  examples: [{ input: { content: 'Hi' }, output: { content: 'Hey' } }],
+};
+```
+
+Tags are lowercased and deduplicated when stored, so `ESQL` and `esql` are the same tag. Each tag must start with a letter or number and may otherwise contain letters, numbers and `: . _ -`; a tag with a space or comma in it fails the upsert with a 400, so keep them slug-like (`team:obs-ai`, `esql`). Leaving either field out preserves what the dataset already has, so a suite that doesn't declare them will not wipe tags curated in the UI.
 
 ### Typing datasets
 
