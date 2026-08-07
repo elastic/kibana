@@ -25,7 +25,7 @@ import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
 jest.mock('@kbn/eval-kql', () => ({
@@ -2368,9 +2368,9 @@ describe('ActionPolicyClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Skipped deleting action policy(ies) [policy-del-stuck]'),
         expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
-          }),
+          labels: {
+            code: ALERTING_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+          },
         })
       );
     });
@@ -2415,9 +2415,7 @@ describe('ActionPolicyClient', () => {
           'Queued API key(s) for action policy(ies) [policy-del-diverged] for invalidation but failed to delete them'
         ),
         expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
-          }),
+          labels: { code: ALERTING_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED },
         })
       );
     });
@@ -2702,9 +2700,9 @@ describe('ActionPolicyClient', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Skipped deleting action policy(ies) [policy-id-del-1]'),
         expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
-          }),
+          labels: {
+            code: ALERTING_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+          },
         })
       );
     });
@@ -2739,9 +2737,7 @@ describe('ActionPolicyClient', () => {
           'Queued API key(s) for action policy(ies) [policy-id-del-1] for invalidation but failed to delete them'
         ),
         expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
-          }),
+          labels: { code: ALERTING_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED },
         })
       );
     });
