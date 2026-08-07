@@ -119,6 +119,7 @@ _capture_output() {
   fi
 }
 trap '_capture_output' EXIT
+export FORCE_COLOR=1 TERM=xterm-256color
 
 ${params.script}`;
 
