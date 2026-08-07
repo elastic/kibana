@@ -130,24 +130,33 @@ export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Ty
 export const SUPPORTED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
 export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number];
 
+export const AGENT_BUILDER_IMAGE_FILE_KIND = 'agentBuilderImages';
+
 const IMAGE_DATA_URL_REGEX = new RegExp(
   `^data:(${SUPPORTED_IMAGE_MIME_TYPES.map((m) => m.replace('/', '\\/')).join('|')});base64,`
 );
 
 export const imageAttachmentDataSchema = z.object({
-  content: z.string().max(3_000_000).regex(IMAGE_DATA_URL_REGEX),
+  file_id: z.string(),
+  name: z.string(),
+  content: z.string().max(3_000_000).regex(IMAGE_DATA_URL_REGEX).optional(),
   mime_type: z.string(),
-  filename: z.string().optional(),
 });
 
 /**
  * Data for an image attachment.
  */
 export interface ImageAttachmentData {
-  /** base64 data URL of the image, e.g. data:image/png;base64,... */
-  content: string;
+  /** Kibana files plugin file ID — used for storage and history rendering */
+  file_id: string;
+  /** Original filename */
+  name: string;
+  /**
+   * base64 data URL — present in-memory during the round so the LLM can see the image.
+   * Stripped before ES persistence; never stored in the conversation document.
+   * Backward compat: old conversations may still have this field populated.
+   */
+  content?: string;
   /** MIME type of the image */
   mime_type: string;
-  /** Optional original filename */
-  filename?: string;
 }

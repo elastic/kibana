@@ -14,6 +14,10 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import {
+  AGENT_BUILDER_IMAGE_FILE_KIND,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -113,6 +117,13 @@ export class AgentBuilderPlugin
     this.isEarsEnabled = deps.actions.isEarsEnabled;
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
+    const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+    deps.files.registerFileKind({
+      id: AGENT_BUILDER_IMAGE_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+    });
+
     registerApp({
       core,
       getServices: () => {
@@ -153,8 +164,13 @@ export class AgentBuilderPlugin
       () => ProjectRoutingAccess.READONLY
     );
 
+    const filesClient = startDependencies.files.filesClientFactory.asScoped(
+      AGENT_BUILDER_IMAGE_FILE_KIND
+    );
+
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
+
     const renderersService = new RenderersService();
 
     const eventsService = new EventsService();
@@ -222,6 +238,7 @@ export class AgentBuilderPlugin
     };
 
     const internalServices: AgentBuilderInternalService = {
+      filesClient,
       agentService,
       attachmentsService,
       renderersService,

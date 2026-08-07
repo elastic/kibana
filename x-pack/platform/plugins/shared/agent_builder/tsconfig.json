@@ -142,5 +142,7 @@
     "@kbn/telemetry",
     "@kbn/embeddable-plugin",
     "@kbn/storybook",
+    "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
   ]
 }

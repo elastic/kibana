@@ -154,7 +154,7 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
               image: {
                 format,
                 source: {
-                  bytes: new TextEncoder().encode(contentPart.source.data),
+                  bytes: Buffer.from(contentPart.source.data, 'base64'),
                 },
               },
             });

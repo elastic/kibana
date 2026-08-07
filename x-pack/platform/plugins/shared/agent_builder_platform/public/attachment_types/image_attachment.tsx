@@ -8,16 +8,31 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { HttpStart } from '@kbn/core/public';
 import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_IMAGE_FILE_KIND } from '@kbn/agent-builder-common/attachments';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 
 type ImageAttachment = UnknownAttachment & { data: ImageAttachmentData };
 
-const ImageInlineContent: React.FC<{ attachment: ImageAttachment }> = ({ attachment }) => (
+const getImageSrc = (attachment: ImageAttachment, http: HttpStart): string | undefined => {
+  if (attachment.data.content) return attachment.data.content;
+  if (attachment.data.file_id) {
+    return http.basePath.prepend(
+      `/api/files/files/${AGENT_BUILDER_IMAGE_FILE_KIND}/${attachment.data.file_id}/blob`
+    );
+  }
+  return undefined;
+};
+
+const ImageInlineContent: React.FC<{ attachment: ImageAttachment; http: HttpStart }> = ({
+  attachment,
+  http,
+}) => (
   <img
-    src={attachment.data.content}
-    alt={attachment.data.filename ?? 'image'}
+    src={getImageSrc(attachment, http)}
+    alt={attachment.data.name ?? 'image'}
     css={css`
       max-width: 100%;
       max-height: 400px;
@@ -27,13 +42,19 @@ const ImageInlineContent: React.FC<{ attachment: ImageAttachment }> = ({ attachm
   />
 );
 
-export const imageAttachmentDefinition: AttachmentUIDefinition<ImageAttachment> = {
+export const createImageAttachmentDefinition = ({
+  http,
+}: {
+  http: HttpStart;
+}): AttachmentUIDefinition<ImageAttachment> => ({
   getLabel: (attachment) =>
-    attachment.data.filename ??
+    attachment.data.name ??
     i18n.translate('xpack.agentBuilderPlatform.attachments.image.label', {
       defaultMessage: 'Image',
     }),
   getIcon: () => 'image',
-  getPillThumbnail: (attachment) => attachment.data.content,
-  renderInlineContent: (props) => <ImageInlineContent attachment={props.attachment} />,
-};
+  getPillThumbnail: (attachment) => getImageSrc(attachment, http),
+  renderInlineContent: (props) => (
+    <ImageInlineContent attachment={props.attachment} http={http} />
+  ),
+});

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { of } from 'rxjs';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AgentBuilderServicesContext } from '../context/agent_builder_services_context';
 import { ConversationContext } from '../context/conversation/conversation_context';
 import { StreamingProvider } from '../context/streaming/streaming_context';
+import { AttachmentsService } from '../../services/attachments/attachements_service';
 import type { AgentBuilderInternalService } from '../../services/types';
 import type { StartServices } from '../hooks/use_kibana';
 import type { ConversationActions } from '../context/conversation/use_conversation_actions';
@@ -76,7 +79,18 @@ const kibanaServices = {
   plugins: {},
 } as unknown as StartServices;
 
-const agentBuilderServices = {
+let fileIdCounter = 0;
+
+const storybookAttachmentsService = new AttachmentsService({
+  http: kibanaServices.http as never,
+});
+storybookAttachmentsService.addAttachmentType(AttachmentType.image, {
+  getLabel: (attachment) => (attachment.data as { name?: string }).name ?? 'Image',
+  getIcon: () => 'image' as const,
+  getPillThumbnail: (attachment) => (attachment.data as { content?: string }).content,
+});
+
+const defaultAgentBuilderServices = {
   agentService: {
     list: () =>
       Promise.resolve([
@@ -87,7 +101,11 @@ const agentBuilderServices = {
     update: () => Promise.resolve({}),
     delete: () => Promise.resolve({}),
   },
-  attachmentsService: { getAttachmentUiDefinition: () => undefined },
+  attachmentsService: storybookAttachmentsService,
+  filesClient: {
+    create: () => Promise.resolve({ file: { id: `storybook-file-${++fileIdCounter}` } }),
+    upload: () => Promise.resolve(),
+  },
   renderersService: {},
   chatService: {},
   conversationsService: {},
@@ -113,29 +131,69 @@ export interface AgentBuilderStorybookProviderProps {
   /** Provide a stable conversationId for stories that exercise telemetry/context reads. */
   conversationId?: string;
   agentId?: string;
+  /** Override any fields of ConversationContext. Merged over the defaults. */
+  conversationContext?: Partial<React.ComponentProps<typeof ConversationContext.Provider>['value']>;
+  /** Override any fields of AgentBuilderInternalService. Merged over the defaults. */
+  services?: Partial<AgentBuilderInternalService>;
 }
 
 export const AgentBuilderStorybookProvider = ({
   children,
   conversationId,
   agentId = agentBuilderDefaultAgentId,
-}: AgentBuilderStorybookProviderProps) => (
-  <QueryClientProvider client={defaultQueryClient}>
-    <KibanaContextProvider services={kibanaServices}>
-      <AgentBuilderServicesContext.Provider value={agentBuilderServices}>
-        <StreamingProvider>
-          <ConversationContext.Provider
-            value={{
-              isEmbeddedContext: false,
-              agentId,
-              conversationId,
-              conversationActions: {} as ConversationActions,
-            }}
-          >
-            {children}
-          </ConversationContext.Provider>
-        </StreamingProvider>
-      </AgentBuilderServicesContext.Provider>
-    </KibanaContextProvider>
-  </QueryClientProvider>
-);
+  conversationContext,
+  services,
+}: AgentBuilderStorybookProviderProps) => {
+  const [attachments, setAttachments] = useState<ConversationAttachment[]>([]);
+
+  const upsertAttachments = useCallback((incoming: ConversationAttachment[]) => {
+    setAttachments((prev) => {
+      const next = [...prev];
+      for (const attachment of incoming) {
+        const idx = next.findIndex((a) => a.id === attachment.id);
+        if (idx !== -1) {
+          next[idx] = attachment;
+        } else {
+          next.push(attachment);
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const resetAttachments = useCallback(() => setAttachments([]), []);
+
+  const mergedServices = services
+    ? ({ ...defaultAgentBuilderServices, ...services } as unknown as AgentBuilderInternalService)
+    : defaultAgentBuilderServices;
+
+  return (
+    <QueryClientProvider client={defaultQueryClient}>
+      <KibanaContextProvider services={kibanaServices}>
+        <AgentBuilderServicesContext.Provider value={mergedServices}>
+          <StreamingProvider>
+            <ConversationContext.Provider
+              value={{
+                isEmbeddedContext: false,
+                agentId,
+                conversationId,
+                conversationActions: {} as ConversationActions,
+                attachments,
+                upsertAttachments,
+                removeAttachment,
+                resetAttachments,
+                ...conversationContext,
+              }}
+            >
+              {children}
+            </ConversationContext.Provider>
+          </StreamingProvider>
+        </AgentBuilderServicesContext.Provider>
+      </KibanaContextProvider>
+    </QueryClientProvider>
+  );
+};

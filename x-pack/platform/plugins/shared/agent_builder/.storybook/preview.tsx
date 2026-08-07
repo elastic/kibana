@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { configure } from '@storybook/test';
 import type { Decorator } from '@storybook/react';
+
+configure({ testIdAttribute: 'data-test-subj' });
 
 const I18nDecorator: Decorator = (storyFn) => <I18nProvider>{storyFn()}</I18nProvider>;
 

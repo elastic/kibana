@@ -30,6 +30,9 @@ const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.remove
 export interface AttachmentPillProps {
   attachment: Attachment;
   onRemoveAttachment?: () => void;
+  isHighlighted?: boolean;
+  onHoverStart?: () => void;
+  onHoverEnd?: () => void;
 }
 
 const DEFAULT_ICON = 'document';
@@ -37,6 +40,9 @@ const DEFAULT_ICON = 'document';
 export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
+  isHighlighted = false,
+  onHoverStart,
+  onHoverEnd,
 }) => {
   const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
@@ -56,9 +62,19 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
           border-radius: ${euiTheme.border.radius.medium};
           overflow: hidden;
           flex-shrink: 0;
+          transition: outline-color ${euiTheme.animation.fast};
+          outline: 2px solid transparent;
+          outline-offset: 1px;
+          ${isHighlighted ? `outline-color: ${euiTheme.colors.borderStrongPrimary};` : ''}
         `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => {
+          setIsHovered(true);
+          onHoverStart?.();
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          onHoverEnd?.();
+        }}
         data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
       >
         <img
@@ -85,7 +101,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
             <EuiButtonIcon
               iconType="cross"
               size="s"
-              color="ghost"
+              style={{ color: 'white' }}
               aria-label={removeAriaLabel}
               onClick={onRemoveAttachment}
               {...getEbtProps({

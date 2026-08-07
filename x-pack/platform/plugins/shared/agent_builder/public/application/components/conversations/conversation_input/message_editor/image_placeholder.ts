@@ -44,3 +44,18 @@ export const createImagePlaceholderElement = (label: string): HTMLSpanElement =>
 
 export const isElementImagePlaceholder = (element: HTMLElement): boolean =>
   element.getAttribute(IMAGE_PLACEHOLDER_ATTRIBUTE) === 'true';
+
+export const getPlaceholderNamesFromElement = (el: HTMLElement): string[] =>
+  Array.from(el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`)).map(
+    (s) => s.title
+  );
+
+export const removePlaceholderByName = (el: HTMLElement, name: string): void => {
+  const spans = el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`);
+  for (const span of Array.from(spans)) {
+    if (span.title === name) {
+      span.remove();
+      return;
+    }
+  }
+};

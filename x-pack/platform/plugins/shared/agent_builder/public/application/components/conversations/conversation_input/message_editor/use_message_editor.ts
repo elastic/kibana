@@ -12,6 +12,10 @@ import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
+  getPlaceholderNamesFromElement,
+  removePlaceholderByName as removePlaceholderByNameFromDom,
+} from './image_placeholder';
+import {
   createCommandRange,
   createTextFragment,
   ensureCaretTargetBeforeFirstBadge,
@@ -40,6 +44,8 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  getPlaceholderNames: () => string[];
+  removePlaceholderByName: (name: string) => void;
 }
 
 /**
@@ -189,6 +195,14 @@ const useMessageEditorController = ({
         if (ref.current) {
           ref.current.innerHTML = '';
           setIsEmpty(true);
+        }
+      },
+      getPlaceholderNames: () =>
+        ref.current ? getPlaceholderNamesFromElement(ref.current) : [],
+      removePlaceholderByName: (name: string) => {
+        if (ref.current) {
+          removePlaceholderByNameFromDom(ref.current, name);
+          syncIsEmpty();
         }
       },
       isEmpty,

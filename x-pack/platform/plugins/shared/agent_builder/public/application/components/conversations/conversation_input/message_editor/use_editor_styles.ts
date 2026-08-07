@@ -24,6 +24,10 @@ export const useImagePlaceholderStyles = () => {
       user-select: all;
       vertical-align: middle;
       line-height: inherit;
+      transition: box-shadow ${euiTheme.animation.fast};
+    }
+    [${IMAGE_PLACEHOLDER_ATTRIBUTE}].image-placeholder-highlighted {
+      box-shadow: 0 0 0 2px ${euiTheme.colors.borderStrongPrimary};
     }
   `;
 };

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  euiTextTruncate,
-  keys,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { euiTextTruncate, keys, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 import { CommandMenuContainer } from './command_menu';
@@ -30,7 +25,7 @@ import {
   getSelectionRange,
   insertNodeAtCursor,
 } from './utils';
-import { createImagePlaceholderElement } from './image_placeholder';
+import { createImagePlaceholderElement, IMAGE_PLACEHOLDER_ATTRIBUTE } from './image_placeholder';
 import { useEditorFontStyles, useImagePlaceholderStyles } from './use_editor_styles';
 
 const EDITOR_MAX_HEIGHT = 240;
@@ -120,8 +115,14 @@ interface MessageEditorProps {
   placeholder?: string;
   ariaLabel?: string;
   'data-test-subj'?: string;
-  onPasteFile?: (file: File) => void;
+  /** Called with the pasted file. Returns the name used for the placeholder (if any). */
+  onPasteFile?: (file: File) => string | undefined;
   insertImagePlaceholderOnPaste?: boolean;
+  onAfterInput?: () => void;
+  /** Called when the pointer enters/leaves an image placeholder span in the editor. */
+  onHoveredPlaceholderChange?: (name: string | null) => void;
+  /** Name of the placeholder to highlight (driven by thumbnail hover). */
+  highlightedPlaceholderName?: string | null;
 }
 
 export const MessageEditor: React.FC<MessageEditorProps> = ({
@@ -133,10 +134,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   'data-test-subj': dataTestSubj,
   onPasteFile,
   insertImagePlaceholderOnPaste = false,
+  onAfterInput,
+  onHoveredPlaceholderChange,
+  highlightedPlaceholderName,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
   const commandMenuRef = useRef<CommandMenuHandle>(null);
-  const pastedImageCountRef = useRef(0);
   const { ref, onChange, onFocus, commandMatch } = messageEditor;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
@@ -180,6 +183,13 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     imagePlaceholderStyles,
   ];
 
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((el) => {
+      el.classList.toggle('image-placeholder-highlighted', el.title === highlightedPlaceholderName);
+    });
+  }, [highlightedPlaceholderName, ref]);
+
   const handleCompositionStart = () => setIsComposing(true);
   const handleCompositionEnd = () => {
     setIsComposing(false);
@@ -207,7 +217,18 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         data-placeholder={placeholder}
         data-test-subj={dataTestSubj}
         css={editorStyles}
-        onInput={onChange}
+        onInput={() => {
+          onChange();
+          onAfterInput?.();
+        }}
+        onMouseOver={(event) => {
+          const target = event.target as HTMLElement;
+          const placeholderEl = target.closest?.(
+            `[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`
+          ) as HTMLElement | null;
+          onHoveredPlaceholderChange?.(placeholderEl?.title ?? null);
+        }}
+        onMouseLeave={() => onHoveredPlaceholderChange?.(null)}
         onFocus={onFocus}
         onBlur={messageEditor.dismissActionMenu}
         onCompositionStart={handleCompositionStart}
@@ -221,16 +242,11 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
               event.preventDefault();
               const file = imageItem.getAsFile();
               if (file) {
-                if (insertImagePlaceholderOnPaste) {
-                  let label = file.name;
-                  if (!label) {
-                    pastedImageCountRef.current += 1;
-                    label = `Image #${pastedImageCountRef.current}`;
-                  }
+                const label = onPasteFile(file);
+                if (insertImagePlaceholderOnPaste && label) {
                   insertNodeAtCursor(createImagePlaceholderElement(label));
                   onChange();
                 }
-                onPasteFile(file);
               }
               return;
             }

@@ -28,7 +28,7 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
     }
     const element = node as HTMLElement;
     if (isElementImagePlaceholder(element)) {
-      // placeholder is visual-only — not included in message text
+      result += element.getAttribute('aria-label') ?? '';
     } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {

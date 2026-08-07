@@ -129,19 +129,22 @@ export const convertPreviousRounds = async ({
     );
   }
 
-  const imageParts: MessageContentImageUrl[] = includeImages
-    ? conversation.attachmentStateManager
-        .getActive()
-        .filter((a) => a.type === AttachmentType.image)
-        .map((a) => {
-          const version = a.versions.find((v) => v.version === a.current_version);
-          const data = version?.data as ImageAttachmentData | undefined;
-          return data
-            ? ({ type: 'image_url', image_url: { url: data.content } } as MessageContentImageUrl)
-            : null;
-        })
-        .filter((part): part is MessageContentImageUrl => part !== null)
-    : [];
+  const imageParts: MessageContentImageUrl[] =
+    includeImages && input.attachment_refs
+      ? input.attachment_refs
+          .filter((ref) => ref.type === AttachmentType.image)
+          .map((ref) => {
+            const attachment = conversation.attachmentStateManager.getAttachmentRecord(
+              ref.attachment_id
+            );
+            const version = attachment?.versions.find((v) => v.version === ref.version);
+            const data = version?.data as ImageAttachmentData | undefined;
+            return data?.content
+              ? ({ type: 'image_url', image_url: { url: data.content } } as MessageContentImageUrl)
+              : null;
+          })
+          .filter((part): part is MessageContentImageUrl => part !== null)
+      : [];
 
   messages.push(
     formatRoundInput({

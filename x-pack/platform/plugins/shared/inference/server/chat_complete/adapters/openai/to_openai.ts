@@ -161,11 +161,12 @@ export function messagesToOpenAI({
               ? message.content
               : message.content.map((contentPart) => {
                   if (contentPart.type === 'image') {
+                    const url = contentPart.source.mimeType
+                      ? `data:${contentPart.source.mimeType};base64,${contentPart.source.data}`
+                      : contentPart.source.data;
                     return {
                       type: 'image_url',
-                      image_url: {
-                        url: contentPart.source.data,
-                      },
+                      image_url: { url },
                     } satisfies ChatCompletionContentPartImage;
                   }
                   return {

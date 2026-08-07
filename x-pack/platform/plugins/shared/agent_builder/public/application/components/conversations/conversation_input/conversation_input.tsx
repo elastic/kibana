@@ -9,9 +9,10 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ConversationInputShell } from '@kbn/agent-builder-browser';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -27,8 +28,9 @@ import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from 
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { AttachmentPillsRow } from './attachment_pills_row';
-import { processImageFile } from './input_actions/attach_image_button';
+import { processImageFile, getUniqueName } from './input_actions/attach_image_button';
 
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
@@ -96,6 +98,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
+  const { filesClient } = useAgentBuilderServices();
+  const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
+  const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
   const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
@@ -110,22 +115,82 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const {
     attachments,
     upsertAttachments,
+    removeAttachment,
     initialMessage,
     autoSendInitialMessage,
     resetInitialMessage,
   } = useConversationContext();
+  const attachmentsRef = useRef(attachments);
   const submitMessage = useSubmitMessage();
 
-  const hasImageAttached = Boolean(
-    attachments?.some((a) => !('items' in a) && a.type === AttachmentType.image)
+  // Keep ref in sync so callbacks below can read latest attachments without stale closure
+  useEffect(() => {
+    attachmentsRef.current = attachments;
+  });
+
+  // Text → pill: when a placeholder is deleted from the editor, remove the matching attachment
+  const handleAfterInput = useCallback(() => {
+    const current = attachmentsRef.current;
+    if (!current || !removeAttachment) return;
+    const placeholderNames = new Set(messageEditorController.getPlaceholderNames());
+    // Walk in reverse so index removal doesn't shift remaining indices
+    for (let i = current.length - 1; i >= 0; i--) {
+      const a = current[i];
+      if ('items' in a || a.type !== AttachmentType.image) continue;
+      const name = (a.data as { name?: string }).name;
+      if (name && !placeholderNames.has(name)) {
+        removeAttachment(i);
+      }
+    }
+  }, [removeAttachment, messageEditorController]);
+
+  // Pill → text: when a thumbnail pill is removed, also remove its editor placeholder
+  const handleRemoveAttachment = useCallback(
+    (attachment: ConversationAttachment) => {
+      if (!removeAttachment) return;
+      const current = attachmentsRef.current ?? [];
+      const index = current.indexOf(attachment);
+      if (index === -1) return;
+      if (!('items' in attachment) && attachment.type === AttachmentType.image) {
+        const name = (attachment.data as { name?: string }).name;
+        if (name) messageEditorController.removePlaceholderByName(name);
+      }
+      removeAttachment(index);
+    },
+    [removeAttachment, messageEditorController]
   );
 
+  // Returns the unique name synchronously so the editor can label the placeholder.
+  // The upload runs async in the background.
   const handlePasteFile = useCallback(
-    async (file: File) => {
-      if (!upsertAttachments) return;
-      await processImageFile({ file, upsertAttachments, addErrorToast, hasImageAttached });
+    (file: File): string | undefined => {
+      if (!upsertAttachments) return undefined;
+      const existingNames = new Set(
+        (attachmentsRef.current ?? []).flatMap((a) =>
+          'items' in a || a.type !== AttachmentType.image
+            ? []
+            : [(a.data as { name?: string }).name ?? '']
+        )
+      );
+      const name = getUniqueName(file.name || 'image.png', existingNames);
+      setUploadingNames((prev) => new Set([...prev, name]));
+      processImageFile({
+        file,
+        name,
+        filesClient,
+        existingAttachments: [],
+        upsertAttachments,
+        addErrorToast,
+      }).finally(() =>
+        setUploadingNames((prev) => {
+          const next = new Set(prev);
+          next.delete(name);
+          return next;
+        })
+      );
+      return name;
     },
-    [upsertAttachments, addErrorToast, hasImageAttached]
+    [upsertAttachments, filesClient, addErrorToast]
   );
 
   const validateAgentId = useValidateAgentId();
@@ -134,7 +199,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
   const isSubmitDisabled =
-    messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty ||
+    isResponseLoading ||
+    !isAgentIdValid ||
+    isAwaitingPrompt ||
+    uploadingNames.size > 0;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -221,35 +290,45 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
-        {visibleAttachments.length > 0 && (
-          <EuiFlexItem grow={false}>
-            <AttachmentPillsRow attachments={visibleAttachments} removable />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem css={editorContainerStyles}>
-          <MessageEditor
-            messageEditor={messageEditor}
-            onSubmit={handleSubmit}
-            disabled={isInputDisabled}
-            placeholder={placeholder}
-            ariaLabel={messageEditorAriaLabel}
-            data-test-subj="agentBuilderConversationInputEditor"
-            onPasteFile={upsertAttachments ? handlePasteFile : undefined}
-            insertImagePlaceholderOnPaste
+      {(visibleAttachments.length > 0 || uploadingNames.size > 0) && (
+        <EuiFlexItem grow={false}>
+          <AttachmentPillsRow
+            attachments={visibleAttachments}
+            uploadingNames={uploadingNames}
+            removable
+            onRemoveAttachment={handleRemoveAttachment}
+            hoveredImageName={hoveredImageName}
+            onHoverImageName={setHoveredImageName}
           />
         </EuiFlexItem>
-        {!isAgentDeleted && (
-          <InputActions
-            onSubmit={handleSubmit}
-            isSubmitDisabled={isSubmitDisabled}
-            resetToPendingMessage={() => {
-              if (pendingMessage) {
-                messageEditorController.setContent(pendingMessage);
-              }
-            }}
-            agentId={agentId}
-          />
-        )}
+      )}
+      <EuiFlexItem css={editorContainerStyles}>
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={handleSubmit}
+          disabled={isInputDisabled}
+          placeholder={placeholder}
+          ariaLabel={messageEditorAriaLabel}
+          data-test-subj="agentBuilderConversationInputEditor"
+          onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onAfterInput={handleAfterInput}
+          onHoveredPlaceholderChange={setHoveredImageName}
+          highlightedPlaceholderName={hoveredImageName}
+          insertImagePlaceholderOnPaste
+        />
+      </EuiFlexItem>
+      {!isAgentDeleted && (
+        <InputActions
+          onSubmit={handleSubmit}
+          isSubmitDisabled={isSubmitDisabled}
+          resetToPendingMessage={() => {
+            if (pendingMessage) {
+              messageEditorController.setContent(pendingMessage);
+            }
+          }}
+          agentId={agentId}
+        />
+      )}
     </InputContainer>
   );
 };
