@@ -13,10 +13,12 @@ import type {
   QueryOccurrencesResponse,
   SignalEntry,
   SignificantEvent,
+  SignificantEventResponse,
 } from '@kbn/significant-events-schema';
 
-export const checkoutEvent: SignificantEvent = {
+export const checkoutEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
+  created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
   event_uuid: 'checkout-latency-v1',
   status: 'open',
@@ -127,7 +129,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   },
 };
 
-export const checkoutEventWithSignals: SignificantEvent = {
+export const checkoutEventWithSignals: SignificantEventResponse = {
   ...checkoutEvent,
   signals: [checkoutDetectionSignal],
 };
