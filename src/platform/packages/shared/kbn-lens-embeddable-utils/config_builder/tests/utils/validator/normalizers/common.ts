@@ -641,11 +641,23 @@ const isEmptyAsNullSupportedColumn = (
  *
  * - `count`/`sum`/`unique_count` (`hideZeroOption`): real render param; transform round-trips as
  *   `Boolean(...)`, so a missing value becomes an explicit `false`.
- * - Every other operation: dead residue (only reaches the aggregation for `hideZeroOption` ops).
+ * - Auto-generated `cumulative_sum` backing `sum`/`count`: the transform regenerates them with
+ *   `empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE` (`false`). Editor-created refs often have
+ *   `true` (editor default). That drift is accepted: `emptyAsNull` only affects post-tabify
+ *   `getValue` (`0 → null`), and `cumulative_sum` treats `0` and `null` the same for the running
+ *   total, so the visible series is unchanged.
+ * - Every other operation: dead residue — strip open-ended (a closed denylist previously missed
+ *   `static_value`).
  */
-const normalizeEmptyAsNull = (col: GenericIndexPatternColumn): void => {
+const normalizeEmptyAsNull = (
+  col: GenericIndexPatternColumn,
+  { isCounterRateOrCumSumRefCol = false }: { isCounterRateOrCumSumRefCol?: boolean } = {}
+): void => {
   if (isEmptyAsNullSupportedColumn(col)) {
-    col.params = { ...col.params, emptyAsNull: Boolean(col.params?.emptyAsNull) };
+    col.params = {
+      ...col.params,
+      emptyAsNull: isCounterRateOrCumSumRefCol ? false : Boolean(col.params?.emptyAsNull),
+    };
     return;
   }
 
@@ -1382,7 +1394,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               }
 
               // Normalize `emptyAsNull` param for metric operations
-              normalizeEmptyAsNull(col);
+              normalizeEmptyAsNull(col, { isCounterRateOrCumSumRefCol });
 
               // Drop an empty `params: {}`
               normalizeEmptyFormatOnlyParams(col);
