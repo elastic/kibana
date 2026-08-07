@@ -30,8 +30,10 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  PackageInfo,
   RegistryElasticsearch,
 } from '../../../../types';
+import { isOtelDataStream } from '../../packages/namespace_template_utils';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import {
@@ -305,9 +307,12 @@ export function getNamespaceFromTemplateId(id: string): string | undefined {
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
+ * @param packageInfo package context used to detect OTel input data streams, which carry a
+ * `.otel` dataset suffix. Callers that omit it get unsuffixed patterns.
  */
 export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
+  dataStreams: RegistryDataStream[] | undefined,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>
 ): Record<string, string> {
   if (!dataStreams) {
     return {};
@@ -315,7 +320,10 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
+    patterns[dataStream.path] = generateTemplateIndexPattern(
+      dataStream,
+      packageInfo ? isOtelDataStream(dataStream, packageInfo) : undefined
+    );
   }
   return patterns;
 }

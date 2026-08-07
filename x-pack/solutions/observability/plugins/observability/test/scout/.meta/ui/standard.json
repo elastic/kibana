@@ -1,5 +1,5 @@
 {
-  "sha1": "9fbfdd7de96bd14f59cef77dd636f86c3f6ac427",
+  "sha1": "0af5251b23f7a3661dd79694cac0e78c4061c89b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -600,7 +600,7 @@
       }
     },
     {
-      "id": "d3ffd39f648f151-77c285778f177cc",
+      "id": "d3ffd39f648f151-47502b229835fc7",
       "title": "Observability cases - no privileges returns Application not found when the Observability app is inaccessible",
       "expectedStatus": "passed",
       "tags": [

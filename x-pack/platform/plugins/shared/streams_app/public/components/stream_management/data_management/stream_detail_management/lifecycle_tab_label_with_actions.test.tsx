@@ -138,6 +138,32 @@ describe('LifecycleTabLabelWithActions', () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  it('calls importAction.onClick when enabled', async () => {
+    const onClick = jest.fn();
+    render(
+      <LifecycleTabLabelWithActions showActions onCopy={jest.fn()} importAction={{ onClick }} />
+    );
+
+    await openActionsMenu();
+    await clickMenuItem('streamsLifecycleTabImportFromStream');
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the import action item when importAction is disabled', async () => {
+    render(
+      <LifecycleTabLabelWithActions
+        showActions
+        onCopy={jest.fn()}
+        importAction={{ disabled: true, onClick: jest.fn() }}
+      />
+    );
+
+    await openActionsMenu();
+
+    expect(screen.getByTestId('streamsLifecycleTabImportFromStream')).toBeDisabled();
+  });
 });
 
 describe('LifecycleTabLabel', () => {
@@ -222,6 +248,66 @@ describe('LifecycleTabLabel', () => {
     await clickMenuItem('streamsLifecycleTabCopyApiRequest');
 
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
+  });
+
+  it('opens the import lifecycle flyout from the import action', async () => {
+    const onImportFromStream = jest.fn();
+
+    render(
+      <LifecycleTabLabel
+        definition={createClassicDefinition()}
+        showActions
+        notifications={createNotifications()}
+        share={createShare()}
+        onImportFromStream={onImportFromStream}
+      />
+    );
+
+    await openActionsMenu();
+    await clickMenuItem('streamsLifecycleTabImportFromStream');
+
+    expect(onImportFromStream).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not include the import lifecycle action without failure store management privilege', async () => {
+    render(
+      <LifecycleTabLabel
+        definition={createMockClassicStreamDefinition({
+          privileges: {
+            ...createMockClassicStreamDefinition().privileges,
+            lifecycle: true,
+            manage_failure_store: false,
+          },
+        })}
+        showActions
+        notifications={createNotifications()}
+        share={createShare()}
+        onImportFromStream={jest.fn()}
+      />
+    );
+
+    await openActionsMenu();
+
+    expect(screen.queryByTestId('streamsLifecycleTabImportFromStream')).not.toBeInTheDocument();
+  });
+
+  it('disables the import lifecycle action while another lifecycle flyout is open', async () => {
+    const onImportFromStream = jest.fn();
+
+    render(
+      <LifecycleTabLabel
+        definition={createClassicDefinition()}
+        showActions
+        notifications={createNotifications()}
+        share={createShare()}
+        onImportFromStream={onImportFromStream}
+        isImportFromStreamDisabled
+      />
+    );
+
+    await openActionsMenu();
+
+    expect(screen.getByTestId('streamsLifecycleTabImportFromStream')).toBeDisabled();
   });
 
   it('opens the index template edit page in a new tab for classic streams', async () => {

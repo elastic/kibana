@@ -13,7 +13,6 @@ import { filterWithLabelSchema } from './filter';
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-  LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
   LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
@@ -230,13 +229,15 @@ export const bucketTermsOperationSchema = schema.object(
      */
     includes: schema.maybe(
       schema.object({
-        values: schema.arrayOf(
-          schema.string({
-            meta: {
-              description: 'Values to include.',
-            },
-          }),
-          { maxSize: 100 }
+        // A terms field is either string- or number-typed, so values are homogeneous.
+        values: schema.oneOf(
+          [
+            schema.arrayOf(schema.string(), { maxSize: 100 }),
+            schema.arrayOf(schema.number(), { maxSize: 100 }),
+          ],
+          {
+            meta: { description: 'Values to include.' },
+          }
         ),
         as_regex: schema.maybe(
           schema.boolean({
@@ -252,13 +253,14 @@ export const bucketTermsOperationSchema = schema.object(
      */
     excludes: schema.maybe(
       schema.object({
-        values: schema.arrayOf(
-          schema.string({
-            meta: {
-              description: 'Values to exclude.',
-            },
-          }),
-          { maxSize: 100 }
+        values: schema.oneOf(
+          [
+            schema.arrayOf(schema.string(), { maxSize: 100 }),
+            schema.arrayOf(schema.number(), { maxSize: 100 }),
+          ],
+          {
+            meta: { description: 'Values to exclude.' },
+          }
         ),
         as_regex: schema.maybe(
           schema.boolean({
@@ -412,16 +414,22 @@ export const bucketHistogramOperationSchema = schema.object(
       },
     }),
     /**
-     * Granularity of the histogram
+     * Granularity of the histogram: the target number of buckets (bars). This maps directly to the
+     * Lens `maxBars` value and controls how finely the field is divided into evenly spaced,
+     * "nice"-valued intervals. It is a target, not a guarantee: the effective ceiling is the
+     * `histogram:maxBars` advanced setting (default 1000), which is deployment-configurable and can
+     * be raised or lowered by an admin. Because that ceiling is only known at render time, no upper
+     * bound is enforced here — values above the configured ceiling are clamped when the chart runs.
+     * Use `'auto'` (the default) to let Lens pick the granularity.
      */
     granularity: schema.oneOf(
       [
         schema.number({
-          meta: {
-            description: 'Granularity of the histogram.',
-          },
           min: LENS_HISTOGRAM_GRANULARITY_MIN,
-          max: LENS_HISTOGRAM_GRANULARITY_MAX,
+          meta: {
+            description:
+              'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
+          },
         }),
         schema.literal('auto'),
       ],

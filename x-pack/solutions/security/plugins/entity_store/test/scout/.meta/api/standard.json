@@ -1,5 +1,5 @@
 {
-  "sha1": "7d04b2b246ea89a4e19819911b59edf9d611f913",
+  "sha1": "07032a804bf22dd57aa215646b7fe9ac499474e7",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1489,7 +1489,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 108,
+        "line": 113,
         "column": 10
       }
     },
@@ -1505,7 +1505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 134,
+        "line": 139,
         "column": 10
       }
     },
@@ -1521,7 +1521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 164,
+        "line": 169,
         "column": 10
       }
     },
@@ -1537,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 186,
+        "line": 191,
         "column": 10
       }
     },
@@ -1553,7 +1553,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 212,
+        "line": 217,
         "column": 10
       }
     },
@@ -1569,7 +1569,55 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 242,
+        "line": 247,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-e8f814791067649",
+      "title": "Entity Store - privilege checks maintainers stop - Should fail when user lacks management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 271,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-75def91c035c039",
+      "title": "Entity Store - privilege checks maintainers start - Should fail when user lacks management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 293,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-fe5666139dbf577",
+      "title": "Entity Store - privilege checks maintainers run - Should fail when user lacks management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 315,
         "column": 10
       }
     },
