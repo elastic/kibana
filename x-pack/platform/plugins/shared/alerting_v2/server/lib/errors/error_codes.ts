@@ -338,6 +338,16 @@ export const ALERTING_LOG_CODES = {
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
 
+  // ─────────────────────────── Agent Builder ─────────────────────────
+  /** `refresh_episode` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
+  /** `get_rule` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
+  /** Episode attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
+  /** Episode attachment isStale check failed; returns false. */
+  AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
+
   // ─────────────────────────────── Tasks ─────────────────────────────
   /**
    * A telemetry task run failed. Usage data for the interval is lost; the
