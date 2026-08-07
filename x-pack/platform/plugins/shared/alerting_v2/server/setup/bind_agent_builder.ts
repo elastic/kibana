@@ -146,8 +146,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
       getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
-      getAvailableConnectors: (sid, req) =>
-        workflowsManagementApi.getAvailableConnectors(sid, req),
+      getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
     });
   });
 }
