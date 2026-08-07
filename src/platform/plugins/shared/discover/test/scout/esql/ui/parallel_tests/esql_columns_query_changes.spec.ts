@@ -46,15 +46,15 @@ spaceTest.describe(
       await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 500');
       expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
-      await spaceTest.step('adding a field replaces the Summary column', async () => {
+      await spaceTest.step('adding a field keeps the Summary column', async () => {
         await unifiedFieldList.clickFieldListItemAdd('bytes');
         await discover.waitUntilSearchingHasFinished();
-        expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'bytes']);
+        expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'bytes', 'Summary']);
       });
 
       await spaceTest.step('same index pattern keeps the selected columns', async () => {
         await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 500 | where bytes > 0');
-        expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'bytes']);
+        expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'bytes', 'Summary']);
       });
 
       await spaceTest.step('different index pattern resets the columns', async () => {

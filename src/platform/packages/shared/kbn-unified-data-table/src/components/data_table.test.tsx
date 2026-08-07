@@ -812,8 +812,10 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: expect.anything(),
-          showColumnSelector: false,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
           showDisplaySelector: {
             allowDensity: false,
             allowResetButton: false,
@@ -838,8 +840,10 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: expect.anything(),
-          showColumnSelector: false,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
           showDisplaySelector: {
             allowDensity: false,
             allowResetButton: false,
@@ -864,8 +868,10 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: expect.anything(),
-          showColumnSelector: false,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
           showDisplaySelector: {
             allowDensity: true,
             allowResetButton: false,
@@ -891,8 +897,10 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: expect.anything(),
-          showColumnSelector: false,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
           showDisplaySelector: {
             allowDensity: false,
             allowResetButton: false,
@@ -908,26 +916,18 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'should still show Summary toggle in display settings if no other handlers provided',
+      'should keep Columns selector available in summary-only mode',
       async () => {
         await renderComponent({
           ...getProps(),
-          onUpdateRowHeight: undefined,
-          onUpdateSampleSize: undefined,
+          columns: [],
         });
 
         expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-          additionalControls: expect.anything(),
-          showColumnSelector: false,
-          showDisplaySelector: {
-            allowDensity: false,
-            allowResetButton: false,
-            allowRowHeight: false,
-            customRender: expect.any(Function),
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
           },
-          showFullScreenSelector: true,
-          showKeyboardShortcuts: true,
-          showSortSelector: true,
         });
       },
       EXTENDED_JEST_TIMEOUT
@@ -1236,9 +1236,6 @@ describe('UnifiedDataTable', () => {
 
         expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
           expect.objectContaining({
-            gridProps: expect.objectContaining({
-              additionalControls: expect.anything(),
-            }),
             toolbarProps: expect.objectContaining({
               hasRoomForGridControls: true,
             }),
@@ -1248,10 +1245,11 @@ describe('UnifiedDataTable', () => {
         // the default eui controls should be available for custom rendering
         expect(toolbarParams?.columnSortingControl).toBeTruthy();
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-        // Summary column toggle is always present in additionalControls
-        expect(gridParams?.additionalControls).toBeTruthy();
+        // Summary toggle lives in the Columns popover, not additionalControls
+        expect(toolbarParams?.columnControl).toBeTruthy();
+        expect(gridParams?.additionalControls).toBeFalsy();
 
-        // selection controls remain available after selecting a document
+        // selection controls become available after selecting a document
         await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(esHitsMock[0])}`));
 
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
@@ -1864,14 +1862,17 @@ describe('UnifiedDataTable', () => {
 
   describe('Summary column toggle', () => {
     it(
-      'should show the toolbar toggle as checked and disabled in summary-only mode',
+      'should show the Columns popover toggle as checked and disabled in summary-only mode',
       async () => {
-        await renderComponent({
-          ...getProps(),
+        await renderDataTable({
           columns: [],
+          showTimeCol: false,
         });
 
-        const toggle = screen.getByTestId('additionalControlsShowSummaryColumn');
+        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
+        await userEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+
+        const toggle = screen.getByTestId('columnSelectorShowSummaryColumn');
         expect(toggle).toBeChecked();
         expect(toggle).toBeDisabled();
       },
@@ -1879,21 +1880,23 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'should append and remove the Summary column via the toolbar toggle',
+      'should append and remove the Summary column via the Columns popover toggle',
       async () => {
         await renderDataTable({
           columns: ['message'],
           showTimeCol: false,
         });
 
-        const toggle = screen.getByTestId('additionalControlsShowSummaryColumn');
+        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
+        await userEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+
+        const toggle = screen.getByTestId('columnSelectorShowSummaryColumn');
         expect(toggle).not.toBeChecked();
 
         await userEvent.click(toggle);
 
         expect(toggle).toBeChecked();
         expect(screen.getByTestId('dataGridHeaderCell-_source')).toBeVisible();
-        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
 
         await userEvent.click(toggle);
 

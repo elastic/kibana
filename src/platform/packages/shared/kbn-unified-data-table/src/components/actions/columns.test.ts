@@ -39,9 +39,12 @@ describe('Test column actions', () => {
     const actions = getStateColumnAction({}, setAppState);
 
     actions.onAddColumn('_score');
-    expect(setAppState).toHaveBeenCalledWith({ columns: ['_score'], sort: [['_score', 'desc']] });
+    expect(setAppState).toHaveBeenCalledWith({
+      columns: ['_score', '_source'],
+      sort: [['_score', 'desc']],
+    });
     actions.onAddColumn('test');
-    expect(setAppState).toHaveBeenCalledWith({ columns: ['test'] });
+    expect(setAppState).toHaveBeenCalledWith({ columns: ['test', '_source'] });
   });
 
   test('getStateColumnActions with columns and sort in state', () => {
@@ -173,6 +176,19 @@ describe('Test column actions', () => {
   });
 
   describe('Summary column coexistence', () => {
+    it('keeps Summary when adding the first field from summary-only', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: [] }, setAppState);
+
+      actions.onAddColumn('bytes');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['bytes', '_source'],
+        })
+      );
+    });
+
     it('keeps _source when adding another column', () => {
       const setAppState = jest.fn();
       const actions = getStateColumnAction(

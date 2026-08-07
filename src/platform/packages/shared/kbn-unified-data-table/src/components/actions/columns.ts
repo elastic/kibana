@@ -112,6 +112,11 @@ function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
     return columns;
   }
+  // Empty columns means summary-only display (via getDisplayedColumns). Keep Summary
+  // when the first field is added so it is not silently removed.
+  if (columns.length === 0) {
+    return [columnName, SOURCE_COLUMN];
+  }
   return buildColumns([...columns, columnName]);
 }
 

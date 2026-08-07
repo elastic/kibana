@@ -113,6 +113,7 @@ import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import { renderCustomToolbar as defaultRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
@@ -122,7 +123,7 @@ import {
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
 import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
-import { SummaryColumnToggle } from './summary_column_toggle';
+import { ColumnControlWithSummary } from './column_control_with_summary';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -1183,16 +1184,12 @@ const InternalUnifiedDataTable = React.forwardRef<
     ]);
 
     const additionalControls = useMemo(() => {
-      const leftControls = (
+      if (!selectedDocsCount && !externalAdditionalControls) {
+        return undefined;
+      }
+
+      return (
         <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-          <EuiFlexItem grow={false}>
-            <SummaryColumnToggle
-              dataTestSubj="additionalControlsShowSummaryColumn"
-              checked={hasSummaryColumns}
-              disabled={isSummaryOnlyColumns}
-              onChange={onChangeShowSummaryColumn}
-            />
-          </EuiFlexItem>
           {Boolean(selectedDocsCount) ? (
             <EuiFlexItem grow={false}>
               <DataTableDocumentToolbarBtn
@@ -1218,22 +1215,9 @@ const InternalUnifiedDataTable = React.forwardRef<
           ) : null}
         </EuiFlexGroup>
       );
-
-      if (!renderCustomToolbar && inTableSearchControl) {
-        return {
-          left: leftControls,
-          right: inTableSearchControl,
-        };
-      }
-
-      return leftControls;
     }, [
-      hasSummaryColumns,
-      isSummaryOnlyColumns,
-      onChangeShowSummaryColumn,
       externalAdditionalControls,
       selectedDocsCount,
-      inTableSearchControl,
       isPlainRecord,
       isFilterActive,
       displayedRows,
@@ -1246,28 +1230,44 @@ const InternalUnifiedDataTable = React.forwardRef<
       unifiedDataTableContextValue.pageSize,
       toastNotifications,
       visibleColumns,
-      renderCustomToolbar,
       customBulkActions,
       hideDefaultBulkActions,
     ]);
 
-    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
-      () =>
-        renderCustomToolbar
-          ? (toolbarProps) =>
-              renderCustomToolbar({
-                toolbarProps,
-                gridProps: {
-                  additionalControls:
-                    additionalControls && 'left' in additionalControls
-                      ? additionalControls.left
-                      : additionalControls,
-                  inTableSearchControl,
-                },
-              })
-          : undefined,
-      [renderCustomToolbar, additionalControls, inTableSearchControl]
-    );
+    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] = useMemo(() => {
+      const baseRender = renderCustomToolbar ?? defaultRenderCustomToolbar;
+
+      return (toolbarProps) => {
+        const columnControl = toolbarProps.columnControl ? (
+          <ColumnControlWithSummary
+            columnControl={toolbarProps.columnControl}
+            showSummaryColumn={hasSummaryColumns}
+            isSummaryColumnToggleDisabled={isSummaryOnlyColumns}
+            onChangeShowSummaryColumn={onChangeShowSummaryColumn}
+          />
+        ) : (
+          toolbarProps.columnControl
+        );
+
+        return baseRender({
+          toolbarProps: {
+            ...toolbarProps,
+            columnControl,
+          },
+          gridProps: {
+            additionalControls,
+            inTableSearchControl,
+          },
+        });
+      };
+    }, [
+      renderCustomToolbar,
+      additionalControls,
+      inTableSearchControl,
+      hasSummaryColumns,
+      isSummaryOnlyColumns,
+      onChangeShowSummaryColumn,
+    ]);
 
     const showDisplaySelector = useMemo((): EuiDataGridToolBarVisibilityDisplaySelectorOptions => {
       return {
@@ -1277,9 +1277,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         customRender: ({ densityControl }) => (
           <>
             <UnifiedDataTableAdditionalDisplaySettings
-              isSummaryColumnToggleDisabled={isSummaryOnlyColumns}
-              showSummaryColumn={hasSummaryColumns}
-              onChangeShowSummaryColumn={onChangeShowSummaryColumn}
               rowHeight={rowHeight}
               onChangeRowHeight={onChangeRowHeight}
               onChangeRowHeightLines={onChangeRowHeightLines}
@@ -1298,9 +1295,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [
       headerRowHeight,
-      isSummaryOnlyColumns,
-      hasSummaryColumns,
-      onChangeShowSummaryColumn,
       maxAllowedSampleSize,
       onChangeHeaderRowHeight,
       onChangeHeaderRowHeightLines,
@@ -1315,27 +1309,15 @@ const InternalUnifiedDataTable = React.forwardRef<
     ]);
 
     const toolbarVisibility = useMemo(
-      () =>
-        isSummaryOnlyColumns
-          ? {
-              ...toolbarVisibilityDefaults,
-              showColumnSelector: false,
-              showSortSelector: isSortEnabled,
-              additionalControls,
-              showDisplaySelector,
-              showKeyboardShortcuts,
-              showFullScreenSelector: showFullScreenButton,
-            }
-          : {
-              ...toolbarVisibilityDefaults,
-              showSortSelector: isSortEnabled,
-              additionalControls,
-              showDisplaySelector,
-              showKeyboardShortcuts,
-              showFullScreenSelector: showFullScreenButton,
-            },
+      () => ({
+        ...toolbarVisibilityDefaults,
+        showSortSelector: isSortEnabled,
+        additionalControls,
+        showDisplaySelector,
+        showKeyboardShortcuts,
+        showFullScreenSelector: showFullScreenButton,
+      }),
       [
-        isSummaryOnlyColumns,
         isSortEnabled,
         additionalControls,
         showDisplaySelector,
