@@ -99,11 +99,15 @@ When a user asks about existing rules:
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
 - To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
-- After attaching, use the returned \`attachment_id\` for subsequent ${ALERTING_TOOL_IDS.manageRule} calls.
+- After attaching, use the returned \`attachment_id\` for subsequent ${
+      ALERTING_TOOL_IDS.manageRule
+    } calls.
 
 ## Composing and Modifying Rules
 
-Build the request for ${ALERTING_TOOL_IDS.manageRule} as an ordered \`operations\` array. Operations run in sequence.
+Build the request for ${
+      ALERTING_TOOL_IDS.manageRule
+    } as an ordered \`operations\` array. Operations run in sequence.
 
 For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`.
 
@@ -140,11 +144,15 @@ ${generateNoDataStrategyDoc()}
 
 ## Final Validation
 
-Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageRule} call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+Always include \`{ operation: "validate" }\` as the **last operation** in the final ${
+      ALERTING_TOOL_IDS.manageRule
+    } call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Rendering Attachments
 
-After calling ${ALERTING_TOOL_IDS.manageRule}, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
+After calling ${
+      ALERTING_TOOL_IDS.manageRule
+    }, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
 
 \`\`\`
 <render_attachment id="<ruleAttachment.id>" version="<version>" />
@@ -154,7 +162,9 @@ This displays the interactive rule card with Preview and Create/Update buttons.
 
 ## Persistence
 
-The ${ALERTING_TOOL_IDS.manageRule} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The ${
+      ALERTING_TOOL_IDS.manageRule
+    } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create rule** — create a new V2 rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
@@ -164,7 +174,9 @@ Never attempt to create, update, delete, enable, or disable rules directly via A
 
 After composing or modifying a rule, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageRule} tool result.
+where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageRule
+    } tool result.
 
 ---
 

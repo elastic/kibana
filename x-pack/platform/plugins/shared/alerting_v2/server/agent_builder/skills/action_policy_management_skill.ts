@@ -151,11 +151,15 @@ When a user asks about existing action policies:
 - Search with \`platform.core.sml_search\`, using keywords like the policy name, matcher, or destination.
 - Summarize matches: name, enabled/disabled, destination count, matcher snippet, grouping mode.
 - To inspect or edit a saved policy, attach it with \`platform.core.sml_attach\` using the \`entry_id\`.
-- After attaching, use the returned \`attachment_id\` for subsequent ${ALERTING_TOOL_IDS.manageActionPolicy} calls.
+- After attaching, use the returned \`attachment_id\` for subsequent ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } calls.
 
 ## Composing and Modifying Action Policies
 
-Build the request for ${ALERTING_TOOL_IDS.manageActionPolicy} as an ordered \`operations\` array. Operations run in sequence.
+Build the request for ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } as an ordered \`operations\` array. Operations run in sequence.
 
 For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`.
 
@@ -171,11 +175,15 @@ If you set both in one request, put \`set_grouping\` before \`set_throttle\`. Th
 
 ## Final Validation
 
-Always include \`{ operation: "validate" }\` as the **last operation** in the final ${ALERTING_TOOL_IDS.manageActionPolicy} call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+Always include \`{ operation: "validate" }\` as the **last operation** in the final ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } call after all fields are set. This validates the accumulated policy against the API request schema and throws if the policy is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
 ## Action Policy Persistence
 
-The ${ALERTING_TOOL_IDS.manageActionPolicy} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create policy** — create a new action policy from the in-memory attachment.
 - **Update Policy** — push changes back to the origin policy (only for attached saved policies).
@@ -184,7 +192,9 @@ Never attempt to create, update, delete, enable, or disable action policies dire
 
 After composing or modifying an action policy, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool result.
 
 ---
 
@@ -270,7 +280,9 @@ Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order:
 
 Render the action policy inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${ALERTING_TOOL_IDS.manageActionPolicy} tool result.
+where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`version\` from the ${
+      ALERTING_TOOL_IDS.manageActionPolicy
+    } tool result.
 
 ## Save Order Reminder
 

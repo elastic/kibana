@@ -414,8 +414,12 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
     '',
     'The throttle strategy must be compatible with the grouping mode:',
     `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
-    `- For ${aggregateModes.map((m) => `\`${m}\``).join(' / ')}: ${formatStrategySet(AGGREGATE_STRATEGIES)}.`,
-    `- ${formatStrategySet(STRATEGIES_REQUIRING_INTERVAL)} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
+    `- For ${aggregateModes.map((m) => `\`${m}\``).join(' / ')}: ${formatStrategySet(
+      AGGREGATE_STRATEGIES
+    )}.`,
+    `- ${formatStrategySet(
+      STRATEGIES_REQUIRING_INTERVAL
+    )} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
   ];
   return lines.join('\n');
 };
@@ -435,13 +439,13 @@ export const generateRuleKindDoc = (): string => {
       `### Alert (\`kind: ${kinds.find((k) => k === 'alert')}\`)`,
       `- **Stateful alerting** with full episode lifecycle: ${episodeStatuses}.`,
       `- Supports state transitions (${transitionFields}), recovery detection, and notification dispatch.`,
-      "- Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.",
+      "- Produces `type: 'alert'` events that participate in the dispatcher pipeline.",
       '- Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.',
     ],
     signal: [
       `### Signal (\`kind: ${kinds.find((k) => k === 'signal')}\`)`,
       '- **Stateless detection** (observation-only).',
-      "- Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.",
+      "- Produces `type: 'signal'` events but **skips** episode lifecycle and dispatcher processing entirely.",
       '- No notifications, no recovery, no state transitions.',
       '- Use for logging or detection without automated action.',
     ],
@@ -450,19 +454,21 @@ export const generateRuleKindDoc = (): string => {
   const missing = kinds.filter((k) => !kindDescriptions[k]);
   if (missing.length > 0) {
     throw new SchemaTranslationError(
-      `setKindOperationSchema descriptions out of sync — missing descriptions for: ${missing.join(', ')}`
+      `setKindOperationSchema descriptions out of sync — missing descriptions for: ${missing.join(
+        ', '
+      )}`
     );
   }
 
   return [
     '## Rule Kind: Alert vs Signal',
     '',
-    'Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.',
+    'Rules declare a `kind` of `alert` or `signal`. This is the most important behavioral split in the system.',
     '',
     ...kinds.flatMap((k, i) => (i > 0 ? ['', ...kindDescriptions[k]] : kindDescriptions[k])),
     '',
     '### Immutability',
-    '\`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely.',
+    '`kind` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to `kind`. For draft (in-memory) rules, `set_kind` can change it freely.',
   ].join('\n');
 };
 
@@ -486,11 +492,11 @@ export const generateStateTransitionDoc = (): string => {
   return [
     '## State Transition',
     '',
-    'Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.',
+    'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.',
     '',
     ...bullets,
     '',
-    'State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.',
+    'State transition is only allowed on `kind: alert` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.',
   ].join('\n');
 };
 
@@ -511,11 +517,11 @@ export const generateEpisodeLifecycleDoc = (): string => {
   return [
     '## Episode Lifecycle',
     '',
-    'Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
+    'Episodes are the unit of alert state. Each unique group (by `group_hash`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
     '',
     table,
     '',
-    'Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw signal events with no episode tracking.',
+    'Only `kind: alert` rules produce episodes. `kind: signal` rules write raw signal events with no episode tracking.',
   ].join('\n');
 };
 
@@ -526,21 +532,21 @@ export const generateSeverityDoc = (): string => {
   return [
     '## Alert Event Severity',
     '',
-    'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.',
+    'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
     '',
     `- **Valid values**: ${values} (case-insensitive).`,
-    '- If the breach query does not produce a \`severity\` column, alert events have no severity.',
+    '- If the breach query does not produce a `severity` column, alert events have no severity.',
     '- Different groups can produce different severities in the same rule execution (the value comes from each row).',
-    '- Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).',
+    '- Action policies can match on `severity` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).',
     '',
     '### Setting Severity in ES|QL',
     '',
-    'Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`:',
+    'Severity is set by adding a `severity` column to the breach query via `EVAL`:',
     '',
     '- **Literal severity** — all alerts from the rule share the same severity:',
-    '  \`| EVAL severity = "critical"\`',
+    '  `| EVAL severity = "critical"`',
     '- **Conditional severity** — severity varies per group based on data:',
-    '  \`| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")\`',
+    '  `| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")`',
   ].join('\n');
 };
 
@@ -551,7 +557,7 @@ export const generateNoDataStrategyDoc = (): string => {
     schemaValues: getNoDataStrategyValues(),
     descriptions: {
       last_known_status: 'Holds the last known episode status when no data is present.',
-      emit: 'Emits a \`no_data\` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.',
+      emit: 'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.',
       recover: 'Forces recovery when no data is present.',
       none: 'No-data situations are ignored (default).',
     },
@@ -561,14 +567,14 @@ export const generateNoDataStrategyDoc = (): string => {
   return [
     '## No-Data Strategy',
     '',
-    '\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present.',
+    '`no_data_strategy` is a **top-level rule field** that controls behaviour when no data is present.',
     '',
     table,
     '',
-    'When setting \`no_data_strategy\` to anything other than \`\'none\'\`, add a \`no_data\` block to the standalone query:',
-    '\`no_data: { query: \'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1\' }\`. For composed query format, the \`base\` query is used as the data query.',
+    "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
+    "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
     '',
-    'Signal rules cannot set \`no_data_strategy\`.',
+    'Signal rules cannot set `no_data_strategy`.',
     'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
   ].join('\n');
 };
@@ -588,13 +594,15 @@ export const generateRecoveryStrategyDoc = (): string => {
   return [
     '## Recovery Strategy',
     '',
-    '\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.',
+    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (`kind: signal`) cannot set `recovery_strategy`.',
     '',
     list,
     '',
-    `When using \`recovery_strategy: '${setQueryOperationSchema.shape.recovery_strategy.unwrap().enum.query}'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
-    '- **Composed**: \`recovery: { segment: \'WHERE cpu < 0.5\' }\`',
-    '- **Standalone**: \`recovery: { query: \'FROM metrics-* | WHERE cpu < 0.5\' }\`',
+    `When using \`recovery_strategy: '${
+      setQueryOperationSchema.shape.recovery_strategy.unwrap().enum.query
+    }'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
+    "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
+    "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
     '',
     'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
   ].join('\n');
@@ -607,7 +615,7 @@ export const generateGroupingModesDoc = (): string => {
     descriptions: {
       per_episode: 'one notification per alert episode lifecycle (default).',
       all: 'a single notification for all matching episodes.',
-      per_field: 'group by specified \`groupBy\` fields.',
+      per_field: 'group by specified `groupBy` fields.',
     },
     schemaName: 'setGroupingOperationSchema.groupingMode',
   });
@@ -620,9 +628,10 @@ export const generateThrottleStrategiesDoc = (): string => {
   const list = generateEnumList({
     schemaValues: getThrottleStrategyValues(),
     descriptions: {
-      on_status_change: 'notify only on episode status transitions (default for \`per_episode\`).',
+      on_status_change: 'notify only on episode status transitions (default for `per_episode`).',
       per_status_interval: 'notify on transitions and at regular intervals.',
-      time_interval: 'notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).',
+      time_interval:
+        'notify at regular intervals regardless of status (default for `all`/`per_field`).',
       every_time: 'notify on every evaluation cycle (high volume).',
     },
     schemaName: 'setThrottleOperationSchema.strategy',
