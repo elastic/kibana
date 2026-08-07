@@ -14,10 +14,10 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { WorkflowExecutionsDataClient } from './data_access_layer';
 
 export class WorkflowExecutionRepository {
-  constructor(private workflowExecutionsDataAccess: WorkflowExecutionsDataAccess) {}
+  constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -33,7 +33,7 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    const { items } = await this.workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId]);
     const doc = items[0]?.document;
 
     // Verify spaceId matches for security/multi-tenancy
@@ -63,7 +63,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.workflowExecutionsDataAccess.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
       items: [
         {
           operation: 'create',
@@ -72,6 +72,18 @@ export class WorkflowExecutionRepository {
       ],
       refresh: options.refresh ?? false,
     });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document create, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. version conflict on duplicate ID).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to create workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**
@@ -97,7 +109,7 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.workflowExecutionsDataAccess.bulk({
+    const bulkResponse = await this.workflowExecutionsDataClient.bulk({
       items: executions.map((execution) => ({
         operation: 'create',
         document: execution as Partial<EsWorkflowExecution> & { id: string },
@@ -134,7 +146,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.workflowExecutionsDataAccess.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
       items: [
         {
           operation: 'update',
@@ -143,6 +155,18 @@ export class WorkflowExecutionRepository {
       ],
       refresh: options.refresh ?? false,
     });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document update, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. doc-not-found, version conflict).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to update workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**
@@ -166,13 +190,19 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    await this.workflowExecutionsDataAccess.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
       items: updates.map((update) => ({
         operation: 'update',
         document: update as Partial<EsWorkflowExecution> & { id: string },
       })),
       refresh: true,
     });
+    if (response.errors) {
+      const errorCount = response.items.filter((item) => item.error).length;
+      throw new Error(
+        `Bulk update failed for ${errorCount} of ${updates.length} workflow executions`
+      );
+    }
   }
 
   /**
@@ -183,7 +213,7 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves to the list of search hits.
    */
   public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       query: query as estypes.QueryDslQueryContainer,
       size,
     });
@@ -226,7 +256,7 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       size: 0, // Don't need the document, just checking existence
       terminate_after: 1, // Stop after finding 1 match
       track_total_hits: true,
@@ -275,7 +305,7 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       size: 1,
       terminate_after: 1, // Stop after finding 1 match
       query: {
@@ -330,7 +360,7 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses, // Filter context = no scoring = faster
@@ -371,7 +401,7 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await this.workflowExecutionsDataAccess.count({
+    const response = await this.workflowExecutionsDataClient.count({
       query: {
         bool: {
           filter: filterClauses,
@@ -389,7 +419,7 @@ export class WorkflowExecutionRepository {
     concurrencyGroupKey: string,
     spaceId: string
   ): Promise<string | null> {
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       size: 1,
       query: {
         bool: {
@@ -409,44 +439,32 @@ export class WorkflowExecutionRepository {
   }
 
   /**
-   * CAS: promoted `queued` → `pending` only when the document still carries `queued` status.
+   * CAS: promotes `queued` → `pending` only when the document still carries `queued` status.
+   * Uses an atomic Painless script update so concurrent drain iterations cannot both promote
+   * the same execution (which would allow a concurrency group to exceed maxConcurrency).
    */
   public async tryCasPromoteQueuedWorkflowExecutionToPending(params: {
     workflowExecutionId: string;
     spaceId: string;
   }): Promise<boolean> {
-    const workflowExecutions = await this.workflowExecutionsDataAccess
-      .search({
-        query: {
-          term: {
-            id: params.workflowExecutionId,
-            spaceId: params.spaceId,
-          },
-        },
-        _source_includes: ['id', 'status'],
-      })
-      .then((response) => response.hits.hits.map((hit) => hit._source as EsWorkflowExecution));
-
-    const queuedWorkflowExecutions = workflowExecutions.filter(
-      (stepExecution) => stepExecution.status === ExecutionStatus.QUEUED
-    );
-
-    if (!queuedWorkflowExecutions.length) {
-      return false;
-    }
-
-    await this.workflowExecutionsDataAccess.bulk({
-      items: queuedWorkflowExecutions.map((workflowExecution) => ({
-        operation: 'upsert',
-        document: {
-          id: workflowExecution.id,
-          status: ExecutionStatus.PENDING,
-        },
-      })),
+    const { result } = await this.workflowExecutionsDataClient.scriptUpdate({
+      id: params.workflowExecutionId,
+      script:
+        'if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {' +
+        '  ctx._source.status = params.pendingStatus;' +
+        '} else {' +
+        "  ctx.op = 'noop';" +
+        '}',
+      params: {
+        queuedStatus: ExecutionStatus.QUEUED,
+        pendingStatus: ExecutionStatus.PENDING,
+        spaceId: params.spaceId,
+      },
+      // Near-real-time search must see this doc as PENDING before the next
+      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
       refresh: 'wait_for',
     });
-
-    return true;
+    return result === 'updated';
   }
 
   /**
@@ -482,7 +500,7 @@ export class WorkflowExecutionRepository {
 
     const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
 
-    const response = await this.workflowExecutionsDataAccess.search({
+    const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses,

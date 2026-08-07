@@ -17,10 +17,10 @@ import type {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+  IWorkflowEventLoggerService,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
@@ -44,22 +44,22 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
   changeHistoryService: IWorkflowChangeHistoryService;
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
 }
 
 /** Deps for WorkflowSearchService. */
 export interface WorkflowSearchDeps extends WorkflowStorageDeps {
   esClient: ElasticsearchClient;
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
 }
 
 /** Deps for WorkflowExecutionQueryService. */
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 

@@ -14,6 +14,15 @@ import { AGENT_BUILDER_TAG } from '../../common/constants';
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.esql.query as unknown as jest.Mock;
 
+const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
+  ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
+
+// set_query resolves the rule's time field from the source index via fieldCaps.
+// Default to an index that exposes @timestamp so query-based operations don't
+// fail time-field resolution.
+const mockResolvableTimeField = (ctx: ToolHandlerContextMock) =>
+  getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: { '@timestamp': { date: {} } } });
+
 const createContext = (): ToolHandlerContextMock => {
   const ctx = agentBuilderMocks.tools.createHandlerContext();
   ctx.attachments.add.mockResolvedValue({
@@ -40,6 +49,7 @@ describe('manageRuleTool', () => {
         ],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       const result = await tool.handler(
         {
@@ -151,6 +161,7 @@ describe('manageRuleTool', () => {
         columns: [{ name: 'host.name', type: 'keyword' }],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       await tool.handler(
         {
@@ -183,6 +194,7 @@ describe('manageRuleTool', () => {
         columns: [{ name: 'host.name', type: 'keyword' }],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       await tool.handler(
         {

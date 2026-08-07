@@ -16,14 +16,14 @@ import type {
 } from '@kbn/workflows';
 import type {
   GetWorkflowExecutionsByIdsOptions,
-  StepExecutionsDataAccess,
-  WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server/data_access_layer';
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 
 interface GetChildWorkflowExecutionsParams {
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
-  stepExecutionsDataAccess: StepExecutionsDataAccess;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   parentExecutionId: string;
   spaceId: string;
 }
@@ -58,11 +58,11 @@ const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
     }));
 
 const fetchChildDocs = async (
-  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess,
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient,
   childIds: string[],
   spaceId: string
 ): Promise<Map<string, EsWorkflowExecution>> => {
-  const { items } = await workflowExecutionsDataAccess.getByIds(childIds, {
+  const { items } = await workflowExecutionsDataClient.getByIds(childIds, {
     sourceIncludes: CHILD_SOURCE_INCLUDES,
   });
 
@@ -89,14 +89,22 @@ const groupStepsByWorkflowRunId = (
 };
 
 export const getChildWorkflowExecutions = async ({
-  workflowExecutionsDataAccess,
-  stepExecutionsDataAccess,
+  workflowExecutionsDataClient,
+  stepExecutionsDataClient,
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  const { items: parentItems } = await workflowExecutionsDataAccess.getByIds([parentExecutionId], {
-    sourceIncludes: [...PARENT_SOURCE_INCLUDES],
-  });
+  const { items: parentItems, missing: parentMissing } =
+    await workflowExecutionsDataClient.getByIds([parentExecutionId], {
+      sourceIncludes: [...PARENT_SOURCE_INCLUDES],
+    });
+
+  // Throw so callers can distinguish "parent doesn't exist" from "parent has no
+  // child executions" — both cases would otherwise silently return [].
+  if (parentMissing.includes(parentExecutionId)) {
+    throw new Error(`Workflow execution not found: ${parentExecutionId}`);
+  }
+
   const parentDoc = parentItems[0]?.document;
 
   if (!parentDoc || parentDoc.spaceId !== spaceId) {
@@ -104,7 +112,7 @@ export const getChildWorkflowExecutions = async ({
   }
 
   const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
-    stepExecutionsDataAccess,
+    stepExecutionsDataClient,
     workflowExecutionId: parentExecutionId,
     stepExecutionIds: parentDoc.stepExecutionIds,
     sourceExcludes: STEP_SOURCE_EXCLUDES,
@@ -116,7 +124,7 @@ export const getChildWorkflowExecutions = async ({
   }
 
   const childDocMap = await fetchChildDocs(
-    workflowExecutionsDataAccess,
+    workflowExecutionsDataClient,
     childRefs.map((ref) => ref.childExecutionId),
     spaceId
   );
@@ -128,7 +136,7 @@ export const getChildWorkflowExecutions = async ({
   const childStepExecutions =
     allChildStepExecutionIds.length > 0
       ? await getStepExecutionsByWorkflowExecution({
-          stepExecutionsDataAccess,
+          stepExecutionsDataClient,
           workflowExecutionId: '',
           stepExecutionIds: allChildStepExecutionIds,
           sourceExcludes: STEP_SOURCE_EXCLUDES,

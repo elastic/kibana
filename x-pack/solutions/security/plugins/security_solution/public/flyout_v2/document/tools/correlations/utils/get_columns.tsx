@@ -81,7 +81,7 @@ export const getColumns = ({
       const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
       return (
         <EuiToolTip content={date}>
-          <span>{date}</span>
+          <span tabIndex={0}>{date}</span>
         </EuiToolTip>
       );
     },
@@ -134,7 +134,7 @@ export const getColumns = ({
     truncateText: true,
     render: (value: string) => (
       <EuiToolTip content={value} position="left">
-        <span>{value}</span>
+        <span tabIndex={0}>{value}</span>
       </EuiToolTip>
     ),
   },

@@ -84,7 +84,6 @@ test.describe(
         await expect(serviceDetailsPage.overviewTab.tab).toBeVisible();
         await expect(serviceDetailsPage.transactionsTab.tab).toBeVisible();
         await expect(serviceDetailsPage.errorsTab.tab).toBeVisible();
-        await expect(serviceDetailsPage.getServiceMapTab()).toBeVisible();
       });
 
       await test.step('Verify dependencies tab is NOT visible', async () => {

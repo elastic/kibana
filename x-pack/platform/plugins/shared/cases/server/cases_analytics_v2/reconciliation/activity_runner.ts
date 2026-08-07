@@ -49,6 +49,12 @@ export interface RunActivityReconciliationDeps {
    * throttling for downstream I/O.
    */
   onPageComplete?: (info: { processed: number }) => void;
+  /**
+   * Optional cooperative-cancellation signal. Same semantics as the cases
+   * runner's `signal`: checked at the top of every page; aborting throws so
+   * the caller's catch pins the cursor for a re-walk on the next tick.
+   */
+  signal?: AbortSignal;
 }
 
 export interface RunActivityReconciliationResult {
@@ -86,6 +92,7 @@ export async function runActivityReconciliation({
   lastRunAt,
   pageDelayMs = 0,
   onPageComplete,
+  signal,
 }: RunActivityReconciliationDeps): Promise<RunActivityReconciliationResult> {
   // Tick start, captured before any I/O. Persisted as the new cursor on
   // a successful drain so user actions created during the tick fall into
@@ -112,6 +119,14 @@ export async function runActivityReconciliation({
 
   try {
     while (true) {
+      // Cooperative cancellation — see the cases runner for the rationale
+      // behind throwing rather than returning the tick-start cursor.
+      if (signal?.aborted) {
+        throw new Error(
+          `cases-analyticsV2: activity reconciliation aborted after processed=${processed}; cursor left pinned for re-walk`
+        );
+      }
+
       const page = await savedObjectsClient.find<UserActionPersistedAttributes>({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         filter,

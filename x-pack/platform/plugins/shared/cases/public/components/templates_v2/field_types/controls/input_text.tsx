@@ -22,22 +22,27 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 import { InlineFieldActions } from './inline_field_actions';
 
-type InputTextProps = z.infer<typeof InputTextFieldSchema> & ConditionRenderProps;
+type InputTextProps = z.infer<typeof InputTextFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const InputText = ({
   label,
   name,
   type,
   isRequired,
+  isRequiredOnClose,
   patternValidation,
   minLength,
   maxLength,
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: InputTextProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -77,7 +82,8 @@ export const InputText = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller
@@ -92,7 +98,7 @@ export const InputText = ({
           <>
             <EuiFormRow
               label={label}
-              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
               isInvalid={Boolean(fieldState.error)}
               error={fieldState.error?.message}
               fullWidth

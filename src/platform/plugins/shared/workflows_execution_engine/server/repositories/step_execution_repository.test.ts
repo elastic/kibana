@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import type { StepExecutionsDataClient } from './data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
-  createMockStepExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
+  createMockStepDataClient,
+} from './data_access_layer/mocks';
 import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
-  let stepExecutionsDataAccess: jest.Mocked<StepExecutionsDataAccess>;
+  let stepExecutionsDataClient: jest.Mocked<StepExecutionsDataClient>;
 
   beforeEach(() => {
-    stepExecutionsDataAccess = createMockStepExecutionsDataAccess();
-    underTest = new StepExecutionRepository(stepExecutionsDataAccess);
+    stepExecutionsDataClient = createMockStepDataClient();
+    stepExecutionsDataClient.bulk.mockResolvedValue({ errors: false, items: [] });
+    underTest = new StepExecutionRepository(stepExecutionsDataClient);
   });
 
   describe('bulkUpsert', () => {
@@ -33,7 +34,7 @@ describe('StepExecutionRepository', () => {
 
       await underTest.bulkUpsert(stepExecutions as any);
 
-      expect(stepExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(stepExecutionsDataClient.bulk).toHaveBeenCalledWith({
         items: stepExecutions.map((stepExecution) => ({
           operation: 'upsert',
           document: stepExecution,
@@ -45,7 +46,7 @@ describe('StepExecutionRepository', () => {
     it('should handle empty array without making DAL call', async () => {
       await underTest.bulkUpsert([]);
 
-      expect(stepExecutionsDataAccess.bulk).not.toHaveBeenCalled();
+      expect(stepExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should throw error if step execution does not have an id', async () => {
@@ -55,7 +56,7 @@ describe('StepExecutionRepository', () => {
         'Step execution ID is required for upsert'
       );
 
-      expect(stepExecutionsDataAccess.bulk).not.toHaveBeenCalled();
+      expect(stepExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should handle single step execution', async () => {
@@ -63,7 +64,7 @@ describe('StepExecutionRepository', () => {
 
       await underTest.bulkUpsert(stepExecutions as any);
 
-      expect(stepExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(stepExecutionsDataClient.bulk).toHaveBeenCalledWith({
         items: [{ operation: 'upsert', document: stepExecutions[0] }],
         refresh: false,
       });
@@ -83,7 +84,7 @@ describe('StepExecutionRepository', () => {
 
       await underTest.bulkUpsert(stepExecutions as any);
 
-      expect(stepExecutionsDataAccess.bulk).toHaveBeenCalledWith({
+      expect(stepExecutionsDataClient.bulk).toHaveBeenCalledWith({
         items: [{ operation: 'upsert', document: stepExecutions[0] }],
         refresh: false,
       });
@@ -96,6 +97,27 @@ describe('StepExecutionRepository', () => {
         'Step execution ID is required for upsert'
       );
     });
+
+    it('should throw with failed document details when bulk response contains errors', async () => {
+      stepExecutionsDataClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { id: 'step-1', index: '.workflows-step-executions' },
+          {
+            id: 'step-2',
+            index: '.workflows-step-executions',
+            error: { type: 'document_missing_exception', reason: 'document missing' },
+          },
+        ],
+      });
+
+      await expect(
+        underTest.bulkUpsert([
+          { id: 'step-1', stepId: 'test-step-1' } as any,
+          { id: 'step-2', stepId: 'test-step-2' } as any,
+        ])
+      ).rejects.toThrow('Failed to upsert 1 step executions:');
+    });
   });
 
   describe('getStepExecutionsByIds', () => {
@@ -104,13 +126,13 @@ describe('StepExecutionRepository', () => {
         { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
         { id: 'step-2', stepId: 'test-step-2', status: 'running' },
       ];
-      stepExecutionsDataAccess.getByIds.mockResolvedValue(
+      stepExecutionsDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse(stepExecutions as any)
       );
 
       const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
 
-      expect(stepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(['step-1', 'step-2'], {
+      expect(stepExecutionsDataClient.getByIds).toHaveBeenCalledWith(['step-1', 'step-2'], {
         sourceIncludes: undefined,
         sourceExcludes: undefined,
       });
@@ -118,21 +140,43 @@ describe('StepExecutionRepository', () => {
     });
 
     it('should pass sourceIncludes and sourceExcludes to getByIds', async () => {
-      stepExecutionsDataAccess.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
+      stepExecutionsDataClient.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
 
       await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output'], ['error']);
 
-      expect(stepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(['step-1'], {
+      expect(stepExecutionsDataClient.getByIds).toHaveBeenCalledWith(['step-1'], {
         sourceIncludes: ['id', 'output'],
         sourceExcludes: ['error'],
       });
+    });
+
+    it('normalizes missing output to null when output was requested', async () => {
+      stepExecutionsDataClient.getByIds.mockResolvedValue({
+        items: [{ document: { id: 's1' } as any, index: '.workflows-step-executions' }],
+        missing: [],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['s1'], ['output']);
+
+      expect(result[0].output).toBeNull();
+    });
+
+    it('does not normalize output when output was not requested', async () => {
+      stepExecutionsDataClient.getByIds.mockResolvedValue({
+        items: [{ document: { id: 's1' } as any, index: '.workflows-step-executions' }],
+        missing: [],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['s1']);
+
+      expect(result[0].output).toBeUndefined();
     });
   });
 
   describe('searchStepExecutionsByExecutionId', () => {
     it('should search step executions by workflow run id', async () => {
       const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1', workflowRunId: 'run-1' }];
-      stepExecutionsDataAccess.search.mockResolvedValue({
+      stepExecutionsDataClient.search.mockResolvedValue({
         hits: {
           hits: stepExecutions.map((stepExecution) => ({ _source: stepExecution })),
           total: { value: 1, relation: 'eq' },
@@ -141,7 +185,7 @@ describe('StepExecutionRepository', () => {
 
       const result = await underTest.searchStepExecutionsByExecutionId('run-1');
 
-      expect(stepExecutionsDataAccess.search).toHaveBeenCalledWith({
+      expect(stepExecutionsDataClient.search).toHaveBeenCalledWith({
         query: {
           match: { workflowRunId: 'run-1' },
         },

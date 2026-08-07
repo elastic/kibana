@@ -13,14 +13,12 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-jest.mock('@kbn/workflows/server/data_access_layer', () => {
-  const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
-  const { createExecutionsDataAccessJestMock } = jest.requireActual(
-    './test_utils/executions_data_access_jest_mock'
-  );
+jest.mock('./repositories/data_access_layer', () => {
+  const actual = jest.requireActual('./repositories/data_access_layer');
+  const { createDataClientJestMock } = jest.requireActual('./test_utils/data_client_jest_mock');
   return {
     ...actual,
-    createExecutionsDataAccess: jest.fn(() => createExecutionsDataAccessJestMock()),
+    createDataClientBundle: jest.fn(() => createDataClientJestMock()),
   };
 });
 jest.mock('./lib/check_license', () => ({
@@ -183,7 +181,7 @@ describe('bulkScheduleWorkflow', () => {
     expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
     const [scheduledTasks, scheduleOptions] = taskManager.bulkSchedule.mock.calls[0];
     expect(scheduledTasks).toHaveLength(2);
-    expect(scheduleOptions).toEqual({ request });
+    expect(scheduleOptions).toEqual({ request, cloneApiKey: true });
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
@@ -556,5 +554,9 @@ describe('bulkScheduleWorkflow', () => {
       { refresh: false }
     );
     expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(taskManager.schedule).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ request, cloneApiKey: true })
+    );
   });
 });

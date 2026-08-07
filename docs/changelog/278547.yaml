@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/278547
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: Update Kibana MITRE mappings to `v19.1`

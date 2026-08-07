@@ -43,8 +43,8 @@ export class ActionPoliciesListPage {
     await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
   }
 
-  detailsLink(policyId: string) {
-    return this.page.testSubj.locator(`actionPolicyDetailsLink-${policyId}`);
+  detailsLink(policyName: string) {
+    return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName });
   }
 
   async openDetailsFlyout() {

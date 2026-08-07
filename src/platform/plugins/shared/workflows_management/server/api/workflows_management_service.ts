@@ -37,10 +37,6 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import {
-  createExecutionsDataAccess,
-  type WorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server/data_access_layer';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -55,6 +51,7 @@ import type {
 } from '@kbn/workflows/types/v1';
 import type {
   LogSearchResult,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
@@ -84,6 +81,10 @@ import type {
 } from '../../common/lib/workflow_change_history/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
+import {
+  type ManagedInstallReadinessResult,
+  waitForManagedWorkflowInstallReadiness,
+} from '../lib/wait_for_managed_workflow_install_readiness';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import {
@@ -104,8 +105,18 @@ import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } f
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
-  sort?: estypes.SortCombinations;
-  from?: number;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  executedBy?: string[];
+  concurrencyGroupKey?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
+  sortField?: string;
+  sortOrder?: WorkflowExecutionSortOrder;
+  page?: number;
   size?: number;
   trackTotalHits?: boolean;
   includeManagedExecutions?: boolean;
@@ -140,7 +151,7 @@ export class WorkflowsService {
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
   private esClient!: ElasticsearchClient;
-  private workflowExecutionsDataAccess!: WorkflowExecutionsDataAccess;
+  private workflowExecutionsDataClient!: WorkflowExecutionsDataClient;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
@@ -153,6 +164,8 @@ export class WorkflowsService {
   ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   private readonly initPromise: Promise<void>;
+  /** One-shot stop signal; replaced on start so abort can fire again next lifecycle. */
+  private stopController = new AbortController();
 
   constructor(
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
@@ -164,8 +177,38 @@ export class WorkflowsService {
     this.initPromise = this.initialize(core);
   }
 
+  public setStopping(stopping: boolean): void {
+    if (stopping) {
+      this.stopController.abort();
+      return;
+    }
+    this.stopController = new AbortController();
+  }
+
   private async ensureInitialized(): Promise<void> {
     await this.initPromise;
+  }
+
+  /**
+   * Waits until Elasticsearch is available (and pingable) or Kibana is stopping.
+   * Never throws for expected teardown / ES unavailability.
+   */
+  private async ensureManagedInstallReady(
+    operation: string
+  ): Promise<ManagedInstallReadinessResult> {
+    const readiness = await waitForManagedWorkflowInstallReadiness({
+      core$: this.core.status.core$,
+      esClient: { ping: () => this.esClient.ping() },
+      signal: this.stopController.signal,
+      operation,
+      logger: this.logger,
+    });
+
+    if (!readiness.ready) {
+      this.logger.warn(`Workflows Management: skipping managed ${operation} (${readiness.reason})`);
+    }
+
+    return readiness;
   }
 
   private async initializeChangeHistoryService(coreStart: CoreStart): Promise<void> {
@@ -205,21 +248,15 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
-    const executionsDataAccessBundle = createExecutionsDataAccess({
-      source: 'system_index',
-      coreSetup: core,
-      logger: this.logger,
-    });
-    this.workflowExecutionsDataAccess =
-      await executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
-    const stepExecutionsDataAccess =
-      await executionsDataAccessBundle.createStepExecutionsDataAccess();
+    const { workflowExecutionsDataClient, stepExecutionsDataClient } =
+      this.workflowsExecutionEngine.__internalStorage;
+    this.workflowExecutionsDataClient = workflowExecutionsDataClient;
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
-      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
-      stepExecutionsDataAccess,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 
@@ -227,7 +264,7 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
-      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
     });
 
     await this.initializeChangeHistoryService(coreStart);
@@ -242,14 +279,15 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
-      stepExecutionsDataAccess,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
       logger: this.logger,
+      isStopping: () => this.stopController.signal.aborted,
       audit: new WorkflowManagementAuditLog({ service: this }),
     });
   }
@@ -269,9 +307,9 @@ export class WorkflowsService {
     return this.coreStart;
   }
 
-  public async getWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {
+  public async getWorkflowDataClient(): Promise<WorkflowExecutionsDataClient> {
     await this.ensureInitialized();
-    return this.workflowExecutionsDataAccess;
+    return this.workflowExecutionsDataClient;
   }
 
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
@@ -315,6 +353,11 @@ export class WorkflowsService {
   ): Promise<WorkflowDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsByIds(ids, spaceId, options);
+  }
+
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    await this.ensureInitialized();
+    return this.crudService.findExistingWorkflowIds(ids);
   }
 
   public async getWorkflowsSourceByIds(
@@ -459,7 +502,7 @@ export class WorkflowsService {
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
+  ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.searchExecutionsView(params, spaceId);
   }
@@ -600,12 +643,23 @@ export class WorkflowsService {
     return this.validationService.getWorkflowZodSchema(options, spaceId, request);
   }
 
+  /**
+   * Install or update a managed workflow after ES readiness gating.
+   * Best-effort: may no-op when Kibana is stopping or ES is not ready (resolve ≠ persisted).
+   * Gated skips mark the plugin install pass incomplete so ready() will not orphan-delete.
+   */
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(`install '${id}'`);
+    if (!readiness.ready) {
+      // So ready() cannot treat gated-out installs as orphans and force-delete them.
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      return;
+    }
     return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
   }
 
@@ -642,13 +696,27 @@ export class WorkflowsService {
     );
   }
 
+  /**
+   * Owner signal that static managed installs for this plugin are finished.
+   * Best-effort: may no-op when Kibana is stopping or ES is not ready. When installs
+   * were incomplete this boot, destructive orphan cleanup is skipped; dynamic auto
+   * upgrades still run once this call has passed Elasticsearch readiness.
+   */
   public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(`ready() for plugin '${pluginId}'`);
+    if (!readiness.ready) {
+      return;
+    }
     return this.managedWorkflowsService.pluginReady(pluginId);
   }
 
   public async cleanupUnregisteredOrphans(registeredOwnerPluginIds: string[]): Promise<void> {
     await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady('global orphan cleanup');
+    if (!readiness.ready) {
+      return;
+    }
     return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
   }
 }

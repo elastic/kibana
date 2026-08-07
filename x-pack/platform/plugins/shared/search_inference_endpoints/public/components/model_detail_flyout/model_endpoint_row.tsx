@@ -118,11 +118,13 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                       aria-label={preconfiguredEndpointAriaLabel}
                       aria-describedby={preconfiguredTooltipDescriptionId}
                     >
+                      {/* eslint-disable-next-line @elastic/eui/no-unnamed-interactive-element */}
                       <EuiButtonIcon
                         data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
                         iconType="lock"
                         size="xs"
                         isDisabled
+                        aria-hidden
                       />
                     </span>
                   </EuiToolTip>

@@ -121,7 +121,7 @@ describe('resumeWorkflow', () => {
       await resumeWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
@@ -161,7 +161,7 @@ describe('resumeWorkflow', () => {
       await resumeWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
@@ -200,7 +200,7 @@ describe('resumeWorkflow', () => {
       await resumeWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
@@ -240,7 +240,7 @@ describe('resumeWorkflow', () => {
       await resumeWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController: new AbortController(),
+        signal: new AbortController().signal,
         dependencies,
         logger: logger as Logger,
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
@@ -276,7 +276,7 @@ describe('resumeWorkflow', () => {
       resumeWorkflow({
         workflowRunId,
         spaceId,
-        taskAbortController,
+        signal: taskAbortController.signal,
         logger,
         config: mockConfig,
         fakeRequest,
@@ -370,7 +370,7 @@ describe('resumeWorkflow', () => {
             workflowExecutionRepository,
             dependencies,
             fakeRequest,
-            taskAbortController,
+            signal: taskAbortController.signal,
           })
         );
       });
@@ -536,7 +536,7 @@ describe('resumeWorkflow', () => {
         resumeWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,
@@ -592,7 +592,7 @@ describe('resumeWorkflow', () => {
         resumeWorkflow({
           workflowRunId,
           spaceId,
-          taskAbortController: new AbortController(),
+          signal: new AbortController().signal,
           logger: logger as Logger,
           config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
           fakeRequest,

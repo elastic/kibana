@@ -81,9 +81,9 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      technicalPreview: true,
       requiresPageReload: true,
-      readonly: false,
+      readonly: true,
+      readonlyMode: 'ui',
     },
     [AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.enabled.name', {
@@ -160,10 +160,11 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
 
     [AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.name', {
-        defaultMessage: 'Include real tool and agent names in traces',
+        defaultMessage: 'Include real tool, agent, and conversation names in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.description', {
-        defaultMessage: 'Tool and agent names are anonymized by default.',
+        defaultMessage:
+          'Tool and agent names are anonymized by default. Conversation titles are omitted by default.',
       }),
       schema: schema.boolean(),
       value: false,

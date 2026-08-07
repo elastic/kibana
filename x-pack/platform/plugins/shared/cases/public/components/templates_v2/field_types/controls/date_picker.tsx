@@ -19,9 +19,12 @@ import {
   type ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type DatePickerProps = z.infer<typeof DatePickerFieldSchema> & ConditionRenderProps;
+type DatePickerProps = z.infer<typeof DatePickerFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const toMoment = (value: unknown, isLocal: boolean): Moment | null => {
   if (!value) return null;
@@ -41,9 +44,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -61,7 +66,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller
@@ -74,7 +80,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         <>
           <EuiFormRow
             label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
             error={fieldState.error?.message}
             isInvalid={Boolean(fieldState.error)}
             fullWidth

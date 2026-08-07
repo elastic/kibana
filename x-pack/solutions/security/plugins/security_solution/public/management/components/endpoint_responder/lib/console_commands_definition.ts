@@ -203,6 +203,7 @@ export const getEndpointConsoleCommands = ({
     responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
     responseActionsEndpointRunScript,
+    responseActionsEndpointKillProcessDescendants,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -232,6 +233,35 @@ export const getEndpointConsoleCommands = ({
   const canCancelForCurrentContext = () => {
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
+
+  // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
+  // a feature flag and requires that the host's Endpoint version supports it (reported via the
+  // `kill_process_descendents` capability).
+  const isKillDescendantsSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('kill_process_descendents');
+  const killDescendantsArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
+      ? {
+          'kill-descendants': {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about:
+              CONSOLE_COMMANDS.killProcess.args.killDescendants.about +
+              (isKillDescendantsSupportedByEndpoint
+                ? ''
+                : ` (${CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported})`),
+            validate: () => {
+              if (!isKillDescendantsSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported;
+              }
+
+              return true;
+            },
+          },
+        }
+      : {};
 
   let consoleCommands: CommandDefinition[] = [
     {
@@ -303,6 +333,7 @@ export const getEndpointConsoleCommands = ({
           about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
         },
+        ...killDescendantsArg,
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,

@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         observabilityCasesV3: 0,
         agentBuilder: 0,
         agentBuilderSml: 0,
+        contextEngine: 0,
         automatic_import: 0,
         uptime: 0,
         slo: 0,

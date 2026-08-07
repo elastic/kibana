@@ -40,6 +40,15 @@ Rule executor / director               Dispatcher
 
 Signal events never enter this pipeline. The dispatcher only processes alert-type rule events that carry `episode.*` state.
 
+### Episode identity: the subject
+
+Episodes are keyed by a `subject`, computed identically in ES|QL (`SUBJECT_EVAL` in `queries.ts`) and in TypeScript (`episodeSubject` in `steps/utils/subject.ts`):
+
+- internal episodes (`source` is `internal` or absent): `subject = rule_id`
+- external episodes (any other `source`): `subject = ${space_id}::${source}`
+
+The subject, not `group_hash`, is what makes a series unique. `group_hash` is only a grouping key — `buildGroupHash` hashes the grouping fields and their values, so the same hash occurs across rules and spaces. A rule id is a globally unique saved-object id and therefore implies a space; a vendor name does not, so the space is folded into external subjects to keep episode aggregation, throttling and suppression isolated per space.
+
 ## How one execution works
 
 Each dispatcher run has two time anchors:

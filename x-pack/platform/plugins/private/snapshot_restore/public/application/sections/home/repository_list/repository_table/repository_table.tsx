@@ -199,22 +199,22 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             const isManaged = name === managedRepository;
             const isReadOnly = isRepositoryReadOnly(repository);
 
+            const moreActionsLabel = i18n.translate(
+              'xpack.snapshotRestore.repositoryList.table.actionMoreAriaLabel',
+              { defaultMessage: 'More actions for repository `{name}`', values: { name } }
+            );
             const actionsButton = (
-              <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'xpack.snapshotRestore.repositoryList.table.actionMoreAriaLabel',
-                  {
-                    defaultMessage: 'More actions for repository `{name}`',
-                    values: { name },
+              <EuiToolTip content={moreActionsLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={moreActionsLabel}
+                  iconType="boxesHorizontal"
+                  color="primary"
+                  onClick={() =>
+                    setOpenActionsRowName(openActionsRowName === name ? undefined : name)
                   }
-                )}
-                iconType="boxesHorizontal"
-                color="primary"
-                onClick={() =>
-                  setOpenActionsRowName(openActionsRowName === name ? undefined : name)
-                }
-                data-test-subj={`repositoryActionsMenuButton-${name}`}
-              />
+                  data-test-subj={`repositoryActionsMenuButton-${name}`}
+                />
+              </EuiToolTip>
             );
 
             return (

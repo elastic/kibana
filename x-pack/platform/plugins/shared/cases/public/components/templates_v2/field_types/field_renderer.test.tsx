@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { parse as parseYaml } from 'yaml';
-import { render, renderHook, screen, waitFor, act } from '@testing-library/react';
+import { render, renderHook, screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
@@ -31,7 +31,7 @@ jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
 }));
 
 jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({ owner: ['cases'] }),
+  useCasesContext: () => ({ owner: ['cases'], permissions: { update: true } }),
 }));
 
 /**
@@ -403,5 +403,79 @@ describe('FieldsRenderer — field isolation', () => {
     render(<TestForm />);
 
     expect(screen.queryByRole('button', { name: /Confirm/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('FieldsRenderer — required-on-close label', () => {
+  const templateWithRequirementLabels = `
+name: Test
+fields:
+  - name: optional_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Optional Field
+  - name: close_field
+    control: INPUT_TEXT
+    type: keyword
+    label: Close Field
+    validation:
+      required_on_close: true
+`;
+
+  it('labels a required_on_close field "Required on close" instead of "Optional"', () => {
+    render(<FormWrapper templateDef={templateWithRequirementLabels} onSubmitResult={jest.fn()} />);
+
+    // The plain optional field keeps the "Optional" label.
+    const optionalField = within(screen.getByTestId('template-field-optional_field'));
+    expect(optionalField.getByTestId('form-optional-field-label')).toBeInTheDocument();
+
+    // The required-on-close field shows "Required on close" and NOT "Optional".
+    const closeField = within(screen.getByTestId('template-field-close_field'));
+    expect(closeField.getByTestId('form-required-on-close-field-label')).toBeInTheDocument();
+    expect(closeField.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
+  });
+});
+
+describe('FieldsRenderer — case details view mode', () => {
+  it('shows the saved value until the user selects Edit', async () => {
+    const field: InlineField = {
+      name: 'investigation_notes',
+      label: 'Investigation notes',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+    };
+    const CaseDetailsFields = () => {
+      const form = useForm({
+        defaultValues: {
+          [CASE_EXTENDED_FIELDS]: {
+            investigation_notes_as_keyword:
+              'A detailed note that should be readable before the field enters edit mode.',
+          },
+        },
+      });
+
+      return (
+        <FormProvider {...form}>
+          <FieldsRenderer resolvedFields={[field]} onFieldConfirm={jest.fn()} viewMode />
+        </FormProvider>
+      );
+    };
+
+    render(<CaseDetailsFields />);
+
+    expect(
+      screen.getByText('A detailed note that should be readable before the field enters edit mode.')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Edit Investigation notes' }));
+
+    expect(screen.getByRole('textbox', { name: 'Investigation notes' })).toHaveValue(
+      'A detailed note that should be readable before the field enters edit mode.'
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel field edit' }));
+
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 });

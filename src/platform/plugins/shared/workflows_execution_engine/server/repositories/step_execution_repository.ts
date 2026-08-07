@@ -9,13 +9,13 @@
 
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server/data_access_layer';
+import type { StepExecutionsDataClient } from './data_access_layer';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from './data_access_layer/lib/get_step_executions_by_workflow_execution';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
 export class StepExecutionRepository {
-  constructor(private stepExecutionsDataAccess: StepExecutionsDataAccess) {}
+  constructor(private stepExecutionsDataClient: StepExecutionsDataClient) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -26,7 +26,7 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.stepExecutionsDataAccess.search({
+    const response = await this.stepExecutionsDataClient.search({
       query: {
         match: { workflowRunId: executionId },
       },
@@ -47,7 +47,7 @@ export class StepExecutionRepository {
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return getStepExecutionsByWorkflowExecutionShared({
-      stepExecutionsDataAccess: this.stepExecutionsDataAccess,
+      stepExecutionsDataClient: this.stepExecutionsDataClient,
       workflowExecutionId,
       stepExecutionIds,
     });
@@ -73,11 +73,17 @@ export class StepExecutionRepository {
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
-    const { items } = await this.stepExecutionsDataAccess.getByIds(stepExecutionIds, {
+    const { items } = await this.stepExecutionsDataClient.getByIds(stepExecutionIds, {
       sourceIncludes,
       sourceExcludes,
     });
-    return items.map(({ document }) => document);
+    const shouldNormalizeOutput = sourceIncludes?.includes('output');
+    return items.map(({ document }) => {
+      if (shouldNormalizeOutput && document.output === undefined) {
+        return { ...document, output: null };
+      }
+      return document;
+    });
   }
 
   /**
@@ -116,12 +122,22 @@ export class StepExecutionRepository {
       }
     });
 
-    await this.stepExecutionsDataAccess.bulk({
+    const bulkResponse = await this.stepExecutionsDataClient.bulk({
       items: stepExecutions.map((stepExecution) => ({
         operation: 'upsert',
         document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
       })),
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
     });
+
+    if (bulkResponse.errors) {
+      const failed = bulkResponse.items
+        .filter((item) => item.error)
+        .map((item) => ({ id: item.id, error: item.error }));
+
+      throw new Error(
+        `Failed to upsert ${failed.length} step executions: ${JSON.stringify(failed)}`
+      );
+    }
   }
 }

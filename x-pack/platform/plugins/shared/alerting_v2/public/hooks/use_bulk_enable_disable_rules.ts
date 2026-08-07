@@ -9,8 +9,8 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, IToasts } from '@kbn/core/public';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
-import { RulesApi, type BulkOperationParams } from '../services/rules_api';
+import { RulesApi, type BulkResponse } from '../services/rules_api';
+import type { BulkSelection } from './use_bulk_select';
 import { ruleKeys } from './query_key_factory';
 
 const getHttpFetchErrorMessage = (error: unknown): string | undefined => {
@@ -31,24 +31,32 @@ const addBulkMutationDangerToast = (
   }
 };
 
+/** Dispatches to the by-ID or by-query enable endpoint based on the selection mode. */
+const dispatchBulkEnable = (rulesApi: RulesApi, params: BulkSelection): Promise<BulkResponse> => {
+  if (params.mode === 'by_ids') {
+    return rulesApi.bulkEnableRules({ ids: params.ids });
+  }
+  const { mode: _mode, ...query } = params;
+  return rulesApi.enableRulesByQuery({ ...query, force: true });
+};
+
+/** Dispatches to the by-ID or by-query disable endpoint based on the selection mode. */
+const dispatchBulkDisable = (rulesApi: RulesApi, params: BulkSelection): Promise<BulkResponse> => {
+  if (params.mode === 'by_ids') {
+    return rulesApi.bulkDisableRules({ ids: params.ids });
+  }
+  const { mode: _mode, ...query } = params;
+  return rulesApi.disableRulesByQuery({ ...query, force: true });
+};
+
 export const useBulkEnableRules = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkEnableRules(params),
+    mutationFn: (params: BulkSelection) => dispatchBulkEnable(rulesApi, params),
     onSuccess: (data) => {
-      if (data.truncated) {
-        toasts.addWarning(
-          i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.truncatedFilterMessage', {
-            defaultMessage: 'Enable applied to the first {maxRules, number} rules only.',
-            values: {
-              maxRules: BULK_FILTER_MAX_RULES,
-            },
-          })
-        );
-      }
       if (data.errors.length > 0) {
         toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.partialSuccessMessage', {
@@ -57,10 +65,12 @@ export const useBulkEnableRules = () => {
             values: { errorCount: data.errors.length },
           })
         );
-      } else if (!data.truncated) {
+      } else {
         toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkEnableRules.successMessage', {
-            defaultMessage: 'Rules enabled successfully',
+            defaultMessage:
+              '{affectedCount, plural, one {# rule} other {# rules}} enabled successfully',
+            values: { affectedCount: data.affected_count },
           })
         );
       }
@@ -84,18 +94,8 @@ export const useBulkDisableRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDisableRules(params),
+    mutationFn: (params: BulkSelection) => dispatchBulkDisable(rulesApi, params),
     onSuccess: (data) => {
-      if (data.truncated) {
-        toasts.addWarning(
-          i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.truncatedFilterMessage', {
-            defaultMessage: 'Disable applied to the first {maxRules, number} rules only.',
-            values: {
-              maxRules: BULK_FILTER_MAX_RULES,
-            },
-          })
-        );
-      }
       if (data.errors.length > 0) {
         toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.partialSuccessMessage', {
@@ -104,10 +104,12 @@ export const useBulkDisableRules = () => {
             values: { errorCount: data.errors.length },
           })
         );
-      } else if (!data.truncated) {
+      } else {
         toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkDisableRules.successMessage', {
-            defaultMessage: 'Rules disabled successfully',
+            defaultMessage:
+              '{affectedCount, plural, one {# rule} other {# rules}} disabled successfully',
+            values: { affectedCount: data.affected_count },
           })
         );
       }

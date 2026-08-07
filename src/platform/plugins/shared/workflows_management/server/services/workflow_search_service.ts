@@ -358,7 +358,7 @@ export class WorkflowSearchService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const response = await this.deps.workflowExecutionsDataAccess.search({
+      const response = await this.deps.workflowExecutionsDataClient.search({
         size: 0,
         query: {
           bool: {
@@ -421,7 +421,7 @@ export class WorkflowSearchService {
     }
 
     try {
-      const response = await this.deps.workflowExecutionsDataAccess.search({
+      const response = await this.deps.workflowExecutionsDataClient.search({
         size: 0,
         query: {
           bool: {

@@ -63,8 +63,11 @@ describe.skip('recover_esql end-to-end (real build_config + real graph)', () => 
     invoke = jest.fn().mockResolvedValue(
       '```json\n' +
         JSON.stringify({
-          mark: { type: 'bar', color: 'steelblue' },
-          encoding: { x: { field: 'response.keyword' } },
+          authoring_note: 'Restyled the existing bar chart while preserving its data.',
+          spec: {
+            mark: { type: 'bar', color: 'steelblue' },
+            encoding: { x: { field: 'response.keyword' } },
+          },
         }) +
         '\n```'
     );
