@@ -5,69 +5,44 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { compareWatchesForDisplay } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
-import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useWatches } from '../../hooks/use_watches_api';
-import { CoverageStrip } from './components/coverage_strip';
-import { WatchCardGrid } from './components/watch_card_grid';
-import {
-  WatchesSectionLayout,
-  WatchesSubnavExpandControl,
-} from './components/watches_section_layout';
+import { WatchesSectionLayout } from './components/watches_section_layout';
 import * as i18n from './translations';
 
 export const WatchesPage: React.FC = () => {
-  const history = useHistory();
   const { data, isLoading, error, refetch } = useWatches();
   usePndDocTitle(i18n.PAGE_TITLE);
 
-  const onSelectWatch = useCallback(
-    (watchId: string) => {
-      history.push(`/watches/${watchId}`);
-    },
-    [history]
-  );
-
-  const sectionCount = useMemo(() => {
-    if (!data) return '';
-    const active = data.watches.filter((w) => w.enabled && !w.draft).length;
-    const drafts = data.watches.filter((w) => w.draft).length;
-    const paused = data.watches.filter((w) => !w.enabled && !w.draft).length;
-    return i18n.watchesSectionCount(active, drafts, paused);
-  }, [data]);
-
-  return (
-    <WatchesSectionLayout active="watches">
-      <PndPageSection>
-        <PndPageHeader
-          title={i18n.PAGE_TITLE}
-          subtitle={i18n.PAGE_SUBTITLE}
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-        />
-
-        {isLoading && !data ? (
+  if (isLoading && !data) {
+    return (
+      <WatchesSectionLayout active="watches">
+        <PndPageSection>
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCHES} />
             </EuiFlexItem>
           </EuiFlexGroup>
-        ) : null}
+        </PndPageSection>
+      </WatchesSectionLayout>
+    );
+  }
 
-        {error && !data ? (
+  if (error && !data) {
+    return (
+      <WatchesSectionLayout active="watches">
+        <PndPageSection>
           <EuiEmptyPrompt
             iconType="error"
             color="danger"
@@ -79,51 +54,34 @@ export const WatchesPage: React.FC = () => {
               </EuiButton>
             }
           />
-        ) : null}
+        </PndPageSection>
+      </WatchesSectionLayout>
+    );
+  }
 
-        {data ? (
-          <>
-            {error ? (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  iconType="warning"
-                  title={i18n.STALE_DATA_WARNING}
-                />
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
-            {data.setupFailed.length > 0 ? (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  iconType="warning"
-                  title={i18n.watchSetupFailed(data.setupFailed)}
-                />
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
-            <CoverageStrip watches={data.watches} onSelectWatch={onSelectWatch} />
-            <EuiSpacer size="l" />
-            <EuiFlexGroup alignItems="baseline" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>{i18n.WATCHES_SECTION_TITLE}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {sectionCount}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <WatchCardGrid watches={data.watches} onSelectWatch={onSelectWatch} />
-          </>
-        ) : null}
-      </PndPageSection>
-    </WatchesSectionLayout>
-  );
+  if (data && data.watches.length === 0) {
+    return (
+      <WatchesSectionLayout active="watches">
+        <PndPageSection>
+          <EuiEmptyPrompt
+            iconType="eye"
+            title={<h2>{i18n.NO_WATCHES_TITLE}</h2>}
+            body={<p>{i18n.NO_WATCHES_BODY}</p>}
+            actions={
+              <EuiButton onClick={() => refetch()} fill>
+                {i18n.RETRY}
+              </EuiButton>
+            }
+          />
+        </PndPageSection>
+      </WatchesSectionLayout>
+    );
+  }
+
+  if (data?.watches.length) {
+    const [firstWatch] = [...data.watches].sort(compareWatchesForDisplay);
+    return <Redirect to={`/watches/${firstWatch.id}`} />;
+  }
+
+  return null;
 };

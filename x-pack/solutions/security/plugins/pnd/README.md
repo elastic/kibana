@@ -1,6 +1,6 @@
 # PND plugin (`@kbn/pnd-plugin`)
 
-Security Watch investigation queue and catalog behind `xpack.pnd.enabled`.
+Security Watch investigation queue and configuration UI behind `xpack.pnd.enabled`.
 
 ## Enablement
 
@@ -31,7 +31,7 @@ The only always-on cost of a soft flag is the tiny public plugin entry bundle (~
 Before enabling live projection in shared or production environments:
 
 - Live watch routes currently require **`pnd_read` + Workflows `read` + `readManaged`** because tagged managed leftovers remain visible until their filtering is handled separately. Recent-run enrichment is included only when the caller has the corresponding execution privileges.
-- The Watches page explicitly calls the setup endpoint for users with **`pnd_write` + Workflows `create` + `update`** before listing. Read-only users can list starting points after they exist; GET routes never create data.
+- The Watches area explicitly calls the setup endpoint for users with **`pnd_write` + Workflows `create` + `update`** before listing. Read-only users can list starting points after they exist; GET routes never create data.
 - Settings writes require **`pnd_write` + Workflows `read` + `update`**.
 
 ## Chrome strategy (PR1)
@@ -45,7 +45,7 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 - **Discover** uses the platform `{ link: 'discover' }` destination (real `/app/discover`)
 - **Dashboards** uses Security’s real dashboards destination (same Throughline slot; no PND stub)
 - **Chats** stays in-app and embeds Agent Builder
-- Watches keeps a **content-area** secondary nav (Workflows / Skills / … stubs)
+- Watches keeps a **content-area** secondary nav for individual Watches, Workers, and Skills
 - Ask PND FAB routes to Chats (hidden on `/chats`)
 
 ## Routes
@@ -61,9 +61,10 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 | `/app/pnd/records` | Placeholder — coming soon |
 | `/app/pnd/threat-hunt` | Placeholder — coming soon |
 | `/app/pnd/streams` | Placeholder — coming soon |
-| `/app/pnd/watches` | Customer-owned Watch catalog |
+| `/app/pnd/watches` | Redirect to the first customer-owned Watch |
 | `/app/pnd/watches/:watchId` | Watch detail |
-| `/app/pnd/watches/workflows` … `/guardrails` | Watches section stubs |
+| `/app/pnd/watches/workers` | Workers section stub |
+| `/app/pnd/watches/skills` | Skills section stub |
 | `/app/pnd/investigations/:id` | Investigation inspector shell |
 | `/app/pnd/investigations/:id/proposals/:proposalId` | Proposal detail shell |
 | `/app/pnd/settings` | Settings stub (no dedicated nav item) |
@@ -117,7 +118,7 @@ Creation is create-if-absent. PND does not reconcile, restore, version, or repla
 
 - Platform chrome (header + Security footer utilities)
 - Throughline body order in Security nav; Discover → real Discover; Dashboards → real Security dashboards
-- Brief queue, Watches catalog/detail, Chats Agent Builder embed
+- Brief queue, Watches navigation/detail, Chats Agent Builder embed
 - Investigation shells + mock internal APIs
 
 ## Non-goals (this PR)
@@ -125,7 +126,7 @@ Creation is create-if-absent. PND does not reconcile, restore, version, or repla
 - Nesting routes under `/app/security` or importing Security page wrappers
 - Wiring remaining operate destinations (Alerts, Attacks, …) to real apps
 - Pixel-perfect Throughline CSS port
-- Implementing Workflows / Skills / Activity / Performance / Guardrails data
+- Implementing Workers / Skills aggregate pages or deferred settings such as callable toggles and approval gates
 - No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
 - Custom watch creation and deletion
 

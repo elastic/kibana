@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -26,32 +25,26 @@ import {
   EuiTextArea,
   EuiTitle,
   useEuiTheme,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type AutonomyLevel, type Watch, type WatchCallableRef } from '@kbn/pnd-common';
+import { type AutonomyLevel, type ScopeAccess, type Watch } from '@kbn/pnd-common';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useUpdateWatchSettings, useWatch } from '../../hooks/use_watches_api';
 import { AgentCapabilitiesList } from './components/agent_capabilities_list';
-import { AutonomyMeter } from './components/autonomy_meter';
+import { AutonomySlider } from './components/autonomy_slider';
 import { RecentRunsTable } from './components/recent_runs_table';
 import { RunSparkline } from './components/run_sparkline';
-import { SchedulePanel } from './components/schedule_panel';
 import {
   WatchesSectionLayout,
   WatchesSubnavExpandControl,
 } from './components/watches_section_layout';
 import * as i18n from './translations';
-
-const SCOPE_COLOR: Record<string, string> = {
-  full: '#16b3a6',
-  masked: '#f59e0b',
-  denied: '#ef4444',
-};
 
 const SCHEDULE_INTERVAL_OPTIONS = [
   { value: '15m', text: i18n.SCHEDULE_INTERVAL_15_MINUTES },
@@ -59,6 +52,17 @@ const SCHEDULE_INTERVAL_OPTIONS = [
   { value: '6h', text: i18n.SCHEDULE_INTERVAL_6_HOURS },
   { value: '1d', text: i18n.SCHEDULE_INTERVAL_1_DAY },
 ];
+
+const scopeAccessColor = (access: ScopeAccess, euiTheme: EuiThemeComputed): string => {
+  switch (access) {
+    case 'full':
+      return euiTheme.colors.success;
+    case 'masked':
+      return euiTheme.colors.warning;
+    case 'denied':
+      return euiTheme.colors.danger;
+  }
+};
 
 export const WatchDetailPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -100,12 +104,8 @@ export const WatchDetailPage: React.FC = () => {
     return [{ value: currentInterval, text: currentInterval }, ...SCHEDULE_INTERVAL_OPTIONS];
   }, [localWatch?.scheduleInterval]);
 
-  const stubToast = useCallback(() => {
-    services.notifications?.toasts.addInfo(i18n.POC_STUB_TOAST);
-  }, [services.notifications]);
-
   const onAutonomyChange = useCallback((level: AutonomyLevel) => {
-    setLocalWatch((prev) => (prev ? { ...prev, autonomyLevel: level } : prev));
+    setLocalWatch((previous) => (previous ? { ...previous, autonomyLevel: level } : previous));
     setIsDirty(true);
   }, []);
 
@@ -131,22 +131,12 @@ export const WatchDetailPage: React.FC = () => {
     }
   }, [localWatch, updateSettings, services.notifications]);
 
-  const onToggleCallable = useCallback(
-    (callableId: string) => {
-      setLocalWatch((prev) => {
-        if (!prev) return prev;
-        const callables: WatchCallableRef[] = prev.callables.map((c) =>
-          c.id === callableId ? { ...c, enabled: !c.enabled } : c
-        );
-        return { ...prev, callables };
-      });
-      stubToast();
-    },
-    [stubToast]
+  const workers = useMemo(
+    () => localWatch?.callables.filter(({ kind }) => kind === 'workflow') ?? [],
+    [localWatch]
   );
-
-  const callablesOn = useMemo(
-    () => localWatch?.callables.filter((c) => c.enabled).length ?? 0,
+  const skills = useMemo(
+    () => localWatch?.callables.filter(({ kind }) => kind === 'skill') ?? [],
     [localWatch]
   );
 
@@ -157,13 +147,15 @@ export const WatchDetailPage: React.FC = () => {
 
   if (!hasCurrentWatch && isLoading) {
     return (
-      <PndPageSection>
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCH} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </PndPageSection>
+      <WatchesSectionLayout active="watches" activeWatchId={watchId}>
+        <PndPageSection>
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCH} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </PndPageSection>
+      </WatchesSectionLayout>
     );
   }
 
@@ -171,7 +163,7 @@ export const WatchDetailPage: React.FC = () => {
     const title = isNotFound ? i18n.WATCH_NOT_FOUND_TITLE : i18n.WATCH_LOAD_ERROR_TITLE;
     const body = isNotFound ? i18n.WATCH_NOT_FOUND_BODY : i18n.WATCH_LOAD_ERROR_BODY;
     return (
-      <WatchesSectionLayout active="watches">
+      <WatchesSectionLayout active="watches" activeWatchId={watchId}>
         <PndPageSection>
           <EuiEmptyPrompt
             iconType={isNotFound ? 'search' : 'error'}
@@ -181,7 +173,7 @@ export const WatchDetailPage: React.FC = () => {
               <EuiFlexGroup gutterSize="s" justifyContent="center">
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={() => history.push('/watches')}>
-                    {i18n.BACK_TO_WATCHES}
+                    {i18n.OPEN_A_WATCH}
                   </EuiButton>
                 </EuiFlexItem>
                 {error && !isNotFound ? (
@@ -201,7 +193,7 @@ export const WatchDetailPage: React.FC = () => {
   const canEdit = hasWatchWritePrivileges && !watch.managed;
 
   return (
-    <WatchesSectionLayout active="watches">
+    <WatchesSectionLayout active="watches" activeWatchId={watch.id}>
       <PndPageSection
         contentProps={{
           css: {
@@ -211,35 +203,39 @@ export const WatchDetailPage: React.FC = () => {
       >
         <PndPageHeader
           title={
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
               <EuiFlexItem grow={false}>{watch.name}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {watch.draft ? (
                   <EuiBadge color="warning">{i18n.DRAFT_BADGE}</EuiBadge>
                 ) : watch.enabled ? (
-                  <EuiBadge color="success">{i18n.ACTIVE_BADGE}</EuiBadge>
+                  <EuiBadge color="success">{i18n.ENABLED_BADGE}</EuiBadge>
                 ) : (
                   <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
                 )}
               </EuiFlexItem>
+              {watch.mandate ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{watch.mandate}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           }
-          subtitle={watch.mandate}
           leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-          backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
           rightSideItems={[
             <EuiSwitch
               key="enabled"
-              label={watch.enabled ? i18n.ACTIVE_BADGE : i18n.PAUSED_BADGE}
+              label={i18n.ENABLED_TOGGLE}
               checked={watch.enabled}
-              onChange={(e) => {
+              onChange={(event) => {
                 setLocalWatch((previous) =>
-                  previous ? { ...previous, enabled: e.target.checked } : previous
+                  previous ? { ...previous, enabled: event.target.checked } : previous
                 );
                 setIsDirty(true);
               }}
               disabled={!canEdit}
               compressed
+              data-test-subj="pndWatchEnabledSwitch"
             />,
             ...(canEdit
               ? [
@@ -282,7 +278,7 @@ export const WatchDetailPage: React.FC = () => {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: ${euiTheme.size.m};
-            max-width: 480px;
+            max-width: 520px;
             opacity: ${watch.metrics.runs7d == null ? 0.4 : 1};
           `}
         >
@@ -325,14 +321,26 @@ export const WatchDetailPage: React.FC = () => {
 
         <EuiSpacer size="xl" />
 
-        {/* Identity */}
-        <SectionHeading title={i18n.IDENTITY_TITLE} subtitle={i18n.IDENTITY_SUBTITLE} />
+        <SectionHeading title={i18n.AUTONOMY_TITLE} subtitle={i18n.AUTONOMY_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
-          <EuiFormRow label={i18n.DESCRIPTION_LABEL} fullWidth>
+          <AutonomySlider
+            value={watch.autonomyLevel}
+            onChange={onAutonomyChange}
+            disabled={!canEdit}
+          />
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <SectionHeading title={i18n.GENERAL_TITLE} subtitle={i18n.GENERAL_SUBTITLE} />
+        <EuiPanel hasBorder paddingSize="m">
+          <EuiFormRow label={i18n.DESCRIPTION_LABEL} helpText={i18n.DESCRIPTION_HELP} fullWidth>
             <EuiTextArea
               value={watch.description}
-              onChange={(e) => {
-                setLocalWatch((prev) => (prev ? { ...prev, description: e.target.value } : prev));
+              onChange={(event) => {
+                setLocalWatch((previous) =>
+                  previous ? { ...previous, description: event.target.value } : previous
+                );
                 setIsDirty(true);
               }}
               disabled={!canEdit}
@@ -340,135 +348,118 @@ export const WatchDetailPage: React.FC = () => {
               rows={2}
               fullWidth
               compressed
+              data-test-subj="pndWatchDescription"
             />
           </EuiFormRow>
         </EuiPanel>
 
         <EuiSpacer size="l" />
 
-        {/* Autonomy */}
-        <SectionHeading title={i18n.AUTONOMY_TITLE} subtitle={i18n.AUTONOMY_SUBTITLE} />
+        <SectionHeading title={i18n.TRIGGERS_TITLE} subtitle={i18n.TRIGGERS_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
-          <EuiFormRow label={i18n.AUTONOMY_LEVEL} fullWidth>
-            <div>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiButtonGroup
-                legend={i18n.AUTONOMY_LEVEL}
-                idSelected={watch.autonomyLevel}
-                onChange={(id) => onAutonomyChange(id as AutonomyLevel)}
-                options={[
-                  { id: 'manual', label: i18n.AUTONOMY_MANUAL_OPTION },
-                  { id: 'assisted', label: i18n.AUTONOMY_ASSISTED_OPTION },
-                  { id: 'supervised', label: i18n.AUTONOMY_SUPERVISED_OPTION },
-                ]}
-                buttonSize="compressed"
-                color="primary"
-                isFullWidth
-                isDisabled={!canEdit}
+          {watch.scheduleInterval ? (
+            <EuiFormRow
+              label={i18n.SCHEDULE_INTERVAL_LABEL}
+              helpText={i18n.SCHEDULE_INTERVAL_HELP}
+              fullWidth
+            >
+              <EuiSelect
+                options={scheduleIntervalOptions}
+                value={watch.scheduleInterval}
+                onChange={(event) => {
+                  setLocalWatch((previous) =>
+                    previous ? { ...previous, scheduleInterval: event.target.value } : previous
+                  );
+                  setIsDirty(true);
+                }}
+                disabled={!canEdit}
+                compressed
+                fullWidth
+                data-test-subj="pndWatchScheduleInterval"
               />
-              <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued">
-                {i18n.AUTONOMY_GUARDRAILS_NOTE}
-              </EuiText>
-            </div>
+            </EuiFormRow>
+          ) : (
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              color="warning"
+              title={i18n.NO_SCHEDULED_TRIGGER}
+            />
+          )}
+          <EuiSpacer size="m" />
+          <EuiFormRow helpText={i18n.ALLOW_MANUAL_RUN_HELP}>
+            <EuiSwitch
+              label={i18n.ALLOW_MANUAL_RUN}
+              checked={watch.triggers.some(({ type }) => type === 'manual')}
+              onChange={() => undefined}
+              disabled
+              compressed
+            />
           </EuiFormRow>
         </EuiPanel>
 
         <EuiSpacer size="l" />
 
-        {/* Schedule */}
-        <SectionHeading title={i18n.SCHEDULE_TITLE} subtitle={i18n.SCHEDULE_SUBTITLE} />
-        {watch.scheduleInterval ? (
-          <>
-            <EuiPanel hasBorder paddingSize="m">
-              <EuiFormRow
-                label={i18n.SCHEDULE_INTERVAL_LABEL}
-                helpText={i18n.SCHEDULE_INTERVAL_HELP}
-                fullWidth
-              >
-                <EuiSelect
-                  options={scheduleIntervalOptions}
-                  value={watch.scheduleInterval}
-                  onChange={(e) => {
-                    setLocalWatch((prev) =>
-                      prev ? { ...prev, scheduleInterval: e.target.value } : prev
-                    );
-                    setIsDirty(true);
-                  }}
-                  disabled={!canEdit}
-                  compressed
-                  fullWidth
-                  data-test-subj="pndWatchScheduleInterval"
-                />
-              </EuiFormRow>
-            </EuiPanel>
-            <EuiSpacer size="s" />
-          </>
+        <SectionHeading title={i18n.SCOPE_ROUTING_TITLE} subtitle={i18n.SCOPE_ROUTING_SUBTITLE} />
+        <EuiPanel hasBorder paddingSize="m">
+          <EuiText size="xs" color="subdued">
+            <p>{i18n.DATA_BOUNDARIES_TITLE}</p>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            {watch.scopes.map((scope) => (
+              <EuiFlexItem grow={false} key={scope.name}>
+                <EuiBadge
+                  color="hollow"
+                  css={css`
+                    border-left: 3px solid ${scopeAccessColor(scope.access, euiTheme)};
+                  `}
+                >
+                  {scope.name}: {scope.label}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <SectionHeading
+          title={i18n.WORKERS_SECTION_TITLE}
+          subtitle={i18n.WORKERS_SECTION_SUBTITLE}
+        />
+        {workers.length === 0 ? (
+          <EuiText size="s" color="subdued">
+            <p>{i18n.WORKERS_EMPTY}</p>
+          </EuiText>
         ) : (
-          <>
-            <EuiCallOut announceOnMount size="s" color="warning" title={i18n.NO_SCHEDULE_TITLE}>
-              {i18n.NO_SCHEDULE_DESCRIPTION}
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </>
+          <AgentCapabilitiesList callables={workers} />
         )}
-        <SchedulePanel watch={watch} />
 
         <EuiSpacer size="l" />
 
-        {/* Agent capabilities */}
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem>
-            <SectionHeading
-              title={i18n.AGENT_CAPABILITIES_TITLE}
-              subtitle={i18n.agentCapabilitiesSubtitle(callablesOn, watch.callables.length)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={stubToast}>
-              {i18n.ADD_CAPABILITY}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <AgentCapabilitiesList callables={watch.callables} onToggle={onToggleCallable} />
+        <SectionHeading title={i18n.SKILLS_SECTION_TITLE} subtitle={i18n.SKILLS_SECTION_SUBTITLE} />
+        <EuiCallOut
+          announceOnMount={false}
+          title={i18n.SKILL_DEPENDENCIES_TITLE}
+          color="warning"
+          iconType="warning"
+          size="s"
+        >
+          <p>{i18n.SKILL_DEPENDENCIES_BODY}</p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+        {skills.length === 0 ? (
+          <EuiText size="s" color="subdued">
+            <p>{i18n.SKILLS_EMPTY}</p>
+          </EuiText>
+        ) : (
+          <AgentCapabilitiesList callables={skills} />
+        )}
 
         <EuiSpacer size="l" />
 
-        {/* Data boundaries */}
-        <SectionHeading title={i18n.DATA_BOUNDARIES_TITLE} />
-        <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-          {watch.scopes.map((scope) => (
-            <EuiFlexItem grow={false} key={scope.name}>
-              <EuiBadge
-                color="hollow"
-                css={css`
-                  border-left: 3px solid ${SCOPE_COLOR[scope.access] ?? euiTheme.colors.lightShade};
-                `}
-              >
-                {scope.name} — {scope.label}
-              </EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        {/* Recent runs */}
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <SectionHeading title={i18n.RECENT_RUNS_TITLE} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={stubToast}>
-              {i18n.VIEW_ALL_RUNS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <SectionHeading title={i18n.RECENT_RUNS_TITLE} subtitle={i18n.RECENT_RUNS_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
           <RecentRunsTable runs={watch.recentRuns} />
         </EuiPanel>

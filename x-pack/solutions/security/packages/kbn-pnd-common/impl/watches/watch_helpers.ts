@@ -56,7 +56,7 @@ export interface WatchDisplaySortable {
   name: string;
 }
 
-/** Sort watches for coverage strip + cards: catalog order, then name. */
+/** Sort watches by configured display order, then name. */
 export function compareWatchesForDisplay(a: WatchDisplaySortable, b: WatchDisplaySortable): number {
   if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
   return a.name.localeCompare(b.name);

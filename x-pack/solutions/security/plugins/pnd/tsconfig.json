@@ -9,7 +9,6 @@
     "@kbn/core",
     "@kbn/core-http-server-mocks",
     "@kbn/config-schema",
-    "@kbn/logging",
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/pnd-common",

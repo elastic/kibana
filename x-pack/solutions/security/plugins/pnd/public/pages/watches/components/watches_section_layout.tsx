@@ -7,7 +7,15 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  EuiToolTip,
+} from '@elastic/eui';
+import { useWatches } from '../../../hooks/use_watches_api';
 import { PndWatchesNav, type WatchesSectionId } from './pnd_watches_nav';
 import * as i18n from '../translations';
 
@@ -61,12 +69,18 @@ export const WatchesSubnavExpandControl: React.FC = () => {
 
 interface WatchesSectionLayoutProps {
   active: WatchesSectionId;
+  activeWatchId?: string;
   children: React.ReactNode;
 }
 
-export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ active, children }) => {
+export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
+  active,
+  activeWatchId,
+  children,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
+  const { data, isLoading } = useWatches();
 
   const setCollapsed = useCallback((next: boolean) => {
     setIsCollapsed(next);
@@ -99,7 +113,14 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ acti
       >
         {!isCollapsed ? (
           <EuiFlexItem grow={false}>
-            <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
+            <PndWatchesNav
+              active={active}
+              activeWatchId={activeWatchId}
+              onCollapse={() => setCollapsed(true)}
+              watches={data?.watches ?? []}
+              setupFailed={data?.setupFailed ?? []}
+              isLoading={isLoading}
+            />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem
@@ -110,6 +131,19 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ acti
             background: ${euiTheme.colors.body};
           `}
         >
+          {isCollapsed && data?.setupFailed.length ? (
+            <EuiCallOut
+              announceOnMount
+              css={css`
+                margin: ${euiTheme.size.m};
+                margin-bottom: 0;
+              `}
+              color="warning"
+              iconType="warning"
+              size="s"
+              title={i18n.watchSetupFailed(data.setupFailed)}
+            />
+          ) : null}
           {children}
         </EuiFlexItem>
       </EuiFlexGroup>
