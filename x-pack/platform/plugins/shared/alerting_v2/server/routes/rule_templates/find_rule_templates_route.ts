@@ -57,7 +57,7 @@ export class FindRuleTemplatesRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'List rule templates',
     description:
-      'Get a paginated list of the rule templates installed for the alerting v2 engine. Templates authored for alerting v1 are never returned.',
+      'Get a paginated list of the rule templates installed for alerting. Templates authored for classic alerting are never returned.',
   } as const;
   static schemas = {
     request: {

@@ -12,7 +12,7 @@ import { inject, injectable } from 'inversify';
 import type { FindRuleTemplatesResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { buildSoSearch } from '../build_so_search';
-import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { getRuleTemplateNotFoundMessage } from '../errors/rule_template_error_messages';
 import {
   LoggerServiceToken,
@@ -80,7 +80,7 @@ export class RuleTemplatesClient {
         // content is discoverable.
         this.logger.error({
           error: e instanceof Error ? e : new Error(String(e)),
-          code: ALERTING_V2_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+          code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
         });
         return [];
       }
@@ -107,7 +107,7 @@ export class RuleTemplatesClient {
       // "no such v2 template" as far as this API is concerned.
       this.logger.error({
         error: e instanceof Error ? e : new Error(String(e)),
-        code: ALERTING_V2_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
+        code: ALERTING_LOG_CODES.RULE_TEMPLATE_VALIDATION_FAILED,
       });
       throw this.ruleTemplateNotFound(id);
     }
@@ -129,7 +129,7 @@ export class RuleTemplatesClient {
 
   private ruleTemplateNotFound(id: string): Boom.Boom {
     return Boom.notFound(getRuleTemplateNotFoundMessage(id), {
-      code: ALERTING_V2_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND,
+      code: ALERTING_ERROR_CODES.RULE_TEMPLATE_NOT_FOUND,
       details: { rule_template_id: id },
     });
   }
