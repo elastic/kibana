@@ -34,8 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let apiClient: SignificantEventsSupertestRepositoryClient;
 
-  // Failing: See https://github.com/elastic/kibana/issues/282874
-  describe.skip('Significant Events', function () {
+  describe('Significant Events', function () {
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
