@@ -10,6 +10,5 @@ export { RuleTemplateSavedObjectsClientToken } from './tokens';
 export type {
   FindRuleTemplatesArgs,
   GetRuleTemplateArgs,
-  GetRuleTemplateTagsArgs,
   RuleTemplateSavedObjectAttributes,
 } from './types';

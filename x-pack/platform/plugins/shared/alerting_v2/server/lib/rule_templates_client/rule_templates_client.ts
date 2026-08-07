@@ -9,10 +9,9 @@ import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { inject, injectable } from 'inversify';
+import type { FindRuleTemplatesResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { buildSoSearch } from '../build_so_search';
-import { TAGS_AGG_SIZE, type TagsAggregationResult } from '../constants';
-import { escapeRegex } from '../escape_regex';
 import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { getRuleTemplateNotFoundMessage } from '../errors/rule_template_error_messages';
 import {
@@ -20,19 +19,15 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { RuleTemplateSavedObjectsClientToken } from './tokens';
-import type { FindRuleTemplatesResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type {
   FindRuleTemplatesArgs,
   GetRuleTemplateArgs,
-  GetRuleTemplateTagsArgs,
   RuleTemplateSavedObjectAttributes,
 } from './types';
 import {
-  buildEngineV2Filter,
   buildFindRuleTemplatesFilter,
   mapSortField,
   RULE_TEMPLATE_SEARCH_FIELDS,
-  RULE_TEMPLATE_TAGS_FIELD,
   transformRuleTemplateSoAttributesToApiResponse,
 } from './utils';
 
@@ -116,33 +111,6 @@ export class RuleTemplatesClient {
       });
       throw this.ruleTemplateNotFound(id);
     }
-  }
-
-  public async getTags({ search }: GetRuleTemplateTagsArgs = {}): Promise<string[]> {
-    const res = await this.savedObjectsClient.find<
-      RuleTemplateSavedObjectAttributes,
-      TagsAggregationResult
-    >({
-      type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-      perPage: 0,
-      filter: buildEngineV2Filter(),
-      aggs: {
-        tags: {
-          terms: {
-            field: RULE_TEMPLATE_TAGS_FIELD,
-            size: TAGS_AGG_SIZE,
-            order: { _key: 'asc' as const },
-            // `include` is a Lucene regex anchored on the whole term, so the
-            // trailing `.*` turns the caller's search into a prefix match.
-            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
-          },
-        },
-      },
-    });
-
-    return (
-      res.aggregations?.tags.buckets.map(({ key }) => key).filter((key) => key.length > 0) ?? []
-    );
   }
 
   private async getRuleTemplateSo(id: string) {

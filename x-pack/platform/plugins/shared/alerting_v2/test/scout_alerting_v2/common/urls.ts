@@ -126,13 +126,6 @@ export const getFindRuleTemplatesUrl = (
   return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
 };
 
-/** URL for the rule template tags aggregation endpoint. */
-export const getRuleTemplateTagsUrl = (query?: { search?: string }): string => {
-  const path = `${RULE_TEMPLATE_API_PATH}/_tags`;
-  const qs = query ? toQueryString(query) : '';
-  return qs ? `${path}?${qs}` : path;
-};
-
 const getAlertActionUrl = (groupHash: string, suffix: string) =>
   `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
 

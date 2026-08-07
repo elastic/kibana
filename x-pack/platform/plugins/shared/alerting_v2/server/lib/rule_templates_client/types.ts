@@ -26,7 +26,3 @@ export interface FindRuleTemplatesArgs {
 export interface GetRuleTemplateArgs {
   id: string;
 }
-
-export interface GetRuleTemplateTagsArgs {
-  search?: string;
-}

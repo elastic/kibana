@@ -174,7 +174,6 @@ export {
   listRuleExecutionsUrl,
   getFindRuleTemplatesUrl,
   getRuleTemplateUrl,
-  getRuleTemplateTagsUrl,
 } from '../../common/urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
@@ -182,7 +181,6 @@ export {
   ACTION_POLICY_TAG_MAX_LENGTH,
   ACTION_POLICY_TAGS_MAX_COUNT,
   RULE_TEMPLATE_PER_PAGE_MAX,
-  RULE_TEMPLATE_TAG_MAX_LENGTH,
   RULE_TEMPLATE_TAGS_MAX_COUNT,
 } from '../../common/constants';
 export * as testData from '../../common/constants';

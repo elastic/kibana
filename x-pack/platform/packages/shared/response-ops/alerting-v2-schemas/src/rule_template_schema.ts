@@ -84,23 +84,3 @@ export const ruleTemplateIdParamsSchema = z.object({
 });
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;
-
-export const ruleTemplateTagsRequestSchema = z.object({
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_TAG_LENGTH)
-    .optional()
-    .describe('Only return tags starting with this prefix.'),
-});
-
-export type RuleTemplateTagsRequest = z.infer<typeof ruleTemplateTagsRequestSchema>;
-
-export const ruleTemplateTagsResponseSchema = z
-  .object({
-    tags: z.array(z.string()).describe('The list of unique rule template tags.'),
-  })
-  .describe('All unique tags across rule templates.');
-
-export type RuleTemplateTagsResponse = z.infer<typeof ruleTemplateTagsResponseSchema>;
