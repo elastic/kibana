@@ -50,11 +50,10 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
       const fieldName = '_bytes-runtimefield';
       const labeledName = '_bytes-runtimefield2';
 
-      const baselineCount = await unifiedFieldList.getAvailableFieldCount();
-      expect(baselineCount).toBeGreaterThan(0);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
       await discover.createRuntimeField(fieldName, `emit((doc["bytes"].value * 2).toString())`);
-      await unifiedFieldList.expectAvailableFieldCount(baselineCount + 1);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
       await unifiedFieldList.searchField(fieldName);
       await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
 
@@ -69,7 +68,7 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
       await discover.deleteRuntimeField(fieldName);
       await unifiedFieldList.clearFieldSearch();
-      await unifiedFieldList.expectAvailableFieldCount(baselineCount);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
       await unifiedFieldList.searchField(fieldName);
       await expect(unifiedFieldList.getAvailableField(fieldName)).toBeHidden();
     }
@@ -80,13 +79,12 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
     async ({ page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const invalidField = '_invalid-runtimefield';
-      const baselineCount = await unifiedFieldList.getAvailableFieldCount();
 
       // Curly quotes make this an invalid Painless script (matches FTR).
       await discover.createRuntimeField(invalidField, 'emit(\u2018\u2019);');
       await expect(discover.getErrorCalloutTitle()).toBeVisible();
 
-      await unifiedFieldList.expectAvailableFieldCount(baselineCount + 1);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
       await unifiedFieldList.searchField(invalidField);
       await expect(unifiedFieldList.getAvailableField(invalidField)).toBeVisible();
 
@@ -106,10 +104,11 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
     async ({ pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const newField = '_test_field_and_column_removal';
-      const baselineCount = await unifiedFieldList.getAvailableFieldCount();
+
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
       await discover.createRuntimeField(newField, 'emit("hi there")');
-      await unifiedFieldList.expectAvailableFieldCount(baselineCount + 1);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
 
       expect(await unifiedFieldList.isFieldSelected(newField)).toBe(false);
       expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);

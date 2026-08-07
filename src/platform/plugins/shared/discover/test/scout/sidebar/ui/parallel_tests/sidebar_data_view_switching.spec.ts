@@ -44,8 +44,7 @@ spaceTest.describe('Discover sidebar data view switching', { tag: tags.deploymen
     async ({ pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
 
-      const baselineCount = await unifiedFieldList.getAvailableFieldCount();
-      expect(baselineCount).toBeGreaterThan(0);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
       await discover.selectDataView('missing-sidebar-index-*');
       await discover.waitUntilSearchingHasFinished();
@@ -55,29 +54,37 @@ spaceTest.describe('Discover sidebar data view switching', { tag: tags.deploymen
 
       await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
       await discover.waitUntilSearchingHasFinished();
-      await unifiedFieldList.expectAvailableFieldCount(baselineCount);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
     }
   );
 
   spaceTest('updates the sidebar when switching data views', async ({ pageObjects }) => {
     const { discover, unifiedFieldList } = pageObjects;
 
-    const baselineCount = await unifiedFieldList.getAvailableFieldCount();
-    expect(baselineCount).toBeGreaterThan(0);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
     await discover.selectDataView('without-timefield');
     await discover.waitUntilSearchingHasFinished();
-    const withoutTimefieldCount = await unifiedFieldList.getAvailableFieldCount();
-    expect(withoutTimefieldCount).toBeGreaterThan(0);
-    expect(withoutTimefieldCount).toBeLessThan(baselineCount);
+    await unifiedFieldList.expectAvailableFieldCount(
+      testData.WITHOUT_TIMEFIELD_AVAILABLE_FIELD_COUNT
+    );
+    await unifiedFieldList.expectSidebarSectionFieldCount(
+      'meta',
+      testData.LOGSTASH_META_FIELD_COUNT
+    );
 
     await discover.selectDataView('with-timefield');
     await discover.waitUntilSearchingHasFinished();
+    await unifiedFieldList.expectAvailableFieldCount(0);
+    await unifiedFieldList.expectSidebarSectionFieldCount(
+      'empty',
+      testData.WITH_TIMEFIELD_EMPTY_FIELD_COUNT
+    );
     await expect(unifiedFieldList.getNoFieldsCallout('available', 'noFieldsMatch')).toBeVisible();
 
     await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
     await discover.waitUntilSearchingHasFinished();
-    await unifiedFieldList.expectAvailableFieldCount(baselineCount);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
   });
 
   spaceTest(
@@ -95,7 +102,13 @@ spaceTest.describe('Discover sidebar data view switching', { tag: tags.deploymen
       });
       await discover.waitUntilSearchingHasFinished();
 
-      expect(await unifiedFieldList.getAvailableFieldCount()).toBeGreaterThan(0);
+      await unifiedFieldList.expectAvailableFieldCount(
+        testData.WITH_TIMEFIELD_MATCHING_RANGE_AVAILABLE_FIELD_COUNT
+      );
+      await unifiedFieldList.expectSidebarSectionFieldCount(
+        'meta',
+        testData.LOGSTASH_META_FIELD_COUNT
+      );
     }
   );
 });

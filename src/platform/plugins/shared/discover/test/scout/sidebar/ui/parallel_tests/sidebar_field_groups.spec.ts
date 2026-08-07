@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '../fixtures';
+import { spaceTest, tags, testData } from '../fixtures';
 
 spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -38,10 +38,13 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
     expect(availableFields).toContain('extension');
     expect(availableFields).toContain('@message');
-    expect(availableFields.length).toBeGreaterThan(0);
-    await unifiedFieldList.expectAvailableFieldCount(availableFields.length);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
     await unifiedFieldList.openSidebarSection('meta');
+    await unifiedFieldList.expectSidebarSectionFieldCount(
+      'meta',
+      testData.LOGSTASH_META_FIELD_COUNT
+    );
     const metaFields = await unifiedFieldList.getSidebarSectionFieldNames('meta');
     expect(metaFields).toContain('_id');
     expect(metaFields).toContain('_index');
@@ -68,8 +71,8 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         'extension',
         '@message',
       ]);
-
-      expect(await unifiedFieldList.getSidebarSectionFieldCount('popular')).toBeGreaterThan(0);
+      await unifiedFieldList.expectSidebarSectionFieldCount('popular', 2);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
       await unifiedFieldList.clickFieldListItemRemove('@message');
       await discover.waitUntilSearchingHasFinished();
@@ -83,6 +86,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         'bytes',
         '@message',
       ]);
+      await unifiedFieldList.expectSidebarSectionFieldCount('popular', 3);
 
       const popularBeforeRefresh = await unifiedFieldList.getSidebarSectionFieldNames('popular');
       expect(popularBeforeRefresh).toContain('extension');

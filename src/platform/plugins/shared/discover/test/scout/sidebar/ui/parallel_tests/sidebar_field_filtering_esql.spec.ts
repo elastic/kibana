@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Discover sidebar field filtering in ES|QL',
@@ -37,14 +37,23 @@ spaceTest.describe(
       await expect(page.locator('[data-test-subj^="typeFilter-"]')).toHaveCount(6);
       await unifiedFieldList.closeFieldTypeFilter();
 
-      const initialCount = await unifiedFieldList.getAvailableFieldCount();
-      expect(initialCount).toBeGreaterThan(0);
+      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT);
+      await unifiedFieldList.expectSidebarSectionFieldCount(
+        'empty',
+        testData.LOGSTASH_ESQL_EMPTY_FIELD_COUNT
+      );
 
       await unifiedFieldList.openFieldTypeFilter();
       await unifiedFieldList.selectFieldTypeFilter('number');
       await unifiedFieldList.closeFieldTypeFilter();
 
-      expect(await unifiedFieldList.getAvailableFieldCount()).toBeLessThan(initialCount);
+      await unifiedFieldList.expectAvailableFieldCount(
+        testData.LOGSTASH_ESQL_NUMBER_FILTER_AVAILABLE_FIELD_COUNT
+      );
+      await unifiedFieldList.expectSidebarSectionFieldCount(
+        'empty',
+        testData.LOGSTASH_ESQL_NUMBER_FILTER_EMPTY_FIELD_COUNT
+      );
     });
 
     spaceTest('shows empty fields for a KEEP query', async ({ pageObjects }) => {
@@ -55,8 +64,13 @@ spaceTest.describe(
       );
 
       await unifiedFieldList.expectSidebarSectionFieldCount('selected', 2);
-      expect(await unifiedFieldList.getAvailableFieldCount()).toBeGreaterThan(0);
-      expect(await unifiedFieldList.getSidebarSectionFieldCount('empty')).toBeGreaterThan(0);
+      await unifiedFieldList.expectAvailableFieldCount(
+        testData.LOGSTASH_ESQL_KEEP_AVAILABLE_FIELD_COUNT
+      );
+      await unifiedFieldList.expectSidebarSectionFieldCount(
+        'empty',
+        testData.LOGSTASH_ESQL_KEEP_EMPTY_FIELD_COUNT
+      );
     });
   }
 );

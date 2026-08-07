@@ -49,6 +49,32 @@ export const DEFAULT_DATA_VIEW = 'logstash-*';
 export const SAVED_SEARCH_TITLE = 'A Saved Search';
 
 /**
+ * Sidebar field counts from the Discover group6 FTR suite. These come from the
+ * stable logstash_functional / many_fields / without-timefield archives under
+ * the default Discover time range.
+ */
+export const LOGSTASH_AVAILABLE_FIELD_COUNT = 49;
+export const LOGSTASH_EMPTY_FIELD_COUNT = 5;
+export const LOGSTASH_META_FIELD_COUNT = 4;
+
+export const MANY_FIELDS_AVAILABLE_FIELD_COUNT = 6873;
+export const MANY_FIELDS_META_FIELD_COUNT = 4;
+
+export const LOGSTASH_KEYWORD_FILTER_AVAILABLE_FIELD_COUNT = 6;
+export const LOGSTASH_KEYWORD_AND_NUMBER_FILTER_AVAILABLE_FIELD_COUNT = 11;
+
+export const LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT = 77;
+export const LOGSTASH_ESQL_EMPTY_FIELD_COUNT = 6;
+export const LOGSTASH_ESQL_NUMBER_FILTER_AVAILABLE_FIELD_COUNT = 5;
+export const LOGSTASH_ESQL_NUMBER_FILTER_EMPTY_FIELD_COUNT = 2;
+export const LOGSTASH_ESQL_KEEP_AVAILABLE_FIELD_COUNT = 1;
+export const LOGSTASH_ESQL_KEEP_EMPTY_FIELD_COUNT = 1;
+
+export const WITHOUT_TIMEFIELD_AVAILABLE_FIELD_COUNT = 6;
+export const WITH_TIMEFIELD_EMPTY_FIELD_COUNT = 7;
+export const WITH_TIMEFIELD_MATCHING_RANGE_AVAILABLE_FIELD_COUNT = 7;
+
+/**
  * Default time range that covers the `logstash_functional` fixture data.
  * Matches the FTR `timePicker.setDefaultAbsoluteRangeViaUiSettings()` values.
  *

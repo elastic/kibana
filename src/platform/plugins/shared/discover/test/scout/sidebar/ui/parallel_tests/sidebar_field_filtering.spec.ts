@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '../fixtures';
+import { spaceTest, tags, testData } from '../fixtures';
 
 spaceTest.describe('Discover sidebar field filtering', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -28,23 +27,25 @@ spaceTest.describe('Discover sidebar field filtering', { tag: tags.deploymentAgn
   spaceTest('filters the field list by field type', async ({ pageObjects }) => {
     const { unifiedFieldList } = pageObjects;
 
-    const initialAvailable = await unifiedFieldList.getAvailableFieldCount();
-    expect(initialAvailable).toBeGreaterThan(0);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
     await unifiedFieldList.openFieldTypeFilter();
     await unifiedFieldList.selectFieldTypeFilter('keyword');
     await unifiedFieldList.closeFieldTypeFilter();
 
-    const keywordOnlyCount = await unifiedFieldList.getAvailableFieldCount();
-    expect(keywordOnlyCount).toBeLessThan(initialAvailable);
+    await unifiedFieldList.expectAvailableFieldCount(
+      testData.LOGSTASH_KEYWORD_FILTER_AVAILABLE_FIELD_COUNT
+    );
 
     await unifiedFieldList.openFieldTypeFilter();
     await unifiedFieldList.selectFieldTypeFilter('number');
     await unifiedFieldList.closeFieldTypeFilter();
 
-    expect(await unifiedFieldList.getAvailableFieldCount()).toBeGreaterThan(keywordOnlyCount);
+    await unifiedFieldList.expectAvailableFieldCount(
+      testData.LOGSTASH_KEYWORD_AND_NUMBER_FILTER_AVAILABLE_FIELD_COUNT
+    );
 
     await unifiedFieldList.clearFieldTypeFilters();
-    await unifiedFieldList.expectAvailableFieldCount(initialAvailable);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
   });
 });

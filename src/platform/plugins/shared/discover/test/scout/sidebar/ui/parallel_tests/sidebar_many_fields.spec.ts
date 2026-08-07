@@ -30,17 +30,28 @@ spaceTest.describe('Discover sidebar many fields', { tag: tags.deploymentAgnosti
   spaceTest('loads a data view with thousands of fields', async ({ pageObjects }) => {
     const { discover, unifiedFieldList } = pageObjects;
 
-    const baselineCount = await unifiedFieldList.getAvailableFieldCount();
-    expect(baselineCount).toBeGreaterThan(0);
+    await unifiedFieldList.waitUntilSidebarHasLoaded();
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
+      String(testData.LOGSTASH_AVAILABLE_FIELD_COUNT)
+    );
 
     await discover.selectDataView('indices-stats*');
     await discover.waitUntilSearchingHasFinished();
 
-    // Behavioral: the wide index exposes far more fields than logstash defaults.
-    expect(await unifiedFieldList.getAvailableFieldCount()).toBeGreaterThan(1_000);
+    await unifiedFieldList.waitUntilSidebarHasLoaded();
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
+      String(testData.MANY_FIELDS_AVAILABLE_FIELD_COUNT)
+    );
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('meta')).toHaveText(
+      String(testData.MANY_FIELDS_META_FIELD_COUNT)
+    );
 
     await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
     await discover.waitUntilSearchingHasFinished();
-    await unifiedFieldList.expectAvailableFieldCount(baselineCount);
+
+    await unifiedFieldList.waitUntilSidebarHasLoaded();
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
+      String(testData.LOGSTASH_AVAILABLE_FIELD_COUNT)
+    );
   });
 });

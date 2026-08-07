@@ -20,7 +20,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
     });
 
@@ -33,17 +33,21 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
-        const classicBaseline = await unifiedFieldList.getAvailableFieldCount();
-        expect(classicBaseline).toBeGreaterThan(0);
-
         await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10000');
-        expect(await unifiedFieldList.getAvailableFieldCount()).toBeGreaterThan(classicBaseline);
+        await unifiedFieldList.expectAvailableFieldCount(
+          testData.LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT
+        );
+        await unifiedFieldList.expectSidebarSectionFieldCount(
+          'empty',
+          testData.LOGSTASH_ESQL_EMPTY_FIELD_COUNT
+        );
 
         await discover.writeAndSubmitEsqlQuery(
           'from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB'
         );
 
         await unifiedFieldList.expectSidebarSectionFieldCount('selected', 2);
+        await unifiedFieldList.expectAvailableFieldCount(2);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
           'countB',
           'geo.dest',
@@ -52,7 +56,7 @@ spaceTest.describe(
         await discover.selectClassicMode();
         await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
         await discover.waitUntilSearchingHasFinished();
-        await unifiedFieldList.expectAvailableFieldCount(classicBaseline);
+        await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
       }
     );
   }

@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '../fixtures';
+import { spaceTest, tags, testData } from '../fixtures';
 
 spaceTest.describe('Discover sidebar field search', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -25,21 +25,16 @@ spaceTest.describe('Discover sidebar field search', { tag: tags.deploymentAgnost
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('narrows available fields when searching by name', async ({ page, pageObjects }) => {
+  spaceTest('narrows available fields when searching by name', async ({ pageObjects }) => {
     const { unifiedFieldList } = pageObjects;
 
-    const initialCount = await unifiedFieldList.getAvailableFieldCount();
-    expect(initialCount).toBeGreaterThan(0);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
     await unifiedFieldList.searchField('clientip');
-    // Count updates asynchronously after the search input; wait for it to change.
-    await expect(page.testSubj.locator('fieldListGroupedAvailableFields-count')).not.toHaveText(
-      String(initialCount)
-    );
-    expect(await unifiedFieldList.getAvailableFieldCount()).toBeLessThan(initialCount);
+    await unifiedFieldList.expectAvailableFieldCount(1);
     await expect(unifiedFieldList.getAvailableField('clientip')).toBeVisible();
 
     await unifiedFieldList.clearFieldSearch();
-    await unifiedFieldList.expectAvailableFieldCount(initialCount);
+    await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
   });
 });
