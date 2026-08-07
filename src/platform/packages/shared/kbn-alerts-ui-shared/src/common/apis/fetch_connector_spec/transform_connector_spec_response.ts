@@ -32,7 +32,13 @@ export interface ConnectorSpecWireResponse {
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
-  actions?: Array<{ name: string; description?: string; is_tool: boolean }>;
+  actions?: ConnectorActionWireDef[];
+}
+
+export interface ConnectorActionWireDef {
+  name: string;
+  description?: string;
+  is_tool: boolean;
 }
 
 /** Client-side connector spec after normalising API casing. */

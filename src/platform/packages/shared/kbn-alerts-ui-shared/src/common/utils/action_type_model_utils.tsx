@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazy, useMemo } from 'react';
+import React, { lazy, useState, useMemo } from 'react';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
@@ -113,6 +113,9 @@ export function transformSpecToActionTypeModel(
   docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
+  let initialSelectedActions: string[] | null = null;
+  let currentSelectedActions: string[] | null = null;
+
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
@@ -125,12 +128,11 @@ export function transformSpecToActionTypeModel(
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
-      const [{ generateFormFields }, { ConnectorActionSelector }, { EuiSpacer }, React] =
+      const [{ generateFormFields }, { ConnectorActionSelector }, { EuiSpacer }] =
         await Promise.all([
           import(/* webpackPrefetch: true */ '@kbn/response-ops-form-generator'),
           import('../components/connector_action_selector'),
           import('@elastic/eui'),
-          import('react'),
         ]);
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
@@ -150,15 +152,27 @@ export function transformSpecToActionTypeModel(
           formConfig: { disabled: readOnly, isEdit },
           metaFunctions: { getMeta, setMeta },
         });
+
+        const [selectedActions, setSelectedActions] = useState<string[] | null>(
+          () => initialSelectedActions
+        );
+        // Keep currentSelectedActions in sync so the serializer sees the latest value.
+        currentSelectedActions = selectedActions;
+
         if (specActions.length <= 1) {
           return configFields;
         }
-        return React.createElement(
-          React.Fragment,
-          null,
-          configFields,
-          React.createElement(EuiSpacer, { size: 'm' }),
-          React.createElement(ConnectorActionSelector, { actions: specActions, readOnly })
+        return (
+          <>
+            {configFields}
+            <EuiSpacer size="m" />
+            <ConnectorActionSelector
+              value={selectedActions}
+              onChange={setSelectedActions}
+              actions={specActions}
+              readOnly={readOnly}
+            />
+          </>
         );
       }
       return { default: SpecConnectorFormFields };
@@ -166,53 +180,38 @@ export function transformSpecToActionTypeModel(
     actionParamsFields: lazy(async () => ({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
-      serializer: createConnectorFormSerializer() as unknown as NonNullable<
-        ActionTypeModel['connectorForm']
-      >['serializer'],
-      deserializer: createConnectorFormDeserializer() as unknown as NonNullable<
-        ActionTypeModel['connectorForm']
-      >['deserializer'],
+      serializer: ((formData: Record<string, unknown>) => {
+        const secrets = formData?.secrets as Record<string, unknown> | undefined;
+        const config = formData?.config as Record<string, unknown> | undefined;
+
+        const updatedConfig: Record<string, unknown> = {
+          ...(config ?? {}),
+          ...(secrets?.authType ? { authType: secrets.authType } : {}),
+        };
+
+        // null = "recommended actions" sentinel; strip so no selectedActions key is saved.
+        if (currentSelectedActions === null) {
+          delete updatedConfig.selectedActions;
+        } else {
+          updatedConfig.selectedActions = currentSelectedActions;
+        }
+
+        return { ...formData, config: updatedConfig };
+      }) as unknown as NonNullable<ActionTypeModel['connectorForm']>['serializer'],
+      deserializer: ((apiData: Record<string, unknown>) => {
+        const config = apiData?.config as Record<string, unknown> | undefined;
+        const secrets = apiData?.secrets as Record<string, unknown> | undefined;
+
+        // Capture the saved selectedActions so the component can initialize from it.
+        initialSelectedActions = (config?.selectedActions as string[] | null | undefined) ?? null;
+        currentSelectedActions = initialSelectedActions;
+
+        if (!config?.authType || secrets?.authType) {
+          return apiData;
+        }
+
+        return { ...apiData, secrets: { ...(secrets ?? {}), authType: config.authType } };
+      }) as unknown as NonNullable<ActionTypeModel['connectorForm']>['deserializer'],
     },
-  };
-}
-
-/**
- * Copy secrets.authType to config.authType when saving the connector.
- * This ensures authType persists since secrets are stripped by the API.
- */
-function createConnectorFormSerializer() {
-  return (formData: Record<string, unknown>) => {
-    const secrets = formData?.secrets as Record<string, unknown> | undefined;
-    const config = formData?.config as Record<string, unknown> | undefined;
-
-    const updatedConfig: Record<string, unknown> = {
-      ...(config ?? {}),
-      ...(secrets?.authType ? { authType: secrets.authType } : {}),
-    };
-
-    // null = "recommended actions" sentinel; strip so no selectedActions key is saved.
-    if (updatedConfig.selectedActions === null) {
-      delete updatedConfig.selectedActions;
-    }
-
-    return { ...formData, config: updatedConfig };
-  };
-}
-
-/**
- * Copies config.authType to secrets.authType when loading the connector.
- * This allows the discriminated union widget to display the correct option on
- * connector edit.
- */
-function createConnectorFormDeserializer() {
-  return (apiData: Record<string, unknown>) => {
-    const config = apiData?.config as Record<string, unknown> | undefined;
-    const secrets = apiData?.secrets as Record<string, unknown> | undefined;
-
-    if (!config?.authType || secrets?.authType) {
-      return apiData;
-    }
-
-    return { ...apiData, secrets: { ...(secrets ?? {}), authType: config.authType } };
   };
 }

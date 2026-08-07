@@ -203,17 +203,13 @@ function convertDynamicConnectorsToContractsInternal(
 
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
+        const spec = getConnectorSpec(connectorType.actionTypeId);
         connectorType.subActions.forEach((subAction) => {
           const hasPermittedInstance =
             connectorType.instances.length === 0 ||
-            connectorType.instances.some(({ config }) => {
-              const spec = getConnectorSpec(connectorType.actionTypeId);
-              return isSelectedActionEnabled(
-                subAction.name,
-                config?.selectedActions,
-                spec?.actions
-              );
-            });
+            connectorType.instances.some(({ config }) =>
+              isSelectedActionEnabled(subAction.name, config?.selectedActions, spec?.actions)
+            );
           if (!hasPermittedInstance) {
             return;
           }

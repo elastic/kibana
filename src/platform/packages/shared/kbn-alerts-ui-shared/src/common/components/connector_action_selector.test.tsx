@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ConnectorActionDef } from '../apis/fetch_connector_spec';
-import { ConnectorActionSelectorUI } from './connector_action_selector';
+import { ConnectorActionSelector } from './connector_action_selector';
 
 // 12 actions → 2 pages at default page size; zero-padded so lex sort = numeric sort.
 const ACTIONS: ConnectorActionDef[] = Array.from({ length: 12 }, (_, i) => ({
@@ -19,7 +19,6 @@ const ACTIONS: ConnectorActionDef[] = Array.from({ length: 12 }, (_, i) => ({
   description: `Description ${i + 1}`,
   isTool: i < 2,
 }));
-const ACTION_NAMES = ACTIONS.map((a) => a.name);
 
 function Fixture({
   initialSelected,
@@ -30,16 +29,13 @@ function Fixture({
 }) {
   const [value, setValue] = useState<string[] | null>(initialSelected);
   return (
-    <ConnectorActionSelectorUI
-      field={{
-        value,
-        setValue: (next) => {
-          setValue(next);
-          onValueChange?.(next);
-        },
+    <ConnectorActionSelector
+      value={value}
+      onChange={(next) => {
+        setValue(next);
+        onValueChange?.(next);
       }}
       actions={ACTIONS}
-      allActionNames={ACTION_NAMES}
       readOnly={false}
     />
   );
@@ -50,7 +46,7 @@ function rowCheckbox(actionName: string) {
   return within(row).getByRole('checkbox');
 }
 
-describe('ConnectorActionSelectorUI — cross-page selection', () => {
+describe('ConnectorActionSelector — cross-page selection', () => {
   it('preserves page-1 selections after navigating to page 2 and back', async () => {
     const user = userEvent.setup();
 
@@ -105,7 +101,7 @@ describe('ConnectorActionSelectorUI — cross-page selection', () => {
   });
 });
 
-describe('ConnectorActionSelectorUI — mode switching', () => {
+describe('ConnectorActionSelector — mode switching', () => {
   it('preserves a specific selection when toggling recommended → specific', async () => {
     const user = userEvent.setup();
     const onValueChange = jest.fn();

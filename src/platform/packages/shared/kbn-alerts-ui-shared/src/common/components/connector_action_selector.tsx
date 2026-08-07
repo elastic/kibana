@@ -25,84 +25,47 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UseField, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ConnectorActionDef } from '../apis/fetch_connector_spec';
 
-const SELECTED_ACTIONS_FIELD = 'config.selectedActions';
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const MODE_RECOMMENDED = 'recommended';
-const MODE_SPECIFIC = 'specific';
+
+const MODES = { RECOMMENDED: 'recommended', SPECIFIC: 'specific' } as const;
 
 const RADIO_OPTIONS = [
   {
-    id: MODE_RECOMMENDED,
-    label: i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.allActionsLabel', {
+    id: MODES.RECOMMENDED,
+    label: i18n.translate('alertsUIShared.connectorActionSelector.allActionsLabel', {
       defaultMessage: 'Recommended actions',
     }),
-    inputProps: { 'data-test-subj': 'connectorActionSelectorModeRecommended' },
+    labelProps: { 'data-test-subj': 'connectorActionSelectorModeRecommended' },
   },
   {
-    id: MODE_SPECIFIC,
-    label: i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.specificActionsLabel', {
+    id: MODES.SPECIFIC,
+    label: i18n.translate('alertsUIShared.connectorActionSelector.specificActionsLabel', {
       defaultMessage: 'Specific actions',
     }),
-    inputProps: { 'data-test-subj': 'connectorActionSelectorModeSpecific' },
+    labelProps: { 'data-test-subj': 'connectorActionSelectorModeSpecific' },
   },
 ];
 
 export interface ConnectorActionSelectorProps {
+  value: string[] | null;
+  onChange: (value: string[] | null) => void;
   actions: ConnectorActionDef[];
   readOnly?: boolean;
 }
 
 // null = "recommended (isTool) actions" sentinel; serializer strips it before saving.
 export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = ({
+  value: rawSelected,
+  onChange,
   actions,
   readOnly = false,
 }) => {
-  const form = useFormContext();
-  const formDefault = form.getFieldDefaultValue<string[] | null | undefined>(
-    SELECTED_ACTIONS_FIELD
-  );
-  const defaultValue = formDefault !== undefined ? formDefault : null;
+  const isRecommended = rawSelected === null;
 
   const allActionNames = useMemo(() => actions.map((a) => a.name), [actions]);
-
-  return (
-    <UseField<string[] | null> path={SELECTED_ACTIONS_FIELD} defaultValue={defaultValue}>
-      {(field) => (
-        <ConnectorActionSelectorUI
-          field={field}
-          actions={actions}
-          allActionNames={allActionNames}
-          readOnly={readOnly}
-        />
-      )}
-    </UseField>
-  );
-};
-
-interface SelectedActionsField {
-  value: string[] | null;
-  setValue: (value: string[] | null) => void;
-}
-
-interface UIProps {
-  field: SelectedActionsField;
-  actions: ConnectorActionDef[];
-  allActionNames: string[];
-  readOnly: boolean;
-}
-
-export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
-  field,
-  actions,
-  allActionNames,
-  readOnly,
-}) => {
-  const rawSelected = field.value;
-  const isRecommended = rawSelected === null;
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -159,13 +122,15 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
 
   const handleModeChange = useCallback(
     (id: string) => {
-      if (id === MODE_RECOMMENDED) {
-        field.setValue(null);
+      setSearchQuery(null);
+      setPageIndex(0);
+      if (id === MODES.RECOMMENDED) {
+        onChange(null);
       } else {
-        field.setValue(previousSpecificRef.current ?? recommendedActionNames);
+        onChange(previousSpecificRef.current ?? recommendedActionNames);
       }
     },
-    [recommendedActionNames, field]
+    [recommendedActionNames, onChange]
   );
 
   const handleSelectionChange = useCallback(
@@ -180,19 +145,19 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
       const offPageSelected = (rawSelectedRef.current ?? []).filter(
         (n) => !currentPageNames.has(n)
       );
-      field.setValue([...offPageSelected, ...newItems.map((a) => a.name)]);
+      onChange([...offPageSelected, ...newItems.map((a) => a.name)]);
     },
-    [actions.length, field]
+    [actions.length, onChange]
   );
 
   const handleSelectAll = useCallback(() => {
     isSelectAllActiveRef.current = true;
-    field.setValue([...allActionNames]);
-  }, [allActionNames, field]);
+    onChange([...allActionNames]);
+  }, [allActionNames, onChange]);
 
   const handleClearSelection = useCallback(() => {
-    field.setValue([]);
-  }, [field]);
+    onChange([]);
+  }, [onChange]);
 
   // Restrict to current page: getDerivedStateFromProps fires onSelectionChange for
   // any selected item absent from items, which would wipe off-page selections.
@@ -214,7 +179,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
     () => [
       {
         field: 'name',
-        name: i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.actionColumnName', {
+        name: i18n.translate('alertsUIShared.connectorActionSelector.actionColumnName', {
           defaultMessage: 'Action',
         }),
         sortable: true,
@@ -251,7 +216,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
         <EuiFlexItem grow>
           {totalFiltered > 0 && (
             <EuiText size="xs" color="subdued">
-              {i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.showingCount', {
+              {i18n.translate('alertsUIShared.connectorActionSelector.showingCount', {
                 defaultMessage: 'Showing {start}–{end} of {total}',
                 values: { start: paginationStart, end: paginationEnd, total: totalFiltered },
               })}
@@ -267,7 +232,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
             disabled={readOnly}
             data-test-subj="connectorActionSelectorSelectAll"
           >
-            {i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.selectAll', {
+            {i18n.translate('alertsUIShared.connectorActionSelector.selectAll', {
               defaultMessage: 'Select all',
             })}
           </EuiButtonEmpty>
@@ -277,7 +242,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
             <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
-                  {i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.selectedCount', {
+                  {i18n.translate('alertsUIShared.connectorActionSelector.selectedCount', {
                     defaultMessage: '{count} selected',
                     values: { count: selectedCount },
                   })}
@@ -293,7 +258,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
                   disabled={readOnly}
                   data-test-subj="connectorActionSelectorClearSelection"
                 >
-                  {i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.clearSelection', {
+                  {i18n.translate('alertsUIShared.connectorActionSelector.clearSelection', {
                     defaultMessage: 'Clear selection',
                   })}
                 </EuiButtonEmpty>
@@ -307,10 +272,10 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.allowedActionsLabel', {
+        label={i18n.translate('alertsUIShared.connectorActionSelector.allowedActionsLabel', {
           defaultMessage: 'Allowed actions',
         })}
-        helpText={i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.helpText', {
+        helpText={i18n.translate('alertsUIShared.connectorActionSelector.helpText', {
           defaultMessage:
             'Recommended actions are those marked for automated use. Choose specific actions to allow a custom set, ' +
             'including actions that require user confirmation.',
@@ -318,7 +283,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
       >
         <EuiRadioGroup
           options={RADIO_OPTIONS}
-          idSelected={isRecommended ? MODE_RECOMMENDED : MODE_SPECIFIC}
+          idSelected={isRecommended ? MODES.RECOMMENDED : MODES.SPECIFIC}
           onChange={handleModeChange}
           disabled={readOnly}
           name="connectorActionSelectorMode"
@@ -332,13 +297,9 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
             isInvalid={emptySpecificSelection}
             error={
               emptySpecificSelection
-                ? i18n.translate(
-                    'kbn-alerts-ui-shared.connectorActionSelector.emptySelectionError',
-                    {
-                      defaultMessage:
-                        'Select at least one action, or switch to recommended actions.',
-                    }
-                  )
+                ? i18n.translate('alertsUIShared.connectorActionSelector.emptySelectionError', {
+                    defaultMessage: 'Select at least one action, or switch to recommended actions.',
+                  })
                 : undefined
             }
             fullWidth
@@ -353,7 +314,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
                   box: {
                     incremental: true,
                     placeholder: i18n.translate(
-                      'kbn-alerts-ui-shared.connectorActionSelector.searchPlaceholder',
+                      'alertsUIShared.connectorActionSelector.searchPlaceholder',
                       { defaultMessage: 'Search actions' }
                     ),
                   },
@@ -379,7 +340,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
                       setPageIndex(page.index);
                     }
                   }
-                  field.setValue(selectionToRestore);
+                  onChange(selectionToRestore);
                 }}
                 pagination={{
                   initialPageSize: DEFAULT_PAGE_SIZE,
@@ -394,7 +355,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
                   'data-test-subj': `connectorActionSelectorRow-${item.name}`,
                 })}
                 tableCaption={i18n.translate(
-                  'kbn-alerts-ui-shared.connectorActionSelector.tableCaption',
+                  'alertsUIShared.connectorActionSelector.tableCaption',
                   { defaultMessage: 'Connector actions' }
                 )}
                 data-test-subj="connectorActionSelectorTable"
