@@ -21,7 +21,7 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { scopeId, isRulePreview, searchHit } = useDocumentDetailsContext();
+  const { scopeId, searchHit } = useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onShowAlert = useCallback(
@@ -48,7 +48,6 @@ export const CorrelationsDetails: React.FC = () => {
     <CorrelationsDetailsView
       hit={hit}
       scopeId={scopeId}
-      isRulePreview={isRulePreview}
       onShowAlert={onShowAlert}
       onShowAttack={onShowAttack}
       useLegacyExpandableFlyout

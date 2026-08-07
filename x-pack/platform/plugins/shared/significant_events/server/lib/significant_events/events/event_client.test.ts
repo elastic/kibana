@@ -7,7 +7,12 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+} from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
 import { storedEventSchema, type SignificantEvent } from './data_stream';
@@ -72,9 +77,12 @@ const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: 
 
 describe('EventClient', () => {
   describe('bulkCreate', () => {
-    it('accepts stored signal descriptions that exceed the agent input limit (backward compat)', () => {
+    it('accepts stored narratives that exceed agent input limits (backward compat)', () => {
       const event: SignificantEvent = {
         ...createEvent(),
+        symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+        summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+        assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
         signals: [
           {
             type: 'detection',
@@ -212,7 +220,7 @@ describe('EventClient', () => {
       );
     });
 
-    it('excludes pending events when no status filter is provided', async () => {
+    it('applies no status filter when no status is provided', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
@@ -223,13 +231,10 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status != "pending"');
-      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
-        dataQuery!.indexOf('status !=')
-      );
+      expect(dataQuery).not.toContain('status');
     });
 
-    it('does not exclude pending when filtering by explicit event ids without status', async () => {
+    it('filters by explicit event ids without a status filter', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
@@ -241,12 +246,11 @@ describe('EventClient', () => {
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
       expect(dataQuery).toContain('event_id IN ("checkout-failure")');
-      expect(dataQuery).not.toContain('status != "pending"');
     });
   });
 
   describe('findLatestActive', () => {
-    it('filters to pending and open statuses after latest-per-event reduction', async () => {
+    it('filters to open status after latest-per-event reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
@@ -261,7 +265,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status IN ("pending", "open")');
+      expect(dataQuery).toContain('status IN ("open")');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );

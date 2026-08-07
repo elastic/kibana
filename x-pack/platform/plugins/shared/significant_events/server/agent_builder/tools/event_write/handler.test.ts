@@ -14,7 +14,12 @@ import {
   type EventsWriteInput,
 } from './handler';
 import type { SignalEntry, BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+} from '@kbn/significant-events-schema';
 import { eventsWriteItemSchema } from './tool';
 
 const successfulBulkCreate = async (documents: object[]) => ({
@@ -30,7 +35,7 @@ const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
 const TS_LATER = '2024-01-03T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
-  status: 'open' as const,
+  status: 'open',
   stream_names: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
@@ -86,6 +91,22 @@ describe('eventsWriteHandler', () => {
     expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
   });
 
+  it('treats an empty event_id as absent and generates a synthetic ID', async () => {
+    const eventClient = {
+      findLatestByEventIds: jest.fn(),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const result = await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, event_id: '' },
+    });
+
+    expect(eventClient.findLatestByEventIds).not.toHaveBeenCalled();
+    expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].event_id).toBe(result.event_id);
+  });
+
   it('sets previous_event_uuid from the latest event returned by findLatestByEventIds', async () => {
     const eventClient = {
       findLatestActive: noopFindLatestActive,
@@ -109,7 +130,7 @@ describe('eventsWriteHandler', () => {
     expect(result.written).toBe(true);
   });
 
-  it('writes with refresh wait_for so an immediate triage _count can see the event', async () => {
+  it('writes with refresh wait_for so an immediate discovery _count can see the event', async () => {
     const eventClient = {
       findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
@@ -500,7 +521,7 @@ describe('mergeEpisodeContext', () => {
 describe('eventsWriteBulkHandler — dedup mode', () => {
   const dedupInput: EventsWriteInput = {
     ...baseInput,
-    status: 'pending' as const,
+    status: 'open' as const,
     stream_names: ['logs.checkout'],
     signals: [
       {
@@ -639,24 +660,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('forces status = "pending" for dedup writes regardless of input status', async () => {
-    const eventClient = {
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
-      findByEventId: noopFindByEventId,
-      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
-    };
-
-    const results = await eventsWriteBulkHandler({
-      eventClient: eventClient as never,
-      inputs: [{ ...dedupInput, status: 'open' as const }],
-    });
-
-    expect(results[0]).toMatchObject({ index: 0, written: true, status: 'pending' });
-    const written = eventClient.bulkCreate.mock.calls[0][0][0];
-    expect(written.status).toBe('pending');
-  });
-
   it('returns duplicate_key error for a second in-batch item with the same fingerprint', async () => {
     const eventClient = {
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
@@ -792,37 +795,6 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     }
   );
 
-  it('skips write when the in-window match has status pending', async () => {
-    const existingEvent = {
-      event_id: 'existing-pending-id',
-      event_uuid: 'existing-pending-uuid',
-      status: 'pending',
-      '@timestamp': new Date().toISOString(),
-      stream_names: ['logs.checkout'],
-      signals: dedupInput.signals,
-    };
-
-    const eventClient = {
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
-      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
-      findByEventId: noopFindByEventId,
-      bulkCreate: jest.fn(),
-    };
-
-    const results = await eventsWriteBulkHandler({
-      eventClient: eventClient as never,
-      inputs: [dedupInput],
-    });
-
-    expect(results[0]).toMatchObject({
-      written: false,
-      skipped: true,
-      reason: 'duplicate_within_window',
-      existing_event_id: 'existing-pending-id',
-    });
-    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-  });
-
   it('deduplicates when the stored episode has a wider stream set than the candidate', async () => {
     const existingEvent = {
       event_id: 'existing-event-id',
@@ -891,7 +863,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 });
 
 describe('eventsWriteBulkHandler — continuation status', () => {
-  it('preserves open status when discovery sends pending on an open continuation', async () => {
+  it('persists open status sent by discovery on an open continuation', async () => {
     const priorOpen = {
       '@timestamp': TS_EARLIER,
       event_uuid: 'prior-uuid',
@@ -916,7 +888,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
         {
           ...baseInput,
           event_id: 'checkout-open',
-          status: 'pending',
+          status: 'open',
         },
       ],
     });
@@ -925,7 +897,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('open');
   });
 
-  it('preserves closed status when discovery sends pending on a closed continuation', async () => {
+  it('persists closed status sent by discovery on a closed continuation', async () => {
     const priorClosed = {
       '@timestamp': TS_EARLIER,
       event_uuid: 'prior-uuid',
@@ -950,7 +922,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
         {
           ...baseInput,
           event_id: 'checkout-closed',
-          status: 'pending',
+          status: 'closed',
         },
       ],
     });
@@ -992,6 +964,33 @@ describe('eventsWriteItemSchema', () => {
         },
       ],
     });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects symptom hypotheses exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects summaries exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects assessment notes exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+    });
+
     expect(result.success).toBe(false);
   });
 });
