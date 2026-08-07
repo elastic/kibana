@@ -25,7 +25,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
   }),
   description: i18n.translate('xpack.alertingV2.workflow.steps.createAlertEvent.description', {
     defaultMessage:
-      'Ingest an external alert event into Elasticsearch without a backing Kibana rule.',
+      'Ingest an alert event into Elasticsearch without a backing Kibana rule.',
   }),
   category: StepCategory.Kibana,
   inputSchema: createAlertEventDataSchema,
@@ -36,9 +36,8 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
       {
         defaultMessage:
           'Writes an alert event to the alerting v2 event stream. ' +
-          'The event participates in the same episode lifecycle, UI, and action policies as ' +
-          'Elastic-produced alerts. Intended for use inside inbound webhook connector workflows ' +
-          'that receive alerts from external monitoring systems.',
+          'The event participates in the same lifecycle, UI, and action policies as ' +
+          'Elastic-produced alerts.',
       }
     ),
     examples: [
@@ -47,7 +46,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
 - name: create_external_alert
   type: alerting.create_alert
   with:
-    source: "datadog"
+    source: "my_external_service"
     fingerprint: "{{ inputs.payload.monitor_id }}"
     alert_status: "active"
     severity: "high"

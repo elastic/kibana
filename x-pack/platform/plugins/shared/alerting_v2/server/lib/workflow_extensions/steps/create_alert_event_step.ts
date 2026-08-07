@@ -20,7 +20,7 @@ export function getCreateAlertEventStepDefinition(
       const client = await getAlertEventsClient(context.contextManager.getFakeRequest());
 
       try {
-        const result = await client.ingestAlertEvent(context.input, {
+        const result = await client.createAlertEvent(context.input, {
           abortSignal: context.abortSignal,
         });
         return { output: result };

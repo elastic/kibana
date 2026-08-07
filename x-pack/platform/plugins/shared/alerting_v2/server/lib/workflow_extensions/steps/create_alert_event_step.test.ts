@@ -37,7 +37,7 @@ const createMockContext = () => {
 describe('getCreateAlertEventStepDefinition', () => {
   it('returns group_hash and episode_id on success', async () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'abc123', episode_id: 'ep-456' });
-    const getAlertEventsClient = jest.fn().mockResolvedValue({ ingestAlertEvent: mockIngest });
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
     const result = await handler(createMockContext());
@@ -47,7 +47,7 @@ describe('getCreateAlertEventStepDefinition', () => {
 
   it('calls the factory with the result of getFakeRequest()', async () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', episode_id: 'e' });
-    const getAlertEventsClient = jest.fn().mockResolvedValue({ ingestAlertEvent: mockIngest });
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
     const context = createMockContext();
@@ -56,9 +56,9 @@ describe('getCreateAlertEventStepDefinition', () => {
     expect(getAlertEventsClient).toHaveBeenCalledWith(fakeRequest);
   });
 
-  it('passes abortSignal to ingestAlertEvent', async () => {
+  it('passes abortSignal to createAlertEvent', async () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', episode_id: 'e' });
-    const getAlertEventsClient = jest.fn().mockResolvedValue({ ingestAlertEvent: mockIngest });
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
     const context = createMockContext();
@@ -81,11 +81,11 @@ describe('getCreateAlertEventStepDefinition', () => {
     expect(thrown.type).toBe('PermissionError');
   });
 
-  it('propagates AbortError from ingestAlertEvent unchanged', async () => {
+  it('propagates AbortError from createAlertEvent unchanged', async () => {
     const abortError = Object.assign(new Error('Aborted'), { name: 'AbortError' });
     const getAlertEventsClient = jest
       .fn()
-      .mockResolvedValue({ ingestAlertEvent: jest.fn().mockRejectedValue(abortError) });
+      .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue(abortError) });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
     const thrown = await handler(createMockContext()).catch((e) => e);
@@ -94,11 +94,11 @@ describe('getCreateAlertEventStepDefinition', () => {
     expect(thrown).not.toBeInstanceOf(ExecutionError);
   });
 
-  it('wraps generic errors from ingestAlertEvent as ApiError', async () => {
+  it('wraps generic errors from createAlertEvent as ApiError', async () => {
     const cause = new Error('ES connection refused');
     const getAlertEventsClient = jest
       .fn()
-      .mockResolvedValue({ ingestAlertEvent: jest.fn().mockRejectedValue(cause) });
+      .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue(cause) });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
     const thrown = await handler(createMockContext()).catch((e) => e);
@@ -109,10 +109,10 @@ describe('getCreateAlertEventStepDefinition', () => {
     expect(thrown.details).toEqual({ name: 'Error', message: 'ES connection refused' });
   });
 
-  it('uses fallback message for non-Error throws from ingestAlertEvent', async () => {
+  it('uses fallback message for non-Error throws from createAlertEvent', async () => {
     const getAlertEventsClient = jest
       .fn()
-      .mockResolvedValue({ ingestAlertEvent: jest.fn().mockRejectedValue('string error') });
+      .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue('string error') });
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
     const thrown = await handler(createMockContext()).catch((e) => e);

@@ -87,7 +87,7 @@ export class AlertEventsClient {
    * Shared by POST /api/alerting/v2/alerts and POST /api/alerting/v2/alerts/:source.
    * Callers must pass a normalized payload with `source` already set.
    */
-  public async ingestAlertEvent(
+  public async createAlertEvent(
     event: CreateAlertEventData,
     { abortSignal }: { abortSignal?: AbortSignal } = {}
   ): Promise<CreateAlertEventResponse> {

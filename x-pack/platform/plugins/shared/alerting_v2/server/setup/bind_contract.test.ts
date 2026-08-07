@@ -47,7 +47,7 @@ describe('bindContract', () => {
     scope = new Container();
     mockRulesClient = { getRule: jest.fn() };
     mockActionPolicyClient = { getActionPolicy: jest.fn() };
-    mockAlertEventsClient = { ingestAlertEvent: jest.fn() };
+    mockAlertEventsClient = { createAlertEvent: jest.fn() };
     scope.bind(RulesClient).toConstantValue(mockRulesClient as RulesClient);
     scope.bind(ActionPolicyClient).toConstantValue(mockActionPolicyClient as ActionPolicyClient);
     scope.bind(AlertEventsClient).toConstantValue(mockAlertEventsClient as AlertEventsClient);
