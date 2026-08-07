@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 const REFERENCE_LINE_LEFT = 'lnsXY_yReferenceLineLeftPanel';
 const REFERENCE_LINE_RIGHT = 'lnsXY_yReferenceLineRightPanel';
@@ -116,10 +115,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           await lens.waitForVisualization('xyVisChart');
 
           await lens.openDimensionEditor(`${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`, 1);
-          await expect(lens.getReferenceLineFillBelowButton()).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
           await lens.closeDimensionEditor();
         }
       );
@@ -137,10 +133,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           await lens.waitForVisualization('xyVisChart');
 
           await lens.openDimensionEditor(`${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`, 1, 1);
-          await expect(lens.getReferenceLineFillBelowButton()).toHaveAttribute(
-            'aria-pressed',
-            'true'
-          );
+          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
           await lens.closeDimensionEditor();
         }
       );

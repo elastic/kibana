@@ -249,7 +249,6 @@ describe('translateLegacyStateToDescriptors', () => {
           documentId: 'doc-7',
           indexName: 'idx',
           scopeId: 'sc',
-          isRulePreview: false,
         },
         { kind: 'document', documentId: 'doc-7', indexName: 'idx' },
       ]);
