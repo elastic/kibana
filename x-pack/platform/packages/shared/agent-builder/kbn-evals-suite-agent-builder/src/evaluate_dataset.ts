@@ -328,11 +328,11 @@ export function createEvaluateExternalDataset({
     await executorClient.runExperiment(
       {
         dataset: {
-            name: datasetName,
-            description: 'External dataset resolved from Elasticsearch by name',
-            // Examples are resolved from upstream dataset storage, not provided in code.
-            examples: [],
-          },
+          name: datasetName,
+          description: 'External dataset resolved from Elasticsearch by name',
+          // Examples are resolved from upstream dataset storage, not provided in code.
+          examples: [],
+        },
         task,
         trustUpstreamDataset: true,
       },
