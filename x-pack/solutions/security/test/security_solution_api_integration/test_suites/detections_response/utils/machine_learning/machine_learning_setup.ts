@@ -85,7 +85,8 @@ export const waitForMlJobToBeInstalled = async ({
     const { body } = await supertest
       .post(`/internal/ml/jobs/jobs_summary`)
       .set(getCommonRequestHeader('1'))
-      .send({ jobIds: [jobId] });
+      .send({ jobIds: [jobId] })
+      .expect(200);
 
     const installedJob = (body as Array<{ id: string; groups: string[] }>).find(
       (job) => job.id === jobId && job.groups.includes(ML_GROUP_ID)
