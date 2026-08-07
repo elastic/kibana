@@ -22,10 +22,6 @@ interface ModeSelectProps {
   value: RuleKind;
   onChange: (kind: RuleKind) => void;
   disabled?: boolean;
-  /**
-   * When true, only the currently selected card is rendered (no radio interaction).
-   * Used in edit mode where kind is immutable.
-   */
   readOnly?: boolean;
   'data-test-subj'?: string;
 }
@@ -84,11 +80,6 @@ const ModeCardLabel = ({ title, description }: { title: string; description: str
   </>
 );
 
-/**
- * Presentational Mode select. Switches a rule between `alert` (stateful lifecycle)
- * and `signal` (stateless detection) modes. Uses radio-style checkable cards so the
- * consequence of each mode is legible before the user commits.
- */
 export const ModeSelect = ({
   value,
   onChange,

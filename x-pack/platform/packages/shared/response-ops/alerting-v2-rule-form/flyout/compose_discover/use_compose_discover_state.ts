@@ -93,10 +93,6 @@ export function getSandboxTabs(
 
 function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
   if (tabs?.includes('recovery')) return 'recovery';
-  /*
-   * When the split editor is open (base + alert), start on the base query —
-   * users build the base query first, then layer the alert condition on top.
-   */
   if (tabs?.includes('base')) return 'base';
   return 'alert';
 }

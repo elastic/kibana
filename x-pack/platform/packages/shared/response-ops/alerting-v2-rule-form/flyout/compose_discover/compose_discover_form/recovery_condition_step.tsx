@@ -142,10 +142,6 @@ export function RecoveryConditionStep({
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
-          {/*
-           * Mount as an element (not a plain function call) so hook-using
-           * recovery content keeps its own fiber when Custom recovery toggles.
-           */}
           {React.createElement(renderCustomRecovery, { state, dispatch })}
         </>
       )}
