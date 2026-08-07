@@ -51,6 +51,13 @@ export const getProjectPickerListContextMenuConfig = (
       },
       isDisabled: (props) => {
         const anchorProjectId = props.activeProject._id;
+        if (
+          props.state.requiredProjectId !== undefined &&
+          anchorProjectId !== props.state.requiredProjectId
+        ) {
+          return true;
+        }
+
         const otherVisibleIds = computeVisibleProjectIds(props.state).filter(
           (id) => id !== anchorProjectId
         );
@@ -70,6 +77,10 @@ export const getProjectPickerListContextMenuConfig = (
       },
       isDisabled: (props) => {
         const anchorProjectId = props.activeProject._id;
+        if (anchorProjectId === props.state.requiredProjectId) {
+          return true;
+        }
+
         const otherVisibleIds = computeVisibleProjectIds(props.state).filter(
           (id) => id !== anchorProjectId
         );

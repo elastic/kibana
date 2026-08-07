@@ -15,18 +15,73 @@ import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
 import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
 
+const ENCRYPTION_KEY_NOT_YET_AVAILABLE_ERROR = 'encryption_key_not_yet_available_exception';
+const START_TRANSFORM_RETRY_DELAYS_MS = [1000, 2000, 5000];
+
+const delay = async (delayMs: number): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
+};
+
+const containsErrorType = (value: unknown, errorType: string): boolean => {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+
+  if ('type' in value && value.type === errorType) {
+    return true;
+  }
+
+  return Object.values(value).some((nestedValue) => {
+    if (Array.isArray(nestedValue)) {
+      return nestedValue.some((item) => containsErrorType(item, errorType));
+    }
+
+    return containsErrorType(nestedValue, errorType);
+  });
+};
+
+const isEncryptionKeyNotYetAvailableError = (error: unknown): boolean => {
+  return containsErrorType(
+    (error as { meta?: { body?: unknown } })?.meta?.body,
+    ENCRYPTION_KEY_NOT_YET_AVAILABLE_ERROR
+  );
+};
+
+const startTransformWithRetry = async (
+  transformId: string,
+  esClient: ElasticsearchClient,
+  retryDelaysMs: number[]
+): Promise<void> => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await esClient.transform.startTransform({
+        transform_id: transformId,
+      });
+      return;
+    } catch (error) {
+      const shouldRetry =
+        attempt < retryDelaysMs.length && isEncryptionKeyNotYetAvailableError(error);
+
+      if (!shouldRetry) {
+        throw error;
+      }
+
+      await delay(retryDelaysMs[attempt]);
+    }
+  }
+};
+
 export async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  retryDelaysMs = START_TRANSFORM_RETRY_DELAYS_MS
 ) {
   const results: StartTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await esClient.transform.startTransform({
-        transform_id: transformId,
-      });
+      await startTransformWithRetry(transformId, esClient, retryDelaysMs);
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {

@@ -30,6 +30,14 @@ export const servers: ScoutServerConfig = {
     uiam: true,
     cps: true,
   },
+  esTestCluster: {
+    ...uiamConfig.esTestCluster,
+    serverArgs: [
+      ...uiamConfig.esTestCluster.serverArgs,
+      'es.transform_cross_project_feature_flag_enabled=true',
+      'es.ml_cross_project_feature_flag_enabled=true',
+    ],
+  },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
