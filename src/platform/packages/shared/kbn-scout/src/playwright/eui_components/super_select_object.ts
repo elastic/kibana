@@ -80,9 +80,11 @@ export class EuiSuperSelectObject extends BaseObject {
    * `.euiSuperSelect` popover wrapper that contains this instance's button.
    */
   private get hiddenInput(): Locator {
+    // Direct child of the popover wrapper, so hidden inputs a consumer might
+    // render inside prepend/append content are never matched.
     return this.scope
       .locator('.euiSuperSelect')
       .filter({ has: this.root })
-      .locator('input[type="hidden"]');
+      .locator(':scope > input[type="hidden"]');
   }
 }
