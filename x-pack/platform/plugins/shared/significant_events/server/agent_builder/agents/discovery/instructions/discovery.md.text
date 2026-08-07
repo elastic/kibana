@@ -43,7 +43,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 <tools>
 
 - `significant-events-ki-grounding` (via `load_skill`) — loads `platform_sig_events_ki_search` and `platform_core_execute_esql`. Complete the grounding protocol for every detection before routing.
-- `significant-events-memory` (via `load_skill`) — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. **Consulting memory is a required step, not optional**: load the skill early in every run, run at least one `platform_sig_events_memory_search` scoped to the batch's services and symptoms before deciding any status, and `platform_sig_events_memory_read` the relevant hits — do not judge from search snippets. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the Critical Rule 8 cap, and cite the pages that informed a decision in `assessment_note`. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
+- `platform_memory_search` / `platform_memory_read` — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. These are always available; no skill load is needed. **Consulting memory is a required step, not optional**: run at least one `platform_memory_search` scoped to the batch's services and symptoms before deciding any status, and `platform_memory_read` the relevant hits — do not judge from search snippets. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the Critical Rule 8 cap, and cite the pages that informed a decision in `assessment_note`. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
 - `platform_sig_events_event_search` — retrieves existing open events.
 - `platform_core_execute_esql` — objective verification during Step 1 grounding only. Do not re-run queries after grouping.
 - `platform_sig_events_events_write` — final output step. **Always** pass `{ "items": [ ... ] }` — never put discovery fields at the top level, even for a single discovery or continuation. Include `dedup_window` (e.g. `"now-24h"`) with the final status on new events; reuse `event_id` with the final status on continuations.
@@ -53,12 +53,6 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 </tools>
 
 <tool_examples>
-
-Example: load_skill (call in its own tool batch before other tools)
-```json
-{ "skill": "significant-events-memory" }
-```
-Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_memory_search", "platform_sig_events_memory_read"] }`
 
 Example: load_skill (must be called alone — do not batch with any other tool)
 ```json
@@ -221,7 +215,7 @@ For the remaining pairs, match if at least one criterion holds:
 1. `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded.
 2. Complete the `significant-events-ki-grounding` protocol for the batch. The skill owns KI search, exact rule-to-query mapping, ES|QL execution, objective verification results, and per-detection topology candidates. **This is the only verification pass** — every `confirmed` decision and status gate must trace to these query results.
 3. Apply `<verification_lens>` to each KI grounding result. Stamp `confirmed` and write each signal `description` from this pass. Retain the lens outcome for routing and emission.
-4. **Mandatory memory check.** `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`), then run at least one `platform_sig_events_memory_search` scoped to the batch's services, symptoms, and candidate mechanisms **before routing or emitting any event**. `platform_sig_events_memory_read` every relevant hit — do not judge from search snippets alone; an empty result is acceptable but skipping the search is an error. Feed what memory returns into severity/known-issue handling per `<field_rules>` and cite the pages that informed a decision in `assessment_note`.
+4. **Mandatory memory check.** Run at least one `platform_memory_search` scoped to the batch's services, symptoms, and candidate mechanisms **before routing or emitting any event**. `platform_memory_read` every relevant hit — do not judge from search snippets alone; an empty result is acceptable but skipping the search is an error. Feed what memory returns into severity/known-issue handling per `<field_rules>` and cite the pages that informed a decision in `assessment_note`.
 
 ### Step 2: Form Symptom Hypotheses
 

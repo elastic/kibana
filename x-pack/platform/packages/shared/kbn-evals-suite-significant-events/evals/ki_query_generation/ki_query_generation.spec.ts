@@ -7,10 +7,7 @@
 
 import { identifyKIQueries, QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
-import {
-  createMemoryDiscoveryTools,
-  MemoryServiceImpl,
-} from '@kbn/significant-events-plugin/server';
+import { createMemoryDiscoveryTools, MemoryServiceImpl } from '@kbn/agent-memory-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 

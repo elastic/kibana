@@ -35,8 +35,7 @@ interface ToolsFlatViewProps {
   onPageChange: (pageIndex: number) => void;
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
-  areElasticCapabilitiesEnabled?: boolean;
-  defaultToolIdSet?: Set<string>;
+  impliedToolIdSet?: Set<string>;
 }
 
 interface ToolDetailsColumnProps {
@@ -66,8 +65,7 @@ const createCheckboxColumn = (
   selectedTools: ToolSelection[],
   onToggleTool: (toolId: string) => void,
   disabled: boolean,
-  areElasticCapabilitiesEnabled: boolean,
-  defaultToolIdSet: Set<string>
+  impliedToolIdSet: Set<string>
 ) => ({
   width: '40px',
   name: (
@@ -79,7 +77,7 @@ const createCheckboxColumn = (
     const toolFields: ToolSelectionRelevantFields = {
       id: tool.id,
     };
-    const isAutoIncluded = areElasticCapabilitiesEnabled && defaultToolIdSet.has(tool.id);
+    const isAutoIncluded = impliedToolIdSet.has(tool.id);
     const checkbox = (
       <EuiCheckbox
         id={`tool-${tool.id}`}
@@ -119,24 +117,17 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
   onPageChange,
   pageSize,
   onPageSizeChange,
-  areElasticCapabilitiesEnabled = false,
-  defaultToolIdSet,
+  impliedToolIdSet,
 }) => {
-  const emptyDefaultToolIdSet = React.useMemo(() => new Set<string>(), []);
-  const resolvedDefaultToolIdSet = defaultToolIdSet ?? emptyDefaultToolIdSet;
+  const emptyImpliedToolIdSet = React.useMemo(() => new Set<string>(), []);
+  const resolvedImpliedToolIdSet = impliedToolIdSet ?? emptyImpliedToolIdSet;
   const columns = React.useMemo(
     () => [
-      createCheckboxColumn(
-        selectedTools,
-        onToggleTool,
-        disabled,
-        areElasticCapabilitiesEnabled,
-        resolvedDefaultToolIdSet
-      ),
+      createCheckboxColumn(selectedTools, onToggleTool, disabled, resolvedImpliedToolIdSet),
       createToolDetailsColumn(),
       createTagsColumn(),
     ],
-    [selectedTools, onToggleTool, disabled, areElasticCapabilitiesEnabled, resolvedDefaultToolIdSet]
+    [selectedTools, onToggleTool, disabled, resolvedImpliedToolIdSet]
   );
 
   const handleTableChange = React.useCallback(

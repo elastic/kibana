@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds, memoryAgentToolIds } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
@@ -39,6 +39,7 @@ import {
   getActivePlugins,
   getActiveSkills,
   getActiveTools,
+  getImpliedToolIds,
 } from '../../../utils/tool_selection_utils';
 
 export const AgentOverview: React.FC = () => {
@@ -66,6 +67,7 @@ export const AgentOverview: React.FC = () => {
   const showWorkflowSection = isPreExecutionWorkflowEnabled(uiSettings);
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
+  const enableMemory = agent?.configuration?.enable_memory ?? false;
 
   const skillsCount = useMemo(
     () =>
@@ -80,17 +82,21 @@ export const AgentOverview: React.FC = () => {
     [allPlugins, agent?.configuration?.plugin_ids, enableElasticCapabilities]
   );
 
-  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+  const impliedToolIdSet = useMemo(
+    () =>
+      getImpliedToolIds({
+        enableElasticCapabilities,
+        enableMemory,
+        defaultToolIds: defaultAgentToolIds,
+        memoryToolIds: memoryAgentToolIds,
+      }),
+    [enableElasticCapabilities, enableMemory]
+  );
 
   const toolsCount = useMemo(() => {
     if (!agent) return 0;
-    return getActiveTools(
-      allTools,
-      agent.configuration?.tools ?? [],
-      enableElasticCapabilities,
-      defaultToolIdSet
-    ).length;
-  }, [agent, allTools, enableElasticCapabilities, defaultToolIdSet]);
+    return getActiveTools(allTools, agent.configuration?.tools ?? [], impliedToolIdSet).length;
+  }, [agent, allTools, impliedToolIdSet]);
 
   const connectorsCount = agent?.configuration?.connector_ids?.length ?? 0;
 
@@ -166,6 +172,7 @@ export const AgentOverview: React.FC = () => {
 
         <SettingsSection
           enableElasticCapabilities={enableElasticCapabilities}
+          enableMemory={enableMemory}
           currentInstructions={agent.configuration?.instructions ?? ''}
           showWorkflowSection={showWorkflowSection}
           workflowIds={agent.configuration?.workflow_ids ?? []}

@@ -53,10 +53,9 @@ import {
   createSignificantEventsServices,
   initializeSignificantEventsTemplates,
 } from './lib/significant_events/significant_events_clients';
-import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { registerStreamsMemoryAgentBuilder } from './memory_and_investigation/skills/memory/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import {
   createContinuousKiOnboardingWorkflowService,
@@ -451,12 +450,6 @@ export class SignificantEventsPlugin
       const agentBuilder = plugins.agentBuilder;
       const telemetry = this.ebtTelemetryService.getClient();
 
-      const memoryToolsOptions = createMemoryToolsOptions({
-        getScopedClients: this.getScopedClients,
-        server: this.server,
-        logger: this.logger,
-      });
-
       // Managed resources (templates + workflows) and agent-builder skills install on independent
       // async paths, so on a runtime flip skills can be advertised a moment before their templates and
       // workflows finish installing. We accept that transient window rather than serializing skills
@@ -472,7 +465,6 @@ export class SignificantEventsPlugin
         telemetry,
         streamsKIsOnboardingClient: this.streamsKIsOnboardingClient,
         maintenanceService: this.maintenanceService,
-        memoryToolsOptions,
         logger: this.logger,
         isAvailable,
       })
@@ -491,27 +483,6 @@ export class SignificantEventsPlugin
         })
         .catch((err) => {
           this.logger.error(`Failed to register significant events skills: ${err.message}`);
-        });
-
-      // Memory skills: gated by availability; (re)registered when the flag flips on.
-      registerStreamsMemoryAgentBuilder({
-        agentBuilder,
-        memoryToolsOptions,
-        logger: this.logger,
-        isAvailable,
-      })
-        .then(({ ensureRegistered }) => {
-          const onFlip = () => {
-            void ensureRegistered().catch((error: unknown) => {
-              this.logSkillsRegistrationError('memory', error);
-            });
-          };
-          this.subscriptions.push(availabilityEnabled$.subscribe(onFlip));
-          // Catch up on any flip that landed before this subscription (see the note above).
-          onFlip();
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to register significant events memory skills: ${err.message}`);
         });
     }
   }

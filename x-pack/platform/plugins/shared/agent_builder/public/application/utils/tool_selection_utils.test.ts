@@ -15,6 +15,7 @@ import {
   toggleToolSelection,
   isToolSelected,
   getActiveTools,
+  getImpliedToolIds,
   getActiveSkills,
   getActivePlugins,
   cleanInvalidToolReferences,
@@ -83,49 +84,88 @@ describe('tool_selection_utils', () => {
   });
 
   describe('getActiveTools', () => {
-    const defaultToolIds = new Set(['tool1', 'tool3']);
+    const impliedNone = new Set<string>();
+    const impliedToolIds = new Set(['tool1', 'tool3']);
 
-    it('should return only explicitly selected tools when elastic capabilities are disabled', () => {
+    it('should return only explicitly selected tools when nothing is implied', () => {
       const selections: ToolSelection[] = [{ tool_ids: ['tool2'] }];
-      const result = getActiveTools(mockTools, selections, false, defaultToolIds);
+      const result = getActiveTools(mockTools, selections, impliedNone);
 
       expect(result.map((t) => t.id)).toEqual(['tool2']);
     });
 
-    it('should include default tools when elastic capabilities are enabled', () => {
+    it('should include implied tools alongside explicit ones', () => {
       const selections: ToolSelection[] = [{ tool_ids: ['tool2'] }];
-      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+      const result = getActiveTools(mockTools, selections, impliedToolIds);
 
       expect(result.map((t) => t.id)).toEqual(['tool2', 'tool1', 'tool3']);
     });
 
-    it('should not duplicate tools that are both explicit and default', () => {
+    it('should not duplicate tools that are both explicit and implied', () => {
       const selections: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
-      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+      const result = getActiveTools(mockTools, selections, impliedToolIds);
 
       expect(result.map((t) => t.id)).toEqual(['tool1', 'tool2', 'tool3']);
     });
 
     it('should return empty array when no tools match selections', () => {
       const selections: ToolSelection[] = [{ tool_ids: [] }];
-      const result = getActiveTools(mockTools, selections, false, defaultToolIds);
+      const result = getActiveTools(mockTools, selections, impliedNone);
 
       expect(result).toEqual([]);
     });
 
-    it('should return only default tools when no explicit selections and elastic capabilities are enabled', () => {
+    it('should return only implied tools when there are no explicit selections', () => {
       const selections: ToolSelection[] = [{ tool_ids: [] }];
-      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+      const result = getActiveTools(mockTools, selections, impliedToolIds);
 
       expect(result.map((t) => t.id)).toEqual(['tool1', 'tool3']);
     });
 
-    it('should handle wildcard selections with elastic capabilities', () => {
+    it('should handle wildcard selections alongside implied tools', () => {
       const selections: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
-      const result = getActiveTools(mockTools, selections, true, defaultToolIds);
+      const result = getActiveTools(mockTools, selections, impliedToolIds);
 
-      // All tools already selected via wildcard, no defaults to append
+      // All tools already selected via wildcard, nothing implied left to append
       expect(result.map((t) => t.id)).toEqual(['tool1', 'tool2', 'tool3']);
+    });
+  });
+
+  describe('getImpliedToolIds', () => {
+    const defaultToolIds = ['tool1'];
+    const memoryToolIds = ['platform.memory.search', 'platform.memory.read'];
+
+    it('implies nothing when both capabilities are off', () => {
+      expect(
+        getImpliedToolIds({
+          enableElasticCapabilities: false,
+          enableMemory: false,
+          defaultToolIds,
+          memoryToolIds,
+        }).size
+      ).toBe(0);
+    });
+
+    it('implies the memory tools when only memory is on', () => {
+      expect([
+        ...getImpliedToolIds({
+          enableElasticCapabilities: false,
+          enableMemory: true,
+          defaultToolIds,
+          memoryToolIds,
+        }),
+      ]).toEqual(memoryToolIds);
+    });
+
+    it('unions both sets when both capabilities are on', () => {
+      expect([
+        ...getImpliedToolIds({
+          enableElasticCapabilities: true,
+          enableMemory: true,
+          defaultToolIds,
+          memoryToolIds,
+        }),
+      ]).toEqual([...defaultToolIds, ...memoryToolIds]);
     });
   });
 

@@ -78,6 +78,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
+        enable_memory: agent.configuration?.enable_memory ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
         instructions: agent.configuration?.instructions ?? '',
       },
@@ -100,6 +101,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         access_control: { access_mode: data.access_control.access_mode },
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
+          enable_memory: data.configuration.enable_memory,
           workflow_ids: data.configuration.workflow_ids,
           instructions: data.configuration.instructions,
         },

@@ -35,9 +35,12 @@ import {
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
+import {
+  MemoryServiceImpl,
+  createMemoryDiscoveryTools,
+  type MemoryDiscoveryTools,
+} from '@kbn/agent-memory-plugin/server';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
-import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
-import { createMemoryDiscoveryTools, type MemoryDiscoveryTools } from '../memory_discovery_tools';
 import {
   createKiExtractionContextTools,
   type KiExtractionContextTools,

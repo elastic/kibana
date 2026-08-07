@@ -41,6 +41,7 @@ const instructionsTextStyles = css`
 
 export interface SettingsSectionProps {
   enableElasticCapabilities: boolean;
+  enableMemory: boolean;
   currentInstructions: string;
   showWorkflowSection: boolean;
   workflowIds: string[];
@@ -50,6 +51,7 @@ export interface SettingsSectionProps {
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
   enableElasticCapabilities,
+  enableMemory,
   currentInstructions,
   showWorkflowSection,
   workflowIds,
@@ -189,6 +191,29 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                         {overviewLabels.notSetBadge}
                       </EuiBadge>
                     )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {/* Memory row */}
+              <EuiHorizontalRule margin="none" />
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow>
+                    <EuiText
+                      color={enableMemory ? 'textPrimary' : euiTheme.colors.textDisabled}
+                      size="s"
+                    >
+                      {overviewLabels.memoryTitle}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color={enableMemory ? 'success' : 'default'}
+                      data-test-subj="agentOverviewMemoryBadge"
+                    >
+                      {enableMemory ? overviewLabels.enabledBadge : overviewLabels.notSetBadge}
+                    </EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

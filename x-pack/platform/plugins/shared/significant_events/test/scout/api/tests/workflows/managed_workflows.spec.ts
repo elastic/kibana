@@ -16,10 +16,9 @@ import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 const MANAGED_WORKFLOW_IDS = [
   // Base significant events workflows (installed when significant events is available)
   'system-significant-events-discovery',
-  // Memory workflows (installed when the memory feature flag is enabled)
+  // Memory synthesis is the only memory workflow this plugin still installs; the
+  // curation workflows are owned by the agent_memory plugin.
   'system-significant-events-memory-synthesis',
-  'system-significant-events-memory-consolidation',
-  'system-significant-events-memory-conversation-scraper',
 ];
 
 /**

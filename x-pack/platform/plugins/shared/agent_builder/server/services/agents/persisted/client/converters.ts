@@ -55,6 +55,9 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       enable_elastic_capabilities:
         configuration.enable_elastic_capabilities ??
         (resolvedId === agentBuilderDefaultAgentId ? true : undefined),
+      // No default-agent fallback: memory is off unless explicitly enabled, since
+      // the tools write to a knowledge base shared across the deployment.
+      enable_memory: configuration.enable_memory,
       workflow_ids: configuration.workflow_ids,
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
@@ -92,6 +95,7 @@ export const createRequestToEs = ({
       tools: profile.configuration.tools,
       skill_ids: profile.configuration.skill_ids,
       enable_elastic_capabilities: profile.configuration.enable_elastic_capabilities,
+      enable_memory: profile.configuration.enable_memory,
       workflow_ids: profile.configuration.workflow_ids,
       plugin_ids: profile.configuration.plugin_ids,
       connector_ids: profile.configuration.connector_ids,

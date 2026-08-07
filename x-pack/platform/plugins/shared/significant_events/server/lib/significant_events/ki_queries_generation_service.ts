@@ -24,6 +24,7 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
+import { MemoryServiceImpl, createMemoryDiscoveryTools } from '@kbn/agent-memory-plugin/server';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
@@ -32,8 +33,6 @@ import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
-import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
-import { createMemoryDiscoveryTools } from './memory_discovery_tools';
 import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {

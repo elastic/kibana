@@ -41,8 +41,8 @@ interface ToolLibraryPanelProps {
   allTools: ToolDefinition[];
   activeToolIdSet: Set<string>;
   onToggleTool: (tool: ToolDefinition, isActive: boolean) => void;
-  enableElasticCapabilities?: boolean;
-  builtinToolIdSet?: Set<string>;
+  /** Tools granted implicitly by a capability toggle; shown but not toggleable. */
+  impliedToolIdSet?: Set<string>;
 }
 
 export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
@@ -50,13 +50,12 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
   allTools,
   activeToolIdSet,
   onToggleTool,
-  enableElasticCapabilities = false,
-  builtinToolIdSet,
+  impliedToolIdSet,
 }) => {
-  const disabledItemIdSet = useMemo(() => {
-    if (!enableElasticCapabilities || !builtinToolIdSet) return undefined;
-    return builtinToolIdSet;
-  }, [enableElasticCapabilities, builtinToolIdSet]);
+  const disabledItemIdSet = useMemo(
+    () => (impliedToolIdSet?.size ? impliedToolIdSet : undefined),
+    [impliedToolIdSet]
+  );
 
   const readOnlyItemIdSet = useMemo(
     () => new Set(allTools.filter((t) => t.readonly).map((t) => t.id)),

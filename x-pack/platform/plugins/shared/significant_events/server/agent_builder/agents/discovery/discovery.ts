@@ -22,10 +22,14 @@ export const discoveryAgentType = {
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID, 'significant-events-memory'],
+    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
     // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
     // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
     enable_elastic_capabilities: false,
+    // Memory grounding is mandatory for discovery (see the instructions). Set on the type
+    // rather than in `tools` so an admin can still turn it off on the derived agent —
+    // a base `tools` entry is a floor that can never be lowered.
+    enable_memory: true,
     // Keep connectors empty so admin-selected connectors persist on the derived agent and merge
     // into this allow-list.
     connector_ids: [],

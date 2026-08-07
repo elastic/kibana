@@ -133,7 +133,7 @@ evaluate.describe(
   () => {
     evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'significant-events-memory',
+        skillId: 'agent-memory',
         examples: SIG_EVENTS_MEMORY_EXAMPLES,
       });
     });

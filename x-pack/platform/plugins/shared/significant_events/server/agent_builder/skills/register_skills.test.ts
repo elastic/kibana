@@ -7,7 +7,6 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
@@ -27,12 +26,10 @@ const CORE_SKILL_IDS = [
   significantEventsKIGroundingSkill.id,
   significantEventsManagementSkill.id,
   'significant-events-onboarding',
-  'streams-gap-detection',
   INVESTIGATION_SKILL_ID,
 ];
 
 const telemetry = {} as EbtTelemetryClient;
-const memoryToolsOptions = {} as MemoryToolsOptions;
 const streamsKIsOnboardingClient = {} as SignificantEventsKIsOnboardingClient;
 const maintenanceService = {} as SignificantEventsMaintenanceService;
 
@@ -43,7 +40,6 @@ const createOptions = (
   const options = {
     agentBuilder,
     telemetry,
-    memoryToolsOptions,
     maintenanceService,
     logger: loggerMock.create(),
     isAvailable: jest.fn().mockResolvedValue(true),
@@ -155,7 +151,7 @@ describe('registerSignificantEventsSkills', () => {
   it('does not latch on partial failure and retries on the next call', async () => {
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === 'streams-gap-detection') {
+      if (skill.id === 'significant-events-onboarding') {
         throw new Error('boom');
       }
     });
@@ -172,14 +168,14 @@ describe('registerSignificantEventsSkills', () => {
   it('retries only the failed skill and never re-attempts already-registered ones', async () => {
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === 'streams-gap-detection') {
+      if (skill.id === 'significant-events-onboarding') {
         throw new Error('boom');
       }
     });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
     // The failed attempt still appears in mock.calls even though registration did not stick.
-    expect(getRegisteredIds(agentBuilder)).toContain('streams-gap-detection');
+    expect(getRegisteredIds(agentBuilder)).toContain('significant-events-onboarding');
     agentBuilder.skills.register.mockClear();
     agentBuilder.skills.register.mockImplementation(async () => undefined);
 
@@ -187,20 +183,20 @@ describe('registerSignificantEventsSkills', () => {
 
     // Only the previously failed skill is retried; the ones that succeeded are not re-registered
     // (a second register() of the same id would throw "already registered").
-    expect(getRegisteredIds(agentBuilder)).toEqual(['streams-gap-detection']);
+    expect(getRegisteredIds(agentBuilder)).toEqual(['significant-events-onboarding']);
   });
 
   it('registers all skills once a transient failure recovers on a later call', async () => {
-    let failGapDetection = true;
+    let failOnboarding = true;
     const { agentBuilder, options } = createOptions();
     agentBuilder.skills.register.mockImplementation(async (skill) => {
-      if (skill.id === 'streams-gap-detection' && failGapDetection) {
+      if (skill.id === 'significant-events-onboarding' && failOnboarding) {
         throw new Error('boom');
       }
     });
 
     const { ensureRegistered } = await registerSignificantEventsSkills(options);
-    failGapDetection = false;
+    failOnboarding = false;
 
     await ensureRegistered();
 

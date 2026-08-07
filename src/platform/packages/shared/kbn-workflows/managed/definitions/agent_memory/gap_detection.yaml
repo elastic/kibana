@@ -1,0 +1,62 @@
+version: "1"
+
+name: Agent Memory Gap Detection
+description: >
+  Audits the memory knowledge base against the knowledge dimensions an agent needs
+  for incident response and writes a structured "_gaps/overview" memory page listing
+  what is unknown, ambiguous, or missing. Runs on a weekly schedule.
+enabled: false
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "agent-memory-gap-detection"
+    strategy: drop
+    max: 1
+tags:
+  - agent-memory
+  - memory
+  - gap-detection
+
+triggers:
+  - type: scheduled
+    with:
+      every: "168h"
+  - type: manual
+
+steps:
+  - name: detect_gaps
+    type: ai.agent
+    # connector-id-by-feature: the agent memory inference feature, registered by the agent_memory plugin.
+    connector-id-by-feature: "agent_memory"
+    plugin-id: "agent_memory_gap_detection"
+    aggregate-by: "agent_memory"
+    create-conversation: true
+    public-conversation: true
+    with:
+      timeout: 1800s
+      message: |
+        First, call the load_skill tool with skill path skills/platform/memory/agent-memory-gap-detection.
+        Wait for the skill to load before calling any other tools.
+
+        Audit the memory knowledge base and produce an up-to-date gaps report.
+
+        Review all existing memory pages, and whatever context tools are available
+        to you, then assess coverage across the required knowledge dimensions and
+        write (or overwrite) the _gaps/overview memory page with a structured report
+        of what is known, what is partial, what is missing, and concrete next steps.
+      schema:
+        type: object
+        properties:
+          gaps_found:
+            type: array
+            description: List of knowledge dimensions with identified gaps.
+            items:
+              type: string
+          summary:
+            type: string
+            description: Brief summary of the overall knowledge coverage assessment.
+        required:
+          - gaps_found
+          - summary
+    on-failure:
+      continue: false

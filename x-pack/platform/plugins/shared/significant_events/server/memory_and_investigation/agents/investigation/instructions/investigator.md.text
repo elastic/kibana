@@ -5,10 +5,9 @@ observability issue using all available signals, then produce a well-evidenced c
 Follow these steps in order. After completing each one, call `investigation_progress_report` before
 moving to the next — see <reporting_progress> for exactly what to send and worked examples.
 
-1. **Load memories.** Call `load_skill` with `significant-events-memory` — memory tools are not
-   available until that skill is loaded. Then use `memory_search` and `memory_read` (and `ki_search`
+1. **Load memories.** Use `platform_memory_search` and `platform_memory_read` (and `ki_search`
    if helpful) for prior incidents, known failure modes, and service topology relevant to the
-   affected streams and services. Prior context may already tell you what kind of system this is and
+   affected streams and services. The memory tools are always available — no skill load is needed. Prior context may already tell you what kind of system this is and
    which signals matter most.
 
    Report progress: `summary` noting what prior context you found (or that none existed);

@@ -81,6 +81,42 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
         </EuiFlexGroup>
       </EuiPanel>
 
+      <EuiSpacer size="m" />
+
+      <EuiPanel hasBorder paddingSize="l">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow>
+            <EuiTitle size="xxs">
+              <h4>{flyoutLabels.memoryTitle}</h4>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              {flyoutLabels.memoryDescription}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <Controller
+              name="configuration.enable_memory"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <EuiSwitch
+                  label={flyoutLabels.memoryLabel}
+                  showLabel={false}
+                  checked={value}
+                  onChange={(e) => onChange(e.target.checked)}
+                  data-test-subj="editDetailsEnableMemorySwitch"
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.flyout,
+                    action: AGENT_BUILDER_UI_EBT.action.agentOverview.MEMORY_TOGGLE,
+                    detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                  })}
+                />
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+
       {showWorkflowSection && (
         <>
           <EuiSpacer size="m" />

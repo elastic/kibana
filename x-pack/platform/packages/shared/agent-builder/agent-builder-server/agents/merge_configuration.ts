@@ -55,7 +55,8 @@ const mergeToolSelections = (base: ToolSelection[], delta: ToolSelection[]): Too
  * - instructions: concatenated base-first with a delimiter.
  * - tools / skill_ids / plugin_ids / workflow_ids / connector_ids: union, base-first,
  *   deduplicated. A base that sets `connector_ids: []` pins the floor to "no connectors".
- * - enable_elastic_capabilities: the delta overrides the base when set.
+ * - enable_elastic_capabilities / enable_memory: the delta overrides the base when set,
+ *   so a type can switch a capability on as a default an admin is still free to turn off.
  */
 export const mergeAgentConfiguration = (
   base: AgentBaseConfiguration | undefined,
@@ -87,6 +88,9 @@ export const mergeAgentConfiguration = (
   if (base.enable_elastic_capabilities !== undefined) {
     result.enable_elastic_capabilities =
       delta.enable_elastic_capabilities ?? base.enable_elastic_capabilities;
+  }
+  if (base.enable_memory !== undefined) {
+    result.enable_memory = delta.enable_memory ?? base.enable_memory;
   }
 
   return result;

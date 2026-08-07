@@ -116,6 +116,7 @@ const ebtAction = {
     DOCS_LINK: 'docs_link',
     DESCRIPTION_TOGGLE: 'description_toggle',
     ELASTIC_CAPABILITIES_TOGGLE: 'elastic_capabilities_toggle',
+    MEMORY_TOGGLE: 'memory_toggle',
     EDIT_FLYOUT_SAVE: 'form_save',
     EDIT_FLYOUT_CANCEL: 'form_cancel',
   },

@@ -21,7 +21,4 @@ export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/di
 
 export { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './agent_builder/tools/tool_ids';
 
-export { createMemoryDiscoveryTools } from './lib/significant_events/memory_discovery_tools';
-export { MemoryServiceImpl } from './memory_and_investigation/lib/memory';
-
 export type { SignificantEventsRouteRepository } from './routes';

@@ -94,26 +94,46 @@ export const toggleToolSelection = (
 };
 
 /**
- * Returns the list of active tools for an agent, combining explicitly selected tools
- * with default tools when elastic capabilities are enabled. Default tools that are
- * already explicitly selected are not duplicated.
+ * Returns the list of active tools for an agent: those explicitly selected, plus any
+ * granted implicitly by a capability toggle (Elastic capabilities, memory). Implied
+ * tools that are also explicitly selected are not duplicated.
  */
 export const getActiveTools = <T extends ToolSelectionRelevantFields>(
   allTools: T[],
   agentToolSelections: ToolSelection[],
-  enableElasticCapabilities: boolean,
-  defaultToolIds: Set<string>
+  impliedToolIds: Set<string>
 ): T[] => {
   const explicitTools = allTools.filter((t) => isToolSelected(t, agentToolSelections));
-  if (enableElasticCapabilities) {
-    const explicitIdSet = new Set(explicitTools.map((t) => t.id));
-    const defaultToolsNotExplicit = allTools.filter(
-      (t) => defaultToolIds.has(t.id) && !explicitIdSet.has(t.id)
-    );
-    return [...explicitTools, ...defaultToolsNotExplicit];
+  if (impliedToolIds.size === 0) {
+    return explicitTools;
   }
-  return explicitTools;
+  const explicitIdSet = new Set(explicitTools.map((t) => t.id));
+  const impliedNotExplicit = allTools.filter(
+    (t) => impliedToolIds.has(t.id) && !explicitIdSet.has(t.id)
+  );
+  return [...explicitTools, ...impliedNotExplicit];
 };
+
+/**
+ * The tools an agent gets without selecting them, derived from its capability
+ * toggles. Callers pass this to {@link getActiveTools} and use it to render those
+ * tools as auto-included (and non-deselectable) in the picker.
+ */
+export const getImpliedToolIds = ({
+  enableElasticCapabilities,
+  enableMemory,
+  defaultToolIds,
+  memoryToolIds,
+}: {
+  enableElasticCapabilities: boolean;
+  enableMemory: boolean;
+  defaultToolIds: readonly string[];
+  memoryToolIds: readonly string[];
+}): Set<string> =>
+  new Set<string>([
+    ...(enableElasticCapabilities ? defaultToolIds : []),
+    ...(enableMemory ? memoryToolIds : []),
+  ]);
 
 /**
  * Returns whether a skill is automatically included when Elastic capabilities are enabled.

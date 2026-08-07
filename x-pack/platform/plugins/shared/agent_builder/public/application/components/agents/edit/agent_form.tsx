@@ -33,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import {
   defaultAgentToolIds,
+  memoryAgentToolIds,
   AGENT_BUILDER_UI_EBT,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
@@ -68,6 +69,7 @@ import {
   getActivePlugins,
   getActiveSkills,
   getActiveTools,
+  getImpliedToolIds,
 } from '../../../utils/tool_selection_utils';
 
 const BUTTON_IDS = {
@@ -236,13 +238,22 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   });
 
   const enableElasticCapabilities = watch('configuration.enable_elastic_capabilities') ?? false;
-  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+  const enableMemory = watch('configuration.enable_memory') ?? false;
+  const impliedToolIdSet = useMemo(
+    () =>
+      getImpliedToolIds({
+        enableElasticCapabilities,
+        enableMemory,
+        defaultToolIds: defaultAgentToolIds,
+        memoryToolIds: memoryAgentToolIds,
+      }),
+    [enableElasticCapabilities, enableMemory]
+  );
 
   const agentTools = watch('configuration.tools');
   const activeToolsCount = useMemo(
-    () =>
-      getActiveTools(tools, agentTools ?? [], enableElasticCapabilities, defaultToolIdSet).length,
-    [tools, agentTools, enableElasticCapabilities, defaultToolIdSet]
+    () => getActiveTools(tools, agentTools ?? [], impliedToolIdSet).length,
+    [tools, agentTools, impliedToolIdSet]
   );
 
   const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
@@ -290,6 +301,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !canEditAgent}
             areElasticCapabilitiesEnabled={enableElasticCapabilities}
+            isMemoryEnabled={enableMemory}
           />
         ),
         append: (
@@ -384,6 +396,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       permissions?.update_access_control,
       isExperimentalFeaturesEnabled,
       enableElasticCapabilities,
+      enableMemory,
     ]
   );
 

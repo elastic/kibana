@@ -47,6 +47,7 @@ const emptyState = (): AgentEditState => ({
     instructions: '',
     tools: defaultToolSelection,
     enable_elastic_capabilities: false,
+    enable_memory: false,
     workflow_ids: [],
     plugin_ids: [],
   },

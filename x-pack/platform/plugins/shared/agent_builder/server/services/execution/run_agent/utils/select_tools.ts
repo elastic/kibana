@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds, memoryAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
 import type {
   ToolProvider,
@@ -83,6 +83,9 @@ export const selectTools = async ({
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
         : []),
+      // Unavailable tools are filtered out by the provider, so this contributes
+      // nothing when memory is not installed.
+      ...(agentConfiguration.enable_memory ? [{ tool_ids: memoryAgentToolIds }] : []),
     ],
     toolProvider,
     request,

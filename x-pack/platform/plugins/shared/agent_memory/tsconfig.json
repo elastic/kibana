@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["../../../../../typings/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-memory-common",
+    "@kbn/data-streams",
+    "@kbn/es-mappings",
+    "@kbn/inference-common",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/features-plugin",
+    "@kbn/i18n",
+    "@kbn/licensing-plugin",
+    "@kbn/logging",
+    "@kbn/search-inference-endpoints",
+    "@kbn/spaces-plugin",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin"
+  ]
+}

@@ -9,9 +9,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -22,7 +19,8 @@ import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 // the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
 // workflow.
 const BASE_WORKFLOW_COUNT = 8;
-const MEMORY_WORKFLOW_COUNT = 4;
+// Only synthesis remains here; the curation workflows moved to the agent_memory plugin.
+const MEMORY_WORKFLOW_COUNT = 1;
 const INVESTIGATION_WORKFLOW_COUNT = 1;
 const TOTAL_WORKFLOW_COUNT =
   BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + INVESTIGATION_WORKFLOW_COUNT;
@@ -111,12 +109,7 @@ describe('createManagedWorkflowsInstaller', () => {
 
     await installer.install();
 
-    const memoryWorkflowIds = [
-      SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
-      SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-      SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-      SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-    ];
+    const memoryWorkflowIds = [SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID];
 
     for (const workflowId of memoryWorkflowIds) {
       expect(client.install).toHaveBeenCalledWith(workflowId, {

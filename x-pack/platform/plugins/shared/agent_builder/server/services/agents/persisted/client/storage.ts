@@ -85,6 +85,7 @@ export interface AgentConfigurationProperties {
   tools: ToolSelection[];
   skill_ids?: string[];
   enable_elastic_capabilities?: boolean;
+  enable_memory?: boolean;
   workflow_ids?: string[];
   plugin_ids?: string[];
   connector_ids?: string[];

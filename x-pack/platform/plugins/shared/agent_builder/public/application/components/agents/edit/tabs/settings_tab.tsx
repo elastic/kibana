@@ -349,6 +349,58 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         direction="row"
         gutterSize="xl"
         alignItems="flexStart"
+        aria-labelledby="memory-section-title"
+      >
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiIcon type="documents" aria-hidden={true} />
+              <EuiTitle size="xs">
+                <h2 id="memory-section-title">
+                  {i18n.translate('xpack.agentBuilder.agents.form.settings.memoryTitle', {
+                    defaultMessage: 'Memory',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexGroup>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.agentBuilder.agents.form.settings.memoryDescription', {
+                defaultMessage:
+                  'Let the agent search and update the shared knowledge base, so what it learns in one conversation is available in the next. Memory is shared across the deployment.',
+              })}
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+          <Controller
+            name="configuration.enable_memory"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <EuiSwitch
+                label={i18n.translate('xpack.agentBuilder.agents.form.settings.enableMemoryLabel', {
+                  defaultMessage: 'Enable memory',
+                })}
+                checked={Boolean(value)}
+                onChange={(e) => onChange(e.target.checked)}
+                disabled={isFormDisabled}
+                data-test-subj="agentSettingsEnableMemorySwitch"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.MEMORY_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
+              />
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
         aria-labelledby="organization-access-section-title"
       >
         <EuiFlexItem grow={1}>

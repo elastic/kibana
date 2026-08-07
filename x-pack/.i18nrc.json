@@ -110,6 +110,10 @@
       "platform/packages/shared/agent-builder"
     ],
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
+    "xpack.agentMemory": [
+      "platform/plugins/shared/agent_memory",
+      "platform/packages/shared/agent-memory"
+    ],
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.queryActivity": "platform/plugins/shared/query_activity",

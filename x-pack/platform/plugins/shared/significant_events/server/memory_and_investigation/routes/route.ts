@@ -11,25 +11,34 @@ import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import {
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  AGENT_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  AGENT_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  AGENT_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { MEMORY_WORKFLOW_IDS } from '../../lib/maintenance/managed_workflow_targets';
-import { createServerRoute } from '../../routes/create_server_route';
 import type {
   MemoryEntry,
   MemoryCategoryNode,
   MemorySearchResult,
   MemoryVersionRecord,
-} from '../lib/memory';
-import { MemoryServiceImpl } from '../lib/memory';
+} from '@kbn/agent-memory-common';
+import { MemoryServiceImpl } from '@kbn/agent-memory-plugin/server';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import {
+  AGENT_MEMORY_WORKFLOW_IDS,
+  MEMORY_WORKFLOW_IDS,
+} from '../../lib/maintenance/managed_workflow_targets';
+import { createServerRoute } from '../../routes/create_server_route';
 import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
 import { assertNotPaused } from '../../routes/utils/assert_not_paused';
+
+/** Synthesis (owned here) plus the curation workflows (owned by agent_memory). */
+const ALL_MEMORY_WORKFLOW_IDS: readonly string[] = [
+  ...MEMORY_WORKFLOW_IDS,
+  ...AGENT_MEMORY_WORKFLOW_IDS,
+];
 
 const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
   new MemoryServiceImpl({ logger, esClient });
@@ -398,7 +407,7 @@ const recentChangesRoute = createServerRoute({
   },
 });
 
-const createWorkflowTriggerRoute = (
+const createCurationTriggerRoute = (
   endpoint: `POST ${string}`,
   managedWorkflowId: string,
   summary: string
@@ -453,16 +462,24 @@ const createWorkflowTriggerRoute = (
     },
   });
 
-const scrapeConversationsRoute = createWorkflowTriggerRoute(
+// The curation workflows are owned by the agent_memory plugin; these routes stay here
+// only to keep the existing memory tab working until it moves to the Context app.
+const scrapeConversationsRoute = createCurationTriggerRoute(
   'POST /internal/streams/memory/_scrape_conversations',
-  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-  'Trigger conversation scraping for memory'
+  AGENT_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  'Trigger conversation scraping into memory'
 );
 
-const consolidateMemoryRoute = createWorkflowTriggerRoute(
+const consolidateMemoryRoute = createCurationTriggerRoute(
   'POST /internal/streams/memory/_consolidate',
-  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  AGENT_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   'Trigger memory consolidation'
+);
+
+const detectGapsRoute = createCurationTriggerRoute(
+  'POST /internal/streams/memory/_detect_gaps',
+  AGENT_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  'Trigger memory gap detection'
 );
 
 const synthesizeMemoryRoute = createServerRoute({
@@ -499,12 +516,6 @@ const synthesizeMemoryRoute = createServerRoute({
   },
 });
 
-const detectGapsRoute = createWorkflowTriggerRoute(
-  'POST /internal/streams/memory/_detect_gaps',
-  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-  'Trigger gap detection for memory'
-);
-
 const getMemoryWorkflowsEnabledRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/_workflows/enabled',
   options: { access: 'internal', summary: 'Get enabled state of all memory workflows' },
@@ -525,14 +536,16 @@ const getMemoryWorkflowsEnabledRoute = createServerRoute({
     if (!wfMgmt) {
       return {
         enabled: false,
-        workflows: MEMORY_WORKFLOW_IDS.map((id) => ({ id, enabled: false })),
+        workflows: ALL_MEMORY_WORKFLOW_IDS.map((id) => ({ id, enabled: false })),
       };
     }
 
     const fetchedWorkflows = await Promise.all(
-      MEMORY_WORKFLOW_IDS.map((id) => wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID))
+      ALL_MEMORY_WORKFLOW_IDS.map((id) =>
+        wfMgmt.management.getWorkflow(id, GLOBAL_WORKFLOW_SPACE_ID)
+      )
     );
-    const workflows = MEMORY_WORKFLOW_IDS.map((id, index) => ({
+    const workflows = ALL_MEMORY_WORKFLOW_IDS.map((id, index) => ({
       id,
       enabled: fetchedWorkflows[index]?.enabled === true,
     }));
@@ -579,7 +592,7 @@ const setMemoryWorkflowsEnabledRoute = createServerRoute({
     // that case and reconcile against the returned `enabled` state.
     const failures: string[] = [];
 
-    for (const managedWorkflowId of MEMORY_WORKFLOW_IDS) {
+    for (const managedWorkflowId of ALL_MEMORY_WORKFLOW_IDS) {
       const workflow = await wfMgmt.management.getWorkflow(
         managedWorkflowId,
         GLOBAL_WORKFLOW_SPACE_ID
@@ -646,9 +659,9 @@ export const internalMemoryRoutes = {
   ...getHistoryRoute,
   ...getVersionRoute,
   ...recentChangesRoute,
+  ...synthesizeMemoryRoute,
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
-  ...synthesizeMemoryRoute,
   ...detectGapsRoute,
   ...getMemoryWorkflowsEnabledRoute,
   ...setMemoryWorkflowsEnabledRoute,

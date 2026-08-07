@@ -19,8 +19,8 @@ import {
 } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
+import type { MemoryDiscoveryTools } from '@kbn/agent-memory-plugin/server';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 import type { KiExtractionContextTools } from './ki_extraction_context_tools';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 

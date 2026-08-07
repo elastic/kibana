@@ -2606,6 +2606,16 @@ export const labels = {
     autoIncludeLabel: i18n.translate('xpack.agentBuilder.overview.settings.autoIncludeLabel', {
       defaultMessage: 'Include built-in capabilities automatically',
     }),
+    memoryTitle: i18n.translate('xpack.agentBuilder.overview.settings.memoryTitle', {
+      defaultMessage: 'Memory',
+    }),
+    memoryDescription: i18n.translate('xpack.agentBuilder.overview.settings.memoryDescription', {
+      defaultMessage:
+        'Let the agent search and update the shared knowledge base, so what it learns in one conversation is available in the next.',
+    }),
+    memoryLabel: i18n.translate('xpack.agentBuilder.overview.settings.memoryLabel', {
+      defaultMessage: 'Enable memory',
+    }),
     instructionsTitle: i18n.translate('xpack.agentBuilder.overview.settings.instructionsTitle', {
       defaultMessage: 'Use custom instructions',
     }),
@@ -2814,6 +2824,19 @@ export const labels = {
       ),
       autoIncludeLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.autoIncludeLabel', {
         defaultMessage: 'Include built-in capabilities automatically',
+      }),
+      memoryTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.memoryTitle', {
+        defaultMessage: 'Memory',
+      }),
+      memoryDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.memoryDescription',
+        {
+          defaultMessage:
+            'Let the agent search and update the shared knowledge base. Memory is shared across the deployment.',
+        }
+      ),
+      memoryLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.memoryLabel', {
+        defaultMessage: 'Enable memory',
       }),
       workflowTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.workflowTitle', {
         defaultMessage: 'Pre-execution workflow',

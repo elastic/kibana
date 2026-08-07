@@ -33,7 +33,9 @@ export const investigationAgentType = {
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: ['significant-events-memory', 'observability.investigation', 'streams-management'],
+    skill_ids: ['observability.investigation', 'streams-management'],
+    // Step 1 of the investigation reads prior context out of memory.
+    enable_memory: true,
     tools: [
       {
         tool_ids: [

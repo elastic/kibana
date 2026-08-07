@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  platformMemoryTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -24,6 +25,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
   ...Object.values(platformSignificantEventsTools),
+  // Memory, registered by the agent_memory plugin
+  ...Object.values(platformMemoryTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -170,7 +173,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Streams
   'streams-management',
-  'significant-events-memory',
   'significant-events-management',
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
@@ -179,10 +181,13 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'knowledge-indicators-management',
   'ki-identification-management',
   'streams-memory-synthesis',
-  'streams-memory-consolidation',
-  'streams-conversation-scraper',
   'significant-events-onboarding',
-  'streams-gap-detection',
+
+  // Platform – Memory
+  'agent-memory',
+  'agent-memory-consolidation',
+  'agent-memory-conversation-scraper',
+  'agent-memory-gap-detection',
 
   // Platform – Context Engine
   'ki-automation-generation',

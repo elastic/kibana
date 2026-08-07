@@ -12,6 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { AiIndexList } from './components/ai_index_list';
 import { CreateAiIndexButton } from './components/create_ai_index_button';
+import { MemorySection } from './components/memory';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
 
 export const ContextLandingPage = () => {
@@ -39,6 +40,9 @@ export const ContextLandingPage = () => {
       />
       <KibanaPageTemplate.Section>
         <AiIndexList aiIndices={aiIndices} isLoading={isLoading} error={error} />
+      </KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section>
+        <MemorySection />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

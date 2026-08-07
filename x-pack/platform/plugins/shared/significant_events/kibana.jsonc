@@ -24,6 +24,7 @@
     "optionalPlugins": [
       "agentBuilder",
       "agentBuilderSml",
+      "agentMemory",
       "cloud",
       "serverless",
       "searchInferenceEndpoints",

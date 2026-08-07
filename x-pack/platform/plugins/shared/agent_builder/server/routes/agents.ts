@@ -279,6 +279,14 @@ export function registerAgentRoutes({
                       },
                     })
                   ),
+                  enable_memory: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, grants the agent the platform memory tools so it can consult and contribute to the shared knowledge base.',
+                      },
+                    })
+                  ),
                   workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
@@ -406,6 +414,14 @@ export function registerAgentRoutes({
                         meta: {
                           description:
                             'When true, enables built-in Elastic capabilities for the agent.',
+                        },
+                      })
+                    ),
+                    enable_memory: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, grants the agent the platform memory tools so it can consult and contribute to the shared knowledge base.',
                         },
                       })
                     ),

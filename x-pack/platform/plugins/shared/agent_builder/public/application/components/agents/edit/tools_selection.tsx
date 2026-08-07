@@ -10,8 +10,16 @@ import { EuiLoadingSpinner, EuiLiveAnnouncer, EuiSpacer, EuiSearchBar } from '@e
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { ToolSelection, ToolDefinition } from '@kbn/agent-builder-common';
-import { activeToolsCountWarningThreshold, defaultAgentToolIds } from '@kbn/agent-builder-common';
-import { getActiveTools, toggleToolSelection } from '../../../utils/tool_selection_utils';
+import {
+  activeToolsCountWarningThreshold,
+  defaultAgentToolIds,
+  memoryAgentToolIds,
+} from '@kbn/agent-builder-common';
+import {
+  getActiveTools,
+  getImpliedToolIds,
+  toggleToolSelection,
+} from '../../../utils/tool_selection_utils';
 import { ActiveToolsStatus } from './active_tools_status';
 import { ToolsSearchControls } from './tools_search_controls';
 import { ToolsFlatView } from './tools_flat_view';
@@ -25,6 +33,7 @@ interface ToolsSelectionProps {
   showActiveOnly?: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
   areElasticCapabilitiesEnabled?: boolean;
+  isMemoryEnabled?: boolean;
 }
 
 export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
@@ -36,16 +45,26 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   showActiveOnly = false,
   onShowActiveOnlyChange,
   areElasticCapabilitiesEnabled = false,
+  isMemoryEnabled = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+  const impliedToolIdSet = useMemo(
+    () =>
+      getImpliedToolIds({
+        enableElasticCapabilities: areElasticCapabilitiesEnabled,
+        enableMemory: isMemoryEnabled,
+        defaultToolIds: defaultAgentToolIds,
+        memoryToolIds: memoryAgentToolIds,
+      }),
+    [areElasticCapabilitiesEnabled, isMemoryEnabled]
+  );
 
   const activeTools = useMemo(
-    () => getActiveTools(tools, selectedTools, areElasticCapabilitiesEnabled, defaultToolIdSet),
-    [tools, selectedTools, areElasticCapabilitiesEnabled, defaultToolIdSet]
+    () => getActiveTools(tools, selectedTools, impliedToolIdSet),
+    [tools, selectedTools, impliedToolIdSet]
   );
 
   const activeToolIdSet = useMemo(() => new Set(activeTools.map((t) => t.id)), [activeTools]);
@@ -83,11 +102,12 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   const handleToggleTool = useCallback(
     (toolId: string) => {
-      if (areElasticCapabilitiesEnabled && defaultToolIdSet.has(toolId)) return;
+      // Implied tools cannot be deselected — the capability toggle owns them.
+      if (impliedToolIdSet.has(toolId)) return;
       const newSelection = toggleToolSelection(toolId, tools, selectedTools);
       onToolsChange(newSelection);
     },
-    [selectedTools, onToolsChange, tools, areElasticCapabilitiesEnabled, defaultToolIdSet]
+    [selectedTools, onToolsChange, tools, impliedToolIdSet]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -139,8 +159,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         onPageChange={handlePageChange}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
-        areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
-        defaultToolIdSet={defaultToolIdSet}
+        impliedToolIdSet={impliedToolIdSet}
       />
     </div>
   );

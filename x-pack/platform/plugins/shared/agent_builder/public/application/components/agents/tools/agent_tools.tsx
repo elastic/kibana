@@ -23,7 +23,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
-import { defaultAgentToolIds, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import {
+  defaultAgentToolIds,
+  memoryAgentToolIds,
+  AGENT_BUILDER_UI_EBT,
+} from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
@@ -33,7 +37,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
-import { getActiveTools } from '../../../utils/tool_selection_utils';
+import { getActiveTools, getImpliedToolIds } from '../../../utils/tool_selection_utils';
 import { ActiveItemRow } from '../common/active_item_row';
 import { ToolLibraryPanel } from './tool_library_panel';
 import { ToolCreateFlyout } from './tool_create_flyout';
@@ -48,8 +52,7 @@ const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
   searchQuery: string;
   selectedToolId: string | null;
-  enableElasticCapabilities: boolean;
-  defaultToolIdSet: Set<string>;
+  impliedToolIdSet: Set<string>;
   isRemoving: boolean;
   onSelect: (id: string) => void;
   onRemove: (tool: ToolDefinition) => void;
@@ -58,8 +61,7 @@ const ActiveToolsList: React.FC<{
   filteredActiveTools,
   searchQuery,
   selectedToolId,
-  enableElasticCapabilities,
-  defaultToolIdSet,
+  impliedToolIdSet,
   isRemoving,
   onSelect,
   onRemove,
@@ -80,8 +82,7 @@ const ActiveToolsList: React.FC<{
   return (
     <>
       {filteredActiveTools.map((tool) => {
-        const isBuiltIn = defaultToolIdSet.has(tool.id);
-        const isAutoIncluded = enableElasticCapabilities && isBuiltIn;
+        const isAutoIncluded = impliedToolIdSet.has(tool.id);
         return (
           <ActiveItemRow
             key={tool.id}
@@ -161,23 +162,30 @@ export const AgentTools: React.FC = () => {
   );
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
+  const enableMemory = agent?.configuration?.enable_memory ?? false;
 
-  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+  const impliedToolIdSet = useMemo(
+    () =>
+      getImpliedToolIds({
+        enableElasticCapabilities,
+        enableMemory,
+        defaultToolIds: defaultAgentToolIds,
+        memoryToolIds: memoryAgentToolIds,
+      }),
+    [enableElasticCapabilities, enableMemory]
+  );
 
   const activeTools = useMemo(
-    () =>
-      agent
-        ? getActiveTools(allTools, agentToolSelections, enableElasticCapabilities, defaultToolIdSet)
-        : [],
-    [allTools, agentToolSelections, agent, enableElasticCapabilities, defaultToolIdSet]
+    () => (agent ? getActiveTools(allTools, agentToolSelections, impliedToolIdSet) : []),
+    [allTools, agentToolSelections, agent, impliedToolIdSet]
   );
 
   const activeToolIdSet = useMemo(() => new Set(activeTools.map((t) => t.id)), [activeTools]);
 
   const libraryActiveToolIdSet = useMemo(() => {
-    if (enableElasticCapabilities) return new Set([...activeToolIdSet, ...defaultToolIdSet]);
-    return activeToolIdSet;
-  }, [activeToolIdSet, enableElasticCapabilities, defaultToolIdSet]);
+    if (impliedToolIdSet.size === 0) return activeToolIdSet;
+    return new Set([...activeToolIdSet, ...impliedToolIdSet]);
+  }, [activeToolIdSet, impliedToolIdSet]);
 
   useEffect(() => {
     if (agentLoading || toolsLoading) return;
@@ -204,14 +212,15 @@ export const AgentTools: React.FC = () => {
 
   const handleToggleTool = useCallback(
     (tool: ToolDefinition, isActive: boolean) => {
-      if (enableElasticCapabilities && defaultToolIdSet.has(tool.id)) return;
+      // Implied tools are owned by the capability toggle, not by this list.
+      if (impliedToolIdSet.has(tool.id)) return;
       if (isActive) {
         handleAddTool(tool);
       } else {
         handleRemoveTool(tool);
       }
     },
-    [handleAddTool, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]
+    [handleAddTool, handleRemoveTool, impliedToolIdSet]
   );
 
   const handleSelectTool = useCallback(
@@ -234,7 +243,7 @@ export const AgentTools: React.FC = () => {
   /** Guarded removal: only prevents removing auto-included tools from the agent. */
   const handleRemoveSelectedTool = () => {
     if (!selectedToolId) return;
-    if (enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)) return;
+    if (impliedToolIdSet.has(selectedToolId)) return;
     const tool = activeTools.find((t) => t.id === selectedToolId);
     if (tool) {
       handleRemoveToolWithDeselect(tool);
@@ -261,8 +270,7 @@ export const AgentTools: React.FC = () => {
           allTools={allTools}
           activeToolIdSet={libraryActiveToolIdSet}
           onToggleTool={handleToggleTool}
-          enableElasticCapabilities={enableElasticCapabilities}
-          builtinToolIdSet={defaultToolIdSet}
+          impliedToolIdSet={impliedToolIdSet}
         />
       ) : null}
       {isCreateToolOpen ? (
@@ -377,8 +385,7 @@ export const AgentTools: React.FC = () => {
                   filteredActiveTools={filteredActiveTools}
                   searchQuery={searchQuery}
                   selectedToolId={selectedToolId}
-                  enableElasticCapabilities={enableElasticCapabilities}
-                  defaultToolIdSet={defaultToolIdSet}
+                  impliedToolIdSet={impliedToolIdSet}
                   isRemoving={false}
                   onSelect={handleSelectTool}
                   onRemove={handleRemoveToolWithDeselect}
@@ -392,7 +399,7 @@ export const AgentTools: React.FC = () => {
                 <ToolDetailPanel
                   toolId={selectedToolId}
                   onRemove={handleRemoveSelectedTool}
-                  isAutoIncluded={enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)}
+                  isAutoIncluded={impliedToolIdSet.has(selectedToolId)}
                   canEditAgent={canEditAgent}
                 />
               ) : (

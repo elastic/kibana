@@ -16,6 +16,7 @@ export interface EditDetailsFormData {
   access_control: Pick<AgentAccessControl, 'access_mode'>;
   configuration: {
     enable_elastic_capabilities: boolean;
+    enable_memory: boolean;
     workflow_ids: string[];
     instructions: string;
   };

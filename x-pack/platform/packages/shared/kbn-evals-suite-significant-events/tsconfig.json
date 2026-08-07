@@ -8,6 +8,8 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-common",
+    "@kbn/agent-memory-common",
+    "@kbn/agent-memory-plugin",
     "@kbn/evals",
     "@kbn/evals-phoenix-executor",
     "@kbn/tooling-log",

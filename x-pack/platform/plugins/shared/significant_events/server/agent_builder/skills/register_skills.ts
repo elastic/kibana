@@ -10,15 +10,11 @@ import type { Logger } from '@kbn/core/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
-import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { significantEventsManagementSkill } from './significant_events_management';
 import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
-import {
-  createSignificantEventsOnboardingSkill,
-  createGapDetectionSkill,
-} from '../../memory_and_investigation/skills/memory';
+import { createSignificantEventsOnboardingSkill } from '../../memory_and_investigation/skills/memory';
 import { streamsInvestigationManagementSkill } from '../../memory_and_investigation/skills/investigation_management';
 
 type SignificantEventsSkill = Parameters<AgentBuilderPluginStart['skills']['register']>[0];
@@ -46,7 +42,6 @@ interface RegisterSignificantEventsSkillsOptions {
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   maintenanceService?: SignificantEventsMaintenanceService;
-  memoryToolsOptions: MemoryToolsOptions;
   logger: Logger;
   isAvailable: () => Promise<boolean>;
 }
@@ -72,7 +67,6 @@ export const registerSignificantEventsSkills = async ({
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
-  memoryToolsOptions,
   logger,
   isAvailable,
 }: RegisterSignificantEventsSkillsOptions): Promise<{ ensureRegistered: () => Promise<void> }> => {
@@ -91,8 +85,7 @@ export const registerSignificantEventsSkills = async ({
           }),
         ]
       : []),
-    createSignificantEventsOnboardingSkill(memoryToolsOptions),
-    createGapDetectionSkill(memoryToolsOptions),
+    createSignificantEventsOnboardingSkill(),
     streamsInvestigationManagementSkill,
   ];
 

@@ -19,6 +19,8 @@
     "@kbn/core-pricing-common",
     "@kbn/significant-events-schema",
     "@kbn/agent-builder-common",
+    "@kbn/agent-memory-common",
+    "@kbn/agent-memory-plugin",
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log",
     "@kbn/synthtrace",

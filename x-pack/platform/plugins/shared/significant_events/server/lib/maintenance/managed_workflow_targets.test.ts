@@ -10,6 +10,7 @@ import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
+  AGENT_MEMORY_WORKFLOW_IDS,
   ALL_INSTALLABLE_WORKFLOW_IDS,
   DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
   GLOBAL_CORE_WORKFLOW_IDS,
@@ -36,7 +37,17 @@ describe('managed_workflow_targets registry', () => {
       ...GLOBAL_CORE_WORKFLOW_IDS,
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       ...MEMORY_WORKFLOW_IDS,
+      ...AGENT_MEMORY_WORKFLOW_IDS,
     ]);
+  });
+
+  it('sweeps the agent_memory curation workflows without installing them', () => {
+    // Owned by the agent_memory plugin, but paused with Significant Events so the
+    // pause banner's promise that memory activity stops stays true.
+    for (const id of AGENT_MEMORY_WORKFLOW_IDS) {
+      expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toContain(id);
+      expect(ALL_INSTALLABLE_WORKFLOW_IDS).not.toContain(id);
+    }
   });
 
   it('keeps continuous onboarding in the default-space set (not memory)', () => {

@@ -79,6 +79,44 @@ export const platformSignificantEventsTools = {
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
 
+const memoryTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformMemory}.${TName}` => {
+  return `${internalNamespaces.platformMemory}.${toolName}`;
+};
+
+/**
+ * Ids of the built-in memory tools, registered by the agent_memory plugin.
+ *
+ * All live under `platform.memory.*` with exactly three segments: the MCP
+ * `?namespace=` filter matches on everything before the *last* dot, so nesting
+ * deeper would make `?namespace=platform.memory` stop matching them.
+ */
+export const platformMemoryTools = {
+  search: memoryTool('search'),
+  read: memoryTool('read'),
+  write: memoryTool('write'),
+  patch: memoryTool('patch'),
+  list: memoryTool('list'),
+  delete: memoryTool('delete'),
+  recentChanges: memoryTool('recent_changes'),
+} as const;
+
+/**
+ * Memory tools granted implicitly by an agent's `enable_memory` configuration.
+ *
+ * Deliberately excludes `delete` (destructive, against a store shared across
+ * spaces) and `recent_changes` (curation-only). Both stay registered and remain
+ * individually selectable, and the curation skills request them explicitly.
+ */
+export const memoryAgentToolIds = [
+  platformMemoryTools.search,
+  platformMemoryTools.read,
+  platformMemoryTools.write,
+  platformMemoryTools.patch,
+  platformMemoryTools.list,
+];
+
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,

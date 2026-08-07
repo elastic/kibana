@@ -292,6 +292,13 @@ export const conversePayloadSchema = schema.object({
             meta: { description: 'Whether to enable built-in Elastic skills for this execution.' },
           })
         ),
+        enable_memory: schema.maybe(
+          schema.boolean({
+            meta: {
+              description: 'Whether to grant the platform memory tools for this execution.',
+            },
+          })
+        ),
       },
       {
         meta: {

@@ -120,6 +120,10 @@ export const InputSchema = z.object({
         .boolean()
         .optional()
         .describe('Whether to enable built-in Elastic skills for this execution.'),
+      enable_memory: z
+        .boolean()
+        .optional()
+        .describe('Whether to grant the platform memory tools for this execution.'),
     })
     .optional()
     .describe(

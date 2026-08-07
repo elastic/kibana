@@ -22,6 +22,8 @@ export {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  platformMemoryTools,
+  memoryAgentToolIds,
   attachmentTools,
   internalTools,
   defaultAgentToolIds,

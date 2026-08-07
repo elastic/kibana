@@ -33,6 +33,7 @@ export type SkillsDirectoryStructure = Directory<{
       dashboard: FileDirectory;
       discover: FileDirectory;
       evals: FileDirectory;
+      memory: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;

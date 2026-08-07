@@ -1,0 +1,63 @@
+version: "1"
+
+name: Agent Memory Consolidation
+description: >
+  Curates the memory wiki by merging duplicates, removing stale entries,
+  improving categorization, and adding cross-references via the
+  agent-memory-consolidation skill. Runs on a 24h schedule.
+enabled: false
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "agent-memory-consolidation"
+    strategy: drop
+    max: 1
+tags:
+  - agent-memory
+  - memory
+  - consolidation
+
+triggers:
+  - type: scheduled
+    with:
+      every: "24h"
+  - type: manual
+
+steps:
+  - name: consolidate_memory
+    type: ai.agent
+    # connector-id-by-feature: the agent memory inference feature, registered by the agent_memory plugin.
+    connector-id-by-feature: "agent_memory"
+    plugin-id: "agent_memory_consolidation"
+    aggregate-by: "agent_memory"
+    create-conversation: true
+    public-conversation: true
+    timeout: 1800s
+    with:
+      message: |
+        First, call the load_skill tool with skill path skills/platform/memory/agent-memory-consolidation.
+        Wait for the skill to load before calling any other tools.
+
+        Then review the current state of the memory wiki. Start by listing all pages, then work through them methodically. Not every page needs changes — focus on the highest-impact improvements.
+      schema:
+        type: object
+        properties:
+          pages_written:
+            type: array
+            description: page_name values of pages written or updated.
+            items:
+              type: string
+          pages_deleted:
+            type: array
+            description: page_name values of pages soft-deleted.
+            items:
+              type: string
+          summary:
+            type: string
+            description: Brief summary of what was changed and why.
+        required:
+          - pages_written
+          - pages_deleted
+          - summary
+    on-failure:
+      continue: false

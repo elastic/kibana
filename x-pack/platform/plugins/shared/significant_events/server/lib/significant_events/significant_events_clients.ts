@@ -13,8 +13,6 @@ import type { DetectionClient } from './detections';
 import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
-import { memoriesDataStream } from '../../memory_and_investigation/lib/memory';
-import { memoryHistoryDataStream } from '../../memory_and_investigation/lib/memory/history_data_stream';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
@@ -26,11 +24,10 @@ export interface SignificantEventsClients {
   getEventClient: () => EventClient;
 }
 
+// Memory's data streams are installed by the agent_memory plugin, which owns them.
 const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
   detectionsDataStream,
   eventsDataStream,
-  memoriesDataStream,
-  memoryHistoryDataStream,
 ];
 
 export function createSignificantEventsServices(): SignificantEventsServices {

@@ -106,6 +106,15 @@ export interface AgentConfiguration {
   enable_elastic_capabilities?: boolean;
 
   /**
+   * When true, grants the agent the platform memory tools (search, read, write,
+   * patch, list) so it can consult and contribute to the shared knowledge base.
+   *
+   * `delete` and `recent_changes` are deliberately not granted — they stay
+   * individually selectable and are requested explicitly by the curation skills.
+   */
+  enable_memory?: boolean;
+
+  /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];
@@ -133,7 +142,7 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
+ * Limited to `instructions`, `tools`, `skill_ids`, `enable_elastic_capabilities` and `enable_memory` - other fields from AgentConfigurationOverrides
  * are internal implementation details.
  *
  * This type is used for:
@@ -142,5 +151,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities' | 'enable_memory'
 >;
