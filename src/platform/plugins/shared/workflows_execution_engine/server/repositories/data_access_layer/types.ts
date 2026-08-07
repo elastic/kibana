@@ -64,8 +64,24 @@ export interface GetExecutionsByIdsResponse<TExecution> {
 }
 
 export interface ReadonlyDataClient<TExecution extends { id: string }> {
+  /**
+   * Searches for execution documents matching the given query.
+   * Throws on storage errors (connection failures, query errors, etc.).
+   */
   search(request: ExecutionsSearchRequest): Promise<estypes.SearchResponse<TExecution>>;
+
+  /**
+   * Returns the count of execution documents matching the given query.
+   * Throws on storage errors.
+   */
   count(request: ExecutionsCountRequest): Promise<estypes.CountResponse>;
+
+  /**
+   * Fetches execution documents by their IDs (real-time, O(1) per doc).
+   * Found docs are returned in `items`; IDs with no matching document appear
+   * in `missing`. Never throws for missing docs — use `missing` to detect them.
+   * Throws on storage errors.
+   */
   getByIds(
     ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution>
@@ -73,8 +89,29 @@ export interface ReadonlyDataClient<TExecution extends { id: string }> {
 }
 
 export interface WritableDataClient<TExecution extends { id: string }> {
+  /**
+   * Writes multiple execution documents in a single request (create/update/upsert).
+   * Response `items` length and order always match the request (1:1 alignment).
+   * Per-document errors are surfaced in `items[i].error` rather than thrown;
+   * check `response.errors` to detect any failures.
+   * Throws on storage errors.
+   */
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
+
+  /**
+   * Applies a conditional script update to a single execution document by ID.
+   * Returns:
+   *   - `'updated'`   — script ran and modified the document.
+   *   - `'noop'`      — script ran but made no changes (e.g. condition not met).
+   *   - `'not_found'` — no document exists for the given ID; no write performed.
+   * Throws on storage errors other than not-found.
+   */
   scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse>;
+
+  /**
+   * Deletes all execution documents matching the given query.
+   * Throws on storage errors.
+   */
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
 }
 
