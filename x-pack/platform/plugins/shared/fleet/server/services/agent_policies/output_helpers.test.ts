@@ -9,6 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
+import { BEATS_OUTPUT_TYPES } from '../../../common/constants';
 import { appContextService } from '..';
 import { outputService } from '../output';
 
@@ -32,29 +33,39 @@ function mockHasLicence(res: boolean) {
 }
 
 describe('validateOutputForPolicy', () => {
+  beforeEach(() => {
+    mockedOutputService.get.mockResolvedValue({ type: 'elasticsearch' } as any);
+  });
+
   describe('Without oldData (create)', () => {
     it('should allow default outputs without platinum licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: null,
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow default outputs with platinum licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: null,
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should not allow custom data outputs without platinum licence', async () => {
       mockHasLicence(false);
-      const res = validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: 'test1',
-        monitoring_output_id: null,
-      });
+      const res = validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: 'test1', monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
       );
@@ -62,10 +73,12 @@ describe('validateOutputForPolicy', () => {
 
     it('should not allow custom monitoring outputs without platinum licence', async () => {
       mockHasLicence(false);
-      const res = validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: 'test1',
-      });
+      const res = validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
       );
@@ -73,28 +86,37 @@ describe('validateOutputForPolicy', () => {
 
     it('should allow custom data output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: 'test1',
-        monitoring_output_id: null,
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: 'test1', monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow custom monitoring output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: 'test1',
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow custom outputs for managed preconfigured policy without licence', async () => {
       mockHasLicence(false);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        is_managed: true,
-        is_preconfigured: true,
-        data_output_id: 'test1',
-        monitoring_output_id: 'test1',
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        {
+          is_managed: true,
+          is_preconfigured: true,
+          data_output_id: 'test1',
+          monitoring_output_id: 'test1',
+        },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
   });
 
@@ -103,14 +125,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: null,
-          monitoring_output_id: null,
-        },
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: 'test1',
-        }
+        { data_output_id: null, monitoring_output_id: null },
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        BEATS_OUTPUT_TYPES
       );
     });
 
@@ -118,14 +135,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       const res = validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: null,
-        },
-        {
-          data_output_id: null,
-          monitoring_output_id: null,
-        }
+        { data_output_id: 'test1', monitoring_output_id: null },
+        { data_output_id: null, monitoring_output_id: null },
+        BEATS_OUTPUT_TYPES
       );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
@@ -136,14 +148,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       const res = validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: null,
-          monitoring_output_id: 'test1',
-        },
-        {
-          data_output_id: null,
-          monitoring_output_id: null,
-        }
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        { data_output_id: null, monitoring_output_id: null },
+        BEATS_OUTPUT_TYPES
       );
       await expect(res).rejects.toThrow(
         'Invalid licence to set per policy output, you need platinum licence'
@@ -154,34 +161,29 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(true);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: null,
-        },
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: null,
-        }
+        { data_output_id: 'test1', monitoring_output_id: null },
+        { data_output_id: 'test1', monitoring_output_id: null },
+        BEATS_OUTPUT_TYPES
       );
     });
 
     it('should allow custom monitoring output with platinum licence', async () => {
       mockHasLicence(true);
-      await validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: 'test1',
-      });
+      await validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: 'test1' },
+        {},
+        BEATS_OUTPUT_TYPES
+      );
     });
 
     it('should allow custom outputs for managed preconfigured policy without licence', async () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: 'test1',
-        },
-        { is_managed: true, is_preconfigured: true }
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        { is_managed: true, is_preconfigured: true },
+        BEATS_OUTPUT_TYPES
       );
     });
 
@@ -189,11 +191,9 @@ describe('validateOutputForPolicy', () => {
       mockHasLicence(false);
       await validateOutputForPolicy(
         savedObjectsClientMock.create(),
-        {
-          data_output_id: 'test1',
-          monitoring_output_id: 'test1',
-        },
-        { data_output_id: 'test1', monitoring_output_id: 'test1' }
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        { data_output_id: 'test1', monitoring_output_id: 'test1' },
+        BEATS_OUTPUT_TYPES
       );
     });
 

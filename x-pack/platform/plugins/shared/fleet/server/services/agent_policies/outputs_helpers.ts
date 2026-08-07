@@ -13,11 +13,7 @@ import {
 } from '../../../common/services/output_helpers';
 
 import type { AgentPolicySOAttributes, AgentPolicy, PackagePolicy } from '../../types';
-import {
-  BEATS_OUTPUT_TYPES,
-  LICENCE_FOR_PER_POLICY_OUTPUT,
-  outputType,
-} from '../../../common/constants';
+import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
 import { outputService } from '../output';
@@ -54,7 +50,7 @@ export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,
   newData: Partial<AgentPolicySOAttributes>,
   existingData: Partial<AgentPolicySOAttributes> = {},
-  allowedOutputTypeForPolicy: string[] = Object.values(outputType)
+  allowedOutputTypeForPolicy: string[]
 ) {
   if (
     Object.keys(existingData).length !== 0 &&
@@ -66,9 +62,9 @@ export async function validateOutputForPolicy(
 
   const data = { ...existingData, ...newData };
 
-  const isOutputTypeRestricted = allowedOutputTypeForPolicy.length !== BEATS_OUTPUT_TYPES.length;
-
-  if (isOutputTypeRestricted) {
+  // Only runs when a custom data output is explicitly set; null means the default
+  // output (always ES in production) and is considered implicitly valid.
+  if (data.data_output_id) {
     const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
       if (err instanceof OutputNotFoundError) {
         return;
@@ -125,28 +121,24 @@ export async function validateAgentPolicyOutputForIntegration(
     allowedOutputTypeForPackagePolicy.includes(type)
   );
 
-  const isOutputTypeRestricted = allowedOutputTypeForPolicy.length !== BEATS_OUTPUT_TYPES.length;
-
-  if (isOutputTypeRestricted) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
-      if (err instanceof OutputNotFoundError) {
-        return;
-      }
-      throw err;
-    });
-    if (!dataOutput) {
+  const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy).catch((err) => {
+    if (err instanceof OutputNotFoundError) {
       return;
     }
-    if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
-      if (isNewPackagePolicy) {
-        throw new OutputInvalidError(
-          `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
-        );
-      } else {
-        throw new OutputInvalidError(
-          `Agent policy "${agentPolicy.name}" uses output type "${dataOutput.type}" which cannot be used for integration "${packageName}".`
-        );
-      }
+    throw err;
+  });
+  if (!dataOutput) {
+    return;
+  }
+  if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
+    if (isNewPackagePolicy) {
+      throw new OutputInvalidError(
+        `Integration "${packageName}" cannot be added to agent policy "${agentPolicy.name}" because it uses output type "${dataOutput.type}".`
+      );
+    } else {
+      throw new OutputInvalidError(
+        `Agent policy "${agentPolicy.name}" uses output type "${dataOutput.type}" which cannot be used for integration "${packageName}".`
+      );
     }
   }
 }
