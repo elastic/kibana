@@ -62,23 +62,16 @@ export async function validateOutputForPolicy(
 
   const data = { ...existingData, ...newData };
 
-  // Only runs when a custom data output is explicitly set; null means the default
-  // output (always ES in production) and is considered implicitly valid.
-  if (data.data_output_id) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
-      if (err instanceof OutputNotFoundError) {
-        return;
-      }
-      throw err;
-    });
-    if (!dataOutput) {
+  const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
+    if (err instanceof OutputNotFoundError) {
       return;
     }
-    if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
-      throw new OutputInvalidError(
-        `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
-      );
-    }
+    throw err;
+  });
+  if (dataOutput && !allowedOutputTypeForPolicy.includes(dataOutput.type)) {
+    throw new OutputInvalidError(
+      `Output of type "${dataOutput.type}" is not usable with policy "${data.name}".`
+    );
   }
 
   if (!data.data_output_id && !data.monitoring_output_id) {
