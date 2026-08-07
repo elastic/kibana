@@ -37,5 +37,3 @@ export {
   ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH as RULE_TEMPLATE_API_PATH,
 } from '@kbn/alerting-v2-constants';
 export { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
-export { ALERT_EVENTS_DATA_STREAM } from '../../../server/resources/datastreams/alert_events';
-export { ALERT_ACTIONS_DATA_STREAM } from '../../../server/resources/datastreams/alert_actions';
