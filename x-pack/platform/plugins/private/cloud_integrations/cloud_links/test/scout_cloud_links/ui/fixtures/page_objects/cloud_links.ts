@@ -42,6 +42,6 @@ export class CloudLinksPageObject {
   }
 
   async isSpacesConfigurationButtonVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('spaceConfigurationSelector').isVisible();
+    return this.page.testSubj.locator('spacePreferenceSelector').isVisible();
   }
 }

@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { useUpdateUserProfile } from '@kbn/user-profile-components';
-import { SpacesConfigurationModal } from './spaces_configuration_modal';
+import { SpacesPreferencesModal } from './spaces_preference_modal';
 
 interface SpaceConfigurationProps {
   closePopover: () => void;
@@ -61,7 +61,7 @@ export function SpaceConfigurationUI({
       toMountPoint(
         React.createElement(function ModalWrapper() {
           return (
-            <SpacesConfigurationModal
+            <SpacesPreferencesModal
               closeModal={closeModal}
               userProfile={userProfile!}
               updateUserProfile={updateUserProfile}
@@ -85,10 +85,10 @@ export function SpaceConfigurationUI({
         openModal();
         closePopover();
       }}
-      data-test-subj="spaceConfigurationSelector"
+      data-test-subj="spacePreferenceSelector"
     >
       {i18n.translate('xpack.cloudLinks.userMenuLinks.spaceConfigurationLinkText', {
-        defaultMessage: 'Space Configuration',
+        defaultMessage: 'Space preferences',
       })}
     </EuiContextMenuItem>
   );

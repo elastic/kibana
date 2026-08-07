@@ -14,7 +14,7 @@ import {
   updateInteractiveUserSettings,
 } from '../fixtures/user_profile_test_helpers';
 
-test.describe('Space configuration modal', { tag: tags.stateful.classic }, () => {
+test.describe('Spaces preferences modal', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.home.goto();
@@ -27,16 +27,16 @@ test.describe('Space configuration modal', { tag: tags.stateful.classic }, () =>
     });
   });
 
-  test('persists remember last selected space when saving', async ({
+  test('persists remember last selected space preference when saving', async ({
     pageObjects,
     apiClient,
     samlAuth,
   }) => {
-    const { spacesConfiguration } = pageObjects;
+    const { spacesPreferences } = pageObjects;
 
-    await spacesConfiguration.open();
-    await spacesConfiguration.enableRememberLastSpace();
-    await spacesConfiguration.save();
+    await spacesPreferences.open();
+    await spacesPreferences.enableRememberLastSpacePreference();
+    await spacesPreferences.save();
 
     await expect
       .poll(async () => {
@@ -51,13 +51,13 @@ test.describe('Space configuration modal', { tag: tags.stateful.classic }, () =>
     apiClient,
     samlAuth,
   }) => {
-    const { spacesConfiguration } = pageObjects;
+    const { spacesPreferences } = pageObjects;
 
     const settingsBefore = await getInteractiveUserSettings(apiClient, samlAuth, 'viewer');
 
-    await spacesConfiguration.open();
-    await spacesConfiguration.enableRememberLastSpace();
-    await spacesConfiguration.discard();
+    await spacesPreferences.open();
+    await spacesPreferences.enableRememberLastSpacePreference();
+    await spacesPreferences.discard();
 
     await expect
       .poll(async () => getInteractiveUserSettings(apiClient, samlAuth, 'viewer'))

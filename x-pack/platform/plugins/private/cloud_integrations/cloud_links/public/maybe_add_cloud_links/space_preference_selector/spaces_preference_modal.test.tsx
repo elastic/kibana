@@ -9,15 +9,15 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { UserProfileData } from '@kbn/user-profile-components';
-import { SpacesConfigurationModal } from './spaces_configuration_modal';
+import { SpacesPreferencesModal } from './spaces_preference_modal';
 
-describe('SpacesConfigurationModal', () => {
+describe('SpacesPreferencesModal', () => {
   const closeModal = jest.fn();
   let updateUserProfile: jest.Mock;
 
   const renderModal = (userProfile: UserProfileData = { userSettings: {} }) =>
     render(
-      <SpacesConfigurationModal
+      <SpacesPreferencesModal
         closeModal={closeModal}
         userProfile={userProfile}
         updateUserProfile={updateUserProfile}
@@ -34,10 +34,10 @@ describe('SpacesConfigurationModal', () => {
   it('renders the modal with the remember last selected space switch', () => {
     renderModal();
 
-    expect(screen.getByText('Spaces Configuration')).toBeInTheDocument();
+    expect(screen.getByText('Spaces preferences')).toBeInTheDocument();
     expect(screen.getByText('Remember last selected space')).toBeInTheDocument();
     expect(
-      screen.getByText('Kibana will redirect to last accessed space on login.')
+      screen.getByText('Kibana will open the last accessed space when logging in.')
     ).toBeInTheDocument();
   });
 
@@ -59,7 +59,7 @@ describe('SpacesConfigurationModal', () => {
     await userEvent.click(getRememberSelectedSpaceSwitch());
     expect(getRememberSelectedSpaceSwitch()).toBeChecked();
 
-    await userEvent.click(screen.getByTestId('spacesConfigurationModalSaveButton'));
+    await userEvent.click(screen.getByTestId('spacesPreferencesModalSaveButton'));
 
     expect(updateUserProfile).toHaveBeenCalledWith({
       userSettings: { rememberSelectedSpace: true },
@@ -70,7 +70,7 @@ describe('SpacesConfigurationModal', () => {
   it('disables the save button when the form has not been changed', () => {
     renderModal({ userSettings: { rememberSelectedSpace: true } });
 
-    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('spacesPreferencesModalSaveButton')).toBeDisabled();
     expect(updateUserProfile).not.toHaveBeenCalled();
   });
 
@@ -80,10 +80,10 @@ describe('SpacesConfigurationModal', () => {
     });
 
     await userEvent.click(getRememberSelectedSpaceSwitch());
-    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeEnabled();
+    expect(screen.getByTestId('spacesPreferencesModalSaveButton')).toBeEnabled();
 
     await userEvent.click(getRememberSelectedSpaceSwitch());
-    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('spacesPreferencesModalSaveButton')).toBeDisabled();
     expect(updateUserProfile).not.toHaveBeenCalled();
 
     unmountInitialOff();
@@ -91,9 +91,9 @@ describe('SpacesConfigurationModal', () => {
     renderModal({ userSettings: { rememberSelectedSpace: true } });
 
     await userEvent.click(getRememberSelectedSpaceSwitch());
-    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeEnabled();
+    expect(screen.getByTestId('spacesPreferencesModalSaveButton')).toBeEnabled();
     await userEvent.click(getRememberSelectedSpaceSwitch());
-    expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('spacesPreferencesModalSaveButton')).toBeDisabled();
     expect(updateUserProfile).not.toHaveBeenCalled();
   });
 
@@ -109,13 +109,13 @@ describe('SpacesConfigurationModal', () => {
 
     await userEvent.click(getRememberSelectedSpaceSwitch());
     await waitFor(() =>
-      expect(screen.getByTestId('spacesConfigurationModalSaveButton')).not.toBeDisabled()
+      expect(screen.getByTestId('spacesPreferencesModalSaveButton')).not.toBeDisabled()
     );
 
-    await userEvent.click(screen.getByTestId('spacesConfigurationModalSaveButton'));
+    await userEvent.click(screen.getByTestId('spacesPreferencesModalSaveButton'));
 
     await waitFor(() =>
-      expect(screen.getByTestId('spacesConfigurationModalSaveButton')).toBeDisabled()
+      expect(screen.getByTestId('spacesPreferencesModalSaveButton')).toBeDisabled()
     );
     expect(closeModal).not.toHaveBeenCalled();
 
@@ -130,7 +130,7 @@ describe('SpacesConfigurationModal', () => {
     renderModal({ userSettings: { rememberSelectedSpace: false } });
 
     await userEvent.click(getRememberSelectedSpaceSwitch());
-    await userEvent.click(screen.getByTestId('spacesConfigurationModalDiscardButton'));
+    await userEvent.click(screen.getByTestId('spacesPreferencesModalCancelButton'));
 
     expect(updateUserProfile).not.toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();

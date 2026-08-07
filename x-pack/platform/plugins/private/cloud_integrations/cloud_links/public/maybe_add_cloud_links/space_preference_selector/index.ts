@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SpaceConfigurationSelector } from './space_configuration_selector';
+export { SpaceConfigurationSelector } from './space_preference_selector';

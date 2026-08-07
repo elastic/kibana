@@ -12,7 +12,7 @@ import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/pub
 import type { CoreStart } from '@kbn/core/public';
 import { AppearanceSelector } from './appearance_selector';
 import { LanguageSelector } from './language_selector';
-import { SpaceConfigurationSelector } from './space_configuration_selector';
+import { SpaceConfigurationSelector } from './space_preference_selector';
 
 export const createUserMenuLinks = async ({
   core,

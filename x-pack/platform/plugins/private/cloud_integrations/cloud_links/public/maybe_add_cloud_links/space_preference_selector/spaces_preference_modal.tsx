@@ -31,11 +31,11 @@ import {
 } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { UserProfileData, UserSettingsData } from '@kbn/user-profile-components';
-import { rememberLastSelectedSpaceConfigEditorStyles } from './spaces_configuration_modal.styles';
+import { rememberLastSelectedSpaceConfigEditorStyles } from './spaces_preference_modal.styles';
 
-type SpacesConfigurationFormValues = Pick<UserSettingsData, 'rememberSelectedSpace'>;
+type SpacesPreferencesFormValues = Pick<UserSettingsData, 'rememberSelectedSpace'>;
 
-interface SpacesConfigurationModalProps {
+interface SpacesPreferencesModalProps {
   closeModal: () => void;
   userProfile: UserProfileData;
   updateUserProfile: (userProfile: UserProfileData) => Promise<UserProfileData>;
@@ -44,7 +44,7 @@ interface SpacesConfigurationModalProps {
 function RememberLastSelectedSpaceConfigEditor() {
   const { euiTheme } = useEuiTheme();
   const styles = rememberLastSelectedSpaceConfigEditorStyles(euiTheme);
-  const { control } = useFormContext<SpacesConfigurationFormValues>();
+  const { control } = useFormContext<SpacesPreferencesFormValues>();
   const rememberLastSpaceId = useGeneratedHtmlId();
 
   return (
@@ -52,7 +52,7 @@ function RememberLastSelectedSpaceConfigEditor() {
       title={
         <h2 id={rememberLastSpaceId}>
           {i18n.translate(
-            'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.rememberLastSelectedSpace.title',
+            'xpack.cloudLinks.userMenuLinks.spacesPreferencesModal.rememberLastSelectedSpace.title',
             {
               defaultMessage: 'Remember last selected space',
             }
@@ -60,9 +60,9 @@ function RememberLastSelectedSpaceConfigEditor() {
         </h2>
       }
       description={i18n.translate(
-        'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.rememberLastSelectedSpace.description',
+        'xpack.cloudLinks.userMenuLinks.spacesPreferencesModal.rememberLastSelectedSpace.description',
         {
-          defaultMessage: 'Kibana will redirect to last accessed space on login.',
+          defaultMessage: 'Kibana will open the last accessed space when logging in.',
         }
       )}
       css={styles.formGroup}
@@ -91,14 +91,14 @@ function RememberLastSelectedSpaceConfigEditor() {
   );
 }
 
-export function SpacesConfigurationModal({
+export function SpacesPreferencesModal({
   closeModal,
   userProfile,
   updateUserProfile,
-}: SpacesConfigurationModalProps) {
+}: SpacesPreferencesModalProps) {
   const modalTitleId = useGeneratedHtmlId();
 
-  const form = useForm<SpacesConfigurationFormValues>({
+  const form = useForm<SpacesPreferencesFormValues>({
     defaultValues: {
       rememberSelectedSpace: userProfile?.userSettings?.rememberSelectedSpace ?? false,
     },
@@ -107,7 +107,7 @@ export function SpacesConfigurationModal({
   const { handleSubmit, formState } = form;
   const { isDirty, isSubmitting } = formState;
 
-  const onSubmit = useCallback<SubmitHandler<SpacesConfigurationFormValues>>(
+  const onSubmit = useCallback<SubmitHandler<SpacesPreferencesFormValues>>(
     async (values) => {
       await updateUserProfile({
         userSettings: {
@@ -123,14 +123,14 @@ export function SpacesConfigurationModal({
     <FormProvider {...form}>
       <EuiForm onSubmit={handleSubmit(onSubmit)}>
         <EuiModal
-          data-test-subj="spacesConfigurationModal"
+          data-test-subj="spacesPreferencesModal"
           aria-labelledby={modalTitleId}
           onClose={closeModal}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle size="m" id={modalTitleId}>
-              {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.title', {
-                defaultMessage: 'Spaces Configuration',
+              {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesPreferencesModal.title', {
+                defaultMessage: 'Spaces preferences',
               })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -139,29 +139,26 @@ export function SpacesConfigurationModal({
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="spacesConfigurationModalDiscardButton"
+              data-test-subj="spacesPreferencesModalCancelButton"
               onClick={() => closeModal()}
             >
               {i18n.translate(
-                'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.cancelButton',
+                'xpack.cloudLinks.userMenuLinks.spacesPreferencesModal.cancelButton',
                 {
-                  defaultMessage: 'Discard',
+                  defaultMessage: 'Cancel',
                 }
               )}
             </EuiButtonEmpty>
             <EuiButton
               fill
-              data-test-subj="spacesConfigurationModalSaveButton"
+              data-test-subj="spacesPreferencesModalSaveButton"
               isLoading={isSubmitting}
               onClick={handleSubmit(onSubmit)}
               isDisabled={!isDirty || isSubmitting}
             >
-              {i18n.translate(
-                'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.saveButton',
-                {
-                  defaultMessage: 'Save',
-                }
-              )}
+              {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesPreferencesModal.saveButton', {
+                defaultMessage: 'Save',
+              })}
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>

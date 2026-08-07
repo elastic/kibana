@@ -12,4 +12,4 @@ export { CloudOnboardingPageObject } from './cloud_onboarding';
 export type { OnboardingParams } from './cloud_onboarding';
 export { ConnectionDetailsPageObject } from './connection_details';
 export { TrialInterceptPageObject } from './trial_intercept';
-export { SpacesConfigurationPageObject } from './spaces_configuration';
+export { SpacesPreferencesPageObject } from './spaces_preferences';

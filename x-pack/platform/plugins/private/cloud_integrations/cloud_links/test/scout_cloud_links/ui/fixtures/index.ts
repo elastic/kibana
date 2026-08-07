@@ -13,7 +13,7 @@ import {
   CloudOnboardingPageObject,
   ConnectionDetailsPageObject,
   TrialInterceptPageObject,
-  SpacesConfigurationPageObject,
+  SpacesPreferencesPageObject,
 } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
@@ -23,7 +23,7 @@ export interface ExtScoutTestFixtures extends ScoutTestFixtures {
     cloudOnboarding: CloudOnboardingPageObject;
     connectionDetails: ConnectionDetailsPageObject;
     trialIntercept: TrialInterceptPageObject;
-    spacesConfiguration: SpacesConfigurationPageObject;
+    spacesPreferences: SpacesPreferencesPageObject;
   };
 }
 
@@ -50,7 +50,7 @@ export const test = mergeTests(baseTest, apiClientFixture).extend<
       cloudOnboarding: createLazyPageObject(CloudOnboardingPageObject, page, kbnUrl),
       connectionDetails: createLazyPageObject(ConnectionDetailsPageObject, page),
       trialIntercept: createLazyPageObject(TrialInterceptPageObject, page),
-      spacesConfiguration: createLazyPageObject(SpacesConfigurationPageObject, page),
+      spacesPreferences: createLazyPageObject(SpacesPreferencesPageObject, page),
     });
   },
 });

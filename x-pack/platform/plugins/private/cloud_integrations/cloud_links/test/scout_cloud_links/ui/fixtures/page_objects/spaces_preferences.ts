@@ -7,11 +7,11 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
-export class SpacesConfigurationPageObject {
+export class SpacesPreferencesPageObject {
   constructor(private readonly page: ScoutPage) {}
 
   private modalLocator() {
-    return this.page.testSubj.locator('spacesConfigurationModal');
+    return this.page.testSubj.locator('spacesPreferencesModal');
   }
 
   private switchLocator() {
@@ -24,11 +24,11 @@ export class SpacesConfigurationPageObject {
       await this.page.testSubj.click('userMenuButton');
       await userMenu.waitFor({ state: 'visible' });
     }
-    await this.page.testSubj.click('spaceConfigurationSelector');
+    await this.page.testSubj.click('spacePreferenceSelector');
     await this.modalLocator().waitFor({ state: 'visible' });
   }
 
-  async enableRememberLastSpace() {
+  async enableRememberLastSpacePreference() {
     const switchControl = this.switchLocator();
     if (!(await switchControl.isChecked())) {
       await switchControl.click();
@@ -36,12 +36,12 @@ export class SpacesConfigurationPageObject {
   }
 
   async save() {
-    await this.page.testSubj.click('spacesConfigurationModalSaveButton');
+    await this.page.testSubj.click('spacesPreferencesModalSaveButton');
     await this.modalLocator().waitFor({ state: 'detached' });
   }
 
   async discard() {
-    await this.page.testSubj.click('spacesConfigurationModalDiscardButton');
+    await this.page.testSubj.click('spacesPreferencesModalCancelButton');
     await this.modalLocator().waitFor({ state: 'detached' });
   }
 }
