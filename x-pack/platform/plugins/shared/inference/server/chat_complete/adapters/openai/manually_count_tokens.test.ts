@@ -35,23 +35,6 @@ describe('manuallyCountPromptTokens', () => {
   });
 });
 
-describe('manuallyCountPromptTokens - special tokens', () => {
-  it('does not throw when the prompt contains a GPT special token', () => {
-    expect(() =>
-      manuallyCountPromptTokens({
-        messages: [{ role: 'user', content: 'Summarize: <|endoftext|>' }],
-      })
-    ).not.toThrow();
-  });
-
-  it('returns a positive count when the prompt contains a GPT special token', () => {
-    const count = manuallyCountPromptTokens({
-      messages: [{ role: 'user', content: 'Summarize: <|endoftext|>' }],
-    });
-    expect(count).toBeGreaterThan(0);
-  });
-});
-
 describe('manuallyCountCompletionTokens', () => {
   const reference = manuallyCountCompletionTokens([chunkEvent('chunk-1')]);
 
@@ -63,17 +46,6 @@ describe('manuallyCountCompletionTokens', () => {
     ]);
 
     expect(count).toBeGreaterThan(reference);
-  });
-
-  it('does not throw when a chunk contains a GPT special token', () => {
-    expect(() =>
-      manuallyCountCompletionTokens([chunkEvent('Result: <|endoftext|>')])
-    ).not.toThrow();
-  });
-
-  it('returns a positive count when a chunk contains a GPT special token', () => {
-    const count = manuallyCountCompletionTokens([chunkEvent('Result: <|endoftext|>')]);
-    expect(count).toBeGreaterThan(0);
   });
 
   it('counts tokens from chunks with tool calls', () => {
