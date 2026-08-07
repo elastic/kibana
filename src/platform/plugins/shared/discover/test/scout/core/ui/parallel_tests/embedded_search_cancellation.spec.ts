@@ -85,8 +85,8 @@ spaceTest.describe(
         );
 
         // Set up listener before opening the dashboard to avoid race conditions
-        const esqlRequestPromise = page.waitForRequest(
-          (req) => req.url().endsWith('/esql_async') && req.method() === 'POST'
+        const esqlRequestPromise = page.waitForResponse(
+          (req) => req.url().endsWith('/esql_async') && req.ok()
         );
         await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
         await esqlRequestPromise;
