@@ -4886,7 +4886,7 @@ This is the type of text _investigation guides_ will contain.`;
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          tags: expect.arrayContaining(['foo', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['foo', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );
