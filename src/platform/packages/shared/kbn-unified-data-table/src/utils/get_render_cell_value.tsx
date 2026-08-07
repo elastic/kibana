@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useContext, memo, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useContext, memo, useRef } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -15,7 +15,6 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import type {
   DataTableColumnsMeta,
   DataTableRecord,
@@ -26,15 +25,9 @@ import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer, SourceDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
+import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import { JsonTreeViewer } from '../components/json_tree_viewer/json_tree_viewer';
-import {
-  getTreeExpansion,
-  setTreeExpansion,
-} from '../components/json_tree_viewer/tree_expansion_store';
-import { getDocumentText } from '../components/json_tree_viewer/doc_scan';
-import { buildDocumentTree, createHighlightFormatter } from './build_document_tree';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -81,15 +74,6 @@ export const getRenderCellValueFn = ({
       columnMeta: columnsMeta?.[columnId],
     });
     const ctx = useContext(UnifiedDataTableContext);
-    const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
-      useContext(InTableSearchCellContext);
-    // Marks the query's matched terms in the JSON tree's leaves. Memoised so the tree's leaf
-    // rendering stays referentially stable across re-renders (e.g. expand/collapse). `dataView` and
-    // `fieldFormats` come from the factory closure and never change for a given renderer.
-    const formatTreeValue = useMemo(
-      () => (row ? createHighlightFormatter({ hit: row.raw, dataView, fieldFormats }) : undefined),
-      [row]
-    );
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
     const customCellProps = useRef<EuiDataGridSetCellProps>({});
     const CustomCellRenderer = externalCustomRenderers?.[columnId];
@@ -194,41 +178,14 @@ export const getRenderCellValueFn = ({
     const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
 
     if (isSourceColumn && sourceDisplayMode === 'json') {
-      const documentTree = buildDocumentTree({
-        row,
-        dataView,
-        columnsMeta,
-        shouldShowFieldHandler,
-      });
-      if (isInTableSearchCounting && inTableSearchTerm) {
-        // Offscreen match-counting pass: the in-table search wrapper only walks the cell's text to
-        // count matches. Skip the interactive tree entirely and render the document's content as
-        // cheap text — doing this (instead of mounting the full tree) for every row is what keeps
-        // Find-in-table responsive on large result sets.
-        return <span className={CELL_CLASS}>{getDocumentText(documentTree)}</span>;
-      }
-      // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
-      // remount in-table search forces on every keystroke.
       return (
-        // The tree stays unaware of the grid: it lets Escape bubble, and the cell renderer turns
-        // that into "return focus to the grid cell" so the grid's own navigation resumes.
-        <span
-          className={CELL_CLASS}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              event.stopPropagation();
-              event.currentTarget.closest<HTMLElement>('[role="gridcell"]')?.focus();
-            }
-          }}
-        >
-          <JsonTreeViewer
-            json={documentTree}
-            initialState={getTreeExpansion(row.raw)}
-            onStateChange={(state) => setTreeExpansion(row.raw, state)}
-            expandNodesContainingTerm={inTableSearchTerm}
-            formatValue={formatTreeValue}
-          />
-        </span>
+        <SourceDocumentJsonMode
+          row={row}
+          dataView={dataView}
+          columnsMeta={columnsMeta}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          fieldFormats={fieldFormats}
+        />
       );
     }
 

@@ -7,26 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createElement } from 'react';
 import { buildDataTableRecord, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { buildDocumentTree, createHighlightFormatter } from './build_document_tree';
-
-// Stands in for the marked-up React the real highlight formatter returns for matched terms.
-const highlightedNode = createElement('span', {}, 'highlighted');
-
-// A default string formatter, matching the pattern used by the neighbouring
-// get_render_cell_value.test.tsx for the fieldFormats service. `convertToReact` is the
-// highlight-rendering path.
-const fieldFormats = {
-  getDefaultInstance: () => ({
-    convertToText: (value: unknown) => String(value),
-    convertToReact: () => highlightedNode,
-  }),
-} as unknown as FieldFormatsStart;
+import { buildDocumentTree } from './build_document_tree';
 
 const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
   const tree = buildDocumentTree({
@@ -265,53 +250,5 @@ describe('buildDocumentTree', () => {
     });
 
     expect(tree).toEqual({ agent: 'Mozilla/5.0' });
-  });
-});
-
-describe('createHighlightFormatter', () => {
-  const hitWith = (highlight?: Record<string, string[]>): EsHitRecord => ({
-    _id: '1',
-    _index: 'test',
-    ...(highlight ? { highlight } : {}),
-  });
-
-  it('formats a highlighted field, resolving the field name from the leaf path', () => {
-    const formatValue = createHighlightFormatter({
-      hit: hitWith({ 'user.name': ['@kibana-highlighted-field@Alice@/kibana-highlighted-field@'] }),
-      dataView: dataViewMock,
-      fieldFormats,
-    });
-
-    expect(formatValue({ value: 'Alice', path: ['user', 'name'] })).toBe(highlightedNode);
-  });
-
-  it('drops array indices when resolving the field name', () => {
-    const formatValue = createHighlightFormatter({
-      hit: hitWith({ tags: ['@kibana-highlighted-field@security@/kibana-highlighted-field@'] }),
-      dataView: dataViewMock,
-      fieldFormats,
-    });
-
-    expect(formatValue({ value: 'security', path: ['tags', '0'] })).toBe(highlightedNode);
-  });
-
-  it('returns undefined for a field the query did not highlight', () => {
-    const formatValue = createHighlightFormatter({
-      hit: hitWith({ other: ['x'] }),
-      dataView: dataViewMock,
-      fieldFormats,
-    });
-
-    expect(formatValue({ value: 'Alice', path: ['user', 'name'] })).toBeUndefined();
-  });
-
-  it('returns undefined for a null value', () => {
-    const formatValue = createHighlightFormatter({
-      hit: hitWith({ 'user.name': ['x'] }),
-      dataView: dataViewMock,
-      fieldFormats,
-    });
-
-    expect(formatValue({ value: null, path: ['user', 'name'] })).toBeUndefined();
   });
 });
