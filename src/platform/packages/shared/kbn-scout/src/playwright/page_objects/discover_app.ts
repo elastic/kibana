@@ -165,12 +165,31 @@ export class DiscoverApp {
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
 
-    if (adHoc) {
-      await this.page.testSubj.click('exploreIndexPatternButton');
-    } else {
-      await this.page.testSubj.click('saveIndexPatternButton');
-    }
-    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
+    const submitBtn = this.page.testSubj.locator(
+      adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
+    );
+
+    // On serverless, the form's submission re-validation can transiently report
+    // "no matching indices" (data-validation-error="1") even though the matching
+    // sources panel already shows results. When that happens the flyout stays
+    // open and the submit buttons become disabled. Re-wait for validation to
+    // settle and retry the click until the flyout actually closes.
+    await submitBtn.click();
+    await expect
+      .poll(
+        async () => {
+          if (await flyout.isVisible()) {
+            await form
+              .and(this.page.locator('[data-validation-error="0"]'))
+              .waitFor({ state: 'visible', timeout: 5_000 })
+              .catch(() => {});
+            await submitBtn.click().catch(() => {});
+          }
+          return !(await flyout.isVisible());
+        },
+        { timeout: 30_000, intervals: [3_000] }
+      )
+      .toBe(true);
 
     await this.waitUntilTabIsLoaded();
   }
