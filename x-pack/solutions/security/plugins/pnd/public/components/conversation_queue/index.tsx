@@ -4,4 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { BriefingCard } from './briefing_card';
+
+export { ConversationQueue } from './conversation_queue';
+export { CONVERSATION_QUEUE_CATEGORIES } from './translations';

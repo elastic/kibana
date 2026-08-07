@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, memo } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -22,13 +22,13 @@ import {
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
-import { WATCH_TIER_LABELS, BRIEFING_CARD_LABELS, BRIEFING_CARD_ACTIONS } from './translations';
+import { WATCH_TIER_LABELS, BRIEFING_CARD_LABELS, CONVERSATION_CARD_ACTIONS } from './translations';
 import { getEmptyValue } from '../helpers';
 
-export const BriefingCard: React.FC<{
+export const ConversationCard = memo<{
   investigation: Investigation;
   hasBorder: boolean;
-}> = ({ investigation, hasBorder }) => {
+}>(({ investigation, hasBorder }) => {
   const { euiTheme } = useEuiTheme();
   const inMotion = investigation.status === 'in-progress';
   const emptyValue = getEmptyValue();
@@ -139,13 +139,13 @@ export const BriefingCard: React.FC<{
                   onOpen();
                 }}
               >
-                {investigation.primaryActionLabel ?? BRIEFING_CARD_ACTIONS.default}
+                {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={BRIEFING_CARD_ACTIONS.openChat} disableScreenReaderOutput>
+              <EuiToolTip content={CONVERSATION_CARD_ACTIONS.openChat} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  aria-label={BRIEFING_CARD_ACTIONS.openChat}
+                  aria-label={CONVERSATION_CARD_ACTIONS.openChat}
                   iconType="comment"
                   color="text"
                   onClick={(event: React.MouseEvent) => {
@@ -160,4 +160,6 @@ export const BriefingCard: React.FC<{
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+});
+
+ConversationCard.displayName = 'ConversationCard';

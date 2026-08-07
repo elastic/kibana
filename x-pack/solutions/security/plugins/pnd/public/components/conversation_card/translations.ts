@@ -21,7 +21,7 @@ export const BRIEFING_CARD_LABELS = Object.freeze({
     }),
 });
 
-export const BRIEFING_CARD_ACTIONS = Object.freeze({
+export const CONVERSATION_CARD_ACTIONS = Object.freeze({
   openChat: i18n.translate('xpack.pnd.brief.openChat', {
     defaultMessage: 'Open in chat',
   }),

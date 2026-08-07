@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RecommendedAction } from '@kbn/pnd-common';
-import { BRIEF_CONTAINER_BUCKETS } from '../../briefing_container/translations';
+import { CONVERSATION_QUEUE_CATEGORIES } from '../../conversation_queue';
 import { ALL_CATEGORIES } from './translations';
 
 const BUCKET_COLORS: Record<RecommendedAction, 'danger' | 'warning' | 'primary' | 'accent'> = {
@@ -40,7 +40,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         {ALL_CATEGORIES}
       </EuiButtonEmpty>
     </EuiFlexItem>
-    {BRIEF_CONTAINER_BUCKETS.map((bucket) => (
+    {CONVERSATION_QUEUE_CATEGORIES.map((bucket) => (
       <EuiFlexItem key={bucket.id} grow={false}>
         <EuiButton
           size="s"

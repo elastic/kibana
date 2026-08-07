@@ -23,8 +23,10 @@ import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { BRIEFING_PAGE_INFO } from './translations';
-import { BriefingContainer } from '../../components/briefing_container';
-import { BRIEF_CONTAINER_BUCKETS } from '../../components/briefing_container/translations';
+import {
+  ConversationQueue,
+  CONVERSATION_QUEUE_CATEGORIES,
+} from '../../components/conversation_queue';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
@@ -35,35 +37,36 @@ const isQueueRow = (investigation: Investigation): boolean =>
 const isAutoResolved = (investigation: Investigation): boolean =>
   AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
-export const BriefPage: React.FC = () => {
+export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useInvestigations();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(BRIEFING_PAGE_INFO.pageTitle);
 
-  const investigations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+  // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
+  const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
-  const sortedEvents = useMemo(
+  const sortedConversations = useMemo(
     () =>
-      investigations.filter(isQueueRow).sort((a, b) => {
+      conversations.filter(isQueueRow).sort((a, b) => {
         const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
         if (priorityDiff !== 0) {
           return priorityDiff;
         }
         return b.updatedAt.localeCompare(a.updatedAt);
       }),
-    [investigations]
+    [conversations]
   );
 
   const autoResolvedCount = useMemo(
-    () => investigations.filter(isAutoResolved).length,
-    [investigations]
+    () => conversations.filter(isAutoResolved).length,
+    [conversations]
   );
 
   const surfaces = useMemo(() => {
     const seen = new Set<string>();
     const labels: string[] = [];
-    for (const investigation of sortedEvents) {
+    for (const investigation of sortedConversations) {
       const surface = investigation.affectedSurface?.trim();
       if (surface && !seen.has(surface)) {
         seen.add(surface);
@@ -71,15 +74,15 @@ export const BriefPage: React.FC = () => {
       }
     }
     return labels;
-  }, [sortedEvents]);
+  }, [sortedConversations]);
 
   const filteredQueueItems = useMemo(
     () =>
-      sortedEvents.filter((investigation) => {
-        if (surfaceFilter && investigation.affectedSurface !== surfaceFilter) return false;
+      sortedConversations.filter((conversation) => {
+        if (surfaceFilter && conversation.affectedSurface !== surfaceFilter) return false;
         return true;
       }),
-    [sortedEvents, surfaceFilter]
+    [sortedConversations, surfaceFilter]
   );
 
   const groupedBriefingItems = useMemo(() => {
@@ -88,9 +91,9 @@ export const BriefPage: React.FC = () => {
       label: string;
       items: Investigation[];
     }> = [];
-    for (const bucket of BRIEF_CONTAINER_BUCKETS) {
+    for (const bucket of CONVERSATION_QUEUE_CATEGORIES) {
       const items = filteredQueueItems.filter(
-        (investigation) => investigation.recommendedAction === bucket.id
+        (conversation) => conversation.recommendedAction === bucket.id
       );
       if (items.length >= 0) {
         groups.push({ ...bucket, items });
@@ -110,7 +113,7 @@ export const BriefPage: React.FC = () => {
                 font-weight: 700;
               `}
             >
-              {BRIEFING_PAGE_INFO.greetingEmphasis(sortedEvents.length)}
+              {BRIEFING_PAGE_INFO.greetingEmphasis(sortedConversations.length)}
             </span>
           </>
         }
@@ -155,8 +158,8 @@ export const BriefPage: React.FC = () => {
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="danger">
                         {
-                          investigations.filter(
-                            (investigation) => investigation.affectedSurface === surface
+                          conversations.filter(
+                            (conversation) => conversation.affectedSurface === surface
                           ).length
                         }
                       </EuiBadge>
@@ -192,7 +195,7 @@ export const BriefPage: React.FC = () => {
 
       {!isLoading && !error
         ? groupedBriefingItems.map((group) => (
-            <BriefingContainer
+            <ConversationQueue
               briefingId={group.id}
               briefingType={group.id as RecommendedAction}
               briefingList={group.items}
