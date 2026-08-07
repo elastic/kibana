@@ -43,7 +43,16 @@ export class ContextEnginePlugin
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
 
-    registerWorkflowSteps(setupDeps.workflowsExtensions);
+    registerWorkflowSteps({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      isContextEngineEnabled: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        const uiSettings = coreStart.uiSettings.asScopedToClient(
+          coreStart.savedObjects.getScopedClient(request)
+        );
+        return (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+      },
+    });
 
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({

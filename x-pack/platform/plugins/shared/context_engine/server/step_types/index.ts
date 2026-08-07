@@ -6,11 +6,17 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { VerifyKiStepDependencies } from './verify_ki_step';
 
-export function registerWorkflowSteps(
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
-): void {
+export function registerWorkflowSteps({
+  workflowsExtensions,
+  isContextEngineEnabled,
+}: VerifyKiStepDependencies & {
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+}): void {
   workflowsExtensions.registerStepDefinition(() =>
-    import('./verify_ki_step').then((m) => m.verifyKiStepDefinition)
+    import('./verify_ki_step').then((m) =>
+      m.createVerifyKiStepDefinition({ isContextEngineEnabled })
+    )
   );
 }

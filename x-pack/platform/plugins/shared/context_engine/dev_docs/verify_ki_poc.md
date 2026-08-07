@@ -33,7 +33,8 @@ consts:
   sourceIndex: poc-national-parks
   aiIndexBackingIndex: ai-index-idx-poc-verified-kis
   candidateKis:
-    - type: access_pattern
+    - id: find-canyon-parks
+      type: access_pattern
       title: Find canyon parks
       description: How to find parks in the canyon category
       tags: ['poc']
@@ -42,7 +43,8 @@ consts:
         ```esql
         FROM poc-national-parks | WHERE category == "canyon" | LIMIT 10
         ```
-    - type: access_pattern
+    - id: broken-access-pattern
+      type: access_pattern
       title: Broken access pattern
       description: This KI contains ES|QL that does not parse
       tags: ['poc']
@@ -58,11 +60,15 @@ steps:
     type: elasticsearch.bulk
     with:
       index: '{{ consts.sourceIndex }}'
+      # Explicit _ids keep the seed idempotent across workflow runs.
       operations:
+        - index: { _id: grand-canyon }
         - name: 'Grand Canyon National Park'
           category: 'canyon'
+        - index: { _id: zion }
         - name: 'Zion National Park'
           category: 'canyon'
+        - index: { _id: yosemite }
         - name: 'Yosemite National Park'
           category: 'mountain'
   - name: process_candidates
@@ -81,6 +87,8 @@ steps:
             type: elasticsearch.index
             with:
               index: '{{ consts.aiIndexBackingIndex }}'
+              # Explicit id keeps persistence idempotent across workflow runs.
+              id: '{{ foreach.item.id }}'
               # document must be a YAML object with templates only at the leaves:
               # the step's `with` schema is a union, and the workflow validator
               # cannot suppress a whole-object template (`${{ }}`) inside a union.
@@ -117,7 +125,7 @@ The same `context-engine.verifyKi` step composes into a standalone sweep workflo
 A KI that was valid at creation can fail later for external reasons. To demo that, first break one: delete the source index the "Find canyon parks" KI queries (or index a KI with bad ES|QL directly, simulating an out-of-workflow write):
 
 ```
-POST ai-index-idx-poc-verified-kis/_doc?refresh=true
+PUT ai-index-idx-poc-verified-kis/_doc/externally-added-broken?refresh=true
 {
   "type": "access_pattern",
   "title": "Externally added, broken",

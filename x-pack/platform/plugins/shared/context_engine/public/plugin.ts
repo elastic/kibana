@@ -55,7 +55,13 @@ export class ContextEnginePlugin
   ): ContextEnginePluginSetup {
     const startServices = core.getStartServices();
 
-    registerWorkflowSteps(setupDeps.workflowsExtensions);
+    registerWorkflowSteps({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      getCoreStart: async () => {
+        const [coreStart] = await startServices;
+        return coreStart;
+      },
+    });
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
