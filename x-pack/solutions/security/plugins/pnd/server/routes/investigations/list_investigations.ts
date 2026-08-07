@@ -6,7 +6,7 @@
  */
 
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATIONS_URL } from '@kbn/pnd-common';
-import type { ListConversationsResponse } from '@kbn/pnd-common';
+import type { ListInvestigationsResponse } from '@kbn/pnd-common';
 import { MOCK_INVESTIGATIONS } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -31,14 +31,14 @@ export const registerListInvestigationsRoute = ({ router, logger, config }: Rout
       async (_context, _request, response) => {
         try {
           if (config.ui.useMockData) {
-            const body: ListConversationsResponse = {
+            const body: ListInvestigationsResponse = {
               investigations: MOCK_INVESTIGATIONS,
               total: MOCK_INVESTIGATIONS.length,
             };
             return response.ok({ body });
           }
 
-          const body: ListConversationsResponse = { investigations: [], total: 0 };
+          const body: ListInvestigationsResponse = { investigations: [], total: 0 };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list investigations: ${error}`);
