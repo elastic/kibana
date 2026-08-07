@@ -60,6 +60,7 @@ import type {
 } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
 import { subscribeToFlyoutV2Navigation } from './flyout_v2_navigation';
+import { DEFAULT_PREVIEW_INDEX } from '../../../../common/constants';
 
 // ---------------------------------------------------------------------------
 // Constants — which descriptor kinds require an async data fetch
@@ -223,7 +224,6 @@ export const openDescriptorAsStart = (
         api.openDocumentCorrelations({
           hit: ctx.docHit,
           scopeId: d.scopeId,
-          isRulePreview: d.isRulePreview,
           ...originParams,
           // Provide a default onShowAlert that opens the alert as a child flyout.
           onShowAlert: (alertId, indexName) =>
@@ -701,10 +701,21 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   const hasRestoredRef = useRef(false);
 
   // Read URL param exactly once (useState initializer runs on the first render only).
+  // Rule preview documents are stored in a transient index that no longer exists after the page
+  // is reloaded, so attempting to restore them reproduces the "Cannot find document" error.
+  // Drop descriptors whose indexName is a preview index before restoring.
   const [descriptors] = useState<FlyoutV2UrlParamValue | null>(() => {
     if (!isNewFlyoutEnabled) return null;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    return decodeFlyoutV2UrlParam(raw);
+    const decoded = decodeFlyoutV2UrlParam(raw);
+    if (!decoded) return null;
+    const filtered = decoded.filter(
+      (d) =>
+        !(
+          'indexName' in d && (d as { indexName: string }).indexName.includes(DEFAULT_PREVIEW_INDEX)
+        )
+    ) as FlyoutV2UrlParamValue;
+    return filtered.length > 0 ? filtered : null;
   });
 
   // Detect a malformed param (raw present but decode failed) to strip it.

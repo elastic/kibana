@@ -7,6 +7,7 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
 import { storedEventSchema, type SignificantEvent } from './data_stream';
@@ -71,6 +72,27 @@ const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: 
 
 describe('EventClient', () => {
   describe('bulkCreate', () => {
+    it('accepts stored signal descriptions that exceed the agent input limit (backward compat)', () => {
+      const event: SignificantEvent = {
+        ...createEvent(),
+        signals: [
+          {
+            type: 'detection',
+            stream_name: 'logs.test',
+            description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+            metadata: {
+              detection_id: 'detection-1',
+              rule_uuid: 'rule-1',
+              change_point_type: 'spike',
+              p_value: 0.01,
+            },
+          },
+        ],
+      };
+
+      expect(storedEventSchema.safeParse(event).success).toBe(true);
+    });
+
     it('returns bulk responses with errors by default', async () => {
       const response = {
         errors: true,
@@ -187,6 +209,57 @@ describe('EventClient', () => {
       expect(dataQuery).toContain('severity IN');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('severity IN')
+      );
+    });
+
+    it('applies no status filter when no status is provided', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({});
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).not.toContain('status');
+    });
+
+    it('filters by explicit event ids without a status filter', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({ eventIds: ['checkout-failure'] });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure")');
+    });
+  });
+
+  describe('findLatestActive', () => {
+    it('filters to open status after latest-per-event reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestActive({
+        from: 'now-24h',
+        streamNames: ['logs.checkout'],
+        ruleUuids: ['rule-abc'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status IN ("open")');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
       );
     });
   });

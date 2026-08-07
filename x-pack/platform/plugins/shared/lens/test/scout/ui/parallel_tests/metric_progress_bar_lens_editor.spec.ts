@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
-import { testData } from '../fixtures';
+import type { ScoutPage } from '@kbn/scout';
+import type { LensPageObjects } from '../fixtures/page_objects';
+import { spaceTest, testData } from '../fixtures';
 
 const STATIC_MAX_VALUE = '100000';
 
@@ -23,7 +23,7 @@ function progressBarLocator(page: ScoutPage) {
 
 async function configureStaticMaxValueForProgressBar(
   page: ScoutPage,
-  lens: PageObjects['lens']
+  lens: LensPageObjects['lens']
 ): Promise<void> {
   await page.testSubj.locator('lnsMetric_maxDimensionPanel > lns-empty-dimension').click();
   await expect(page.testSubj.locator('lns-indexPattern-dimensionContainerClose')).toBeVisible();
@@ -56,7 +56,7 @@ async function closePrimaryMetricDimensionEditor(page: ScoutPage): Promise<void>
 async function setupMetricProgressBarInLensEditor(
   browserAuth: { loginAsPrivilegedUser: () => Promise<void> },
   page: ScoutPage,
-  pageObjects: PageObjects
+  pageObjects: LensPageObjects
 ): Promise<void> {
   const { lens, visualize } = pageObjects;
 

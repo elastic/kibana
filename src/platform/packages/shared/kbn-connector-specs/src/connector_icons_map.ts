@@ -51,6 +51,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
   ],
   [
+    '.censys',
+    lazy(() => import(/* webpackChunkName: "connectorIconCensys" */ './specs/censys/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
@@ -113,6 +117,10 @@ export const ConnectorIconsMap: Map<
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
     ),
+  ],
+  [
+    '.graphql',
+    lazy(() => import(/* webpackChunkName: "connectorIconGraphQL" */ './specs/graphql/icon')),
   ],
   [
     '.slack2',
@@ -208,7 +216,6 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
   [
     '.snowflake',
     lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
@@ -290,9 +297,53 @@ export const ConnectorIconsMap: Map<
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
   ],
-
   [
     '.jenkins',
     lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
+  ],
+  [
+    '.azure_monitor',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+    ),
+  ],
+  [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
+  ],
+  [
+    '.aws_x_ray',
+    lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
+  [
+    '.prometheus',
+    lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
+  ],
+
+  [
+    '.google_cloud_monitoring',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIcongooglecloudmonitoring" */ './specs/google_cloud_monitoring/icon'
+        )
+    ),
+  ],
+
+  [
+    '.opensearch_aws_opensearch_service',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconopensearchawsopensearchservice" */ './specs/opensearch_aws_opensearch_service/icon'
+        )
+    ),
+  ],
+  [
+    '.zabbix',
+    lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
   ],
 ]);
