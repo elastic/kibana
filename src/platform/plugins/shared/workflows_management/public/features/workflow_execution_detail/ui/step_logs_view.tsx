@@ -63,7 +63,50 @@ interface AnsiState {
   bold: boolean;
 }
 
-// eslint-disable-next-line complexity
+const applyExtendedColor = (
+  codes: number[],
+  i: number,
+  isFg: boolean,
+  state: AnsiState
+): { state: AnsiState; advance: number } | null => {
+  if (codes[i + 1] === 5 && codes[i + 2] !== undefined) {
+    const color = ansi256ToHex(codes[i + 2]);
+    return {
+      state: isFg ? { ...state, fg: color } : { ...state, bg: color },
+      advance: 3,
+    };
+  }
+  if (codes[i + 1] === 2 && codes[i + 4] !== undefined) {
+    const color = `rgb(${codes[i + 2]},${codes[i + 3]},${codes[i + 4]})`;
+    return {
+      state: isFg ? { ...state, fg: color } : { ...state, bg: color },
+      advance: 5,
+    };
+  }
+  return null;
+};
+
+const applyAnsiCode = (
+  codes: number[],
+  i: number,
+  state: AnsiState,
+  rawParam: string
+): { state: AnsiState; advance: number } => {
+  const c = codes[i];
+  if (c === 0 || (rawParam === '' && codes.length === 1))
+    return { state: { bold: false }, advance: 1 };
+  if (c === 1) return { state: { ...state, bold: true }, advance: 1 };
+  if ((c >= 30 && c <= 37) || (c >= 90 && c <= 97))
+    return { state: { ...state, fg: ANSI_FG[c] }, advance: 1 };
+  if ((c >= 40 && c <= 47) || (c >= 100 && c <= 107))
+    return { state: { ...state, bg: ANSI_FG[c - 10] }, advance: 1 };
+  if (c === 38 || c === 48) {
+    const extended = applyExtendedColor(codes, i, c === 38, state);
+    if (extended) return extended;
+  }
+  return { state, advance: 1 };
+};
+
 const ansiToSpans = (text: string): React.ReactNode[] => {
   const result: React.ReactNode[] = [];
   let state: AnsiState = { bold: false };
@@ -92,34 +135,9 @@ const ansiToSpans = (text: string): React.ReactNode[] => {
     const codes = m[1].split(';').map(Number);
     let i = 0;
     while (i < codes.length) {
-      const c = codes[i];
-      if (c === 0 || (m[1] === '' && codes.length === 1)) {
-        state = { bold: false };
-        i++;
-      } else if (c === 1) {
-        state = { ...state, bold: true };
-        i++;
-      } else if ((c >= 30 && c <= 37) || (c >= 90 && c <= 97)) {
-        state = { ...state, fg: ANSI_FG[c] };
-        i++;
-      } else if ((c >= 40 && c <= 47) || (c >= 100 && c <= 107)) {
-        state = { ...state, bg: ANSI_FG[c - 10] };
-        i++;
-      } else if (c === 38 && codes[i + 1] === 5 && codes[i + 2] !== undefined) {
-        state = { ...state, fg: ansi256ToHex(codes[i + 2]) };
-        i += 3;
-      } else if (c === 48 && codes[i + 1] === 5 && codes[i + 2] !== undefined) {
-        state = { ...state, bg: ansi256ToHex(codes[i + 2]) };
-        i += 3;
-      } else if (c === 38 && codes[i + 1] === 2 && codes[i + 4] !== undefined) {
-        state = { ...state, fg: `rgb(${codes[i + 2]},${codes[i + 3]},${codes[i + 4]})` };
-        i += 5;
-      } else if (c === 48 && codes[i + 1] === 2 && codes[i + 4] !== undefined) {
-        state = { ...state, bg: `rgb(${codes[i + 2]},${codes[i + 3]},${codes[i + 4]})` };
-        i += 5;
-      } else {
-        i++;
-      }
+      const { state: next, advance } = applyAnsiCode(codes, i, state, m[1]);
+      state = next;
+      i += advance;
     }
   }
   flush(text.length);

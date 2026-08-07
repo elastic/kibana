@@ -28,10 +28,9 @@ export interface StepLogsConfig {
   enabled: boolean;
   /**
    * How to render log entries in the Logs tab.
-   * - `'sections'` (default): stdout and stderr in separate collapsible sections.
-   * - `'terminal'`: all entries interleaved in chronological order, stderr colored.
+   * Currently only `'terminal'` is supported: entries in chronological order, ANSI colors preserved.
    */
-  renderer?: 'sections' | 'terminal';
+  renderer?: 'terminal';
   /**
    * Custom log resolver. When omitted, the Logs tab shows all engine-level log entries
    * for this step via `logsApi.fetchLogs()`. When defined, the step author decides what

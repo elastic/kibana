@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable complexity */
-
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -34,7 +32,7 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import type { StepLogsApi } from '@kbn/workflows-extensions/public';
+import type { StepLogsApi, StepLogsConfig } from '@kbn/workflows-extensions/public';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
@@ -44,6 +42,51 @@ import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_na
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+
+interface StepTab {
+  id: string;
+  name: string;
+}
+
+const buildStepTabs = (
+  isTriggerPseudoStep: boolean,
+  hasError: boolean,
+  hasInput: boolean,
+  hasOutput: boolean,
+  triggerType: string | undefined,
+  logsConfig: StepLogsConfig | undefined
+): StepTab[] => {
+  if (isTriggerPseudoStep) {
+    const pseudoTabs: StepTab[] = [];
+    if (hasError) pseudoTabs.push({ id: 'output', name: 'Error' });
+    if (hasInput) {
+      // For non-manual triggers (alert/document/etc.), rename to "Event" when manual
+      // inputs are also present — the output slot holds those inputs (see workflow_pseudo_step_context.ts)
+      pseudoTabs.push({
+        id: 'input',
+        name: triggerType !== 'manual' && hasOutput ? 'Event' : 'Input',
+      });
+    }
+    if (hasOutput) {
+      // For non-manual triggers, output holds user-supplied manual inputs supplied alongside the event
+      pseudoTabs.push({ id: 'output', name: triggerType !== 'manual' ? 'Input' : 'Output' });
+    }
+    return pseudoTabs;
+  }
+  const baseTabs: StepTab[] = [
+    { id: 'output', name: hasError ? 'Error' : 'Output' },
+    { id: 'input', name: 'Input' },
+  ];
+  if (logsConfig?.enabled) {
+    baseTabs.push({
+      id: 'logs',
+      name: i18n.translate('workflowsManagement.stepExecutionDetails.logsTab', {
+        defaultMessage: 'Logs',
+      }),
+    });
+  }
+  return baseTabs;
+};
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -170,49 +213,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const hasOutput = Boolean(stepExecution?.output);
     const hasError = Boolean(stepExecution?.error);
 
-    const tabs = useMemo(() => {
-      if (isTriggerPseudoStep) {
-        const pseudoTabs: { id: string; name: string }[] = [];
-        if (hasError) {
-          pseudoTabs.push({
-            id: 'output',
-            name: 'Error',
-          });
-        }
-        if (hasInput) {
-          // For non-manual triggers (alert/document/etc.), rename to "Event" when manual
-          // inputs are also present — the output slot holds those inputs (see workflow_pseudo_step_context.ts)
-          pseudoTabs.push({
-            id: 'input',
-            name: triggerType !== 'manual' && hasOutput ? 'Event' : 'Input',
-          });
-        }
-        if (hasOutput) {
-          // For non-manual triggers, output holds user-supplied manual inputs supplied alongside the event
-          pseudoTabs.push({ id: 'output', name: triggerType !== 'manual' ? 'Input' : 'Output' });
-        }
-        return pseudoTabs;
-      }
-      const baseTabs = [
-        {
-          id: 'output',
-          name: hasError ? 'Error' : 'Output',
-        },
-        {
-          id: 'input',
-          name: 'Input',
-        },
-      ];
-      if (logsConfig?.enabled) {
-        baseTabs.push({
-          id: 'logs',
-          name: i18n.translate('workflowsManagement.stepExecutionDetails.logsTab', {
-            defaultMessage: 'Logs',
-          }),
-        });
-      }
-      return baseTabs;
-    }, [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType, logsConfig]);
+    const tabs = useMemo(
+      () =>
+        buildStepTabs(isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType, logsConfig),
+      [isTriggerPseudoStep, hasError, hasInput, hasOutput, triggerType, logsConfig]
+    );
 
     const defaultTabId = isWaitingForInput ? 'input' : tabs[0]?.id ?? 'input';
     const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
