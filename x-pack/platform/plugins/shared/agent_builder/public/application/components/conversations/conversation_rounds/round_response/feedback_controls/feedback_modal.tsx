@@ -18,7 +18,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ChipRow, CHIP_OTHER } from './chip_row';
 import { CommentBox } from './comment_box';
 
@@ -77,8 +79,26 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>{labels.cancel}</EuiButtonEmpty>
-        <EuiButton fill onClick={onSubmit} data-test-subj="roundFeedbackSubmitButton">
+        <EuiButtonEmpty
+          onClick={onClose}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_MODAL_CANCEL,
+            detail: 'conversation',
+          })}
+        >
+          {labels.cancel}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={onSubmit}
+          data-test-subj="roundFeedbackSubmitButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.FEEDBACK_SUBMIT,
+            detail: 'conversation',
+          })}
+        >
           {labels.submit}
         </EuiButton>
       </EuiModalFooter>

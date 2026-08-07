@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -126,7 +127,7 @@ export function registerInternalConversationRoutes({
               ])
             )
           ),
-          comment: schema.maybe(schema.string({ maxLength: 5000 })),
+          comment: schema.maybe(schema.string({ maxLength: 500 })),
         }),
       },
       options: { access: 'internal' },
@@ -140,7 +141,11 @@ export function registerInternalConversationRoutes({
       const { vote, chips, comment } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      await client.updateRoundFeedback(conversationId, roundId, { vote, chips, comment });
+      await client.updateRoundFeedback(conversationId, roundId, {
+        vote,
+        chips: chips as FeedbackChipId[] | undefined,
+        comment,
+      });
 
       return response.noContent();
     })

@@ -68,6 +68,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     inviteVisible,
     submitted,
     submittedFading,
+    isSubmitting,
     setVote,
     toggleChip,
     setComment,
@@ -210,6 +211,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
                   <ThumbButton
                     direction="up"
                     isActive={vote === 'up'}
+                    isDisabled={isSubmitting}
                     onClick={() => setVote('up')}
                   />
                 </EuiFlexItem>
@@ -217,6 +219,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
                   <ThumbButton
                     direction="down"
                     isActive={vote === 'down'}
+                    isDisabled={isSubmitting}
                     onClick={() => setVote('down')}
                   />
                 </EuiFlexItem>

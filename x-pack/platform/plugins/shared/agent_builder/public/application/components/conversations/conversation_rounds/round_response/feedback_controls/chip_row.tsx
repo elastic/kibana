@@ -84,6 +84,8 @@ export const ChipRow: React.FC<ChipRowProps> = ({ vote, selected, onToggle }) =>
           <EuiFlexItem key={id} grow={false}>
             <button
               type="button"
+              aria-pressed={isSelected}
+              data-test-subj={`roundFeedbackChip-${id}`}
               onClick={() => onToggle(id)}
               css={css`
                 padding: 2px 10px;
