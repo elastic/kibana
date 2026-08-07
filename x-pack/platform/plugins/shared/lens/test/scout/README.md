@@ -1,33 +1,82 @@
 # How to run Lens Scout tests
 
+## Namespaces
+
+The Lens Scout suite is split into [namespaces](https://www.elastic.co/docs/extend/kibana/testing/setup-scout#scout-namespaces) so that each Playwright config carries a homogeneous set of environment tags.
+
+```
+lens/test/scout/
+├── common/ui/fixtures/   shared page objects, helpers, constants and archives
+├── core/                 the Lens editor itself, plus the public visualizations API
+├── open_in_lens/         agg-based and TSVB conversion into Lens
+└── tsdb/                 time series / downsampled index behavior
+```
+
+`common/` holds no tests and no config; it only exists so the three namespaces can share fixtures. Each namespace re-exports it from its own `ui/fixtures/index.ts`, which is why specs import from `'../fixtures'` regardless of which namespace they live in.
+
+| Config | Environments |
+|---|---|
+| `core/ui/parallel.playwright.config.ts` | stateful only |
+| `core/ui/playwright.config.ts` | stateful only |
+| `core/api/playwright.config.ts` | all |
+| `open_in_lens/ui/parallel.playwright.config.ts` | all |
+| `tsdb/ui/playwright.config.ts` | all |
+
 ## Running tests
 
-Run the server
+### Stateful
+
+Start the server once and leave it running:
 
 ```bash
 node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
-Then you can run the tests in another terminal
+Then run a config against it from another terminal:
 
 ```bash
-node scripts/playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/  --ui
+# Lens editor, parallel
+node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel.playwright.config.ts
+
+# Lens editor, sequential (these override feature flags server-wide, so they cannot run in parallel)
+node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/core/ui/playwright.config.ts
+
+# Public visualizations API
+node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/core/api/playwright.config.ts
+
+# Open in Lens conversions
+node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel.playwright.config.ts
+
+# TSDB
+node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/playwright.config.ts
 ```
 
-You can run the parallel tests in another terminal
+Add `--ui` to any of these to open the Playwright UI runner.
+
+### Serverless
+
+Only the configs marked `all` in the table above have serverless coverage: `core/api`, `open_in_lens` and `tsdb`. The two `core/ui` configs are stateful-only, so they would match nothing here.
+
+Start a project type — `search`, `observability_complete` or `security_complete`:
 
 ```bash
-node scripts/playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/parallel.playwright.config.ts
+node scripts/scout.js start-server --arch serverless --domain search
 ```
 
-## TSVB Open in Lens coverage notes
+Then run against it, passing the tag for the domain you started:
 
-The TSVB Open in Lens Scout tests verify that TSVB panels convert correctly to Lens.
+```bash
+node scripts/playwright test --project local \
+  --grep @local-serverless-search \
+  --config x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel.playwright.config.ts
+```
 
-The non-dashboard TSVB conversion specs focus on conversion logic. The following dashboard persistence flows are tracked separately in `ui/parallel_tests/open_in_lens/tsvb/convert_from_dashboard.spec.ts`:
+`--grep` matters here in a way it doesn't on stateful. Playwright does not filter by tag on its own, and every Lens test carries `@local-stateful-classic`, so omitting it on stateful is harmless. On serverless it would also pick up the stateful-only specs, which are not meant to run there. Use `@local-serverless-observability_complete` or `@local-serverless-security_complete` for the other two domains.
 
-- Save and return to dashboard: does the converted panel persist after saving?
-- Replace in dashboard: does the converted Lens panel replace the original TSVB panel?
-- Save to library: can the converted visualization be saved as a library item?
+`node scripts/scout.js run-tests --arch serverless --domain search --config <path>` boots the stack and applies the matching `--grep` for you, which is handy for a one-off run.
 
-The dashboard conversion spec is temporarily marked `fixme` while Scout stability is validated. The original stateful FTR suite was skipped for [#179307](https://github.com/elastic/kibana/issues/179307), while serverless FTR also covered these dashboard flows, so keep the skip temporary and confirm follow-up coverage before removing the old context.
+After moving or adding specs, refresh the generated manifests under each namespace's `.meta/`:
+
+```bash
+node scripts/scout update-test-config-manifests
+```

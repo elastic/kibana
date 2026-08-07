@@ -87,6 +87,7 @@ import {
   registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
+  registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
@@ -366,6 +367,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         chrome: core.chrome,
         experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
+        uiSettings: core.uiSettings,
+      });
+      registerEntityGraphAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        http: core.http,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+        experimentalFeatures: this.experimentalFeatures,
         uiSettings: core.uiSettings,
       });
       registerEntityAttachment({
