@@ -26,7 +26,7 @@ export const datasetWizardStrings = {
 
   stepLogistics: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.stepLogistics', {
-      defaultMessage: 'Logistics',
+      defaultMessage: 'Define dataset',
     }),
 
   stepAdditionalSettings: () =>
@@ -46,7 +46,7 @@ export const datasetWizardStrings = {
 
   logisticsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.logisticsTitle', {
-      defaultMessage: 'Logistics',
+      defaultMessage: 'Define dataset',
     }),
 
   logisticsDescription: () =>
@@ -518,7 +518,7 @@ export const datasetWizardStrings = {
 
   reviewLogisticsSectionTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewLogisticsSectionTitle', {
-      defaultMessage: 'Logistics',
+      defaultMessage: 'Define dataset',
     }),
 
   reviewSettingsSectionTitle: () =>

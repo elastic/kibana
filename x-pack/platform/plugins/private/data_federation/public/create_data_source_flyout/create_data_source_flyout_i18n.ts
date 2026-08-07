@@ -42,7 +42,7 @@ export const createDataSourceFlyoutStrings = {
 
   detailsTitle: () =>
     i18n.translate('xpack.dataFederation.createFlyout.detailsTitle', {
-      defaultMessage: 'Details',
+      defaultMessage: 'Define data source',
     }),
 
   typeAriaLabel: () =>
