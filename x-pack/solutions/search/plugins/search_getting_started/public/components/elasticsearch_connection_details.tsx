@@ -69,6 +69,7 @@ export const ElasticsearchConnectionDetails = () => {
                 target="_blank"
                 onClick={() => openWiredConnectionDetails()}
                 color="text"
+                size="s"
                 aria-label={i18n.translate(
                   'xpack.searchGettingStarted.elasticsearchConnectionDetails.viewDetails',
                   {
