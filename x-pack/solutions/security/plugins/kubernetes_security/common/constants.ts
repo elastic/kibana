@@ -59,9 +59,9 @@ export const DEFAULT_FILTER = {
   },
 };
 
-// String length ceilings (maxLength) for schema.string — DoS protection.
-// ES index name/pattern limit per Elasticsearch specification.
-export const INDEX_NAME_MAX_LENGTH = 255;
+// Kubernetes Security receives the data view title, which can contain a remote
+// cluster alias followed by an index pattern. Keep this aligned with Session View.
+export const INDEX_PATTERN_MAX_LENGTH = 1000 + 1 + 256;
 // JSON-serialized ES bool query DSL passed as a query parameter and parsed server-side.
 // This carries the global KQL/filter bar serialized to Elasticsearch DSL, so a filter with
 // many clauses (e.g. an "is one of" with dozens of values) can expand well past a KQL string.
