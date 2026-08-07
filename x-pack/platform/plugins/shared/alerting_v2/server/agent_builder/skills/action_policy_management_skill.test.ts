@@ -11,7 +11,13 @@ import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
-  logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), forSubsystem: jest.fn() } as unknown as LoggerServiceContract,
+  logger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    forSubsystem: jest.fn(),
+  } as unknown as LoggerServiceContract,
   getWorkflow: jest.fn(async () => null),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
 });

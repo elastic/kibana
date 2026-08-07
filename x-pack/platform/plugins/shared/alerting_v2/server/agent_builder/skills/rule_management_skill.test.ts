@@ -14,7 +14,13 @@ import type { LoggerServiceContract } from '../../lib/services/logger_service/lo
 import { createRuleManagementSkill } from './rule_management_skill';
 
 const createDeps = () => ({
-  logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), forSubsystem: jest.fn() } as unknown as LoggerServiceContract,
+  logger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    forSubsystem: jest.fn(),
+  } as unknown as LoggerServiceContract,
 });
 
 describe('createRuleManagementSkill', () => {
