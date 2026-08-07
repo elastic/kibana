@@ -23,6 +23,14 @@ spaceTest.describe(
       await discoverScoutSpace.setupDiscoverDefaults();
     });
 
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      const { discover, datePicker } = pageObjects;
+      await browserAuth.loginAsPrivilegedUser();
+      await discover.goto({ queryMode: 'classic' });
+      await discover.waitUntilTabIsLoaded();
+      await datePicker.setCommonlyUsedTime('This_week');
+    });
+
     spaceTest.afterAll(async ({ esClient, discoverScoutSpace }) => {
       await Promise.all([
         esClient.indices.delete({ index: NEW_FIELDS_INDEX, ignore_unavailable: true }),
@@ -33,8 +41,8 @@ spaceTest.describe(
 
     spaceTest(
       'adds newly ingested fields to the available fields section',
-      async ({ browserAuth, esClient, pageObjects }) => {
-        const { discover, datePicker, unifiedFieldList } = pageObjects;
+      async ({ esClient, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
         const now = new Date().toISOString();
 
         await esClient.index({
@@ -43,57 +51,66 @@ spaceTest.describe(
           refresh: true,
         });
 
-        await browserAuth.loginAsPrivilegedUser();
-        await discover.goto({ queryMode: 'classic' });
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setCommonlyUsedTime('This_week');
+        await discover.createDataViewFromSearchBar({ name: 'fl-new-fields-', adHoc: true });
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await spaceTest.step('creates ad hoc data view and verifies initial fields', async () => {
-          await discover.createDataViewFromSearchBar({ name: 'fl-new-fields-', adHoc: true });
-          await unifiedFieldList.waitUntilSidebarHasLoaded();
+        expect(await discover.getHitCountInt()).toBe(1);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
+          '@timestamp',
+          'a',
+        ]);
+      }
+    );
 
-          expect(await discover.getHitCountInt()).toBe(1);
-          expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
-            '@timestamp',
-            'a',
-          ]);
+    spaceTest(
+      'detects new field after indexing a document with it',
+      async ({ esClient, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+        const now = new Date().toISOString();
+
+        await esClient.indices.delete({ index: NEW_FIELDS_INDEX, ignore_unavailable: true });
+        await esClient.index({
+          index: NEW_FIELDS_INDEX,
+          document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
+          refresh: true,
         });
 
-        await spaceTest.step('detects new field after indexing a document with it', async () => {
-          await esClient.index({
-            index: NEW_FIELDS_INDEX,
-            document: { '@timestamp': now, b: 'GET /search HTTP/1.1 200 1070000' },
-            refresh: true,
-          });
+        await discover.createDataViewFromSearchBar({ name: 'fl-new-fields-', adHoc: true });
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-          await expect
-            .poll(
-              async () => {
-                await discover.submitQuery();
-                await discover.waitUntilSearchingHasFinished();
-                await unifiedFieldList.waitUntilSidebarHasLoaded();
-                return (
-                  (await discover.getHitCountInt()) === 2 &&
-                  (await unifiedFieldList.getAvailableFieldCount()) === 3
-                );
-              },
-              { timeout: 30_000, intervals: [1_000] }
-            )
-            .toBe(true);
-
-          expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
-            '@timestamp',
-            'a',
-            'b',
-          ]);
+        await esClient.index({
+          index: NEW_FIELDS_INDEX,
+          document: { '@timestamp': now, b: 'GET /search HTTP/1.1 200 1070000' },
+          refresh: true,
         });
+
+        await expect
+          .poll(
+            async () => {
+              await discover.submitQuery();
+              await discover.waitUntilSearchingHasFinished();
+              await unifiedFieldList.waitUntilSidebarHasLoaded();
+              return (
+                (await discover.getHitCountInt()) === 2 &&
+                (await unifiedFieldList.getAvailableFieldCount()) === 3
+              );
+            },
+            { timeout: 30_000, intervals: [1_000] }
+          )
+          .toBe(true);
+
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
+          '@timestamp',
+          'a',
+          'b',
+        ]);
       }
     );
 
     spaceTest(
       'does not show mapped fields that have no values',
-      async ({ browserAuth, esClient, pageObjects }) => {
-        const { discover, datePicker, unifiedFieldList } = pageObjects;
+      async ({ esClient, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
         const now = new Date().toISOString();
 
         await esClient.index({
@@ -102,54 +119,60 @@ spaceTest.describe(
           refresh: true,
         });
 
-        await browserAuth.loginAsPrivilegedUser();
-        await discover.goto({ queryMode: 'classic' });
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setCommonlyUsedTime('This_week');
+        await discover.createDataViewFromSearchBar({ name: MAPPED_ONLY_INDEX, adHoc: true });
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await spaceTest.step('creates ad hoc data view and verifies initial fields', async () => {
-          await discover.createDataViewFromSearchBar({ name: MAPPED_ONLY_INDEX, adHoc: true });
-          await unifiedFieldList.waitUntilSidebarHasLoaded();
+        expect(await discover.getHitCountInt()).toBe(1);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
+          '@timestamp',
+          'a',
+        ]);
+      }
+    );
 
-          expect(await discover.getHitCountInt()).toBe(1);
-          expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
-            '@timestamp',
-            'a',
-          ]);
+    spaceTest(
+      'does not show a mapped field that has no values after re-query',
+      async ({ esClient, pageObjects }) => {
+        const { discover, unifiedFieldList } = pageObjects;
+        const now = new Date().toISOString();
+
+        await esClient.indices.delete({ index: MAPPED_ONLY_INDEX, ignore_unavailable: true });
+        await esClient.index({
+          index: MAPPED_ONLY_INDEX,
+          document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
+          refresh: true,
         });
 
-        await spaceTest.step(
-          'does not show a mapped field that has no values after re-query',
-          async () => {
-            await esClient.indices.putMapping({
-              index: MAPPED_ONLY_INDEX,
-              properties: { b: { type: 'keyword' } },
-            });
+        await discover.createDataViewFromSearchBar({ name: MAPPED_ONLY_INDEX, adHoc: true });
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-            await esClient.index({
-              index: MAPPED_ONLY_INDEX,
-              document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
-              refresh: true,
-            });
+        await esClient.indices.putMapping({
+          index: MAPPED_ONLY_INDEX,
+          properties: { b: { type: 'keyword' } },
+        });
 
-            await expect
-              .poll(
-                async () => {
-                  await discover.submitQuery();
-                  await discover.waitUntilSearchingHasFinished();
-                  await unifiedFieldList.waitUntilSidebarHasLoaded();
-                  return (await discover.getHitCountInt()) === 2;
-                },
-                { timeout: 30_000, intervals: [1_000] }
-              )
-              .toBe(true);
+        await esClient.index({
+          index: MAPPED_ONLY_INDEX,
+          document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
+          refresh: true,
+        });
 
-            expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
-              '@timestamp',
-              'a',
-            ]);
-          }
-        );
+        await expect
+          .poll(
+            async () => {
+              await discover.submitQuery();
+              await discover.waitUntilSearchingHasFinished();
+              await unifiedFieldList.waitUntilSidebarHasLoaded();
+              return (await discover.getHitCountInt()) === 2;
+            },
+            { timeout: 30_000, intervals: [1_000] }
+          )
+          .toBe(true);
+
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
+          '@timestamp',
+          'a',
+        ]);
       }
     );
   }

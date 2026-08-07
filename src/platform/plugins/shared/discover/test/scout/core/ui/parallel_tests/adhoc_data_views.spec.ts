@@ -8,9 +8,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
-spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -133,50 +133,65 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
     async ({ pageObjects }) => {
       const { discover, unifiedFieldList, dataGrid, dashboard } = pageObjects;
 
-      await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
-      await discover.waitUntilSearchingHasFinished();
-      const prevId = await discover.getCurrentDataViewId();
+      await spaceTest.step(
+        'creates ad hoc data view with runtime field and saves search',
+        async () => {
+          await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
+          await discover.waitUntilSearchingHasFinished();
+          const prevId = await discover.getCurrentDataViewId();
 
-      await discover.createRuntimeField(
-        '_bytes-runtimefield',
-        `emit(doc["bytes"].value.toString())`
+          await discover.createRuntimeField(
+            '_bytes-runtimefield',
+            `emit(doc["bytes"].value.toString())`
+          );
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+          await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
+
+          const newId = await discover.getCurrentDataViewId();
+          expect(newId).not.toBe(prevId);
+
+          await discover.saveSearch('logst*-ss-_bytes-runtimefield');
+          await discover.waitUntilTabIsLoaded();
+        }
       );
-      await unifiedFieldList.waitUntilSidebarHasLoaded();
-      await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
 
-      const newId = await discover.getCurrentDataViewId();
-      expect(newId).not.toBe(prevId);
+      await spaceTest.step(
+        'recreates runtime field with 2× multiplier and saves as new search',
+        async () => {
+          await unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
+          await discover.deleteRuntimeField('_bytes-runtimefield');
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-      await discover.saveSearch('logst*-ss-_bytes-runtimefield');
-      await discover.waitUntilTabIsLoaded();
+          await discover.createRuntimeField(
+            '_bytes-runtimefield',
+            `emit((doc["bytes"].value * 2).toString())`
+          );
+          await discover.waitUntilTabIsLoaded();
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+          await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
 
-      await unifiedFieldList.clickFieldListItemRemove('_bytes-runtimefield');
-      await discover.deleteRuntimeField('_bytes-runtimefield');
-      await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-      await discover.createRuntimeField(
-        '_bytes-runtimefield',
-        `emit((doc["bytes"].value * 2).toString())`
+          await discover.saveSearchAsNew('logst*-ss-_bytes-runtimefield-updated');
+          await discover.waitUntilTabIsLoaded();
+        }
       );
-      await discover.waitUntilTabIsLoaded();
-      await unifiedFieldList.waitUntilSidebarHasLoaded();
-      await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
 
-      await discover.saveSearchAsNew('logst*-ss-_bytes-runtimefield-updated');
-      await discover.waitUntilTabIsLoaded();
+      await spaceTest.step(
+        'adds both saved searches to a dashboard and compares cell values',
+        async () => {
+          await dashboard.goto();
+          await dashboard.openNewDashboard();
 
-      await dashboard.goto();
-      await dashboard.openNewDashboard();
+          await dashboard.addSavedSearch('logst*-ss-_bytes-runtimefield');
+          await dashboard.addSavedSearch('logst*-ss-_bytes-runtimefield-updated');
 
-      await dashboard.addSavedSearch('logst*-ss-_bytes-runtimefield');
-      await dashboard.addSavedSearch('logst*-ss-_bytes-runtimefield-updated');
-
-      const cellLocator = dataGrid.getCellsAtVisibleRowIndex('_bytes-runtimefield', 0);
-      await expect(cellLocator).toHaveCount(2);
-      const cells = await cellLocator.all();
-      const first = parseFloat((await cells[0].innerText()).replace(/,/g, ''));
-      const second = parseFloat((await cells[1].innerText()).replace(/,/g, ''));
-      expect(second).toBe(first * 2);
+          const cellLocator = dataGrid.getCellsAtVisibleRowIndex('_bytes-runtimefield', 0);
+          await expect(cellLocator).toHaveCount(2);
+          const cells = await cellLocator.all();
+          const first = parseFloat((await cells[0].innerText()).replace(/,/g, ''));
+          const second = parseFloat((await cells[1].innerText()).replace(/,/g, ''));
+          expect(second).toBe(first * 2);
+        }
+      );
     }
   );
 
