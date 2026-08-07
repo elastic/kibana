@@ -89,6 +89,7 @@ toc:
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/buildkite-action-type.md
+          - file: connectors-kibana/censys-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
           - file: connectors-kibana/databricks-action-type.md
           - file: connectors-kibana/datadog-action-type.md
@@ -135,6 +136,7 @@ toc:
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
           - file: connectors-kibana/workday-action-type.md
+          - file: connectors-kibana/zabbix-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md

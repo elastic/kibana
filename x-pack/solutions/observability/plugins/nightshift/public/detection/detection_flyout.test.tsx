@@ -264,7 +264,7 @@ describe('DetectionFlyout', () => {
 
     expect(mockOpenChat).toHaveBeenCalledWith({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about the latency-p95-spike detection',
       attachments: [
         {

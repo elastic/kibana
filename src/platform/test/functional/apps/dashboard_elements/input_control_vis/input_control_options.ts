@@ -167,6 +167,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('useTimeFilter', () => {
       it('should use global time filter when getting terms', async () => {
+        // Pin the global time filter to a window with no logstash-* data (that index only
+        // spans Sep 2015) so enabling "Use time filter" deterministically disables the control.
+        await timePicker.setAbsoluteRange(
+          'Jan 1, 2020 @ 00:00:00.000',
+          'Jan 1, 2021 @ 00:00:00.000'
+        );
         await visEditor.clickVisEditorTab('options');
         await testSubjects.setCheckbox('inputControlEditorUseTimeFilterCheckbox', 'check');
         await visEditor.clickGo();
