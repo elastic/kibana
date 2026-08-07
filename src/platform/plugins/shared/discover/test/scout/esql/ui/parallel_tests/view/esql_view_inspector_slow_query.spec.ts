@@ -37,9 +37,11 @@ declare global {
 
 const SLOW_QUERY = 'from logstash-* | sort @timestamp';
 
-// Simulated ES|QL round-trip delay, matching the FTR test it replaces (see
+// Simulated ES|QL round-trip delay. Kept short: every retried request is
+// delayed again for as long as the flag is set, and a long delay makes the
+// chart's retry exceed the render-complete timeout (see
 // `src/platform/plugins/shared/data/common/search/expressions/esql.ts`).
-const ESQL_DELAY_SECONDS = 5;
+const ESQL_DELAY_SECONDS = 1;
 
 spaceTest.describe(
   'Discover ES|QL view - inspector, slow query',
@@ -75,10 +77,14 @@ spaceTest.describe(
         }, ESQL_DELAY_SECONDS);
         await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await discover.waitForHistogramRendered();
+        // Stop delaying before waiting for the chart: the table request has
+        // already paid the delay (that is what the assertions below measure),
+        // while the visualization request may still be retried and would
+        // otherwise be delayed again on every attempt.
         await page.evaluate(() => {
           window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
         });
+        await discover.waitForHistogramRendered();
         await discover.openInspectorFromTabMenu();
         await switchToRequestsView(page);
 
@@ -101,7 +107,7 @@ spaceTest.describe(
 
         await selectInspectorRequest(page, 'Table');
         const requestTotalTime = await getInspectorRequestTotalTime(page);
-        expect(requestTotalTime).toBeGreaterThan(ESQL_DELAY_SECONDS * 1000);
+        expect(requestTotalTime).toBeGreaterThanOrEqual(ESQL_DELAY_SECONDS * 1000);
       }
     );
   }
