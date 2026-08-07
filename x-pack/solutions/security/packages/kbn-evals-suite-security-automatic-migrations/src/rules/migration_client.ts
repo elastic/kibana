@@ -7,11 +7,10 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnEvalsHttpHandler } from '@kbn/evals/src/utils/http_handler_from_kbn_client';
 
 // Inlined to avoid package→plugin import boundary violation.
 const SIEM_RULE_MIGRATION_INVOKE_PATH = '/internal/siem_migrations/rules/_invoke';
-
-export type EvalFetch = (path: string, options?: Record<string, unknown>) => Promise<unknown>;
 
 /** Mirrors MigrateRuleState from the plugin — do not import directly. */
 export interface InvokeRuleOutput {
@@ -49,7 +48,7 @@ export interface RuleMigrationResult {
 }
 
 export class RuleMigrationClient {
-  constructor(private readonly fetch: EvalFetch, private readonly log: ToolingLog) {}
+  constructor(private readonly fetch: KbnEvalsHttpHandler, private readonly log: ToolingLog) { }
 
   public async migrateRule(
     input: { original_rule: Record<string, unknown>; resources: Array<Record<string, unknown>> },
@@ -65,9 +64,14 @@ export class RuleMigrationClient {
       return acc;
     }, {});
 
+    // Opt in to network retries: `_invoke` only runs the translation graph and returns its
+    // output without persisting anything, and the server aborts graph execution when the
+    // client socket disconnects — so replaying after a transport failure cannot duplicate
+    // work, while a dropped connection would otherwise fail the eval run.
     const response = (await this.fetch(SIEM_RULE_MIGRATION_INVOKE_PATH, {
       method: 'POST',
       headers: { 'elastic-api-version': '1' },
+      retryPolicy: { onNetworkError: true },
       body: JSON.stringify({
         connector_id: connectorId,
         input: { id, original_rule: input.original_rule, resources: resourcesByType },
