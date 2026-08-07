@@ -22,11 +22,14 @@ import * as i18n from '../translations';
 interface AgentCapabilitiesListProps {
   callables: WatchCallableRef[];
   onToggle?: (callableId: string) => void;
+  /** When false, hide skill/workflow kind badges (section already labels the list). */
+  showKindBadge?: boolean;
 }
 
 export const AgentCapabilitiesList: React.FC<AgentCapabilitiesListProps> = ({
   callables,
   onToggle,
+  showKindBadge = true,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -83,31 +86,37 @@ export const AgentCapabilitiesList: React.FC<AgentCapabilitiesListProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-            css={css`
-              margin-top: ${euiTheme.size.s};
-              flex-wrap: wrap;
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={callable.kind === 'workflow' ? 'accent' : 'primary'}>
-                {callable.kind === 'workflow' ? i18n.KIND_WORKFLOW : i18n.KIND_SKILL}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" iconType="bolt">
-                {callable.summary}
-              </EuiBadge>
-            </EuiFlexItem>
-            {callable.gated ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">{i18n.GATED_BADGE}</EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          {callable.summary || callable.gated || showKindBadge ? (
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              css={css`
+                margin-top: ${euiTheme.size.s};
+                flex-wrap: wrap;
+              `}
+            >
+              {showKindBadge ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={callable.kind === 'workflow' ? 'accent' : 'primary'}>
+                    {callable.kind === 'workflow' ? i18n.KIND_WORKFLOW : i18n.KIND_SKILL}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+              {callable.summary ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {callable.summary}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+              {callable.gated ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">{i18n.GATED_BADGE}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          ) : null}
         </EuiPanel>
       ))}
     </div>

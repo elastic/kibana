@@ -5,63 +5,101 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
   EuiTitle,
-  useEuiTheme,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import {
+  compareWatchesForDisplay,
+  WATCH_DARK_TAG,
+  WATCH_DEEP_TAG,
+  type Watch,
+} from '@kbn/pnd-common';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
+import { useWatches } from '../../../hooks/use_watches_api';
 import * as i18n from '../translations';
 
-export type WatchesSectionId =
-  | 'watches'
-  | 'workflows'
-  | 'skills'
-  | 'activity'
-  | 'performance'
-  | 'guardrails';
+export type WatchesSectionId = 'watches' | 'workers' | 'skills';
 
-interface NavItem {
-  id: WatchesSectionId;
+interface TopNavItem {
+  id: Exclude<WatchesSectionId, 'watches'>;
   label: string;
   path: string;
-  icon: string;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { id: 'watches', label: i18n.SUBNAV_WATCHES, path: '/watches', icon: 'eye' },
-  { id: 'workflows', label: i18n.SUBNAV_WORKFLOWS, path: '/watches/workflows', icon: 'branch' },
-  { id: 'skills', label: i18n.SUBNAV_SKILLS, path: '/watches/skills', icon: 'nested' },
-  { id: 'activity', label: i18n.SUBNAV_ACTIVITY, path: '/watches/activity', icon: 'stats' },
-  {
-    id: 'performance',
-    label: i18n.SUBNAV_PERFORMANCE,
-    path: '/watches/performance',
-    icon: 'visLine',
-  },
-  {
-    id: 'guardrails',
-    label: i18n.SUBNAV_GUARDRAILS,
-    path: '/watches/guardrails',
-    icon: 'lock',
-  },
+const TOP_NAV_ITEMS: TopNavItem[] = [
+  { id: 'workers', label: i18n.SUBNAV_WORKERS, path: '/watches/workers' },
+  { id: 'skills', label: i18n.SUBNAV_SKILLS, path: '/watches/skills' },
 ];
+
+const isBetaWatch = (watch: Watch): boolean =>
+  watch.tags.includes(WATCH_DARK_TAG) ||
+  watch.tags.includes(WATCH_DEEP_TAG) ||
+  /dark|deep/i.test(watch.name);
 
 interface PndWatchesNavProps {
   active: WatchesSectionId;
+  /** Highlighted watch when viewing a detail page. */
+  activeWatchId?: string;
   onCollapse: () => void;
 }
 
-export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse }) => {
+export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({
+  active,
+  activeWatchId,
+  onCollapse,
+}) => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const { data, isLoading } = useWatches();
+
+  const watches = useMemo(() => {
+    if (!data?.watches) return [];
+    return [...data.watches].sort(compareWatchesForDisplay);
+  }, [data]);
+
+  const navButtonCss = (isActive: boolean) => css`
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+    width: 100%;
+    padding: ${euiTheme.size.s} ${euiTheme.size.m};
+    border: none;
+    border-radius: ${euiTheme.border.radius.medium};
+    background: ${isActive ? euiTheme.colors.lightShade : 'transparent'};
+    color: ${isActive ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued};
+    cursor: pointer;
+    font-size: ${euiTheme.size.m};
+    font-weight: ${isActive ? 600 : 500};
+    text-align: left;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+      background: ${isActive ? euiTheme.colors.primary : 'transparent'};
+    }
+
+    &:hover {
+      background: ${euiTheme.colors.lightestShade};
+      color: ${euiTheme.colors.textParagraph};
+    }
+  `;
 
   return (
     <aside
@@ -74,6 +112,7 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
         padding: ${euiTheme.size.m};
         border-right: 1px solid ${euiTheme.border.color};
         background: ${euiTheme.colors.emptyShade};
+        overflow: auto;
       `}
     >
       <EuiFlexGroup
@@ -100,6 +139,74 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiText
+        size="xs"
+        color="subdued"
+        css={css`
+          margin-top: ${euiTheme.size.m};
+          margin-bottom: ${euiTheme.size.xs};
+          padding-left: ${euiTheme.size.s};
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        `}
+      >
+        <p>{i18n.SUBNAV_WATCHES}</p>
+      </EuiText>
+
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+        {isLoading && watches.length === 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="center" css={{ padding: euiTheme.size.m }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
+        {watches.map((watch) => {
+          const isActive = active === 'watches' && activeWatchId === watch.id;
+          return (
+            <EuiFlexItem key={watch.id} grow={false}>
+              <button
+                type="button"
+                aria-current={isActive ? 'page' : undefined}
+                onClick={() => history.push(`/watches/${watch.id}`)}
+                data-test-subj={`pndWatchesSubnav-watch-${watch.id}`}
+                css={navButtonCss(isActive)}
+              >
+                <span
+                  aria-hidden="true"
+                  css={css`
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    flex-shrink: 0;
+                    background: ${watch.color};
+                  `}
+                />
+                <span
+                  css={css`
+                    flex: 1;
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  `}
+                >
+                  {watch.name}
+                </span>
+                {isBetaWatch(watch) ? (
+                  <EuiBadge color="hollow" css={{ flexShrink: 0 }}>
+                    {i18n.BETA_BADGE}
+                  </EuiBadge>
+                ) : null}
+              </button>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"
@@ -108,7 +215,7 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
           margin-top: ${euiTheme.size.m};
         `}
       >
-        {NAV_ITEMS.map((item) => {
+        {TOP_NAV_ITEMS.map((item) => {
           const isActive = item.id === active;
           return (
             <EuiFlexItem key={item.id} grow={false}>
@@ -117,40 +224,8 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => history.push(item.path)}
                 data-test-subj={`pndWatchesSubnav-${item.id}`}
-                css={css`
-                  position: relative;
-                  display: flex;
-                  align-items: center;
-                  gap: ${euiTheme.size.s};
-                  width: 100%;
-                  padding: ${euiTheme.size.s} ${euiTheme.size.m};
-                  border: none;
-                  border-radius: ${euiTheme.border.radius.medium};
-                  background: ${isActive ? euiTheme.colors.lightShade : 'transparent'};
-                  color: ${isActive ? euiTheme.colors.textParagraph : euiTheme.colors.textSubdued};
-                  cursor: pointer;
-                  font-size: ${euiTheme.size.m};
-                  font-weight: ${isActive ? 600 : 500};
-                  text-align: left;
-
-                  &::before {
-                    content: '';
-                    position: absolute;
-                    left: 0;
-                    top: 8px;
-                    bottom: 8px;
-                    width: 3px;
-                    border-radius: 0 2px 2px 0;
-                    background: ${isActive ? euiTheme.colors.primary : 'transparent'};
-                  }
-
-                  &:hover {
-                    background: ${euiTheme.colors.lightestShade};
-                    color: ${euiTheme.colors.textParagraph};
-                  }
-                `}
+                css={navButtonCss(isActive)}
               >
-                <EuiIcon type={item.icon} size="m" aria-hidden={true} />
                 <span>{item.label}</span>
               </button>
             </EuiFlexItem>

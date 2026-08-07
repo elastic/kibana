@@ -25,11 +25,8 @@ const SECTION_COPY: Record<
   Exclude<WatchesSectionId, 'watches'>,
   { title: string; subtitle: string }
 > = {
-  workflows: { title: i18n.SUBNAV_WORKFLOWS, subtitle: i18n.STUB_WORKFLOWS_SUBTITLE },
+  workers: { title: i18n.SUBNAV_WORKERS, subtitle: i18n.STUB_WORKERS_SUBTITLE },
   skills: { title: i18n.SUBNAV_SKILLS, subtitle: i18n.STUB_SKILLS_SUBTITLE },
-  activity: { title: i18n.SUBNAV_ACTIVITY, subtitle: i18n.STUB_ACTIVITY_SUBTITLE },
-  performance: { title: i18n.SUBNAV_PERFORMANCE, subtitle: i18n.STUB_PERFORMANCE_SUBTITLE },
-  guardrails: { title: i18n.SUBNAV_GUARDRAILS, subtitle: i18n.STUB_GUARDRAILS_SUBTITLE },
 };
 
 export const WatchesSectionStubPage: React.FC<WatchesSectionStubPageProps> = ({ section }) => {

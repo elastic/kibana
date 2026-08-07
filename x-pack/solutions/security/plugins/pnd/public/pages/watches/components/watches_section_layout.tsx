@@ -61,10 +61,16 @@ export const WatchesSubnavExpandControl: React.FC = () => {
 
 interface WatchesSectionLayoutProps {
   active: WatchesSectionId;
+  /** When on a watch detail page, highlights that watch in the nested nav list. */
+  activeWatchId?: string;
   children: React.ReactNode;
 }
 
-export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ active, children }) => {
+export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
+  active,
+  activeWatchId,
+  children,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
 
@@ -99,7 +105,11 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ acti
       >
         {!isCollapsed ? (
           <EuiFlexItem grow={false}>
-            <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
+            <PndWatchesNav
+              active={active}
+              activeWatchId={activeWatchId}
+              onCollapse={() => setCollapsed(true)}
+            />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem

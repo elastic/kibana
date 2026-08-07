@@ -78,24 +78,16 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
                   />
                   <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
                   <Route
+                    path="/watches/workers"
+                    render={() => <WatchesSectionStubPage section="workers" />}
+                  />
+                  <Route
                     path="/watches/workflows"
-                    render={() => <WatchesSectionStubPage section="workflows" />}
+                    render={() => <WatchesSectionStubPage section="workers" />}
                   />
                   <Route
                     path="/watches/skills"
                     render={() => <WatchesSectionStubPage section="skills" />}
-                  />
-                  <Route
-                    path="/watches/activity"
-                    render={() => <WatchesSectionStubPage section="activity" />}
-                  />
-                  <Route
-                    path="/watches/performance"
-                    render={() => <WatchesSectionStubPage section="performance" />}
-                  />
-                  <Route
-                    path="/watches/guardrails"
-                    render={() => <WatchesSectionStubPage section="guardrails" />}
                   />
                   <Route path="/watches/:watchId" component={WatchDetailPage} />
                   <Route path="/watches" exact component={WatchesPage} />

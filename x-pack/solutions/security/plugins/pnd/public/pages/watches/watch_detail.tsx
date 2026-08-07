@@ -9,11 +9,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
-  EuiConfirmModal,
+  EuiCode,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,17 +27,15 @@ import {
   EuiTextArea,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  coverageFromSchedule,
   type AutonomyLevel,
   type Watch,
   type WatchCallableRef,
-  type WatchSchedule,
 } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
@@ -48,10 +46,9 @@ import {
   useWatch,
 } from '../../hooks/use_watches_api';
 import { AgentCapabilitiesList } from './components/agent_capabilities_list';
-import { AutonomyMeter } from './components/autonomy_meter';
+import { AutonomySlider, type UiAutonomy } from './components/autonomy_slider';
 import { RecentRunsTable } from './components/recent_runs_table';
 import { RunSparkline } from './components/run_sparkline';
-import { SchedulePanel } from './components/schedule_panel';
 import {
   WatchesSectionLayout,
   WatchesSubnavExpandControl,
@@ -65,8 +62,6 @@ const SCOPE_COLOR: Record<string, string> = {
 };
 
 /** POC: three UI levels mapped onto shipped 1–5 AutonomyLevel. */
-type UiAutonomy = 'manual' | 'assisted' | 'supervised';
-
 const UI_AUTONOMY_TO_STORED: Record<UiAutonomy, AutonomyLevel> = {
   manual: 1,
   assisted: 3,
@@ -86,6 +81,62 @@ const SCHEDULE_INTERVAL_OPTIONS = [
   { value: '1d', text: 'Every day' },
 ];
 
+const DATA_SOURCE_OPTIONS = [
+  { value: 'alerts-entities-timelines', text: 'Alerts, entities, timelines' },
+];
+
+const ASSIGNEE_OPTIONS = [{ value: 'tier1', text: 'Tier 1 — Alert triage' }];
+
+const ESCALATION_OPTIONS = [{ value: 'soc-lead', text: 'SOC lead on-call' }];
+
+interface ApprovalGateRow {
+  id: string;
+  actionType: string;
+  requires: string;
+  role: string;
+}
+
+const APPROVAL_GATE_ROWS: ApprovalGateRow[] = [
+  {
+    id: 'host-isolation',
+    actionType: 'Host isolation',
+    requires: 'Always',
+    role: 'Incident lead',
+  },
+  {
+    id: 'detection-rule-change',
+    actionType: 'Detection rule change',
+    requires: 'Always',
+    role: 'Detection engineer',
+  },
+  {
+    id: 'new-detection-rule',
+    actionType: 'New detection rule',
+    requires: 'Always',
+    role: 'Detection engineer',
+  },
+  {
+    id: 'hunt-execution',
+    actionType: 'Hunt execution',
+    requires: 'High-impact only',
+    role: 'Threat hunter',
+  },
+  {
+    id: 'evidence-only',
+    actionType: 'Evidence-only investigation',
+    requires: 'Runs in scope',
+    role: '—',
+  },
+];
+
+const runAsIdentityFromWatch = (watch: Watch): string => {
+  const slug = watch.id
+    .replace(/^security-watch-/, '')
+    .replace(/^system-security-watch-/, '')
+    .replace(/_/g, '-');
+  return `svc-watch-${slug}`;
+};
+
 export const WatchDetailPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
@@ -96,43 +147,24 @@ export const WatchDetailPage: React.FC = () => {
   const applyUpdate = useApplyWatchUpdate();
 
   const [localWatch, setLocalWatch] = useState<Watch | null>(null);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const confirmModalTitleId = useGeneratedHtmlId();
+  const [allowManualRun, setAllowManualRun] = useState(true);
   usePndDocTitle(localWatch?.name ?? i18n.PAGE_TITLE);
 
   useEffect(() => {
     setLocalWatch(null);
-    setIsDeleteConfirmOpen(false);
+    setAllowManualRun(true);
   }, [watchId]);
 
   useEffect(() => {
     if (!data?.watch || data.watch.id !== watchId) {
       return;
     }
-    // Always accept server data after refetch/save so round-trip is visible.
     setLocalWatch(data.watch);
   }, [data, watchId]);
 
   const stubToast = useCallback(() => {
     services.notifications?.toasts.addInfo(i18n.POC_STUB_TOAST);
   }, [services.notifications]);
-
-  const onConfirmDelete = useCallback(() => {
-    setIsDeleteConfirmOpen(false);
-    stubToast();
-  }, [stubToast]);
-
-  const onScheduleChange = useCallback((schedule: WatchSchedule) => {
-    setLocalWatch((prev) =>
-      prev
-        ? {
-            ...prev,
-            schedule,
-            coverage: coverageFromSchedule(schedule),
-          }
-        : prev
-    );
-  }, []);
 
   const onUiAutonomyChange = useCallback((ui: UiAutonomy) => {
     setLocalWatch((prev) =>
@@ -220,9 +252,22 @@ export const WatchDetailPage: React.FC = () => {
     [stubToast]
   );
 
-  const callablesOn = useMemo(
-    () => localWatch?.callables.filter((c) => c.enabled).length ?? 0,
+  const workers = useMemo(
+    () => localWatch?.callables.filter((c) => c.kind === 'workflow') ?? [],
     [localWatch]
+  );
+  const skills = useMemo(
+    () => localWatch?.callables.filter((c) => c.kind === 'skill') ?? [],
+    [localWatch]
+  );
+
+  const approvalColumns = useMemo<Array<EuiBasicTableColumn<ApprovalGateRow>>>(
+    () => [
+      { field: 'actionType', name: i18n.APPROVAL_COL_ACTION },
+      { field: 'requires', name: i18n.APPROVAL_COL_REQUIRES, width: '160px' },
+      { field: 'role', name: i18n.APPROVAL_COL_ROLE, width: '180px' },
+    ],
+    []
   );
 
   const hasCurrentWatch = localWatch?.id === watchId;
@@ -232,13 +277,15 @@ export const WatchDetailPage: React.FC = () => {
 
   if (!hasCurrentWatch && isLoading) {
     return (
-      <PndPageSection>
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCH} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </PndPageSection>
+      <WatchesSectionLayout active="watches" activeWatchId={watchId}>
+        <PndPageSection>
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCH} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </PndPageSection>
+      </WatchesSectionLayout>
     );
   }
 
@@ -275,7 +322,7 @@ export const WatchDetailPage: React.FC = () => {
   const watch = localWatch;
 
   return (
-    <WatchesSectionLayout active="watches">
+    <WatchesSectionLayout active="watches" activeWatchId={watch.id}>
       <PndPageSection
         contentProps={{
           css: {
@@ -285,26 +332,29 @@ export const WatchDetailPage: React.FC = () => {
       >
         <PndPageHeader
           title={
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
               <EuiFlexItem grow={false}>{watch.name}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {watch.draft ? (
                   <EuiBadge color="warning">{i18n.DRAFT_BADGE}</EuiBadge>
                 ) : watch.enabled ? (
-                  <EuiBadge color="success">{i18n.ACTIVE_BADGE}</EuiBadge>
+                  <EuiBadge color="success">{i18n.ENABLED_BADGE}</EuiBadge>
                 ) : (
                   <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
                 )}
               </EuiFlexItem>
+              {watch.mandate ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{watch.mandate}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           }
-          subtitle={watch.mandate}
           leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-          backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
           rightSideItems={[
             <EuiSwitch
               key="enabled"
-              label={watch.enabled ? i18n.ACTIVE_BADGE : i18n.PAUSED_BADGE}
+              label={i18n.ENABLED_BADGE}
               checked={watch.enabled}
               onChange={(e) => onToggleEnabled(e.target.checked)}
               compressed
@@ -318,26 +368,6 @@ export const WatchDetailPage: React.FC = () => {
             >
               {i18n.SAVE}
             </EuiButton>,
-            <EuiButtonEmpty
-              key="discard"
-              onClick={() => {
-                if (data?.watch) setLocalWatch(data.watch);
-                else history.push('/watches');
-              }}
-            >
-              {i18n.DISCARD}
-            </EuiButtonEmpty>,
-            ...(!watch.managed
-              ? [
-                  <EuiButtonEmpty
-                    key="delete"
-                    color="danger"
-                    onClick={() => setIsDeleteConfirmOpen(true)}
-                  >
-                    {i18n.DELETE}
-                  </EuiButtonEmpty>,
-                ]
-              : []),
           ]}
         />
 
@@ -373,28 +403,12 @@ export const WatchDetailPage: React.FC = () => {
           </>
         ) : null}
 
-        {isDeleteConfirmOpen ? (
-          <EuiConfirmModal
-            aria-labelledby={confirmModalTitleId}
-            title={i18n.DELETE_CONFIRM_TITLE}
-            titleProps={{ id: confirmModalTitleId }}
-            onCancel={() => setIsDeleteConfirmOpen(false)}
-            onConfirm={onConfirmDelete}
-            cancelButtonText={i18n.DELETE_CANCEL}
-            confirmButtonText={i18n.DELETE_CONFIRM_BUTTON}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          >
-            <p>{i18n.deleteConfirmBody(watch.name)}</p>
-          </EuiConfirmModal>
-        ) : null}
-
         <div
           css={css`
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: ${euiTheme.size.m};
-            max-width: 480px;
+            max-width: 520px;
             opacity: ${watch.metrics.runs7d == null ? 0.4 : 1};
           `}
         >
@@ -437,10 +451,28 @@ export const WatchDetailPage: React.FC = () => {
 
         <EuiSpacer size="xl" />
 
-        {/* Identity */}
-        <SectionHeading title={i18n.IDENTITY_TITLE} subtitle={i18n.IDENTITY_SUBTITLE} />
+        <SectionHeading title={i18n.AUTONOMY_TITLE} subtitle={i18n.AUTONOMY_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
-          <EuiFormRow label={i18n.DESCRIPTION_LABEL} fullWidth>
+          <AutonomySlider
+            value={storedToUiAutonomy(watch.autonomyLevel)}
+            onChange={onUiAutonomyChange}
+            onViewGuardrails={stubToast}
+          />
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <SectionHeading title={i18n.GENERAL_TITLE} subtitle={i18n.GENERAL_SUBTITLE} />
+        <EuiPanel hasBorder paddingSize="m">
+          <EuiFormRow label={i18n.RUN_AS_IDENTITY_LABEL} fullWidth>
+            <EuiCode>{runAsIdentityFromWatch(watch)}</EuiCode>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.DESCRIPTION_LABEL}
+            helpText="POC: persisted on Save with other watch settings."
+            fullWidth
+          >
             <EuiTextArea
               value={watch.description}
               onChange={(e) =>
@@ -451,137 +483,162 @@ export const WatchDetailPage: React.FC = () => {
               compressed
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiCallOut title={i18n.MVP_SCOPE_TITLE} color="warning" iconType="iInCircle" size="s">
+            <p>{i18n.MVP_SCOPE_BODY}</p>
+          </EuiCallOut>
         </EuiPanel>
 
         <EuiSpacer size="l" />
 
-        {/* Autonomy — POC: three levels in UI, stored as 1 / 3 / 5 */}
-        <SectionHeading title={i18n.AUTONOMY_TITLE} subtitle={i18n.AUTONOMY_SUBTITLE} />
+        <SectionHeading title={i18n.TRIGGERS_TITLE} subtitle={i18n.TRIGGERS_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
-          <EuiFormRow label={i18n.AUTONOMY_LEVEL} fullWidth>
-            <div>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    stored {watch.autonomyLevel}/5 · UI{' '}
-                    {storedToUiAutonomy(watch.autonomyLevel)}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiButtonGroup
-                legend={i18n.AUTONOMY_LEVEL}
-                idSelected={storedToUiAutonomy(watch.autonomyLevel)}
-                onChange={(id) => onUiAutonomyChange(id as UiAutonomy)}
-                options={[
-                  { id: 'manual', label: 'Manual' },
-                  { id: 'assisted', label: 'Assisted' },
-                  { id: 'supervised', label: 'Supervised' },
-                ]}
-                buttonSize="compressed"
-                color="primary"
-                isFullWidth
+          <EuiCallOut color="primary" iconType="iInCircle" size="s" title={i18n.TRIGGERS_SHARED_AD} />
+          <EuiSpacer size="m" />
+          {watch.scheduleInterval ? (
+            <EuiFormRow label={i18n.ATTACK_DISCOVERY_SCHEDULE} fullWidth>
+              <EuiSelect
+                options={SCHEDULE_INTERVAL_OPTIONS}
+                value={watch.scheduleInterval}
+                onChange={(e) =>
+                  setLocalWatch((prev) =>
+                    prev ? { ...prev, scheduleInterval: e.target.value } : prev
+                  )
+                }
+                compressed
+                fullWidth
+                data-test-subj="pndWatchScheduleInterval"
               />
-              <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued">
-                POC maps Manual→1, Assisted→3, Supervised→5 on the shipped 1–5 field.
-              </EuiText>
-            </div>
+            </EuiFormRow>
+          ) : (
+            <EuiCallOut size="s" color="warning" title={i18n.NO_SCHEDULED_TRIGGER} />
+          )}
+          <EuiSpacer size="m" />
+          <EuiFormRow helpText={i18n.ALLOW_MANUAL_RUN_HELP}>
+            <EuiSwitch
+              label={i18n.ALLOW_MANUAL_RUN}
+              checked={allowManualRun}
+              onChange={(e) => {
+                setAllowManualRun(e.target.checked);
+                stubToast();
+              }}
+              compressed
+            />
           </EuiFormRow>
         </EuiPanel>
 
         <EuiSpacer size="l" />
 
-        {/* Schedule */}
-        <SectionHeading title={i18n.SCHEDULE_TITLE} subtitle={i18n.SCHEDULE_SUBTITLE} />
-        {watch.scheduleInterval ? (
-          <>
-            <EuiPanel hasBorder paddingSize="m">
-              <EuiFormRow
-                label="Schedule interval (Task Manager)"
-                helpText="Writable cadence for watches with a scheduled trigger. Writes triggers[].with.every."
-                fullWidth
-              >
-                <EuiSelect
-                  options={SCHEDULE_INTERVAL_OPTIONS}
-                  value={watch.scheduleInterval}
-                  onChange={(e) =>
-                    setLocalWatch((prev) =>
-                      prev ? { ...prev, scheduleInterval: e.target.value } : prev
-                    )
-                  }
-                  compressed
-                  fullWidth
-                  data-test-subj="pndWatchScheduleInterval"
-                />
-              </EuiFormRow>
-            </EuiPanel>
-            <EuiSpacer size="s" />
-          </>
-        ) : (
-          <>
-            <EuiCallOut size="s" color="warning" title="No scheduled trigger on this watch">
-              Cadence cannot drive Task Manager here (Floor/Deep are alert/manual). Change interval
-              on Officer or Dark.
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </>
-        )}
-        <SchedulePanel watch={watch} onScheduleChange={onScheduleChange} />
-
-        <EuiSpacer size="l" />
-
-        {/* Agent capabilities */}
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem>
-            <SectionHeading
-              title={i18n.AGENT_CAPABILITIES_TITLE}
-              subtitle={i18n.agentCapabilitiesSubtitle(callablesOn, watch.callables.length)}
+        <SectionHeading title={i18n.SCOPE_ROUTING_TITLE} subtitle={i18n.SCOPE_ROUTING_SUBTITLE} />
+        <EuiPanel hasBorder paddingSize="m">
+          <EuiFormRow label={i18n.ALLOWED_DATA_SOURCES} fullWidth>
+            <EuiSelect
+              options={DATA_SOURCE_OPTIONS}
+              value={DATA_SOURCE_OPTIONS[0].value}
+              onChange={() => stubToast()}
+              compressed
+              fullWidth
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={stubToast}>
-              {i18n.ADD_CAPABILITY}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <AgentCapabilitiesList callables={watch.callables} onToggle={onToggleCallable} />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow label={i18n.DEFAULT_ASSIGNEE_QUEUE} fullWidth>
+            <EuiSelect
+              options={ASSIGNEE_OPTIONS}
+              value={ASSIGNEE_OPTIONS[0].value}
+              onChange={() => stubToast()}
+              compressed
+              fullWidth
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiFormRow label={i18n.ESCALATION_CONTACT} fullWidth>
+            <EuiSelect
+              options={ESCALATION_OPTIONS}
+              value={ESCALATION_OPTIONS[0].value}
+              onChange={() => stubToast()}
+              compressed
+              fullWidth
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            <p>{i18n.DATA_BOUNDARIES_TITLE}</p>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            {watch.scopes.map((scope) => (
+              <EuiFlexItem grow={false} key={scope.name}>
+                <EuiBadge
+                  color="hollow"
+                  css={css`
+                    border-left: 3px solid ${SCOPE_COLOR[scope.access] ?? euiTheme.colors.lightShade};
+                  `}
+                >
+                  {scope.name}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiPanel>
 
         <EuiSpacer size="l" />
 
-        {/* Data boundaries */}
-        <SectionHeading title={i18n.DATA_BOUNDARIES_TITLE} />
-        <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-          {watch.scopes.map((scope) => (
-            <EuiFlexItem grow={false} key={scope.name}>
-              <EuiBadge
-                color="hollow"
-                css={css`
-                  border-left: 3px solid ${SCOPE_COLOR[scope.access] ?? euiTheme.colors.lightShade};
-                `}
-              >
-                {scope.name} — {scope.label}
-              </EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <SectionHeading title={i18n.WORKERS_SECTION_TITLE} subtitle={i18n.WORKERS_SECTION_SUBTITLE} />
+        {workers.length === 0 ? (
+          <EuiText size="s" color="subdued">
+            <p>{i18n.WORKERS_EMPTY}</p>
+          </EuiText>
+        ) : (
+          <AgentCapabilitiesList
+            callables={workers}
+            onToggle={onToggleCallable}
+            showKindBadge={false}
+          />
+        )}
 
         <EuiSpacer size="l" />
 
-        {/* Recent runs */}
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <SectionHeading title={i18n.RECENT_RUNS_TITLE} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={stubToast}>
-              {i18n.VIEW_ALL_RUNS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <SectionHeading title={i18n.SKILLS_SECTION_TITLE} subtitle={i18n.SKILLS_SECTION_SUBTITLE} />
+        <EuiCallOut
+          title={i18n.SKILL_DEPENDENCIES_TITLE}
+          color="warning"
+          iconType="warning"
+          size="s"
+        >
+          <p>{i18n.SKILL_DEPENDENCIES_BODY}</p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+        {skills.length === 0 ? (
+          <EuiText size="s" color="subdued">
+            <p>{i18n.SKILLS_EMPTY}</p>
+          </EuiText>
+        ) : (
+          <AgentCapabilitiesList
+            callables={skills}
+            onToggle={onToggleCallable}
+            showKindBadge={false}
+          />
+        )}
+
+        <EuiSpacer size="l" />
+
+        <SectionHeading
+          title={i18n.APPROVAL_GATES_TITLE}
+          subtitle={i18n.APPROVAL_GATES_SUBTITLE}
+        />
+        <EuiPanel hasBorder paddingSize="m">
+          <EuiBasicTable
+            items={APPROVAL_GATE_ROWS}
+            columns={approvalColumns}
+            tableCaption={i18n.APPROVAL_GATES_TITLE}
+          />
+          <EuiSpacer size="s" />
+          <EuiCallOut color="primary" iconType="iInCircle" size="s" title={i18n.APPROVAL_AUDIT_NOTE} />
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <SectionHeading title={i18n.RECENT_RUNS_TITLE} subtitle={i18n.RECENT_RUNS_SUBTITLE} />
         <EuiPanel hasBorder paddingSize="m">
           <RecentRunsTable runs={watch.recentRuns} />
         </EuiPanel>
