@@ -20,7 +20,6 @@ import {
   installIndicesAndDataStreams,
   uninstallElasticsearchAssets,
 } from './install_assets';
-import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
 import {
   scheduleHistorySnapshotTasks,
@@ -32,7 +31,6 @@ import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
 
 jest.mock('./install_assets');
-jest.mock('./euid_stored_scripts');
 jest.mock('../../tasks/extract_entity_task');
 jest.mock('../../tasks/history_snapshot_task');
 jest.mock('../../tasks/status_report_task');
@@ -53,12 +51,6 @@ const mockInstallIndicesAndDataStreams = installIndicesAndDataStreams as jest.Mo
 >;
 const mockUninstallElasticsearchAssets = uninstallElasticsearchAssets as jest.MockedFunction<
   typeof uninstallElasticsearchAssets
->;
-const mockInstallEuidStoredScripts = installEuidStoredScripts as jest.MockedFunction<
-  typeof installEuidStoredScripts
->;
-const mockDeleteEuidStoredScripts = deleteEuidStoredScripts as jest.MockedFunction<
-  typeof deleteEuidStoredScripts
 >;
 const mockScheduleExtractEntityTask = scheduleExtractEntityTask as jest.MockedFunction<
   typeof scheduleExtractEntityTask
@@ -114,8 +106,6 @@ describe('AssetManagerClient', () => {
     mockInstallSharedElasticsearchAssets.mockResolvedValue(undefined);
     mockInstallIndicesAndDataStreams.mockResolvedValue(undefined);
     mockUninstallElasticsearchAssets.mockResolvedValue(undefined);
-    mockInstallEuidStoredScripts.mockResolvedValue(undefined);
-    mockDeleteEuidStoredScripts.mockResolvedValue(undefined);
     mockScheduleExtractEntityTask.mockResolvedValue(undefined);
     mockStopExtractEntityTask.mockResolvedValue(undefined);
     mockScheduleHistorySnapshotTasks.mockResolvedValue(undefined);
@@ -204,21 +194,17 @@ describe('AssetManagerClient', () => {
     expect(order.indexOf('history')).toBeGreaterThan(lastDescriptor);
   });
 
-  it('runs v1 cleanup and stored-script setup as the internal user', async () => {
+  it('runs v1 cleanup as the internal user', async () => {
     await client.init({} as KibanaRequest, ['host', 'user']);
 
-    // Legacy v1 cleanup and managed stored scripts must not require the enabling user to hold
-    // transform/enrich/cluster-manage privileges, so they run as the internal/system user.
+    // Legacy v1 cleanup must not require the enabling user to hold transform/enrich
+    // privileges, so it runs as the internal/system user.
     // Reference-equality (toBe) matters here: both mock clients are `{}` and would be
     // structurally equal under objectContaining.
     expect(mockStopAndRemoveV1).toHaveBeenCalled();
     mockStopAndRemoveV1.mock.calls.forEach(([arg]) => {
       expect(arg.esClient).toBe(mockInternalEsClient);
       expect(arg.esClient).not.toBe(mockUserEsClient);
-    });
-    expect(mockInstallEuidStoredScripts).toHaveBeenCalled();
-    mockInstallEuidStoredScripts.mock.calls.forEach(([arg]) => {
-      expect(arg.esClient).toBe(mockInternalEsClient);
     });
   });
 
@@ -349,7 +335,6 @@ describe('AssetManagerClient', () => {
       expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
       // Shared, per-namespace / cluster assets must survive.
       expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
-      expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.delete).not.toHaveBeenCalled();
       expect(mockStopHistorySnapshotTask).not.toHaveBeenCalled();
       expect(mockStopStatusReportTask).not.toHaveBeenCalled();
@@ -373,9 +358,6 @@ describe('AssetManagerClient', () => {
       expect(mockUninstallElasticsearchAssets).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: mockUserEsClient, namespace })
       );
-      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledWith(
-        expect.objectContaining({ esClient: mockUserEsClient })
-      );
       expect(mockGlobalStateClient.delete).toHaveBeenCalledTimes(1);
     });
 
@@ -394,7 +376,7 @@ describe('AssetManagerClient', () => {
   });
 
   describe('cleanupNamespace', () => {
-    it('removes namespace tasks, ES assets, EUID scripts, and global state', async () => {
+    it('removes namespace tasks, ES assets, and global state', async () => {
       await client.cleanupNamespace();
 
       expect(mockStopHistorySnapshotTask).toHaveBeenCalledWith(
@@ -410,9 +392,6 @@ describe('AssetManagerClient', () => {
       );
       expect(mockUninstallElasticsearchAssets).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: mockUserEsClient, namespace })
-      );
-      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledWith(
-        expect.objectContaining({ esClient: mockUserEsClient })
       );
       expect(mockGlobalStateClient.delete).toHaveBeenCalledTimes(1);
       expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
