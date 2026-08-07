@@ -54,7 +54,7 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(
+  return await getDashboardCRUResponseBody(
     savedObject,
     'create',
     strictValidationSchema,

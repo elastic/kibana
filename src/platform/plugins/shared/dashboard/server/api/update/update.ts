@@ -151,7 +151,7 @@ export async function update(
   );
 
   return {
-    body: getDashboardCRUResponseBody(
+    body: await getDashboardCRUResponseBody(
       updated,
       'update',
       strictValidationSchema,

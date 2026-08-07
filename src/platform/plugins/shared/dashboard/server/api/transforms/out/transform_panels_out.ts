@@ -10,6 +10,10 @@
 import { flow } from 'lodash';
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  PanelTypeMigrationContext,
+  PanelTypeMigrationResult,
+} from '@kbn/embeddable-plugin/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 
@@ -22,16 +26,27 @@ import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from 
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
 
-export function transformPanelsOut(
+interface WorkingPanel {
+  readonly sectionId?: string;
+  readonly references: SavedObjectReference[];
+  readonly sourceType: string;
+  readonly sourceConfig: SavedDashboardPanel['embeddableConfig'];
+  panel: DashboardPanel;
+  migration?: { from: string; to: string };
+  dropped?: boolean;
+}
+
+export async function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false,
-  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
-): { panels: DashboardState['panels']; warnings: Warnings } {
-  const topLevelPanels: DashboardPanel[] = [];
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+  migrationContext?: PanelTypeMigrationContext
+): Promise<{ panels: DashboardState['panels']; warnings: Warnings }> {
   const warnings: Warnings = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
+
   sections.forEach((section) => {
     const { gridData: grid, ...restOfSection } = section;
     const { i: sectionId, ...restOfGrid } = grid;
@@ -44,7 +59,7 @@ export function transformPanelsOut(
     };
   });
 
-  let parsedPanels;
+  let parsedPanels: SavedDashboardPanel[];
   try {
     parsedPanels = JSON.parse(panelsJSON);
   } catch (parseError) {
@@ -52,49 +67,89 @@ export function transformPanelsOut(
     return { panels: [], warnings };
   }
 
-  parsedPanels.forEach((storedPanel: SavedDashboardPanel) => {
+  const workingPanels: WorkingPanel[] = [];
+
+  for (const storedPanel of parsedPanels) {
     const storedPanelReferences = getPanelReferences(containerReferences ?? [], storedPanel);
     const { sectionId } = storedPanel.gridData;
     const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
-    let panelProperties: DashboardPanel;
+
     try {
-      panelProperties = transformPanel(
+      const panelOut = transformPanelWithoutValidation(
         panel,
         panelReferences,
         containerReferences,
         isDashboardAppRequest,
         useGASchemas
       );
+
+      workingPanels.push({
+        sectionId,
+        references: panelReferences,
+        sourceType: panel.type,
+        sourceConfig: panel.embeddableConfig,
+        panel: panelOut,
+      });
     } catch (err) {
-      let message = err.message;
-      if (err instanceof ZodError) {
-        message = stringifyZodError(err);
-      }
       warnings.push({
         type: 'dropped_panel',
         panel_type: panel.type,
         panel_config: panel.embeddableConfig,
         panel_references: panelReferences,
-        message: `Unable to transform panel config. Error: ${message}`,
+        message: `Unable to transform panel config. Error: ${formatTransformError(err)}`,
       });
-      return;
     }
+  }
+
+  if (migrationContext) {
+    await applyPanelTypeMigrations(workingPanels, migrationContext, warnings);
+  }
+
+  const topLevelPanels: DashboardPanel[] = [];
+
+  for (const working of workingPanels) {
+    if (working.dropped) continue;
+
+    const { panel, sectionId, references, migration } = working;
+
+    const schemaErrorOrConfig = validatePanelConfig(panel, isDashboardAppRequest, {
+      migratedFrom: migration?.from,
+      migratedTo: migration?.to,
+    });
+
+    if (schemaErrorOrConfig instanceof Error) {
+      warnings.push({
+        type: 'dropped_panel',
+        panel_type: panel.type,
+        panel_config: working.sourceConfig,
+        panel_references: references,
+        message: `Unable to transform panel config. Error: ${formatTransformError(
+          schemaErrorOrConfig
+        )}`,
+      });
+      continue;
+    }
+
+    const validatedPanel: DashboardPanel = {
+      ...panel,
+      config: schemaErrorOrConfig,
+    };
 
     if (sectionId) {
       if (!sectionsMap[sectionId]) {
         warnings.push({
           type: 'dropped_panel',
-          panel_type: panelProperties.type,
-          panel_config: panelProperties.config,
+          panel_type: validatedPanel.type,
+          panel_config: validatedPanel.config,
           message: `Panel references non-existent section '${sectionId}'`,
         });
-        return;
+        continue;
       }
-      sectionsMap[sectionId].panels.push(panelProperties);
+      sectionsMap[sectionId].panels.push(validatedPanel);
     } else {
-      topLevelPanels.push(panelProperties);
+      topLevelPanels.push(validatedPanel);
     }
-  });
+  }
 
   return {
     panels: [...topLevelPanels, ...Object.values(sectionsMap)],
@@ -109,24 +164,33 @@ const defaultTransform = (
   return transformsFlow(config);
 };
 
-function transformPanel(
+function getTransformLookupType(type: string, isDashboardAppRequest: boolean) {
+  // Temporary escape hatch for lens as code
+  // TODO remove when lens as code transforms are ready for production
+  return type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+}
+
+function formatTransformError(err: unknown) {
+  if (err instanceof ZodError) {
+    return stringifyZodError(err);
+  }
+  return err instanceof Error ? err.message : String(err);
+}
+
+function transformPanelWithoutValidation(
   panel: SavedDashboardPanel,
   panelReferences: SavedObjectReference[],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false,
   useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
-) {
+): DashboardPanel {
   const { embeddableConfig, gridData, panelIndex, type } = panel;
+  const { i, sectionId, ...restOfGrid } = gridData;
 
-  const { sectionId, i, ...restOfGrid } = gridData;
-
-  // Temporary escape hatch for lens as code
-  // TODO remove when lens as code transforms are ready for production
-  const transformType =
-    type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
-
-  const transforms = embeddableService?.getTransforms(transformType);
-  let transformedPanelConfig =
+  const transforms = embeddableService?.getTransforms(
+    getTransformLookupType(type, isDashboardAppRequest)
+  );
+  const transformedPanelConfig =
     transforms?.transformOut?.(
       embeddableConfig,
       panelReferences,
@@ -135,14 +199,131 @@ function transformPanel(
       useGASchemas
     ) ?? defaultTransform(embeddableConfig);
 
-  if (transforms?.schema) {
-    transformedPanelConfig = transforms.schema.parse(transformedPanelConfig);
-  }
-
   return {
     grid: restOfGrid,
-    config: transformedPanelConfig,
+    config: transformedPanelConfig as Record<string, unknown>,
     id: panelIndex,
     type,
   };
+}
+
+function validatePanelConfig(
+  panel: DashboardPanel,
+  isDashboardAppRequest: boolean,
+  options: { migratedFrom?: string; migratedTo?: string }
+): Record<string, unknown> | Error {
+  const transforms = embeddableService?.getTransforms(
+    getTransformLookupType(panel.type, isDashboardAppRequest)
+  );
+  const schema = transforms?.schema;
+
+  if (!schema) {
+    if (options.migratedFrom && options.migratedTo) {
+      return new Error(
+        `Panel schema not available for migrated panel type: ${panel.type} (from: ${options.migratedFrom})`
+      );
+    }
+    return panel.config as Record<string, unknown>;
+  }
+
+  try {
+    return schema.parse(panel.config) as Record<string, unknown>;
+  } catch (e) {
+    return e as Error;
+  }
+}
+
+function toError(err: unknown): Error {
+  return err instanceof Error ? err : new Error(String(err));
+}
+
+async function applyPanelTypeMigrations(
+  panels: WorkingPanel[],
+  migrationContext: PanelTypeMigrationContext,
+  warnings: Warnings
+) {
+  const panelsBySource = new Map<string, WorkingPanel[]>();
+  for (const working of panels) {
+    const group = panelsBySource.get(working.sourceType) ?? [];
+    group.push(working);
+    panelsBySource.set(working.sourceType, group);
+  }
+
+  for (const [sourceType, sourcePanels] of panelsBySource.entries()) {
+    const migrations = embeddableService?.getPanelTypeMigrations(sourceType) ?? [];
+    if (migrations.length === 0) continue;
+
+    const panelIds = new Set(sourcePanels.map((p) => p.panel.id));
+    const inputPanels = sourcePanels.map(({ panel }) => ({
+      id: panel.id,
+      config: panel.config,
+    }));
+
+    const errorsByPanelId = new Map<string, Error>();
+    const successesByPanelId = new Map<
+      string,
+      Array<{ to: string; config: Record<string, unknown> }>
+    >();
+
+    for (const migration of migrations) {
+      let results: readonly PanelTypeMigrationResult[];
+      try {
+        results = await migration.migrateOut(inputPanels, migrationContext);
+      } catch (e) {
+        const err = toError(e);
+        results = inputPanels.map(({ id }) => ({ panelId: id, error: err }));
+      }
+
+      for (const result of results) {
+        const panelId = result.panelId;
+        if (!panelIds.has(panelId)) continue;
+
+        if ('error' in result) {
+          errorsByPanelId.set(panelId, result.error);
+          continue;
+        }
+
+        const existing = successesByPanelId.get(panelId) ?? [];
+        existing.push({ to: migration.to, config: result.config });
+        successesByPanelId.set(panelId, existing);
+      }
+    }
+
+    for (const working of sourcePanels) {
+      const panelId = working.panel.id;
+      const error = errorsByPanelId.get(panelId);
+      if (error) {
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: sourceType,
+          panel_config: working.panel.config,
+          panel_references: working.references,
+          message: `Unable to migrate panel type. Error: ${formatTransformError(error)}`,
+        });
+        working.dropped = true;
+        continue;
+      }
+
+      const successes = successesByPanelId.get(panelId) ?? [];
+      if (successes.length > 1) {
+        warnings.push({
+          type: 'dropped_panel',
+          panel_type: sourceType,
+          panel_config: working.panel.config,
+          panel_references: working.references,
+          message: `Multiple panel type migrations claimed this panel: ${successes
+            .map((s) => s.to)
+            .join(', ')}`,
+        });
+        working.dropped = true;
+        continue;
+      }
+
+      const success = successes[0];
+      if (!success) continue;
+
+      working.migration = { from: sourceType, to: success.to };
+      working.panel = { ...working.panel, type: success.to, config: success.config };
+    }
+  }
 }

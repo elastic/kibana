@@ -9,6 +9,7 @@
 
 import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { DashboardState, Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
@@ -18,6 +19,7 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState,
+  savedObjectsClient?: SavedObjectsClientContract,
   useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
@@ -35,12 +37,13 @@ export async function sanitize(
     useGASchemas
   );
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-    transformDashboardOut(
+    await transformDashboardOut(
       storedDashboardState ?? {},
       references ?? [],
       undefined,
       dashboardStateSchema,
-      useGASchemas
+      useGASchemas,
+      savedObjectsClient ? { savedObjectsClient } : undefined
     );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
