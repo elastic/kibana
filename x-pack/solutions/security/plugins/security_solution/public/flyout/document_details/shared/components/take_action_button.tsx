@@ -23,6 +23,10 @@ import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import type {
+  SecurityActionMenuActionId,
+  SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 interface AlertSummaryData {
   /**
@@ -39,10 +43,15 @@ interface AlertSummaryData {
   ruleId: string;
 }
 
+export interface TakeActionButtonProps {
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
+}
+
 /**
  * Take action button in the panel footer
  */
-export const TakeActionButton: FC = () => {
+export const TakeActionButton: FC<TakeActionButtonProps> = ({ customActions, actionOrder }) => {
   const { closeFlyout } = useExpandableFlyoutApi();
   const {
     dataFormattedForFieldBrowser,
@@ -131,6 +140,8 @@ export const TakeActionButton: FC = () => {
           scopeId={scopeId}
           onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
           searchHit={searchHit}
+          customActions={customActions}
+          actionOrder={actionOrder}
         />
       )}
 

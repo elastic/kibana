@@ -37,7 +37,6 @@ export interface AnomalyTableRowActionsResult {
 interface UseAnomalyTableRowActionsArgs {
   row: TableRow;
   timeRange: { from: string; to: string };
-  closePopover: () => void;
 }
 
 const KNOWN_EMPTY_QUERIES = [
@@ -109,7 +108,6 @@ const buildAnomalyQueryParams = (record: AnomalyQuerySource) => {
 export const useAnomalyTableRowActions = ({
   row,
   timeRange,
-  closePopover,
 }: UseAnomalyTableRowActionsArgs): AnomalyTableRowActionsResult => {
   const { services } = useKibana();
   const { ml, share, data } = services;
@@ -159,7 +157,6 @@ export const useAnomalyTableRowActions = ({
   }, [ml, row.jobId]);
 
   const handleAddToTimeline = useCallback(async () => {
-    closePopover();
     try {
       const [record, job] = await Promise.all([fetchRecord(), fetchJob()]);
       if (!record) return;
@@ -177,10 +174,9 @@ export const useAnomalyTableRowActions = ({
     } catch (e) {
       // Failed to add anomaly to timeline
     }
-  }, [closePopover, fetchJob, fetchRecord, investigateInTimeline, row.jobId]);
+  }, [fetchJob, fetchRecord, investigateInTimeline, row.jobId]);
 
   const handleViewInDiscover = useCallback(async () => {
-    closePopover();
     if (!ml?.mlApi) return;
 
     try {
@@ -218,12 +214,11 @@ export const useAnomalyTableRowActions = ({
     } catch (e) {
       // Failed to open anomaly in Discover
     }
-  }, [closePopover, fetchJob, fetchRecord, ml, share, data, row.jobId]);
+  }, [fetchJob, fetchRecord, ml, share, data, row.jobId]);
 
   const getUrl = useAnomalySingleMetricViewerUrl(timeRange);
 
   const handleViewInSingleMetricViewer = useCallback(async () => {
-    closePopover();
     if (!getUrl) return;
     try {
       const record = await fetchRecord();
@@ -235,7 +230,7 @@ export const useAnomalyTableRowActions = ({
     } catch (e) {
       // Failed to open anomaly in Single Metric Viewer
     }
-  }, [closePopover, fetchRecord, getUrl]);
+  }, [fetchRecord, getUrl]);
 
   const actions = useMemo(() => {
     const items: AnomalyTableRowAction[] = [];

@@ -22,71 +22,82 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import type {
+  SecurityActionMenuActionId,
+  SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 interface Props {
   riskInputs: InputAlert[];
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
-export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ riskInputs }) => {
-  const { euiTheme } = useEuiTheme();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const panels = useRiskInputActionsPanels(riskInputs, closePopover);
+export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
+  ({ riskInputs, customActions, actionOrder }) => {
+    const { euiTheme } = useEuiTheme();
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+    const panels = useRiskInputActionsPanels(riskInputs, closePopover, {
+      customActions,
+      actionOrder,
+    });
 
-  if (riskInputs.length === 0) {
-    return null;
-  }
-  return (
-    <>
-      <EuiFlexGroup
-        data-test-subj="risk-input-utility-bar"
-        alignItems="center"
-        justifyContent="flexStart"
-        gutterSize="m"
-      >
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            padding: ${euiTheme.size.s} 0;
-          `}
-        />
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.actionsAriaLabel',
-              {
-                defaultMessage: 'Risk contribution actions',
+    if (riskInputs.length === 0) {
+      return null;
+    }
+    return (
+      <>
+        <EuiFlexGroup
+          data-test-subj="risk-input-utility-bar"
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="m"
+        >
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              padding: ${euiTheme.size.s} 0;
+            `}
+          />
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.actionsAriaLabel',
+                {
+                  defaultMessage: 'Risk contribution actions',
+                }
+              )}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              button={
+                <EuiButtonEmpty
+                  onClick={togglePopover}
+                  size="xs"
+                  iconSide="right"
+                  iconType="chevronSingleDown"
+                  flush="left"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
+                    defaultMessage="{totalSelectedContributions} selected risk contribution"
+                    values={{
+                      totalSelectedContributions: riskInputs.length,
+                    }}
+                  />
+                </EuiButtonEmpty>
               }
-            )}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            button={
-              <EuiButtonEmpty
-                onClick={togglePopover}
-                size="xs"
-                iconSide="right"
-                iconType="chevronSingleDown"
-                flush="left"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
-                  defaultMessage="{totalSelectedContributions} selected risk contribution"
-                  values={{
-                    totalSelectedContributions: riskInputs.length,
-                  }}
-                />
-              </EuiButtonEmpty>
-            }
-          >
-            <EuiContextMenu panels={panels} initialPanelId={0} />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-    </>
-  );
-});
+            >
+              <EuiContextMenu panels={panels} initialPanelId={0} />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+      </>
+    );
+  }
+);
 
 RiskInputsUtilityBar.displayName = 'RiskInputsUtilityBar';

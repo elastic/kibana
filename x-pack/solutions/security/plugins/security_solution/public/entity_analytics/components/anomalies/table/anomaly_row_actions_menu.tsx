@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP } from '../translations';
 import type { TableRow } from './types';
 import { useAnomalyTableRowActions } from '../../../api/hooks/use_anomaly_table_row_actions';
@@ -15,23 +14,36 @@ import {
   ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID,
   ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX,
 } from '../test_ids';
+import {
+  SECURITY_ACTION_IDS,
+  SecurityActionMenuContent,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 interface AnomalyRowActionsMenuProps {
   row: TableRow;
   timeRange: { from: string; to: string };
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
-export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ row, timeRange }) => {
+export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({
+  row,
+  timeRange,
+  customActions,
+  actionOrder,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((value) => !value), []);
 
-  const { actions } = useAnomalyTableRowActions({ row, timeRange, closePopover });
+  const { actions } = useAnomalyTableRowActions({ row, timeRange });
 
-  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
+  const contributions: SecurityActionMenuContribution[] = useMemo(
     () => [
       {
-        id: 0,
+        id: SECURITY_ACTION_IDS.anomalyNavigation,
         items: actions.map((action) => ({
           name: action.label,
           icon: action.icon,
@@ -42,7 +54,6 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
     ],
     [actions]
   );
-
   const button = (
     <EuiToolTip content={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP} disableScreenReaderOutput>
       <EuiButtonIcon
@@ -64,7 +75,13 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <SecurityActionMenuContent
+        preset="anomalyRow"
+        contributions={contributions}
+        customActions={customActions}
+        actionOrder={actionOrder}
+        closeMenu={closePopover}
+      />
     </EuiPopover>
   );
 };

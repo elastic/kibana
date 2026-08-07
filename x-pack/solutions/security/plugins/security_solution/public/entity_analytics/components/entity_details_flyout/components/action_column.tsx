@@ -9,18 +9,31 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import type {
+  SecurityActionMenuActionId,
+  SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface ActionColumnProps {
   input: InputAlert;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
-export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {
+export const ActionColumn: React.FC<ActionColumnProps> = ({
+  input,
+  customActions,
+  actionOrder,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
-  const panels = useRiskInputActionsPanels([input], closePopover);
+  const panels = useRiskInputActionsPanels([input], closePopover, {
+    customActions,
+    actionOrder,
+  });
 
   return (
     <EuiPopover

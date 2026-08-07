@@ -13,6 +13,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
+import type {
+  SecurityActionMenuActionId,
+  SecurityActionMenuContribution,
+} from '../../../../common/components/security_action_menu';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -36,6 +40,8 @@ export interface TakeActionProps {
    * Callback to open the notes flyout.
    */
   onShowNotes: () => void;
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
 }
 
 /**
@@ -46,7 +52,13 @@ export interface TakeActionProps {
  * We're doing all of this to avoid having to refactor all the actions that are currently using dataAsNestedObject.
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
-export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNotes }) => {
+export const TakeAction: FC<TakeActionProps> = ({
+  hit,
+  onAlertUpdated,
+  onShowNotes,
+  customActions,
+  actionOrder,
+}) => {
   const eventId = hit.raw._id;
   const indexName = hit.raw._index;
 
@@ -78,6 +90,8 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
       refetchFlyoutData={refetchFlyoutData}
       onAlertUpdated={onAlertUpdated}
       onShowNotes={onShowNotes}
+      customActions={customActions}
+      actionOrder={actionOrder}
     />
   );
 };

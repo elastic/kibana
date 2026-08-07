@@ -36,7 +36,6 @@ const mockGetRedirectUrl = jest.fn();
 const mockDataViewsFind = jest.fn();
 const mockInvestigateInTimeline = jest.fn();
 const mockGetUrl = jest.fn();
-const mockClosePopover = jest.fn();
 
 const mockAnomalyRecord = {
   job_id: 'test-job',
@@ -85,7 +84,6 @@ const mockTimeRange = { from: '2023-11-01T00:00:00.000Z', to: '2023-11-30T00:00:
 const defaultArgs = {
   row: mockRow,
   timeRange: mockTimeRange,
-  closePopover: mockClosePopover,
 };
 
 const EXPECTED_KQL =

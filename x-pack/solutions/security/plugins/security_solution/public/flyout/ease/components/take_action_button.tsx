@@ -6,12 +6,18 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
 import { useEaseDetailsContext } from '../context';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import {
+  SECURITY_ACTION_IDS,
+  SecurityActionMenuContent,
+  type SecurityActionMenuActionId,
+  type SecurityActionMenuContribution,
+} from '../../../common/components/security_action_menu';
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'alert-summary-flyout-take-action';
 
@@ -28,6 +34,11 @@ export const ADD_TO_CASE_ARIA_LABEL = i18n.translate(
   }
 );
 
+export interface TakeActionButtonProps {
+  customActions?: readonly SecurityActionMenuContribution[];
+  actionOrder?: readonly SecurityActionMenuActionId[];
+}
+
 /**
  * Take action button in the panel footer.
  * This is used in EASE alert summary page.
@@ -36,7 +47,7 @@ export const ADD_TO_CASE_ARIA_LABEL = i18n.translate(
  * - add to new case
  * - apply alert tags
  */
-export const TakeActionButton = memo(() => {
+export const TakeActionButton = memo(({ customActions, actionOrder }: TakeActionButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { dataAsNestedObject } = useEaseDetailsContext();
@@ -80,26 +91,35 @@ export const TakeActionButton = memo(() => {
     ecsRowData: dataAsNestedObject,
   });
 
-  const panels = useMemo(
+  const contributions: SecurityActionMenuContribution[] = useMemo(
     () => [
       {
-        id: 0,
-        items: [...addToCaseActionItems, ...alertTagsItems],
+        id: SECURITY_ACTION_IDS.addToCase,
+        items: addToCaseActionItems,
       },
-      ...alertTagsPanels,
+      {
+        id: SECURITY_ACTION_IDS.tags,
+        items: alertTagsItems,
+        panels: alertTagsPanels,
+      },
     ],
     [addToCaseActionItems, alertTagsItems, alertTagsPanels]
   );
-
   return (
     <EuiPopover
       aria-label={TAKE_ACTION_BUTTON}
       button={button}
-      closePopover={togglePopover}
+      closePopover={closePopover}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <SecurityActionMenuContent
+        preset="easeAlertFlyout"
+        contributions={contributions}
+        customActions={customActions}
+        actionOrder={actionOrder}
+        closeMenu={closePopover}
+      />
     </EuiPopover>
   );
 });
