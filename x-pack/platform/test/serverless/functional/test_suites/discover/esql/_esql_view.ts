@@ -280,62 +280,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
-      it('should switch to a data view immediately without a modal', async () => {
+      it('should switch to a data view immediately', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.selectDataViewMode();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         expect(await testSubjects.exists('ESQLEditor')).to.be(false);
-      });
-
-      it('should switch to a data view immediately while a saved search is open', async () => {
-        await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
-        await monacoEditor.setCodeEditorValue(testQuery);
-        await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.saveSearch('esql_test');
-        await PageObjects.discover.selectDataViewMode();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should switch to a data view immediately while a saved search with unsaved changes is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.saveSearch('esql_test2');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.selectDataViewMode();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
+        await PageObjects.discover.waitUntilTabIsLoaded();
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
       it('should show available data views and search results after switching to classic mode', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
 
         await browser.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.unifiedSearch.switchToDataViewMode();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.assertHitCount('14,004');
         const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
