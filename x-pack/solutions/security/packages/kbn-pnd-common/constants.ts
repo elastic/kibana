@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RecommendedAction } from "./impl/schemas";
+import type { RecommendedAction } from "./impl/schemas";
 
 export const PND_FEATURE_ID = 'pnd' as const;
 export const PND_PLUGIN_NAME = 'PND' as const;

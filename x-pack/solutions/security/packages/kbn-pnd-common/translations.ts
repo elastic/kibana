@@ -1,5 +1,5 @@
 import { i18n } from '@kbn/i18n';
-import { RecommendedAction } from './impl/schemas';
+import type { RecommendedAction } from './impl/schemas';
 
 export const CONVERSATION_QUEUE_LABELS: Record<RecommendedAction, string> = Object.freeze({
   contain: i18n.translate('xpack.pnd.conversationQueue.bucket.contain', {
