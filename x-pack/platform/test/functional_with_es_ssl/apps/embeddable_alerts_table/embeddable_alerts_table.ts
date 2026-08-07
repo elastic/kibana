@@ -42,12 +42,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
   const comboBox = getService('comboBox');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const toasts = getService('toasts');
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  // Failing: See https://github.com/elastic/kibana/issues/258426
-  describe.skip('Embeddable alerts panel', function () {
+  describe('Embeddable alerts panel', function () {
     this.tags('skipFIPS');
 
     before(async () => {
@@ -72,12 +72,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await sampleData.testResources.removeAllKibanaSampleData();
-      await objectRemover.removeAll();
+      const [sampleResult, removerResult] = await Promise.allSettled([
+        sampleData.testResources.removeAllKibanaSampleData(),
+        objectRemover.removeAll(),
+      ]);
+      if (sampleResult.status === 'rejected') throw sampleResult.reason;
+      if (removerResult.status === 'rejected') throw removerResult.reason;
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/258426
-    describe.skip('Config editor', () => {
+    describe('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
         await dashboardAddPanel.openAddPanelFlyout();
@@ -101,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#security`);
 
-        expect(await find.byButtonText('Switch solution')).to.be.ok();
+        await testSubjects.existOrFail('confirmModalConfirmButton');
       });
     });
 
@@ -190,27 +193,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it("should show a missing authz prompt when the user doesn't have access to a panel's rule types", async () => {
-      // User with o11y-only access should see a missing authz prompt in the security panel
-      await security.testUser.setRoles([`observability_alerting`]);
-      let panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
-      ).to.equal(false);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
-      ).to.equal(true);
+      try {
+        // User with o11y-only access should see a missing authz prompt in the security panel
+        await security.testUser.setRoles([`observability_alerting`]);
+        let panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
+        ).to.equal(false);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
+        ).to.equal(true);
 
-      // User with security-only access should see a missing authz prompt in the o11y panel
-      await security.testUser.setRoles([`security_alerting`]);
-      panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
-      ).to.equal(true);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
-      ).to.equal(false);
-
-      await security.testUser.restoreDefaults();
+        // User with security-only access should see a missing authz prompt in the o11y panel
+        await security.testUser.setRoles([`security_alerting`]);
+        panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
+        ).to.equal(true);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
+        ).to.equal(false);
+      } finally {
+        await security.testUser.restoreDefaults();
+      }
     });
 
     it('should apply the global time filter to alert panels by default', async () => {
@@ -221,8 +226,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should override the time range for specific panels', async () => {
-      await testSubjects.moveMouseTo(DASHBOARD_PANEL_TEST_SUBJ);
-      await testSubjects.click('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL');
+      await dashboardPanelActions.customizePanel();
       await testSubjects.click('customizePanelShowCustomTimeRange');
       // The nested selector is necessary to disambiguate with the global time picker
       await find.clickByCssSelector(
