@@ -36,6 +36,8 @@ import {
 import { RulesClient } from '../lib/rules_client';
 import {
   createChangeHistoryClient,
+  ChangeHistoryClientToken,
+  RuleChangesHistoryClient,
   RuleChangesHistoryClientToken,
   RuleChangesHistoryService,
   RuleChangesHistoryServiceToken,
@@ -139,7 +141,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(RuleChangesHistoryClientToken)
+  bind(ChangeHistoryClientToken)
     .toDynamicValue(({ get }) => {
       const logger = get(Logger).get('rule_changes_history');
       const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
@@ -148,6 +150,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
   bind(RuleChangesHistoryService).toSelf().inSingletonScope();
   bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
+  bind(RuleChangesHistoryClient).toSelf().inRequestScope();
+  bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);
 
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {
