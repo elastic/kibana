@@ -1101,6 +1101,7 @@ describe('<EditRolePage />', () => {
       return {
         history,
         openConfirm: props.overlays.openConfirm,
+        navigateToUrl: props.navigateToUrl,
         rolesAPIClient: props.rolesAPIClient,
       };
     };
@@ -1194,12 +1195,30 @@ describe('<EditRolePage />', () => {
       expect(history.location.pathname).toBe('/edit/my_role');
     });
 
-    // Note: the Cancel path is deliberately not covered here. It navigates synchronously from the
-    // click handler that resets state, and jsdom and a real browser disagree about whether the
-    // prompt's navigation block has been torn down by then — jsdom reports a prompt that the
-    // browser does not show. Asserting either way would encode a jsdom artifact. The save and
-    // delete paths above are safe to assert on because they reset state *before* their request
-    // goes out, so the teardown is a full task ahead of the redirect.
+    it('does not prompt when the form is cancelled', async () => {
+      const { history, openConfirm } = await renderEditRolePage();
+
+      editDescription('a different role');
+      fireEvent.click(screen.getByTestId('roleFormCancelButton'));
+
+      await waitFor(() => {
+        expect(history.location.pathname).toBe('/');
+      });
+      expect(openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('navigates away when the user confirms the prompt', async () => {
+      const { history, openConfirm, navigateToUrl } = await renderEditRolePage();
+      openConfirm.mockResolvedValue(true);
+
+      editDescription('a different role');
+      history.push('/');
+
+      // on confirm the prompt unblocks and navigates itself, to the base-path-prepended target
+      await waitFor(() => {
+        expect(navigateToUrl).toHaveBeenCalledWith('/mock/', expect.anything());
+      });
+    });
   });
 });
 

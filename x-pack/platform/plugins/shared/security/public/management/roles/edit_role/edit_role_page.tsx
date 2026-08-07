@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -280,7 +280,7 @@ function useRole(
       });
   }, [roleName, action, fatalErrors, rolesAPIClient, notifications, license, backToRoleList]);
 
-  return [role, setRole, initialRole] as [Role | null, typeof setRole, Role | null];
+  return { role, setRole, initialRole };
 }
 
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
@@ -363,17 +363,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
     // so this error edge case is an acceptable tradeoff.
     throw new Error('The dataViews plugin is required for this page, but it is not available');
   }
-  // Once the user has chosen to leave — by saving, deleting, or cancelling — their changes are
-  // either persisted or deliberately discarded, so the unsaved changes prompt must not fire on the
-  // way back to the role list. `hasUnsavedChanges` cannot tell the difference on its own: it
-  // compares against the role as it was loaded, and saving does not change what was loaded.
-  // The save and delete paths set this before their request goes out, which also leaves React a
-  // full round trip to tear the prompt's navigation block down before the redirect.
   const [isLeaving, setIsLeaving] = useState(false);
-  const backToRoleList = useCallback(() => {
-    setIsLeaving(true);
-    history.push('/');
-  }, [history]);
+  const backToRoleList = useCallback(() => setIsLeaving(true), []);
   const hasReadOnlyPrivileges = !useCapabilities('roles').save;
 
   // We should keep the same mutable instance of Validator for every re-render since we'll
@@ -389,7 +380,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const features = useFeatures(getFeatures, fatalErrors);
   const featureCheckState = useFeatureCheck(http, buildFlavor);
   const remoteClustersState = useRemoteClusters(http);
-  const [role, setRole, initialRole] = useRole(
+  const { role, setRole, initialRole } = useRole(
     rolesAPIClient,
     fatalErrors,
     notifications,
@@ -407,10 +398,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
     }
   }, [hasReadOnlyPrivileges, isEditingExistingRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const hasUnsavedChanges = useMemo(
+    () => Boolean(role && initialRole && !isLeaving && hasRoleChanged(initialRole, role)),
+    [role, initialRole, isLeaving]
+  );
+
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: Boolean(
-      role && initialRole && !isLeaving && hasRoleChanged(initialRole, role)
-    ),
+    hasUnsavedChanges,
     http,
     openConfirm: overlays.openConfirm,
     navigateToUrl,
@@ -428,6 +422,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       defaultMessage: 'Leave',
     }),
   });
+
+  useEffect(() => {
+    if (isLeaving) {
+      history.push('/');
+    }
+  }, [isLeaving, history]);
 
   if (
     !role ||
@@ -724,12 +724,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        setIsLeaving(true);
         await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
       } catch (error) {
-        // the role was not saved, so the user does still have changes worth warning them about
-        setIsLeaving(false);
-
         if (!isEditingExistingRole && error?.body?.statusCode === 409) {
           setCreatingRoleAlreadyExists(true);
           window.scroll({ top: 0, behavior: 'smooth' });
@@ -802,12 +798,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const handleDeleteRole = async () => {
     try {
-      setIsLeaving(true);
       await rolesAPIClient.deleteRole(role.name);
     } catch (error) {
-      // the role is still there, and so are the user's unsaved changes to it
-      setIsLeaving(false);
-
       notifications.toasts.addDanger(
         error?.data?.message ??
           i18n.translate('xpack.security.management.editRole.errorDeletingRoleError', {
