@@ -301,8 +301,10 @@ describe('manageRuleTool', () => {
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
       expect(logger.debug).toHaveBeenCalledWith({
-        message: expect.stringContaining('manage_rule tool: invalid input'),
+        message: expect.any(Function),
       });
+      const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
+      expect(debugMessage()).toContain('manage_rule tool: invalid input');
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -325,6 +327,69 @@ describe('manageRuleTool', () => {
         error: expect.any(Error),
       });
       expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('includes rule_id on unexpected errors when the rule is already persisted', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        origin: 'rule-persisted-id',
+        versions: [
+          {
+            data: {
+              id: 'rule-persisted-id',
+              kind: 'alert',
+              metadata: { name: 'Existing', owner: 'observability' },
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          ruleAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        labels: { space_id: ctx.spaceId, rule_id: 'rule-persisted-id' },
+        error: expect.any(Error),
+      });
+    });
+
+    it('omits rule_id on unexpected errors when the rule is only in memory', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        versions: [
+          {
+            data: {
+              id: 'rule-in-memory-id',
+              kind: 'alert',
+              metadata: { name: 'Draft', owner: 'observability' },
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          ruleAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        labels: { space_id: ctx.spaceId },
+        error: expect.any(Error),
+      });
     });
   });
 });

@@ -263,8 +263,10 @@ describe('manageActionPolicyTool', () => {
       );
 
       expect(logger.debug).toHaveBeenCalledWith({
-        message: expect.stringContaining('manage_action_policy tool: invalid input'),
+        message: expect.any(Function),
       });
+      const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
+      expect(debugMessage()).toContain('manage_action_policy tool: invalid input');
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -296,6 +298,75 @@ describe('manageActionPolicyTool', () => {
         error: expect.any(Error),
       });
       expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('includes policy_id on unexpected errors when the policy is already persisted', async () => {
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        origin: 'policy-persisted-id',
+        versions: [
+          {
+            data: {
+              id: 'policy-persisted-id',
+              name: 'Existing Policy',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          actionPolicyAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage action policy',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+        labels: { space_id: ctx.spaceId, policy_id: 'policy-persisted-id' },
+        error: expect.any(Error),
+      });
+    });
+
+    it('omits policy_id on unexpected errors when the policy is only in memory', async () => {
+      const logger = createLogger();
+      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        versions: [
+          {
+            data: {
+              id: 'policy-in-memory-id',
+              name: 'Draft Policy',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          actionPolicyAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage action policy',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
+        labels: { space_id: ctx.spaceId },
+        error: expect.any(Error),
+      });
     });
   });
 });

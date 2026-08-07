@@ -7,6 +7,7 @@
 
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import Boom from '@hapi/boom';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
@@ -133,13 +134,19 @@ describe('createRuleAttachmentType', () => {
       expect(result).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
     });
 
-    it('returns undefined and logs a warning when getRule throws', async () => {
-      getRule.mockRejectedValueOnce(new Error('not found'));
+    it('returns undefined without logging when getRule returns 404', async () => {
+      getRule.mockRejectedValueOnce(Boom.notFound('not found'));
 
-      const result = await definition.resolve!(
-        'rule-missing',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('rule-missing', createResolveContext());
+
+      expect(result).toBeUndefined();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined and logs a warning when getRule throws unexpectedly', async () => {
+      getRule.mockRejectedValueOnce(new Error('boom'));
+
+      const result = await definition.resolve!('rule-missing', createResolveContext());
 
       expect(result).toBeUndefined();
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -151,7 +158,7 @@ describe('createRuleAttachmentType', () => {
             code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
           },
           error: expect.objectContaining({
-            message: 'not found',
+            message: 'boom',
             type: 'Error',
           }),
         })

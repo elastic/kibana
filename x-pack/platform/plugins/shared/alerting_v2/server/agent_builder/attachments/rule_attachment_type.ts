@@ -15,6 +15,7 @@ import {
   ruleAttachmentDataSchema,
   type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { RulesClient } from '../../lib/rules_client';
@@ -70,12 +71,15 @@ export const createRuleAttachmentType = ({
       const rule = await rulesClient.getRule({ id: origin });
       return ruleAttachmentDataSchema.parse(rule);
     } catch (error) {
-      logger.warn({
-        message: 'Failed to resolve rule attachment',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
-        labels: { rule_id: origin, space_id: context.spaceId },
-        error,
-      });
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to resolve rule attachment',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
+          labels: { rule_id: origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return undefined;
     }
   },

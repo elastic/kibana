@@ -15,6 +15,7 @@ import {
   actionPolicyAttachmentDataSchema,
   type ActionPolicyAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
@@ -75,12 +76,15 @@ export const createActionPolicyAttachmentType = ({
       const policy = await client.getActionPolicy({ id: origin });
       return actionPolicyAttachmentDataSchema.parse(policy);
     } catch (error) {
-      logger.warn({
-        message: 'Failed to resolve action policy attachment',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED,
-        labels: { policy_id: origin, space_id: context.spaceId },
-        error,
-      });
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to resolve action policy attachment',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED,
+          labels: { policy_id: origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return undefined;
     }
   },

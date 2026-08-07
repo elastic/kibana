@@ -69,6 +69,7 @@ Use operations[] to:
     { actionPolicyAttachmentId: previousAttachmentId, operations },
     { attachments, spaceId, request }
   ) => {
+    let policyId: string | undefined;
     try {
       const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
@@ -79,6 +80,7 @@ Use operations[] to:
 
       const currentData: Partial<ActionPolicyAttachmentData> =
         currentAttachment?.versions.at(-1)?.data ?? {};
+      policyId = currentAttachment?.origin;
 
       const updatedData = executeActionPolicyOperations(currentData, operations, {
         isNew,
@@ -131,7 +133,8 @@ Use operations[] to:
       }
 
       logger.debug({
-        message: `Action policy attachment ${isNew ? 'created' : 'updated'}: "${updatedData.name}"`,
+        message: () =>
+          `Action policy attachment ${isNew ? 'created' : 'updated'}: "${updatedData.name}"`,
       });
 
       return {
@@ -157,12 +160,17 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof ActionPolicyOperationValidationError) {
-        logger.debug({ message: `manage_action_policy tool: invalid input — ${message}` });
+        logger.debug({
+          message: () => `manage_action_policy tool: invalid input — ${message}`,
+        });
       } else {
         logger.warn({
           message: 'Failed to manage action policy',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED,
-          labels: { space_id: spaceId },
+          labels: {
+            space_id: spaceId,
+            ...(policyId != null ? { policy_id: policyId } : {}),
+          },
           error,
         });
       }

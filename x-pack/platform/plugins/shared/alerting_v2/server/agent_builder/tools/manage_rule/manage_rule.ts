@@ -66,6 +66,7 @@ Use operations[] to:
     { ruleAttachmentId: previousAttachmentId, operations },
     { attachments, esClient, spaceId }
   ) => {
+    let ruleId: string | undefined;
     try {
       const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
@@ -76,6 +77,7 @@ Use operations[] to:
 
       const currentData: Partial<RuleAttachmentData> =
         currentAttachment?.versions.at(-1)?.data ?? {};
+      ruleId = currentAttachment?.origin;
 
       const { data: updatedData, queryColumns } = await executeRuleOperations(
         currentData,
@@ -110,7 +112,8 @@ Use operations[] to:
       }
 
       logger.debug({
-        message: `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`,
+        message: () =>
+          `Rule attachment ${isNew ? 'created' : 'updated'}: "${updatedData.metadata?.name}"`,
       });
 
       return {
@@ -136,12 +139,15 @@ Use operations[] to:
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RuleOperationValidationError) {
-        logger.debug({ message: `manage_rule tool: invalid input — ${message}` });
+        logger.debug({ message: () => `manage_rule tool: invalid input — ${message}` });
       } else {
         logger.warn({
           message: 'Failed to manage rule',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
-          labels: { space_id: spaceId },
+          labels: {
+            space_id: spaceId,
+            ...(ruleId != null ? { rule_id: ruleId } : {}),
+          },
           error,
         });
       }
