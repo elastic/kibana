@@ -90,7 +90,6 @@ spaceTest.describe(
           unfilteredTopValuesText,
           { useInnerText: true }
         );
-        await unifiedFieldList.closeFieldPopover();
       }
     );
   }

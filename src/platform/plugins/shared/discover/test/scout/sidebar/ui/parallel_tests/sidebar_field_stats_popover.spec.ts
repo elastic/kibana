@@ -37,8 +37,6 @@ spaceTest.describe(
       await expect(unifiedFieldList.getFieldStatsTitle()).toContainText('Top values');
       await expect(unifiedFieldList.getFieldStatsFooter()).toContainText('records');
       await expect(page.testSubj.locator('dscFieldStats-topValues-bucket')).not.toHaveCount(0);
-
-      await unifiedFieldList.closeFieldPopover();
     });
   }
 );
