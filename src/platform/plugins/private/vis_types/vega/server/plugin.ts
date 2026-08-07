@@ -22,6 +22,7 @@ import {
   LEGACY_VEGA_PANEL_MIGRATION_DEFAULT,
   LEGACY_VEGA_PANEL_MIGRATION_FEATURE_FLAG,
 } from './legacy_vega_panel_migration/constants';
+import { migrateLegacyVegaPanels } from './legacy_vega_panel_migration/migrate_out';
 
 const LEGACY_VIS_EMBEDDABLE_TYPE = 'legacy_vis';
 
@@ -51,14 +52,12 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     const legacyVegaMigration: PanelTypeMigration = {
       from: LEGACY_VIS_EMBEDDABLE_TYPE,
       to: VEGA_EMBEDDABLE_TYPE,
-      migrateOut: async (_panels, _context) => {
+      migrateOut: async (panels, { savedObjectsClient }) => {
         if (!this.legacyVegaMigrationEnabled) {
           return [];
         }
 
-        // Tasks 3.3 and 3.4 implement the conversion mapping. Until then, keep this a no-op even
-        // while enabled so the registry can be wired without behavior changes.
-        return [];
+        return await migrateLegacyVegaPanels(panels, savedObjectsClient);
       },
     };
 

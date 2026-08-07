@@ -115,18 +115,254 @@ describe('VisTypeVegaPlugin (server)', () => {
     plugin.start(coreStart);
 
     const savedObjectsClient = savedObjectsClientMock.create();
-    const result = await migration.migrateOut([{ id: '1', config: {} }], {
+    const result = await migration.migrateOut([{ id: '1', config: { savedObjectId: 'vis-1' } }], {
       savedObjectsClient,
     });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
 
     flag$.next(true);
-    const resultEnabled = await migration.migrateOut([{ id: '1', config: {} }], {
-      savedObjectsClient,
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'vis-1',
+          type: 'visualization',
+          attributes: {
+            visState: JSON.stringify({ type: 'vega', params: { spec: '{foo: 1}' } }),
+          },
+        },
+      ],
     });
-    expect(resultEnabled).toEqual([]);
+
+    const resultEnabled = await migration.migrateOut(
+      [{ id: '1', config: { savedObjectId: 'vis-1', title: 't' } }],
+      { savedObjectsClient }
+    );
+    expect(resultEnabled).toEqual([{ panelId: '1', config: { title: 't', spec: '{foo: 1}' } }]);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+  });
+
+  test('migrates by-value legacy Vega panels when enabled', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = (embeddableSetup.registerPanelTypeMigration as jest.Mock).mock
+      .calls[0][0] as PanelTypeMigration;
+
+    const flag$ = new BehaviorSubject<boolean>(false);
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+
+    flag$.next(true);
+
+    const savedObjectsClient = {
+      bulkGet: jest.fn(),
+    } as any;
+
+    const result = await migration.migrateOut(
+      [
+        {
+          id: '1',
+          config: {
+            title: 'My panel',
+            hide_border: true,
+            savedVis: { type: 'vega', params: { spec: '{a: 1}' } },
+          },
+        },
+      ],
+      { savedObjectsClient }
+    );
+
+    expect(result).toEqual([
+      { panelId: '1', config: { title: 'My panel', hide_border: true, spec: '{a: 1}' } },
+    ]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  test('omits non-Vega legacy visualizations', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = (embeddableSetup.registerPanelTypeMigration as jest.Mock).mock
+      .calls[0][0] as PanelTypeMigration;
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+
+    const savedObjectsClient = {
+      bulkGet: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'vis-1',
+            type: 'visualization',
+            attributes: {
+              visState: JSON.stringify({ type: 'pie', params: {} }),
+            },
+          },
+        ],
+      }),
+    } as any;
+
+    const result = await migration.migrateOut(
+      [
+        { id: '1', config: { savedVis: { type: 'pie', params: {} } } },
+        { id: '2', config: { savedObjectId: 'vis-1' } },
+      ],
+      { savedObjectsClient }
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  test('migrates by-reference legacy Vega panels with one bulkGet', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = (embeddableSetup.registerPanelTypeMigration as jest.Mock).mock
+      .calls[0][0] as PanelTypeMigration;
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+
+    const savedObjectsClient = {
+      bulkGet: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'vis-a',
+            type: 'visualization',
+            attributes: {
+              visState: JSON.stringify({ type: 'vega', params: { spec: '{a: 1}' } }),
+            },
+          },
+          {
+            id: 'vis-b',
+            type: 'visualization',
+            attributes: {
+              visState: JSON.stringify({ type: 'vega', params: { spec: '{b: 2}' } }),
+            },
+          },
+        ],
+      }),
+    } as any;
+
+    const result = await migration.migrateOut(
+      [
+        { id: 'panel-a', config: { savedObjectId: 'vis-a', title: 'A' } },
+        { id: 'panel-b', config: { savedObjectId: 'vis-b', hide_title: true } },
+      ],
+      { savedObjectsClient }
+    );
+
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([
+      { panelId: 'panel-a', config: { title: 'A', spec: '{a: 1}' } },
+      { panelId: 'panel-b', config: { hide_title: true, spec: '{b: 2}' } },
+    ]);
+  });
+
+  test('returns a per-panel error when referenced visualization visState cannot be parsed', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = (embeddableSetup.registerPanelTypeMigration as jest.Mock).mock
+      .calls[0][0] as PanelTypeMigration;
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+
+    const savedObjectsClient = {
+      bulkGet: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'vis-bad',
+            type: 'visualization',
+            attributes: {
+              visState: '{not-json',
+            },
+          },
+        ],
+      }),
+    } as any;
+
+    const result = await migration.migrateOut(
+      [{ id: 'panel-1', config: { savedObjectId: 'vis-bad' } }],
+      { savedObjectsClient }
+    );
+
+    expect(result).toHaveLength(1);
+    expect((result[0] as any).panelId).toBe('panel-1');
+    expect((result[0] as any).error.message).toContain(
+      'Unable to parse visualization "vis-bad" visState'
+    );
+  });
+
+  test('returns per-panel errors for missing spec and for bulkGet errors', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = (embeddableSetup.registerPanelTypeMigration as jest.Mock).mock
+      .calls[0][0] as PanelTypeMigration;
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+
+    const savedObjectsClient = {
+      bulkGet: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'vis-missing',
+            type: 'visualization',
+            error: { statusCode: 404, message: 'not found' },
+          },
+          {
+            id: 'vis-bad',
+            type: 'visualization',
+            attributes: {
+              visState: JSON.stringify({ type: 'vega', params: {} }),
+            },
+          },
+        ],
+      }),
+    } as any;
+
+    const result = await migration.migrateOut(
+      [
+        { id: 'by-value', config: { savedVis: { type: 'vega', params: {} } } },
+        { id: 'missing', config: { savedObjectId: 'vis-missing' } },
+        { id: 'bad', config: { savedObjectId: 'vis-bad' } },
+      ],
+      { savedObjectsClient }
+    );
+
+    expect(result).toHaveLength(3);
+    expect(result.map((r) => r.panelId)).toEqual(['by-value', 'missing', 'bad']);
+    expect((result[0] as any).error.message).toBe('By-value Vega visualization is missing spec');
+    expect((result[1] as any).error.message).toBe('not found');
+    expect((result[2] as any).error.message).toBe('Visualization "vis-bad" is missing Vega spec');
   });
 
   test('subscribes to the feature flag and cleans up on stop', () => {
