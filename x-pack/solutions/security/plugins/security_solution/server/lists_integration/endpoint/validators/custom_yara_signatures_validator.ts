@@ -205,7 +205,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       // Only errors are rejected on create/update.
       ({ errors } = await validateYaraRule(ruleText));
     } catch (error) {
-      this.logger.error(`Error validating YARA rule: ${error.message}`);
+      this.logger.error(error);
       throw new EndpointArtifactExceptionValidationError(
         'Unable to validate YARA rule due to an internal error. Please try again later.',
         500
@@ -217,7 +217,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       try {
         libyaraVersion = await getYaraEngineVersion();
       } catch (error) {
-        this.logger.error(`Error getting YARA engine version: ${error.message}`);
+        this.logger.error(error);
       }
 
       const details = errors

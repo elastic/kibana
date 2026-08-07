@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { getYaraEngineVersion, validateYaraRule } from './validate_yara_rule';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { getYaraEngineVersion, setYaraLogger, validateYaraRule } from './validate_yara_rule';
 
 /**
  * Smoke test against the real libyara WASM artifact.
  * Keep this focused — unit tests of the API validator should mock validateYaraRule.
  */
 describe('validateYaraRule (libyara WASM)', () => {
+  afterEach(() => {
+    setYaraLogger(undefined);
+  });
+
   it('reports the pinned engine version', async () => {
     await expect(getYaraEngineVersion()).resolves.toBe('4.3.2');
   });
@@ -81,6 +86,55 @@ rule X {
             }
             `);
     expect(good.errors).toEqual([]);
+  });
+
+  describe('logging', () => {
+    it('logs debug metadata without rule source on validate', async () => {
+      const mockLogger = loggingSystemMock.createLogger();
+      setYaraLogger(mockLogger);
+
+      const uniqueMarker = 'UNIQUE_YARA_LOG_MARKER_xyzzy';
+      await validateYaraRule(`
+rule Minimal {
+  strings:
+    $a = "${uniqueMarker}"
+  condition:
+    $a
+}
+`);
+
+      expect(mockLogger.debug).toHaveBeenCalled();
+      const debugArg = mockLogger.debug.mock.calls[0][0];
+      const debugMessage = typeof debugArg === 'function' ? debugArg() : String(debugArg);
+
+      expect(debugMessage).toContain('outcome=success');
+      expect(debugMessage).toContain('errorCount=0');
+      expect(debugMessage).toContain('durationMs=');
+      expect(debugMessage).toContain('sourceByteLength=');
+      expect(debugMessage).not.toContain(uniqueMarker);
+    });
+
+    it('logs compile_error outcome without rule source', async () => {
+      const mockLogger = loggingSystemMock.createLogger();
+      setYaraLogger(mockLogger);
+
+      const uniqueMarker = 'UNIQUE_YARA_LOG_MARKER_broken';
+      await validateYaraRule(`
+rule Broken {
+  strings:
+    $a = "${uniqueMarker}"
+  condition:
+    not_a_thing
+}
+`);
+
+      expect(mockLogger.debug).toHaveBeenCalled();
+      const debugArg = mockLogger.debug.mock.calls[0][0];
+      const debugMessage = typeof debugArg === 'function' ? debugArg() : String(debugArg);
+
+      expect(debugMessage).toContain('outcome=compile_error');
+      expect(debugMessage).not.toContain(uniqueMarker);
+    });
   });
 
   describe('supported modules', () => {

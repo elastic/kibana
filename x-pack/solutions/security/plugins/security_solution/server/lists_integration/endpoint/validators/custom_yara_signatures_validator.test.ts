@@ -292,9 +292,8 @@ describe('YARA Signatures API validations', () => {
     });
 
     it('rejects create with a safe 500 when the YARA engine fails', async () => {
-      mockValidateYaraRule.mockRejectedValue(
-        new WebAssembly.RuntimeError('memory access out of bounds')
-      );
+      const engineError = new WebAssembly.RuntimeError('memory access out of bounds');
+      mockValidateYaraRule.mockRejectedValue(engineError);
 
       const error = await customYaraSignaturesValidator
         .validatePreCreateItem(buildCreateItem())
@@ -306,6 +305,9 @@ describe('YARA Signatures API validations', () => {
       );
       expect(error.message).not.toContain('memory access out of bounds');
       expect(error.getStatusCode()).toBe(500);
+
+      const logger = mockEndpointAppContextService.createLogger.mock.results.at(-1)?.value;
+      expect(logger.error).toHaveBeenCalledWith(engineError);
     });
   });
 });

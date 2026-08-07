@@ -12,6 +12,10 @@ import { validateYaraRule } from '...';
 const result = await validateYaraRule(ruleText);
 ```
 
+## Logging
+
+Call `setYaraLogger(logger)` once at Endpoint service start (done in `EndpointAppContextService.start`). The wrapper logs module load, WASM traps, and per-validate debug metadata (`outcome`, counts, duration, source byte length). **Never logs rule source text.**
+
 ## Modules
 
 Supports standard module imports used at compile time (e.g. `import "pe"`, `import "math"`). Validation is compile-only — modules are not loaded against sample bytes.

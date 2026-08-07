@@ -7,7 +7,19 @@
 
 import { createRequire } from 'module';
 import path from 'path';
+import type { Logger } from '@kbn/logging';
 import type { YaraDiagnostic, YaraValidateResult } from './types';
+
+let logger: Logger | undefined;
+
+/**
+ * Sets the process-wide logger used by the libyara WASM wrapper.
+ * Call once at Endpoint service start. Pass `undefined` to clear.
+ * Rule source text must never be logged.
+ */
+export const setYaraLogger = (nextLogger: Logger | undefined): void => {
+  logger = nextLogger;
+};
 
 /**
  * Compile-check a YARA rule source string with classic libyara (WASM).
@@ -15,20 +27,36 @@ import type { YaraDiagnostic, YaraValidateResult } from './types';
  * Reloads the module if a WASM trap leaves it unusable.
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
+  const started = performance.now();
   const mod = await loadModule();
   let ptr = 0;
 
   try {
     ptr = mod.ccall<number>('validate_yara', 'number', ['string'], [source]);
     const json = mod.UTF8ToString(ptr);
-    return parseResult(json);
+    const result = parseResult(json);
+    const durationMs = Math.round(performance.now() - started);
+    const outcome = result.errors.length > 0 ? 'compile_error' : 'success';
+
+    logger?.debug(
+      () =>
+        `YARA validate completed: outcome=${outcome}, errorCount=${
+          result.errors.length
+        }, warningCount=${
+          result.warnings.length
+        }, durationMs=${durationMs}, sourceByteLength=${Buffer.byteLength(source, 'utf8')}`
+    );
+
+    return result;
   } catch (error) {
     // WASM traps (signature mismatch, OOB, abort) can leave linear memory /
     // the function table unusable for the rest of the process. Drop the
     // singleton so the next call instantiates a fresh module.
     if (isWasmTrap(error)) {
       modulePromise = undefined;
+      logger?.error('libyara WASM trap during validate; module will be reloaded on next call');
     }
+    logger?.error(error);
     throw error;
   } finally {
     if (ptr !== 0) {
@@ -37,7 +65,11 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
       } catch (freeError) {
         if (isWasmTrap(freeError)) {
           modulePromise = undefined;
+          logger?.error(
+            'libyara WASM trap during validate_yara_free; module will be reloaded on next call'
+          );
         }
+        logger?.error(freeError);
       }
     }
   }
@@ -79,17 +111,27 @@ const isWasmTrap = (error: unknown): boolean =>
 const loadModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
     modulePromise = (async () => {
+      const started = performance.now();
       // Emscripten emits CJS; load it with createRequire. __filename/__dirname are
       // fine here — Kibana server code is Babel-transpiled to CJS at runtime.
       const require = createRequire(__filename);
       const distDir = path.join(__dirname, 'wasm', 'dist');
       const factory = require(path.join(distDir, 'validate_yara.js')) as CreateYaraValidateModule;
 
-      return factory({
+      const mod = await factory({
         locateFile: (file: string) => path.join(distDir, file),
       });
+      const libyaraVersion = mod.ccall<string>('yara_engine_version', 'string', [], []);
+      const loadDurationMs = Math.round(performance.now() - started);
+
+      logger?.info(
+        `libyara WASM module loaded (version ${libyaraVersion}, loadDurationMs=${loadDurationMs})`
+      );
+
+      return mod;
     })().catch((err) => {
       modulePromise = undefined;
+      logger?.error(err);
       throw err;
     });
   }
