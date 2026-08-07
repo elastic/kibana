@@ -11,6 +11,7 @@ export const LANDING_PATH = '/landing' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERTS_INBOX_PATH = '/alerts/inbox' as const;
+export const ALERTS_INBOX_EPISODE_DETAIL_PATH = '/alerts/inbox/:episodeId' as const;
 export const ALERTING_RULES_HUB_PATH = '/alerts/rules-hub' as const;
 export const ALERTING_RULES_HUB_RULE_DETAIL_PATH = '/alerts/rules-hub/:ruleId' as const;
 export const RULES_LIBRARY_PATH = '/alerts/rules-library' as const;
@@ -48,6 +49,9 @@ export const paths = {
     rulesHub: `${OBSERVABILITY_BASE_PATH}${ALERTING_RULES_HUB_PATH}`,
     rulesHubRuleDetails: (ruleId: string) =>
       `${OBSERVABILITY_BASE_PATH}${ALERTING_RULES_HUB_PATH}/${encodeURIComponent(ruleId)}`,
+    inbox: `${OBSERVABILITY_BASE_PATH}${ALERTS_INBOX_PATH}`,
+    inboxEpisodeDetails: (episodeId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${ALERTS_INBOX_PATH}/${encodeURIComponent(episodeId)}`,
     rules: RULES_APP_BASE_PATH,
     ruleDetails: (ruleId: string) => `${RULES_APP_BASE_PATH}/rule/${encodeURIComponent(ruleId)}`,
     createRule: (ruleTypeId: string) =>

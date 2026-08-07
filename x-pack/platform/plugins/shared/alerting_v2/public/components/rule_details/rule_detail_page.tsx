@@ -150,9 +150,14 @@ const getRuleDetailMenu = ({
 export const RuleDetailPage: React.FunctionComponent<{
   /** When set (Observability hub), back navigation stays under Observability. */
   rulesListHref?: string;
+  /**
+   * App path for episodes list (Observability Inbox). When set, "View all
+   * episodes" stays under Observability.
+   */
+  episodesListBasePath?: string;
   /** Skip management page template / breadcrumbs when nested under Observability. */
   embedded?: boolean;
-}> = ({ rulesListHref, embedded = false }) => {
+}> = ({ rulesListHref, episodesListBasePath, embedded = false }) => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name }, { enabled: !embedded });
   const { euiTheme } = useEuiTheme();
@@ -304,7 +309,7 @@ export const RuleDetailPage: React.FunctionComponent<{
             }
           `}
         >
-          <RuleOverviewSection />
+          <RuleOverviewSection episodesListBasePath={episodesListBasePath} />
         </EuiPanel>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner

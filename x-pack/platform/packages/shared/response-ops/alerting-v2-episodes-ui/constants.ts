@@ -61,8 +61,12 @@ export const FLYOUT_FOOTER_OFFSET = 80;
 export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
 export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 
-export const getAlertEpisodeDetailsPath = (episodeId: string) =>
-  `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`;
+export const getAlertEpisodeDetailsPath = (
+  episodeId: string,
+  listBasePath: string = ALERTING_V2_EPISODES_BASE_PATH
+) => `${listBasePath}/${encodeURIComponent(episodeId)}`;
 
-export const getRuleDetailsPath = (ruleId: string) =>
-  `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(ruleId)}`;
+export const getRuleDetailsPath = (
+  ruleId: string,
+  listBasePath: string = ALERTING_V2_RULES_BASE_PATH
+) => `${listBasePath}/${encodeURIComponent(ruleId)}`;

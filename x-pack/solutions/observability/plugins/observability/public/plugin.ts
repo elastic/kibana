@@ -558,6 +558,9 @@ export class Plugin
                                   defaultMessage: 'Inbox',
                                 }),
                                 path: ALERTS_INBOX_PATH,
+                                matchPath: (path: string) =>
+                                  path === ALERTS_INBOX_PATH ||
+                                  path.startsWith(`${ALERTS_INBOX_PATH}/`),
                               },
                               {
                                 app: observabilityAppId,

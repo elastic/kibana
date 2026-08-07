@@ -81,4 +81,13 @@ describe('paths.alertEpisodesListHref', () => {
     });
     expect(new URL(url, 'http://localhost').searchParams.has('_g')).toBe(false);
   });
+
+  it('uses an override basePath when provided (e.g. Observability Inbox)', () => {
+    const url = paths.alertEpisodesListHref({
+      basePath: '/app/observability/alerts/inbox',
+      filters: { ruleId: 'rule-1' },
+    });
+    expect(url.startsWith('/app/observability/alerts/inbox?')).toBe(true);
+    expect(decodeAppState(url)).toMatchObject({ ruleId: 'rule-1' });
+  });
 });

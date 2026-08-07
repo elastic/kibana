@@ -9,10 +9,14 @@ import type { ComponentType } from 'react';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { EmbeddedRulesListProps } from './pages/rules_list_page/embedded_rules_list';
 import type { EmbeddedRuleDetailsProps } from './pages/rules_list_page/embedded_rule_details';
+import type { EmbeddedEpisodesListProps } from './pages/alert_episodes_list_page/embedded_episodes_list';
+import type { EmbeddedEpisodeDetailsProps } from './pages/alert_episodes_list_page/embedded_episode_details';
 
 export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_flyout';
 export type { EmbeddedRulesListProps };
 export type { EmbeddedRuleDetailsProps };
+export type { EmbeddedEpisodesListProps };
+export type { EmbeddedEpisodeDetailsProps };
 
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
@@ -21,5 +25,7 @@ export interface AlertingV2PublicStart {
   /** Embeddable rule details for Observability Rules hub (Alerting IA POC). */
   EmbeddedRuleDetails: ComponentType<EmbeddedRuleDetailsProps>;
   /** Embeddable episodes (Inbox) list for Observability (Alerting IA POC). */
-  EmbeddedEpisodesList: ComponentType;
+  EmbeddedEpisodesList: ComponentType<EmbeddedEpisodesListProps>;
+  /** Embeddable episode details for Observability Inbox (Alerting IA POC). */
+  EmbeddedEpisodeDetails: ComponentType<EmbeddedEpisodeDetailsProps>;
 }

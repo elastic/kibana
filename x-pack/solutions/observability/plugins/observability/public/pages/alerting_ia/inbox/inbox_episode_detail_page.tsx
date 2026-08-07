@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -13,13 +14,17 @@ import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 
 /**
- * Observability Inbox — embeds Alerting v2 episodes without leaving for Stack Management.
+ * Observability-hosted Alerting v2 episode details — keeps Alerts chrome
+ * instead of jumping to Stack Management.
  */
-export function InboxPage() {
+export function InboxEpisodeDetailPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const {
-    services: { http, alertingVTwo, serverless },
+    services: { http, serverless, alertingVTwo },
   } = useKibana();
+
+  const episodesListHref = http.basePath.prepend(paths.observability.inbox);
+  const EmbeddedEpisodeDetails = alertingVTwo?.EmbeddedEpisodeDetails;
 
   useBreadcrumbs(
     [
@@ -32,27 +37,37 @@ export function InboxPage() {
         text: i18n.translate('xpack.observability.alertingIa.breadcrumbs.inbox', {
           defaultMessage: 'Inbox',
         }),
+        href: episodesListHref,
       },
     ],
     { serverless }
   );
 
-  const EmbeddedEpisodesList = alertingVTwo?.EmbeddedEpisodesList;
-
   return (
-    <ObservabilityPageTemplate data-test-subj="observabilityAlertsInboxPage">
-      {EmbeddedEpisodesList ? (
-        <EmbeddedEpisodesList
+    <ObservabilityPageTemplate data-test-subj="observabilityInboxEpisodeDetailPage">
+      {EmbeddedEpisodeDetails ? (
+        <EmbeddedEpisodeDetails
+          episodesListHref={episodesListHref}
           getEpisodeDetailsHref={(episodeId) =>
             http.basePath.prepend(paths.observability.inboxEpisodeDetails(episodeId))
           }
+          getRuleDetailsHref={(ruleId) =>
+            http.basePath.prepend(paths.observability.rulesHubRuleDetails(ruleId))
+          }
         />
       ) : (
-        <p>
-          {i18n.translate('xpack.observability.alertingIa.inbox.unavailable', {
-            defaultMessage: 'Inbox requires Alerting v2 to be enabled.',
+        <EuiCallOut
+          title={i18n.translate('xpack.observability.alertingIa.inbox.v2UnavailableTitle', {
+            defaultMessage: 'Alerting v2 is not available',
           })}
-        </p>
+          color="warning"
+        >
+          <p>
+            {i18n.translate('xpack.observability.alertingIa.inbox.v2UnavailableBody', {
+              defaultMessage: 'Enable Alerting v2 to view alert episodes in Inbox.',
+            })}
+          </p>
+        </EuiCallOut>
       )}
     </ObservabilityPageTemplate>
   );

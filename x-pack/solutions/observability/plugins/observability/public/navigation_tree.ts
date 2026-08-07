@@ -124,6 +124,8 @@ function createNavTree({
                   defaultMessage: 'Inbox',
                 }),
                 badgeType: 'new',
+                getIsActive: ({ pathNameSerialized, prepend }) =>
+                  pathNameSerialized.startsWith(prepend('/app/observability/alerts/inbox')),
               },
               {
                 link: 'observability-overview:alerts',

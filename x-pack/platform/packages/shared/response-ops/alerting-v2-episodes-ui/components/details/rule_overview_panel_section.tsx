@@ -23,11 +23,13 @@ import * as i18n from './translations';
 export interface AlertEpisodeRuleOverviewPanelSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
+  getRuleDetailsHref?: (ruleId: string) => string;
 }
 
 export const AlertEpisodeRuleOverviewPanelSection = ({
   episodeId,
   services,
+  getRuleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelSectionProps) => {
   const {
     data: episode,
@@ -75,7 +77,11 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
   return (
     <AlertEpisodeRuleOverviewPanel
       rule={ruleState.rule}
-      ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(resolvedRuleId))}
+      ruleDetailsHref={
+        getRuleDetailsHref
+          ? getRuleDetailsHref(resolvedRuleId)
+          : services.http.basePath.prepend(getRuleDetailsPath(resolvedRuleId))
+      }
     />
   );
 };

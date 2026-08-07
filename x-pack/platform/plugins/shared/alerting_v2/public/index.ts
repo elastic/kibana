@@ -71,11 +71,24 @@ const LazyEmbeddedEpisodesList = React.lazy(() =>
   }))
 );
 
-const EmbeddedEpisodesList = () =>
+const EmbeddedEpisodesList = (props: React.ComponentProps<typeof LazyEmbeddedEpisodesList>) =>
   React.createElement(
     React.Suspense,
     { fallback: null },
-    React.createElement(LazyEmbeddedEpisodesList)
+    React.createElement(LazyEmbeddedEpisodesList, props)
+  );
+
+const LazyEmbeddedEpisodeDetails = React.lazy(() =>
+  import('./pages/alert_episodes_list_page/embedded_episode_details').then((m) => ({
+    default: m.EmbeddedEpisodeDetails,
+  }))
+);
+
+const EmbeddedEpisodeDetails = (props: React.ComponentProps<typeof LazyEmbeddedEpisodeDetails>) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyEmbeddedEpisodeDetails, props)
   );
 
 const LazyEmbeddedRuleDetails = React.lazy(() =>
@@ -107,6 +120,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
     EmbeddedRulesList,
     EmbeddedRuleDetails,
     EmbeddedEpisodesList,
+    EmbeddedEpisodeDetails,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));

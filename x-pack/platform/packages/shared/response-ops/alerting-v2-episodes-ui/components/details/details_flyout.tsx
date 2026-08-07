@@ -49,6 +49,8 @@ export interface AlertEpisodeDetailsFlyoutProps {
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
+  /** Override full-page episode details href (Observability Inbox embedding). */
+  getEpisodeDetailsHref?: (episodeId: string) => string;
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -57,6 +59,7 @@ export const AlertEpisodeDetailsFlyout = ({
   onClose,
   services,
   actions,
+  getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
@@ -71,6 +74,14 @@ export const AlertEpisodeDetailsFlyout = ({
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
     [actions, episodes]
+  );
+
+  const episodeDetailsHref = useMemo(
+    () =>
+      getEpisodeDetailsHref
+        ? getEpisodeDetailsHref(episodeId)
+        : services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId)),
+    [getEpisodeDetailsHref, episodeId, services.http.basePath]
   );
 
   const effectiveTab: TabId =
@@ -245,6 +256,7 @@ export const AlertEpisodeDetailsFlyout = ({
             services={services}
             showHeading={false}
             compressed
+            getEpisodeDetailsHref={getEpisodeDetailsHref}
           />
         )}
         {effectiveTab === 'timeline' && (
@@ -291,7 +303,7 @@ export const AlertEpisodeDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
+                href={episodeDetailsHref}
                 data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
                 iconType="eye"
               >

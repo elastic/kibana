@@ -18,6 +18,11 @@ import { RuleDetailsRoute } from '../../routes/rule_details_route';
 export interface EmbeddedRuleDetailsProps {
   /** Absolute (basePath-prefixed) href back to the Observability Rules hub. */
   rulesListHref: string;
+  /**
+   * App path for Observability Inbox (no http basePath), e.g.
+   * `/app/observability/alerts/inbox`. Used for "View all episodes".
+   */
+  episodesListBasePath: string;
 }
 
 /**
@@ -25,7 +30,10 @@ export interface EmbeddedRuleDetailsProps {
  * Stays under `/app/observability/alerts/rules-hub/:ruleId` — does not use
  * Stack Management chrome.
  */
-export function EmbeddedRuleDetails({ rulesListHref }: EmbeddedRuleDetailsProps) {
+export function EmbeddedRuleDetails({
+  rulesListHref,
+  episodesListBasePath,
+}: EmbeddedRuleDetailsProps) {
   const [container, setContainer] = useState<Container | null>(null);
 
   useEffect(() => {
@@ -59,7 +67,10 @@ export function EmbeddedRuleDetails({ rulesListHref }: EmbeddedRuleDetailsProps)
             defaultMessage: 'Rules',
           })}
         >
-          <RuleDetailsRoute rulesListHref={rulesListHref} />
+          <RuleDetailsRoute
+            rulesListHref={rulesListHref}
+            episodesListBasePath={episodesListBasePath}
+          />
         </RequireAlertingPrivilege>
       </BreadcrumbProvider>
     </Context.Provider>

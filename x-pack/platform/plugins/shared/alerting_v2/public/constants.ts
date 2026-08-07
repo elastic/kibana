@@ -50,6 +50,11 @@ export interface AlertEpisodesListLinkOptions {
   };
   /** Time range embedded in `_a.episodesList.{timeFrom,timeTo}`. */
   timeRange?: { from: string; to: string };
+  /**
+   * Override the episodes list app path (default: Stack Management episodes).
+   * Use Observability Inbox (`/app/observability/alerts/inbox`) when embedded.
+   */
+  basePath?: string;
 }
 
 export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/conversations/new';
@@ -75,7 +80,8 @@ export const paths = {
    * history entry.
    */
   alertEpisodesListHref: (opts?: AlertEpisodesListLinkOptions): string => {
-    if (!opts) return ALERTING_V2_EPISODES_BASE_PATH;
+    const listBase = opts?.basePath ?? ALERTING_V2_EPISODES_BASE_PATH;
+    if (!opts) return listBase;
 
     const { filters, timeRange } = opts;
     const episodesList = Object.fromEntries(
@@ -92,13 +98,13 @@ export const paths = {
       }).filter(([_key, value]) => value != null)
     );
 
-    if (Object.keys(episodesList).length === 0) return ALERTING_V2_EPISODES_BASE_PATH;
+    if (Object.keys(episodesList).length === 0) return listBase;
 
     const search = new URLSearchParams();
     search.set('_a', encodeRison({ episodesList }));
-    return `${ALERTING_V2_EPISODES_BASE_PATH}?${search.toString()}`;
+    return `${listBase}?${search.toString()}`;
   },
-  alertEpisodeDetails: (episodeId: string) =>
-    `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
+  alertEpisodeDetails: (episodeId: string, listBasePath: string = ALERTING_V2_EPISODES_BASE_PATH) =>
+    `${listBasePath}/${encodeURIComponent(episodeId)}`,
   executionHistoryList: ALERTING_V2_EXECUTION_HISTORY_BASE_PATH,
 };

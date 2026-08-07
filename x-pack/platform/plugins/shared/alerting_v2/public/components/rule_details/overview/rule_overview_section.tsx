@@ -14,7 +14,9 @@ import { ArtifactsSection, SignalArtifactsSection } from './artifacts';
 import { SignalRuleOverview } from './signal_rule_overview';
 import { useRule } from '../rule_context';
 
-export const RuleOverviewSection: React.FC = () => {
+export const RuleOverviewSection: React.FC<{
+  episodesListBasePath?: string;
+}> = ({ episodesListBasePath }) => {
   const rule = useRule();
   const canReadAlerts = useService(UserCapabilities).canRead('alerts');
 
@@ -26,7 +28,7 @@ export const RuleOverviewSection: React.FC = () => {
         </EuiErrorBoundary>
       ) : canReadAlerts ? (
         <EuiErrorBoundary>
-          <AlertTimelineSection />
+          <AlertTimelineSection episodesListBasePath={episodesListBasePath} />
         </EuiErrorBoundary>
       ) : null}
       {rule.kind === 'alert' ? (

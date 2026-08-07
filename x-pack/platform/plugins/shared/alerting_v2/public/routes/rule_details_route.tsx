@@ -22,7 +22,9 @@ const LazyRuleDetailPage = lazy(async () => {
 export const RuleDetailsRoute: React.FunctionComponent<{
   /** When set (embedded Obs hub), back/error navigation stays under Observability. */
   rulesListHref?: string;
-}> = ({ rulesListHref }) => {
+  /** Observability Inbox app path for "View all episodes". */
+  episodesListBasePath?: string;
+}> = ({ rulesListHref, episodesListBasePath }) => {
   const { ruleId } = useParams<{ ruleId: string }>();
   const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const history = useHistory();
@@ -77,7 +79,11 @@ export const RuleDetailsRoute: React.FunctionComponent<{
   return (
     <RuleProvider rule={rule}>
       <Suspense fallback={<Skeleton />}>
-        <LazyRuleDetailPage rulesListHref={rulesListHref} embedded={Boolean(rulesListHref)} />
+        <LazyRuleDetailPage
+          rulesListHref={rulesListHref}
+          episodesListBasePath={episodesListBasePath}
+          embedded={Boolean(rulesListHref)}
+        />
       </Suspense>
     </RuleProvider>
   );

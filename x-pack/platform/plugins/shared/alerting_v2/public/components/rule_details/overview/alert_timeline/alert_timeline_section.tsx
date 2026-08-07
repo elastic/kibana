@@ -37,7 +37,13 @@ import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
 import { DEFAULT_ACTIVITY_TIME_RANGE, resolveGteLte } from '../time_range';
 
-export const AlertTimelineSection: React.FC = () => {
+export const AlertTimelineSection: React.FC<{
+  /**
+   * App path for the episodes list (no http basePath). When set (Obs Inbox),
+   * "View all episodes" stays under Observability instead of Stack Management.
+   */
+  episodesListBasePath?: string;
+}> = ({ episodesListBasePath }) => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const share = useService(PluginStart('share')) as SharePluginStart;
   const application = useService(CoreStart('application'));
@@ -110,14 +116,16 @@ export const AlertTimelineSection: React.FC = () => {
             from: new Date(windowStartMs).toISOString(),
             to: new Date(windowEndMs).toISOString(),
           },
+          basePath: episodesListBasePath,
         })
       ),
-    [http, rule.id, windowStartMs, windowEndMs]
+    [http, rule.id, windowStartMs, windowEndMs, episodesListBasePath]
   );
 
   const getEpisodeHref = useCallback(
-    (episodeId: string) => http.basePath.prepend(paths.alertEpisodeDetails(episodeId)),
-    [http]
+    (episodeId: string) =>
+      http.basePath.prepend(paths.alertEpisodeDetails(episodeId, episodesListBasePath)),
+    [http, episodesListBasePath]
   );
 
   const onEpisodeClick = useCallback(

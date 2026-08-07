@@ -20,6 +20,7 @@ export interface AlertEpisodesRelatedSectionProps {
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
   showHeading?: boolean;
   compressed?: boolean;
+  getEpisodeDetailsHref?: (episodeId: string) => string;
 }
 
 export const AlertEpisodesRelatedSection = ({
@@ -27,10 +28,14 @@ export const AlertEpisodesRelatedSection = ({
   services,
   showHeading,
   compressed,
+  getEpisodeDetailsHref: getEpisodeDetailsHrefProp,
 }: AlertEpisodesRelatedSectionProps) => {
   const getEpisodeDetailsHref = useCallback(
-    (id: string) => services.http.basePath.prepend(getAlertEpisodeDetailsPath(id)),
-    [services.http.basePath]
+    (id: string) =>
+      getEpisodeDetailsHrefProp
+        ? getEpisodeDetailsHrefProp(id)
+        : services.http.basePath.prepend(getAlertEpisodeDetailsPath(id)),
+    [getEpisodeDetailsHrefProp, services.http.basePath]
   );
   const {
     data: episode,

@@ -21,6 +21,7 @@ import { RulePage } from '../pages/rules/rule';
 import {
   ALERT_DETAIL_PATH,
   ALERTS_INBOX_PATH,
+  ALERTS_INBOX_EPISODE_DETAIL_PATH,
   ALERTING_RULES_HUB_PATH,
   ALERTING_RULES_HUB_RULE_DETAIL_PATH,
   ALERTS_PATH,
@@ -50,6 +51,7 @@ import { RulesHubPage } from '../pages/alerting_ia/rules_hub/rules_hub_page';
 import { RulesHubRuleDetailPage } from '../pages/alerting_ia/rules_hub/rules_hub_rule_detail_page';
 import { RulesLibraryPage } from '../pages/alerting_ia/rules_library/rules_library_page';
 import { InboxPage } from '../pages/alerting_ia/inbox/inbox_page';
+import { InboxEpisodeDetailPage } from '../pages/alerting_ia/inbox/inbox_episode_detail_page';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -141,6 +143,13 @@ const routes: Record<RoutePath, RouteDefinition> = {
   [ALERTS_INBOX_PATH]: {
     handler: () => {
       return <InboxPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [ALERTS_INBOX_EPISODE_DETAIL_PATH]: {
+    handler: () => {
+      return <InboxEpisodeDetailPage />;
     },
     params: {},
     exact: true,

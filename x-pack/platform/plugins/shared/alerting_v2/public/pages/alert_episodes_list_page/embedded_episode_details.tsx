@@ -22,18 +22,24 @@ import { untilPluginStartServicesReady } from '../../kibana_services';
 import { BreadcrumbProvider } from '../../application/breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { RequireAlertingPrivilege } from '../../components/require_alerting_privilege';
-import { AlertEpisodesListPage } from './alert_episodes_list_page';
+import { EpisodeDetailsPage } from '../episode_details_page/episode_details_page';
 
-export interface EmbeddedEpisodesListProps {
-  /** Absolute href builder for full episode details (Observability Inbox). */
-  getEpisodeDetailsHref?: (episodeId: string) => string;
+export interface EmbeddedEpisodeDetailsProps {
+  /** Absolute href back to Observability Inbox. */
+  episodesListHref: string;
+  getEpisodeDetailsHref: (episodeId: string) => string;
+  getRuleDetailsHref: (ruleId: string) => string;
 }
 
 /**
- * Embeddable Alerting v2 episodes (Inbox) list for Observability.
- * Stays under `/app/observability/alerts/inbox` — does not navigate to Stack Management.
+ * Embeddable Alerting v2 episode details for Observability Inbox.
+ * Stays under `/app/observability/alerts/inbox/:episodeId`.
  */
-export function EmbeddedEpisodesList({ getEpisodeDetailsHref }: EmbeddedEpisodesListProps = {}) {
+export function EmbeddedEpisodeDetails({
+  episodesListHref,
+  getEpisodeDetailsHref,
+  getRuleDetailsHref,
+}: EmbeddedEpisodeDetailsProps) {
   const parentServices = useKibana().services;
   const [container, setContainer] = useState<Container | null>(null);
   const [extraPlugins, setExtraPlugins] = useState<{
@@ -88,7 +94,7 @@ export function EmbeddedEpisodesList({ getEpisodeDetailsHref }: EmbeddedEpisodes
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" data-test-subj="alertingV2EmbeddedEpisodesLoading" />
+          <EuiLoadingSpinner size="l" data-test-subj="alertingV2EmbeddedEpisodeDetailsLoading" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -100,11 +106,16 @@ export function EmbeddedEpisodesList({ getEpisodeDetailsHref }: EmbeddedEpisodes
         <BreadcrumbProvider setBreadcrumbs={() => {}}>
           <RequireAlertingPrivilege
             features={['alerts']}
-            pageName={i18n.translate('xpack.alertingV2.embeddedEpisodes.pageName', {
+            pageName={i18n.translate('xpack.alertingV2.embeddedEpisodeDetails.pageName', {
               defaultMessage: 'Inbox',
             })}
           >
-            <AlertEpisodesListPage embedded getEpisodeDetailsHref={getEpisodeDetailsHref} />
+            <EpisodeDetailsPage
+              embedded
+              episodesListHref={episodesListHref}
+              getEpisodeDetailsHref={getEpisodeDetailsHref}
+              getRuleDetailsHref={getRuleDetailsHref}
+            />
           </RequireAlertingPrivilege>
         </BreadcrumbProvider>
       </Context.Provider>

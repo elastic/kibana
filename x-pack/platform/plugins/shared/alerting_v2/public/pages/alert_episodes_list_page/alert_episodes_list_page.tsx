@@ -127,7 +127,13 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const AlertEpisodesListPage = ({ embedded = false }: { embedded?: boolean }) => {
+export const AlertEpisodesListPage = ({
+  embedded = false,
+  getEpisodeDetailsHref,
+}: {
+  embedded?: boolean;
+  getEpisodeDetailsHref?: (episodeId: string) => string;
+} = {}) => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
@@ -317,6 +323,7 @@ export const AlertEpisodesListPage = ({ embedded = false }: { embedded?: boolean
         groupHash={hit.flattened.group_hash as string | undefined}
         onClose={closeFlyout}
         actions={episodeActions}
+        getEpisodeDetailsHref={getEpisodeDetailsHref}
         services={{
           data: services.data,
           http: services.http,
@@ -329,7 +336,7 @@ export const AlertEpisodesListPage = ({ embedded = false }: { embedded?: boolean
         }}
       />
     ),
-    [closeFlyout, episodeActions, services]
+    [closeFlyout, episodeActions, getEpisodeDetailsHref, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(

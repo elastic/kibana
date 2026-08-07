@@ -72,7 +72,21 @@ interface EpisodeRouteParams {
 
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
-export function EpisodeDetailsPage() {
+export interface EpisodeDetailsPageProps {
+  /** Skip management page template / breadcrumbs when nested under Observability. */
+  embedded?: boolean;
+  /** Absolute href back to the episodes list (Observability Inbox). */
+  episodesListHref?: string;
+  getEpisodeDetailsHref?: (episodeId: string) => string;
+  getRuleDetailsHref?: (ruleId: string) => string;
+}
+
+export function EpisodeDetailsPage({
+  embedded = false,
+  episodesListHref: episodesListHrefProp,
+  getEpisodeDetailsHref,
+  getRuleDetailsHref,
+}: EpisodeDetailsPageProps = {}) {
   const { euiTheme } = useEuiTheme();
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
@@ -85,6 +99,7 @@ export function EpisodeDetailsPage() {
     : EPISODE_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
   const history = useHistory();
+  const { navigateToUrl } = services.application;
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -135,7 +150,7 @@ export function EpisodeDetailsPage() {
       ? ruleState.rule.metadata.name
       : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
-  useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
+  useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle }, { enabled: !embedded });
 
   const actualMainPanel: EpisodeDetailsMainPanel =
     (mainPanel === 'metadata' && !showRuleDependentUi) ||
@@ -244,7 +259,8 @@ export function EpisodeDetailsPage() {
     [applicableActions, episode, invalidateEpisodeQueries]
   );
 
-  const episodesListHref = services.http.basePath.prepend(paths.alertEpisodesList);
+  const episodesListHref =
+    episodesListHrefProp ?? services.http.basePath.prepend(paths.alertEpisodesList);
 
   const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;
@@ -260,7 +276,13 @@ export function EpisodeDetailsPage() {
           <EuiButton
             color="primary"
             fill
-            onClick={() => history.push('/')}
+            onClick={() => {
+              if (episodesListHrefProp) {
+                navigateToUrl(episodesListHrefProp);
+              } else {
+                history.push('/');
+              }
+            }}
             data-test-subj="episodeDetailsErrorBackButton"
           >
             {i18n.BACK_TO_ALERT_EPISODES}
@@ -353,6 +375,7 @@ export function EpisodeDetailsPage() {
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}
               services={detailsServices}
+              getRuleDetailsHref={getRuleDetailsHref}
             />
           </>
         )}
@@ -506,7 +529,11 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodesRelatedSection episodeId={episodeId} services={detailsServices} />
+                    <AlertEpisodesRelatedSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                      getEpisodeDetailsHref={getEpisodeDetailsHref}
+                    />
                   </EuiFlexGroup>
                 </EuiPanel>
               )}

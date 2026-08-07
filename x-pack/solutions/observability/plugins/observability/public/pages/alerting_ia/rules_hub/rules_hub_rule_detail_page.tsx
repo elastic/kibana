@@ -46,7 +46,10 @@ export function RulesHubRuleDetailPage() {
   return (
     <ObservabilityPageTemplate data-test-subj="observabilityRulesHubRuleDetailPage">
       {EmbeddedRuleDetails ? (
-        <EmbeddedRuleDetails rulesListHref={rulesListHref} />
+        <EmbeddedRuleDetails
+          rulesListHref={rulesListHref}
+          episodesListBasePath={paths.observability.inbox}
+        />
       ) : (
         <EuiCallOut
           title={i18n.translate('xpack.observability.alertingIa.rulesHub.v2UnavailableTitle', {
