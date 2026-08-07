@@ -12,21 +12,44 @@ import {
   type Container,
   ContainerModule,
   type ContainerModuleLoadOptions,
+  type GetOptions,
+  type GetAllOptions,
   LazyServiceIdentifier,
   type MapToResolvedValueInjectOptions,
   type ResolutionContext,
+  type ResolvedValueInjectOptions,
   type ServiceIdentifier,
 } from 'inversify';
+import { once } from 'lodash';
 import { OnSetup, OnStart } from './services/plugin';
 
-export type KibanaBind = <T>(
-  serviceIdentifier: ServiceIdentifier<T>
-) => KibanaBindToFluentSyntax<T>;
-export type KibanaHandler<T, A extends unknown[] = []> = (
-  context: ResolutionContext,
-  injectable: T,
-  ...services: A
-) => void;
+/**
+ * Extended container module options providing Kibana-specific features.
+ */
+export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOptions {
+  /**
+   * An extended binding supporting Kibana-specific features.
+   */
+  bind<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T>;
+
+  /**
+   * Wraps a handler that will be called after the start phase injecting the listed dependencies.
+   * The returned function can be used in dynamic bindings like `toDynamicValue` or `toFactory` or as an `onActivation` handler.
+   * @example
+   * ```ts
+   * import { KibanaContainerModule } from '@kbn/core-di';
+   *
+   * export const module = new KibanaContainerModule(({ bind, inject }) => {
+   *   bind(Token).toDynamicValue(inject(User, Key, (user, key) => getToken(user, key)));
+   * });
+   * ```
+   * @param dependencies Dependencies to resolve before calling the inner function.
+   * @param inner A function to wrap inside an asynchronous function.
+   */
+  inject<R, A extends unknown[], D extends unknown[]>(
+    ...definition: [...dependencies: MapToResolvedValueInjectOptions<D>, inner: Injectable<R, A, D>]
+  ): (context: Pick<ResolutionContext, 'getAsync' | 'getAllAsync'>, ...args: A) => Promise<R>;
+}
 
 export interface KibanaBindToFluentSyntax<T> extends BindToFluentSyntax<T> {
   /**
@@ -50,14 +73,167 @@ export interface KibanaBindToFluentSyntax<T> extends BindToFluentSyntax<T> {
   ): void;
 }
 
-/**
- * Extended container module options providing Kibana-specific features.
- */
-export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOptions {
+export type KibanaHandler<T, A extends unknown[] = []> = (
+  context: KibanaResolutionContext,
+  injectable: T,
+  ...services: A
+) => void;
+
+export interface KibanaResolutionContext extends ResolutionContext {
   /**
-   * An extended binding supporting Kibana-specific features.
+   * Wraps a handler that will be called after the start phase injecting the listed dependencies.
+   * @example
+   * ```ts
+   * import { KibanaContainerModule } from '@kbn/core-di';
+   *
+   * export const module = new KibanaContainerModule(({ bind, inject }) => {
+   *   bind(Route).onSetup(({ inject }, router, route) => {
+   *     router.register(route, inject(CoreStart('elasticsearch'), (client, request, response) => {
+   *       return client.search(request.body);
+   *     });
+   *   }, Router);
+   * });
+   * ```
+   * @param dependencies Dependencies to resolve before calling the inner function.
+   * @param handler A function to wrap inside an asynchronous function.
    */
-  bind: KibanaBind;
+  inject<R, A extends unknown[], D extends unknown[]>(
+    ...args: [...dependencies: MapToResolvedValueInjectOptions<D>, inner: Injectable<R, A, D>]
+  ): (...args: A) => Promise<R>;
+}
+
+export type Injectable<R, A extends unknown[], D extends unknown[]> = (
+  ...args: [...dependencies: D, ...arguments: A]
+) => Promise<R> | R;
+
+interface NormalizedResolutionOptions<T> extends GetOptions, GetAllOptions {
+  serviceIdentifier: ServiceIdentifier<T>;
+  isMultiple?: boolean;
+}
+
+function normalizeResolutionOptions<T>(
+  request: ResolvedValueInjectOptions<T>
+): NormalizedResolutionOptions<T> {
+  if (typeof request !== 'object') {
+    return { serviceIdentifier: request };
+  }
+
+  if (LazyServiceIdentifier.is(request)) {
+    return { serviceIdentifier: request.unwrap() };
+  }
+
+  return {
+    ...request,
+    serviceIdentifier: LazyServiceIdentifier.is<T>(request.serviceIdentifier)
+      ? request.serviceIdentifier.unwrap()
+      : (request.serviceIdentifier as ServiceIdentifier<T>),
+  };
+}
+
+function resolveSync<A extends unknown[]>(
+  context: Pick<ResolutionContext, 'get' | 'getAll'>,
+  services: MapToResolvedValueInjectOptions<A>
+): A {
+  return services.map((service) => {
+    const { serviceIdentifier, isMultiple, ...options } = normalizeResolutionOptions(service);
+
+    return isMultiple
+      ? context.getAll(serviceIdentifier, options)
+      : context.get(serviceIdentifier, options);
+  }) as A;
+}
+
+function resolveAsync<A extends unknown[]>(
+  context: Pick<ResolutionContext, 'getAsync' | 'getAllAsync'>,
+  services: MapToResolvedValueInjectOptions<A>
+): Promise<A> {
+  return Promise.all(
+    services.map((service) => {
+      const { serviceIdentifier, isMultiple, ...options } = normalizeResolutionOptions(service);
+
+      return isMultiple
+        ? context.getAllAsync(serviceIdentifier, options)
+        : context.getAsync(serviceIdentifier, options);
+    })
+  ) as Promise<A>;
+}
+
+function toKibanaContainerModuleLoadOptions(
+  options: ContainerModuleLoadOptions
+): KibanaContainerModuleLoadOptions {
+  const started = new Promise((resolve) => {
+    const id = options
+      .bind(OnStart)
+      .toConstantValue(
+        once((container) => {
+          resolve(container);
+          options.unbind(id);
+        })
+      )
+      .getIdentifier();
+  });
+
+  function toKibanaResolutionContext(context: ResolutionContext): KibanaResolutionContext {
+    return {
+      ...context,
+      inject: (...args) => inject(...args).bind(undefined, context),
+    };
+  }
+
+  function onHook<T, A extends unknown[]>(
+    hook: ServiceIdentifier<(container: Container) => void>,
+    serviceIdentifier: ServiceIdentifier<T>,
+    handler: KibanaHandler<T, A>,
+    ...dependences: MapToResolvedValueInjectOptions<A>
+  ): void {
+    options.onActivation(serviceIdentifier, (context, injectable) => {
+      handler.apply(undefined, [
+        toKibanaResolutionContext(context),
+        injectable,
+        ...resolveSync(context, dependences),
+      ]);
+
+      return injectable;
+    });
+    bind(hook).toConstantValue((container) => {
+      if (container.isCurrentBound(serviceIdentifier)) {
+        container.getAll(serviceIdentifier);
+      }
+    });
+  }
+
+  function bind<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T> {
+    return Object.defineProperties(options.bind(serviceIdentifier), {
+      onSetup: {
+        value: onHook.bind(undefined, OnSetup, serviceIdentifier),
+      },
+      onStart: {
+        value: onHook.bind(undefined, OnStart, serviceIdentifier),
+      },
+    }) as KibanaBindToFluentSyntax<T>;
+  }
+
+  function inject<R, A extends unknown[], D extends unknown[]>(
+    ...definition: [
+      ...dependencies: MapToResolvedValueInjectOptions<D>,
+      handler: Injectable<R, A, D>
+    ]
+  ): (context: Pick<ResolutionContext, 'getAsync' | 'getAllAsync'>, ...args: A) => Promise<R> {
+    return async (context, ...args) => {
+      await started;
+      const inner = definition[definition.length - 1] as Injectable<R, A, D>;
+      const dependencies = definition.slice(0, -1) as MapToResolvedValueInjectOptions<D>;
+      const resolvedDependencies = await resolveAsync(context, dependencies);
+
+      return inner(...resolvedDependencies, ...args);
+    };
+  }
+
+  return {
+    ...options,
+    bind,
+    inject,
+  };
 }
 
 /**
@@ -65,70 +241,6 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
  */
 export class KibanaContainerModule extends ContainerModule {
   constructor(load: (options: KibanaContainerModuleLoadOptions) => void | Promise<void>) {
-    super((options) =>
-      load({
-        ...options,
-        bind: this.#bind.bind(this, options) as KibanaBind,
-      })
-    );
-  }
-
-  #bind<T>(
-    options: ContainerModuleLoadOptions,
-    serviceIdentifier: ServiceIdentifier<T>
-  ): KibanaBindToFluentSyntax<T> {
-    const fluentSyntax = options.bind(serviceIdentifier);
-
-    Object.defineProperties(fluentSyntax, {
-      onSetup: {
-        value: this.#onHook.bind(this, OnSetup, options, serviceIdentifier),
-      },
-      onStart: {
-        value: this.#onHook.bind(this, OnStart, options, serviceIdentifier),
-      },
-    });
-
-    return fluentSyntax as KibanaBindToFluentSyntax<T>;
-  }
-
-  #onHook<T, A extends unknown[]>(
-    hook: ServiceIdentifier<(container: Container) => void>,
-    { bind, onActivation }: ContainerModuleLoadOptions,
-    serviceIdentifier: ServiceIdentifier<T>,
-    handler: KibanaHandler<T, A>,
-    ...dependences: MapToResolvedValueInjectOptions<A>
-  ): void {
-    onActivation(serviceIdentifier, (context, injectable) => {
-      handler.apply(undefined, [context, injectable, ...this.#resolve(context, dependences)]);
-
-      return injectable;
-    });
-    bind(hook).toConstantValue((container) => {
-      container.getAll(serviceIdentifier);
-    });
-  }
-
-  #resolve<A extends unknown[]>(
-    context: ResolutionContext,
-    services: MapToResolvedValueInjectOptions<A>
-  ): A {
-    return services.map((service) => {
-      if (typeof service !== 'object') {
-        return context.get(service);
-      }
-
-      if (LazyServiceIdentifier.is(service)) {
-        return context.get(service.unwrap());
-      }
-
-      const serviceIdentifier = LazyServiceIdentifier.is(service.serviceIdentifier)
-        ? service.serviceIdentifier.unwrap()
-        : service.serviceIdentifier;
-      const method = (service as typeof service & { isMultiple: boolean }).isMultiple
-        ? 'getAll'
-        : 'get';
-
-      return context[method](serviceIdentifier, service);
-    }) as A;
+    super((options) => load(toKibanaContainerModuleLoadOptions(options)));
   }
 }
