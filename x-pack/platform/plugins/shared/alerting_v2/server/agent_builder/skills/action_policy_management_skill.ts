@@ -17,6 +17,11 @@ import {
   generateActionPolicyOperationsDoc,
   generateActionPolicySchemaDoc,
   generateActionPolicyWorkflowPayloadDoc,
+  generateGroupingModesDoc,
+  generateThrottleStrategiesDoc,
+  getEpisodeStatusValues,
+  formatEnumValuesList,
+  generateThrottleGroupingCompatibilityDoc,
 } from './schema_to_skill_docs';
 
 export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
@@ -50,7 +55,7 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | Field | Description |
 |---|---|
 | \`episode_id\` | The episode UUID |
-| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, or \`recovering\` |
+| \`episode_status\` | ${formatEnumValuesList(getEpisodeStatusValues())} |
 | \`group_hash\` | Hash of the grouping fields |
 | \`last_event_timestamp\` | Timestamp of the most recent event |
 | \`rule.id\` | The rule's saved object ID |
@@ -58,16 +63,9 @@ When the dispatcher evaluates a policy's KQL matcher, these fields are available
 | \`rule.tags\` | The rule's tags array |
 | \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
 
-### Grouping Modes
-- \`per_episode\` (default): one notification per alert episode lifecycle.
-- \`all\`: a single notification for all matching episodes.
-- \`per_field\`: group by specified \`groupBy\` fields.
+${generateGroupingModesDoc()}
 
-### Throttle Strategies
-- \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
-- \`per_status_interval\`: notify on transitions and at regular intervals.
-- \`time_interval\`: notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).
-- \`every_time\`: notify on every evaluation cycle (high volume).
+${generateThrottleStrategiesDoc()}
 
 ---
 
@@ -167,12 +165,7 @@ Refer to the [action-policy-operations-schema reference](./references/action-pol
 
 Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the concepts reference.
 
-### Throttle / Grouping Compatibility
-
-The throttle strategy must be compatible with the grouping mode:
-- For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
-- For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
-- \`per_status_interval\` and \`time_interval\` require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).
+${generateThrottleGroupingCompatibilityDoc()}
 
 If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool validates compatibility after all operations run.
 

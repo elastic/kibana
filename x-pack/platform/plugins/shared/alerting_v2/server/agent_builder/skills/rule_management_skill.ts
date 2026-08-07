@@ -16,7 +16,12 @@ import { manageRuleTool } from '../tools/manage_rule';
 import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
-  getSeverityValues,
+  generateRuleKindDoc,
+  generateEpisodeLifecycleDoc,
+  generateSeverityDoc,
+  generateStateTransitionDoc,
+  generateRecoveryStrategyDoc,
+  generateNoDataStrategyDoc,
 } from './schema_to_skill_docs';
 
 export const createRuleManagementSkill = () =>
@@ -34,41 +39,11 @@ export const createRuleManagementSkill = () =>
         relativePath: './references',
         content: `# Alerting V2 Concepts
 
-## Rule Kind: Alert vs Signal
-
-Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.
-
-### Alert (\`kind: alert\`)
-- **Stateful alerting** with full episode lifecycle: pending, active, recovering, inactive.
-- Supports state transitions (\`pending_count\` / \`recovering_count\`), recovery detection, and notification dispatch.
-- Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
-- UI label: **"Alert"**.
-- Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
-
-### Signal (\`kind: signal\`)
-- **Stateless detection** (observation-only).
-- Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
-- No notifications, no recovery, no state transitions.
-- UI label: **"Signal"**.
-- Use for logging or detection without automated action.
-
-### Immutability
-\`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely.
+${generateRuleKindDoc()}
 
 ---
 
-## Episode Lifecycle
-
-Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has its own episode.
-
-| Status | Meaning |
-|---|---|
-| \`pending\` | Breached but below the consecutive-breaches threshold |
-| \`active\` | Met the threshold — alert is firing |
-| \`recovering\` | Breach stopped but not yet fully recovered |
-| \`inactive\` | Fully recovered |
-
-Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw signal events with no episode tracking.
+${generateEpisodeLifecycleDoc()}
 
 ---
 
@@ -80,25 +55,7 @@ When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${
 
 ---
 
-## Alert Event Severity
-
-Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
-
-- **Valid values**: ${getSeverityValues()
-          .map((v) => `\`${v}\``)
-          .join(', ')} (case-insensitive).
-- If the breach query does not produce a \`severity\` column, alert events have no severity.
-- Different groups can produce different severities in the same rule execution (the value comes from each row).
-- Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).
-
-### Setting Severity in ES|QL
-
-Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`:
-
-- **Literal severity** — all alerts from the rule share the same severity:
-  \`| EVAL severity = "critical"\`
-- **Conditional severity** — severity varies per group based on data:
-  \`| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")\``,
+${generateSeverityDoc()}`,
       },
       {
         name: 'rule-schema',
@@ -171,47 +128,15 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
-## State Transition
-
-Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
-
-- \`pending_count: N\` — breaches required before transitioning from pending to active (e.g. \`pending_count: 3\` means 3 consecutive breach cycles).
-- \`pending_timeframe\` — optional time window for the pending evaluation (e.g. \`"15m"\`).
-- \`recovering_count: N\` — non-breach cycles required before transitioning from recovering to inactive.
-- \`recovering_timeframe\` — optional time window for the recovering evaluation.
-
-State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
+${generateStateTransitionDoc()}
 
 ## Severity
 
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [concepts reference](./references/concepts.md) for valid values, the extraction model, and literal vs conditional patterns.
 
-## Recovery Strategy
+${generateRecoveryStrategyDoc()}
 
-\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
-
-When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
-- **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
-- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
-
-Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
-
-## No-Data Strategy
-
-\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present.
-
-| Value | Behaviour |
-|---|---|
-| \`'none'\` | No-data situations are ignored (default). |
-| \`'emit'\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API. |
-| \`'last_known_status'\` | Holds the last known episode status when no data is present. |
-| \`'recover'\` | Forces recovery when no data is present. |
-
-When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
-\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
-
-Signal rules cannot set \`no_data_strategy\`.
-Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
+${generateNoDataStrategyDoc()}
 
 ## Final Validation
 
