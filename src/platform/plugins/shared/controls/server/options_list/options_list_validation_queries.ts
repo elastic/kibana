@@ -60,8 +60,8 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
         };
       }
 
-      // Wrap in global so validation always checks all docs regardless of the outer query's
-      // search string filter, then re-apply dashboard filters inside.
+      // wrap in global so validation always checks all docs regardless of the outer query's
+      // search string filter, then re-apply dashboard filters inside
       return {
         globalValidation: {
           global: {},
