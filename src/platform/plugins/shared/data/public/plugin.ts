@@ -163,7 +163,6 @@ export class DataPublicPlugin
     const dateRangePickerPresets = new DateRangePickerPresetsService({
       userStorage: core.userStorage,
       uiSettings,
-      userProfile: core.userProfile,
     });
 
     const search = this.searchService.start(core, {

@@ -288,6 +288,16 @@ type AppHeaderSecondaryContent =
 export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
+ * Chrome-owned registration config. Unlike {@link AppHeaderConfig}, `back` may be `false` to
+ * suppress the breadcrumb-derived fallback.
+ *
+ * @public
+ */
+export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
+  back?: AppHeaderBack | false;
+};
+
+/**
  * Chrome Next rollout APIs.
  *
  * @remarks
@@ -297,7 +307,12 @@ export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome Next feature flag is enabled. */
+  /**
+   * Whether the Chrome Next feature flag is enabled.
+   *
+   * This does not indicate that the current layout renders Chrome Next. Before replacing or hiding
+   * fallback UI, also require `chrome.getChromeStyle() === 'project'`.
+   */
   readonly isEnabled: boolean;
   aiButton: {
     /**
@@ -351,7 +366,7 @@ export interface ChromeNext {
      * Pass the config to show; the returned callback removes it.
      * Per-app, cleared on app change.
      */
-    set(config: AppHeaderConfig): () => void;
+    set(config: ChromeAppHeaderConfig): () => void;
   };
   userMenu: {
     /**

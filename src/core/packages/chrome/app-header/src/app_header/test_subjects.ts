@@ -21,7 +21,6 @@ export const APP_HEADER_TEST_SUBJECTS = {
   titleActions: 'appHeaderTitleActions',
   badge: 'appHeaderBadge',
   sharePrefix: 'appHeaderShare',
-  /** Stable share control id for FTR / Scout (title action). */
   shareButton: 'shareTopNavButton',
   favorite: 'appHeaderFavorite',
   favoriteButton: 'appHeaderFavoriteButton',

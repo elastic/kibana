@@ -14,6 +14,7 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderConfig,
+  ChromeAppHeaderConfig,
   AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderFavoriteAction,

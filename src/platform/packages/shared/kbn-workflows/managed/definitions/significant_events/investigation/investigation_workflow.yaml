@@ -43,7 +43,7 @@ triggers:
 steps:
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
-  # Only runs when a sig-event context was supplied (triage or chat-agent paths).
+  # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
   - name: attach_pending_to_significant_event
     type: kibana.request
     if: '${{ inputs.context.event_uuid != null }}'
@@ -120,6 +120,42 @@ steps:
                 reason:
                   type: string
                   maxLength: 10000
+                evidence:
+                  type: array
+                  description: >
+                    What this hypothesis' verdict rests on — at most 3 entries. Every hypothesis
+                    that ends "confirmed" or "dismissed" must carry at least one. Only cite ES|QL
+                    you actually executed, verbatim, with the absolute window it ran over; never
+                    invent a query.
+                  maxItems: 3
+                  items:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                        maxLength: 10000
+                        description: What was observed and why it decided this hypothesis.
+                      esql_query:
+                        type: string
+                        maxLength: 10000
+                        description: The exact ES|QL query executed to gather this evidence, when one was run.
+                      time_range:
+                        type: object
+                        description: >
+                          Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                          esql_query is set — without it the query cannot be opened in Discover.
+                        properties:
+                          from:
+                            type: string
+                            maxLength: 64
+                          to:
+                            type: string
+                            maxLength: 64
+                        required:
+                          - from
+                          - to
+                    required:
+                      - description
               required:
                 - candidate
                 - confidence
@@ -187,6 +223,21 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
                         required:
                           - description
                   required:
@@ -229,6 +280,21 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
                         required:
                           - description
                   required:
@@ -249,11 +315,11 @@ steps:
                       const: status
                     from:
                       type: string
-                      enum: ['pending', 'open', 'closed', 'dismissed']
+                      enum: ['open', 'closed', 'dismissed']
                       description: The status from inputs.context.status — the value before this investigation ran.
                     to:
                       type: string
-                      enum: ['pending', 'open', 'closed', 'dismissed']
+                      enum: ['open', 'closed', 'dismissed']
                       description: The proposed new status.
                     reason:
                       type: string
@@ -274,6 +340,21 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
                         required:
                           - description
                   required:
@@ -294,7 +375,7 @@ steps:
   # `significant_event_updates` (severity/summary/status). Recording the completed investigation
   # and its reassessed fields as one write keeps the lifecycle to a single meaningful version
   # rather than two. Only runs when a sig-event context was supplied (i.e. the investigation was
-  # triggered from triage or from the chat agent for a specific event). Other callers (free-form
+  # triggered from discovery or from the chat agent for a specific event). Other callers (free-form
   # issues, alerts) that do not supply `inputs.context.event_uuid` are unaffected.
   #
   # The agent only *proposes* field changes; this deterministic step performs the write. Each
