@@ -52,4 +52,17 @@ describe('createActionPolicyManagementSkill', () => {
     expect(skill.content).toContain('Default Notification Setup');
     expect(skill.content).toContain('workflow-authoring');
   });
+
+  it('exposes the generated workflow dispatch payload schema as referenced content', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const payloadRef = skill.referencedContent?.find(
+      (entry) => entry.name === 'workflow-dispatch-payload'
+    );
+
+    expect(payloadRef?.content).toContain('Action Policy Workflow Dispatch Payload');
+    expect(payloadRef?.content).toContain('`policyId`');
+    expect(payloadRef?.content).toContain('`episodes`');
+    expect(payloadRef?.content).toContain('`rules`');
+    expect(payloadRef?.content).toContain('`episode_status`');
+  });
 });

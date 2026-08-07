@@ -26,9 +26,13 @@ import {
   validateCaseExtendedFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import {
+  buildExtendedFieldsDefaults,
+  mergeCustomFieldsIntoExtendedFields,
+} from '../../../common/utils/template_fields';
 import {
   applyTemplateDefaultsToCreateRequest,
   ensureTemplateVersionIsPinned,
@@ -137,8 +141,49 @@ export const create = async (
       }
     }
 
+    // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
+    // before submission, so UI-created cases persist them — but API and workflow-step callers
+    // only send the fields they know about, which left every global field empty on non-UI cases.
+    // Merge the defaults here with the same precedence the UI create form produces: template
+    // defaults, then global defaults (the global definition is authoritative on a storage-key
+    // collision — see resolveApplicableFields), then caller-sent values (caller always wins).
+    // Runs AFTER template expansion so the collision order holds, and BEFORE extended_fields
+    // validation so the merged map is what gets validated.
+    //
+    // Captured before injection: when the map exists only because defaults were injected, the
+    // validation below must run with partial (update) semantics. Full create-time validation
+    // enforces `required` on absent fields, and enforcing it here would 400 requests that
+    // succeeded before defaults injection existed — e.g. every legacy customFields-only create
+    // in a space whose required v1 custom fields are mirrored into required global definitions.
+    const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
+    let globalFields: InlineField[] | undefined;
+    if (clientArgs.config.templates.enabled) {
+      globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      const globalFieldsDefaults = Object.fromEntries(
+        // A field without a default produces '' — writing that adds no information and, for a
+        // required field, would immediately fail its own validation. Only inject real defaults.
+        Object.entries(buildExtendedFieldsDefaults(globalFields)).filter(
+          ([, value]) => value !== ''
+        )
+      );
+      if (Object.keys(globalFieldsDefaults).length > 0) {
+        query = {
+          ...query,
+          extended_fields: {
+            ...(query.extended_fields ?? {}),
+            ...globalFieldsDefaults,
+            // The caller's original extended_fields, NOT query.extended_fields — template
+            // expansion already merged template defaults into the latter, and those must not
+            // shadow a global default on a storage-key collision.
+            ...(rawQuery.extended_fields ?? {}),
+          },
+        };
+      }
+    }
+
     if (query.extended_fields) {
-      const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFields =
+        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
       await validateCaseExtendedFields({
         extendedFields: query.extended_fields,
         templateId: query.template?.id,
@@ -146,6 +191,10 @@ export const create = async (
         templatesService,
         fieldDefinitionsService,
         owner: query.owner,
+        // Injection-only maps get partial semantics: validate the injected values, but do not
+        // enforce `required` on fields the caller never sent — that keeps creates that
+        // succeeded before defaults injection succeeding after it (see comment above).
+        partial: !hadExtendedFieldsBeforeDefaults,
         preResolvedTemplateFields: resolvedTemplateFields,
       });
     }
