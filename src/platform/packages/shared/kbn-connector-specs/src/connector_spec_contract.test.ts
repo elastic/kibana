@@ -12,11 +12,15 @@ import * as connectorsSpecs from './all_specs';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
+import { buildEventId } from './event_type_id';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
 const MAX_CONNECTOR_ID_LENGTH = 64;
 const allSpecs = Object.entries(connectorsSpecs) as Array<[string, ConnectorSpec]>;
 const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[];
+
+// Specs allowed to declare `events`
+const SPECS_ALLOWED_EVENTS = new Set<string>([]);
 
 const getAuthTypeId = (authType: string | AuthTypeDef): string =>
   typeof authType === 'string' ? authType : authType.type;
@@ -81,5 +85,21 @@ describe('connector spec contracts', () => {
     const mappedIconIds = [...ConnectorIconsMap.keys()].sort();
 
     expect(mappedIconIds).toEqual(connectorIdsRequiringMappedIcons);
+  });
+
+  it.each(allSpecs)('%s does not declare events unless allowlisted', (_exportName, spec) => {
+    if (spec.events === undefined) {
+      return;
+    }
+    expect(SPECS_ALLOWED_EVENTS.has(spec.metadata.id)).toBe(true);
+  });
+
+  it.each(allSpecs)('%s eventIds match metadata.id when events present', (_exportName, spec) => {
+    if (spec.events === undefined) {
+      return;
+    }
+    for (const [eventKey, def] of Object.entries(spec.events.definitions)) {
+      expect(def.eventId).toBe(buildEventId(spec.metadata.id, eventKey));
+    }
   });
 });

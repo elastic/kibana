@@ -9,21 +9,21 @@
 
 /**
  * Connector eventId namespace — strips leading dot.
- * `.inboundWebhook` → `inboundWebhook`
+ * `.myConnector` → `myConnector`
  */
 export const connectorTypeToEventNamespace = (connectorTypeId: string): string =>
   connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
 
 /**
  * URL `{typeId}` → canonical actionTypeId for connector SO lookup.
- * `inboundWebhook` → `.inboundWebhook`
+ * `myConnector` → `.myConnector`
  */
 export const normalizeConnectorTypeId = (typeId: string): string =>
   typeId.startsWith('.') ? typeId : `.${typeId}`;
 
 /**
  * Public event id: `{connectorTypeIdWithoutDot}.{eventKey}`
- * e.g. `.inboundWebhook` + `received` → `inboundWebhook.received`
+ * e.g. `.myConnector` + `received` → `myConnector.received`
  */
 export const buildEventId = (connectorTypeId: string, eventKey: string): string =>
   `${connectorTypeToEventNamespace(connectorTypeId)}.${eventKey}`;
