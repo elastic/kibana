@@ -91,7 +91,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Fix terms formatting to preserve multi-field grouping and column format on round-trip [#282760]({{kib-pull}}282760).
 * Fix terms include and exclude values to preserve numbers instead of converting them to strings [#282752]({{kib-pull}}282752).
 * Fix a Lens panel failing to load after duplicating it and then modifying its ad hoc data view, caused by colliding data view IDs [#281786]({{kib-pull}}281786).
-* Fix a Visualization API error when reading back an XY chart with an annotation layer backed by an ad hoc data view [#281079]({{kib-pull}}281079).
+* Fix a Visualizations API error when reading back an XY chart with an annotation layer backed by an ad hoc data view [#281079]({{kib-pull}}281079).
 * Fix the Visualizations API dropping the custom name of an ad hoc, form-based data view on round-trip [#280546]({{kib-pull}}280546).
 * Fix Metric chart values colored by a value outside the configured range to use the default text color instead of blending into the background [#280816]({{kib-pull}}280816).
 * Disable **Fast mode** for Basic and Platinum licenses; approximate results in Discover and Dashboards require an Enterprise license [#279903]({{kib-pull}}279903).
