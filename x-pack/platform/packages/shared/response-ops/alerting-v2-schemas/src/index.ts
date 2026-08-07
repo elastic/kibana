@@ -20,15 +20,13 @@ export {
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
-<<<<<<< HEAD
 export * from './episode_attachment_schema';
-=======
->>>>>>> 5c326ccfe4381ff05f1d9c8d8797eb836a2ea8d7
 export * from './alert_episode_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
 export * from './policy_execution_history_schema';
 export * from './rule_execution_history_schema';
+export * from './rule_change_history_schema';
 export * from './matched_action_policies_response_schema';
 export * from './matcher_data_fields_schema';
 export * from './action_policy_tags_schema';

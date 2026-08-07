@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createRuleDataBaseSchema, createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  createRuleDataBaseSchema,
+  createActionPolicyDataSchema,
+  alertEventSeveritySchema,
+} from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
@@ -291,6 +295,8 @@ export const generateRuleOperationsDoc = (): string =>
     source: 'the `manage_rule` tool Zod schemas',
     schema: ruleOperationSchema,
   });
+
+export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 
 /**
  * Generates concise markdown documentation from the create-action-policy Zod schema.
