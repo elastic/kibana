@@ -8,6 +8,7 @@
  */
 
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
+import { DataStreamDataClientBundle } from './data_stream/data_stream_data_client_bundle';
 import { createUnsupportedStorageSourceError } from '../lib/validate_factory_params';
 import type { CreateDataClientDeps, DataClientBundle } from '../types';
 
@@ -15,6 +16,8 @@ export function createDataClientBundle(deps: CreateDataClientDeps): DataClientBu
   switch (deps.source) {
     case 'system_index':
       return new PlainIndexDataClientBundle(deps);
+    case 'data_stream':
+      return new DataStreamDataClientBundle(deps);
     default: {
       throw createUnsupportedStorageSourceError('DataClient', deps.source);
     }

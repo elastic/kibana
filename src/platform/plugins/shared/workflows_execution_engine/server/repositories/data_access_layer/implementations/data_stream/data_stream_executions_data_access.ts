@@ -17,9 +17,9 @@ import type {
   BulkItem,
   BulkRequestOptions,
   BulkResponse,
+  DataClient,
   DocumentVersionFields,
   ExecutionsCountRequest,
-  ExecutionsDataAccess,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionByIdsItem,
@@ -42,7 +42,7 @@ export interface DataStreamExecutionsDataAccessDeps {
 }
 
 export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
-  implements ExecutionsDataAccess<TExecution>
+  implements DataClient<TExecution>
 {
   private additionalIndexesToQuery: string[];
   private versionsCollector: Map<string, Required<DocumentVersionFields>> | undefined;
@@ -201,8 +201,6 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
             index: this.deps.dataStreamName,
           };
         } else if (items[idx]?.operation === 'update') {
-          // The update is not found, so we assign write index to the update
-          // so it will fail on the update operation
           resolved[idx] = {
             ...items[idx],
             index: writeIndex,
@@ -236,7 +234,6 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     }
     const idsWithResolvedIndexes: { id: string; index: string[] }[] = [];
 
-    // Create a map of the ids to undefined so we can track which ids are missing after the search
     const map: Map<string, GetExecutionByIdsItem<TExecution> | undefined> = ids.reduce(
       (acc, id) => {
         acc.set(typeof id === 'string' ? id : id.id, undefined);
@@ -247,7 +244,6 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
 
     let resolvedWriteIndex = writeIndex;
 
-    // Resolve the write index for the ids that don't have an index
     for (let i = 0; i < ids.length; i++) {
       const item = ids[i];
 
@@ -261,7 +257,6 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
       }
     }
 
-    // Get the executions by ids first
     const getByIdsResponse = await getExecutionsByIds({
       esClient: this.deps.esClient,
       ids: idsWithResolvedIndexes,
@@ -269,12 +264,10 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
       options,
     });
 
-    // Add the found executions to the map
     getByIdsResponse.items.forEach((item) => {
       map.set(item.document.id, item);
     });
 
-    // If there are any missing ids, search for them
     if (getByIdsResponse.missing.length) {
       const searchResponse = await this.search({
         size: getByIdsResponse.missing.length,
@@ -287,7 +280,6 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         _source_excludes: options?.sourceExcludes,
       });
 
-      // Add the found executions to the map
       searchResponse.hits.hits
         .filter((hit) => hit?._source)
         .forEach((hit) => {
@@ -302,7 +294,6 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         });
     }
 
-    // Return the executions by ids response in the provided ids order
     return ids.reduce(
       (acc, current) => {
         const id = typeof current === 'string' ? current : current.id;
