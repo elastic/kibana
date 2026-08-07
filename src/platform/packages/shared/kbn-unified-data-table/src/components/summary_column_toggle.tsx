@@ -12,7 +12,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const summaryToggleLabel = i18n.translate('unifiedDataTable.summaryColumnToggleLabel', {
-  defaultMessage: 'Show Summary column',
+  defaultMessage: 'Pin summary',
 });
 
 export const SummaryColumnToggle = ({

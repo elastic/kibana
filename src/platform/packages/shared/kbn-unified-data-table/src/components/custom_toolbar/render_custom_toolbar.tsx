@@ -50,30 +50,30 @@ export const internalRenderCustomToolbar = (
 
   const buttons = hasRoomForGridControls ? (
     <>
-      {leftSide && additionalControls && (
+      {leftSide && additionalControls ? (
         <EuiFlexItem grow={false}>
           <div>{additionalControls}</div>
         </EuiFlexItem>
-      )}
-      {columnControl && (
+      ) : null}
+      {columnControl ? (
         <EuiFlexItem grow={false}>
           <div className="unifiedDataTableToolbarControlButton" css={styles.controlButton}>
             {columnControl}
           </div>
         </EuiFlexItem>
-      )}
-      {columnSortingControl && (
+      ) : null}
+      {columnSortingControl ? (
         <EuiFlexItem grow={false}>
           <div className="unifiedDataTableToolbarControlButton" css={styles.controlButton}>
             {columnSortingControl}
           </div>
         </EuiFlexItem>
-      )}
-      {!leftSide && additionalControls && (
+      ) : null}
+      {!leftSide && additionalControls ? (
         <EuiFlexItem grow={false}>
           <div>{additionalControls}</div>
         </EuiFlexItem>
-      )}
+      ) : null}
     </>
   ) : null;
 
@@ -192,9 +192,12 @@ export const getRenderCustomToolbarWithElements = ({
 
 export const styles = {
   toolbar: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
-    }),
+    euiTheme
+      ? css({
+          padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+        })
+      : // required for unit tests to pass
+        undefined,
   controlButton: ({ euiTheme }: UseEuiTheme) =>
     euiTheme
       ? css({
@@ -210,7 +213,8 @@ export const styles = {
             },
           },
         })
-      : undefined, // for making unit tests pass
+      : // required for unit tests to pass
+        undefined,
   controlGroup: ({ euiTheme }: UseEuiTheme) =>
     euiTheme
       ? css({
@@ -252,20 +256,22 @@ export const styles = {
         })
       : undefined,
   controlGroupIconButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '.euiToolTipAnchor .euiButtonIcon': {
-        inlineSize: euiTheme.size.xl,
-        blockSize: euiTheme.size.xl,
-        borderRadius: 'inherit',
+    euiTheme
+      ? css({
+          '.euiToolTipAnchor .euiButtonIcon': {
+            inlineSize: euiTheme.size.xl,
+            blockSize: euiTheme.size.xl,
+            borderRadius: 'inherit',
 
-        // cancel default behavior
-        '&:hover, &:active, &:focus': {
-          background: 'transparent',
-          animation: 'none !important',
-          transform: 'none !important',
-        },
-      },
-    }),
+            // cancel default behavior
+            '&:hover, &:active, &:focus': {
+              background: 'transparent',
+              animation: 'none !important',
+              transform: 'none !important',
+            },
+          },
+        })
+      : undefined, // for making unit tests pass
   toolbarBottom: css({
     position: 'relative', // for placing a loading indicator correctly
   }),

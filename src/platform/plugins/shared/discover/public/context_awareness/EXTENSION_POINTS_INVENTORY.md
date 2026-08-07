@@ -30,7 +30,7 @@ columns: [
 ],
 ```
 
-`_source` is always treated as a valid profile column. Users can still toggle Summary from the table toolbar / Display options.
+`_source` is always treated as a valid profile column. Users can still pin Summary from the Columns popover.
 
 **Screenshot:**
 ![Default app state example](./docs/extension_points/get_default_app_state.png)
