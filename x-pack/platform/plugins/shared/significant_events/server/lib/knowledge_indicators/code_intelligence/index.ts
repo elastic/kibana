@@ -22,6 +22,9 @@ export {
 } from './code_change_state';
 export {
   identifyCodeFeaturesForService,
+  getCodeFeatureStreamPrefix,
+  getRepositoryFeatureStreamName,
+  getServiceFeatureStreamName,
   type IdentifyCodeForServiceOptions,
   type IdentifyCodeForServiceResult,
   type RepositoryServiceResult,
@@ -37,7 +40,12 @@ export {
   type LogStreamBinding,
 } from './link_ingesting_streams';
 export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
-export { extractOtelSignals } from './extract_otel_signals';
+export {
+  extractOtelSignals,
+  extractOtelSignalsResult,
+  type ExtractOtelSignalsOptions,
+  type ExtractOtelSignalsResult,
+} from './extract_otel_signals';
 export {
   generateOtelQueries,
   type OtelQueryCandidate,

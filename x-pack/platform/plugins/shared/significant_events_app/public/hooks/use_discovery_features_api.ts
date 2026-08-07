@@ -20,6 +20,7 @@ type CrossStreamOp =
   | { restore: { id: string } };
 
 type BuildOp = (feature: Feature) => CrossStreamOp;
+const BULK_FEATURE_OPERATION_LIMIT = 1000;
 
 interface DiscoveryFeaturesApi {
   deleteFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
@@ -45,14 +46,26 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
       if (features.length === 0) {
         return { succeededCount: 0, failedCount: 0 };
       }
-      const { succeeded, failed } = await significantEventsRepositoryClient.fetch(
-        'POST /internal/streams/features/_bulk',
-        {
-          signal: null,
-          params: { body: { operations: features.map(buildOp) } },
-        }
-      );
-      return { succeededCount: succeeded, failedCount: failed };
+      let succeededCount = 0;
+      let failedCount = 0;
+      for (let start = 0; start < features.length; start += BULK_FEATURE_OPERATION_LIMIT) {
+        const { succeeded, failed } = await significantEventsRepositoryClient.fetch(
+          'POST /internal/streams/features/_bulk',
+          {
+            signal: null,
+            params: {
+              body: {
+                operations: features
+                  .slice(start, start + BULK_FEATURE_OPERATION_LIMIT)
+                  .map(buildOp),
+              },
+            },
+          }
+        );
+        succeededCount += succeeded;
+        failedCount += failed;
+      }
+      return { succeededCount, failedCount };
     };
 
     return {

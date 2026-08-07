@@ -87,6 +87,9 @@ describe('resolveSignalStreams', () => {
       traceStreams: ['traces-generic.otel-default'],
       metricStreams: ['metrics-generic.otel-default'],
       logStreams: ['logs-generic.otel-default'],
+      traceStreamNames: ['traces.otel'],
+      metricStreamNames: ['metrics.otel'],
+      logStreamNames: ['logs.otel'],
     });
   });
 });

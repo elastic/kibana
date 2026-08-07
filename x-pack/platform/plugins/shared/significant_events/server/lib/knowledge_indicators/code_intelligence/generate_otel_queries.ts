@@ -89,6 +89,9 @@ export function generateOtelQueries({
   traceStreams,
   metricStreams,
   logStreams,
+  traceStreamNames = traceStreams,
+  metricStreamNames = metricStreams,
+  logStreamNames = logStreams,
 }: {
   serviceName: string;
   repository: string;
@@ -98,9 +101,13 @@ export function generateOtelQueries({
   traceStreams: string[];
   metricStreams: string[];
   logStreams: string[];
+  traceStreamNames?: string[];
+  metricStreamNames?: string[];
+  logStreamNames?: string[];
 }): GenerateOtelQueriesResult {
   const candidates: OtelQueryCandidate[] = [];
   const seen = new Set<string>();
+  const serviceFilter = `service.name == "${escapeString(serviceName)}"`;
   const add = ({
     esql,
     tier,
@@ -114,8 +121,9 @@ export function generateOtelQueries({
     source: OtelSignal;
     stream: string;
   }) => {
-    if (seen.has(esql)) return;
-    seen.add(esql);
+    const scopedEsql = esql.replace('| WHERE ', `| WHERE ${serviceFilter} AND `);
+    if (seen.has(scopedEsql)) return;
+    seen.add(scopedEsql);
     const evidence = `code: ${repository}@${gitSha}:${source.file}:${source.line} tier=${tier}`;
     candidates.push({
       tier,
@@ -123,14 +131,14 @@ export function generateOtelQueries({
       source,
       stream,
       query: {
-        id: uuidv5(`${serviceName}:${esql}`, OTEL_QUERY_NAMESPACE),
-        type: esql.includes('| STATS ') ? QUERY_TYPE_STATS : QUERY_TYPE_MATCH,
+        id: uuidv5(`${serviceName}:${scopedEsql}`, OTEL_QUERY_NAMESPACE),
+        type: scopedEsql.includes('| STATS ') ? QUERY_TYPE_STATS : QUERY_TYPE_MATCH,
         title: defaultTitle(serviceName, tier, field),
         description: `Predictive typed OTel query for ${tier.replace(
           /_/g,
           ' '
         )} in service "${serviceName}".`,
-        esql: { query: esql },
+        esql: { query: scopedEsql },
         severity_score: severityForTier(tier),
         evidence: [evidence],
       },
@@ -150,7 +158,7 @@ export function generateOtelQueries({
             tier: signal.kind,
             field: 'status.code',
             source: signal,
-            stream: traceStreams[0],
+            stream: traceStreamNames[0],
           });
           add({
             esql: `FROM ${sources(
@@ -159,7 +167,7 @@ export function generateOtelQueries({
             tier: signal.kind,
             field: 'duration',
             source: signal,
-            stream: traceStreams[0],
+            stream: traceStreamNames[0],
           });
         }
         break;
@@ -172,7 +180,7 @@ export function generateOtelQueries({
             tier: signal.kind,
             field: 'attributes.exception.type',
             source: signal,
-            stream: logStreams[0],
+            stream: logStreamNames[0],
           });
         }
         break;
@@ -185,7 +193,7 @@ export function generateOtelQueries({
             tier: signal.kind,
             field: signal.value!,
             source: signal,
-            stream: traceStreams[0],
+            stream: traceStreamNames[0],
           });
           add({
             esql: `FROM ${sources(
@@ -194,7 +202,7 @@ export function generateOtelQueries({
             tier: signal.kind,
             field: signal.value!,
             source: signal,
-            stream: traceStreams[0],
+            stream: traceStreamNames[0],
           });
         }
         break;
@@ -205,7 +213,7 @@ export function generateOtelQueries({
             tier: signal.kind,
             field: signal.value!,
             source: signal,
-            stream: logStreams[0],
+            stream: logStreamNames[0],
           });
         }
         break;
@@ -224,7 +232,7 @@ export function generateOtelQueries({
             traceStreams
           )} | WHERE ${field} IS NOT NULL | STATS c = COUNT(*) BY ${field}`;
         }
-        add({ esql, tier: signal.kind, field, source: signal, stream: traceStreams[0] });
+        add({ esql, tier: signal.kind, field, source: signal, stream: traceStreamNames[0] });
         break;
       }
       case 'metric_name': {
@@ -239,7 +247,7 @@ export function generateOtelQueries({
           tier: signal.kind,
           field,
           source: signal,
-          stream: metricStreams[0],
+          stream: metricStreamNames[0],
         });
         break;
       }
@@ -263,7 +271,7 @@ export function generateOtelQueries({
       tier: 'instrumented_error_status',
       field: 'status.code',
       source,
-      stream: traceStreams[0],
+      stream: traceStreamNames[0],
     });
     add({
       esql: `FROM ${sources(
@@ -272,7 +280,7 @@ export function generateOtelQueries({
       tier: 'grpc_failure',
       field: 'attributes.rpc.grpc.status_code',
       source,
-      stream: traceStreams[0],
+      stream: traceStreamNames[0],
     });
   }
 

@@ -95,7 +95,7 @@ export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
-  pluginId: 'significant_events',
+  pluginId: 'significantEvents',
   version: 9,
   billable: false,
   yaml: CODE_EXTRACTION_YAML,

@@ -196,22 +196,37 @@ export function extractOtelSignalsFromWindows(windows: OtelSourceWindow[]): Otel
   return signals;
 }
 
-/** Extracts typed OTel instrumentation signals from one indexed service. Never throws. */
-export async function extractOtelSignals({
-  esClient,
-  repository,
-  gitSha,
-  serviceRoot,
-  logger,
-  perPatternLimit = 1000,
-}: {
+export interface ExtractOtelSignalsOptions {
   esClient: ElasticsearchClient;
   repository: string;
   gitSha: string;
   serviceRoot: string;
   logger: Logger;
   perPatternLimit?: number;
-}): Promise<OtelSignal[]> {
+}
+
+export interface ExtractOtelSignalsResult {
+  signals: OtelSignal[];
+  /** True only when source discovery failed rather than finding no signals. */
+  failed: boolean;
+}
+
+/** Extracts typed OTel instrumentation signals from one indexed service. Never throws. */
+export async function extractOtelSignals(
+  options: ExtractOtelSignalsOptions
+): Promise<OtelSignal[]> {
+  return (await extractOtelSignalsResult(options)).signals;
+}
+
+/** Preserves source-discovery failures so the OTel route never treats them as an empty gate. */
+export async function extractOtelSignalsResult({
+  esClient,
+  repository,
+  gitSha,
+  serviceRoot,
+  logger,
+  perPatternLimit = 1000,
+}: ExtractOtelSignalsOptions): Promise<ExtractOtelSignalsResult> {
   const { org, repo } = splitRepository(repository);
   const root = serviceRoot.replace(/^\.[/\\]?$/, '').replace(/\/+$/, '');
   const hitsByFile = new Map<string, Set<number>>();
@@ -268,13 +283,13 @@ export async function extractOtelSignals({
         });
       }
     }
-    return extractOtelSignalsFromWindows(sourceWindows);
+    return { signals: extractOtelSignalsFromWindows(sourceWindows), failed: false };
   } catch (error) {
     logger.warn(
       `otel_extraction: failed for "${repository}" @ "${root}": ${
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return [];
+    return { signals: [], failed: true };
   }
 }

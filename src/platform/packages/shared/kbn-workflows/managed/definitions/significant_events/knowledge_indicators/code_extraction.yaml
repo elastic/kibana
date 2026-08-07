@@ -13,8 +13,8 @@
 # set up" (the agent itself is no longer called by this workflow; re-pointing the
 # gate at the index is a follow-up).
 #
-# It runs manually and on a schedule; the fingerprint noop guard keeps unchanged
-# runs cheap.
+# It runs manually in a concrete user space; the fingerprint noop guard keeps
+# unchanged runs cheap.
 
 version: '1'
 name: 'Code KI Extraction'
@@ -29,13 +29,12 @@ tags:
 settings:
   timeout: '60m'
   concurrency:
-    key: significant-events-code-ki-extraction
+    # The workflow definition is managed globally but each run has a concrete
+    # execution space. Keep concurrent tenant runs independent.
+    key: 'significant-events-code-ki-extraction-{{ workflow.spaceId }}'
     strategy: drop
     max: 1
 triggers:
-  - type: scheduled
-    with:
-      every: '1h'
   - type: manual
     inputs:
       - name: agentConnectorId
@@ -48,7 +47,7 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/internal/streams/code_intelligence/_discover_services'
+      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_discover_services'
       headers:
         x-elastic-internal-origin: 'kibana'
       body: {}
@@ -72,7 +71,7 @@ steps:
             type: kibana.request
             with:
               method: POST
-              path: '/internal/streams/code_intelligence/_identify_service'
+              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_service'
               headers:
                 x-elastic-internal-origin: 'kibana'
               body:
@@ -96,13 +95,13 @@ steps:
         foreach: '${{ steps.discover_services.output.services | where: "hasOtel", true }}'
         max-concurrency: 1
         iteration-on-failure:
-          continue: true
+          continue: false
         steps:
           - name: identify_otel_signals
             type: kibana.request
             with:
               method: POST
-              path: '/internal/streams/code_intelligence/_identify_otel_signals'
+              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_otel_signals'
               headers:
                 x-elastic-internal-origin: 'kibana'
                 elastic-api-version: '1'

@@ -67,6 +67,8 @@ interface Props {
   pageIndex?: number;
   pageCount?: number;
   onSelectPage?: (pageIndex: number) => void;
+  canManage?: boolean;
+  onDataChanged?: () => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
@@ -78,6 +80,8 @@ export function KnowledgeIndicatorDetailsFlyout({
   pageIndex,
   pageCount,
   onSelectPage,
+  canManage = true,
+  onDataChanged,
 }: Props) {
   const {
     dependencies: {
@@ -119,11 +123,23 @@ export function KnowledgeIndicatorDetailsFlyout({
     restoreFeature,
     promoteQuery,
     isMutating: isActionMutating,
-  } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
+  } = useKnowledgeIndicatorActions({
+    streamName,
+    onSuccess: () => {
+      onClose();
+      onDataChanged?.();
+    },
+  });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
-    useStreamKnowledgeIndicatorsBulkDelete({ streamName, onSuccess: onClose });
+    useStreamKnowledgeIndicatorsBulkDelete({
+      streamName,
+      onSuccess: () => {
+        onClose();
+        onDataChanged?.();
+      },
+    });
 
   const { demoteRules, isPending: isDemoting } = useRulesDemote({ onSuccess: onClose });
 
@@ -161,7 +177,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [openFeatureInDiscover]);
 
   const featureActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'feature') {
+    if (!canManage || knowledgeIndicator.kind !== 'feature') {
       return [];
     }
 
@@ -174,7 +190,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           <EuiContextMenuItem
             key="feature-restore"
             icon="eye"
-            disabled={isMutating}
+            disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
               restoreFeature(knowledgeIndicator.feature.uuid);
@@ -188,7 +204,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           <EuiContextMenuItem
             key="feature-exclude"
             icon="eyeClosed"
-            disabled={isMutating}
+            disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
               excludeFeature(knowledgeIndicator.feature.uuid);
@@ -205,7 +221,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         key="feature-delete"
         icon="trash"
         color="danger"
-        disabled={isMutating}
+        disabled={isMutating || blocksActivity}
         onClick={() => {
           setIsActionsMenuOpen(false);
           setShowDeleteModal(true);
@@ -216,10 +232,10 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
+  }, [blocksActivity, canManage, excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
 
   const queryActionItems = useMemo(() => {
-    if (knowledgeIndicator.kind !== 'query') {
+    if (!canManage || knowledgeIndicator.kind !== 'query') {
       return [];
     }
 
@@ -249,7 +265,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         key="query-delete"
         icon="trash"
         color="danger"
-        disabled={isMutating}
+        disabled={isMutating || blocksActivity}
         onClick={() => {
           setIsActionsMenuOpen(false);
           setShowDeleteModal(true);
@@ -258,7 +274,14 @@ export function KnowledgeIndicatorDetailsFlyout({
         {DELETE_LABEL}
       </EuiContextMenuItem>,
     ];
-  }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
+  }, [
+    activityBlockTooltip,
+    blocksActivity,
+    canManage,
+    isMutating,
+    knowledgeIndicator,
+    promoteQuery,
+  ]);
 
   const title =
     knowledgeIndicator.kind === 'feature'
@@ -306,7 +329,7 @@ export function KnowledgeIndicatorDetailsFlyout({
                     iconType="boxesVertical"
                     aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
                     isLoading={isMutating}
-                    isDisabled={isMutating}
+                    isDisabled={isMutating || blocksActivity}
                     onClick={() => setIsActionsMenuOpen((open) => !open)}
                   />
                 </EuiToolTip>

@@ -133,6 +133,7 @@ export class KnowledgeIndicatorClient {
       ruleIds?: string[];
       minSeverityScore?: number;
       includeExpired?: boolean;
+      limit?: number;
     }
   ): Promise<QueryLink[]> {
     return this.reader.getQueryLinks(streamNames, filters);

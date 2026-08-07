@@ -35,11 +35,13 @@ import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
+import { CodeIntelligenceTab } from './components/code_intelligence_tab';
 
 const significantEventsTabs = [
   'streams',
   'knowledge_indicators',
   'queries',
+  'code_intelligence',
   'detections',
   'significant_events',
   'memory',
@@ -185,6 +187,14 @@ export function SignificantEventsPage() {
         isSelected: tab === 'queries',
       },
 
+      {
+        id: 'code_intelligence',
+        label: i18n.translate('xpack.significantEventsApp.codeIntelligenceTab', {
+          defaultMessage: 'Code Intelligence',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'code_intelligence' } }),
+        isSelected: tab === 'code_intelligence',
+      },
       {
         id: 'detections',
         label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
@@ -354,6 +364,7 @@ export function SignificantEventsPage() {
             {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}
+            {tab === 'code_intelligence' && <CodeIntelligenceTab />}
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'significant_events' && <SignificantEventsTab />}
             {tab === 'memory' && <MemoryTab />}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/logging';
 import { CODE_ANALYSIS_FEATURE_TYPE, type FeatureUpsert } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
@@ -35,6 +36,8 @@ export interface IdentifyCodeForServiceOptions {
   iacSignals?: IacSignal[];
   /** The `service.name` the agent resolved for this deployable service. */
   serviceName: string;
+  /** Space that owns the code-only pseudo-stream feature records. */
+  spaceId?: string;
   /** Primary language reported by the agent, if any. */
   language?: string;
   /** Source files the agent cited as evidence for this service, if any. */
@@ -42,6 +45,8 @@ export interface IdentifyCodeForServiceOptions {
   kiClient: KnowledgeIndicatorClient;
   logger: Logger;
   runId: string;
+  /** Called immediately before every write so a paused run cannot continue mutating. */
+  beforeWrite?: () => Promise<void>;
 }
 
 /**
@@ -54,16 +59,20 @@ export async function identifyCodeFeaturesForService({
   languageHistogram = [],
   iacSignals = [],
   serviceName,
+  spaceId = 'default',
   language,
   evidence,
   kiClient,
   logger,
   runId,
+  beforeWrite,
 }: IdentifyCodeForServiceOptions): Promise<IdentifyCodeForServiceResult> {
   const classification = classifyRepository(languageHistogram, iacSignals);
   const persisted: FeatureUpsert[] = [];
+  const repositoryStreamName = getRepositoryFeatureStreamName(spaceId, repository);
+  const serviceStreamName = getServiceFeatureStreamName(spaceId, repository, serviceName);
 
-  const { hits: existingRepoFeatures } = await kiClient.getFeatures(repository, {
+  const { hits: existingRepoFeatures } = await kiClient.getFeatures(repositoryStreamName, {
     type: [CODE_ANALYSIS_FEATURE_TYPE],
     includeExcluded: true,
   });
@@ -73,6 +82,7 @@ export async function identifyCodeFeaturesForService({
       repository,
       gitSha,
       classification,
+      streamName: repositoryStreamName,
       includePrimaryLanguage: !language,
     });
     const reconciled = reconcileCodeFeatures({
@@ -80,15 +90,16 @@ export async function identifyCodeFeaturesForService({
       existing: existingRepoFeatures,
       runId,
     });
+    await beforeWrite?.();
     await kiClient.bulk(
-      repository,
+      repositoryStreamName,
       reconciled.map((feature) => ({ index: { feature } }))
     );
     persisted.push(...reconciled);
   }
 
   if (language) {
-    const { hits: existingServiceFeatures } = await kiClient.getFeatures(serviceName, {
+    const { hits: existingServiceFeatures } = await kiClient.getFeatures(serviceStreamName, {
       type: [CODE_ANALYSIS_FEATURE_TYPE],
       includeExcluded: true,
     });
@@ -96,6 +107,7 @@ export async function identifyCodeFeaturesForService({
       serviceName,
       repository,
       gitSha,
+      streamName: serviceStreamName,
       language,
       citations: evidence,
     });
@@ -104,8 +116,9 @@ export async function identifyCodeFeaturesForService({
       existing: existingServiceFeatures,
       runId,
     });
+    await beforeWrite?.();
     await kiClient.bulk(
-      serviceName,
+      serviceStreamName,
       reconciled.map((feature) => ({ index: { feature } }))
     );
     persisted.push(...reconciled);
@@ -153,22 +166,40 @@ export function formatCitations(
   return lines.length > 0 ? lines : undefined;
 }
 
+const virtualKey = (value: string): string =>
+  createHash('sha256').update(value).digest('base64url');
+
+export const getCodeFeatureStreamPrefix = (spaceId: string): string =>
+  `code:${virtualKey(spaceId)}`;
+
+export const getRepositoryFeatureStreamName = (spaceId: string, repository: string): string =>
+  `${getCodeFeatureStreamPrefix(spaceId)}:repository:${virtualKey(repository)}`;
+
+export const getServiceFeatureStreamName = (
+  spaceId: string,
+  repository: string,
+  serviceName: string
+): string =>
+  `${getCodeFeatureStreamPrefix(spaceId)}:service:${virtualKey(`${repository}:${serviceName}`)}`;
+
 const buildRepositoryFeatures = ({
   repository,
   gitSha,
   classification,
+  streamName,
   includePrimaryLanguage,
 }: {
   repository: string;
   gitSha: string;
   classification: RepoClassification;
+  streamName: string;
   includePrimaryLanguage: boolean;
 }): FeatureUpsert[] => {
   const ref = `${repository}@${gitSha}`;
   const features: FeatureUpsert[] = [
     {
       id: CODE_FEATURE_SUBTYPE_REPO_TYPE,
-      stream_name: repository,
+      stream_name: streamName,
       type: CODE_ANALYSIS_FEATURE_TYPE,
       subtype: CODE_FEATURE_SUBTYPE_REPO_TYPE,
       title: REPO_TYPE_TITLES[classification.repoType],
@@ -187,7 +218,7 @@ const buildRepositoryFeatures = ({
   if (includePrimaryLanguage && classification.primaryLanguage) {
     features.push({
       id: CODE_FEATURE_SUBTYPE_LANGUAGE,
-      stream_name: repository,
+      stream_name: streamName,
       type: CODE_ANALYSIS_FEATURE_TYPE,
       subtype: CODE_FEATURE_SUBTYPE_LANGUAGE,
       title: classification.primaryLanguage,
@@ -206,12 +237,14 @@ const buildServiceLanguageFeature = ({
   serviceName,
   repository,
   gitSha,
+  streamName,
   language,
   citations,
 }: {
   serviceName: string;
   repository: string;
   gitSha: string;
+  streamName: string;
   language: string;
   citations?: CodeEvidenceCitation[];
 }): FeatureUpsert[] => {
@@ -219,7 +252,7 @@ const buildServiceLanguageFeature = ({
   return [
     {
       id: CODE_FEATURE_SUBTYPE_LANGUAGE,
-      stream_name: serviceName,
+      stream_name: streamName,
       type: CODE_ANALYSIS_FEATURE_TYPE,
       subtype: CODE_FEATURE_SUBTYPE_LANGUAGE,
       title: language,

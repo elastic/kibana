@@ -6,10 +6,14 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Feature, FeatureUpsert } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, type Feature, type FeatureUpsert } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { CODE_FEATURE_SUBTYPE_LANGUAGE, CODE_FEATURE_SUBTYPE_REPO_TYPE } from './constants';
-import { identifyCodeFeaturesForService } from './identify_code_features';
+import {
+  getRepositoryFeatureStreamName,
+  getServiceFeatureStreamName,
+  identifyCodeFeaturesForService,
+} from './identify_code_features';
 
 const REPO = 'acme/checkout';
 
@@ -28,6 +32,11 @@ const createKiClient = (existing: Feature[]) => {
 };
 
 describe('identifyCodeFeaturesForService (repo-level vs service-level keying)', () => {
+  it('uses bounded virtual stream names for maximum accepted identifiers', () => {
+    const value = 'x'.repeat(MAX_ID_LENGTH);
+    expect(getRepositoryFeatureStreamName(value, value)).toHaveLength(103);
+    expect(getServiceFeatureStreamName(value, value, value)).toHaveLength(100);
+  });
   it('keys repo_type by the repository (not the service) and per-service language by the service', async () => {
     const { kiClient, bulk } = createKiClient([]);
     const result = await identifyCodeFeaturesForService({
@@ -44,14 +53,16 @@ describe('identifyCodeFeaturesForService (repo-level vs service-level keying)', 
     expect(result.status).toBe('updated');
     expect(result.streamName).toBe('cartservice');
 
+    const repositoryStreamName = getRepositoryFeatureStreamName('default', REPO);
+    const serviceStreamName = getServiceFeatureStreamName('default', REPO, 'cartservice');
     const byStream = Object.fromEntries(bulk.mock.calls.map((call) => [call[0], call[1]]));
-    expect(Object.keys(byStream).sort()).toEqual([REPO, 'cartservice'].sort());
+    expect(Object.keys(byStream).sort()).toEqual([repositoryStreamName, serviceStreamName].sort());
 
     // repo_type is written to the repository stream so it collapses to one KI
     // per repository regardless of how many services reference it.
-    const repoOps = byStream[REPO];
+    const repoOps = byStream[repositoryStreamName];
     expect(repoOps.map((op) => op.index.feature.subtype)).toContain(CODE_FEATURE_SUBTYPE_REPO_TYPE);
-    expect(repoOps.every((op) => op.index.feature.stream_name === REPO)).toBe(true);
+    expect(repoOps.every((op) => op.index.feature.stream_name === repositoryStreamName)).toBe(true);
     // With an agent-provided per-service language, the repo-wide language is not
     // emitted at the repository level.
     expect(repoOps.map((op) => op.index.feature.subtype)).not.toContain(
@@ -59,12 +70,12 @@ describe('identifyCodeFeaturesForService (repo-level vs service-level keying)', 
     );
 
     // The service-specific language is keyed by the service stream.
-    const serviceOps = byStream.cartservice;
+    const serviceOps = byStream[serviceStreamName];
     expect(serviceOps.map((op) => op.index.feature.subtype)).toEqual([
       CODE_FEATURE_SUBTYPE_LANGUAGE,
     ]);
     expect(serviceOps[0].index.feature.properties.language).toBe('go');
-    expect(serviceOps[0].index.feature.stream_name).toBe('cartservice');
+    expect(serviceOps[0].index.feature.stream_name).toBe(serviceStreamName);
   });
 
   it('writes the repo-wide primary language at the repository level when the agent gives none', async () => {
@@ -81,11 +92,12 @@ describe('identifyCodeFeaturesForService (repo-level vs service-level keying)', 
 
     // Only the repository stream is written (repo_type + primary language); no
     // per-service code_analysis feature is created.
-    expect(bulk.mock.calls.map((call) => call[0])).toEqual([REPO]);
+    const repositoryStreamName = getRepositoryFeatureStreamName('default', REPO);
+    expect(bulk.mock.calls.map((call) => call[0])).toEqual([repositoryStreamName]);
     const repoOps = bulk.mock.calls[0][1];
     expect(repoOps.map((op) => op.index.feature.subtype).sort()).toEqual(
       [CODE_FEATURE_SUBTYPE_LANGUAGE, CODE_FEATURE_SUBTYPE_REPO_TYPE].sort()
     );
-    expect(repoOps.every((op) => op.index.feature.stream_name === REPO)).toBe(true);
+    expect(repoOps.every((op) => op.index.feature.stream_name === repositoryStreamName)).toBe(true);
   });
 });

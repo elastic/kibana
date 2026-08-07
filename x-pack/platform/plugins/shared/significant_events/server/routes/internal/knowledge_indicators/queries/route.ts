@@ -45,6 +45,7 @@ import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators'
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
+const BULK_DELETE_MAX_QUERY_IDS = 1000;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
@@ -214,7 +215,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
+      queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(BULK_DELETE_MAX_QUERY_IDS),
     }),
   }),
   handler: async ({
@@ -223,30 +224,33 @@ const bulkDeleteQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    // Intentionally not guarded by assertNotPaused: bulk delete is teardown
-    // (removes queries/rules), which stays allowed while paused — same as
-    // disabling scheduled discovery / continuous onboarding.
+    await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
     // Bulk delete must cover both backed and unbacked queries; the default 'exclude'
     // filter would skip unbacked (draft) ones. includeExpired: explicit-id action, so
     // an expired query must stay reachable.
-    const queryLinks = await kiClient.getQueryLinks([], {
-      queryIds: params.body.queryIds,
-      ruleUnbacked: 'include',
-      includeExpired: true,
-    });
+    const accessibleStreamNames = (await streamsClient.listStreams()).map((stream) => stream.name);
+    const queryLinks =
+      accessibleStreamNames.length > 0
+        ? await kiClient.getQueryLinks(accessibleStreamNames, {
+            queryIds: params.body.queryIds,
+            ruleUnbacked: 'include',
+            includeExpired: true,
+          })
+        : [];
 
     // Count requested IDs that getQueryLinks did not find — these are idempotent
     // no-ops (already gone / never existed) and reported as `skipped`, not failed.
     const foundIds = new Set(queryLinks.map((link) => link.query.id));
-    const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
+    let skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
 
     // Capture backed rule IDs per stream to log on mid-flight failure.
     const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
@@ -292,9 +296,11 @@ const bulkDeleteQueriesRoute = createServerRoute({
         failed += queryIds.length;
         continue;
       }
+      await assertNotPaused({ maintenanceService, request });
       try {
-        await kiClient.deleteQueries(definition, queryIds);
-        succeeded += queryIds.length;
+        const { deleted } = await kiClient.deleteQueries(definition, queryIds);
+        succeeded += deleted;
+        skipped += queryIds.length - deleted;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const orphanContext =

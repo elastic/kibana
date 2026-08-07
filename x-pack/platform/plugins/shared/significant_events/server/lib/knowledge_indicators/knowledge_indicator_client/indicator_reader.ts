@@ -182,6 +182,7 @@ export class IndicatorReader {
       ruleIds?: string[];
       minSeverityScore?: number;
       includeExpired?: boolean;
+      limit?: number;
     }
   ): Promise<QueryLink[]> {
     const minSeverityFilter =
@@ -210,7 +211,12 @@ export class IndicatorReader {
       minSeverityFilter
     );
 
-    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
+    const docs = await this.revisionReader.fetchLatestRevisions(
+      where,
+      postGroupingWhere,
+      undefined,
+      filters?.limit
+    );
     return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
   }
 

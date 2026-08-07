@@ -117,7 +117,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     execution,
     workflowId,
   }: {
-    execution: WorkflowExecutionListItemDto;
+    execution: Pick<WorkflowExecutionListItemDto, 'id' | 'status' | 'error' | 'workflowId'>;
     workflowId: string;
   }): SignificantEventsWorkflowStatusResult {
     const status = WorkflowExecutionService.classifyExecutionStatus(execution.status);
@@ -135,19 +135,30 @@ export class WorkflowExecutionService<TInput extends object = {}> {
 
   async getStatus({
     spaceId,
+    executionId,
     queryParams,
   }: {
     spaceId: string;
+    /** When supplied, read this exact execution rather than the latest one. */
+    executionId?: string;
     queryParams?: WorkflowExecutionQueryParams;
   }): Promise<SignificantEventsWorkflowStatusResult> {
-    const lastExecution = await this.getLastExecution(spaceId, queryParams);
+    const execution = executionId
+      ? await this.getExecution({ id: executionId, spaceId })
+      : await this.getLastExecution(spaceId, queryParams);
 
-    if (!lastExecution) {
+    if (!execution) {
+      if (executionId) {
+        throw new Error(`Workflow execution ${executionId} was not found.`);
+      }
       return { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };
+    }
+    if (executionId && execution.workflowId !== this.workflowId) {
+      throw new Error(`Workflow execution ${executionId} was not found.`);
     }
 
     return WorkflowExecutionService.toStatusResult({
-      execution: lastExecution,
+      execution,
       workflowId: this.workflowId,
     });
   }
@@ -156,6 +167,11 @@ export class WorkflowExecutionService<TInput extends object = {}> {
    * `TInput` is cast to `Record<string, unknown>` at the wire boundary — it
    * enforces the input shape for callers but not the underlying management API call.
    */
+  async isInstalled(): Promise<boolean> {
+    const workflow = await this.managementApi.getWorkflow(this.workflowId, this.workflowSpaceId);
+    return Boolean(workflow?.definition);
+  }
+
   async execute({
     executionSpaceId,
     inputs,

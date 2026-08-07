@@ -31,15 +31,16 @@ const generate = (signals: OtelSignal[], counts = EMPTY_OTEL_SIGNAL_COUNTS) =>
 
 const esql = (signals: OtelSignal[]) =>
   generate(signals).queries.map(({ query }) => query.esql.query);
+const SERVICE_FILTER = 'service.name == "checkout" AND ';
 
 describe('generateOtelQueries', () => {
   it('maps error and exception tiers to the correct stream families', () => {
     const queries = esql([signal({ kind: 'error_status' }), signal({ kind: 'record_exception' })]);
     expect(queries).toContain(
-      'FROM traces-generic.otel-default | WHERE status.code == "Error" | STATS c = COUNT(*) BY name'
+      `FROM traces-generic.otel-default | WHERE ${SERVICE_FILTER}status.code == "Error" | STATS c = COUNT(*) BY name`
     );
     expect(queries).toContain(
-      'FROM logs-generic.otel-default | WHERE attributes.exception.type IS NOT NULL | STATS c = COUNT(*) BY attributes.exception.type'
+      `FROM logs-generic.otel-default | WHERE ${SERVICE_FILTER}attributes.exception.type IS NOT NULL | STATS c = COUNT(*) BY attributes.exception.type`
     );
     expect(queries.find((query) => query.includes('exception.type'))).not.toContain('traces-');
   });
@@ -52,10 +53,12 @@ describe('generateOtelQueries', () => {
     ]);
     expect(queries).toEqual(
       expect.arrayContaining([
-        expect.stringContaining('WHERE name == "checkout" | STATS total = COUNT(*)'),
-        'FROM logs-generic.otel-default | WHERE event_name == "charged"',
+        expect.stringContaining(
+          `WHERE ${SERVICE_FILTER}name == "checkout" | STATS total = COUNT(*)`
+        ),
+        `FROM logs-generic.otel-default | WHERE ${SERVICE_FILTER}event_name == "charged"`,
         // metrics-* is TSDB: TS source + RATE() for a source counter (represents the code)
-        'TS metrics-generic.otel-default | WHERE `metrics.checkout.requests` IS NOT NULL | STATS rate = SUM(RATE(`metrics.checkout.requests`))',
+        `TS metrics-generic.otel-default | WHERE ${SERVICE_FILTER}\`metrics.checkout.requests\` IS NOT NULL | STATS rate = SUM(RATE(\`metrics.checkout.requests\`))`,
       ])
     );
   });
@@ -68,19 +71,19 @@ describe('generateOtelQueries', () => {
   ] as const)('emits the code-derived TS aggregation for %s instruments', (metricKind, shape) => {
     const queries = esql([signal({ kind: 'metric_name', value: 'm', metricKind })]);
     expect(queries[0]).toBe(
-      `TS metrics-generic.otel-default | WHERE \`metrics.m\` IS NOT NULL | ${shape}`
+      `TS metrics-generic.otel-default | WHERE ${SERVICE_FILTER}\`metrics.m\` IS NOT NULL | ${shape}`
     );
   });
 
   it('defaults unknown-kind metrics to the gauge-safe level aggregation', () => {
     const queries = esql([signal({ kind: 'metric_name', value: 'm' })]);
     expect(queries[0]).toBe(
-      'TS metrics-generic.otel-default | WHERE `metrics.m` IS NOT NULL | STATS avg = AVG(AVG_OVER_TIME(`metrics.m`))'
+      `TS metrics-generic.otel-default | WHERE ${SERVICE_FILTER}\`metrics.m\` IS NOT NULL | STATS avg = AVG(AVG_OVER_TIME(\`metrics.m\`))`
     );
   });
 
   it.each([
-    ['bool', 'WHERE `attributes.app.amount` == false'],
+    ['bool', `WHERE ${SERVICE_FILTER}\`attributes.app.amount\` == false`],
     [
       'number',
       'STATS avg = AVG(`attributes.app.amount`), max = MAX(`attributes.app.amount`), p95 = PERCENTILE(`attributes.app.amount`, 95)',

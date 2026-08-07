@@ -7,6 +7,7 @@
 
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
@@ -31,9 +32,10 @@ describe('managed_workflow_targets registry', () => {
     }
   });
 
-  it('keeps core + investigation + memory as the global maintenance set', () => {
+  it('includes code extraction in the global maintenance set', () => {
     expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([
       ...GLOBAL_CORE_WORKFLOW_IDS,
+      SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       ...MEMORY_WORKFLOW_IDS,
     ]);

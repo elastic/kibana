@@ -31,9 +31,14 @@ export interface StreamSamplingSource {
  * field, so the message is the join signal.
  */
 export interface SignalStreams {
+  /** Index or data-stream sources used in generated ES|QL. */
   traceStreams: string[];
   metricStreams: string[];
   logStreams: string[];
+  /** Owning Stream definition names used to store and authorize each KI. */
+  traceStreamNames: string[];
+  metricStreamNames: string[];
+  logStreamNames: string[];
 }
 
 export interface LogStreamBinding {
@@ -179,10 +184,13 @@ export async function resolveSignalStreams({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<SignalStreams> {
-  const hasDocs = async ({ name, index }: StreamSamplingSource): Promise<string | undefined> => {
+  const hasDocs = async (
+    stream: StreamSamplingSource
+  ): Promise<StreamSamplingSource | undefined> => {
+    const { name, index } = stream;
     try {
       const { count } = await esClient.count({ index, ignore_unavailable: true });
-      return count > 0 ? index : undefined;
+      return count > 0 ? stream : undefined;
     } catch (error) {
       logger.debug(
         `code_features: signal-stream probe failed for "${name}": ${
@@ -212,13 +220,18 @@ export async function resolveSignalStreams({
       logger,
     }),
   ]);
+  const resolvedTraces = traces.filter((stream): stream is StreamSamplingSource => Boolean(stream));
+  const resolvedMetrics = metrics.filter((stream): stream is StreamSamplingSource =>
+    Boolean(stream)
+  );
+  const resolvedLogBindings = logBindings.filter((binding) => binding.hasDocs);
   return {
-    traceStreams: traces.filter((stream): stream is string => Boolean(stream)).sort(),
-    metricStreams: metrics.filter((stream): stream is string => Boolean(stream)).sort(),
-    logStreams: logBindings
-      .filter((binding) => binding.hasDocs)
-      .map(({ index }) => index)
-      .sort(),
+    traceStreams: resolvedTraces.map(({ index }) => index).sort(),
+    metricStreams: resolvedMetrics.map(({ index }) => index).sort(),
+    logStreams: resolvedLogBindings.map(({ index }) => index).sort(),
+    traceStreamNames: resolvedTraces.map(({ name }) => name).sort(),
+    metricStreamNames: resolvedMetrics.map(({ name }) => name).sort(),
+    logStreamNames: resolvedLogBindings.map(({ stream }) => stream).sort(),
   };
 }
 

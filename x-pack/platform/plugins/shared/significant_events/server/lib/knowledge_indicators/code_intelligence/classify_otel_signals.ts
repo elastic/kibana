@@ -94,7 +94,7 @@ export async function classifyOtelSignals({
     }
   }
 
-  return candidates.flatMap((candidate, id) => {
+  const classified = candidates.flatMap((candidate, id) => {
     const decision = decisions.get(id);
     if (decision?.keep === false) return [];
     const score = decision?.severity_score;
@@ -113,4 +113,12 @@ export async function classifyOtelSignals({
       },
     ];
   });
+
+  if (classified.length === 0 && candidates.length > 0) {
+    logger.warn(
+      'classify_otel_signals: classifier dropped every candidate; keeping deterministic queries'
+    );
+    return candidates;
+  }
+  return classified;
 }

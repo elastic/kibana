@@ -58,15 +58,7 @@ export function useKnowledgeIndicatorsBulkDelete({
 
       const queriesPromise: Promise<BulkOperationResult> =
         queryIds.length > 0
-          ? significantEventsRepositoryClient
-              .fetch('POST /internal/streams/queries/_bulk_delete', {
-                signal: null,
-                params: { body: { queryIds } },
-              })
-              .then(({ succeeded, failed }) => ({
-                succeededCount: succeeded,
-                failedCount: failed,
-              }))
+          ? deleteQueriesInBatches({ significantEventsRepositoryClient, queryIds })
           : Promise.resolve({ succeededCount: 0, failedCount: 0 });
 
       const [featuresSettled, queriesSettled] = await Promise.allSettled([
@@ -126,6 +118,39 @@ export function useKnowledgeIndicatorsBulkDelete({
     isDeleting: mutation.isLoading,
   };
 }
+
+const QUERY_DELETE_BATCH_SIZE = 1000;
+
+const deleteQueriesInBatches = async ({
+  significantEventsRepositoryClient,
+  queryIds,
+}: {
+  significantEventsRepositoryClient: ReturnType<
+    typeof useKibana
+  >['dependencies']['start']['significantEvents']['significantEventsRepositoryClient'];
+  queryIds: string[];
+}): Promise<BulkOperationResult> => {
+  let succeededCount = 0;
+  let failedCount = 0;
+  for (let start = 0; start < queryIds.length; start += QUERY_DELETE_BATCH_SIZE) {
+    const batch = queryIds.slice(start, start + QUERY_DELETE_BATCH_SIZE);
+    try {
+      const { succeeded, failed } = await significantEventsRepositoryClient.fetch(
+        'POST /internal/streams/queries/_bulk_delete',
+        {
+          signal: null,
+          params: { body: { queryIds: batch } },
+        }
+      );
+      succeededCount += succeeded;
+      failedCount += failed;
+    } catch {
+      failedCount += batch.length;
+      break;
+    }
+  }
+  return { succeededCount, failedCount };
+};
 
 const BULK_DELETE_REJECTED_ERROR_MESSAGE = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicators.bulkDeleteRejectedErrorMessage',

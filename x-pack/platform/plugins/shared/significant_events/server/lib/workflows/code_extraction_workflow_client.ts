@@ -29,8 +29,9 @@ export interface CodeExtractionRunParams {
  * Triggers the managed "Continuous Code KI Extraction" workflow. The workflow
  * uses `ai.agent` steps (the code-intelligence agent) to enumerate deployable
  * services and their logging sites across the indexed repositories, then fans out to the per-service
- * `_identify_service` endpoint. Runs are singleton per space: a non-terminal
- * execution is reused rather than starting a duplicate.
+ * `_identify_service` endpoint. The managed definition enforces an atomic
+ * per-space concurrency group; this client also reuses an observed active run
+ * to avoid unnecessary dropped executions.
  */
 export class SignificantEventsCodeExtractionClient {
   private readonly workflowExecutionService: WorkflowExecutionService<CodeExtractionWorkflowInputPayload>;
@@ -61,11 +62,17 @@ export class SignificantEventsCodeExtractionClient {
     return { executionId, isNew: true };
   }
 
+  async isInstalled(): Promise<boolean> {
+    return this.workflowExecutionService.isInstalled();
+  }
+
   async getStatus({
     spaceId,
+    executionId,
   }: {
     spaceId: string;
+    executionId?: string;
   }): Promise<SignificantEventsWorkflowStatusResult> {
-    return this.workflowExecutionService.getStatus({ spaceId });
+    return this.workflowExecutionService.getStatus({ spaceId, executionId });
   }
 }

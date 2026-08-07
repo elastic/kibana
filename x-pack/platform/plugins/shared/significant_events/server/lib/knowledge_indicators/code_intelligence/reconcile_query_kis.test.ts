@@ -87,6 +87,31 @@ describe('esqlStructuralSignature', () => {
       )
     ).not.toEqual(esqlStructuralSignature('FROM traces | WHERE status.code == "Error"'));
   });
+
+  it('distinguishes aggregation shapes over the same source and fields', () => {
+    expect(
+      esqlStructuralSignature(
+        'FROM traces | WHERE service.name == "checkout" AND status.code == "Error" | STATS c = COUNT(*) BY name'
+      )
+    ).not.toEqual(
+      esqlStructuralSignature(
+        'FROM traces | WHERE service.name == "checkout" AND status.code == "Error" | STATS p95 = PERCENTILE(duration, 95) BY name'
+      )
+    );
+  });
+
+  it('distinguishes typed TS metric sources and backtick-quoted fields', () => {
+    expect(
+      esqlStructuralSignature('TS metrics.a | WHERE `metrics.checkout.requests` IS NOT NULL')
+    ).not.toEqual(
+      esqlStructuralSignature('TS metrics.a | WHERE `metrics.checkout.errors` IS NOT NULL')
+    );
+    expect(
+      esqlStructuralSignature('TS metrics.a | WHERE `metrics.checkout.requests` IS NOT NULL')
+    ).not.toEqual(
+      esqlStructuralSignature('TS metrics.b | WHERE `metrics.checkout.requests` IS NOT NULL')
+    );
+  });
 });
 
 describe('computeClusters', () => {

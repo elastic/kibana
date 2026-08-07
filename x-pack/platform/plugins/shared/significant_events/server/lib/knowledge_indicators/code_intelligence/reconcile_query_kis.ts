@@ -67,6 +67,7 @@ const FIELD_COMPARISON_RE =
   /([a-zA-Z_@][\w.]*)\s*(?:==|!=|>=|<=|>|<|\bIS\s+(?:NOT\s+)?NULL\b|\bLIKE\b|\bRLIKE\b|\bIN\s*\()/gi;
 const MATCH_FN_RE = /\b(?:MATCH|MATCH_PHRASE|MATCH_OPERATOR|QSTR|KQL)\s*\(\s*([a-zA-Z_@][\w.]*)/gi;
 const BY_CLAUSE_RE = /\bBY\s+((?:[a-zA-Z_@][\w.]*\s*,\s*)*[a-zA-Z_@][\w.]*)/gi;
+const BACKTICK_FIELD_RE = /`([^`]+)`\s*(?:==|!=|>=|<=|>|<|\bIS\s+(?:NOT\s+)?NULL\b)/gi;
 
 /**
  * Deterministic structural signature of an ES|QL query: the sorted source
@@ -79,9 +80,9 @@ const BY_CLAUSE_RE = /\bBY\s+((?:[a-zA-Z_@][\w.]*\s*,\s*)*[a-zA-Z_@][\w.]*)/gi;
 export function esqlStructuralSignature(esqlText: string): string {
   const text = esqlText.replace(/\s+/g, ' ').trim();
 
-  const fromMatch = text.match(/^\s*FROM\s+([^|]+)/i);
-  const sources = fromMatch
-    ? fromMatch[1]
+  const sourceMatch = text.match(/^\s*(?:FROM|TS)\s+([^|]+)/i);
+  const sources = sourceMatch
+    ? sourceMatch[1]
         .replace(/\bMETADATA\b.*$/i, '')
         .split(',')
         .map((source) => source.trim().toLowerCase())
@@ -107,8 +108,16 @@ export function esqlStructuralSignature(esqlText: string): string {
       addField(field.trim());
     }
   }
+  for (const match of text.matchAll(BACKTICK_FIELD_RE)) {
+    addField(match[1]);
+  }
 
-  return JSON.stringify({ sources, fields: [...fields].sort() });
+  // The aggregation clause distinguishes otherwise identical filter shapes
+  // such as error count and p95 latency. Omitting it permits reconciliation to
+  // tombstone a materially different typed query.
+  const aggregation = text.match(/\|\s*STATS\s+(.+)$/i)?.[1].toLowerCase() ?? null;
+
+  return JSON.stringify({ sources, fields: [...fields].sort(), aggregation });
 }
 
 /** Connected components over an undirected adjacency map. */

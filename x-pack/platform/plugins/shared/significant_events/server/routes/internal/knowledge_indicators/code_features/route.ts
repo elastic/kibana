@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { KibanaRequest } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import {
   getStreamSamplingSource,
@@ -16,28 +17,35 @@ import {
 import {
   deriveKnowledgeIndicatorSource,
   SignificantEventsWorkflowStatus,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
   type Feature,
   type QueryLink,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
-import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../../../../lib/knowledge_indicators/fields';
+import { KI_TYPE_FEATURE } from '../../../../lib/knowledge_indicators/fields';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators/knowledge_indicator_client';
+import { REVISION_SIZE_LIMIT } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/revision_reader';
+import type { SignificantEventsCodeExtractionClient } from '../../../../lib/workflows/code_extraction_workflow_client';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
+import { StatusError } from '../../../../lib/errors/status_error';
+import { SignificantEventsPausedError } from '../../../../lib/errors/significant_events_paused_error';
 import {
   identifyCodeFeaturesForService,
   identifyCodeQueries,
+  getCodeFeatureStreamPrefix,
   reconcileCodeAndLogQueries,
   linkServiceEntities,
   discoverLoggingSites,
   classifyLoggingSites,
-  extractOtelSignals,
+  extractOtelSignalsResult,
   generateOtelQueries,
   classifyOtelSignals,
   resolveSignalStreams,
@@ -46,8 +54,6 @@ import {
   buildLanguageHistogram,
   detectOtelInstrumentation,
   classifyServices,
-  isCodeIntelligenceAgentAvailable,
-  CODE_INTELLIGENCE_AGENT_ID,
   type ServiceCandidateRoot,
   type IacSignal,
   type LanguageCount,
@@ -79,6 +85,17 @@ const isPurelyCodeSource = (
   return resolved.length === 1 && resolved[0] === 'code';
 };
 
+const CODE_KNOWLEDGE_INDICATORS_LIMIT = REVISION_SIZE_LIMIT;
+// Keep each synchronous destructive batch aligned with the existing bounded
+// cross-stream reconciliation endpoint.
+const CODE_INTELLIGENCE_OPERATION_BATCH_SIZE = 10;
+const CODE_INTELLIGENCE_BULK_OPERATION_BATCH_SIZE = 1000;
+const CODE_INTELLIGENCE_MAX_ARRAY_SIZE = 1_000;
+const CODE_INTELLIGENCE_MAX_COUNT = Number.MAX_SAFE_INTEGER;
+
+const codeIntelligenceInput = z.string().max(MAX_ID_LENGTH);
+const codeIntelligenceTextInput = z.string().max(MAX_TEXT_LENGTH);
+
 /**
  * Lists the real streams and the index/pattern each one's data lives in, used to
  * resolve which stream ingests a given `service.name`.
@@ -105,6 +122,96 @@ const listStreamSamplingSources = async (streamsClient: {
   return sources;
 };
 
+/**
+ * The KI data stream is plugin-owned and read with an internal client. Restrict
+ * every user-facing operation to stream definitions the request is authorized to
+ * access before reading or mutating that global storage.
+ */
+const listAccessibleStreamNames = async (streamsClient: {
+  listStreams: () => Promise<Array<{ name: string }>>;
+}): Promise<string[]> => (await streamsClient.listStreams()).map(({ name }) => name);
+
+/** Returns a stable, bounded stream batch and the cursor needed to resume it. */
+/**
+ * Code-analysis features have space-scoped virtual streams. They are safe to
+ * combine with the request's real streams because the prefix is assigned at
+ * write time from the execution space, not supplied by the caller.
+ */
+const listAuthorizedCodeKnowledgeIndicatorStreams = async ({
+  kiClient,
+  streamsClient,
+  spaceId,
+}: {
+  kiClient: { getStreamNamesWithKnowledgeIndicators: () => Promise<string[]> };
+  streamsClient: { listStreams: () => Promise<Array<{ name: string }>> };
+  spaceId: string;
+}): Promise<{ streamNames: string[]; isTruncated: boolean }> => {
+  const [realStreams, allKiStreams] = await Promise.all([
+    listAccessibleStreamNames(streamsClient),
+    kiClient.getStreamNamesWithKnowledgeIndicators(),
+  ]);
+  const prefix = getCodeFeatureStreamPrefix(spaceId);
+  return {
+    streamNames: [
+      ...new Set([...realStreams, ...allKiStreams.filter((name) => name.startsWith(prefix))]),
+    ],
+    isTruncated: allKiStreams.length === REVISION_SIZE_LIMIT,
+  };
+};
+
+const getStreamBatch = (streamNames: string[], cursor: string | undefined) => {
+  const sortedStreamNames = [...streamNames].sort();
+  const remaining = sortedStreamNames.filter((streamName) => !cursor || streamName > cursor);
+  const batch = remaining.slice(0, CODE_INTELLIGENCE_OPERATION_BATCH_SIZE);
+  return {
+    streamNames: batch,
+    nextCursor:
+      remaining.length > CODE_INTELLIGENCE_OPERATION_BATCH_SIZE ? batch.at(-1) : undefined,
+  };
+};
+
+type CodeIntelligenceReadiness = { available: true } | { available: false; message: string };
+
+/**
+ * Verifies every dependency required by the managed code-extraction workflow.
+ * Connector misconfiguration is a setup prerequisite; operational failures keep
+ * their original error so callers render a retryable error rather than setup UI.
+ */
+const getCodeIntelligenceReadiness = async ({
+  request,
+  server,
+  codeExtractionClient,
+}: {
+  request: KibanaRequest;
+  server: {
+    searchInferenceEndpoints?: Parameters<
+      typeof resolveConnectorForFeature
+    >[0]['searchInferenceEndpoints'];
+  };
+  codeExtractionClient: SignificantEventsCodeExtractionClient | undefined;
+}): Promise<CodeIntelligenceReadiness> => {
+  if (!codeExtractionClient || !(await codeExtractionClient.isInstalled())) {
+    return {
+      available: false,
+      message: 'Code Intelligence extraction workflow is not installed.',
+    };
+  }
+  try {
+    await resolveConnectorForFeature({
+      searchInferenceEndpoints: server.searchInferenceEndpoints,
+      featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+      featureName: 'logging-site classification',
+      request,
+    });
+    return { available: true };
+  } catch (error) {
+    if (error instanceof StatusError && error.statusCode === 400) {
+      return { available: false, message: error.message };
+    }
+    throw error;
+  }
+};
+
 // ---------------------------------------------------------------------------
 // Reconcile Query KIs across sources (code vs logs).
 //
@@ -126,16 +233,18 @@ const reconcileCodeQueriesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string() }),
+    path: z.object({ streamName: codeIntelligenceInput }),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    await assertNotPaused({ maintenanceService, request });
 
     return reconcileCodeAndLogQueries({
       streamName,
@@ -146,9 +255,9 @@ const reconcileCodeQueriesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Code Intelligence availability. Ready once the code-intelligence agent (today
-// the externally-installed Sourcerer agent) is registered in Agent Builder; the
-// user installs Sourcerer and indexes repositories out of band.
+// Code Intelligence availability. Ready when the managed workflow and the
+// required service-discovery classifier connector are available. OTel query
+// classification degrades to deterministic typed queries when unavailable.
 // ---------------------------------------------------------------------------
 
 const codeIntelligenceAvailabilityRoute = createServerRoute({
@@ -166,29 +275,26 @@ const codeIntelligenceAvailabilityRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
+    workflowClients,
     server,
     logger,
-  }): Promise<{ available: boolean }> => {
+  }): Promise<{ available: boolean; message?: string }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
-    if (!server.agentBuilder) {
-      return { available: false };
-    }
-    const available = await isCodeIntelligenceAgentAvailable({
-      agentBuilder: server.agentBuilder,
+    const readiness = await getCodeIntelligenceReadiness({
       request,
-      logger: logger.get('code_intelligence', 'agent_availability'),
+      server,
+      codeExtractionClient: workflowClients.codeExtractionClient,
     });
-    return { available };
+    return readiness.available ? { available: true } : readiness;
   },
 });
 
 // ---------------------------------------------------------------------------
-// List code-derived Knowledge Indicators (cross-stream). Enumerates every
-// KI-bearing stream — including the service-name pseudo-streams that code
-// features are keyed by (which the real-stream-scoped `_features` route does not
-// cover) — and returns the code-sourced features and queries. Powers the
+// List code-derived Knowledge Indicators from streams the request can access.
+// The KI data stream is global plugin storage, so pseudo-stream KIs without a
+// caller-authorized stream definition are deliberately excluded. Powers the
 // discovery Code Intelligence tab.
 // ---------------------------------------------------------------------------
 
@@ -207,25 +313,35 @@ const listCodeKnowledgeIndicatorsRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
+    getSpaceId,
     server,
-  }): Promise<{ features: Feature[]; queries: QueryLink[] }> => {
+  }): Promise<{ features: Feature[]; queries: QueryLink[]; isTruncated: boolean }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const { streamNames, isTruncated: streamEnumerationTruncated } =
+      await listAuthorizedCodeKnowledgeIndicatorStreams({
+        kiClient,
+        streamsClient: scopedClients.streamsClient,
+        spaceId: await getSpaceId(request),
+      });
     if (streamNames.length === 0) {
-      return { features: [], queries: [] };
+      return { features: [], queries: [], isTruncated: streamEnumerationTruncated };
     }
-
     const [{ hits: allFeatures }, links] = await Promise.all([
-      // Fetch all features across every KI-bearing stream, then keep the ones
-      // carrying code evidence — this includes `code_analysis` features (repo
-      // type, language) and `entity`/`service` features the code merged onto.
-      kiClient.getFeatures(streamNames, { includeExcluded: true, limit: 10_000 }),
-      kiClient.getQueryLinks(streamNames, { ruleUnbacked: 'include' }),
+      // Fetch bounded, caller-scoped data before applying the code-evidence
+      // filter. A cap hit is explicitly reported as potentially incomplete.
+      kiClient.getFeatures(streamNames, {
+        includeExcluded: true,
+        limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
+      }),
+      kiClient.getQueryLinks(streamNames, {
+        ruleUnbacked: 'include',
+        limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
+      }),
     ]);
 
     const features = allFeatures.filter((feature) =>
@@ -233,7 +349,14 @@ const listCodeKnowledgeIndicatorsRoute = createServerRoute({
     );
     const queries = links.filter((link) => hasCodeSource(link.query.evidence, link.query.source));
 
-    return { features, queries };
+    return {
+      features,
+      queries,
+      isTruncated:
+        streamEnumerationTruncated ||
+        allFeatures.length === CODE_KNOWLEDGE_INDICATORS_LIMIT ||
+        links.length === CODE_KNOWLEDGE_INDICATORS_LIMIT,
+    };
   },
 });
 
@@ -265,22 +388,24 @@ const serviceDistributionRoute = createServerRoute({
     logsOnly: number;
     /** Names of services known from code but not yet observed in logs. */
     codeOnlyServices: string[];
+    /** The bounded entity scan may omit additional services. */
+    isTruncated: boolean;
   }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const streamNames = await listAccessibleStreamNames(scopedClients.streamsClient);
     if (streamNames.length === 0) {
-      return { codeOnly: 0, both: 0, logsOnly: 0, codeOnlyServices: [] };
+      return { codeOnly: 0, both: 0, logsOnly: 0, codeOnlyServices: [], isTruncated: false };
     }
 
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { hits } = await kiClient.getFeatures(streamNames, {
       type: ['entity'],
       includeExpired: true,
-      limit: 10_000,
+      limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
     });
 
     // Group service entities by name; a service can be represented by separate
@@ -321,12 +446,18 @@ const serviceDistributionRoute = createServerRoute({
 
     codeOnlyServices.sort((a, b) => a.localeCompare(b));
 
-    return { codeOnly, both, logsOnly, codeOnlyServices };
+    return {
+      codeOnly,
+      both,
+      logsOnly,
+      codeOnlyServices,
+      isTruncated: hits.length === CODE_KNOWLEDGE_INDICATORS_LIMIT,
+    };
   },
 });
 
 // ---------------------------------------------------------------------------
-// Reset: delete every code-derived Feature KI across all streams.
+// Reset: delete every code-derived Feature KI across streams the request can access.
 //
 // Removes all `code_analysis` features (including excluded ones), which also
 // clears the stored change fingerprint — so a subsequent run re-derives features
@@ -339,7 +470,7 @@ const resetCodeFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_reset',
   options: {
     access: 'internal',
-    summary: 'Delete all code-derived Feature KIs across every stream',
+    summary: 'Delete all code-derived Feature KIs across accessible streams',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -347,37 +478,61 @@ const resetCodeFeaturesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    body: z.object({ cursor: codeIntelligenceInput.optional() }).optional(),
+  }),
   handler: async ({
+    params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
     logger,
-  }): Promise<{ deleted: number; streamsAffected: number }> => {
+    maintenanceService,
+  }): Promise<{
+    deleted: number;
+    streamsAffected: number;
+    failedStreams: string[];
+    nextCursor?: string;
+  }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const routeLogger = logger.get('code_intelligence', 'reset');
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-
-    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const { streamNames: authorizedStreamNames, isTruncated: streamEnumerationTruncated } =
+      await listAuthorizedCodeKnowledgeIndicatorStreams({
+        kiClient,
+        streamsClient: scopedClients.streamsClient,
+        spaceId: await getSpaceId(request),
+      });
+    if (streamEnumerationTruncated) {
+      throw new StatusError(
+        'Code Intelligence reset is unavailable because the stream result reached its maximum size.',
+        409
+      );
+    }
+    const { streamNames, nextCursor } = getStreamBatch(authorizedStreamNames, params?.body?.cursor);
     if (streamNames.length === 0) {
-      return { deleted: 0, streamsAffected: 0 };
+      return { deleted: 0, streamsAffected: 0, failedStreams: [] };
     }
 
-    // Delete every code-sourced KI (any feature type + queries) so the next run
-    // regenerates from scratch. Deletes match on the stored id, so features use
-    // their `uuid` and queries use `query.id`. Grouped per stream for bulk.
-    const [{ hits: allFeatures }, links] = await Promise.all([
-      kiClient.getFeatures(streamNames, {
-        includeExcluded: true,
-        includeExpired: true,
-        limit: 10_000,
-      }),
-      kiClient.getQueryLinks(streamNames, { ruleUnbacked: 'include' }),
-    ]);
+    // Reset only code-derived Features. Query KIs are retained because a code
+    // extraction run can create no replacement for a previously useful query.
+    const { hits: allFeatures } = await kiClient.getFeatures(streamNames, {
+      includeExcluded: true,
+      includeExpired: true,
+      limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
+    });
+    if (allFeatures.length === CODE_KNOWLEDGE_INDICATORS_LIMIT) {
+      throw new StatusError(
+        'Code Intelligence reset is unavailable because the feature result reached its maximum size. Narrow the source data before retrying.',
+        409
+      );
+    }
 
     const opsByStream = new Map<string, KIBulkOperation[]>();
     const addOp = (stream: string, op: KIBulkOperation) => {
@@ -386,34 +541,61 @@ const resetCodeFeaturesRoute = createServerRoute({
       opsByStream.set(stream, ops);
     };
 
-    // Only delete purely code-derived KIs. Merged KIs (`both`) also carry log
-    // evidence, so deleting them would destroy the log side too — leave those.
+    // Only delete purely code-derived Features. Merged features (`both`) also
+    // carry log evidence, so deleting them would destroy the log side too.
     for (const feature of allFeatures) {
       if (isPurelyCodeSource(feature.evidence, feature.source)) {
         addOp(feature.stream_name, { delete: { type: KI_TYPE_FEATURE, id: feature.uuid } });
       }
     }
-    for (const link of links) {
-      if (isPurelyCodeSource(link.query.evidence, link.query.source)) {
-        addOp(link.stream_name, { delete: { type: KI_TYPE_QUERY, id: link.query.id } });
-      }
-    }
 
     let deleted = 0;
     const affected = new Set<string>();
+    const failedStreams: string[] = [];
     for (const [streamName, ops] of opsByStream) {
-      const { applied } = await kiClient.bulk(streamName, ops);
-      deleted += applied;
-      if (applied > 0) {
-        affected.add(streamName);
+      try {
+        let appliedForStream = 0;
+        for (
+          let start = 0;
+          start < ops.length;
+          start += CODE_INTELLIGENCE_BULK_OPERATION_BATCH_SIZE
+        ) {
+          // Pause cancellation is best effort. Recheck each bounded write batch
+          // so an operation admitted before pause cannot keep deleting afterwards.
+          await assertNotPaused({ maintenanceService, request });
+          const { applied } = await kiClient.bulk(
+            streamName,
+            ops.slice(start, start + CODE_INTELLIGENCE_BULK_OPERATION_BATCH_SIZE)
+          );
+          deleted += applied;
+          appliedForStream += applied;
+        }
+        if (appliedForStream > 0) {
+          affected.add(streamName);
+        }
+      } catch (error) {
+        if (error instanceof SignificantEventsPausedError) {
+          throw error;
+        }
+        failedStreams.push(streamName);
+        routeLogger.warn(
+          `code_intelligence: reset failed for stream "${streamName}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
     }
 
     routeLogger.info(
-      `code_intelligence: reset removed ${deleted} code knowledge indicator(s) across ${affected.size} stream(s)`
+      `code_intelligence: reset removed ${deleted} code knowledge indicator(s) across ${affected.size} stream(s); ${failedStreams.length} stream(s) failed`
     );
 
-    return { deleted, streamsAffected: affected.size };
+    return {
+      deleted,
+      streamsAffected: affected.size,
+      failedStreams,
+      ...(nextCursor ? { nextCursor } : {}),
+    };
   },
 });
 
@@ -480,15 +662,15 @@ const buildServiceCodeMetadata = (
 };
 
 const otelSignalCountsSchema = z.object({
-  instrumentation_grpc: z.number().nonnegative(),
-  instrumentation_http: z.number().nonnegative(),
-  instrumentation_other: z.number().nonnegative(),
-  start_span: z.number().nonnegative(),
-  set_attribute: z.number().nonnegative(),
-  add_event: z.number().nonnegative(),
-  record_exception: z.number().nonnegative(),
-  set_status_error: z.number().nonnegative(),
-  create_metric: z.number().nonnegative(),
+  instrumentation_grpc: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  instrumentation_http: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  instrumentation_other: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  start_span: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  set_attribute: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  add_event: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  record_exception: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  set_status_error: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+  create_metric: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
 });
 
 const identifyOtelSignalsRoute = createServerRoute({
@@ -501,19 +683,20 @@ const identifyOtelSignalsRoute = createServerRoute({
   security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
   params: z.object({
     body: z.object({
-      repository: z.string(),
-      gitSha: z.string(),
-      serviceRoot: z.string(),
-      name: z.string(),
-      language: z.string(),
+      repository: codeIntelligenceInput,
+      gitSha: codeIntelligenceInput,
+      serviceRoot: codeIntelligenceInput,
+      name: codeIntelligenceInput,
+      language: codeIntelligenceInput,
       hasOtel: z.boolean(),
       signalCounts: otelSignalCountsSchema,
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
     const { repository, gitSha, serviceRoot, name, language, signalCounts } = params.body;
     const routeLogger = logger.get('code_intelligence', 'identify_otel_signals', name);
     const esClient = scopedClusterClient.asCurrentUser;
@@ -541,6 +724,7 @@ const identifyOtelSignalsRoute = createServerRoute({
         candidates,
         logger: routeLogger,
       });
+      await assertNotPaused({ maintenanceService, request });
       return identifyCodeQueries({
         serviceName: name,
         repository,
@@ -555,87 +739,84 @@ const identifyOtelSignalsRoute = createServerRoute({
       });
     };
 
-    let queriesGenerated = 0;
+    const extraction = await extractOtelSignalsResult({
+      esClient,
+      repository,
+      gitSha,
+      serviceRoot,
+      logger: routeLogger,
+    });
+    if (extraction.failed) {
+      throw new Error(`OTel signal extraction failed for service "${name}".`);
+    }
+    const resolved = await resolveSignalStreams({ streams, esClient, logger: routeLogger });
+    const generated = generateOtelQueries({
+      serviceName: name,
+      repository,
+      gitSha,
+      signals: extraction.signals,
+      signalCounts,
+      ...resolved,
+    });
+
+    // Template queries are valid only when no typed signal tier can target a
+    // usable stream. Any later typed-path failure must not create a mixed
+    // typed/message-string result for this OTel service.
+    if (generated.gateBypassed) {
+      routeLogger.warn(`otel gate bypassed for service "${name}"; using template query fallback`);
+      await assertNotPaused({ maintenanceService, request });
+      const fallback = await runTemplateFallback();
+      return { status: 'gate_bypassed' as const, queriesGenerated: fallback.generatedCount ?? 0 };
+    }
+
+    let classified = generated.queries;
     try {
-      const signals = await extractOtelSignals({
-        esClient,
-        repository,
-        gitSha,
-        serviceRoot,
-        logger: routeLogger,
-      });
-      const resolved = await resolveSignalStreams({ streams, esClient, logger: routeLogger });
-      const generated = generateOtelQueries({
-        serviceName: name,
-        repository,
-        gitSha,
-        signals,
-        signalCounts,
-        ...resolved,
-      });
-
-      if (generated.gateBypassed) {
-        routeLogger.warn(`otel gate bypassed for service "${name}"; using template query fallback`);
-        const fallback = await runTemplateFallback();
-        return { status: 'gate_bypassed' as const, queriesGenerated: fallback.generatedCount ?? 0 };
-      }
-
       const connectorId = await resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         featureId: SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
         featureName: 'OTel signal classification',
         request,
       });
-      const classified = await classifyOtelSignals({
+      classified = await classifyOtelSignals({
         inferenceClient,
         connectorId,
         candidates: generated.queries,
         logger: routeLogger,
       });
-      const byStream = new Map<string, typeof classified>();
-      for (const candidate of classified) {
-        const entries = byStream.get(candidate.stream) ?? [];
-        entries.push(candidate);
-        byStream.set(candidate.stream, entries);
-      }
-      for (const [streamName, candidates] of byStream) {
-        const { [streamName]: existing } = await kiClient.getStreamToQueryLinksMap([streamName]);
-        const existingEsql = new Set(
-          existing.map(({ query }) => normalizeEsqlSafe(query.esql.query))
-        );
-        const fresh = candidates.filter(
-          ({ query }) => !existingEsql.has(normalizeEsqlSafe(query.esql.query))
-        );
-        if (fresh.length === 0) continue;
-        await kiClient.bulk(
-          streamName,
-          fresh.map(({ query }) => ({ index: { query: { ...query, rule_backed: false } } }))
-        );
-        queriesGenerated += fresh.length;
-        await reconcileCodeAndLogQueries({ streamName, kiClient, logger: routeLogger });
-      }
-      return { status: 'generated' as const, queriesGenerated };
     } catch (error) {
       routeLogger.warn(
-        `otel gate bypassed for service "${name}" after typed extraction failure: ${
+        `otel signal classification failed for service "${name}"; keeping deterministic typed queries: ${
           error instanceof Error ? error.message : String(error)
-        }; using template query fallback`
+        }`
       );
-      try {
-        const fallback = await runTemplateFallback();
-        return {
-          status: 'gate_bypassed' as const,
-          queriesGenerated: queriesGenerated + (fallback.generatedCount ?? 0),
-        };
-      } catch (fallbackError) {
-        routeLogger.warn(
-          `otel template fallback failed for service "${name}": ${
-            fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
-          }`
-        );
-        throw fallbackError;
-      }
     }
+
+    let queriesGenerated = 0;
+    const byStream = new Map<string, typeof classified>();
+    for (const candidate of classified) {
+      const entries = byStream.get(candidate.stream) ?? [];
+      entries.push(candidate);
+      byStream.set(candidate.stream, entries);
+    }
+    for (const [streamName, candidates] of byStream) {
+      const { [streamName]: existing } = await kiClient.getStreamToQueryLinksMap([streamName]);
+      const existingEsql = new Set(
+        existing.map(({ query }) => normalizeEsqlSafe(query.esql.query))
+      );
+      const fresh = candidates.filter(
+        ({ query }) => !existingEsql.has(normalizeEsqlSafe(query.esql.query))
+      );
+      if (fresh.length === 0) continue;
+      await assertNotPaused({ maintenanceService, request });
+      await kiClient.bulk(
+        streamName,
+        fresh.map(({ query }) => ({ index: { query: { ...query, rule_backed: false } } }))
+      );
+      queriesGenerated += fresh.length;
+      await assertNotPaused({ maintenanceService, request });
+      await reconcileCodeAndLogQueries({ streamName, kiClient, logger: routeLogger });
+    }
+    return { status: 'generated' as const, queriesGenerated };
   },
 });
 
@@ -653,10 +834,16 @@ const identifyServiceRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      repository: z.string(),
-      gitSha: z.string(),
+      repository: codeIntelligenceInput,
+      gitSha: codeIntelligenceInput,
       repositoryLanguages: z
-        .array(z.object({ language: z.string(), count: z.number().nonnegative() }))
+        .array(
+          z.object({
+            language: codeIntelligenceInput,
+            count: z.number().int().min(0).max(CODE_INTELLIGENCE_MAX_COUNT),
+          })
+        )
+        .max(CODE_INTELLIGENCE_MAX_ARRAY_SIZE)
         .nullish(),
       iacSignals: z
         .array(
@@ -669,42 +856,49 @@ const identifyServiceRoute = createServerRoute({
               'pulumi',
               'cloudformation',
             ]),
-            path: z.string(),
+            path: codeIntelligenceInput,
           })
         )
+        .max(CODE_INTELLIGENCE_MAX_ARRAY_SIZE)
         .nullish(),
       hasOtel: z.boolean().optional(),
       service: z.object({
-        name: z.string(),
-        serviceRoot: z.string(),
-        language: z.string().optional(),
+        name: codeIntelligenceInput,
+        serviceRoot: codeIntelligenceInput,
+        language: codeIntelligenceInput.optional(),
         // Additional code-derived service metadata gathered by the agent. All
         // optional: the agent omits what it cannot determine, and the workflow
         // may send empty strings/nulls for absent fields (normalized below).
-        version: z.string().nullish(),
-        environmentVariables: z.array(z.string()).nullish(),
-        configPaths: z.array(z.string()).nullish(),
-        loggingPattern: z.string().nullish(),
+        version: codeIntelligenceInput.nullish(),
+        environmentVariables: z
+          .array(codeIntelligenceInput)
+          .max(CODE_INTELLIGENCE_MAX_ARRAY_SIZE)
+          .nullish(),
+        configPaths: z.array(codeIntelligenceInput).max(CODE_INTELLIGENCE_MAX_ARRAY_SIZE).nullish(),
+        loggingPattern: codeIntelligenceTextInput.nullish(),
         tracing: z.boolean().nullish(),
         evidence: z
           .array(
             z.object({
-              path: z.string(),
-              line: z.number().optional(),
-              snippet: z.string().optional(),
+              path: codeIntelligenceInput,
+              line: z.number().int().min(1).max(CODE_INTELLIGENCE_MAX_COUNT).optional(),
+              snippet: codeIntelligenceTextInput.optional(),
             })
           )
+          .max(CODE_INTELLIGENCE_MAX_ARRAY_SIZE)
           .nullish(),
       }),
-      runId: z.string().optional(),
+      runId: codeIntelligenceInput.optional(),
     }),
   }),
   handler: async ({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
     logger,
+    maintenanceService,
   }): Promise<{
     status: 'updated' | 'noop' | 'no_repo';
     streamName: string;
@@ -715,6 +909,7 @@ const identifyServiceRoute = createServerRoute({
     const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const {
       repository,
@@ -726,6 +921,7 @@ const identifyServiceRoute = createServerRoute({
     } = params.body;
     const routeLogger = logger.get('code_intelligence', 'identify_service', service.name);
     const metadata = buildServiceCodeMetadata(service, { gitSha, iacSignals });
+    const spaceId = await getSpaceId(request);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const esClient = scopedClusterClient.asCurrentUser;
@@ -758,23 +954,27 @@ const identifyServiceRoute = createServerRoute({
     });
 
     // Stage 1: derive code Feature KIs (repo type, language, predicted service name).
+    await assertNotPaused({ maintenanceService, request });
     const featureResult = await identifyCodeFeaturesForService({
       repository,
       gitSha,
       languageHistogram: repositoryLanguages ?? undefined,
       iacSignals: iacSignals ?? undefined,
       serviceName: service.name,
+      spaceId,
       language: service.language,
       evidence: service.evidence ?? undefined,
       kiClient,
       logger: routeLogger,
       runId,
+      beforeWrite: () => assertNotPaused({ maintenanceService, request }),
     });
 
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
 
     // Stage 2: generate predictive Query KIs from the service's logger call
     // sites, written to the real stream(s) that ingest the service.
+    await assertNotPaused({ maintenanceService, request });
     const queryResult = await identifyCodeQueries({
       serviceName: featureResult.streamName,
       repository,
@@ -791,6 +991,7 @@ const identifyServiceRoute = createServerRoute({
     // Reconcile code- and log-derived Query KIs on each ingesting stream that
     // now carries code queries (semantic dedup merges the two sources).
     for (const streamName of queryResult.streams ?? []) {
+      await assertNotPaused({ maintenanceService, request });
       await reconcileCodeAndLogQueries({ streamName, kiClient, logger: routeLogger });
     }
 
@@ -798,6 +999,7 @@ const identifyServiceRoute = createServerRoute({
     // merging with any matching log-derived entity. Runs every time (even on a
     // code no-op) so it tracks log entities that appear after the code was
     // analyzed.
+    await assertNotPaused({ maintenanceService, request });
     try {
       await linkServiceEntities({
         serviceName: featureResult.streamName,
@@ -859,11 +1061,13 @@ const discoverServicesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ services: DiscoveredService[] }> => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const routeLogger = logger.get('code_intelligence', 'discover_services');
     const esClient = scopedClusterClient.asCurrentUser;
@@ -933,6 +1137,7 @@ const discoverServicesRoute = createServerRoute({
       request,
     });
 
+    await assertNotPaused({ maintenanceService, request });
     const services = await classifyServices({
       inferenceClient,
       connectorId,
@@ -982,52 +1187,32 @@ const runCodeIntelligenceRoute = createServerRoute({
     getSpaceId,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ executionId: string; isNew: boolean }> => {
-    const { codeExtractionClient } = workflowClients;
-    if (!codeExtractionClient) {
-      throw new FeatureNotEnabledError(
-        'Code intelligence extraction requires the workflows feature to be enabled'
-      );
-    }
-
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
-    if (!server.agentBuilder) {
-      throw new FeatureNotEnabledError(
-        'Code intelligence extraction requires the Agent Builder feature to be enabled'
-      );
-    }
-    const agentAvailable = await isCodeIntelligenceAgentAvailable({
-      agentBuilder: server.agentBuilder,
+    const codeExtractionClient = workflowClients.codeExtractionClient;
+    const readiness = await getCodeIntelligenceReadiness({
       request,
-      logger: logger.get('code_intelligence', 'agent_availability'),
+      server,
+      codeExtractionClient,
     });
-    if (!agentAvailable) {
-      throw new FeatureNotEnabledError(
-        `Code intelligence is unavailable: the "${CODE_INTELLIGENCE_AGENT_ID}" agent is not installed. ` +
-          'Install Sourcerer (run its setup to register the code agent, tools, and skills) and index the repositories to analyze.'
-      );
+    if (!readiness.available) {
+      throw new FeatureNotEnabledError(readiness.message);
+    }
+    if (!codeExtractionClient) {
+      throw new FeatureNotEnabledError('Code Intelligence extraction workflow is not available.');
     }
 
     const spaceId = await getSpaceId(request);
-    const agentConnectorId = await resolveConnectorForFeature({
-      searchInferenceEndpoints: server.searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-      featureName: 'knowledge indicator extraction',
-      request,
-    });
-
-    return codeExtractionClient.run({
-      request,
-      spaceId,
-      inputs: { agentConnectorId },
-    });
+    return codeExtractionClient.run({ request, spaceId });
   },
 });
 
 // ---------------------------------------------------------------------------
-// Reconcile KIs across every stream on demand.
+// Reconcile KIs across streams the request can access on demand.
 //
 // Runs the cross-source Query KI reconciler (semantic dedup of code- vs
 // log-derived queries) for every stream that has KIs, and refreshes each code
@@ -1040,7 +1225,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_reconcile',
   options: {
     access: 'internal',
-    summary: 'Reconcile duplicate Query KIs across sources and refresh stream linkage',
+    summary: 'Reconcile duplicate Query KIs across accessible streams and refresh stream linkage',
     timeout: { idleSocket: 600_000 },
   },
   security: {
@@ -1048,36 +1233,64 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    body: z.object({ cursor: codeIntelligenceInput.optional() }).optional(),
+  }),
   handler: async ({
+    params,
     request,
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{
     streamsReconciled: number;
     clustersMerged: number;
     queriesTombstoned: number;
+    failedStreams: string[];
+    nextCursor?: string;
   }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const routeLogger = logger.get('code_intelligence', 'reconcile');
-    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-
-    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const { streamNames, nextCursor } = getStreamBatch(
+      await listAccessibleStreamNames(scopedClients.streamsClient),
+      params?.body?.cursor
+    );
     if (streamNames.length === 0) {
-      return { streamsReconciled: 0, clustersMerged: 0, queriesTombstoned: 0 };
+      return {
+        streamsReconciled: 0,
+        clustersMerged: 0,
+        queriesTombstoned: 0,
+        failedStreams: [],
+      };
     }
 
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     let streamsReconciled = 0;
     let clustersMerged = 0;
     let queriesTombstoned = 0;
+    const failedStreams: string[] = [];
 
     for (const streamName of streamNames) {
       try {
+        await assertNotPaused({ maintenanceService, request });
+        const links = await kiClient.getQueryLinks([streamName], {
+          ruleUnbacked: 'include',
+          includeExpired: true,
+          limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
+        });
+        if (links.length === CODE_KNOWLEDGE_INDICATORS_LIMIT) {
+          throw new StatusError(
+            `Reconciliation is unavailable for stream "${streamName}" because its query result reached the maximum size.`,
+            409
+          );
+        }
+        await assertNotPaused({ maintenanceService, request });
         const result = await reconcileCodeAndLogQueries({
           streamName,
           kiClient,
@@ -1087,6 +1300,10 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
         clustersMerged += result.clustersMerged;
         queriesTombstoned += result.queriesTombstoned;
       } catch (error) {
+        if (error instanceof SignificantEventsPausedError) {
+          throw error;
+        }
+        failedStreams.push(streamName);
         routeLogger.warn(
           `code_intelligence: reconcile failed for stream "${streamName}": ${
             error instanceof Error ? error.message : String(error)
@@ -1095,7 +1312,13 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       }
     }
 
-    return { streamsReconciled, clustersMerged, queriesTombstoned };
+    return {
+      streamsReconciled,
+      clustersMerged,
+      queriesTombstoned,
+      failedStreams,
+      ...(nextCursor ? { nextCursor } : {}),
+    };
   },
 });
 
@@ -1115,8 +1338,11 @@ const codeIntelligenceRunStatusRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    query: z.object({ executionId: codeIntelligenceInput.optional() }).optional(),
+  }),
   handler: async ({
+    params,
     request,
     getScopedClients,
     workflowClients,
@@ -1132,7 +1358,10 @@ const codeIntelligenceRunStatusRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const spaceId = await getSpaceId(request);
-    return codeExtractionClient.getStatus({ spaceId });
+    return codeExtractionClient.getStatus({
+      spaceId,
+      executionId: params?.query?.executionId,
+    });
   },
 });
 
