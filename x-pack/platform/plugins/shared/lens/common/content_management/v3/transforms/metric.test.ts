@@ -23,8 +23,10 @@ const baseFormBasedColumn = {
 
 function buildV2MetricAttributes({
   visualizationOverrides = {},
+  secondaryColumn = baseFormBasedColumn,
 }: {
   visualizationOverrides?: Record<string, unknown>;
+  secondaryColumn?: Record<string, unknown>;
 } = {}): LensAttributesV2 {
   return {
     title: 'metric',
@@ -52,7 +54,7 @@ function buildV2MetricAttributes({
                   sourceField: 'bytes',
                   isBucketed: false,
                 },
-                [SECONDARY_ACCESSOR]: baseFormBasedColumn,
+                [SECONDARY_ACCESSOR]: secondaryColumn,
               },
             },
           },
@@ -88,6 +90,69 @@ describe('transformToV3LensItemAttributes', () => {
     );
   });
 
+  it('gives secondaryLabel priority over an existing column custom label', () => {
+    const result = transformToV3LensItemAttributes(
+      buildV2MetricAttributes({
+        visualizationOverrides: { secondaryLabel: 'Custom Name (label)' },
+        secondaryColumn: {
+          ...baseFormBasedColumn,
+          label: 'Custom Name',
+          customLabel: true,
+        },
+      })
+    );
+
+    const secondaryColumn =
+      result.state?.datasourceStates?.formBased?.layers?.[LAYER_ID]?.columns?.[SECONDARY_ACCESSOR];
+
+    expect(secondaryColumn).toEqual(
+      expect.objectContaining({
+        label: 'Custom Name (label)',
+        customLabel: true,
+      })
+    );
+  });
+
+  it('does not overwrite the column when secondaryLabel was emptied (hidden)', () => {
+    const result = transformToV3LensItemAttributes(
+      buildV2MetricAttributes({
+        visualizationOverrides: { secondaryLabel: '' },
+        secondaryColumn: {
+          ...baseFormBasedColumn,
+          label: 'Custom Name',
+          customLabel: true,
+        },
+      })
+    );
+
+    const secondaryColumn =
+      result.state?.datasourceStates?.formBased?.layers?.[LAYER_ID]?.columns?.[SECONDARY_ACCESSOR];
+
+    expect(secondaryColumn).toEqual(
+      expect.objectContaining({
+        label: 'Custom Name',
+        customLabel: true,
+      })
+    );
+    expect(result.state?.visualization).toEqual(
+      expect.objectContaining({ secondaryNameVisibility: 'hidden' })
+    );
+  });
+
+  it('leaves the default operation name when no legacy custom label was set', () => {
+    const result = transformToV3LensItemAttributes(buildV2MetricAttributes());
+
+    const secondaryColumn =
+      result.state?.datasourceStates?.formBased?.layers?.[LAYER_ID]?.columns?.[SECONDARY_ACCESSOR];
+
+    expect(secondaryColumn).toEqual(
+      expect.objectContaining({
+        label: 'Maximum of bytes',
+      })
+    );
+    expect(secondaryColumn).not.toHaveProperty('customLabel');
+  });
+
   it('preserves an explicit secondaryLabelPosition as secondaryNameVisibility', () => {
     const result = transformToV3LensItemAttributes(
       buildV2MetricAttributes({
@@ -103,6 +168,50 @@ describe('transformToV3LensItemAttributes', () => {
       expect.objectContaining({ secondaryNameVisibility: 'after' })
     );
     expect(result.state?.visualization).not.toHaveProperty('secondaryLabelPosition');
+  });
+
+  it('copies a custom secondaryLabel onto a text-based secondary column', () => {
+    const attributes = {
+      title: 'metric',
+      visualizationType: 'lnsMetric',
+      version: LENS_ITEM_VERSION_V2,
+      references: [],
+      state: {
+        visualization: {
+          layerId: LAYER_ID,
+          layerType: 'data',
+          metricAccessor: PRIMARY_ACCESSOR,
+          secondaryMetricAccessor: SECONDARY_ACCESSOR,
+          secondaryLabel: 'ES|QL custom',
+        },
+        datasourceStates: {
+          textBased: {
+            layers: {
+              [LAYER_ID]: {
+                columns: [
+                  { columnId: PRIMARY_ACCESSOR, fieldName: 'median_bytes' },
+                  { columnId: SECONDARY_ACCESSOR, fieldName: 'max_bytes' },
+                ],
+              },
+            },
+          },
+        },
+        query: { query: '', language: 'kuery' },
+        filters: [],
+      },
+    } as LensAttributesV2;
+
+    const result = transformToV3LensItemAttributes(attributes);
+    const secondaryColumn = result.state?.datasourceStates?.textBased?.layers?.[
+      LAYER_ID
+    ]?.columns?.find((column: { columnId: string }) => column.columnId === SECONDARY_ACCESSOR);
+
+    expect(secondaryColumn).toEqual(
+      expect.objectContaining({
+        label: 'ES|QL custom',
+        customLabel: true,
+      })
+    );
   });
 
   it('is idempotent for already-migrated v3 attributes', () => {
