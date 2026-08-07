@@ -13,6 +13,7 @@ import { spaceTest } from '../fixtures';
 
 const ESQL_ENDPOINT = '/internal/search/esql_async';
 const REQUEST_COUNT_OPTIONS = {
+  endpoint: ESQL_ENDPOINT,
   method: 'POST',
   exactPathname: true,
 } as const;
@@ -60,15 +61,11 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) on submit',
       async ({ page, pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESQL_ENDPOINT,
-          async () => {
-            await pageObjects.discover.submitQuery();
-            await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest(page);
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await waitForChartRequest(page);
+        });
         expect(count).toBe(2);
       }
     );
@@ -76,15 +73,11 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when refreshing',
       async ({ page, pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESQL_ENDPOINT,
-          async () => {
-            await pageObjects.discover.submitQuery();
-            await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest(page);
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await waitForChartRequest(page);
+        });
         expect(count).toBe(2);
       }
     );
@@ -98,15 +91,11 @@ spaceTest.describe(
           'from logstash-* | where bytes > 1000 '
         );
         await pageObjects.discover.waitUntilSearchingHasFinished();
-        const count = await network.countMatchingRequests(
-          ESQL_ENDPOINT,
-          async () => {
-            await pageObjects.discover.submitQuery();
-            await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest(page);
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await waitForChartRequest(page);
+        });
         expect(count).toBe(2);
       }
     );
@@ -114,23 +103,19 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when changing the time range',
       async ({ page, pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESQL_ENDPOINT,
-          async () => {
-            // Pre-register before the range change so neither the docs nor chart response can be missed.
-            let esqlCount = 0;
-            const waitForBoth = page.waitForResponse(
-              (r) => r.url().includes(ESQL_ENDPOINT) && ++esqlCount >= 2,
-              { timeout: 30_000 }
-            );
-            await pageObjects.datePicker.setAbsoluteRange({
-              from: 'Sep 21, 2015 @ 06:31:44.000',
-              to: 'Sep 23, 2015 @ 00:00:00.000',
-            });
-            await waitForBoth;
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          // Pre-register before the range change so neither the docs nor chart response can be missed.
+          let esqlCount = 0;
+          const waitForBoth = page.waitForResponse(
+            (r) => r.url().includes(ESQL_ENDPOINT) && ++esqlCount >= 2,
+            { timeout: 30_000 }
+          );
+          await pageObjects.datePicker.setAbsoluteRange({
+            from: 'Sep 21, 2015 @ 06:31:44.000',
+            to: 'Sep 23, 2015 @ 00:00:00.000',
+          });
+          await waitForBoth;
+        });
         expect(count).toBe(2);
       }
     );
@@ -138,14 +123,10 @@ spaceTest.describe(
     spaceTest(
       'should send no requests when toggling the chart visibility',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESQL_ENDPOINT,
-          async () => {
-            await pageObjects.discover.hideChart();
-            await pageObjects.discover.showChart();
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.hideChart();
+          await pageObjects.discover.showChart();
+        });
         expect(count).toBe(0);
       }
     );
@@ -161,14 +142,10 @@ spaceTest.describe(
         });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const count = await network.countMatchingRequests(
-          ESQL_ENDPOINT,
-          async () => {
-            await pageObjects.discover.showChart();
-            await waitForChartRequest(page);
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.showChart();
+          await waitForChartRequest(page);
+        });
         expect(count).toBe(1);
       }
     );

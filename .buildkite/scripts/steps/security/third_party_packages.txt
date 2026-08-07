@@ -1,3 +1,4 @@
+eslint-plugin-n
 @xterm/xterm
 knip
 safe-stable-stringify
@@ -58,4 +59,5 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/plugin-emotion
 graphql
