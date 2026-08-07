@@ -8,9 +8,21 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { METRICS_INFO_EVENT_TYPE } from './constants';
+import { MAX_DIMENSIONS_REACHED_EVENT_TYPE, METRICS_INFO_EVENT_TYPE } from './constants';
 
 export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
+  analytics.registerEventType({
+    eventType: MAX_DIMENSIONS_REACHED_EVENT_TYPE,
+    schema: {
+      max_dimensions: {
+        type: 'integer',
+        _meta: {
+          description: 'Maximum number of dimensions allowed in the Metrics experience',
+        },
+      },
+    },
+  });
+
   analytics.registerEventType({
     eventType: METRICS_INFO_EVENT_TYPE,
     schema: {
