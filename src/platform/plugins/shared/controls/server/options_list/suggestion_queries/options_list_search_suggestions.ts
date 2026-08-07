@@ -53,8 +53,28 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
    * regardless of if it is keyword only, keyword+text, or some nested keyword/keyword+text field.
    */
   textOrKeywordOrNested: {
-    buildAggregation: ({
+    buildSearchFilter: ({
       searchTechnique,
+      searchString,
+      fieldName,
+      fieldSpec,
+    }: OptionsListRequestBody) => {
+      const hasSearchString = searchString && searchString.length > 0;
+      if (!hasSearchString || fieldSpec?.type === 'date') return undefined;
+
+      return {
+        [(searchTechnique ?? getDefaultSearchTechnique(fieldSpec?.type ?? 'string')) as string]: {
+          [fieldName]: {
+            value:
+              searchTechnique === 'wildcard'
+                ? `*${getEscapedWildcardQuery(searchString)}*`
+                : searchString,
+            case_insensitive: true,
+          },
+        },
+      };
+    },
+    buildAggregation: ({
       searchString,
       fieldName,
       fieldSpec,
@@ -62,63 +82,40 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       size,
     }: OptionsListRequestBody) => {
       const hasSearchString = searchString && searchString.length > 0;
-      if (!hasSearchString || fieldSpec?.type === 'date') {
-        // we can assume that this is only ever called with a search string, and date fields are not
-        // currently searchable; so, if any of these things is true, this is invalid.
-        return undefined;
-      }
+      if (!hasSearchString || fieldSpec?.type === 'date') return undefined;
 
       const subTypeNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
-      let textOrKeywordQuery: any = {
-        filteredSuggestions: {
-          filter: {
-            [(searchTechnique ?? getDefaultSearchTechnique(fieldSpec?.type ?? 'string')) as string]:
-              {
-                [fieldName]: {
-                  value:
-                    searchTechnique === 'wildcard'
-                      ? `*${getEscapedWildcardQuery(searchString)}*`
-                      : searchString,
-                  case_insensitive: true,
-                },
-              },
+      const suggestionsAgg = {
+        suggestions: {
+          terms: {
+            size,
+            field: fieldName,
+            shard_size: 10,
+            order: getSortType(sort),
           },
-          aggs: {
-            suggestions: {
-              terms: {
-                size,
-                field: fieldName,
-                shard_size: 10,
-                order: getSortType(sort),
-              },
-            },
-            unique_terms: {
-              cardinality: {
-                field: fieldName,
-              },
-            },
+        },
+        unique_terms: {
+          cardinality: {
+            field: fieldName,
           },
         },
       };
 
       if (subTypeNested) {
-        textOrKeywordQuery = {
+        return {
           nestedSuggestions: {
             nested: {
               path: subTypeNested.nested.path,
             },
-            aggs: {
-              ...textOrKeywordQuery,
-            },
+            aggs: suggestionsAgg,
           },
         };
       }
-      return textOrKeywordQuery;
+      return suggestionsAgg;
     },
     parse: (rawEsResult, { fieldSpec }) => {
-      let basePath = 'aggregations';
       const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
-      basePath += isNested ? '.nestedSuggestions.filteredSuggestions' : '.filteredSuggestions';
+      const basePath = `aggregations${isNested ? '.nestedSuggestions' : ''}`;
 
       const buckets = get(rawEsResult, `${basePath}.suggestions.buckets`, []) as EsBucket[];
       const suggestions = buckets.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {

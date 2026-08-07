@@ -119,7 +119,7 @@ export function fetchAndValidate$({
           if ('totalCardinality' in emptyResponse) {
             return emptyResponse;
           }
-          return { suggestions: emptyResponse.suggestions, totalCardinality: 0 };
+          return { suggestions: emptyResponse.suggestions, totalCardinality: 0, isPartial: false };
         }
 
         if (built.showLoadingSuggestions) {

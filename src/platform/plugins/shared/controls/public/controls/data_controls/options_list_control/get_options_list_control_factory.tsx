@@ -206,6 +206,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
+        temporaryStateManager.api.setIsPartial(successResponse.isPartial);
 
         // reset the request size back to the minimum (if it's not already)
         if (temporaryStateManager.api.requestSize$.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {

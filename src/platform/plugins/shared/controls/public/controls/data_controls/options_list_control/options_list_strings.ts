@@ -111,12 +111,12 @@ export const OptionsListStrings = {
     },
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
-        defaultMessage: 'Ignore timeout for results',
+        defaultMessage: 'Always load all results',
       }),
     getRunPastTimeoutTooltip: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout.tooltip', {
         defaultMessage:
-          'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
+          'By default, the list of values available in the control can be partial when the data comes from very large data sets. Turn on this option to always load the full list. It will take longer to load.',
       }),
   },
   popover: {

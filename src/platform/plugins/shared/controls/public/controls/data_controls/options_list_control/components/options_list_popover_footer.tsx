@@ -14,6 +14,7 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPopoverFooter,
   EuiProgress,
   useEuiBackgroundColor,
@@ -42,9 +43,10 @@ const aggregationToggleButtons = [
 export const OptionsListPopoverFooter = () => {
   const { componentApi } = useOptionsListContext();
 
-  const [exclude, loading] = useBatchedPublishingSubjects(
+  const [exclude, loading, isPartial] = useBatchedPublishingSubjects(
     isDSLOptionsListApi(componentApi) ? componentApi.exclude$ : new BehaviorSubject(false),
-    componentApi.dataLoading$
+    componentApi.dataLoading$,
+    componentApi.isPartial$
   );
 
   return (
@@ -87,6 +89,19 @@ export const OptionsListPopoverFooter = () => {
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
+          {isPartial && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                aria-label="Some values may be missing."
+                size="m"
+                type="partial"
+                title={'Some values may be missing.'}
+                content={
+                  'This control is configured to load values fast and can show partial results if it relies on a large data set. To ensure it shows all values, edit the control to "Always load all results". All valid values will show but will take longer to load.'
+                }
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </>
