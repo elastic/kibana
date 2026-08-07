@@ -12,13 +12,7 @@ import { useFetchErrorToast } from './use_fetch_error_toast';
 const SIGNIFICANT_EVENTS_AVAILABILITY_QUERY_KEY = ['significantEventsAvailability'] as const;
 
 export const useSignificantEventsAvailability = () => {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   const { data, isLoading, error } = useQuery({

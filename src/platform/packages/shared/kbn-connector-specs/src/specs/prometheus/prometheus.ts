@@ -550,7 +550,6 @@ export const Prometheus: ConnectorSpec = {
         const response = await ctx.client.get(`${buildBaseUrl(ctx)}/api/v2/status`);
         const status = response.data as AlertmanagerStatus;
         return {
-          ok: true,
           message: `Successfully connected to Alertmanager ${
             status.versionInfo?.version ?? ''
           } (cluster status: ${status.cluster?.status ?? 'unknown'}).`,

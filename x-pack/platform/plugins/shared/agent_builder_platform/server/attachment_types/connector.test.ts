@@ -114,6 +114,7 @@ describe('connector attachment type', () => {
             supportedFeatureIds: [],
           },
           actions: {},
+          test: { handler: jest.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);
@@ -173,6 +174,7 @@ describe('connector attachment type', () => {
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
         });
         formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
 
@@ -215,6 +217,7 @@ describe('connector attachment type', () => {
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
           skill: 'Always resolve channel ID before sending a message.',
         });
         formatSchemaForLlmMock.mockReturnValue('No parameters');
@@ -267,6 +270,7 @@ describe('connector attachment type', () => {
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
         });
 
         const attachment = createAttachment(validData);
