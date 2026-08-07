@@ -22,8 +22,10 @@ import {
   getBarSeriesLayers,
   hasAreaSeries,
   hasNonBarSeries,
+  isAreaLayer,
   isBarLayer,
   isHorizontalChart,
+  isStackedChart,
 } from '../../state_helpers';
 import { getDataLayers } from '../../visualization_helpers';
 
@@ -75,6 +77,10 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
   const hasAreaSettings = hasAreaSeries(dataLayers);
   const shouldDisplayDividerHr = !!(hasAnyBarSetting && isHasNonBarSeries);
 
+  const hasStackedAreaSeries = dataLayers.some(
+    (layer) => isStackedChart(layer.seriesType) && isAreaLayer(layer)
+  );
+
   return (
     <>
       {hasAnyBarSetting ? (
@@ -113,6 +119,7 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
             }}
           />
           <AreaFillOption
+            isStacked={hasStackedAreaSeries}
             selectedAreaFillOption={state?.areaFill ?? AreaFillOptions.SOLID}
             onChange={(newValue) => {
               setState({

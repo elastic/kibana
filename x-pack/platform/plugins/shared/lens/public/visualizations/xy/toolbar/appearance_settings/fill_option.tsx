@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import type { AreaFillOption as AreaFillOptionValue } from '@kbn/expression-xy-plugin/common';
 import { AreaFillOptions } from '@kbn/expression-xy-plugin/public';
@@ -15,11 +16,13 @@ const fillLabel = i18n.translate('xpack.lens.xyChart.fillLabel', {
   defaultMessage: 'Fill',
 });
 
-const areaFillOptions: Array<{
-  id: string;
-  value: AreaFillOptionValue;
-  label: string;
-}> = [
+export interface AreaFillOptionProps {
+  isStacked: boolean;
+  selectedAreaFillOption?: AreaFillOptionValue;
+  onChange: (value: AreaFillOptionValue) => void;
+}
+
+const areaFillOptions: EuiButtonGroupOptionProps[] = [
   {
     id: `xy_area_fill_solid`,
     value: AreaFillOptions.SOLID,
@@ -36,20 +39,26 @@ const areaFillOptions: Array<{
   },
 ];
 
-export interface AreaFillOptionProps {
-  selectedAreaFillOption?: AreaFillOptionValue;
-  onChange: (value: AreaFillOptionValue) => void;
-}
-
 export const AreaFillOption: React.FC<AreaFillOptionProps> = ({
+  isStacked,
   selectedAreaFillOption = AreaFillOptions.SOLID,
   onChange,
 }) => {
   const selectedOption =
     areaFillOptions.find(({ value }) => value === selectedAreaFillOption) ?? areaFillOptions[0];
 
+  const validation = useMemo(() => {
+    if (isStacked && selectedAreaFillOption === AreaFillOptions.GRADIENT) {
+      return {
+        help: i18n.translate('xpack.lens.axisExtent.areaFill.gradientErrorMsg', {
+          defaultMessage: 'Gradient fill can make bands in stacked area charts harder to read',
+        }),
+      };
+    }
+  }, [isStacked, selectedAreaFillOption]);
+
   return (
-    <EuiFormRow display="columnCompressed" label={fillLabel} fullWidth>
+    <EuiFormRow display="columnCompressed" label={fillLabel} fullWidth helpText={validation?.help}>
       <EuiButtonGroup
         isFullWidth
         legend={fillLabel}
