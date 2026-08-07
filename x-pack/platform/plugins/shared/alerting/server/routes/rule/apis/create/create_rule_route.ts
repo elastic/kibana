@@ -116,7 +116,9 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 systemActions,
               }),
               options: { id: params?.id },
-              templateId: createRuleData.template_id,
+              ...(createRuleData.template_id
+                ? { templateId: createRuleData.template_id }
+                : {}),
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type
