@@ -47,7 +47,6 @@ dependsOn:
   - '@kbn/ml-agg-utils'
   - '@kbn/share-plugin'
   - '@kbn/tooling-log'
-  - '@kbn/cross-cluster-replication-plugin'
   - '@kbn/index-management-plugin'
   - '@kbn/snapshot-restore-plugin'
   - '@kbn/monitoring-plugin'
