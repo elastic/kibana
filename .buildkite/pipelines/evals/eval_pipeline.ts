@@ -13,6 +13,14 @@ import Path from 'path';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
+// Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
+// whole file. Each shard becomes its own fanout step, filtered by Playwright --grep/--grep-invert.
+export interface EvalsSuiteShard {
+  id: string;
+  grep?: string;
+  grepInvert?: string;
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
@@ -21,6 +29,8 @@ export interface EvalsSuiteMetadataEntry {
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  shards?: EvalsSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {

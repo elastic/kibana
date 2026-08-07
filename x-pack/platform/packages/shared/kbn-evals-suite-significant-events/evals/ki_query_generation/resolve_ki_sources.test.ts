@@ -51,9 +51,9 @@ describe('KI_FEATURE_SOURCES_TO_RUN', () => {
     ]);
   });
 
-  it('falls back to auto for an unrecognized value', async () => {
+  it('rejects an unrecognized value rather than silently picking a variant', async () => {
     await expect(
-      loadSources({ KI_QUERY_GENERATION_KI_FEATURE_SOURCE: 'nonsense' })
-    ).resolves.toEqual(['auto']);
+      loadSources({ KI_QUERY_GENERATION_KI_FEATURE_SOURCE: 'cannonical' })
+    ).rejects.toThrow('Unsupported KI feature source "cannonical"');
   });
 });

@@ -98,6 +98,13 @@ record_suite_failure() {
 on_exit() {
   local exit_status=$?
   trap - EXIT
+  # The pre-run snapshot is only a baseline; ES fills `.es` while the suite runs, so these are the
+  # numbers that show a watermark breach. Skipped in the parent fanout step, which never starts ES.
+  if [[ -d .es ]]; then
+    echo "--- Disk usage after the run"
+    df -h .
+    du -sh .es 2>/dev/null || true
+  fi
   cleanup
   record_suite_failure "$exit_status"
   exit "$exit_status"
@@ -190,14 +197,14 @@ EOF
 
       # Suites that don't fit one step declare `shards` in evals.suites.json; each shard becomes a
       # separate step (with its own Scout stack) filtered by Playwright --grep/--grep-invert.
-      # An explicit EVAL_GREP is a manual override, so it takes precedence over the shard split.
+      # An explicit grep/grep-invert is a manual override, so it takes precedence over the shards.
       # Expanded into parallel arrays rather than read positionally from a delimited row, because
       # bash collapses runs of tabs when splitting and would shift a shard with an empty `grep`.
       shard_ids=()
       shard_greps=()
       shard_grep_inverts=()
       shard_count=0
-      if [[ -z "${EVAL_GREP:-}" ]]; then
+      if [[ -z "${EVAL_GREP:-}" && -z "${EVAL_GREP_INVERT:-}" ]]; then
         shard_count="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '(.shards // []) | length' 2>/dev/null || echo 0)"
         [[ "$shard_count" =~ ^[0-9]+$ ]] || shard_count=0
       fi

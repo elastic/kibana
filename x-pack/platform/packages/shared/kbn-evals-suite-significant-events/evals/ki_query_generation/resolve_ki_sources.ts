@@ -39,7 +39,11 @@ const resolveKISourcesToRun = (source: KISourceInput | string | undefined): KISo
     return [source];
   }
 
-  return ['auto'];
+  // Falling back would let a typo like `cannonical` quietly select a different variant set, which
+  // is invisible in the report and changes what CI measures.
+  throw new Error(
+    `Unsupported KI feature source "${source}". Expected one of: canonical, snapshot, auto, both.`
+  );
 };
 
 /**

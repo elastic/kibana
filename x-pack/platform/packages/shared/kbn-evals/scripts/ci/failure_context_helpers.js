@@ -40,9 +40,17 @@ const WEEKLY_ROLLUP_OUTPUT_INSTRUCTIONS = `Output exactly these bullets, in this
 
 Constraints: base everything on the per-suite triage above (do not invent suites, models, or causes); no second person, narration, or preamble; portable markdown only (bullets and inline \`code\`; no bold, headings, links, or code fences); stay under 900 characters.`;
 
-function failureLogMetadataKey(suiteId, project, shardId) {
-  const base = `kbn-evals:suite-failure-log:${slugifyId(suiteId)}:${slugifyId(project)}`;
-  return shardId ? `${base}:${slugifyId(shardId)}` : base;
+/**
+ * Unsharded metadata key for one model's log excerpt. Sharded runs append
+ * `:<slugified shard id>` to this, but only `run_suite.sh` writes those keys, so
+ * the shard suffix is matched by prefix here rather than rebuilt.
+ *
+ * @param {string} suiteId
+ * @param {string} project
+ * @returns {string}
+ */
+function failureLogMetadataKey(suiteId, project) {
+  return `kbn-evals:suite-failure-log:${slugifyId(suiteId)}:${slugifyId(project)}`;
 }
 
 /**

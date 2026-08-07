@@ -26,10 +26,16 @@ export interface TraceBasedEvaluatorConfig {
   extractResult: (response: EsqlResponse) => number | null;
   // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
   isResultValid?: (result: number | null) => boolean;
-  // Optional check for a trace that is present but never emitted this metric, which no amount of
-  // retrying will produce. Reported as an unscored result so aggregations exclude it, rather than
-  // scored as a zero the provider never measured.
+  // Trace is present but never emitted this metric, so retrying cannot help. Scored as unreported
+  // rather than zero, which the provider never measured.
   isNotReported?: (response: EsqlResponse) => boolean;
+  // An unmapped column makes ES|QL reject the query, leaving no row for `isNotReported`. Re-asks
+  // without it: a complete trace means unreported rather than not yet indexed.
+  notReportedProbe?: {
+    matchesQueryError: (error: unknown) => boolean;
+    buildQuery: (traceId: string) => string;
+    isTraceComplete: (response: EsqlResponse) => boolean;
+  };
 }
 
 export function createTraceBasedEvaluator({
@@ -41,7 +47,8 @@ export function createTraceBasedEvaluator({
   log: ToolingLog;
   config: TraceBasedEvaluatorConfig;
 }): Evaluator {
-  const { name, buildQuery, extractResult, isResultValid, isNotReported } = config;
+  const { name, buildQuery, extractResult, isResultValid, isNotReported, notReportedProbe } =
+    config;
 
   return {
     evaluate: async ({ output }) => {
@@ -69,9 +76,43 @@ export function createTraceBasedEvaluator({
 
       let lastResult: number | null | undefined;
 
+      async function runQuery(query: string): Promise<EsqlResponse> {
+        return (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
+      }
+
+      // Anything the probe cannot vouch for stays a failure, so real query errors still surface.
+      async function probeNotReported(error: unknown): Promise<typeof NOT_REPORTED> {
+        if (!notReportedProbe?.matchesQueryError(error)) {
+          throw error;
+        }
+
+        let probeResponse: EsqlResponse;
+        try {
+          probeResponse = await runQuery(notReportedProbe.buildQuery(traceId));
+        } catch {
+          // Probe failed too, so nothing can be concluded about the trace.
+          throw error;
+        }
+
+        if (!probeResponse.values?.length || !notReportedProbe.isTraceComplete(probeResponse)) {
+          throw error;
+        }
+
+        log.debug(
+          `${name} is not reported by this provider (column missing from the mapping), trace ${traceId} is otherwise complete`
+        );
+        return NOT_REPORTED;
+      }
+
       async function fetchStats(): Promise<number | typeof NOT_REPORTED> {
         const query = buildQuery(traceId);
-        const response = (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
+
+        let response: EsqlResponse;
+        try {
+          response = await runQuery(query);
+        } catch (error) {
+          return probeNotReported(error);
+        }
 
         const { values } = response;
 

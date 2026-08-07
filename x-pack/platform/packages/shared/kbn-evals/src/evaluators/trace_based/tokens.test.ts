@@ -90,4 +90,59 @@ describe('createCachedTokensEvaluator', () => {
     expect(result.score).toBe(50);
     expect(query).toHaveBeenCalledTimes(2);
   });
+
+  describe('when the cache_read column is missing from the mapping', () => {
+    const unknownColumnError = () =>
+      new Error(
+        'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\n' +
+          'line 1:79: Unknown column [attributes.gen_ai.usage.cache_read.input_tokens], ' +
+          'did you mean [attributes.gen_ai.usage.input_tokens]?'
+      );
+
+    const INPUT_ONLY_COLUMNS = [{ name: 'input_tokens', type: 'long' }];
+
+    it('reports no score once the probe shows the trace is otherwise complete', async () => {
+      const query = mockEsClient.esql.query as jest.Mock;
+      query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResolvedValueOnce({ columns: INPUT_ONLY_COLUMNS, values: [[4000]] });
+
+      const result = await evaluate();
+
+      expect(result.score).toBeNull();
+      expect(result.label).toBe('unavailable');
+      expect(query).toHaveBeenCalledTimes(2);
+      expect(mockLog.error).not.toHaveBeenCalled();
+      expect(mockLog.warning).not.toHaveBeenCalled();
+    });
+
+    it('retries instead when the probe shows the trace has not been indexed yet', async () => {
+      const query = mockEsClient.esql.query as jest.Mock;
+      query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResolvedValueOnce({ columns: INPUT_ONLY_COLUMNS, values: [[null]] })
+        .mockResolvedValueOnce({ columns: COLUMNS, values: [[75, 4000]] });
+
+      const promise = evaluate();
+      await jest.advanceTimersByTimeAsync(60_000);
+      const result = await promise;
+
+      expect(result.score).toBe(75);
+      expect(query).toHaveBeenCalledTimes(3);
+    });
+
+    it('keeps an unknown column that is not cache_read a hard failure', async () => {
+      const query = mockEsClient.esql.query as jest.Mock;
+      query.mockRejectedValue(new Error('verification_exception: Unknown column [typo_column]'));
+
+      const promise = evaluate();
+      await jest.advanceTimersByTimeAsync(300_000);
+      const result = await promise;
+
+      expect(result.label).toBe('error');
+      // Only the main query runs; the probe is never reached for an unrelated column.
+      expect(query).toHaveBeenCalledTimes(6);
+      expect(mockLog.error).toHaveBeenCalled();
+    });
+  });
 });
