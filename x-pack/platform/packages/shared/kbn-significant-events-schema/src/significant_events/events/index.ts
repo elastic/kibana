@@ -8,7 +8,13 @@
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { significantEventBaseSchema } from '../common_schemas';
-import { MAX_TEXT_LENGTH, MAX_ID_LENGTH, NO_RAW_SENSITIVE_VALUES_RULE } from '../constants';
+import {
+  ASSESSMENT_NOTE_ROLE_RULE,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+} from '../constants';
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['open', 'closed', 'dismissed'] as const;
 
@@ -66,7 +72,9 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .optional()
     .describe(
       dedent`
-        Free-text note from the analyst or agent that assessed this event. Use to capture investigation rationale, ambiguities, or caveats not covered by other fields.
+        Concise operator-facing rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        ${ASSESSMENT_NOTE_ROLE_RULE}
+        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, detection artifacts, or memory-page presence.
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
