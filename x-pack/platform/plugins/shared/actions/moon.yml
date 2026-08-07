@@ -69,6 +69,7 @@ dependsOn:
   - '@kbn/usage-api-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
