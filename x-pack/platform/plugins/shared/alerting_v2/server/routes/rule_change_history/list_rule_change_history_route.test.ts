@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { RuleChangesHistoryClientContract } from '../../lib/rule_changes_history';
 import { createRuleChangesHistoryClientMock } from '../../lib/rule_changes_history/rule_changes_history_client.mock';
 import { createRouteDependencies } from '../test_utils';
 import { ListRuleChangeHistoryRoute } from './list_rule_change_history_route';
@@ -18,6 +19,20 @@ const createMocks = () => {
   return { deps, ruleChangesHistoryClient };
 };
 
+const buildListRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks>) =>
+  new ListRuleChangeHistoryRoute(
+    mocks.deps.ctx,
+    request as any,
+    mocks.ruleChangesHistoryClient as RuleChangesHistoryClientContract
+  );
+
+const buildGetRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks>) =>
+  new GetRuleChangeHistoryEventRoute(
+    mocks.deps.ctx,
+    request as any,
+    mocks.ruleChangesHistoryClient as RuleChangesHistoryClientContract
+  );
+
 describe('ListRuleChangeHistoryRoute', () => {
   it('forwards rule id, page, and per_page to the client', async () => {
     const mocks = createMocks();
@@ -25,11 +40,7 @@ describe('ListRuleChangeHistoryRoute', () => {
       params: { id: 'rule-1' },
       query: { page: 2, per_page: 25 },
     });
-    const route = new ListRuleChangeHistoryRoute(
-      mocks.deps.ctx,
-      request as unknown as KibanaRequest,
-      mocks.ruleChangesHistoryClient
-    );
+    const route = buildListRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
@@ -59,11 +70,7 @@ describe('ListRuleChangeHistoryRoute', () => {
       params: { id: 'rule-1' },
       query: { page: 1, per_page: 20 },
     });
-    const route = new ListRuleChangeHistoryRoute(
-      mocks.deps.ctx,
-      request as unknown as KibanaRequest,
-      mocks.ruleChangesHistoryClient
-    );
+    const route = buildListRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
@@ -77,11 +84,7 @@ describe('ListRuleChangeHistoryRoute', () => {
       params: { id: 'rule-1' },
       query: { page: 1, per_page: 20 },
     });
-    const route = new ListRuleChangeHistoryRoute(
-      mocks.deps.ctx,
-      request as unknown as KibanaRequest,
-      mocks.ruleChangesHistoryClient
-    );
+    const route = buildListRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
@@ -103,11 +106,7 @@ describe('GetRuleChangeHistoryEventRoute', () => {
     const request = httpServerMock.createKibanaRequest({
       params: { id: 'rule-1', eventId: 'event-1' },
     });
-    const route = new GetRuleChangeHistoryEventRoute(
-      mocks.deps.ctx,
-      request as unknown as KibanaRequest,
-      mocks.ruleChangesHistoryClient
-    );
+    const route = buildGetRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 

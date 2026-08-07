@@ -503,7 +503,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         isCurrent: true,
         metadata: { version: updated.metadata.version },
       });
-      expect(list.items[0]).not.toHaveProperty('snapshot');
+      expect('snapshot' in list.items[0]).toBe(false);
       expect(list.items[0].changes?.count).toBeGreaterThan(0);
       expect(list.items[0].changes?.summary).toStrictEqual(
         expect.objectContaining({
