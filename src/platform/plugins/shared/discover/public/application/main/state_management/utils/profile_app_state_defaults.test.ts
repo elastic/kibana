@@ -13,11 +13,11 @@ import { createContextAwarenessMocks } from '../../../../context_awareness/__moc
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../context_awareness/toolkit';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
-  DEFAULT_PROFILE_STATE_FIELDS,
-  type DefaultProfileStateField,
-  type DefaultProfileStateFields,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
 } from '../redux';
-import { getDefaultProfileState, getFieldsToReset } from './default_profile_state';
+import { getProfileAppStateDefaults, getFieldsToReset } from './profile_app_state_defaults';
 
 const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
@@ -31,13 +31,13 @@ const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
 
 scopedProfilesManager.resolveDataSourceProfile({});
 
-const createDefaultProfileState = (fieldsToReset: DefaultProfileStateFields) => ({
+const createProfileAppStateDefaults = (fieldsToReset: ProfileAppStateDefaultFields) => ({
   resetId: 'test',
   fieldsToReset,
   snapshotsByProfileId: {},
 });
 
-const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
+const getResetByField = (fieldsToReset: ProfileAppStateDefaultField[]) => ({
   columns: fieldsToReset.includes('columns'),
   rowHeight: fieldsToReset.includes('rowHeight'),
   breakdownField: fieldsToReset.includes('breakdownField'),
@@ -46,21 +46,21 @@ const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
   hideSidebar: fieldsToReset.includes('hideSidebar'),
 });
 
-describe('getDefaultProfileState', () => {
+describe('getProfileAppStateDefaults', () => {
   describe('getPreFetchState', () => {
     it('should return expected breakdownField', () => {
-      const appStateWithBreakdownField = getDefaultProfileState({
+      const appStateWithBreakdownField = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['breakdownField']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['breakdownField']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
       expect(appStateWithBreakdownField).toEqual({
         breakdownField: 'extension',
       });
 
-      const appStateWithoutBreakdownField = getDefaultProfileState({
+      const appStateWithoutBreakdownField = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['breakdownField']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['breakdownField']),
         dataView: emptyDataView,
       }).getPreFetchState();
 
@@ -68,9 +68,9 @@ describe('getDefaultProfileState', () => {
     });
 
     it('should return expected hideChart', () => {
-      const appStateWithHideChart = getDefaultProfileState({
+      const appStateWithHideChart = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['hideChart']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['hideChart']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
 
@@ -78,9 +78,9 @@ describe('getDefaultProfileState', () => {
         hideChart: true,
       });
 
-      const appStateWithoutHideChart = getDefaultProfileState({
+      const appStateWithoutHideChart = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState('none'),
+        profileAppStateDefaults: createProfileAppStateDefaults('none'),
         dataView: emptyDataView,
       }).getPreFetchState();
 
@@ -88,17 +88,17 @@ describe('getDefaultProfileState', () => {
     });
 
     it('should return expected hideTable', () => {
-      let appState = getDefaultProfileState({
+      let appState = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['hideTable']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['hideTable']),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
       expect(appState).toEqual({
         hideTable: false,
       });
-      appState = getDefaultProfileState({
+      appState = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState('none'),
+        profileAppStateDefaults: createProfileAppStateDefaults('none'),
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
       expect(appState).toEqual(undefined);
@@ -107,9 +107,9 @@ describe('getDefaultProfileState', () => {
 
   describe('getPostFetchState', () => {
     it('should return expected columns', () => {
-      const appStateFromDataView = getDefaultProfileState({
+      const appStateFromDataView = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['columns']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
@@ -130,9 +130,9 @@ describe('getDefaultProfileState', () => {
         },
       });
 
-      const appStateFromEsqlColumns = getDefaultProfileState({
+      const appStateFromEsqlColumns = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['columns']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['columns']),
         dataView: emptyDataView,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
@@ -154,9 +154,9 @@ describe('getDefaultProfileState', () => {
     });
 
     it('should return expected rowHeight', () => {
-      const appState = getDefaultProfileState({
+      const appState = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState(['rowHeight']),
+        profileAppStateDefaults: createProfileAppStateDefaults(['rowHeight']),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: [],
@@ -168,9 +168,9 @@ describe('getDefaultProfileState', () => {
     });
 
     it('should return undefined', () => {
-      const appState = getDefaultProfileState({
+      const appState = getProfileAppStateDefaults({
         scopedProfilesManager,
-        defaultProfileState: createDefaultProfileState('none'),
+        profileAppStateDefaults: createProfileAppStateDefaults('none'),
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
         defaultColumns: [],
@@ -187,7 +187,7 @@ describe('getFieldsToReset', () => {
   });
 
   it('should return all when all fields should reset', () => {
-    expect(getFieldsToReset(getResetByField([...DEFAULT_PROFILE_STATE_FIELDS]))).toBe('all');
+    expect(getFieldsToReset(getResetByField([...PROFILE_APP_STATE_DEFAULT_FIELDS]))).toBe('all');
   });
 
   it('should return only selected fields', () => {
