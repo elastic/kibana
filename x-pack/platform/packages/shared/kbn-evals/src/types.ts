@@ -69,8 +69,7 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
  * standardized score/label/explanation outputs. The `metadata` field can carry trace
  * references and evaluator-specific details for explainability.
  *
- * This shape is intentionally compatible with the existing evaluator implementations and
- * the Phoenix client types:
+ * This shape is intentionally compatible with the existing evaluator implementations:
  * - `score` may be omitted or `null` for "unavailable"/"error" cases
  * - `label`/`explanation` are used widely in tests and reporting
  */
@@ -125,9 +124,9 @@ export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOut
 ) => Promise<TTaskOutput>;
 
 /**
- * Shared executor interface implemented by both the in-Kibana and Phoenix-backed executors.
+ * Shared executor interface for eval runners.
  *
- * Note: the eval suites should depend on this interface (or structural typing), not Phoenix-specific types.
+ * Note: the eval suites should depend on this interface (or structural typing), not executor-specific types.
  */
 export interface EvalsExecutorClient {
   runExperiment<
