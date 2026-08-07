@@ -1142,10 +1142,7 @@ describe('generateExecutorFunction', () => {
         return ctx.client.get('https://denied.example.com/api');
       });
 
-      const executor = generateExecutorFunction({
-        actions: makeActions(),
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-      });
+      const executor = makeExecutor();
 
       const result = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
