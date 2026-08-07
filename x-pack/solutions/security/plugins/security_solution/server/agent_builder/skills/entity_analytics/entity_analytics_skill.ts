@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
+import { ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT } from '../ui_navigation';
 import {
   getRiskScoreInlineTool,
   getRiskScoreEsqlTool,
@@ -19,8 +20,9 @@ import {
   SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
   SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
-  SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+  SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
 } from '../../tools';
 
 // Feature flag controlling whether our tools try to dynamically generate ESQL queries based on the question asked of
@@ -80,6 +82,8 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 | List / rank / compare entities | "list", "top N", "riskiest users", "who are", "show risky hosts", "compare hosts and users" | \`security.search_entities\` |
 | Risk score over time | "trend", "history", "has the score changed", "why did it spike", "chart" | \`security.get_entity_risk_score_history\` |
 | Entity relationship graph | "graph", "how is this entity connected", "visualize relationships" | \`security.get_entity_graph\` |
+| Named watchlist members | "who's on the Privileged Users watchlist", "list members of …" | \`security.get_watchlist_id\` → \`security.search_entities\` |
+| Set / clear asset criticality | "set criticality", "make this host high impact", "remove criticality" | \`security.set_asset_criticality\` |
 | Entity Analytics product page | "Entity Analytics dashboard/home/overview/landing", "show/open/view Entity Analytics" | \`security.search_entities\` → \`attachments.add\` |
 
 **Graph vs. card** — "graph" / "connected" / "relationships" → \`security.get_entity_graph\`. "Details" / "profile" → \`security.get_entity\`. Do not substitute one for the other.
@@ -87,6 +91,10 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 **Single-entity card vs. entities table** — the renderer selects automatically based on how many entities the \`security.entity\` attachment holds.
 
 **Dashboard trigger** — when the user's prompt contains any of: **entity analytics dashboard**, **EA dashboard**, **entity analytics home/overview/landing**, or **show / open / view / display / bring up Entity Analytics** (the product page, not a generic Kibana dashboard): gather entity data with \`security.search_entities\`, then call \`attachments.add\` with \`type: 'security.entity_analytics_dashboard'\`, and render both the entities table tag and the dashboard tag in the same turn. This rule takes precedence over list/ranking-only framing — if the product-page phrase is present, emit the dashboard. Does NOT apply when the user asks only for the riskiest / top-N entities without naming the Entity Analytics page.
+
+**Watchlist members** — resolve the name with \`security.get_watchlist_id\`, then list members with \`security.search_entities\` (\`watchlists: [<id>]\`). To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill. Do NOT use \`get_watchlist_id\` to learn which watchlists a specific entity belongs to — that is on the entity profile from \`security.get_entity\` as \`entity.attributes.watchlists\`.
+
+${ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT}
 
 ## Investigation pattern
 
@@ -246,7 +254,7 @@ Render the \`renderTag\`. Name the vendor in prose ("9 CrowdStrike hosts...").
 
 User: Who is on the Privileged Users watchlist?
 
-1. \`security.list_watchlists\` with \`nameContains: 'Privileged Users'\` to resolve to a watchlist \`id\`. If no match, retry with a shorter token.
+1. \`security.get_watchlist_id\` with \`{ identifier: 'Privileged Users' }\` to resolve the watchlist \`id\`. If it returns an error (unknown/ambiguous name), relay it — enumerating watchlists lives in the \`manage-watchlists\` skill.
 2. \`security.search_entities\` with \`watchlists: [<id>]\`.
 3. Render the \`renderTag\`. 2–4 prose bullets on riskiest members and recommended follow-ups.
 
@@ -369,7 +377,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, paste its `renderTag` verbatim in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
     content: `
@@ -390,7 +398,8 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
             SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
             SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
-            SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
+            SECURITY_GET_WATCHLIST_ID_TOOL_ID,
             SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
           ]
         : [],

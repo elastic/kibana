@@ -101,13 +101,16 @@ evaluate.describe(
             },
             {
               input: {
-                question: 'What is the current risk profile for host server1?',
+                question:
+                  'What is the current risk profile for host server1, and is that risk score up to date?',
               },
               output: {
                 criteria: [
                   'Retrieve and summarise the current risk profile for host server1, or clearly state the entity was not found.',
                   'Include risk score, risk level, and asset criticality where available.',
-                  'Do not fabricate entity data.',
+                  'If the risk score grounding signal reports the risk-score maintainer as stopped or never_started, explicitly caveat that risk scores are stale or unavailable rather than implying they are current.',
+                  'If the risk score grounding signal reports started, do not add an unnecessary "scoring is current" caveat.',
+                  'Do not fabricate entity data or a risk score grounding status.',
                 ],
                 toolCalls: [
                   {
@@ -143,20 +146,20 @@ evaluate.describe(
             },
             {
               input: {
-                question:
-                  'What is the current risk profile for host server1, and is that risk score up to date?',
+                question: 'Which watchlists is host server01 on?',
               },
               output: {
                 criteria: [
-                  'Retrieve the risk profile for host server1, or clearly state the entity was not found.',
-                  'If the risk score grounding signal reports the risk-score maintainer as stopped or never_started, explicitly caveat that risk scores are stale or unavailable rather than implying they are current.',
-                  'If the risk score grounding signal reports started, do not add an unnecessary "scoring is current" caveat.',
-                  'Do not fabricate entity data or a risk score grounding status.',
+                  "Call security.get_entity — the entity's watchlist memberships are on the entity profile (entity.attributes.watchlists). Or clearly state the entity was not found.",
+                  "Answer from the entity profile; do NOT iterate/enumerate all watchlists looking for this entity's memberships — the profile already has them.",
+                  'Do not fabricate entity or watchlist data.',
                 ],
                 toolCalls: [
                   {
                     id: 'security.get_entity',
-                    criteria: ['The tool is called with an entityId matching "server1".'],
+                    criteria: [
+                      'The tool is called with an entityId matching "server01" or "host:server01".',
+                    ],
                   },
                 ],
               },

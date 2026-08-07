@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
+import { buildRedirectUrlTool } from './build_redirect_url_tool';
 import {
   addEntitiesToWatchlistTool,
   createWatchlistTool,
@@ -19,6 +20,7 @@ import {
   getEntityGraphTool,
   getEntityRiskScoreHistoryTool,
   listWatchlistsTool,
+  getWatchlistIdTool,
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
@@ -66,6 +68,7 @@ export const registerTools = (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(buildRedirectUrlTool(core, experimentalFeatures));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(
     getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)
@@ -79,6 +82,7 @@ export const registerTools = (
     deleteWatchlistTool(core, logger, experimentalFeatures, hasEncryptionKey)
   );
   agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(getWatchlistIdTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(
