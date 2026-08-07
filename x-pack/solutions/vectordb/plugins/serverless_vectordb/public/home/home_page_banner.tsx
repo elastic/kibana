@@ -25,7 +25,7 @@ interface HomePageBannerProps {
 
 export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
   const {
-    services: { application, docLinks },
+    services: { application },
   } = useKibana();
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(BANNER_DISMISSED_KEY, false);
 
