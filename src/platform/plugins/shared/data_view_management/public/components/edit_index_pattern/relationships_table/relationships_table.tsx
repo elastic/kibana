@@ -120,11 +120,6 @@ export const RelationshipsTable = ({
               <EuiLink
                 href={href}
                 data-test-subj="relationshipsTitle"
-                onClick={(event) => {
-                  if (hasActiveModifierKey(event)) return;
-                  event.preventDefault();
-                  navigateToUrl(href);
-                }}
               >
                 {titleDisplayed}
               </EuiLink>

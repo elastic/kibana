@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { coreMock } from '@kbn/core/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../../../collectors/mocks';
 import { nameColumn } from './name';
 import { render, screen } from '@testing-library/react';
@@ -25,13 +25,13 @@ const setup = ({
   onBackgroundSearchOpened?: jest.Mock;
 } = {}) => {
   const user = userEvent.setup();
+  const core = coreMock.createStart();
   const searchUsageCollector = createSearchUsageCollectorMock();
-  const navigateToUrl = jest.fn();
 
   const column = nameColumn({
+    core,
     searchUsageCollector,
     kibanaVersion,
-    navigateToUrl,
     onBackgroundSearchOpened,
   });
 
@@ -39,7 +39,7 @@ const setup = ({
 
   render(column.render(uiSession.name, uiSession));
 
-  return { searchUsageCollector, kibanaVersion, navigateToUrl, onBackgroundSearchOpened, user };
+  return { searchUsageCollector, kibanaVersion, navigateToUrl: core.application.navigateToUrl, onBackgroundSearchOpened, user };
 };
 
 describe('name column', () => {

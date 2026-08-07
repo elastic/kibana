@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { SearchSessionStatus } from '../../../../../../../common';
 import type { SearchUsageCollector } from '../../../../../collectors';
 import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
@@ -52,14 +52,14 @@ const NameColumnText = ({
 };
 
 export const nameColumn = ({
+  core,
   searchUsageCollector,
   kibanaVersion,
-  navigateToUrl,
   onBackgroundSearchOpened,
 }: {
+  core: CoreStart;
   searchUsageCollector: SearchUsageCollector;
   kibanaVersion: string;
-  navigateToUrl?: CoreStart['application']['navigateToUrl'];
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
 }): EuiBasicTableColumn<UISession> => ({
   field: 'name',
@@ -115,9 +115,9 @@ export const nameColumn = ({
           // The handler can take over opening the session (e.g. Discover restores
           // it in a new tab) by preventing the default behavior.
           onBackgroundSearchOpened?.({ session, event });
-          if (navigateToUrl && !event.defaultPrevented) {
+          if (!event.defaultPrevented) {
             event.preventDefault();
-            navigateToUrl(href);
+            core.application.navigateToUrl(href);
           }
         }}
       >
