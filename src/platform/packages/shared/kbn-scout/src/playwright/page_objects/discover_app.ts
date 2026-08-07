@@ -1046,13 +1046,6 @@ export class DiscoverApp {
 
     if (currentMode !== 'classic') {
       await this.clickAppMenuItem('select-classic-mode-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'visible',
-      });
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'hidden',
-      });
     }
 
     await this.waitUntilSearchingHasFinished();
@@ -1336,20 +1329,12 @@ export class DiscoverApp {
 
   /**
    * Switches the active tab from ES|QL back to classic (data view) mode via
-   * the tab menu. When `discardModal` is set, also confirms the
-   * "discard changes" modal that appears when switching away from an ES|QL
-   * session with unsaved changes.
+   * the tab menu. The switch applies immediately — unsaved ES|QL changes are
+   * discarded without a confirmation modal.
    */
-  async selectDataViewMode(options?: { discardModal?: boolean }) {
+  async selectDataViewMode() {
     await this.unifiedTabs.clickActiveTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
     await this.waitUntilTabIsLoaded();
-
-    if (options?.discardModal) {
-      const modal = this.page.testSubj.locator('discover-esql-to-dataview-modal');
-      await expect(modal).toBeVisible();
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await expect(modal).toBeHidden();
-    }
   }
 
   getCascadeLayout(): Locator {

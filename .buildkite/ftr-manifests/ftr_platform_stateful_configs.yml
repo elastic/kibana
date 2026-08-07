@@ -339,7 +339,6 @@ enabled:
   - x-pack/platform/test/spaces_api_integration/access_control_objects/feature_disabled.config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
-  - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
