@@ -37,7 +37,9 @@ spaceTest.describe(
       await expect(page.locator('[data-test-subj^="typeFilter-"]')).toHaveCount(6);
       await unifiedFieldList.closeFieldTypeFilter();
 
-      await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT);
+      await unifiedFieldList.expectAvailableFieldCount(
+        testData.LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT
+      );
       await unifiedFieldList.expectSidebarSectionFieldCount(
         'empty',
         testData.LOGSTASH_ESQL_EMPTY_FIELD_COUNT
