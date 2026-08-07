@@ -23,6 +23,7 @@ import {
   EuiLink,
   EuiNotificationBadge,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiStepsHorizontal,
   EuiText,
@@ -75,8 +76,8 @@ const ServiceCard: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoAWS" size="m" />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
+          <EuiFlexItem style={{ minWidth: 0 }}>
+            <EuiText size="s" className="eui-textTruncate">
               <strong>{service.name}</strong>
             </EuiText>
           </EuiFlexItem>
@@ -176,7 +177,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const [activeCategoryId, setActiveCategoryId] = useState<string>(
     AWS_SERVICE_CATEGORIES[0].id
   );
-  const [deploymentMethod, setDeploymentMethod] = useState<DeploymentMethod>('agent');
+  const [deploymentMethod, setDeploymentMethod] = useState<DeploymentMethod>('managed');
   const [triggerSources, setTriggerSources] = useState<Record<string, string>>({});
 
   const selectedServices = useMemo(
@@ -244,8 +245,33 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const onCancel = () => history.push('/detail/aws/overview');
 
   return (
-    <div style={{ maxWidth: 1240, margin: '0 auto', padding: euiTheme.size.l }}>
-      <EuiSpacer size="l" />
+    <div
+      style={{
+        maxWidth: 1240,
+        width: '100%',
+        minWidth: 0,
+        overflowX: 'hidden',
+        margin: '0 auto',
+        padding: euiTheme.size.l,
+      }}
+    >
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            compressed
+            prepend="Deployment method"
+            options={[
+              { value: 'managed', text: 'Elastic Managed Integration' },
+              { value: 'agent', text: 'Agent-based' },
+            ]}
+            value={deploymentMethod}
+            onChange={(e) => setDeploymentMethod(e.target.value as DeploymentMethod)}
+            aria-label="Deployment method"
+            data-test-subj="awsOnboardingDeploymentMethodDropdown"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="logoAWS" size="xl" />
@@ -261,7 +287,10 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         <p>Collect logs and metrics from Amazon Web Services (AWS)</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiStepsHorizontal steps={steps} size="m" />
+      {/* Fixed-width container so the progress bar never resizes between steps */}
+      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+        <EuiStepsHorizontal steps={steps} size="m" />
+      </div>
       <EuiSpacer size="xl" />
 
       {currentStep === 1 && (
@@ -300,7 +329,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
               {AWS_SERVICE_CATEGORIES.map((cat) => {
                 const visible = visibleByCategory.get(cat.id) ?? [];
                 const selectedCount = cat.services.filter((s) => selected.has(s.id)).length;
@@ -319,7 +348,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 );
               })}
             </EuiFlexItem>
-            <EuiFlexItem grow={3}>
+            <EuiFlexItem grow={3} style={{ minWidth: 0 }}>
               {renderedCategories.length === 0 ? (
                 <EuiEmptyPrompt
                   iconType="search"
