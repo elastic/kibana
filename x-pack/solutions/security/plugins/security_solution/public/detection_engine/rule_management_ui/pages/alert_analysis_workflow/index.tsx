@@ -302,7 +302,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.alertAnalysisWorkflow.createConversationSectionDescription"
-                    defaultMessage="When enabled, the AI agent creates a new conversation for each alert analysis. Disable to prevent large numbers of conversations from accumulating."
+                    defaultMessage="When enabled, the AI agent creates a new conversation for each batch of alerts it analyzes. Disable to prevent large numbers of conversations from accumulating."
                   />
                 </p>
               }
