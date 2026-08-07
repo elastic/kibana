@@ -24,6 +24,7 @@ describe('parseUrlParams', () => {
         "assignees": Array [],
         "category": Array [],
         "customFields": Object {},
+        "extendedFieldFilters": Array [],
         "from": "now-30d",
         "page": 1,
         "perPage": 10,
@@ -47,6 +48,7 @@ describe('parseUrlParams', () => {
       search: 'My title',
       owner: ['cases'],
       customFields: { my_field: ['foo'] },
+      extendedFieldFilters: [{ label: 'Requires postmortem', value: 'true' }],
     };
 
     const url = `cases=${encode(state)}`;
@@ -62,6 +64,12 @@ describe('parseUrlParams', () => {
             "foo",
           ],
         },
+        "extendedFieldFilters": Array [
+          Object {
+            "label": "Requires postmortem",
+            "value": "true",
+          },
+        ],
         "search": "My title",
         "status": Array [
           "open",

@@ -56,11 +56,26 @@ export const useGetCases = (
     if (Object.keys(overrides).length > 0) {
       return {};
     }
-    const { extendedFieldFilters, freeText } = parseExtendedFieldSearch(rawSearch);
-    if (extendedFieldFilters.length === 0) {
+    const { extendedFieldFilters: searchFilters, freeText } = parseExtendedFieldSearch(rawSearch);
+    if (searchFilters.length === 0) {
       return {};
     }
-    return { search: freeText, extendedFieldFilters };
+    const pickerFilters = params.filterOptions?.extendedFieldFilters ?? [];
+    const seen = new Set(
+      pickerFilters.map((entry) => `${entry.label.toLowerCase()}\0${entry.value}`)
+    );
+    const merged = [
+      ...pickerFilters,
+      ...searchFilters.filter((entry) => {
+        const key = `${entry.label.toLowerCase()}\0${entry.value}`;
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      }),
+    ];
+    return { search: freeText, extendedFieldFilters: merged };
   })();
 
   return useQuery(
