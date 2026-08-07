@@ -12,7 +12,7 @@ import {
   listRuleChangeHistoryResponseSchema,
   ruleChangeHistoryDetailSchema,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RuleChangesHistoryClient } from './rule_changes_history_client';
 
 const createDocument = (
@@ -137,7 +137,7 @@ describe('RuleChangesHistoryClient', () => {
         client.listRuleChanges({ ruleId: 'rule-1', page: 1, perPage: 20 })
       ).rejects.toMatchObject({
         output: { statusCode: 503 },
-        data: { code: ALERTING_V2_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE },
       });
       expect(changeHistory.getHistory).not.toHaveBeenCalled();
     });
@@ -199,7 +199,7 @@ describe('RuleChangesHistoryClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
         data: {
-          code: ALERTING_V2_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
           details: { rule_id: 'rule-1', event_id: 'missing' },
         },
       });
