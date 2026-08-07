@@ -22463,7 +22463,6 @@
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.nameTitle": "Nom",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.stepTitle": "Logistique",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError": "L'entrée n'est pas valide.",
-    "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.nameSpacesError": "Le nom d'un modèle de composant ne doit pas contenir d'espaces.",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription": "Numéro utilisé par les systèmes de gestion externes pour identifier le modèle de composant.",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionFieldLabel": "Version (facultatif)",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle": "Version",
