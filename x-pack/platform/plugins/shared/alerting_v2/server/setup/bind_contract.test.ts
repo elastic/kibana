@@ -58,7 +58,9 @@ describe('bindContract', () => {
       getContainer: jest.fn(() => container),
     } as never);
 
-    container.bind(PluginStart('security')).toConstantValue(createMockSecurity({ hasAllRequested: true }));
+    container
+      .bind(PluginStart('security'))
+      .toConstantValue(createMockSecurity({ hasAllRequested: true }));
     container.bind(PluginStart('spaces')).toConstantValue(mockSpaces);
 
     container.load(new ContainerModule((options) => bindContract(options)));
@@ -133,14 +135,16 @@ describe('bindContract', () => {
     it('throws a PermissionError when the privilege check fails', async () => {
       const deniedContainer = new Container();
       const deniedScope = new Container();
-      deniedScope.bind(AlertEventsClient).toConstantValue(mockAlertEventsClient as AlertEventsClient);
+      deniedScope
+        .bind(AlertEventsClient)
+        .toConstantValue(mockAlertEventsClient as AlertEventsClient);
       deniedContainer.bind(CoreStart('injection')).toConstantValue({
         fork: jest.fn(() => deniedScope),
         getContainer: jest.fn(() => deniedContainer),
       } as never);
-      deniedContainer.bind(PluginStart('security')).toConstantValue(
-        createMockSecurity({ hasAllRequested: false })
-      );
+      deniedContainer
+        .bind(PluginStart('security'))
+        .toConstantValue(createMockSecurity({ hasAllRequested: false }));
       deniedContainer.bind(PluginStart('spaces')).toConstantValue(mockSpaces);
       deniedContainer.load(new ContainerModule((options) => bindContract(options)));
 

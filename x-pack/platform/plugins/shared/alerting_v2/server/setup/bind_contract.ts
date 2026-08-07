@@ -64,16 +64,12 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         return buildScope(request, spaceId).get(ActionPolicyClient);
       },
 
-      async getAlertEventsClientWithRequest(
-        request: KibanaRequest
-      ): Promise<AlertEventsClientApi> {
+      async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
         const spaceId = spaces.spacesService.getSpaceId(request);
         const { hasAllRequested } = await security.authz
           .checkPrivilegesWithRequest(request)
           .atSpace(spaceId, {
-            kibana: [
-              security.authz.actions.api.get(ALERTING_V2_API_PRIVILEGES.alerts.write),
-            ],
+            kibana: [security.authz.actions.api.get(ALERTING_V2_API_PRIVILEGES.alerts.write)],
           });
         if (!hasAllRequested) {
           throw new ExecutionError({

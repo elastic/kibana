@@ -73,9 +73,9 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     registerTriggerDefinitions(workflowsExtensionsSetup);
 
     const getAlertEventsClient = (request: KibanaRequest) =>
-      (container.get(Start as ServiceToken<AlertingServerStart>)).getAlertEventsClientWithRequest(
-        request
-      );
+      container
+        .get(Start as ServiceToken<AlertingServerStart>)
+        .getAlertEventsClientWithRequest(request);
     registerStepDefinitions(workflowsExtensionsSetup, getAlertEventsClient);
 
     // Usage collection is optional. The telemetry task that feeds this collector
