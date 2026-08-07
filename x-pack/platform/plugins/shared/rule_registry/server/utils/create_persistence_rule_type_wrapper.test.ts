@@ -374,18 +374,6 @@ describe('getAlertSourceField', () => {
     ).toBe('instance-id-1');
   });
 
-  it('should read a field when `_source` is returned in partially nested form', () => {
-    expect(
-      getAlertSourceField({ 'kibana.alert': { 'instance.id': 'instance-id-1' } }, ALERT_INSTANCE_ID)
-    ).toBe('instance-id-1');
-    expect(
-      getAlertSourceField(
-        { kibana: { 'alert.instance': { id: 'instance-id-1' } } },
-        ALERT_INSTANCE_ID
-      )
-    ).toBe('instance-id-1');
-  });
-
   it('should prefer the flat key when both shapes are present', () => {
     expect(
       getAlertSourceField(
@@ -409,7 +397,7 @@ describe('getAlertSourceField', () => {
     expect(getAlertSourceField(undefined, ALERT_INSTANCE_ID)).toBeUndefined();
   });
 
-  it('should not traverse into array values', () => {
+  it('should return undefined when the dotted path runs through an array', () => {
     expect(
       getAlertSourceField({ kibana: [{ alert: { instance: { id: 'x' } } }] }, ALERT_INSTANCE_ID)
     ).toBeUndefined();

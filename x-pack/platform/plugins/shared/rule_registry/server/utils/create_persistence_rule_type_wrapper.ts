@@ -12,7 +12,7 @@ import {
   shouldCreateAlertsInAllSpaces,
   type RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import { chunk, partition } from 'lodash';
+import { chunk, get, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
@@ -229,32 +229,14 @@ export const suppressAlertsInMemory = <
  * Reading existing alerts with a bare `_source[field]` access silently misses such
  * documents, which disables cross-execution alert suppression and results in duplicated
  * alerts, so every read of an existing alert `_source` must go through this helper.
+ *
+ * `get` handles both shapes: it returns the value of the flat dotted key when the document
+ * has one, and otherwise walks the dotted path through the nested objects.
  */
 export const getAlertSourceField = <T = unknown>(
   source: object | null | undefined,
   field: string
-): T | undefined => {
-  if (source == null) {
-    return undefined;
-  }
-  const record = source as Record<string, unknown>;
-  if (record[field] !== undefined) {
-    return record[field] as T;
-  }
-  const parts = field.split('.');
-  // resolve the dotted path through (possibly partially) nested objects,
-  // preferring the longest matching key prefix
-  for (let splitIndex = parts.length - 1; splitIndex >= 1; splitIndex--) {
-    const parent = record[parts.slice(0, splitIndex).join('.')];
-    if (parent != null && typeof parent === 'object' && !Array.isArray(parent)) {
-      const nested = getAlertSourceField<T>(parent, parts.slice(splitIndex).join('.'));
-      if (nested !== undefined) {
-        return nested;
-      }
-    }
-  }
-  return undefined;
-};
+): T | undefined => get(source, field);
 
 /**
  * Compare existing alert suppression date props with alert to suppressed alert values
