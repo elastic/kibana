@@ -26,8 +26,13 @@ describe('ApiKeyHeaderAuth', () => {
       const { getAuthHeaders } = ApiKeyHeaderAuth;
       if (!getAuthHeaders) throw new Error('ApiKeyHeaderAuth.getAuthHeaders is not defined');
 
+      // Runtime secrets are normalized to `{ [headerName]: value }` and may still include `authType`.
+      // Cast past the pre-normalize schema type that AuthTypeSpec exposes on getAuthHeaders.
       await expect(
-        getAuthHeaders(mockAuthContext, { authType: 'api_key_header', 'X-API-Key': 'abc123' })
+        getAuthHeaders(mockAuthContext, {
+          authType: 'api_key_header',
+          'X-API-Key': 'abc123',
+        } as never)
       ).resolves.toEqual({ 'X-API-Key': 'abc123' });
     });
   });
