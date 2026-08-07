@@ -29,6 +29,7 @@ import { inject, injectable } from 'inversify';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
+  type PartiallyUpdateableActionPolicyAttributes,
 } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import {
@@ -67,6 +68,7 @@ import type {
 import {
   buildCreateActionPolicyAttributes,
   buildUpdateActionPolicyAttributes,
+  toApiKeyAttributes,
   transformActionPolicySoAttributesToApiResponse,
   validateDateString,
 } from './utils';
@@ -249,7 +251,7 @@ export class ActionPolicyClient {
         attributes,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
@@ -477,7 +479,7 @@ export class ActionPolicyClient {
       await this.writeActionPolicyAttrs({
         id,
         attrs: {
-          auth: apiKeyAttrs,
+          ...toApiKeyAttributes(apiKeyAttrs),
           updatedBy: userProfileUid,
           updatedAt: now,
         },
@@ -602,7 +604,7 @@ export class ActionPolicyClient {
    */
   private async executeBulkUpdate(
     ids: string[],
-    stateUpdate: Partial<ActionPolicySavedObjectAttributes>
+    stateUpdate: PartiallyUpdateableActionPolicyAttributes
   ): Promise<BulkResponse> {
     if (ids.length === 0) {
       return { affected_count: 0, errors: [] };
@@ -804,14 +806,20 @@ export class ActionPolicyClient {
           id,
           this.namespace ? { namespace: this.namespace } : undefined
         );
-      const auth = doc.attributes?.auth;
-      if (!auth?.apiKey) return null;
+      const { apiKey, apiKeyCreatedByUser } = doc.attributes ?? {};
+      if (!apiKey) return null;
 
       return {
-        apiKey: auth.apiKey,
-        createdByUser: auth.createdByUser,
+        apiKey,
+        createdByUser: apiKeyCreatedByUser ?? false,
       };
-    } catch {
+    } catch (e) {
+      this.logger.debug({
+        message: () =>
+          `Failed to decrypt auth for action policy "${id}": ${
+            e instanceof Error ? e.message : String(e)
+          }`,
+      });
       return null;
     }
   }
@@ -832,10 +840,10 @@ export class ActionPolicyClient {
 
       for await (const response of finder.find()) {
         for (const so of response.saved_objects) {
-          if (targetIds.has(so.id) && so.attributes.auth?.apiKey) {
+          if (targetIds.has(so.id) && so.attributes.apiKey) {
             authMap.set(so.id, {
-              apiKey: so.attributes.auth.apiKey,
-              createdByUser: so.attributes.auth.createdByUser,
+              apiKey: so.attributes.apiKey,
+              createdByUser: so.attributes.apiKeyCreatedByUser ?? false,
             });
           }
         }
@@ -853,7 +861,7 @@ export class ActionPolicyClient {
 
   private async updatePolicyState(
     id: string,
-    stateUpdate: { enabled?: boolean; snoozedUntil?: string | null }
+    stateUpdate: PartiallyUpdateableActionPolicyAttributes
   ): Promise<ActionPolicyResponse> {
     if (stateUpdate.snoozedUntil) {
       validateDateString(stateUpdate.snoozedUntil);

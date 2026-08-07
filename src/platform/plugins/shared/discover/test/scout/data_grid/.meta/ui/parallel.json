@@ -1,5 +1,5 @@
 {
-  "sha1": "f50b8c531c01be83d7aa1eaa69468eb56a501593",
+  "sha1": "4e634705f2b0d2e18faa1b9ba8e76bd946b76451",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -584,42 +584,68 @@
       }
     },
     {
-      "id": "5e6b7e0aad76158-a966b4d2472039f",
-      "title": "Discover data grid sample size - saved search and Dashboard saves a custom sample size with a search",
-      "expectedStatus": "skipped",
+      "id": "5e6b7e0aad76158-4165cd5e8ccb60d",
+      "title": "Discover data grid sample size - saved search and Dashboard saves and restores a custom sample size",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 34,
-        "column": 25
+        "column": 24
       }
     },
     {
-      "id": "5e6b7e0aad76158-ee4ba796528cd50",
-      "title": "Discover data grid sample size - saved search and Dashboard uses the default sample size on Dashboard",
-      "expectedStatus": "skipped",
+      "id": "5e6b7e0aad76158-02edc36d356bb8c",
+      "title": "Discover data grid sample size - saved search and Dashboard new Discover sessions use the default sample size",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 89,
-        "column": 24
+        "line": 71,
+        "column": 11
       }
     },
     {
-      "id": "5e6b7e0aad76158-185cc2b7dabf234",
-      "title": "Discover data grid sample size - saved search and Dashboard uses a custom sample size on Dashboard when specified",
-      "expectedStatus": "skipped",
+      "id": "5e6b7e0aad76158-2e6bba352dc2c66",
+      "title": "Discover data grid sample size - saved search and Dashboard loading an archived saved search uses the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 94,
+        "column": 13
+      }
+    },
+    {
+      "id": "5e6b7e0aad76158-ee4ba796528cd50",
+      "title": "Discover data grid sample size - saved search and Dashboard uses the default sample size on Dashboard",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 107,
-        "column": 17
+        "column": 22
+      }
+    },
+    {
+      "id": "5e6b7e0aad76158-185cc2b7dabf234",
+      "title": "Discover data grid sample size - saved search and Dashboard uses a custom sample size on Dashboard when specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 116,
+        "column": 51
       }
     },
     {
