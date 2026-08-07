@@ -39,7 +39,13 @@ const setup = ({
 
   render(column.render(uiSession.name, uiSession));
 
-  return { searchUsageCollector, kibanaVersion, navigateToUrl: core.application.navigateToUrl, onBackgroundSearchOpened, user };
+  return {
+    searchUsageCollector,
+    kibanaVersion,
+    navigateToUrl: core.application.navigateToUrl,
+    onBackgroundSearchOpened,
+    user,
+  };
 };
 
 describe('name column', () => {
