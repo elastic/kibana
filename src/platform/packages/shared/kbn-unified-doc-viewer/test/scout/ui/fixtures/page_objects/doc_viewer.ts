@@ -90,6 +90,30 @@ export class DocViewer {
     return this.page.testSubj.locator(`docViewerTab-${tabId}`);
   }
 
+  /**
+   * Pagination control for the document at `pageIndex` in the flyout navigation.
+   * Only the currently active document's page control is rendered.
+   */
+  getNavigationPage(pageIndex: number): Locator {
+    return this.page.testSubj.locator(`docViewerFlyoutNavigationPage-${pageIndex}`);
+  }
+
+  getFieldSearchInput(): Locator {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
+  }
+
+  /**
+   * Drag handle of the resizable push flyout. Scoped to the flyout because
+   * `euiResizableButton` is a generic EUI test subject.
+   */
+  getResizeHandle(): Locator {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator('[data-test-subj="euiResizableButton"]');
+  }
+
   async getFieldTokens(limit = 10): Promise<string[]> {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await flyout.waitFor({ state: 'visible' });
