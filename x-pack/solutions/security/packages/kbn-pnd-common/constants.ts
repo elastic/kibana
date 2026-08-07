@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RecommendedAction } from "./impl/schemas";
+import type { RecommendedAction } from './impl/schemas';
 
 export const PND_FEATURE_ID = 'pnd' as const;
 export const PND_PLUGIN_NAME = 'PND' as const;
@@ -87,7 +87,10 @@ export const PROPOSAL_STATUSES = [
   'executed',
 ] as const;
 
-export const CONVERSATION_CATEGORY_COLORS: Record<RecommendedAction, 'danger' | 'warning' | 'primary' | 'accent'> = {
+export const CONVERSATION_CATEGORY_COLORS: Record<
+  RecommendedAction,
+  'danger' | 'warning' | 'primary' | 'accent'
+> = {
   contain: 'danger',
   escalate: 'warning',
   investigate: 'primary',

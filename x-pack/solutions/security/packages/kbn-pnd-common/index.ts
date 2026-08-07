@@ -50,10 +50,7 @@ export {
   buildWatchUrl,
 } from './constants';
 
-export {
-  CONVERSATION_QUEUE_CATEGORIES,
-  CONVERSATION_QUEUE_LABELS,
-} from './translations';
+export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {
   AutonomyLevel,
@@ -116,5 +113,3 @@ export {
   getMockProposalsByInvestigationId,
   getMockWatchById,
 } from './impl/samples';
-
-
