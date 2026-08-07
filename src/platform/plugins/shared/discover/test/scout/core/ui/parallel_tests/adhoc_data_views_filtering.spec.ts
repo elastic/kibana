@@ -31,7 +31,7 @@ spaceTest.describe(
 
     spaceTest(
       'supports query and filtering on ad hoc data view',
-      async ({ discoverScoutSpace, page, pageObjects }) => {
+      async ({ discoverScoutSpace, pageObjects }) => {
         const { discover, filterBar, queryBar } = pageObjects;
 
         await spaceTest.step('creates ad hoc data view', async () => {
@@ -71,12 +71,12 @@ spaceTest.describe(
 
         await spaceTest.step('searches with a text query and verifies hit count', async () => {
           await queryBar.setQuery('test');
-          await page.keyboard.press('Enter');
+          await discover.submitQuery();
           await discover.waitUntilSearchingHasFinished();
           expect(await discover.getHitCount()).toBe('22');
 
           await queryBar.clearQuery();
-          await page.keyboard.press('Enter');
+          await discover.submitQuery();
           await discover.waitUntilSearchingHasFinished();
         });
       }
@@ -146,12 +146,26 @@ spaceTest.describe(
 
     spaceTest(
       'shows toast notifications for invalid filter references after data view update',
-      async ({ page, pageObjects }) => {
+      async ({ discoverScoutSpace, page, pageObjects }) => {
         const { discover, filterBar, toasts } = pageObjects;
         let prevId: string;
 
         await spaceTest.step('creates ad hoc data view and adds filters', async () => {
-          await discover.createDataViewFromSearchBar({ name: 'logstas', adHoc: true });
+          await discoverScoutSpace.createDiscoverSession({
+            title: 'logstas-filter-toast-test',
+            tabs: [
+              {
+                id: 'main',
+                label: 'Untitled',
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logstash*',
+                  time_field: '@timestamp',
+                },
+              },
+            ],
+          });
+          await discover.loadSavedSearch('logstas-filter-toast-test');
 
           await filterBar.addFilter({
             field: 'nestedField.child',

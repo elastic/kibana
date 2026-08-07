@@ -87,7 +87,7 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
     await discover.createDataViewFromSearchBar({ name: 'data-view-index-', adHoc: true });
     await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-    expect(await discover.getHitCountInt()).toBe(2);
+    await expect.poll(() => discover.getHitCountInt()).toBe(2);
     expect(await unifiedFieldList.getAvailableFieldCount()).toBe(3);
   });
 
