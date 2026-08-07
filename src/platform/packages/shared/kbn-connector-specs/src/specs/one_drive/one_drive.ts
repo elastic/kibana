@@ -282,20 +282,12 @@ export const OneDrive: ConnectorSpec = {
         'Verifies the OneDrive connection by fetching the authenticated user profile.',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/me', {
-          params: { $select: 'displayName,mail' },
-        });
-        const { displayName, mail } = response.data as { displayName: string; mail: string };
-        return {
-          ok: true,
-          message: `Connected to OneDrive as ${displayName} (${mail})`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get('https://graph.microsoft.com/v1.0/me', {
+        params: { $select: 'displayName,mail' },
+      });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

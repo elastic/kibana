@@ -48,7 +48,7 @@ function BlastRadiusEntityButton({
 
   return (
     <button
-      aria-label={i18n.translate('xpack.observability.nightshift.blastRadiusChipAriaLabel', {
+      aria-label={i18n.translate('xpack.nightshift.blastRadiusChipAriaLabel', {
         defaultMessage: '{name}: {count}',
         values: { count, name },
       })}
@@ -190,7 +190,7 @@ export function BlastRadiusEntities({
             margin-bottom: ${euiTheme.size.m};
           `}
         >
-          {i18n.translate('xpack.observability.nightshift.blastRadiusTitle', {
+          {i18n.translate('xpack.nightshift.blastRadiusTitle', {
             defaultMessage: 'Impacted entities',
           })}
         </span>
@@ -231,7 +231,7 @@ export function BlastRadiusEntities({
                   element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
                 })}
               >
-                {i18n.translate('xpack.observability.nightshift.blastRadiusShowMore', {
+                {i18n.translate('xpack.nightshift.blastRadiusShowMore', {
                   defaultMessage: '+{count} more',
                   values: { count: hiddenCount },
                 })}
@@ -255,7 +255,7 @@ export function BlastRadiusEntities({
                   element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
                 })}
               >
-                {i18n.translate('xpack.observability.nightshift.blastRadiusShowLess', {
+                {i18n.translate('xpack.nightshift.blastRadiusShowLess', {
                   defaultMessage: 'Show less',
                 })}
               </EuiButtonEmpty>
