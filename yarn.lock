@@ -2065,8 +2065,8 @@
     lodash "^4.17.21"
 
 "@elastic/eui@file:./elastic_eui_upstream_main.tgz":
-  version "117.1.0"
-  resolved "file:./elastic_eui_upstream_main.tgz#92a4060dbc1554a00b682612c3dad44529d4461d"
+  version "118.0.0"
+  resolved "file:./elastic_eui_upstream_main.tgz#fe224a198f2a937cf22afc8b102dc4f10da9cb1c"
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
