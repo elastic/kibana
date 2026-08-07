@@ -528,7 +528,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 **Data ingestion and Fleet**:
 * Fix Fleet output edits failing with a validation error when more than 10 hosts were configured, by raising the host limit from 10 to 100 for Elasticsearch, remote Elasticsearch, Logstash, and Kafka outputs [#282397]({{kib-pull}}282397).
-* Fix Kafka outputs showing and accepting a proxy configuration, which Kafka outputs don't support [#282313]({{kib-pull}}282313).
+% !!DEFERRED!! Not yet confirmed in build candidate 9.4.5-c191ddff (backport merged after BC cutoff).
+% * Fix Kafka outputs showing and accepting a proxy configuration, which Kafka outputs don't support [#282313]({{kib-pull}}282313).
 * Fix the `expiration` parameter on `POST /enrollment_api_keys` being silently dropped, and add an **Expiration** field to the **Create enrollment token** form in Fleet [#281324]({{kib-pull}}281324).
 * Fix OpenTelemetry integration metrics not defaulting to the `time_series` index mode [#281295]({{kib-pull}}281295).
 * Fix the agent policy filter on the **Agents** list returning no agents for version-specific policies [#281195]({{kib-pull}}281195).
@@ -561,8 +562,9 @@ For the Elastic Security 9.4.5 release information, refer to [Elastic Security S
 * Fix the annotation and anomaly results APIs not enforcing job-level space access [#277197]({{kib-pull}}277197).
 * Fix the anomaly detection, data frame analytics, and trained model saved object APIs denying access to users who hold only a subset of the required privileges [#276936]({{kib-pull}}276936).
 
-**Workflows**:
-* Warn instead of block enabling a workflow when the editor can't statically prove a `foreach` collection is an array, deferring the check to runtime [#283360]({{kib-pull}}283360).
+% !!DEFERRED!! Workflows section has no confirmed entries yet: #283360 not yet confirmed in build candidate 9.4.5-c191ddff (backport merged after BC cutoff). Restore the "**Workflows**:" header when an entry is confirmed.
+% **Workflows**:
+% * Warn instead of block enabling a workflow when the editor can't statically prove a `foreach` collection is an array, deferring the check to runtime [#283360]({{kib-pull}}283360).
 
 ## 9.4.4 [kibana-9.4.4-release-notes]
 
