@@ -9,6 +9,18 @@
 **Authors:** Workflows Engine Team
 **Last updated:** 2026-06-25
 
+## Problem
+
+Before this service existed, plugins that needed to react to domain facts from other plugins had no neutral, in-process pub/sub channel. This produced three compounding problems.
+
+**Publisher–consumer coupling.** Cases and `alerting_v2` each wanted to notify the workflows engine when domain-relevant things happened (a case was created, an alert fired). With no shared bus, the only option was a direct plugin dependency: both plugins declared `workflowsExtensions` as a `requiredPlugin` and actively called `workflowsExtensions.getClient(request).emitEvent(triggerId, payload)`. Publishers were forced to import and depend on the consumer's API, inverting the intended direction of knowledge. The coupling ran in the other direction too: Agent Builder needed to know when a scheduled workflow finished so it could continue a conversation, but with no event to subscribe to it had to poll workflow execution status instead — adding latency, wasting resources, and coupling Agent Builder to the execution engine's query API.
+
+**Trigger-ID knowledge leaking into publishers.** Calling `emitEvent` required knowing workflow-domain constants (`CaseCreatedTriggerId`, etc.). Cases had to maintain an `event_bridge.ts` inside its own server code whose only job was to translate Cases events into workflow trigger calls. The publishing plugin absorbed coupling that belonged in the consumer.
+
+**Duplicated private bus implementations.** Facing the same decoupling need within their own code, Cases invented `CasesEventBus` (a plain `EventEmitter` wrapper) and `alerting_v2` independently invented `AsyncDomainEventBus` (an Inversify-wired `EventEmitterAsyncResource` with a typed context parameter). Both solved the same single-node fan-out problem in isolation, with no shared envelope, no shared schema catalog, and no coordination with the Core plugin lifecycle.
+
+The result was a situation where domain facts could only reach the workflows engine from plugins that had explicitly opted in with a direct plugin dependency, and every new integration required another publisher to absorb consumer-specific knowledge.
+
 ## Summary
 
 - **What:** A node-local Core service for publishing and subscribing to typed domain events.
