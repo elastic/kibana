@@ -11,6 +11,7 @@ import {
   buildKnownFeatureIds,
   buildTelemetry,
   findSimilarFeatures,
+  isSampleHealthy,
   selectPreviouslyIdentifiedFeatures,
   stripModelAssignedAliases,
 } from './identify_inferred_features';
@@ -26,6 +27,20 @@ const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'i
   properties: { name: id },
   confidence: 80,
   ...overrides,
+});
+
+describe('isSampleHealthy', () => {
+  it('is healthy when no entity filters were applied', () => {
+    expect(isSampleHealthy({ totalFilters: 0, hasFilteredDocuments: false })).toBe(true);
+  });
+
+  it('is healthy when entity filters returned documents', () => {
+    expect(isSampleHealthy({ totalFilters: 3, hasFilteredDocuments: true })).toBe(true);
+  });
+
+  it('is degraded when entity filters were applied but returned nothing', () => {
+    expect(isSampleHealthy({ totalFilters: 3, hasFilteredDocuments: false })).toBe(false);
+  });
 });
 
 describe('selectPreviouslyIdentifiedFeatures', () => {

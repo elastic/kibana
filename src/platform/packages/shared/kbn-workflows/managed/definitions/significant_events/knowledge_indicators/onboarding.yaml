@@ -51,6 +51,10 @@ triggers:
         type: number
         default: 5
         description: "Maximum number of LLM sampling iterations for features identification."
+      - name: featuresConvergencePatience
+        type: number
+        default: 2
+        description: "Stop features identification after this many consecutive healthy iterations that discover no new features."
       - name: featuresSampleSize
         type: number
         description: "Number of documents sampled per features identification iteration."
@@ -138,6 +142,7 @@ steps:
             start: "${{ inputs.featuresStart }}"
             end: "${{ inputs.featuresEnd }}"
             maxIterations: "${{ inputs.featuresMaxIterations }}"
+            convergencePatience: "${{ inputs.featuresConvergencePatience }}"
             sampleSize: "${{ inputs.featuresSampleSize }}"
             featureTtlDays: "${{ inputs.featuresTtlDays }}"
             entityFilteredRatio: "${{ inputs.featuresEntityFilteredRatio }}"

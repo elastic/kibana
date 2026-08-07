@@ -47,6 +47,10 @@ triggers:
         type: number
         default: 5
         description: "Maximum number of LLM sampling iterations."
+      - name: convergencePatience
+        type: number
+        default: 2
+        description: "Stop the loop after this many consecutive healthy iterations that discover no new features."
       - name: sampleSize
         type: number
         description: "Number of documents sampled per iteration."
@@ -83,6 +87,7 @@ steps:
       discoveredFeatures: []
       iterationResults: []
       connectorId: ""
+      consecutiveNoNew: 0
 
   # -----------------------------------------------------------------------
   # Step 2: Main loop — each pass runs identify_inferred_features.
@@ -142,6 +147,37 @@ steps:
             type: data.set
             with:
               hasSuccess: true
+
+      # 2e: Convergence early-stop. Only healthy successful iterations count:
+      #     a new feature resets patience, a barren one increments it, and a
+      #     degraded/failed sample is neutral (left unchanged). Break once
+      #     convergencePatience consecutive barren iterations are reached.
+      - name: track_convergence
+        type: if
+        condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' and steps.identify_inferred.output.sampleHealthy == true }}"
+        steps:
+          - name: reset_convergence
+            type: if
+            condition: "${{ steps.identify_inferred.output.iterationResult.newFeatures.size > 0 }}"
+            steps:
+              - name: reset_counter
+                type: data.set
+                with:
+                  consecutiveNoNew: 0
+          - name: increment_convergence
+            type: if
+            condition: "${{ steps.identify_inferred.output.iterationResult.newFeatures.size == 0 }}"
+            steps:
+              - name: bump_counter
+                type: data.set
+                with:
+                  consecutiveNoNew: "${{ variables.consecutiveNoNew | plus: 1 }}"
+          - name: maybe_stop
+            type: if
+            condition: "${{ variables.consecutiveNoNew >= inputs.convergencePatience }}"
+            steps:
+              - name: stop_converged
+                type: loop.break
 
   # -----------------------------------------------------------------------
   # Step 3: Fail if iterations ran but none succeeded.

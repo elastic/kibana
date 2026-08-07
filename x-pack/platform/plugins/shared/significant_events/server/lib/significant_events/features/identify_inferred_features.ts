@@ -489,6 +489,16 @@ type InferredIterationResult =
           };
     };
 
+// Zero new features only signals convergence if the entity-filtered arm actually ran:
+// filters present but no filtered docs = sampling artifact (flaky SAMPLE), not progress.
+export const isSampleHealthy = ({
+  totalFilters,
+  hasFilteredDocuments,
+}: {
+  totalFilters: number;
+  hasFilteredDocuments: boolean;
+}): boolean => !(totalFilters > 0 && !hasFilteredDocuments);
+
 async function runInferredIteration({
   samplingEsClient,
   kiClient,
@@ -682,6 +692,7 @@ export interface IdentifyInferredFeaturesOptions {
 
 export interface IdentifyInferredFeaturesResult {
   hasDocuments: boolean;
+  sampleHealthy: boolean;
   docsCount: number;
   docIds: string[];
   discoveredFeatures: FeatureUpsert[];
@@ -782,6 +793,7 @@ export async function identifyInferredFeatures({
   if (!iterationResult.hasDocuments) {
     return {
       hasDocuments: false,
+      sampleHealthy: false,
       docsCount: 0,
       docIds: [],
       discoveredFeatures,
@@ -830,6 +842,7 @@ export async function identifyInferredFeatures({
 
     return {
       hasDocuments: true,
+      sampleHealthy: false,
       docsCount,
       docIds,
       discoveredFeatures,
@@ -892,6 +905,7 @@ export async function identifyInferredFeatures({
 
   return {
     hasDocuments: true,
+    sampleHealthy: isSampleHealthy({ totalFilters, hasFilteredDocuments }),
     docsCount,
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),
