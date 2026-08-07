@@ -21,7 +21,8 @@ import {
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 
-describe('elasticsearch clients', () => {
+// Failing: See https://github.com/elastic/kibana/issues/171294
+describe.skip('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
 
