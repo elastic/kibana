@@ -16,8 +16,7 @@ import { TEST_CONNECTOR_SUB_ACTION } from './connector_spec';
  */
 export type SelectedActions = string[] | null | undefined;
 
-export const HITL_ACTION_CONFIRMATION_SUFFIX =
-  ' (requires user confirmation before calling)';
+export const HITL_ACTION_CONFIRMATION_SUFFIX = ' (requires user confirmation before calling)';
 
 export const isSpecificActionsSelection = (
   selectedActions: SelectedActions
@@ -54,9 +53,7 @@ export const isSelectedActionEnabled = (
  * Filters a connector's actions by instance selection.
  * Recommended mode returns isTool actions; specific mode returns the allowlist.
  */
-export const filterActionsBySelection = <
-  T extends { isTool?: boolean; description?: string }
->(
+export const filterActionsBySelection = <T extends { isTool?: boolean; description?: string }>(
   actions: Record<string, T>,
   selectedActions: SelectedActions,
   options?: { requireDescription?: boolean }

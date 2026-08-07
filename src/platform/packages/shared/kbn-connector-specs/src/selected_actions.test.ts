@@ -66,9 +66,10 @@ describe('selected_actions helpers', () => {
     });
 
     it('returns allowlisted actions in specific mode, including HITL', () => {
-      expect(
-        filterActionsBySelection(ACTIONS, ['send', 'approve']).map(([name]) => name)
-      ).toEqual(['send', 'approve']);
+      expect(filterActionsBySelection(ACTIONS, ['send', 'approve']).map(([name]) => name)).toEqual([
+        'send',
+        'approve',
+      ]);
     });
 
     it('can require descriptions', () => {
