@@ -8,6 +8,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
+import type {
+  Conversation,
+  ConversationRoundFeedback,
+  FeedbackChipId,
+} from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { useToasts } from '../../../../../hooks/use_toasts';
@@ -17,13 +22,20 @@ const labels = {
   submitError: i18n.translate('xpack.agentBuilder.feedbackControls.submitError', {
     defaultMessage: 'Failed to save feedback, please try again',
   }),
+  voteError: i18n.translate('xpack.agentBuilder.feedbackControls.voteError', {
+    defaultMessage: 'Failed to save vote, please try again',
+  }),
+  retractError: i18n.translate('xpack.agentBuilder.feedbackControls.retractError', {
+    defaultMessage: 'Failed to remove vote, please try again',
+  }),
 };
 
 type Vote = 'up' | 'down' | null;
+type SubmittedPhase = 'idle' | 'visible' | 'fading';
 
 export interface FeedbackState {
   vote: Vote;
-  chips: string[];
+  chips: FeedbackChipId[];
   comment: string;
   modalOpen: boolean;
   inviteVisible: boolean;
@@ -33,7 +45,7 @@ export interface FeedbackState {
 
 export interface UseFeedbackReturn extends FeedbackState {
   setVote: (vote: 'up' | 'down') => void;
-  toggleChip: (chip: string) => void;
+  toggleChip: (chip: FeedbackChipId) => void;
   setComment: (value: string) => void;
   openModal: () => void;
   closeModal: () => void;
@@ -54,92 +66,85 @@ export const useFeedback = (
   const queryClient = useQueryClient();
   const serverVote = initialFeedback?.vote ?? null;
   const [vote, setVoteState] = useState<Vote>(serverVote);
-  const [chips, setChips] = useState<string[]>([]);
-  const [comment, setCommentState] = useState('');
+  const [chips, setChips] = useState<FeedbackChipId[]>([]);
+  const [comment, setComment] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [submittedFading, setSubmittedFading] = useState(false);
+  const [submittedPhase, setSubmittedPhase] = useState<SubmittedPhase>('idle');
 
   const voteRef = useRef(vote);
-  const chipsRef = useRef(chips);
-  const commentRef = useRef(comment);
-  const initialFeedbackRef = useRef(initialFeedback);
+  const serverVoteRef = useRef(serverVote);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasUserInteractedRef = useRef(false);
   voteRef.current = vote;
-  chipsRef.current = chips;
-  commentRef.current = comment;
-  initialFeedbackRef.current = initialFeedback;
-
-  useEffect(() => {
-    return () => {
-      if (timer1Ref.current) clearTimeout(timer1Ref.current);
-      if (timer2Ref.current) clearTimeout(timer2Ref.current);
-    };
-  }, []);
+  serverVoteRef.current = serverVote;
 
   const clearSubmittedTimers = useCallback(() => {
     if (timer1Ref.current) clearTimeout(timer1Ref.current);
     if (timer2Ref.current) clearTimeout(timer2Ref.current);
   }, []);
 
-  useEffect(() => {
-    hasUserInteractedRef.current = false;
-    clearSubmittedTimers();
-    setVoteState(initialFeedbackRef.current?.vote ?? null);
-    setChips([]);
-    setCommentState('');
-    setModalOpen(false);
-    setInviteVisible(false);
-    setSubmitted(false);
-    setSubmittedFading(false);
-  }, [roundId, clearSubmittedTimers]);
+  useEffect(() => clearSubmittedTimers, [clearSubmittedTimers]);
+
+  const resetTo = useCallback(
+    (initialVote: Vote = null) => {
+      clearSubmittedTimers();
+      setVoteState(initialVote);
+      setChips([]);
+      setComment('');
+      setModalOpen(false);
+      setInviteVisible(false);
+      setSubmittedPhase('idle');
+    },
+    [clearSubmittedTimers]
+  );
 
   useEffect(() => {
-    if (!hasUserInteractedRef.current) {
-      setVoteState(serverVote);
-    }
+    resetTo(serverVoteRef.current);
+  }, [roundId, resetTo]);
+
+  useEffect(() => {
+    setVoteState(serverVote);
   }, [serverVote]);
 
-  const invalidateConversation = useCallback(() => {
-    if (conversationId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
-    }
-  }, [conversationId, queryClient]);
-
-  const reset = useCallback(() => {
-    clearSubmittedTimers();
-    setVoteState(null);
-    setChips([]);
-    setCommentState('');
-    setModalOpen(false);
-    setInviteVisible(false);
-    setSubmitted(false);
-    setSubmittedFading(false);
-  }, [clearSubmittedTimers]);
+  const patchCache = useCallback(
+    (feedback: ConversationRoundFeedback | undefined) => {
+      if (!conversationId) return;
+      const key = queryKeys.conversations.byId(conversationId);
+      queryClient.setQueryData<Conversation>(key, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          rounds: old.rounds.map((r) => (r.id === roundId ? { ...r, feedback } : r)),
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: key });
+    },
+    [conversationId, queryClient, roundId]
+  );
 
   const setVote = useCallback(
     (next: 'up' | 'down') => {
       const prev = voteRef.current;
-      hasUserInteractedRef.current = true;
 
       if (prev === next) {
+        resetTo();
         if (conversationId) {
           conversationsService
             .submitRoundFeedback({ conversationId, roundId, vote: null })
-            .then(invalidateConversation);
+            .then(() => patchCache(undefined))
+            .catch(() => {
+              addErrorToast({ title: labels.retractError });
+              setVoteState(prev);
+            });
         }
-        reset();
         return;
       }
 
       clearSubmittedTimers();
       setChips([]);
-      setCommentState('');
-      setSubmitted(false);
-      setSubmittedFading(false);
+      setComment('');
+      setSubmittedPhase('idle');
 
       if (next === 'down') {
         setVoteState('down');
@@ -152,7 +157,19 @@ export const useFeedback = (
         if (conversationId) {
           conversationsService
             .submitRoundFeedback({ conversationId, roundId, vote: 'up' })
-            .then(invalidateConversation);
+            .then(() =>
+              patchCache({
+                vote: 'up',
+                chips: [],
+                comment: '',
+                submitted_at: new Date().toISOString(),
+              })
+            )
+            .catch(() => {
+              addErrorToast({ title: labels.voteError });
+              setVoteState(prev);
+              setInviteVisible(false);
+            });
         }
       }
     },
@@ -160,18 +177,15 @@ export const useFeedback = (
       conversationId,
       conversationsService,
       roundId,
-      reset,
+      resetTo,
       clearSubmittedTimers,
-      invalidateConversation,
+      patchCache,
+      addErrorToast,
     ]
   );
 
-  const toggleChip = useCallback((chip: string) => {
+  const toggleChip = useCallback((chip: FeedbackChipId) => {
     setChips((prev) => (prev.includes(chip) ? prev.filter((c) => c !== chip) : [...prev, chip]));
-  }, []);
-
-  const setComment = useCallback((value: string) => {
-    setCommentState(value);
   }, []);
 
   const openModal = useCallback(() => {
@@ -189,10 +203,6 @@ export const useFeedback = (
     const currentVote = voteRef.current;
     if (!currentVote || !conversationId) return;
 
-    hasUserInteractedRef.current = true;
-    const currentChips = chipsRef.current;
-    const currentComment = commentRef.current;
-
     setModalOpen(false);
 
     conversationsService
@@ -200,35 +210,40 @@ export const useFeedback = (
         conversationId,
         roundId,
         vote: currentVote,
-        chips: currentChips,
-        comment: currentComment,
+        chips,
+        comment,
       })
       .then(() => {
-        invalidateConversation();
-        setSubmitted(true);
-        setSubmittedFading(false);
+        patchCache({
+          vote: currentVote,
+          chips,
+          comment,
+          submitted_at: new Date().toISOString(),
+        });
+        setSubmittedPhase('visible');
 
         clearSubmittedTimers();
         timer1Ref.current = setTimeout(() => {
-          setSubmittedFading(true);
+          setSubmittedPhase('fading');
           timer2Ref.current = setTimeout(() => {
-            setSubmitted(false);
-            setSubmittedFading(false);
+            setSubmittedPhase('idle');
           }, SUBMITTED_FADE_MS);
         }, SUBMITTED_VISIBLE_MS);
       })
       .catch(() => {
         addErrorToast({ title: labels.submitError });
-        reset();
+        resetTo();
       });
   }, [
     conversationId,
     conversationsService,
     roundId,
+    chips,
+    comment,
     clearSubmittedTimers,
     addErrorToast,
-    reset,
-    invalidateConversation,
+    resetTo,
+    patchCache,
   ]);
 
   return {
@@ -237,8 +252,8 @@ export const useFeedback = (
     comment,
     modalOpen,
     inviteVisible,
-    submitted,
-    submittedFading,
+    submitted: submittedPhase !== 'idle',
+    submittedFading: submittedPhase === 'fading',
     setVote,
     toggleChip,
     setComment,

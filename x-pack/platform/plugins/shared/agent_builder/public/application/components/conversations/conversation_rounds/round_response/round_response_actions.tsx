@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
@@ -117,7 +117,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
-  const showFeedback = Boolean(rawRound);
+  const showFeedback = Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>

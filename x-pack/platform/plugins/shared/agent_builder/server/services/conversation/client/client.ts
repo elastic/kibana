@@ -11,6 +11,7 @@ import type {
   ConversationOrigin,
   ConversationWithoutRounds,
   ConversationRoundFeedback,
+  FeedbackChipId,
 } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
@@ -56,7 +57,7 @@ export interface ConversationClient {
   updateRoundFeedback(
     conversationId: string,
     roundId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string }
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
@@ -217,7 +218,11 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId } = conversationUpdate;
     const { access } = options;
     const now = new Date();
-    const document = await this.getDocumentWithAccess({ conversationId, access });
+    const document = await this.getDocumentWithAccess({
+      conversationId,
+      access,
+      seqNoPrimaryTerm: true,
+    });
 
     const storedConversation = fromEs(document);
     const updatedConversation = updateConversation({
@@ -242,7 +247,7 @@ class ConversationClientImpl implements ConversationClient {
   async updateRoundFeedback(
     conversationId: string,
     roundId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string }
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void> {
     return this._updateRoundFeedbackWithRetry(conversationId, roundId, feedback, false);
   }
@@ -250,10 +255,14 @@ class ConversationClientImpl implements ConversationClient {
   private async _updateRoundFeedbackWithRetry(
     conversationId: string,
     roundId: string,
-    userFeedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string },
+    userFeedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string },
     isRetry: boolean
   ): Promise<void> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const document = await this.getDocumentWithAccess({
+      conversationId,
+      access: 'owner',
+      seqNoPrimaryTerm: true,
+    });
     const rounds = document._source!.conversation_rounds ?? [];
     const roundIndex = rounds.findIndex((r) => r.id === roundId);
 
@@ -263,6 +272,15 @@ class ConversationClientImpl implements ConversationClient {
 
     const round = rounds[roundIndex];
     const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+    const existingFeedback = round.feedback;
+    const voteHistory: ConversationRoundFeedback['vote_history'] = existingFeedback?.vote
+      ? [
+          ...(existingFeedback.vote_history ?? []),
+          { vote: existingFeedback.vote, changed_at: existingFeedback.submitted_at },
+        ]
+      : existingFeedback?.vote_history;
+
     const updatedRound =
       userFeedback.vote === null
         ? roundWithoutFeedback
@@ -276,14 +294,11 @@ class ConversationClientImpl implements ConversationClient {
               connector_id: round.model_usage?.connector_id,
               model: round.model_usage?.model,
               trace_id: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
+              ...(voteHistory?.length ? { vote_history: voteHistory } : {}),
             } satisfies ConversationRoundFeedback,
           };
 
-    const updatedRounds = [
-      ...rounds.slice(0, roundIndex),
-      updatedRound,
-      ...rounds.slice(roundIndex + 1),
-    ];
+    const updatedRounds = rounds.map((r, i) => (i === roundIndex ? updatedRound : r));
 
     try {
       await this.storage.getClient().index({
@@ -315,12 +330,15 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  private async _get(conversationId: string): Promise<Document | undefined> {
+  private async _get(
+    conversationId: string,
+    { seqNoPrimaryTerm = false }: { seqNoPrimaryTerm?: boolean } = {}
+  ): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
-      seq_no_primary_term: true,
+      ...(seqNoPrimaryTerm && { seq_no_primary_term: true }),
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
@@ -343,11 +361,13 @@ class ConversationClientImpl implements ConversationClient {
   private async getDocumentWithAccess({
     conversationId,
     access,
+    seqNoPrimaryTerm = false,
   }: {
     conversationId: string;
     access: ConversationAccess;
+    seqNoPrimaryTerm?: boolean;
   }): Promise<Document> {
-    const document = await this._get(conversationId);
+    const document = await this._get(conversationId, { seqNoPrimaryTerm });
 
     if (!document) {
       throw createConversationNotFoundError({ conversationId });

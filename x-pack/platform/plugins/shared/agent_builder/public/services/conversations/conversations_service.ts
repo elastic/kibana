@@ -6,7 +6,11 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationWithoutRounds,
+  FeedbackChipId,
+} from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
@@ -82,7 +86,7 @@ export class ConversationsService {
     conversationId: string;
     roundId: string;
     vote: 'up' | 'down' | null;
-    chips?: string[];
+    chips?: FeedbackChipId[];
     comment?: string;
   }): Promise<void> {
     await this.http.post(
