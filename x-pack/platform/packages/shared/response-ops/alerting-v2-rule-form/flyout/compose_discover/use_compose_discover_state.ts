@@ -56,7 +56,7 @@ export const createInitialState = ({
         manualSplitEnabled: false,
       })
     ),
-    childOpen: forceYamlMode || mode === 'create',
+    childOpen: forceYamlMode,
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
     manualSplitEnabled: false,
