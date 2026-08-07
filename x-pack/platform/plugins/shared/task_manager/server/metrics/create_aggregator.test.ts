@@ -34,6 +34,8 @@ import { metricsAggregatorMock } from './metrics_aggregator.mock';
 import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
 import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+import { TaskRunResult } from '../task_running';
 
 const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
@@ -771,25 +773,25 @@ describe('createAggregator', () => {
     test('returns a cumulative count of successful task runs, on time task runs and total task runs, broken down by type, along with histogram of run delays', async () => {
       const taskRunEvents = [
         getTaskManagerStatEvent(3.234),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(10.45),
         getTaskRunSuccessEvent('telemetry'),
         getTaskManagerStatEvent(3.454),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(35.45),
         getTaskRunSuccessEvent('report'),
         getTaskManagerStatEvent(8.85673),
-        getTaskRunFailedEvent('alerting:example'),
+        getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting'),
         getTaskManagerStatEvent(4.5745),
-        getTaskRunSuccessEvent('alerting:.index-threshold'),
+        getTaskRunSuccessEvent('alerting:.index-threshold', false, 'alerting'),
         getTaskManagerStatEvent(11.564),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(3.78),
-        getTaskRunFailedEvent('alerting:example'),
+        getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting'),
         getTaskManagerStatEvent(3.7863),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(3.245),
-        getTaskRunFailedEvent('actions:webhook'),
+        getTaskRunFailedEvent('actions:webhook', false, TaskRunResult.Failed, 'actions'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
 
@@ -1895,28 +1897,28 @@ describe('createAggregator', () => {
       const reset$ = new Subject<boolean>();
       const taskRunEvents1 = [
         getTaskManagerStatEvent(3.234),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(10.45),
         getTaskRunSuccessEvent('telemetry'),
         getTaskManagerStatEvent(3.454),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(35.45),
         getTaskRunSuccessEvent('report'),
         getTaskManagerStatEvent(8.85673),
-        getTaskRunFailedEvent('alerting:example'),
+        getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting'),
       ];
 
       const taskRunEvents2 = [
         getTaskManagerStatEvent(4.5745),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(11.564),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(3.78),
-        getTaskRunFailedEvent('alerting:example'),
+        getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting'),
         getTaskManagerStatEvent(3.7863),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(3.245),
-        getTaskRunFailedEvent('actions:webhook'),
+        getTaskRunFailedEvent('actions:webhook', false, TaskRunResult.Failed, 'actions'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
 
@@ -2947,28 +2949,28 @@ describe('createAggregator', () => {
       clock.tick(0);
       const taskRunEvents1 = [
         getTaskManagerStatEvent(3.234),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(10.45),
         getTaskRunSuccessEvent('telemetry'),
         getTaskManagerStatEvent(3.454),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(35.45),
         getTaskRunSuccessEvent('report'),
         getTaskManagerStatEvent(8.85673),
-        getTaskRunFailedEvent('alerting:example'),
+        getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting'),
       ];
 
       const taskRunEvents2 = [
         getTaskManagerStatEvent(4.5745),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(11.564),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(3.78),
-        getTaskRunFailedEvent('alerting:example'),
+        getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting'),
         getTaskManagerStatEvent(3.7863),
-        getTaskRunSuccessEvent('alerting:example'),
+        getTaskRunSuccessEvent('alerting:example', false, 'alerting'),
         getTaskManagerStatEvent(3.245),
-        getTaskRunFailedEvent('actions:webhook'),
+        getTaskRunFailedEvent('actions:webhook', false, TaskRunResult.Failed, 'actions'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
 
@@ -4001,6 +4003,11 @@ describe('createAggregator', () => {
   });
 
   describe('with TaskOverdueMetricsAggregator', () => {
+    const mockDefinitions = (overrides: Record<string, { taskTypeGroup?: string }> = {}) =>
+      ({
+        get: (type: string) => overrides[type],
+      } as unknown as TaskTypeDictionary);
+
     test('returns latest values for task overdue by time', async () => {
       const events = [
         getTaskManagerMetricEvent({
@@ -4055,7 +4062,14 @@ describe('createAggregator', () => {
         config,
         reset$: new Subject<boolean>(),
         eventFilter: (event: TaskLifecycleEvent) => isTaskManagerMetricEvent(event),
-        metricsAggregator: new TaskOverdueMetricsAggregator(),
+        metricsAggregator: new TaskOverdueMetricsAggregator(
+          mockDefinitions({
+            ['alerting:example']: { taskTypeGroup: 'alerting' },
+            ['alerting:.index-threshold']: { taskTypeGroup: 'alerting' },
+            ['actions:webhook']: { taskTypeGroup: 'actions' },
+            ['actions:.email']: { taskTypeGroup: 'actions' },
+          })
+        ),
       });
 
       return new Promise<void>((resolve) => {

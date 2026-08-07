@@ -69,6 +69,7 @@ export interface RanTask {
   persistence: TaskPersistence;
   result: TaskRunResult;
   isExpired: boolean;
+  taskTypeGroup?: string;
 }
 export type ErroredTask = RanTask & {
   error: DecoratedError;

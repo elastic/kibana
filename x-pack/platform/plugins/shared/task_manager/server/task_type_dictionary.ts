@@ -120,6 +120,7 @@ export interface TaskRegisterDefinition {
   >;
 
   paramsSchema?: ObjectType;
+  taskTypeGroup?: 'alerting' | 'actions';
 }
 
 /**

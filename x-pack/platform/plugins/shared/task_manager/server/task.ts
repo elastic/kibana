@@ -256,6 +256,14 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+
+    /**
+     * Used to group tasks for metrics calculated within task_manager.
+     * If value is not set, metrics will be ignored for the specific task type
+     */
+    taskTypeGroup: schema.maybe(
+      schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
+    ),
   },
   {
     validate({ timeout, priority, cost }) {
