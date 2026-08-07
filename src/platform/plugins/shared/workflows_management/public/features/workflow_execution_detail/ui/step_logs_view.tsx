@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiAccordion,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type ExecutionStatus,
@@ -24,11 +17,6 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows/types/latest';
 import type { StepLogEntry, StepLogsApi, StepLogsConfig } from '@kbn/workflows-extensions/public';
-
-const preWrapCss = css`
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
 
 const terminalContainerCss = css`
   font-family: monospace;
@@ -138,21 +126,6 @@ const ansiToSpans = (text: string): React.ReactNode[] => {
   return result;
 };
 
-interface LogSectionProps {
-  id: string;
-  label: string;
-  content: string;
-}
-
-const LogSection = memo<LogSectionProps>(({ id, label, content }) => (
-  <EuiAccordion id={id} buttonContent={label} paddingSize="s" initialIsOpen>
-    <EuiText size="xs" css={preWrapCss}>
-      <p>{content}</p>
-    </EuiText>
-  </EuiAccordion>
-));
-LogSection.displayName = 'LogSection';
-
 const TerminalLogsView = memo<{ entries: StepLogEntry[] }>(({ entries }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -183,8 +156,6 @@ interface StepLogsViewProps {
 
 export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, config, logsApi }) => {
   const [entries, setEntries] = useState<StepLogEntry[] | null>(null);
-  const outputId = useGeneratedHtmlId({ prefix: 'stepLogsOutput' });
-  const errorId = useGeneratedHtmlId({ prefix: 'stepLogsError' });
 
   // Refs so the poll loop always reads the latest values without restarting on every parent re-render.
   const stepExecutionRef = useRef(stepExecution);
@@ -233,20 +204,6 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
     };
   }, [logsApi]); // logsApi is memoized on stepExecution.id — restarts only when the step changes
 
-  const { outputText, errorText } = useMemo(() => {
-    if (!entries) return { outputText: '', errorText: '' };
-    return {
-      outputText: entries
-        .filter((e) => !e.level || e.level === 'info')
-        .map((e) => e.message)
-        .join('\n'),
-      errorText: entries
-        .filter((e) => e.level === 'warn' || e.level === 'error')
-        .map((e) => e.message)
-        .join('\n'),
-    };
-  }, [entries]);
-
   if (entries === null) {
     return <EuiLoadingSpinner size="m" />;
   }
@@ -263,33 +220,5 @@ export const StepLogsView: React.FC<StepLogsViewProps> = ({ stepExecution, confi
     );
   }
 
-  if (config.renderer === 'terminal') {
-    return <TerminalLogsView entries={entries} />;
-  }
-
-  return (
-    <>
-      {errorText && (
-        <>
-          <LogSection
-            id={errorId}
-            label={i18n.translate('workflowsManagement.stepLogsView.errorsLabel', {
-              defaultMessage: 'Errors',
-            })}
-            content={errorText}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {outputText && (
-        <LogSection
-          id={outputId}
-          label={i18n.translate('workflowsManagement.stepLogsView.outputLabel', {
-            defaultMessage: 'Output',
-          })}
-          content={outputText}
-        />
-      )}
-    </>
-  );
+  return <TerminalLogsView entries={entries} />;
 };
