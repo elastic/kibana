@@ -523,6 +523,7 @@ describe('rule template create-rule schema coupling', () => {
     const templateJson = toStableJsonSchema(ruleTemplateDataSchema) as {
       properties?: Record<string, unknown>;
       required?: string[];
+      definitions?: Record<string, unknown>;
     };
 
     expect({
@@ -539,9 +540,21 @@ describe('rule template create-rule schema coupling', () => {
       required: ['engine', 'rule'],
     });
 
+    // createRuleDataSchema carries .meta({ id: 'alerting_v2_new_rule' }), so when nested
+    // under the template schema Zod emits a $ref instead of inlining the object.
+    expect(templateJson.properties?.rule).toEqual({
+      $ref: '#/definitions/alerting_v2_new_rule',
+    });
+
+    const { alerting_v2_new_rule: ruleBody, ...ruleNestedDefs } = templateJson.definitions ?? {};
+    const resolvedRule = {
+      ...(ruleBody as Record<string, unknown>),
+      definitions: ruleNestedDefs,
+    };
+
     expect({
       hint: 'Rule template rule property must match createRuleDataSchema. Keep rule: createRuleDataSchema.',
-      rule: templateJson.properties?.rule,
+      rule: resolvedRule,
       createRule: createJson,
     }).toEqual({
       hint: 'Rule template rule property must match createRuleDataSchema. Keep rule: createRuleDataSchema.',
