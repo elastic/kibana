@@ -166,19 +166,21 @@ describe('Lens App', () => {
 
       expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'New visualization',
+          title: undefined,
           back: undefined,
           menu: undefined,
+          spacing: 'compact',
         })
       );
       expect(screen.getByTestId('top-nav')).toBeInTheDocument();
       expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           showFilterBar: true,
-          dataTestSubj: 'lnsApp_topNav',
+          showQueryInput: true,
         }),
         {}
       );
+      expect(screen.getByTestId('lnsApp_topNav')).toBeInTheDocument();
     });
 
     it('registers the document title when a saved visualization is loaded', async () => {

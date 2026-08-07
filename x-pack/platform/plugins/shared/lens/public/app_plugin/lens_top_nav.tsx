@@ -14,7 +14,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux-v7';
 import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { TopNavMenuItems } from '@kbn/navigation-plugin/public';
+import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -22,6 +22,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
 import type { UseEuiTheme } from '@elastic/eui';
 import { euiBreakpoint } from '@elastic/eui';
@@ -338,6 +339,7 @@ export const LensTopNavMenu = ({
     data,
     uiSettings,
     application,
+    chrome,
     share,
     unifiedSearch,
     dataViewFieldEditor,
@@ -345,6 +347,8 @@ export const LensTopNavMenu = ({
     dataViews: dataViewsService,
     getOriginatingAppName,
   } = useKibana<LensAppServices>().services;
+
+  const isChromeNextAppHeader = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
@@ -1159,27 +1163,28 @@ export const LensTopNavMenu = ({
 
   const managed = useLensSelector(selectIsManaged);
 
-  const badges: AppHeaderBadge[] | undefined = managed
-    ? [
-        {
-          label: i18n.translate('xpack.lens.managedBadgeLabel', {
-            defaultMessage: 'Managed',
-          }),
-          color: 'primary',
-          tooltip: i18n.translate('xpack.lens.managedBadgeTooltip', {
-            defaultMessage:
-              'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
-          }),
-          'data-test-subj': 'managedContentBadge',
-        },
-      ]
-    : undefined;
+  const managedBadgeTooltip = i18n.translate('xpack.lens.managedBadgeTooltip', {
+    defaultMessage:
+      'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
+  });
 
-  const headerTitle =
-    title ||
-    i18n.translate('xpack.lens.app.headerTitle', {
-      defaultMessage: 'New visualization',
-    });
+  // AppHeader badges (Chrome Next project). Classic chrome keeps TopNavMenuBadges in the portal.
+  const appHeaderBadges: AppHeaderBadge[] | undefined =
+    isChromeNextAppHeader && managed
+      ? [
+          {
+            label: i18n.translate('xpack.lens.managedBadgeLabel', {
+              defaultMessage: 'Managed',
+            }),
+            color: 'primary',
+            tooltip: managedBadgeTooltip,
+            'data-test-subj': 'managedContentBadge',
+          },
+        ]
+      : undefined;
+
+  const legacyBadges =
+    !isChromeNextAppHeader && managed ? [getManagedContentBadge(managedBadgeTooltip)] : undefined;
 
   // Same condition as the Cancel menu action: opened from a container view (e.g. Dashboard
   // "Edit visualization in Lens"), not from a library listing page.
@@ -1221,48 +1226,59 @@ export const LensTopNavMenu = ({
       {/*
         Chrome-owned registration so omitted `back` can fall back to project breadcrumbs.
         Menu is omitted so setHeaderActionMenu keeps feeding the legacy slot.
+        Only active when Chrome Next + project style; classic keeps portal badges below.
       */}
-      <ChromeAppHeaderRegistration title={headerTitle} back={back} badges={badges} />
-      <MountPointPortal setMountPoint={setHeaderActionMenu}>
-        <TopNavMenuItems
-          config={topNavConfig}
-          className="hide-for-sharing"
-          popoverBreakpoints={['xs', 's', 'm']}
-        />
-      </MountPointPortal>
-      <AggregateQuerySearchBar
-        allowSavingQueries
-        savedQuery={savedQuery}
-        onQuerySubmit={onQuerySubmitWrapped}
-        onSaved={onSavedWrapped}
-        onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
-        onClearSavedQuery={onClearSavedQueryWrapped}
-        indexPatterns={indexPatterns}
-        query={query}
-        dateRangeFrom={from}
-        dateRangeTo={to}
-        indicateNoData={indicateNoData}
-        dataViewPickerComponentProps={dataViewPickerProps}
-        showDatePicker={
-          indexPatterns.some((ip) => ip.isTimeBased()) ||
-          // always show the timepicker for text based languages
-          isOnTextBasedMode ||
-          Boolean(
-            allLoaded &&
-              activeDatasourceId &&
-              datasourceMap[activeDatasourceId].isTimeBased(
-                datasourceStates[activeDatasourceId].state,
-                dataViews.indexPatterns
-              )
-          )
-        }
-        showFilterBar={true}
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        dataTestSubj="lnsApp_topNav"
-        screenTitle="lens"
-        appName={LENS_APP_NAME}
-        displayStyle="detached"
+      <ChromeAppHeaderRegistration
+        title={title}
+        back={back}
+        badges={appHeaderBadges}
+        spacing="compact"
       />
+      <MountPointPortal setMountPoint={setHeaderActionMenu}>
+        <span className="kbnTopNavMenu__wrapper hide-for-sharing">
+          <TopNavMenuBadges badges={legacyBadges} />
+          <TopNavMenuItems config={topNavConfig} popoverBreakpoints={['xs', 's', 'm']} />
+        </span>
+      </MountPointPortal>
+      {/*
+        Do not pass dataTestSubj into SearchBar — that prop overrides the query input's
+        default `queryInput` test subject (used by FTR/Scout). Keep lnsApp_topNav on a wrapper.
+      */}
+      <div data-test-subj="lnsApp_topNav">
+        <AggregateQuerySearchBar
+          allowSavingQueries
+          savedQuery={savedQuery}
+          onQuerySubmit={onQuerySubmitWrapped}
+          onSaved={onSavedWrapped}
+          onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+          onClearSavedQuery={onClearSavedQueryWrapped}
+          indexPatterns={indexPatterns}
+          query={query}
+          dateRangeFrom={from}
+          dateRangeTo={to}
+          indicateNoData={indicateNoData}
+          dataViewPickerComponentProps={dataViewPickerProps}
+          showQueryInput={true}
+          showDatePicker={
+            indexPatterns.some((ip) => ip.isTimeBased()) ||
+            // always show the timepicker for text based languages
+            isOnTextBasedMode ||
+            Boolean(
+              allLoaded &&
+                activeDatasourceId &&
+                datasourceMap[activeDatasourceId].isTimeBased(
+                  datasourceStates[activeDatasourceId].state,
+                  dataViews.indexPatterns
+                )
+            )
+          }
+          showFilterBar={true}
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          screenTitle="lens"
+          appName={LENS_APP_NAME}
+          displayStyle="detached"
+        />
+      </div>
     </>
   );
 };
