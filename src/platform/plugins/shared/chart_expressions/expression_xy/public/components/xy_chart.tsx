@@ -22,6 +22,7 @@ import type {
   TooltipValue,
   PointerValue,
   AxisStyle,
+  RectStyle,
 } from '@elastic/charts';
 import {
   Chart,
@@ -294,6 +295,11 @@ export function XYChart({
           !xAccessor || (xScaleType ?? defaultXScaleType) === XScaleTypes.ORDINAL
       ),
     [dataLayers, defaultXScaleType]
+  );
+
+  const categoricalXValues = useMemo(
+    () => (isCategoricalXAxis ? getXValues(dataLayers) : undefined),
+    [dataLayers, isCategoricalXAxis]
   );
 
   const getShowLegendDefault = useCallback(() => {
@@ -615,6 +621,18 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
+  // safeguard against overly thick bars on sparse charts
+  const barRectStyle: Partial<{ rect: RecursivePartial<RectStyle> }> = hasBars
+    ? {
+        rect: {
+          widthPixel: 400,
+          ...(categoricalXValues?.length && categoricalXValues.length <= 2
+            ? { widthRatio: Math.min(1, 0.5 + 0.2 * categoricalXValues.length) }
+            : {}),
+        },
+      }
+    : {};
+
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
@@ -921,6 +939,7 @@ export function XYChart({
                 {
                   barSeriesStyle: {
                     ...valueLabelsStyling,
+                    ...barRectStyle,
                   },
                   background: {
                     color: undefined, // removes background for embeddables
