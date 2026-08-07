@@ -3,14 +3,14 @@ pageLoadAssetSize:
   advancedSettings: 1981
   agentBuilder: 375
   agentBuilderDashboards: 3074
-  agentBuilderPlatform: 22338
+  agentBuilderPlatform: 21685
   agentBuilderSml: 328
   agentBuilderVisualizations: 1284
   agentBuilderWorkflows: 761
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 17141
+  alertingVTwo: 17111
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
@@ -23,10 +23,10 @@ pageLoadAssetSize:
   cloud: 8477
   cloudConnect: 4998
   cloudDataMigration: 1755
-  cloudDefend: 3152
+  cloudDefend: 3060
   cloudExperiments: 67356
   cloudFullStory: 1373
-  cloudLinks: 18103
+  cloudLinks: 18005
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   discoverEnhanced: 1091
   discoveries: 31528
   discoverShared: 1070
-  elasticAssistant: 137336
+  elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 850
   embeddable: 990
@@ -70,7 +70,7 @@ pageLoadAssetSize:
   eventAnnotation: 17299
   eventAnnotationListing: 2987
   exploratoryView: 707
-  expressionGauge: 5424
+  expressionGauge: 5138
   expressionHeatmap: 12315
   expressionLegacyMetricVis: 7969
   expressionMetricVis: 13684
@@ -79,7 +79,7 @@ pageLoadAssetSize:
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 3625
+  feedback: 3622
   fieldFormats: 4136
   fieldsMetadata: 1568
   files: 3957
@@ -88,14 +88,14 @@ pageLoadAssetSize:
   fleet: 6095
   genAiSettings: 1541
   globalSearch: 5183
-  globalSearchBar: 21452
+  globalSearchBar: 21337
   globalSearchProviders: 2586
   graph: 3659
   grokdebugger: 1333
   home: 9251
   imageEmbeddable: 1732
   inbox: 1294
-  indexLifecycleManagement: 32106
+  indexLifecycleManagement: 32081
   indexManagement: 316
   inference: 5564
   inferenceWorkflows: 895
@@ -105,8 +105,8 @@ pageLoadAssetSize:
   inputControlVis: 3216
   inspectComponent: 1152
   inspector: 590
-  interactiveSetup: 32844
-  intercepts: 14394
+  interactiveSetup: 32694
+  intercepts: 14374
   kibanaOverview: 1863
   kibanaReact: 1225
   kibanaUsageCollection: 529
@@ -163,7 +163,7 @@ pageLoadAssetSize:
   savedObjectsTaggingOss: 807
   savedSearch: 849
   screenshotMode: 979
-  screenshotting: 1493
+  screenshotting: 1387
   searchAssistant: 1545
   searchGettingStarted: 2339
   searchHomepage: 3873
@@ -186,20 +186,19 @@ pageLoadAssetSize:
   sessionView: 379
   share: 379
   shared-core: 348361
-  shared-misc: 103637
+  shared-misc: 97669
   shared-packages: 4546017
   shared-plugins: 13536562
-  shared-solution-packages: 353531
-  significantEvents: 5400
-  # Proportional to webpack 14459 using prior rspack/webpack ratio (~5600/9784).
-  significantEventsApp: 8500
+  shared-solution-packages: 347767
+  significantEvents: 3153
+  significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
   stackConnectors: 63548
-  streams: 6778
-  streamsApp: 83679
+  streams: 4563
+  streamsApp: 55882
   synthetics: 18443
   telemetry: 20586
   telemetryManagementSection: 1738
@@ -207,7 +206,7 @@ pageLoadAssetSize:
   transform: 8828
   triggersActionsUi: 3033
   uiActions: 454
-  unifiedDocViewer: 627
+  unifiedDocViewer: 726
   unifiedSearch: 511
   upgradeAssistant: 1822
   uptime: 37816
