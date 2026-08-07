@@ -7,9 +7,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { useToasts } from '../../../../../hooks/use_toasts';
+import { queryKeys } from '../../../../../query_keys';
 
 const labels = {
   submitError: i18n.translate('xpack.agentBuilder.feedbackControls.submitError', {
@@ -49,7 +51,9 @@ export const useFeedback = (
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
   const { addErrorToast } = useToasts();
-  const [vote, setVoteState] = useState<Vote>(initialFeedback?.vote ?? null);
+  const queryClient = useQueryClient();
+  const serverVote = initialFeedback?.vote ?? null;
+  const [vote, setVoteState] = useState<Vote>(serverVote);
   const [chips, setChips] = useState<string[]>([]);
   const [comment, setCommentState] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,11 +64,14 @@ export const useFeedback = (
   const voteRef = useRef(vote);
   const chipsRef = useRef(chips);
   const commentRef = useRef(comment);
+  const initialFeedbackRef = useRef(initialFeedback);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasUserInteractedRef = useRef(false);
   voteRef.current = vote;
   chipsRef.current = chips;
   commentRef.current = comment;
+  initialFeedbackRef.current = initialFeedback;
 
   useEffect(() => {
     return () => {
@@ -77,6 +84,30 @@ export const useFeedback = (
     if (timer1Ref.current) clearTimeout(timer1Ref.current);
     if (timer2Ref.current) clearTimeout(timer2Ref.current);
   }, []);
+
+  useEffect(() => {
+    hasUserInteractedRef.current = false;
+    clearSubmittedTimers();
+    setVoteState(initialFeedbackRef.current?.vote ?? null);
+    setChips([]);
+    setCommentState('');
+    setModalOpen(false);
+    setInviteVisible(false);
+    setSubmitted(false);
+    setSubmittedFading(false);
+  }, [roundId, clearSubmittedTimers]);
+
+  useEffect(() => {
+    if (!hasUserInteractedRef.current) {
+      setVoteState(serverVote);
+    }
+  }, [serverVote]);
+
+  const invalidateConversation = useCallback(() => {
+    if (conversationId) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+    }
+  }, [conversationId, queryClient]);
 
   const reset = useCallback(() => {
     clearSubmittedTimers();
@@ -92,10 +123,13 @@ export const useFeedback = (
   const setVote = useCallback(
     (next: 'up' | 'down') => {
       const prev = voteRef.current;
+      hasUserInteractedRef.current = true;
 
       if (prev === next) {
         if (conversationId) {
-          conversationsService.submitRoundFeedback({ conversationId, roundId, vote: null });
+          conversationsService
+            .submitRoundFeedback({ conversationId, roundId, vote: null })
+            .then(invalidateConversation);
         }
         reset();
         return;
@@ -116,11 +150,20 @@ export const useFeedback = (
         setModalOpen(false);
         setInviteVisible(true);
         if (conversationId) {
-          conversationsService.submitRoundFeedback({ conversationId, roundId, vote: 'up' });
+          conversationsService
+            .submitRoundFeedback({ conversationId, roundId, vote: 'up' })
+            .then(invalidateConversation);
         }
       }
     },
-    [conversationId, conversationsService, roundId, reset, clearSubmittedTimers]
+    [
+      conversationId,
+      conversationsService,
+      roundId,
+      reset,
+      clearSubmittedTimers,
+      invalidateConversation,
+    ]
   );
 
   const toggleChip = useCallback((chip: string) => {
@@ -146,6 +189,7 @@ export const useFeedback = (
     const currentVote = voteRef.current;
     if (!currentVote || !conversationId) return;
 
+    hasUserInteractedRef.current = true;
     const currentChips = chipsRef.current;
     const currentComment = commentRef.current;
 
@@ -160,6 +204,7 @@ export const useFeedback = (
         comment: currentComment,
       })
       .then(() => {
+        invalidateConversation();
         setSubmitted(true);
         setSubmittedFading(false);
 
@@ -176,7 +221,15 @@ export const useFeedback = (
         addErrorToast({ title: labels.submitError });
         reset();
       });
-  }, [conversationId, conversationsService, roundId, clearSubmittedTimers, addErrorToast, reset]);
+  }, [
+    conversationId,
+    conversationsService,
+    roundId,
+    clearSubmittedTimers,
+    addErrorToast,
+    reset,
+    invalidateConversation,
+  ]);
 
   return {
     vote,
