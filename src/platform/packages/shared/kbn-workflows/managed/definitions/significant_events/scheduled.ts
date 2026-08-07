@@ -58,11 +58,14 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   // The change_point agg needs >= 22 buckets, so detectionLookbackMinutes must be an exact
   // multiple of detectionBucketIntervalMinutes with a quotient in [22, 1000] — the scheduled
   // discovery settings route validates the pair before installing.
+  //
+  // Defaults below only matter on a Kibana restart with an install from before these fields
+  // existed: this workflow re-renders from old persisted values on boot, which won't have them.
   yamlTemplate: ({
     detectionIntervalMinutes,
-    detectionBucketIntervalMinutes,
-    detectionLookbackMinutes,
-    targetCoverageMinutes,
+    detectionBucketIntervalMinutes = 1,
+    detectionLookbackMinutes = 40,
+    targetCoverageMinutes = 30,
   }) =>
     renderTemplate(SCHEDULED_DETECTION_YAML, {
       __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
@@ -78,13 +81,16 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   pluginId: 'significantEvents',
   version: 5,
   billable: false,
+  // Defaults on the 3 flaky-rule fields only matter on a Kibana restart with a pre-upgrade
+  // install: this workflow re-renders from old persisted values on boot, and without a
+  // default the missing fields would render as the literal string "undefined".
   yamlTemplate: ({
     reviewIntervalMinutes,
     discoveryBatchSize,
     maxReviewPasses,
-    flakyRuleDetectionThreshold,
-    flakyRuleProbeAfterMinutes,
-    flakyRuleExemptSeverityScore,
+    flakyRuleDetectionThreshold = 10,
+    flakyRuleProbeAfterMinutes = 360,
+    flakyRuleExemptSeverityScore = 80,
   }) =>
     renderTemplate(SCHEDULED_REVIEW_YAML, {
       __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,

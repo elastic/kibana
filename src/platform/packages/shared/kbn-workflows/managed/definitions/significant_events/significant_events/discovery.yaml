@@ -110,7 +110,7 @@ steps:
     type: elasticsearch.esql.query
     with:
       query: |-
-        FROM .significant_events-detections
+        FROM .significant_events-detections METADATA _id
         | INLINE STATS processed_count = COUNT(processed_by) BY detection_id
         | WHERE change_point_type IS NOT NULL
         | INLINE STATS recent_detection_count = COUNT(*) BY rule_uuid

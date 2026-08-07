@@ -123,9 +123,10 @@ export const MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD = 2;
 export const MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD = 1000;
 export const DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 360;
 export const MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 10;
-// The probe clock derives from detections inside the 24h detectionLookback window.
-// A probe age above 1440 can never be reached because detections age out first.
-export const MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 1440;
+// Detections age out of the 24h detectionLookback window, so a probe age near 1440 leaves
+// almost no time for a scheduled review pass to actually catch it. Capped well below 1440
+// for a real chance to fire before the detection disappears.
+export const MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES = 1200;
 export const DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 80;
 export const MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 0;
 // 101 means "no rule is exempt" — severity scores top out at 100.
