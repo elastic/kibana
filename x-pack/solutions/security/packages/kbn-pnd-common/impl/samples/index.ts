@@ -16,7 +16,6 @@ export {
 } from './investigations';
 
 export {
-  CONVERSATION_CATEGORY_COLORS,
   MOCK_PROPOSALS,
   createMockProposal,
   getMockProposalById,
