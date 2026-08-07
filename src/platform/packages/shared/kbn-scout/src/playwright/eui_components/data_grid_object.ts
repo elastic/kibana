@@ -30,6 +30,10 @@ export class EuiDataGridObject extends BaseObject {
   /**
    * A single data cell, addressed by row index and column id. Column order and
    * virtualized horizontal scrolling do not affect the column id.
+   *
+   * Rows are virtualized: the target row must be rendered for the locator to
+   * resolve, so only use this on grids small enough to render fully (data
+   * correctness over many cells belongs in unit/RTL tests, not e2e).
    */
   cell(rowIndex: number, columnId: string): Locator {
     return this.root.locator(
@@ -39,7 +43,9 @@ export class EuiDataGridObject extends BaseObject {
 
   /**
    * All currently rendered data cells of a column. Rows are virtualized, so
-   * this is the rendered window, not necessarily every row.
+   * this is the rendered window, not necessarily every row — narrow the data
+   * first (e.g. query/filter for the entity under test) instead of scanning a
+   * large grid, and keep data-correctness checks in unit/RTL tests.
    */
   cells(columnId: string): Locator {
     return this.root.locator(`.euiDataGridRowCell[data-gridcell-column-id="${columnId}"]`);

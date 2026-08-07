@@ -24,6 +24,10 @@ export class Toasts {
   /**
    * The title of the toast. Strict: throws when several toasts with a title
    * are shown at once.
+   *
+   * Prefer not to assert on toast content at all — validate the action's
+   * outcome through the UI or an API instead, and use toasts only as something
+   * to close so they don't block the flow (`page.components.toast().closeAll()`).
    */
   async getHeaderText() {
     return (await this.toastList.toasts.getByTestId('euiToastHeader__title').textContent()) ?? '';
@@ -32,6 +36,8 @@ export class Toasts {
   /**
    * The body text of the toast, or an empty string for a title-only toast.
    * Strict: throws when several toasts with a body are shown at once.
+   *
+   * Prefer not to assert on toast content at all — see {@link getHeaderText}.
    */
   async getMessageText() {
     const text = this.toastList.toasts.getByTestId('euiToastText');
@@ -41,7 +47,7 @@ export class Toasts {
 
   /**
    * Waits for a toast to appear (throws when none does), then closes every
-   * toast. Use `page.components.globalToastList().closeAll()` directly to
+   * toast. Use `page.components.toast().closeAll()` directly to
    * dismiss toasts only if present.
    */
   async closeAll() {
