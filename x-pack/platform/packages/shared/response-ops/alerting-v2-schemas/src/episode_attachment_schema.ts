@@ -6,22 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ALERT_EPISODE_STATUS } from './alert_action_schema';
+import { alertEpisodeStatusSchema } from './alert_episode_schema';
 import { tagsSchema } from './common';
-import { ID_MAX_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
+import { ID_MAX_LENGTH, MAX_EPISODE_DATA_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
 
-export const alertEpisodeStatusSchema = z.enum([
-  ALERT_EPISODE_STATUS.ACTIVE,
-  ALERT_EPISODE_STATUS.INACTIVE,
-  ALERT_EPISODE_STATUS.PENDING,
-  ALERT_EPISODE_STATUS.RECOVERING,
-]);
+/** Namespaced to match `ALERTING_NAMESPACE` in `@kbn/alerting-v2-constants`. */
+export const EPISODE_ATTACHMENT_TYPE = 'platform.alerting.episode' as const;
 
-/**
- * Canonical AlertEpisode row shape (dotted ES|QL keys).
- * Nullable fields match what query / client normalization may return.
- */
-export const alertEpisodeSchema = z
+export const episodeAttachmentDataSchema = z
   .object({
     '@timestamp': z.iso.datetime(),
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
@@ -31,18 +23,15 @@ export const alertEpisodeSchema = z
     first_timestamp: z.iso.datetime(),
     last_timestamp: z.iso.datetime(),
     duration: z.number(),
-    /** ISO timestamp of the first event where episode.status === 'active'. */
     triggered_at: z.iso.datetime().optional(),
     last_ack_action: z.enum(['ack', 'unack']).optional(),
-    last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).nullable().optional(),
+    last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).optional(),
     last_snooze_action: z.enum(['snooze', 'unsnooze']).optional(),
     snooze_expiry: z.iso.datetime().optional(),
     last_tags: tagsSchema.optional(),
-    /** JSON string from the latest non-empty alert `data`. */
-    episode_data: z.string().nullable().optional(),
-    /** Latest top-level `severity` from a breached rule event, when present. */
-    severity: z.string().min(1).nullable().optional(),
+    episode_data: z.string().max(MAX_EPISODE_DATA_LENGTH).optional(),
+    severity: z.string().min(1).max(ID_MAX_LENGTH).optional(),
   })
   .strict();
 
-export type AlertEpisode = z.infer<typeof alertEpisodeSchema>;
+export type EpisodeAttachmentData = z.infer<typeof episodeAttachmentDataSchema>;
