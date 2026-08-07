@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   PanelTypeMigrationContext,
   PanelTypeMigrationPanel,
@@ -250,9 +251,7 @@ describe('transformPanelsOut', () => {
   });
 
   describe('panel type migration pipeline', () => {
-    const savedObjectsClient = {
-      bulkGet: jest.fn(),
-    } as any;
+    const savedObjectsClient = savedObjectsClientMock.create();
 
     beforeEach(() => {
       savedObjectsClient.bulkGet.mockReset();
@@ -492,15 +491,19 @@ describe('transformPanelsOut', () => {
             panels: readonly PanelTypeMigrationPanel[],
             context: PanelTypeMigrationContext
           ) => {
+            const savedObjectIds = panels.map(({ config }) => {
+              const { savedObjectId } = config;
+              if (typeof savedObjectId !== 'string') {
+                throw new Error('Expected savedObjectId');
+              }
+              return savedObjectId;
+            });
             await context.savedObjectsClient.bulkGet(
-              panels.map((p) => ({
-                id: (p.config as any).savedObjectId,
-                type: 'visualization',
-              }))
+              savedObjectIds.map((id) => ({ id, type: 'visualization' }))
             );
-            return panels.map((p) => ({
-              panelId: p.id,
-              config: { spec: `from:${(p.config as any).savedObjectId}` },
+            return panels.map(({ id }, index) => ({
+              panelId: id,
+              config: { spec: `from:${savedObjectIds[index]}` },
             }));
           },
         },

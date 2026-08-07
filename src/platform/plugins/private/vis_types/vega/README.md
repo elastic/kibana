@@ -23,14 +23,14 @@ save/load routes store and return it as-is.
 
 The `dashboard.legacyVegaPanelMigration` feature flag (default **false**) enables a read-path
 migration from stored `legacy_vis` Vega panels (visualization saved objects) to first-class `vega`
-panels:
+panels when `vega.standaloneEmbeddable` is also enabled. Because the standalone embeddable flag
+controls server schema registration, enable it before starting Kibana.
 
-- **Disabled (default)**: migration returns no results and performs no saved-object reads.
-- **Enabled**:
+- **Either flag disabled (default)**: migration returns no results.
+- **Both flags enabled**:
   - **By-value** `legacy_vis` Vega panels are converted by mapping `savedVis.params.spec` to `spec`.
-  - **By-reference** `legacy_vis` Vega panels are resolved via one `bulkGet` per dashboard, parsed to
-    confirm `visState.type === "vega"`, and returned as **by-value** `vega` panels with an inlined
-    `spec`.
+  - **By-reference** `legacy_vis` Vega panels are intentionally **not** migrated yet. They remain
+    `legacy_vis` until the standalone Vega embeddable supports library (by-reference) state.
 
-In both cases, supported panel-level fields (titles, hide flags, optional `time_range`, and
-drilldowns) are preserved, and the stored dashboard saved object remains unchanged.
+When a panel is migrated, supported panel-level fields (titles, hide flags, optional `time_range`,
+and drilldowns) are preserved, and the stored dashboard saved object remains unchanged.

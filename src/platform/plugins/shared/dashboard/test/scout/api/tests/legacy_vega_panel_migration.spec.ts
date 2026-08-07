@@ -18,6 +18,7 @@ import {
   DASHBOARD_API_PATH,
   KBN_ARCHIVES,
   LEGACY_VEGA_DASHBOARD_ID,
+  LEGACY_VEGA_BY_VALUE_DASHBOARD_ID,
   LEGACY_VEGA_VISUALIZATION_ID,
 } from '../fixtures';
 
@@ -29,10 +30,13 @@ apiTest.describe(
   { tag: tags.deploymentAgnostic },
   () => {
     let viewerCredentials: RoleApiCredentials;
+    let viewerCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    apiTest.beforeAll(async ({ kbnClient, requestAuth, samlAuth }) => {
       viewerCredentials = await requestAuth.getApiKey('viewer');
+      viewerCookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
       await kbnClient.importExport.load(KBN_ARCHIVES.LEGACY_VEGA_PANEL_MIGRATION);
+      await kbnClient.importExport.load(KBN_ARCHIVES.LEGACY_VEGA_BY_VALUE_PANEL_MIGRATION);
     });
 
     apiTest.afterAll(async ({ apiServices, kbnClient }) => {
@@ -45,7 +49,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'public read returns a vega panel without dropped_panel when the flag is enabled',
+      'public read migrates a by-value legacy Vega panel when the flag is enabled',
       async ({ apiClient, apiServices, kbnClient }) => {
         await apiServices.core.settings({
           'feature_flags.overrides': {
@@ -53,13 +57,16 @@ apiTest.describe(
           },
         });
 
-        const response = await apiClient.get(`${DASHBOARD_API_PATH}/${LEGACY_VEGA_DASHBOARD_ID}`, {
-          headers: {
-            ...COMMON_HEADERS,
-            ...viewerCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-        });
+        const response = await apiClient.get(
+          `${DASHBOARD_API_PATH}/${LEGACY_VEGA_BY_VALUE_DASHBOARD_ID}`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...viewerCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          }
+        );
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.warnings).toBeUndefined();
@@ -73,12 +80,14 @@ apiTest.describe(
 
         const stored = await kbnClient.savedObjects.get<{ panelsJSON?: string }>({
           type: 'dashboard',
-          id: LEGACY_VEGA_DASHBOARD_ID,
+          id: LEGACY_VEGA_BY_VALUE_DASHBOARD_ID,
         });
         const storedPanels = JSON.parse(stored.attributes.panelsJSON ?? '[]');
         expect(storedPanels[0]).toMatchObject({
           type: 'visualization',
-          panelRefName: 'panel_1',
+          embeddableConfig: {
+            savedVis: { type: 'vega' },
+          },
         });
       }
     );
@@ -98,7 +107,7 @@ apiTest.describe(
             headers: {
               ...COMMON_HEADERS,
               'elastic-api-version': DASHBOARD_APP_API_VERSION,
-              ...viewerCredentials.apiKeyHeader,
+              ...viewerCookieHeader,
             },
             responseType: 'json',
           }
@@ -116,7 +125,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'internal app read returns a vega panel when the flag is enabled',
+      'internal app read keeps by-reference legacy Vega panels as legacy_vis when the flag is enabled',
       async ({ apiClient, apiServices }) => {
         await apiServices.core.settings({
           'feature_flags.overrides': {
@@ -130,7 +139,7 @@ apiTest.describe(
             headers: {
               ...COMMON_HEADERS,
               'elastic-api-version': DASHBOARD_APP_API_VERSION,
-              ...viewerCredentials.apiKeyHeader,
+              ...viewerCookieHeader,
             },
             responseType: 'json',
           }
@@ -139,9 +148,9 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body.data.panels).toHaveLength(1);
         expect(response.body.data.panels[0]).toMatchObject({
-          type: 'vega',
+          type: 'legacy_vis',
           config: {
-            spec: '{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }',
+            savedObjectId: LEGACY_VEGA_VISUALIZATION_ID,
           },
         });
       }

@@ -27,6 +27,7 @@ import { migrateLegacyVegaPanels } from './legacy_vega_panel_migration/migrate_o
 const LEGACY_VIS_EMBEDDABLE_TYPE = 'legacy_vis';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
+  private standaloneEmbeddableEnabled = false;
   private legacyVegaMigrationEnabled = LEGACY_VEGA_PANEL_MIGRATION_DEFAULT;
   private legacyVegaMigrationSubscription?: Subscription;
 
@@ -40,6 +41,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
           VEGA_STANDALONE_EMBEDDABLE_FLAG,
           false
         );
+        this.standaloneEmbeddableEnabled = standaloneEmbeddableEnabled;
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',
           getTransforms,
@@ -53,7 +55,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
       from: LEGACY_VIS_EMBEDDABLE_TYPE,
       to: VEGA_EMBEDDABLE_TYPE,
       migrateOut: async (panels, { savedObjectsClient }) => {
-        if (!this.legacyVegaMigrationEnabled) {
+        if (!this.standaloneEmbeddableEnabled || !this.legacyVegaMigrationEnabled) {
           return [];
         }
 

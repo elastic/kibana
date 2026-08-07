@@ -73,7 +73,7 @@ describe('dashboard search sort options', () => {
       })
     );
     expect(mockedTransformDashboardOut).toHaveBeenCalled();
-    expect(mockedTransformDashboardOut.mock.calls[0]).toHaveLength(5);
+    expect(mockedTransformDashboardOut.mock.calls[0]).toHaveLength(4);
   });
 
   it('omits sort options when query is present', async () => {
@@ -84,6 +84,6 @@ describe('dashboard search sort options', () => {
     expect(findOptions).not.toHaveProperty('sortOrder');
     expect(findOptions).toHaveProperty('search');
     expect(mockedTransformDashboardOut).toHaveBeenCalled();
-    expect(mockedTransformDashboardOut.mock.calls[0]).toHaveLength(5);
+    expect(mockedTransformDashboardOut.mock.calls[0]).toHaveLength(4);
   });
 });

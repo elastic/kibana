@@ -55,7 +55,12 @@ export async function search(
     soResponse.saved_objects.map(async (so) => {
       const {
         dashboardState: { description, tags, time_range, title },
-      } = await transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
+      } = await transformDashboardOut(
+        so.attributes,
+        so.references,
+        undefined,
+        strictValidationSchema
+      );
 
       return {
         id: so.id,
