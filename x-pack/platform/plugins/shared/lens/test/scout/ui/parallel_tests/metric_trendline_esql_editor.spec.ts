@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
+  spaceTest,
   testData,
 } from '../fixtures';
 
@@ -109,7 +110,7 @@ spaceTest.describe(
           ).toBeVisible();
         });
 
-        await lens.getSecondaryFlyoutBackButton().click();
+        await lens.secondaryFlyoutBackButton.click();
         await applyLensInlineEditorAndWaitClosed({ lens });
       }
     );
@@ -131,7 +132,7 @@ spaceTest.describe(
           await page.getByTestId('lnsMetric_background_chart_line').click();
           await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
 
-          await lens.getSecondaryFlyoutBackButton().click();
+          await lens.secondaryFlyoutBackButton.click();
         });
 
         await spaceTest.step(
@@ -152,7 +153,7 @@ spaceTest.describe(
         );
 
         // Wait for the apply button to become enabled after the query finishes
-        await expect(lens.getApplyFlyoutButton()).toBeEnabled({ timeout: 30000 });
+        await expect(lens.applyFlyoutButton).toBeEnabled({ timeout: 30000 });
         await applyLensInlineEditorAndWaitClosed({ lens });
       }
     );
