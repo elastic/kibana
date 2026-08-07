@@ -1,8 +1,8 @@
 version: "1"
 name: Detection Watch
 description: >
-  Runs detection engineering work by dispatching to one worker per run: rule tuning on
-  a schedule, or rule creation when a caller supplies a detection gap.
+  Runs detection engineering work by dispatching to one worker per run: rule tuning by
+  default, or rule creation when a caller supplies a detection gap.
 enabled: true
 tags:
   - watch
@@ -15,9 +15,6 @@ settings:
     strategy: drop
     max: 1
 triggers:
-  - type: scheduled
-    with:
-      every: "60m"
   - type: manual
     inputs:
       properties:
@@ -49,7 +46,7 @@ consts:
     handoff: none
     onDemand: true
     draft: false
-    cadence: sweep
+    cadence: manual
     mode: always
     ui:
       color: "#e7664c"
@@ -82,7 +79,7 @@ consts:
         enabled: true
 steps:
   # A supplied technique means a caller wants one rule drafted; anything else is
-  # the scheduled sweep. Exactly one worker runs per execution.
+  # the tuning sweep. Exactly one worker runs per execution.
   - name: select_worker
     type: data.set
     with:
