@@ -43,35 +43,47 @@ spaceTest.describe(
         await unifiedFieldList.expectAvailableFieldCount(49);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.createNewTab();
-            await discover.waitUntilTabIsLoaded();
-            await unifiedFieldList.expectAvailableFieldCount(49);
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.createNewTab();
+              await discover.waitUntilTabIsLoaded();
+              await unifiedFieldList.expectAvailableFieldCount(49);
+            }
+          )
         ).toBe(1);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.selectTab(0);
-            await discover.waitUntilTabIsLoaded();
-            await unifiedFieldList.expectAvailableFieldCount(49);
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.selectTab(0);
+              await discover.waitUntilTabIsLoaded();
+              await unifiedFieldList.expectAvailableFieldCount(49);
+            }
+          )
         ).toBe(0);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.selectTab(1);
-            await discover.waitUntilTabIsLoaded();
-            await unifiedFieldList.expectAvailableFieldCount(49);
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.selectTab(1);
+              await discover.waitUntilTabIsLoaded();
+              await unifiedFieldList.expectAvailableFieldCount(49);
+            }
+          )
         ).toBe(0);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.createNewTab();
-            await discover.waitUntilTabIsLoaded();
-            await unifiedFieldList.expectAvailableFieldCount(49);
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.createNewTab();
+              await discover.waitUntilTabIsLoaded();
+              await unifiedFieldList.expectAvailableFieldCount(49);
+            }
+          )
         ).toBe(1);
       }
     );
@@ -89,64 +101,82 @@ spaceTest.describe(
         await unifiedFieldList.expectAvailableFieldCount(49);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.createNewTab();
-            await discover.waitUntilTabIsLoaded();
-            await unifiedFieldList.expectAvailableFieldCount(49);
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.createNewTab();
+              await discover.waitUntilTabIsLoaded();
+              await unifiedFieldList.expectAvailableFieldCount(49);
+            }
+          )
         ).toBe(1);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await discover.createRuntimeField(field, `emit('test')`);
-            await unifiedFieldList.expectAvailableFieldCount(50);
-            await unifiedFieldList.searchField(field);
-            await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await discover.createRuntimeField(field, `emit('test')`);
+              await unifiedFieldList.expectAvailableFieldCount(50);
+              await unifiedFieldList.searchField(field);
+              await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
+            }
+          )
         ).toBe(1);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.selectTab(0);
-            await discover.waitUntilTabIsLoaded();
-            await expectUnfilteredAvailableFieldCount(pageObjects, 50);
-            await unifiedFieldList.searchField(field);
-            await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.selectTab(0);
+              await discover.waitUntilTabIsLoaded();
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
+              await unifiedFieldList.searchField(field);
+              await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
+            }
+          )
         ).toBe(1);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.selectTab(1);
-            await discover.waitUntilTabIsLoaded();
-            await expectUnfilteredAvailableFieldCount(pageObjects, 50);
-            await unifiedFieldList.searchField(field);
-            await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.selectTab(1);
+              await discover.waitUntilTabIsLoaded();
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
+              await unifiedFieldList.searchField(field);
+              await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
+            }
+          )
         ).toBe(0);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedFieldList.openFieldEditor(field);
-            await discover.renameRuntimeField(field2);
-            await expectUnfilteredAvailableFieldCount(pageObjects, 50);
-            await unifiedFieldList.searchField(field);
-            await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
-            await unifiedFieldList.searchField(field2);
-            await expect(unifiedFieldList.getAvailableField(field2)).toBeVisible();
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedFieldList.openFieldEditor(field);
+              await discover.renameRuntimeField(field2);
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
+              await unifiedFieldList.searchField(field);
+              await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
+              await unifiedFieldList.searchField(field2);
+              await expect(unifiedFieldList.getAvailableField(field2)).toBeVisible();
+            }
+          )
         ).toBe(1);
 
         expect(
-          await network.countMatchingRequests(FIELDS_FOR_WILDCARD_ENDPOINT, async () => {
-            await unifiedTabs.selectTab(0);
-            await discover.waitUntilTabIsLoaded();
-            await expectUnfilteredAvailableFieldCount(pageObjects, 50);
-            await unifiedFieldList.searchField(field);
-            await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
-            await unifiedFieldList.searchField(field2);
-            await expect(unifiedFieldList.getAvailableField(field2)).toBeVisible();
-          })
+          await network.countMatchingRequests(
+            { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
+            async () => {
+              await unifiedTabs.selectTab(0);
+              await discover.waitUntilTabIsLoaded();
+              await expectUnfilteredAvailableFieldCount(pageObjects, 50);
+              await unifiedFieldList.searchField(field);
+              await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
+              await unifiedFieldList.searchField(field2);
+              await expect(unifiedFieldList.getAvailableField(field2)).toBeVisible();
+            }
+          )
         ).toBe(1);
       }
     );
