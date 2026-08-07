@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
+export { ProjectPickerFilterForm } from './filter_form';

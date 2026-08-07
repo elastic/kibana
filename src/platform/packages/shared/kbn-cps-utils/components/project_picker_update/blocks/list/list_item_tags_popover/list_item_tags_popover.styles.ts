@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+export const projectTagsStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  projectTagsBadgeContainer: css({
+    maxWidth: '200px',
+    maxHeight: '268px',
+    overflowY: 'auto',
+  }),
+  projectTagsBadge: css({
+    maxWidth: 'max-content',
+  }),
+});

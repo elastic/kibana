@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
+export { FilterSelectionInput, type FilterInput } from './filter_input';
+export { filterExpressionCodec } from '../../../../../../utils/filter_input_codec';

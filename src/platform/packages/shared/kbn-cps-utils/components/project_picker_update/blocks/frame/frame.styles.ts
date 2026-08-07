@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
+import { css } from '@emotion/react';
+import { type UseEuiTheme } from '@elastic/eui';
+
+export const projectPickerFrameStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
+  container: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
+  headerWrapper: css({
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+  }),
+});

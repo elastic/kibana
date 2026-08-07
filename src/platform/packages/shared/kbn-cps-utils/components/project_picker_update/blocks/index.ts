@@ -8,3 +8,5 @@
  */
 
 export { ProjectPickerButton, type ProjectPickerButtonProps } from './button';
+export { ProjectPickerFrame } from './frame';
+export { ProjectPickerList } from './list';
