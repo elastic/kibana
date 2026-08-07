@@ -32,11 +32,7 @@ export type {
   HandleEventsResult,
   ConnectorSpecEvents,
 } from './src/connector_spec_events';
-export {
-  buildEventId,
-  connectorTypeToEventNamespace,
-  normalizeConnectorTypeId,
-} from './src/event_type_id';
+export { buildEventId, connectorTypeToEventNamespace } from './src/event_type_id';
 export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,

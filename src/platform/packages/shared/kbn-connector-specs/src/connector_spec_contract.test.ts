@@ -13,14 +13,12 @@ import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
 import { buildEventId } from './event_type_id';
+import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
 const MAX_CONNECTOR_ID_LENGTH = 64;
 const allSpecs = Object.entries(connectorsSpecs) as Array<[string, ConnectorSpec]>;
 const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[];
-
-// Specs allowed to declare `events`
-const SPECS_ALLOWED_EVENTS = new Set<string>([]);
 
 const getAuthTypeId = (authType: string | AuthTypeDef): string =>
   typeof authType === 'string' ? authType : authType.type;
