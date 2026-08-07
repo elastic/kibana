@@ -59,16 +59,24 @@ describe('createActionPolicyManagementSkill', () => {
       (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
     );
 
-    expect(byName['action-policy-matchers']).toContain('Auto-generated from `MATCHER_CONTEXT_FIELDS`');
+    expect(byName['action-policy-matchers']).toContain(
+      'Auto-generated from `MATCHER_CONTEXT_FIELDS`'
+    );
     expect(byName['action-policy-matchers']).toContain('`episode_status`');
     expect(byName['action-policy-matchers']).toContain('`rule.id`');
 
-    expect(byName['action-policy-grouping-modes']).toContain('Auto-generated from `groupingModeSchema`');
+    expect(byName['action-policy-grouping-modes']).toContain(
+      'Auto-generated from `groupingModeSchema`'
+    );
     expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
 
-    expect(byName['action-policy-throttle-strategies']).toContain('Auto-generated from `throttleStrategySchema`');
+    expect(byName['action-policy-throttle-strategies']).toContain(
+      'Auto-generated from `throttleStrategySchema`'
+    );
     expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
-    expect(byName['action-policy-throttle-strategies']).toContain('Compatibility with grouping modes');
+    expect(byName['action-policy-throttle-strategies']).toContain(
+      'Compatibility with grouping modes'
+    );
   });
 
   it('exposes the generated workflow dispatch payload schema as referenced content', () => {
