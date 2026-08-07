@@ -36,7 +36,7 @@ By default, the suite uses `trustUpstreamDataset: true` and resolves the dataset
 by name from the golden cluster. The name defaults to `attack_discovery: bundled alerts (jsonl)`
 and can be overridden with `ATTACK_DISCOVERY_DATASET_NAME`.
 
-This requires `EVALUATIONS_KBN_URL` and `EVALUATIONS_KBN_API_KEY` to be set
+This requires `EVAL_KBN_URL` and `EVAL_KBN_API_KEY` to be set
 (automatically configured in CI via the vault config, or locally via `local_ci_env.sh`).
 
 ### Local JSONL override
@@ -56,8 +56,8 @@ Place the JSONL in the `data/` directory (it is gitignored).
 Use the provided upload script. Set the required env vars from your config (or export them via your preferred method):
 
 ```bash
-EVALUATIONS_KBN_URL=https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud \
-EVALUATIONS_KBN_API_KEY=<your-api-key> \
+EVAL_KBN_URL=https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud \
+EVAL_KBN_API_KEY=<your-api-key> \
   node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/scripts/upload_dataset.js [path/to/file.jsonl]
 ```
 
@@ -114,7 +114,7 @@ ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME=alerts-snapshot \
 ```
 
 The restore uses the shared `GCS_CREDENTIALS` service account (automatically set via the vault config when using `node scripts/evals`).
-See `src/data_generators/restore_alerts_snapshot.ts`.
+See `@kbn/security-evals-alerts-snapshot` (`x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot/src/restore.ts`).
 
 #### Dataset registry (Dataplex)
 
@@ -214,8 +214,8 @@ nvm use && ATTACK_DISCOVERY_DATASET_JSONL_PATH=data/eval_dataset_attack_discover
 | `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET` | GCS bucket for alert snapshot restore | `security-ai-datasets` |
 | `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH` | GCS base path within the bucket | `attack-discovery/oh-my-malware/2026-03-26` |
 | `ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME` | Specific snapshot name (defaults to pinned) | `alerts-snapshot` |
-| `EVALUATIONS_KBN_URL` | Golden cluster Kibana URL for dataset ops | (from vault config) |
-| `EVALUATIONS_KBN_API_KEY` | API key for golden cluster Kibana | (from vault config) |
+| `EVAL_KBN_URL` | Golden cluster Kibana URL for dataset ops | (from vault config) |
+| `EVAL_KBN_API_KEY` | API key for golden cluster Kibana | (from vault config) |
 
 ---
 

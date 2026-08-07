@@ -449,6 +449,18 @@ module.exports = {
      * EUI Team rules
      */
 
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
     '@elastic/eui/no-restricted-eui-imports': [
       'warn',
       {
@@ -474,6 +486,7 @@ module.exports = {
     '@elastic/eui/tooltip-button-icon-wrap': 'error',
     '@elastic/eui/tooltip-focusable-anchor': 'error',
     '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [
