@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { withRetry } from './retry_utils';
+import { isRetryableNetworkError, withRetry } from './retry_utils';
 
 const fastRetryOptions = { minDelayMs: 1, maxDelayMs: 2, jitter: false } as const;
 
@@ -97,50 +97,42 @@ describe('withRetry', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ attempt: 1, label: 'upsert' }));
   });
+});
 
-  // Connection-drop / OOM scenarios — the retry_utils shared layer should handle these
-  // so that the outer wrapKbnClientWithRetries wrapper retries on connection drops
-  // (when retries:0 is NOT set, i.e. the outer wrapper is active).
+describe('isRetryableNetworkError', () => {
+  it.each(['fetch failed', 'other side closed', 'socket hang up', 'terminated'])(
+    'recognizes the top-level transport message "%s"',
+    (message) => {
+      expect(isRetryableNetworkError(new Error(message))).toBe(true);
+    }
+  );
 
-  it('retries on "fetch failed" (Kibana OOM connection drop)', async () => {
-    const err = new Error('fetch failed');
-    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
-    const result = await withRetry(fn, fastRetryOptions);
-    expect(result).toBe('ok');
-    expect(fn).toHaveBeenCalledTimes(2);
+  it.each(['ECONNRESET', 'ECONNREFUSED', 'EPIPE', 'UND_ERR_SOCKET'])(
+    'recognizes a transport code in the immediate cause: %s',
+    (code) => {
+      const cause = Object.assign(new Error('socket failure'), { code });
+      expect(isRetryableNetworkError(Object.assign(new Error('fetch failed'), { cause }))).toBe(
+        true
+      );
+    }
+  );
+
+  it('should not recognize unrelated errors', () => {
+    expect(isRetryableNetworkError(new Error('request failed'))).toBe(false);
   });
 
-  it('retries on "other side closed" (Kibana socket reset)', async () => {
-    const err = new Error('other side closed');
-    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
-    const result = await withRetry(fn, fastRetryOptions);
-    expect(result).toBe('ok');
-    expect(fn).toHaveBeenCalledTimes(2);
+  it('should not recognize errors with an HTTP status', () => {
+    expect(isRetryableNetworkError(Object.assign(new Error('fetch failed'), { status: 500 }))).toBe(
+      false
+    );
   });
 
-  it('retries on ECONNRESET buried in error.cause (undici pattern)', async () => {
-    const cause = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
-    const err = Object.assign(new Error('fetch failed'), { cause });
-    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
-    const result = await withRetry(fn, fastRetryOptions);
-    expect(result).toBe('ok');
-    expect(fn).toHaveBeenCalledTimes(2);
-  });
-
-  it('retries on UND_ERR_SOCKET in error.cause (undici socket drop)', async () => {
-    const cause = Object.assign(new Error('Socket closed'), { code: 'UND_ERR_SOCKET' });
-    const err = Object.assign(new Error('fetch failed'), { cause });
-    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
-    const result = await withRetry(fn, fastRetryOptions);
-    expect(result).toBe('ok');
-    expect(fn).toHaveBeenCalledTimes(2);
-  });
-
-  it('retries on ECONNREFUSED', async () => {
-    const err = new Error('connect ECONNREFUSED 127.0.0.1:5620');
-    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
-    const result = await withRetry(fn, fastRetryOptions);
-    expect(result).toBe('ok');
-    expect(fn).toHaveBeenCalledTimes(2);
+  it('should not retry caller cancellation in the immediate cause', () => {
+    const cause = Object.assign(new Error('The operation was aborted'), {
+      name: 'AbortError',
+    });
+    expect(isRetryableNetworkError(Object.assign(new Error('fetch failed'), { cause }))).toBe(
+      false
+    );
   });
 });

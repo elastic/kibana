@@ -60,7 +60,12 @@ describe('httpHandlerFromKbnClient — connection-drop retry', () => {
     const fetch = httpHandlerFromKbnClient({ kbnClient, log });
     return {
       fetch: (path = '/internal/siem_migrations/dashboards/_invoke') =>
-        fetch(path, { method: 'POST', body: JSON.stringify({ connector_id: 'test' }) }),
+        fetch(path, {
+          method: 'POST',
+          body: JSON.stringify({ connector_id: 'test' }),
+          // Preserve the legacy suite's explicit network-retry behavior.
+          retryPolicy: { onNetworkError: true },
+        }),
       log,
     };
   }
@@ -79,7 +84,7 @@ describe('httpHandlerFromKbnClient — connection-drop retry', () => {
     const { fetch, log } = makeFetch(request);
     await expect(fetch()).resolves.toEqual({ result: 'ok' });
     expect(request).toHaveBeenCalledTimes(2);
-    expect(log.warning).toHaveBeenCalledWith(expect.stringMatching(/connection drop/i));
+    expect(log.warning).toHaveBeenCalledWith(expect.stringMatching(/network retry/i));
   });
 
   it('retries when ECONNRESET is buried in error.cause', async () => {
@@ -150,7 +155,7 @@ describe('httpHandlerFromKbnClient — connection-drop retry', () => {
     expect(log.warning).toHaveBeenCalledWith(expect.stringMatching(/HTTP 429/i));
   });
 
-  it('KBN_EVALS_NETWORK_RETRIES=0 disables network-drop retries', async () => {
+  it('should disable network-drop retries when KBN_EVALS_NETWORK_RETRIES=0', async () => {
     process.env.KBN_EVALS_NETWORK_RETRIES = '0';
     const err = makeKbnRequesterError('fetch failed');
     const request = jest.fn().mockRejectedValue(err);
@@ -158,5 +163,97 @@ describe('httpHandlerFromKbnClient — connection-drop retry', () => {
     const { fetch } = makeFetch(request);
     await expect(fetch()).rejects.toBe(err);
     expect(request).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('httpHandlerFromKbnClient — call-site-controlled retries', () => {
+  const originalEnv = { ...process.env };
+  let setTimeoutSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    setTimeoutSpy = jest.spyOn(global, 'setTimeout').mockImplementation((fn: any) => {
+      fn();
+      return 0 as any;
+    });
+    process.env.KBN_EVALS_NETWORK_RETRIES = '2';
+    process.env.KBN_EVALS_HTTP_RETRIES = '0';
+  });
+
+  afterEach(() => {
+    setTimeoutSpy.mockRestore();
+    process.env = { ...originalEnv };
+  });
+
+  const createHandler = (request: jest.Mock) => {
+    const log = createLog();
+    const fetch = httpHandlerFromKbnClient({
+      kbnClient: createKbnClient(request),
+      log,
+    });
+    return { fetch, log };
+  };
+
+  it('should not retry network errors unless the call site opts in', async () => {
+    const error = makeKbnRequesterError('fetch failed');
+    const request = jest.fn().mockRejectedValue(error);
+    const { fetch } = createHandler(request);
+
+    await expect(
+      fetch('/internal/siem_migrations/rules/_invoke', {
+        method: 'POST',
+        retryPolicy: undefined,
+      })
+    ).rejects.toBe(error);
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('should retry network errors when the call site opts in', async () => {
+    const request = jest
+      .fn()
+      .mockRejectedValueOnce(makeKbnRequesterError('fetch failed'))
+      .mockResolvedValueOnce({ data: 'ok', status: 200, statusText: 'OK', headers: {} });
+    const { fetch, log } = createHandler(request);
+
+    await expect(
+      fetch('/internal/siem_migrations/rules/_invoke', {
+        method: 'POST',
+        retryPolicy: { onNetworkError: true },
+      })
+    ).resolves.toBe('ok');
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(log.warning).toHaveBeenCalledWith(expect.stringMatching(/network retry/i));
+  });
+
+  it('should not forward retryPolicy to kbnClient.request', async () => {
+    const request = jest.fn().mockResolvedValue({
+      data: 'ok',
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+    });
+    const { fetch } = createHandler(request);
+
+    await fetch('/internal/siem_migrations/rules/_invoke', {
+      method: 'POST',
+      retryPolicy: { onNetworkError: true },
+    });
+
+    expect(request).toHaveBeenCalledWith(
+      expect.not.objectContaining({ retryPolicy: expect.anything() })
+    );
+  });
+
+  it('should keep status retries enabled independently of network retry opt-in', async () => {
+    process.env.KBN_EVALS_HTTP_RETRIES = '1';
+    const request = jest
+      .fn()
+      .mockRejectedValueOnce(makeKbnRequesterError('HTTP 429', { status: 429 }))
+      .mockResolvedValueOnce({ data: 'ok', status: 200, statusText: 'OK', headers: {} });
+    const { fetch } = createHandler(request);
+
+    await expect(
+      fetch('/internal/siem_migrations/rules/_invoke', { method: 'POST' })
+    ).resolves.toBe('ok');
+    expect(request).toHaveBeenCalledTimes(2);
   });
 });
