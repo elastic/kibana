@@ -110,9 +110,97 @@ GET ai-index-idx-poc-verified-kis/_search
 
 Only the "Find canyon parks" KI is present. The workflow execution log shows the rejected KI with the parse errors from the ES|QL verifier.
 
+## Part 2: Re-verify existing KIs and hard-delete failures (human in the loop)
+
+The same `context-engine.verifyKi` step composes into a standalone sweep workflow that re-verifies KIs already in the AI index and hard-deletes the ones that no longer pass — with a `waitForApproval` gate before every delete. This covers the on-demand re-trigger and externally-added-KI sweep cases from the verification automation epic, and the hard-delete recommendation (with human in the loop) from the exclusion epic.
+
+A KI that was valid at creation can fail later for external reasons. To demo that, first break one: delete the source index the "Find canyon parks" KI queries (or index a KI with bad ES|QL directly, simulating an out-of-workflow write):
+
+```
+POST ai-index-idx-poc-verified-kis/_doc?refresh=true
+{
+  "type": "access_pattern",
+  "title": "Externally added, broken",
+  "content": "```esql\nFROM poc-national-parks | WHERE | LIMIT\n```",
+  "tags": ["poc"]
+}
+```
+
+Then create and run:
+
+```yaml
+version: '1'
+name: POC - Re-verify existing KIs
+description: |
+  Sweeps an AI index backing index, re-verifies each KI with
+  context-engine.verifyKi, and hard-deletes failures after human approval.
+enabled: true
+tags: ['poc', 'context-engine']
+consts:
+  aiIndexBackingIndex: ai-index-idx-poc-verified-kis
+triggers:
+  - type: manual # use a scheduled trigger for a recurring sweep
+steps:
+  - name: fetch_kis
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.aiIndexBackingIndex }}'
+      size: 100
+      query:
+        match_all: {}
+  - name: reverify_kis
+    type: foreach
+    foreach: '${{ steps.fetch_kis.output.hits.hits }}'
+    steps:
+      - name: verify_ki
+        type: context-engine.verifyKi
+        with:
+          ki: '${{ foreach.item._source }}'
+      - name: gate_ki
+        type: if
+        condition: 'steps.verify_ki.output.valid : false'
+        steps:
+          - name: request_delete_approval
+            type: waitForApproval
+            timeout: 24h
+            with:
+              message: |-
+                KI "{{ foreach.item._source.title }}" ({{ foreach.item._id }}) failed re-verification: {{ steps.verify_ki.output.results | json: 2 }}. Approve hard delete?
+              approveLabel: Delete KI
+              rejectLabel: Keep KI
+          - name: gate_delete
+            type: if
+            condition: 'steps.request_delete_approval.output.response.approved : true'
+            steps:
+              - name: delete_ki
+                type: elasticsearch.bulk
+                with:
+                  index: '{{ consts.aiIndexBackingIndex }}'
+                  operations:
+                    - delete:
+                        _id: '{{ foreach.item._id }}'
+              - name: log_deleted
+                type: console
+                with:
+                  message: 'KI "{{ foreach.item._source.title }}" hard-deleted (approved by {{ steps.request_delete_approval.output.respondedBy }})'
+            else:
+              - name: log_kept
+                type: console
+                with:
+                  message: 'KI "{{ foreach.item._source.title }}" failed re-verification but deletion was rejected'
+```
+
+The run pauses at `request_delete_approval` for each failing KI; approve or reject from the workflow execution view. After approving, the broken KI is gone from the index and the valid one is untouched.
+
+Caveats for anything past a POC:
+
+- The ES|QL verifier fails a KI on *execution* errors too, which can be transient (source index temporarily missing, permissions). Parse errors are strong delete signals; execution errors are weaker. Before automating deletes without HITL, the verifier result should distinguish the two so the delete gate can be stricter.
+- `elasticsearch.search` is capped at `size` here; a real sweep needs pagination.
+- `waitForApproval` is tech preview.
+
 ## Notes / follow-ups
 
 - The step is opt-in per workflow, matching the M2 scope ("initially we want to verify before persisting, opt in").
 - The verifier framework is the extension point: additional verifiers (groundedness, entailment, TTL) register through `KiVerifierRegistry` without changes to the step.
 - The step definition approval file (`workflows_extensions` Scout gate) is intentionally not included in this POC branch; it is required before merging.
-- On-demand re-verification, sweeps for externally added KIs, and stale handling are out of scope for this POC.
+- Stale handling (criteria and TTLs) is out of scope for this POC; the Part 2 sweep is the mechanism it would plug into.
