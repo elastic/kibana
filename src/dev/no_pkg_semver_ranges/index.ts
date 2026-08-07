@@ -134,9 +134,16 @@ export function checkSemverRanges(
  */
 function makeResolver(pnpmLockContent: string) {
   const lock = (parseYaml(pnpmLockContent) ?? {}) as {
-    importers?: Record<string, { dependencies?: Record<string, ImporterDep> }>;
+    importers?: Record<
+      string,
+      {
+        dependencies?: Record<string, ImporterDep>;
+        devDependencies?: Record<string, ImporterDep>;
+      }
+    >;
   };
-  const rootDeps = lock.importers?.['.']?.dependencies ?? {};
+  const rootImporter = lock.importers?.['.'] ?? {};
+  const rootDeps = { ...rootImporter.dependencies, ...rootImporter.devDependencies };
 
   return (name: string, specifier: string): string | null => {
     const dep = rootDeps[name];

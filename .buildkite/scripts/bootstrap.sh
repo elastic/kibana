@@ -4,12 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Log the agent image marker baked into the -qa image, if present.
-if [[ -f "$HOME/kibana-image-info.txt" ]]; then
-  echo "--- kibana image info (~/kibana-image-info.txt)"
-  cat "$HOME/kibana-image-info.txt" || true
-fi
-
 echo "--- pnpm install and bootstrap"
 
 BOOTSTRAP_PARAMS=()
@@ -68,12 +62,4 @@ fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'pnpm kbn bootstrap'
-fi
-
-# Opt-in per job (via CLEAR_YARN_CACHE) to free disk space on disk-constrained agents
-if [[ "${CLEAR_YARN_CACHE:-}" ]]; then
-  echo "Clearing yarn cache at /opt/buildkite-agent/.cache/yar..."
-  rm -rf /opt/buildkite-agent/.cache/yarn
-  echo "Available disk space after clearing yarn cache:"
-  df -h . || echo "Failed to get disk space"
 fi

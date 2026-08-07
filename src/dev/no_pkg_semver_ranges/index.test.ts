@@ -28,8 +28,23 @@ jest.mock('fs', () => {
 import { checkSemverRanges } from '.';
 
 /** Build a minimal pnpm-lock.yaml root importer from name -> [specifier, version]. */
-const lock = (deps: Record<string, [specifier: string, version: string]>) => {
+const lock = (
+  deps: Record<string, [specifier: string, version: string]>,
+  devDeps: Record<string, [specifier: string, version: string]> = {}
+) => {
   const lines = ['importers:', '  .:', '    dependencies:'];
+  appendImporterDeps(lines, deps);
+  if (Object.keys(devDeps).length > 0) {
+    lines.push('    devDependencies:');
+    appendImporterDeps(lines, devDeps);
+  }
+  return lines.join('\n') + '\n';
+};
+
+const appendImporterDeps = (
+  lines: string[],
+  deps: Record<string, [specifier: string, version: string]>
+) => {
   for (const [name, [specifier, version]] of Object.entries(deps)) {
     lines.push(
       `      '${name}':`,
@@ -37,7 +52,6 @@ const lock = (deps: Record<string, [specifier: string, version: string]>) => {
       `        version: ${version}`
     );
   }
-  return lines.join('\n') + '\n';
 };
 
 describe('checkSemverRanges', () => {
@@ -151,6 +165,26 @@ describe('checkSemverRanges', () => {
     expect(fs.writeFileSync).toHaveBeenCalledWith(
       expect.any(String),
       JSON.stringify({ dependencies: { ai: '5.0.190' } }, null, 2)
+    );
+  });
+
+  it('resolves devDependency ranges from the root importer devDependencies map', () => {
+    const pkgJson = JSON.stringify({
+      devDependencies: {
+        typescript: '~4.9.5',
+      },
+    });
+    const result = checkSemverRanges({
+      pkgJsonContent: pkgJson,
+      pnpmLockContent: lock({}, { typescript: ['~4.9.5', '4.9.5'] }),
+      fix: true,
+    });
+
+    expect(result.totalFixes).toBe(1);
+    expect(result.fixesPerField).toEqual({ devDependencies: 1 });
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      expect.any(String),
+      JSON.stringify({ devDependencies: { typescript: '4.9.5' } }, null, 2)
     );
   });
 
