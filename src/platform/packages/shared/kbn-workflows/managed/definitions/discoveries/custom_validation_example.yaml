@@ -14,9 +14,9 @@ description: |
   normalization — to build a post-validation pipeline tailored to your needs.
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - Example
+  - attack-discovery
+  - security
+  - example
   - attackDiscovery:custom_validation_example
 
 triggers:
