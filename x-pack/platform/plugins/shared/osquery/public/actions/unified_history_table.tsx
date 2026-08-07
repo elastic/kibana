@@ -433,7 +433,7 @@ const UnifiedHistoryTableComponent = () => {
 
   const renderTimestampColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => (
-      <>{formatDate(isScheduledRow(row) ? (row.plannedTime ?? row.timestamp) : row.timestamp)}</>
+      <>{formatDate(isScheduledRow(row) ? row.plannedTime ?? row.timestamp : row.timestamp)}</>
     ),
     []
   );
