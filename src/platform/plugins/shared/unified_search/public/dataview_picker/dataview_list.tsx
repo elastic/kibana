@@ -77,7 +77,7 @@ const DIRECTION_OPTIONS = [SortDirection.ASC, SortDirection.DESC].map((key) => {
 });
 
 export const getAlphabeticalComparable = (item: DataViewListItemEnhanced) =>
-  item.name ?? item.title;
+  item.name || item.title;
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
