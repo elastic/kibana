@@ -327,7 +327,7 @@ const routes = {
             },
           },
           '/': {
-            element: <RedirectTo pathname="/stacktraces/threads" />,
+            element: <RedirectTo pathname="/stacktraces/executables" />,
           },
         },
         element: <Outlet />,
