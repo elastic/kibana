@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';

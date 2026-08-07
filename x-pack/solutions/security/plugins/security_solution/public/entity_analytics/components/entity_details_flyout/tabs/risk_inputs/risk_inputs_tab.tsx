@@ -13,14 +13,13 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -59,12 +58,12 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
-import { AiAssistantButton } from '../../../ai_assistant_button/ai_assistant_button';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
+import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -72,6 +71,9 @@ export interface RiskInputsTabProps<T extends EntityType> {
   entityId?: string;
   /** Navigates to the alert preview for a risk-input row. */
   onShowAlert: (id: string, indexName: string) => void;
+  /** Initial sub-tab to select. Takes precedence over the expandable-flyout URL state. Used by
+   *  the v2 tool flyout which has no expandable-flyout state. */
+  subTab?: RiskScoreLeftPanelSubTab;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -116,13 +118,33 @@ export const RiskInputsTab = <T extends EntityType>({
   entityName,
   entityId,
   onShowAlert,
+  subTab: subTabProp,
 }: RiskInputsTabProps<T>) => {
   const panels = useStableExpandableFlyoutState();
-  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const subTabFromState = isRiskScoreFlyoutPanelProps(panels.left)
     ? panels.left.params.path.subTab
     : undefined;
+  const subTab = subTabFromState ?? subTabProp;
+
+  // Keeps the expandable-flyout URL state in sync with the user's manual tab
+  // toggle so that clicking the same flyout link twice still forces a remount.
+  const onSubTabChange = useCallback(
+    (newSubTab: RiskScoreLeftPanelSubTab) => {
+      if (!isRiskScoreFlyoutPanelProps(panels.left)) return;
+      openLeftPanel({
+        ...panels.left,
+        params: {
+          ...panels.left.params,
+          path: { tab: EntityDetailsLeftPanelTab.RISK_INPUTS, subTab: newSubTab },
+        },
+      });
+    },
+    [openLeftPanel, panels.left]
+  );
 
   const { data: watchlists } = useGetWatchlists();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const entityFilterQuery = useMemo(
     () =>
@@ -205,6 +227,10 @@ export const RiskInputsTab = <T extends EntityType>({
     return map;
   }, [watchlists]);
 
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return <RiskEnginePrivilegesCallOut privileges={privileges} />;
+  }
+
   if (riskScoreError) {
     return (
       <EuiCallOut
@@ -248,6 +274,7 @@ export const RiskInputsTab = <T extends EntityType>({
       resolutionGroup={resolutionGroup}
       watchlistNamesById={watchlistNamesById}
       onShowAlert={onShowAlert}
+      onSubTabChange={onSubTabChange}
     />
   );
 };
@@ -271,6 +298,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
   watchlistNamesById: Map<string, string>;
   onShowAlert: (id: string, indexName: string) => void;
+  onSubTabChange: (subTab: RiskScoreLeftPanelSubTab) => void;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -290,17 +318,15 @@ const RiskInputsTabContent = <T extends EntityType>({
   resolutionGroup,
   watchlistNamesById,
   onShowAlert,
+  onSubTabChange,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
-  const [historyFrom, setHistoryFrom] = useState(DEFAULT_HISTORY_FROM);
+  const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
-  const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const showAiAssistantButton = !isAssistantToolDisabled || isAgentBuilderEnabled;
 
   const defaultView =
     !loadingRiskScore && !entityRiskScore && hasResolutionScore
@@ -337,7 +363,6 @@ const RiskInputsTabContent = <T extends EntityType>({
     to: selectedTimestamp,
     scoreType: historyScoreType,
     includeContributions: true,
-    pageSize: 1,
     skip: !pitSelectionActive,
   });
 
@@ -350,17 +375,25 @@ const RiskInputsTabContent = <T extends EntityType>({
     [pitEntry, historyEntityId, entityType, historyEntityName]
   );
 
-  const onHistoryRangeChange = useCallback((from: string) => {
-    setHistoryFrom(from);
+  const onHistoryRangeChange = useCallback((range: { from: string; to: string }) => {
+    setHistoryRange(range);
     setSelectedTimestamp((current) =>
-      isTimestampWithinRange(current, from) ? current : undefined
+      isTimestampWithinRange(current, range) ? current : undefined
     );
   }, []);
 
-  const onViewChange = useCallback((id: string) => {
-    setUserSelectedView(id as RiskScoreLeftPanelSubTab);
-    setSelectedTimestamp(undefined);
-  }, []);
+  const onViewChange = useCallback(
+    (id: string) => {
+      const newSubTab = id as RiskScoreLeftPanelSubTab;
+      setUserSelectedView(newSubTab);
+      setSelectedTimestamp(undefined);
+      // Keep the expandable-flyout URL state in sync so that clicking the same
+      // right-panel link again produces a URL change, which forces a remount and
+      // resets userSelectedView to the correct value (v1 mode only; no-op in v2).
+      onSubTabChange(newSubTab);
+    },
+    [onSubTabChange]
+  );
 
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
   const activeRiskScore = pitRiskScore ?? latestRiskScore;
@@ -586,8 +619,8 @@ const RiskInputsTabContent = <T extends EntityType>({
           <RiskScoreTimeline
             entityType={entityType}
             entityId={historyEntityId}
-            from={historyFrom}
-            to={HISTORY_RANGE_TO}
+            from={historyRange.from}
+            to={historyRange.to}
             scoreType={historyScoreType}
             selectedTimestamp={selectedTimestamp}
             onPointSelect={setSelectedTimestamp}
@@ -638,20 +671,6 @@ const RiskInputsTabContent = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
-      {showAiAssistantButton && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <AiAssistantButton
-                entityType={entityType}
-                entityName={entityName}
-                telemetryPathway="entity_risk_contribution"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };
@@ -748,10 +767,21 @@ const ContextsSection = <T extends EntityType>({
       return undefined;
     }
 
+    const criticalityMetadata = criticality?.metadata as
+      | {
+          criticality_level?: CriticalityLevel;
+          contributor_euid?: string;
+        }
+      | undefined;
+
     return {
       criticality: {
-        level: (criticality?.metadata?.criticality_level as CriticalityLevel) ?? null,
+        level: criticalityMetadata?.criticality_level ?? null,
         contribution: criticality?.contribution,
+        contributorEUID:
+          typeof criticalityMetadata?.contributor_euid === 'string'
+            ? criticalityMetadata.contributor_euid
+            : undefined,
       },
       watchlists,
     };
@@ -765,8 +795,19 @@ const ContextsSection = <T extends EntityType>({
   const items: ContextRow[] = [];
 
   if (criticality.level != null && criticality.contribution != null) {
+    // Prefer the attribution persisted on the score document: the current-state
+    // join below is wrong for historical scores once a member's criticality
+    // changes. Scores written before attribution existed fall back to the join.
+    const contributorMember =
+      criticality.contributorEUID !== undefined
+        ? memberEntities.find((member) => getEntityId(member) === criticality.contributorEUID)
+        : undefined;
+    const contributorName =
+      criticality.contributorEUID !== undefined
+        ? (contributorMember && getEntityName(contributorMember)) || criticality.contributorEUID
+        : undefined;
     const relatedEntities = isResolutionView
-      ? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
+      ? contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
       : '';
     items.push({
       field: (
@@ -989,16 +1030,20 @@ const formatContribution = (value: number): string => {
   return fixedValue;
 };
 
-const DEFAULT_HISTORY_FROM = 'now-90d';
-const HISTORY_RANGE_TO = 'now';
+const DEFAULT_HISTORY_RANGE = { from: 'now-90d', to: 'now' };
 
-const isTimestampWithinRange = (timestamp: string | undefined, from: string): boolean => {
+const isTimestampWithinRange = (
+  timestamp: string | undefined,
+  range: { from: string; to: string }
+): boolean => {
   if (timestamp === undefined) {
     return false;
   }
 
-  const min = dateMath.parse(from)?.valueOf();
-  return min === undefined || new Date(timestamp).getTime() >= min;
+  const ms = new Date(timestamp).getTime();
+  const min = dateMath.parse(range.from)?.valueOf();
+  const max = dateMath.parse(range.to, { roundUp: true })?.valueOf();
+  return (min === undefined || ms >= min) && (max === undefined || ms <= max);
 };
 
 /**

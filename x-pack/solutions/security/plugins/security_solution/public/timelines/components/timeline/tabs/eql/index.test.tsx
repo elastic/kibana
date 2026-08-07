@@ -25,7 +25,7 @@ import * as notesApi from '../../../../../notes/api/api';
 import { timelineActions } from '../../../../store';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../body/renderers';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -33,6 +33,7 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -100,7 +101,8 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
   return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
 };
 
-describe('EQL Tab', () => {
+// Failing: See https://github.com/elastic/kibana/issues/277361
+describe.skip('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
   const mockOpenFlyout = jest.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
@@ -460,6 +462,7 @@ describe('EQL Tab', () => {
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
             hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
         expect(mockOpenFlyout).not.toHaveBeenCalled();

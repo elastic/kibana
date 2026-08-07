@@ -114,6 +114,20 @@ describe('buildPainlessSource', () => {
     expect(src).not.toContain('ef.get(');
   });
 
+  it('wraps the doc[] access in try/catch so a never-indexed flattened sub-key returns instead of throwing', () => {
+    // A `flattened` sub-key is absent from the index field infos until a
+    // doc indexes it; until then `doc[...]` throws `No field found for [...]
+    // in mapping` and aborts the request. Every type must guard the access
+    // itself, not just the parse step, so an eagerly-published runtime field
+    // survives querying a template field no case has populated yet.
+    for (const type of ['long', 'double', 'date', 'boolean', 'keyword'] as const) {
+      const src = buildPainlessSource('unpopulated_as_thing', type);
+      expect(src).toMatch(
+        /try\s*\{\s*vals = doc\['case\.extended_fields\.unpopulated_as_thing'\];\s*\}\s*catch\s*\(Exception e\)\s*\{\s*return;\s*\}/
+      );
+    }
+  });
+
   it('uses Long.parseLong for long', () => {
     expect(buildPainlessSource('s', 'long')).toContain('Long.parseLong');
   });
@@ -134,10 +148,8 @@ describe('buildPainlessSource', () => {
   });
 
   it('emits the raw string for keyword without parsing', () => {
-    // Flattened sub-keys are stored as keyword in ES; doc-values iteration
-    // yields the raw strings directly. A keyword runtime field just lifts
-    // them to a discoverable path. No try/catch needed because there is no
-    // parse step.
+    // Keyword flattened sub-keys need no parse step, so the only try/catch
+    // is the one guarding the `doc[]` access against a never-indexed sub-key.
     const src = buildPainlessSource('summary_as_keyword', 'keyword');
     expect(src).toContain("doc['case.extended_fields.summary_as_keyword']");
     expect(src).toContain('emit(v)');

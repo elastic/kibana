@@ -91,16 +91,17 @@ export const FlyoutFooterWithRetentionWarning = ({
   return (
     <EuiFlyoutFooter>
       {showWarning && (
-        <EuiCallOut
-          title={footerStrings.downsamplingNotAppliedTitle}
-          color="primary"
-          size="s"
-          announceOnMount
-          css={styles.callout}
-          data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
-        >
-          <EuiText size="s">{warningBody}</EuiText>
-        </EuiCallOut>
+        <div css={styles.callout}>
+          <EuiCallOut
+            title={footerStrings.downsamplingNotAppliedTitle}
+            color="primary"
+            size="s"
+            announceOnMount
+            data-test-subj="flyoutFooter-downsamplingNotAppliedCallout"
+          >
+            <EuiText size="s">{warningBody}</EuiText>
+          </EuiCallOut>
+        </div>
       )}
 
       <EuiFlexGroup
@@ -113,6 +114,7 @@ export const FlyoutFooterWithRetentionWarning = ({
           <EuiButtonEmpty
             onClick={onCancel}
             flush="left"
+            size="s"
             data-test-subj="dataLifecycleFlyoutCancelButton"
           >
             {cancelLabel}
@@ -122,6 +124,7 @@ export const FlyoutFooterWithRetentionWarning = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
+            size="s"
             onClick={onApply}
             disabled={isApplyDisabled}
             data-test-subj="dataLifecycleFlyoutApplyButton"

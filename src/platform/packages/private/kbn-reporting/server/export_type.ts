@@ -23,7 +23,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { Logger } from '@kbn/logging';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -151,7 +151,7 @@ export abstract class ExportType<
     }
     const rawRequest: FakeRawRequest = {
       headers,
-      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
+      spaceId: spaceId ? brandSpaceId(spaceId) : undefined,
     };
     return kibanaRequestFactory(rawRequest);
   }

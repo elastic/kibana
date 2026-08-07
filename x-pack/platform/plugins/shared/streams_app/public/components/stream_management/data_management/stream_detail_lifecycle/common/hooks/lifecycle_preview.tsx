@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { isEqual } from 'lodash';
 import type { LifecyclePhase } from '../data_lifecycle/lifecycle_types';
@@ -34,6 +34,7 @@ export interface LifecyclePreviewApi extends LifecyclePreviewState {
   }) => void;
   setIsDslDownsampleFlyoutOpen: (isOpen: boolean) => void;
   clearPreview: () => void;
+  releaseHoldAfterRefresh: () => void;
 }
 
 const LifecyclePreviewContext = createContext<LifecyclePreviewApi | undefined>(undefined);
@@ -49,8 +50,53 @@ const defaultState: LifecyclePreviewState = {
   timelineDownsampleSteps: null,
 };
 
-export const LifecyclePreviewProvider = ({ children }: { children: React.ReactNode }) => {
+export const LifecyclePreviewProvider = ({
+  children,
+  refreshSignal,
+}: {
+  children: React.ReactNode;
+  refreshSignal?: number;
+}) => {
   const [state, setState] = useState<LifecyclePreviewState>(defaultState);
+
+  // Hold a flyout-close clear until the post-save definition refresh lands, so the summary never
+  // flashes the pre-save value in between (see `releaseHoldAfterRefresh`).
+  const holdClearRef = useRef(false);
+  const pendingClearRef = useRef(false);
+  const prevRefreshSignalRef = useRef(refreshSignal);
+
+  // Detect a refresh request during render — before descendant effects run their
+  // flyout-close clear — so that clear is deferred rather than applied immediately.
+  if (refreshSignal !== undefined && prevRefreshSignalRef.current !== refreshSignal) {
+    prevRefreshSignalRef.current = refreshSignal;
+    holdClearRef.current = true;
+  }
+
+  const performClear = useCallback(() => {
+    setState((prev) => {
+      const next = {
+        ...defaultState,
+        isDslDownsampleFlyoutOpen: prev.isDslDownsampleFlyoutOpen,
+      };
+
+      if (isEqual(prev, next)) {
+        return prev;
+      }
+
+      return next;
+    });
+  }, []);
+
+  const releaseHoldAfterRefresh = useCallback(() => {
+    if (!holdClearRef.current && !pendingClearRef.current) {
+      return;
+    }
+    holdClearRef.current = false;
+    if (pendingClearRef.current) {
+      pendingClearRef.current = false;
+      performClear();
+    }
+  }, [performClear]);
 
   const setIsActive = useCallback((isActive: boolean) => {
     setState((prev) => {
@@ -115,19 +161,12 @@ export const LifecyclePreviewProvider = ({ children }: { children: React.ReactNo
   }, []);
 
   const clearPreview = useCallback(() => {
-    setState((prev) => {
-      const next = {
-        ...defaultState,
-        isDslDownsampleFlyoutOpen: prev.isDslDownsampleFlyoutOpen,
-      };
-
-      if (isEqual(prev, next)) {
-        return prev;
-      }
-
-      return next;
-    });
-  }, []);
+    if (holdClearRef.current) {
+      pendingClearRef.current = true;
+      return;
+    }
+    performClear();
+  }, [performClear]);
 
   const value = useMemo<LifecyclePreviewApi>(() => {
     return {
@@ -140,9 +179,11 @@ export const LifecyclePreviewProvider = ({ children }: { children: React.ReactNo
       setTimelineModel,
       setIsDslDownsampleFlyoutOpen,
       clearPreview,
+      releaseHoldAfterRefresh,
     };
   }, [
     clearPreview,
+    releaseHoldAfterRefresh,
     setDataPhasesCount,
     setDownsampleStepsCount,
     setHasUnsavedChanges,

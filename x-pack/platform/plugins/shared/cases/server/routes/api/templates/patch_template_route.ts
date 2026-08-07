@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { parse as yamlParse } from 'yaml';
+import { isBoom } from '@hapi/boom';
 import {
   PatchTemplateInputSchema,
   ParsedTemplateDefinitionSchema,
@@ -97,6 +98,12 @@ export const patchTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to patch template: ${error}`,
         error,

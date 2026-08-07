@@ -36,6 +36,10 @@ export enum SecurityGroupName {
   alertDetections = 'securityGroup:alertDetections',
 }
 
+/** This Kibana Advanced Setting allows users to enable/disable Attack Discovery 2.0 Workflows per space */
+export const ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING =
+  'securitySolution:enableAttackDiscoveryWorkflows' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature */
 export const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment' as const;

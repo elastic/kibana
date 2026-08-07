@@ -9,6 +9,7 @@ import {
   buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
+  buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
@@ -16,15 +17,56 @@ import {
   buildExperimentsListingAggregation,
   parseExperimentsListingResponse,
   buildModelDisplayId,
+  escapeWildcard,
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('escapeWildcard', () => {
+    it('escapes wildcard metacharacters so they match literally', () => {
+      // input chars: a * b ? c \ d  ->  a \* b \? c \\ d
+      expect(escapeWildcard('a*b?c\\d')).toBe('a\\*b\\?c\\\\d');
+    });
+
+    it('leaves input without metacharacters unchanged', () => {
+      expect(escapeWildcard('feature/in-tool')).toBe('feature/in-tool');
+    });
+  });
+
+  describe('buildSpaceFilter', () => {
+    it('matches the space or all-spaces, plus legacy (missing) docs in the default space', () => {
+      expect(buildSpaceFilter('default')).toEqual({
+        bool: {
+          should: [
+            { terms: { space_ids: ['default', '*'] } },
+            { bool: { must_not: { exists: { field: 'space_ids' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('matches only the space or all-spaces for a non-default space (no legacy fallback)', () => {
+      expect(buildSpaceFilter('marketing')).toEqual({
+        bool: {
+          should: [{ terms: { space_ids: ['marketing', '*'] } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
   describe('buildExampleScoresQuery', () => {
     it('filters by example.id', () => {
       const query = buildExampleScoresQuery('example-123');
       expect(query).toEqual({
         bool: { must: [{ term: { 'example.id': 'example-123' } }] },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildExampleScoresQuery('example-123', { spaceId: 'marketing' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
   });
 
@@ -53,6 +95,14 @@ describe('query_builders', () => {
           ],
         },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'experiment-123', {
+        spaceId: 'default',
+      });
+      expect(query.bool.must).toHaveLength(3);
+      expect(query.bool.must[2]).toEqual(buildSpaceFilter('default'));
     });
   });
 
@@ -94,6 +144,12 @@ describe('query_builders', () => {
       expect(query).toEqual({
         bool: { must: [{ term: { 'metadata.execution_id': 'run-abc' } }] },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildExperimentFilterQuery('experiment-123', { spaceId: 'marketing' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
   });
 
@@ -179,6 +235,54 @@ describe('query_builders', () => {
       });
     });
 
+    it('filters by search matching experiment name or branch', () => {
+      const query = buildExperimentsListingFilterQuery({ search: 'in-tool' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    wildcard: { experiment_name: { value: '*in-tool*', case_insensitive: true } },
+                  },
+                  {
+                    wildcard: {
+                      'metadata.git.branch': { value: '*in-tool*', case_insensitive: true },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('escapes wildcard metacharacters in the branch filter', () => {
+      const query = buildExperimentsListingFilterQuery({ branch: 'feature/foo?bar' }) as {
+        bool: { filter: Array<{ wildcard: { 'metadata.git.branch': { value: string } } }> };
+      };
+      expect(query.bool.filter[0].wildcard['metadata.git.branch'].value).toBe(
+        '*feature/foo\\?bar*'
+      );
+    });
+
+    it('escapes wildcard metacharacters in the search filter for both fields', () => {
+      const query = buildExperimentsListingFilterQuery({ search: 'a*b' }) as {
+        bool: {
+          filter: Array<{
+            bool: { should: Array<{ wildcard: Record<string, { value: string }> }> };
+          }>;
+        };
+      };
+      const should = query.bool.filter[0].bool.should;
+      expect(should[0].wildcard.experiment_name.value).toBe('*a\\*b*');
+      expect(should[1].wildcard['metadata.git.branch'].value).toBe('*a\\*b*');
+    });
+
     it('filters by datasetId', () => {
       const query = buildExperimentsListingFilterQuery({ datasetId: 'dataset-1' });
       expect(query).toEqual({
@@ -205,6 +309,16 @@ describe('query_builders', () => {
         bool: {
           must_not: [preflightExclusion],
           filter: [{ term: { 'metadata.ci.build_id': 'bk-abc123' } }],
+        },
+      });
+    });
+
+    it('filters by spaceId', () => {
+      const query = buildExperimentsListingFilterQuery({ spaceId: 'marketing' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [buildSpaceFilter('marketing')],
         },
       });
     });

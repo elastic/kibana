@@ -10,7 +10,7 @@
  */
 
 import type { InfraDocument } from '@kbn/synthtrace-client';
-import { infra, generateShortId } from '@kbn/synthtrace-client';
+import { infra } from '@kbn/synthtrace-client';
 
 import type { Scenario } from '@kbn/synthtrace';
 import { withClient, getNumberOpt } from '@kbn/synthtrace';
@@ -24,7 +24,9 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
       const PODS = Array(numPods)
         .fill(0)
         .map((_, idx) => {
-          const uid = generateShortId();
+          // Deterministic pod UIDs for synthtrace fixtures — not security-sensitive
+          // (avoids CodeQL js/insecure-randomness on generateShortId / Math.random).
+          const uid = `pod-${idx}`;
           return infra.pod(uid, `node-${idx}`);
         });
 

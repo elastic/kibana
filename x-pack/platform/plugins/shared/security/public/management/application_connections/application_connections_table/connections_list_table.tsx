@@ -10,9 +10,10 @@ import { EuiFlexGroup, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ApplicationConnectionsEmptyPrompt } from './application_connections_empty_prompt';
+import { isRevocable } from './application_connections_filters';
 import { ApplicationConnectionsTableHeader } from './application_connections_table_header';
 import { flatTableStyles } from './application_connections_table_styles';
-import { isConnectionActive, useConnectionTableColumns } from './connection_table_columns';
+import { useConnectionTableColumns } from './connection_table_columns';
 import { labels } from '../constants/i18n';
 import type { ApplicationConnection } from '../constants/types';
 import { useNavigation } from '../hooks/use_navigation';
@@ -48,7 +49,7 @@ export const ConnectionsListTable = ({
   const selectionConfig: EuiTableSelectionType<ApplicationConnection> = {
     selected: selectedItems,
     onSelectionChange: (next) => onSelectionChange(next.map((row) => row.connection)),
-    selectable: isConnectionActive,
+    selectable: isRevocable,
     selectableMessage: (selectable, { connection }) =>
       selectable
         ? labels.connectionColumns.selectRowLabel(connection.name ?? connection.id)

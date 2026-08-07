@@ -155,9 +155,18 @@ export class NodeDetailsPage {
     const url = `${this.kbnUrl.app(
       'metrics'
     )}/detail/${entityType}/${entityId}?assetDetails=${assetDetailsParam}`;
+
+    // The Kubernetes section and its quick-access item are gated by the async
+    // POST /api/infra/metadata feature check; await it so integration-gated
+    // content is mounted before tests assert on it.
+    const metadataResponse = this.page.waitForResponse(
+      (response) => response.url().includes('/api/infra/metadata'),
+      { timeout: EXTENDED_TIMEOUT }
+    );
     await this.page.goto(url);
     // Wait for the page to load - check for overview tab or any tab to be visible
     await this.overviewTab.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await metadataResponse;
   }
 
   public async refreshPage() {

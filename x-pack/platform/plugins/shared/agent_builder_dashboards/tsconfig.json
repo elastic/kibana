@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -28,12 +28,16 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
     "@kbn/data-plugin",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/agent-builder-sml-plugin",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/esql-utils",
+    "@kbn/presentation-publishing",
+    "@kbn/scout",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

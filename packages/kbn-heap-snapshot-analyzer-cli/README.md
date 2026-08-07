@@ -10,10 +10,10 @@ in the repo root.
 
 ---
 
-## Capturing an idle snapshot
+## Capturing from a source build
 
-The recommended setup is a built Kibana with the allocation-tracking 
-preload enabled. End-to-end:
+The recommended source-build setup uses a built Kibana with the
+allocation-tracking preload enabled.
 
 ### 1. Build Kibana
 
@@ -74,43 +74,39 @@ HEAP_TRACK_OUTPUT=/tmp/kibana-tracked-idle.heapsnapshot \
 ./build/default/kibana-*-*/bin/kibana
 ```
 
-What the env vars do:
+What the environment variables do:
 
-- `--require ...heap_track_preload.js` — loads the preload, which opens
-  an inspector session and starts allocation tracking.
-- `HEAP_TRACK_FORCE=1` — required for built Kibana. The preload normally
-  gates on `isDevCliChild=true` (set by the dev CLI fork) so it doesn't
-  slow down the launcher and `@kbn/optimizer` workers; built Kibana
-  doesn't fork, so the gate has to be opened explicitly.
-- `HEAP_TRACK_OUTPUT` — destination path for the snapshot.
+- `--require ...heap_track_preload.js` loads the preload, which opens an
+  inspector session and starts allocation tracking.
+- `HEAP_TRACK_FORCE=1` is required for built Kibana. The preload normally
+  gates on `isDevCliChild=true` so it does not slow down the launcher and
+  `@kbn/optimizer` workers.
+- `HEAP_TRACK_OUTPUT` sets the snapshot destination.
 
-You should see in the log:
+You should see:
 
 ```
 [heap-track] allocation tracking started (PID <N>)
 [heap-track] preload installed (PID <N>) — kill -SIGUSR2 <N> to capture
 ```
 
-If those lines are missing, the preload didn't activate (usually because
-`HEAP_TRACK_FORCE=1` wasn't set).
+If those lines are missing, the preload did not activate (usually because
+`HEAP_TRACK_FORCE=1` was not set).
 
 ### 5. Wait for idle
 
-Kibana goes through saved-object migrations, plugin starts, and lazy
-initialization on first boot. Two reliable signals:
+Wait for the `Kibana is now available` log line or poll the status endpoint:
 
-- Log line: `Kibana is now available`
-- HTTP probe:
+```sh
+while [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5601/api/status)" != "200" ]; do
+  sleep 2
+done
+sleep 30
+```
 
-  ```sh
-  while [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5601/api/status)" != "200" ]; do
-    sleep 2
-  done
-  ```
-
-After the first 200, give it ~30s of additional idle time so background
-tasks settle. Don't open the UI — that triggers plugin startup work and
-pollutes the baseline.
+The final sleep gives Kibana additional idle time after the first 200 so
+background tasks settle. Do not open the UI because that triggers plugin startup
+work and pollutes the baseline.
 
 ### 6. Trigger the snapshot and require.cache dump
 
@@ -133,7 +129,234 @@ The heap snapshot writes to `$HEAP_TRACK_OUTPUT`. Watch for:
 [heap-track] snapshot written in 12.3s (1081.3 MB)
 ```
 
-The snapshot is ~1 GB for a typical full-build idle Kibana.
+A snapshot is about 1 GB for a typical full-build idle Kibana.
+
+---
+
+## Capturing from a serverless Docker image
+
+This workflow runs a published serverless Kibana image against a disposable,
+single-node Elasticsearch container. The snapshot is captured through the
+Node inspector and analyzed from the Kibana checkout on the host.
+
+The allocation-tracking preload is mounted from the checkout because release
+images do not contain it. CDP is used to write the snapshot because
+`SIGUSR2` can produce a zero-byte file under Docker Desktop.
+
+### 1. Select a Kibana image
+
+Authenticate to `docker.elastic.co` using
+[the Elastic Docker registry instructions](https://docker-auth.elastic.co/github_auth),
+then pull the image to measure:
+
+```sh
+export KIBANA_IMAGE=docker.elastic.co/kibana-ci/kibana-serverless:git-<12-char-sha>
+docker pull "$KIBANA_IMAGE"
+```
+
+Use `git-<sha>` for a CI or release build, or `pr-<number>-<sha>` for a PR
+build.
+
+To resolve the latest two `deploy@` tags to image names:
+
+```sh
+git ls-remote --tags origin 'deploy@*^{}' |
+  awk '{
+    ref=$2
+    sub(/^refs\/tags\/deploy@/, "", ref)
+    sub(/\^\{\}$/, "", ref)
+    print ref, $1
+  }' |
+  sort -k1,1nr |
+  awk 'NR <= 2 {
+    printf "deploy@%s -> docker.elastic.co/kibana-ci/kibana-serverless:git-%s\n",
+      $1, substr($2, 1, 12)
+  }'
+```
+
+Set the solution mode separately from the image:
+
+```sh
+export SOLUTION=oblt # oblt | security | es | workplaceai | vectordb
+export NAME="kibana-heap-$SOLUTION"
+```
+
+### 2. Start Elasticsearch
+
+A single-node Elasticsearch container is sufficient for an idle heap
+measurement. Inspect the Kibana version:
+
+```sh
+export KIBANA_VERSION=$(
+  docker run --rm \
+    --entrypoint /usr/share/kibana/node/default/bin/node \
+    "$KIBANA_IMAGE" \
+    -p "require('/usr/share/kibana/package.json').version"
+)
+echo "$KIBANA_VERSION"
+```
+
+Select an available Elasticsearch image from the same major version:
+
+```sh
+export ELASTICSEARCH_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:<compatible-version>
+
+docker rm -f es-for-kibana 2>/dev/null || true
+docker run -d \
+  --name es-for-kibana \
+  -p 127.0.0.1:9200:9200 \
+  -e discovery.type=single-node \
+  -e xpack.security.enabled=false \
+  -e xpack.license.self_generated.type=trial \
+  -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
+  "$ELASTICSEARCH_IMAGE"
+```
+
+Wait for Elasticsearch:
+
+```sh
+until curl -sf http://localhost:9200/_cluster/health >/dev/null; do
+  sleep 2
+done
+```
+
+The exact Elasticsearch version may not be published yet when the serverless
+Kibana image is built from `main`. A nearby version from the same major is
+sufficient for this measurement because serverless Kibana ignores the
+version mismatch. The workflow was validated with Kibana 9.6.0 images against
+`elasticsearch:9.5.0-SNAPSHOT`.
+
+### 3. Start the Kibana container
+
+Resolve the Elasticsearch container's address:
+
+```sh
+export ES_IP=$(
+  docker inspect es-for-kibana \
+    --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+)
+```
+
+Start Kibana with the inspector exposed. Pass `kibana-docker` and
+`--serverless` explicitly so the selected solution configuration is loaded:
+
+```sh
+docker rm -f "$NAME" 2>/dev/null || true
+docker run --rm -d \
+  --name "$NAME" \
+  -p 127.0.0.1:5601:5601 \
+  -p 127.0.0.1:9229:9229 \
+  -v "$(pwd)/packages/kbn-heap-snapshot-analyzer-cli/src/heap_track_preload.js:/usr/share/kibana/heap_track_preload.js:ro" \
+  -e "ELASTICSEARCH_HOSTS=http://$ES_IP:9200" \
+  -e XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=0123456789abcdef0123456789abcdef \
+  -e NODE_OPTIONS="--require=/usr/share/kibana/heap_track_preload.js --inspect=0.0.0.0:9229" \
+  -e HEAP_TRACK_FORCE=1 \
+  "$KIBANA_IMAGE" \
+  /usr/local/bin/kibana-docker --serverless="$SOLUTION"
+```
+
+The encryption key must contain at least 32 characters. Otherwise related
+plugins are disabled and the baseline is skewed. `HEAP_TRACK_FORCE=1` is
+required because the production image does not run through the development
+CLI child-process gate.
+
+Confirm that allocation tracking started:
+
+```sh
+docker logs "$NAME" 2>&1 | grep '\[heap-track\]'
+```
+
+The output should include:
+
+```
+[heap-track] allocation tracking started (PID <N>)
+[heap-track] preload installed (PID <N>) — kill -SIGUSR2 <N> to capture
+```
+
+### 4. Wait for idle
+
+Kibana goes through saved-object migrations, plugin starts, and lazy
+initialization on first boot. Two reliable signals:
+
+- Log line: `Kibana is now available`
+- HTTP probe:
+
+  ```sh
+  until docker logs "$NAME" 2>&1 | grep -q 'Kibana is now available'; do
+    sleep 3
+  done
+
+  until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5601/api/status)" = "200" ]; do
+    sleep 2
+  done
+  sleep 30
+  ```
+
+The final sleep gives Kibana additional idle time after the first 200 so
+background tasks settle. Don't open the UI — that triggers plugin startup work
+and pollutes the baseline.
+
+Allocation tracking substantially slows startup. Five minutes to reach
+available is normal for a full serverless image.
+
+Confirm that the inspector is reachable:
+
+```sh
+curl -sf http://localhost:9229/json
+```
+
+### 5. Capture through the inspector
+
+On macOS, sending `SIGUSR2` into a Docker container can leave a zero-byte
+snapshot. Capture through the Chrome DevTools Protocol (CDP) instead. This
+also forces a garbage collection immediately before capture, making
+comparisons more repeatable:
+
+```sh
+export HEAP_SNAPSHOT="/tmp/kibana-$SOLUTION.heapsnapshot"
+
+node <<'NODE'
+const CDP = require('chrome-remote-interface');
+const fs = require('fs');
+
+(async () => {
+  const client = await CDP({ host: '127.0.0.1', port: 9229 });
+  const output = fs.openSync(process.env.HEAP_SNAPSHOT, 'w');
+
+  try {
+    client.on('HeapProfiler.addHeapSnapshotChunk', ({ chunk }) =>
+      fs.writeSync(output, chunk)
+    );
+    await client.HeapProfiler.enable();
+    await client.HeapProfiler.collectGarbage();
+    await client.HeapProfiler.takeHeapSnapshot({ reportProgress: false });
+  } finally {
+    fs.closeSync(output);
+    await client.close();
+  }
+
+  console.log(`Wrote ${process.env.HEAP_SNAPSHOT}`);
+})().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+NODE
+```
+
+Run this command from a bootstrapped Kibana checkout; the root package
+provides `chrome-remote-interface`. Because the preload started allocation
+tracking during process startup, the CDP snapshot includes allocation traces.
+
+Expect a file hundreds of MB in size. Verify it before running the analyzer:
+
+```sh
+ls -lh "$HEAP_SNAPSHOT"
+test -s "$HEAP_SNAPSHOT"
+```
+
+Serverless snapshots are normally smaller than snapshots from the full
+stateful distribution. Compare snapshots captured with the same image type,
+project, configuration, idle period, and GC procedure.
 
 The require.cache dump writes to `$REQUIRE_CACHE_OUTPUT` (or
 `$HEAP_TRACK_DIR/require-cache-<ts>.jsonl`). It is JSONL, one line per
@@ -159,7 +382,7 @@ These two tools answer different questions. Use them in order:
 
 ```sh
 node --max-old-space-size=8192 scripts/heap_snapshot_analyzer.js \
-  /tmp/kibana-tracked-idle.heapsnapshot
+  "$HEAP_SNAPSHOT"
 ```
 
 This tells you **what is retained in memory and how much**, attributed to
@@ -191,8 +414,66 @@ Output sections:
   shows up with the zod bytes its callers allocated). Tells you *which
   Kibana code triggered the allocations*.
 
-All tables include both percentage and absolute MB columns, so you
-can diff snapshots across interventions.
+### Choosing an analysis view
+
+Choose the view based on the question:
+
+- **What changed between two snapshots?** Use `--compare=<baseline>`.
+  Its self-size buckets are mutually exclusive and additive, so the rows
+  reconcile exactly with the total heap delta. Use this as the primary view
+  for regressions.
+- **What physical kind of memory changed?** Start with the V8 node-type
+  breakdown to distinguish strings, arrays, compiled code, objects, and other
+  runtime structures.
+- **Which package or plugin dominates memory now?** Use the retained tables.
+  Retained boundaries can contain nested boundaries owned by other packages,
+  so do not add rows together or subtract them from total heap size.
+- **What would disappear if a package were absent?** Use counterfactual
+  `Saved`. This models an independent removal scenario for each package.
+  Results can overlap and are not additive; increasing `--counterfactual=N`
+  also increases analysis time.
+- **Which code created the surviving objects?** Use allocation-site views.
+  These require a snapshot captured with allocation tracking.
+- **Who called a particular allocator?** Use `--filter=<regex>` to select
+  allocations made by that library and walk past its frames to the caller.
+
+### Understanding allocation-site views
+
+Allocation tracking records the call stack that was active when each heap
+object was created. The analyzer walks that stack and presents the same live
+objects through three alternative rollups:
+
+1. **Module** finds the first package frame, including third-party modules.
+   This identifies allocator code such as `zod` or
+   `@opentelemetry/sdk-node`.
+2. **Package** skips third-party frames and finds the first `@kbn/*` frame.
+   This identifies the Kibana package that triggered the allocation.
+3. **Plugin** finds the first plugin-package frame. This identifies the
+   product/plugin area responsible for investigating it.
+
+For example, an allocation stack might be:
+
+```text
+zod creates schema objects
+→ @kbn/connector-schemas defines the schema
+→ @kbn/actions-plugin loads the connector
+```
+
+Those objects appear under `zod` in the Module view,
+`@kbn/connector-schemas` in the Package view, and `@kbn/actions-plugin` in
+the Plugin view. These are alternative attributions of the same bytes and
+must not be added together.
+
+Allocation-site attribution has several limitations:
+
+- It includes only objects still alive when the snapshot is captured.
+- Objects created before allocation tracking started are reported as
+  untracked.
+- It identifies who created an object, not who currently retains it.
+- Runtime loaders and instrumentation wrappers can obscure callers.
+  `--filter=<regex>` is useful when investigating one known allocator.
+
+All tables include percentage and absolute MB columns.
 
 Flags:
 
@@ -205,6 +486,10 @@ Flags:
   matching frames when walking the stack so attribution lands on the
   *caller* of the filtered code. Example: `--filter=zod` to attribute
   Zod-allocated state back to the package that defined the schema.
+- `--compare=<snapshot>` — treat `<snapshot>` as the baseline and emit an
+  additive self-size diff grouped by allocation source and V8 node type.
+- `--compare-limit=N` — number of source-diff rows in human-readable output
+  (default 100). JSON output always contains every row.
 
 ### Step 2 — require.cache dump: trace who loaded it
 
@@ -272,15 +557,8 @@ Flags:
 
 ---
 
-## Capturing without allocation tracking
-
-If you only want a plain heap snapshot (no per-allocation call stacks),
-skip the `--require` and use Node's built-in `--heapsnapshot-signal`:
+## Cleanup
 
 ```sh
-NODE_OPTIONS="--heapsnapshot-signal=SIGUSR2" ./build/default/kibana-*-*/bin/kibana
-kill -SIGUSR2 <pid>
+docker rm -f "$NAME" es-for-kibana
 ```
-
-The analyzer works on either kind — the alloc-site table is just
-omitted when tracking data is absent.

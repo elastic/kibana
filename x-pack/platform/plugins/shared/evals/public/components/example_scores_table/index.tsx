@@ -15,7 +15,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPagination,
   EuiSpacer,
   EuiText,
@@ -29,11 +28,6 @@ import type {
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import * as i18n from './translations';
-
-const EXAMPLE_ID_VISIBLE_LENGTH = 16;
-
-const truncate = (value: string, maxLength: number) =>
-  value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
 
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
@@ -149,14 +143,12 @@ interface ExampleScoreRow {
 export interface ExampleScoresTableProps {
   examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
-  onExampleClick: (exampleId: string) => void;
   onTraceClick: (traceId: string, exampleId: string) => void;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
   examples,
   selectedExampleId,
-  onExampleClick,
   onTraceClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -317,19 +309,19 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'exampleId',
       name: i18n.COLUMN_EXAMPLE_ID,
-      width: '120px',
+      width: '160px',
       render: (exampleId: string, row: ExampleScoreRow) => {
         // Numeric-only IDs (auto-generated) get a 1-based "#N" label for readability.
-        // Descriptive string IDs (e.g. "healthy-baseline") are shown as-is;
-        // the index prefix is omitted because the ID is self-explanatory.
+        // Descriptive/string IDs (e.g. content hashes) are shown in full. Long ids
+        // wrap within the column rather than being truncated.
         const isNumericFallback = /^\d+$/.test(exampleId);
         const label = isNumericFallback
           ? `#${(row.exampleIndex ?? Number(exampleId)) + 1}`
           : exampleId;
         return (
-          <EuiLink onClick={() => onExampleClick(exampleId)}>
-            {truncate(label, EXAMPLE_ID_VISIBLE_LENGTH)}
-          </EuiLink>
+          <EuiText size="s" css={{ fontFamily: euiTheme.font.familyCode, wordBreak: 'break-all' }}>
+            {label}
+          </EuiText>
         );
       },
     },

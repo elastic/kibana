@@ -18,7 +18,7 @@ import {
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 import { FederatedIdentityClusterInfoFields } from './federated_identity_cluster_info_fields';
 

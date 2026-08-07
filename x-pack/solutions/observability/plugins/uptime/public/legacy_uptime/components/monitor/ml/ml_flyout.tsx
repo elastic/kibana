@@ -23,7 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ShowLicenseInfo } from './license_info';

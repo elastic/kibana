@@ -604,6 +604,68 @@ describe('config validation', () => {
       );
     });
   });
+
+  describe('relay.url', () => {
+    test('accepts an https URL in production mode', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { dev: false }
+      );
+
+      expect(result.relay?.url).toEqual('https://relay.test');
+    });
+
+    test('rejects an http URL in production mode', () => {
+      expect(() =>
+        configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: false })
+      ).toThrow(/expected URI with scheme \[https\]/);
+    });
+
+    test('accepts an http URL in development mode', () => {
+      const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
+
+      expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
+  describe('relay.ssl', () => {
+    test('accepts the Relay URL and complete SSL configuration', () => {
+      const result = configSchema.validate({
+        relay: {
+          url: 'https://relay.test',
+          ssl: {
+            verificationMode: 'full',
+            certificateAuthorities: ['/path/to/ca.pem'],
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+          },
+        },
+      });
+
+      expect(result.relay).toEqual({
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificateAuthorities: ['/path/to/ca.pem'],
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+      });
+    });
+
+    test('throws when certificate is specified without key', () => {
+      expect(() =>
+        configSchema.validate({
+          relay: {
+            url: 'https://relay.test',
+            ssl: {
+              certificate: '/path/to/cert.pem',
+            },
+          },
+        })
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
+    });
+  });
 });
 
 // object creator that ensures we can create a property named __proto__ on an

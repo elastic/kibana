@@ -16,7 +16,7 @@ import type {
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
@@ -188,7 +188,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     onRuleChange,
   });
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
   const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
   const license = useLicense();

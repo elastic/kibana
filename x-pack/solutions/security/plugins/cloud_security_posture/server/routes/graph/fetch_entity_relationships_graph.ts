@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -13,6 +14,7 @@ import {
   type EuidSourceFields,
   GRAPH_ACTOR_EUID_SOURCE_FIELDS,
   TYPED_ENTITY_PREFIXES,
+  RELATIONSHIP_FIELDS_FORK_BATCH_SIZE,
 } from './constants';
 import {
   concatJsonObjectPropertyBool,
@@ -217,6 +219,14 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
  * Queries for all relationship types for entities matching the provided entityIds.
  * Note: Relationships require the v2 entity store; returns an empty result if the
  * entities index does not exist.
+ *
+ * ENTITY_RELATIONSHIP_FIELDS is batched into groups of at most
+ * RELATIONSHIP_FIELDS_FORK_BATCH_SIZE (ES|QL FORK's branch limit) and each batch is issued as
+ * its own ES|QL query; the batches run in parallel and their records are concatenated. Each
+ * batch independently pre-aggregates via STATS BY (see buildRelationshipsEsqlQuery), so this
+ * merge stays a strict refinement of the single-query grouping — a batch only narrows which
+ * relationship fields are grouped together, and downstream regroupRelationships is unaffected.
+ * A failure in any batch rejects the whole call, matching the existing all-or-nothing semantics.
  */
 export const fetchEntityRelationships = async ({
   esClient,
@@ -240,33 +250,41 @@ export const fetchEntityRelationships = async ({
   const indexName = getEntitiesLatestIndexName(spaceId);
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
-  const query = buildRelationshipsEsqlQuery({
-    indexName,
-    relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
-    entityIds,
-    pinnedIds,
-  });
   const filter = buildRelationshipDslFilter(entityIds);
   const params = [
     ...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id })),
     ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
   ];
 
-  logger.trace(`Relationships ES|QL query: ${query}`);
-  logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
+  const fieldBatches = chunk(ENTITY_RELATIONSHIP_FIELDS, RELATIONSHIP_FIELDS_FORK_BATCH_SIZE);
 
-  const response = await esClient.asCurrentUser.helpers
-    .esql({
-      columnar: false,
-      filter,
-      query,
-      params,
+  const responses = await Promise.all(
+    fieldBatches.map((relationshipFields) => {
+      const query = buildRelationshipsEsqlQuery({
+        indexName,
+        relationshipFields,
+        entityIds,
+        pinnedIds,
+      });
+
+      logger.trace(`Relationships ES|QL query: ${query}`);
+      logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
+
+      return esClient.asCurrentUser.helpers
+        .esql({
+          columnar: false,
+          filter,
+          query,
+          params,
+        })
+        .toRecords<RelationshipEsqlRow>();
     })
-    .toRecords<RelationshipEsqlRow>();
+  );
 
-  logger.trace(`Fetched [${response.records.length}] relationship records`);
+  const records = responses.flatMap((response) => response.records);
+  logger.trace(`Fetched [${records.length}] relationship records`);
 
-  return response;
+  return { columns: responses[0]?.columns ?? [], records };
 };
 
 export const fetchEntities = async ({

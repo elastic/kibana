@@ -10,7 +10,7 @@
 import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css as cssClassName } from '@emotion/css';
 import { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
 import {
   selectEditorFocusedStepInfo,

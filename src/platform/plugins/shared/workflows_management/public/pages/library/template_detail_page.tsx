@@ -26,7 +26,7 @@ import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_exp
 
 const libraryBreadcrumbLabel = i18n.translate(
   'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Library' }
+  { defaultMessage: 'Template Library' }
 );
 
 const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
@@ -74,12 +74,9 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const [templateBreadcrumb, setTemplateBreadcrumb] = useState<TemplateBreadcrumb | undefined>();
-  const handleTemplateLoaded = useCallback(
-    (template: TemplateBody) => {
-      setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
-    },
-    [setTemplateBreadcrumb]
-  );
+  const handleTemplateLoaded = useCallback((template: TemplateBody) => {
+    setTemplateBreadcrumb({ slug: template.metadata.slug, name: template.metadata.name });
+  }, []);
 
   const breadcrumbs = useMemo<ChromeBreadcrumb[]>(() => {
     if (templateBreadcrumb?.slug === slug) {

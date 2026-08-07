@@ -361,6 +361,15 @@ describe('StepAboutRuleComponent', () => {
     );
     await user.click(await screen.findByRole('option', { name: /medium/i }));
 
+    // Wait for the risk score to auto-update to 47 (medium default) before submitting
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
+          'spinbutton'
+        )
+      ).toHaveValue(47);
+    });
+
     await submitForm();
 
     await waitFor(() => {

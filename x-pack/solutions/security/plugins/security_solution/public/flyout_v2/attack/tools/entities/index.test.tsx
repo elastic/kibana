@@ -7,10 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
 import { EntitiesDetails } from '.';
 import { useAttackEntitiesLists } from './hooks/use_attack_entities_lists';
+import { useEntityFlyoutApi } from '../../../entity/use_entity_flyout_api';
 import {
   ATTACK_ENTITIES_TOOL_ERROR_TEST_ID,
   ATTACK_ENTITIES_TOOL_LOADING_TEST_ID,
@@ -18,31 +20,93 @@ import {
 } from './test_ids';
 
 jest.mock('./hooks/use_attack_entities_lists');
+jest.mock('../../../entity/use_entity_flyout_api');
 jest.mock('../../../shared/components/document_tools_flyout_header', () => ({
   DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
 }));
 jest.mock('../../../../flyout/attack_details/left/components/attack_entity_insight_rows', () => ({
   AttackUserInsightsRow: ({
     identityFields,
+    buildEntityOverrides,
   }: {
     identityFields: Record<string, string | undefined>;
-  }) => (
-    <div data-test-subj="mock-user-insights-row">
-      {identityFields['user.name'] ?? 'unknown-user'}
-    </div>
-  ),
+    buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+      onPreviewEntity?: () => void;
+      onShowDetailsPanel?: (subTab: string) => void;
+    };
+  }) => {
+    const name = identityFields['user.name'] ?? 'unknown-user';
+    const overrides = buildEntityOverrides?.({ name });
+    return (
+      <div data-test-subj="mock-user-insights-row">
+        <span>{name}</span>
+        {overrides?.onPreviewEntity && (
+          <button
+            type="button"
+            data-test-subj="mock-user-preview-button"
+            onClick={overrides.onPreviewEntity}
+          >
+            {'preview'}
+          </button>
+        )}
+        {overrides?.onShowDetailsPanel && (
+          <button
+            type="button"
+            data-test-subj="mock-user-alerts-button"
+            onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+          >
+            {'alerts'}
+          </button>
+        )}
+      </div>
+    );
+  },
   AttackHostInsightsRow: ({
     identityFields,
+    buildEntityOverrides,
   }: {
     identityFields: Record<string, string | undefined>;
-  }) => (
-    <div data-test-subj="mock-host-insights-row">
-      {identityFields['host.name'] ?? 'unknown-host'}
-    </div>
-  ),
+    buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+      onPreviewEntity?: () => void;
+      onShowDetailsPanel?: (subTab: string) => void;
+    };
+  }) => {
+    const name = identityFields['host.name'] ?? 'unknown-host';
+    const overrides = buildEntityOverrides?.({ name });
+    return (
+      <div data-test-subj="mock-host-insights-row">
+        <span>{name}</span>
+        {overrides?.onPreviewEntity && (
+          <button
+            type="button"
+            data-test-subj="mock-host-preview-button"
+            onClick={overrides.onPreviewEntity}
+          >
+            {'preview'}
+          </button>
+        )}
+        {overrides?.onShowDetailsPanel && (
+          <button
+            type="button"
+            data-test-subj="mock-host-alerts-button"
+            onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+          >
+            {'alerts'}
+          </button>
+        )}
+      </div>
+    );
+  },
 }));
 
 const mockUseAttackEntitiesLists = useAttackEntitiesLists as jest.Mock;
+const mockUseEntityFlyoutApi = useEntityFlyoutApi as jest.Mock;
+
+const mockOpenUserFlyoutAsChild = jest.fn();
+const mockOpenHostFlyoutAsChild = jest.fn();
+const mockOpenEntityAlertsInsights = jest.fn();
+const mockOpenEntityMisconfigurationInsights = jest.fn();
+const mockOpenEntityVulnerabilityInsights = jest.fn();
 
 const mockHit: DataTableRecord = {
   id: 'attack-1',
@@ -73,6 +137,13 @@ describe('EntitiesDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAttackEntitiesLists.mockReturnValue(defaultEntitiesResult);
+    mockUseEntityFlyoutApi.mockReturnValue({
+      openUserFlyoutAsChild: mockOpenUserFlyoutAsChild,
+      openHostFlyoutAsChild: mockOpenHostFlyoutAsChild,
+      openEntityAlertsInsights: mockOpenEntityAlertsInsights,
+      openEntityMisconfigurationInsights: mockOpenEntityMisconfigurationInsights,
+      openEntityVulnerabilityInsights: mockOpenEntityVulnerabilityInsights,
+    });
   });
 
   it('renders the header and body', () => {
@@ -175,23 +246,64 @@ describe('EntitiesDetails', () => {
       expect(screen.getByTestId('mock-host-insights-row')).toBeInTheDocument();
     });
 
-    it('entity name rows have no click handler (no-op)', () => {
+    it('clicking the user preview button calls openUserFlyoutAsChild', async () => {
       mockUseAttackEntitiesLists.mockReturnValue({
         ...defaultEntitiesResult,
         userEntityEntries: [userEntry],
+      });
+
+      renderTool();
+
+      await userEvent.click(screen.getByTestId('mock-user-preview-button'));
+
+      expect(mockOpenUserFlyoutAsChild).toHaveBeenCalledWith(
+        expect.objectContaining({ userName: 'alice' })
+      );
+    });
+
+    it('clicking the host preview button calls openHostFlyoutAsChild', async () => {
+      mockUseAttackEntitiesLists.mockReturnValue({
+        ...defaultEntitiesResult,
         hostEntityEntries: [hostEntry],
       });
 
       renderTool();
 
-      // The insight row mocks receive no onClick prop — clicking them should not throw
-      const userRow = screen.getByTestId('mock-user-insights-row');
-      const hostRow = screen.getByTestId('mock-host-insights-row');
-      expect(userRow).toBeInTheDocument();
-      expect(hostRow).toBeInTheDocument();
-      // No onClick attribute wired — absence of role="button" confirms no-op
-      expect(userRow.closest('[role="button"]')).toBeNull();
-      expect(hostRow.closest('[role="button"]')).toBeNull();
+      await userEvent.click(screen.getByTestId('mock-host-preview-button'));
+
+      expect(mockOpenHostFlyoutAsChild).toHaveBeenCalledWith(
+        expect.objectContaining({ hostName: 'server-1' })
+      );
+    });
+
+    it('clicking the user alerts button calls openEntityAlertsInsights for the user', async () => {
+      mockUseAttackEntitiesLists.mockReturnValue({
+        ...defaultEntitiesResult,
+        userEntityEntries: [userEntry],
+      });
+
+      renderTool();
+
+      await userEvent.click(screen.getByTestId('mock-user-alerts-button'));
+
+      expect(mockOpenEntityAlertsInsights).toHaveBeenCalledWith(
+        expect.objectContaining({ value: 'alice' })
+      );
+    });
+
+    it('clicking the host alerts button calls openEntityAlertsInsights for the host', async () => {
+      mockUseAttackEntitiesLists.mockReturnValue({
+        ...defaultEntitiesResult,
+        hostEntityEntries: [hostEntry],
+      });
+
+      renderTool();
+
+      await userEvent.click(screen.getByTestId('mock-host-alerts-button'));
+
+      expect(mockOpenEntityAlertsInsights).toHaveBeenCalledWith(
+        expect.objectContaining({ value: 'server-1' })
+      );
     });
   });
 });

@@ -51,7 +51,7 @@ const FILTERS_STEP: AttacksTourStep = {
   stepId: 'filters',
   title: i18n.STEP_FILTERS_TITLE,
   anchor: ATTACKS_TOUR_ANCHORS.filters,
-  anchorPosition: 'upRight',
+  anchorPosition: 'downLeft',
   content: (
     <>
       <EuiImage size="fullWidth" alt={i18n.STEP_FILTERS_TITLE} src={newFiltersImage} />

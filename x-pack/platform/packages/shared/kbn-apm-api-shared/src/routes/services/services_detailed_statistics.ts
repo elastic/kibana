@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -45,18 +45,20 @@ const serviceNamesJsonSchema = z
 export const servicesDetailedStatisticsRoute =
   defineRoute<ServiceTransactionDetailedStatPeriodsResponse>()({
     endpoint: 'POST /internal/apm/services/detailed_statistics',
-    params: z.object({
-      query: environmentSchema
-        .merge(kuerySchema)
-        .merge(rangeSchema)
-        .merge(offsetSchema)
-        .merge(probabilitySchema)
-        .merge(serviceTransactionDataSourceSchema)
-        .merge(
-          z.object({
-            bucketSizeInSeconds: z.coerce.number(),
-          })
-        ),
-      body: z.object({ serviceNames: serviceNamesJsonSchema }),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: environmentSchema
+          .merge(kuerySchema)
+          .merge(rangeSchema)
+          .merge(offsetSchema)
+          .merge(probabilitySchema)
+          .merge(serviceTransactionDataSourceSchema)
+          .merge(
+            z.object({
+              bucketSizeInSeconds: z.coerce.number(),
+            })
+          ),
+        body: z.object({ serviceNames: serviceNamesJsonSchema }),
+      })
+    ),
   });

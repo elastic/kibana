@@ -8,7 +8,7 @@ the browser-side attachment UI that renders them inline in a conversation.
 ## What it registers
 
 On `setup` the plugin registers four things with `agentBuilder` (and
-`agentContextLayer`):
+`agentBuilderSml`):
 
 - **`visualization` attachment type** (`server/attachment_types`) — validation of
   the unified attachment payload, by-reference resolution from Lens saved

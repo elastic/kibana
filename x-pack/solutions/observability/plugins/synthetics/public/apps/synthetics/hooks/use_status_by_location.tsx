@@ -14,6 +14,7 @@ import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
+  STATUS_LOOKBACK_RANGE_FILTER,
 } from '../../../../common/constants/client_defaults';
 import type { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
@@ -43,6 +44,7 @@ export function useStatusByLocation({
           filter: [
             FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
+            STATUS_LOOKBACK_RANGE_FILTER,
             {
               term: {
                 config_id: configId,

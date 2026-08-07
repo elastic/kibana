@@ -229,6 +229,7 @@ export function LatencyChart({
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
                   element={APM_CHART_EBT_ELEMENTS.LATENCY}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
