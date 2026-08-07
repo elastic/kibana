@@ -17,13 +17,12 @@ import type { Conversation } from '@kbn/agent-builder-common';
  * logic can be built and tested now, and swapped for a real cross-plugin registry later
  * without the flyout itself needing to change.
  *
- * `tab: 'timeline'` is reserved: the flyout always ignores an entry's `content` for it and
- * only honors its `position`, since Timeline's content is 100% Agent-Builder-owned.
+ * Entries render in the order listed here. `tab: 'timeline'` is reserved — the flyout
+ * always ignores an entry targeting it and appends its own fixed Timeline tab last.
  */
 export interface ConversationMetadataTabRegistryEntry {
   tab: string;
   content: (props: { conversation: Conversation }) => React.ReactNode;
-  position: number;
 }
 
 const ConversationJson: React.FC<{ value: unknown }> = ({ value }) => (
@@ -36,105 +35,49 @@ const REGISTRY: Record<string, ConversationMetadataTabRegistryEntry[]> = {
   'endpoint-compromise': [
     {
       tab: 'overview',
-      position: 1,
       content: ({ conversation }) => (
         <>
-          <p>{`Phishing overview for conversation ${conversation.id}.`}</p>
           <ConversationJson value={conversation} />
         </>
       ),
-    },
-    {
-      tab: 'attachments',
-      position: 2,
-      content: ({ conversation }) => (
-        <>
-          <p>{`All Attachments: ${conversation.attachments?.length ?? 0}`}</p>
-          <ConversationJson value={conversation.attachments} />
-        </>
-      ),
-    },
-    {
-      // Reserved id — only `position` is honored, `content` here is ignored.
-      tab: 'timeline',
-      position: 3,
-      content: () => null,
     },
   ],
   'insider-threat': [
     {
       tab: 'overview',
-      position: 1,
       content: ({ conversation }) => (
         <>
-          <p>{`Phishing overview for conversation ${conversation.id}.`}</p>
           <ConversationJson value={conversation} />
         </>
       ),
     },
     {
       tab: 'custom-1',
-      position: 2,
       content: ({ conversation }) => (
         <>
           <p>Custom content 1. Full conversation is available</p>
           <ConversationJson value={conversation} />
         </>
       ),
-    },
-    {
-      // Reserved id — only `position` is honored, `content` here is ignored.
-      tab: 'timeline',
-      position: 3,
-      content: () => null,
     },
   ],
   'cloud-security-incident': [
     {
       tab: 'overview',
-      position: 1,
       content: ({ conversation }) => (
         <>
-          <p>{`Phishing overview for conversation ${conversation.id}.`}</p>
           <ConversationJson value={conversation} />
         </>
       ),
     },
     {
       tab: 'custom-1',
-      position: 2,
       content: ({ conversation }) => (
         <>
           <p>Custom content 1. Full conversation is available</p>
           <ConversationJson value={conversation} />
         </>
       ),
-    },
-    {
-      tab: 'custom-2',
-      position: 2,
-      content: ({ conversation }) => (
-        <>
-          <p>Custom content 2. Full conversation is available</p>
-          <ConversationJson value={conversation} />
-        </>
-      ),
-    },
-    {
-      tab: 'custom-3',
-      position: 2,
-      content: ({ conversation }) => (
-        <>
-          <p>Custom content 3. Full conversation is available</p>
-          <ConversationJson value={conversation} />
-        </>
-      ),
-    },
-    {
-      // Reserved id — only `position` is honored, `content` here is ignored.
-      tab: 'timeline',
-      position: 3,
-      content: () => null,
     },
   ],
 };

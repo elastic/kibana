@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
@@ -14,23 +15,25 @@ import {
   EuiTab,
   EuiText,
   EuiLoadingSpinner,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
-import { CONVERSATION_TEMPLATES } from '../../common/templates';
-import type { ConversationsService } from '../services/conversations/conversations_service';
+import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { getConversationFlyoutTabs } from './conversation_metadata_tabs_registry';
+
+const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.title', {
+  defaultMessage: 'Chat info',
+});
 
 interface ConversationMetadataFlyoutProps {
   conversationId: string;
-  titleId: string;
-  conversationsService: ConversationsService;
+  onClose: () => void;
 }
 
 interface ResolvedTab {
   id: string;
-  position: number;
   content: (props: { conversation: Conversation }) => React.ReactNode;
 }
 
@@ -44,35 +47,57 @@ const TimelineComingSoon: React.FC = () => (
   </EuiText>
 );
 
+const AttachmentsComingSoon: React.FC = () => (
+  <EuiText size="s" color="subdued">
+    <p>
+      {i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.attachmentsComingSoon', {
+        defaultMessage: 'Attachments coming soon.',
+      })}
+    </p>
+  </EuiText>
+);
+
 const tabLabel = (id: string) => id.charAt(0).toUpperCase() + id.slice(1);
 
-// Timeline is reserved: only its `position` can be overridden by the registry, its
-// `content` is always this fixed placeholder — never populated by outside content.
+// Ordering: whatever custom tabs the registry defines render first, in the order the
+// registry lists them ("the order they send tabs gets honored") — then Timeline, then
+// Attachments are always appended at the end, in that fixed order. Timeline is reserved:
+// a registry entry can never target it, its content is always the fixed placeholder.
+// Attachments is not reserved: a registry entry targeting it overrides its content, but
+// never moves it out of last place.
 const buildTabs = (conversation: Conversation): ResolvedTab[] => {
-  const tabs = new Map<string, ResolvedTab>([
-    ['timeline', { id: 'timeline', position: 0, content: () => <TimelineComingSoon /> }],
-  ]);
+  const customTabs: ResolvedTab[] = [];
+  let attachmentsContent: ResolvedTab['content'] = () => <AttachmentsComingSoon />;
 
   for (const entry of getConversationFlyoutTabs(conversation.template_id ?? '')) {
     if (entry.tab === 'timeline') {
-      const timeline = tabs.get('timeline');
-      if (timeline) {
-        tabs.set('timeline', { ...timeline, position: entry.position });
-      }
       continue;
     }
-    tabs.set(entry.tab, { id: entry.tab, position: entry.position, content: entry.content });
+    if (entry.tab === 'attachments') {
+      attachmentsContent = entry.content;
+      continue;
+    }
+    customTabs.push({ id: entry.tab, content: entry.content });
   }
 
-  return Array.from(tabs.values()).sort((a, b) => a.position - b.position);
+  return [
+    ...customTabs,
+    { id: 'timeline', content: () => <TimelineComingSoon /> },
+    { id: 'attachments', content: attachmentsContent },
+  ];
 };
 
 export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProps> = ({
   conversationId,
-  titleId,
-  conversationsService,
+  onClose,
 }) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'agentBuilderConversationMetadataFlyoutTitle' });
+  const { conversationsService } = useAgentBuilderServices();
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setSelectedTabId(undefined);
+  }, [conversationId]);
 
   const {
     data: conversation,
@@ -87,33 +112,17 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
   const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
   const selectedTab = tabs.find((tab) => tab.id === effectiveSelectedTabId);
 
-  const title = useMemo(() => {
-    if (isLoading) {
-      return i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.loadingTitle', {
-        defaultMessage: 'Loading…',
-      });
-    }
-    if (isError) {
-      return i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.errorTitle', {
-        defaultMessage: 'Unable to load conversation',
-      });
-    }
-    const templateId = conversation?.template_id;
-    const templateName = CONVERSATION_TEMPLATES.find((t) => t.id === templateId)?.name;
-    return (
-      templateName ??
-      templateId ??
-      i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.title', {
-        defaultMessage: 'Conversation metadata',
-      })
-    );
-  }, [isLoading, isError, conversation?.template_id]);
-
   return (
-    <>
+    <EuiFlyout
+      onClose={onClose}
+      size="s"
+      type="push"
+      aria-labelledby={titleId}
+      data-test-subj="agentBuilderConversationMetadataFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={titleId}>{title}</h2>
+          <h2 id={titleId}>{FLYOUT_TITLE}</h2>
         </EuiTitle>
         {conversation && (
           <EuiTabs>
@@ -142,6 +151,6 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
         )}
         {conversation && selectedTab?.content({ conversation })}
       </EuiFlyoutBody>
-    </>
+    </EuiFlyout>
   );
 };

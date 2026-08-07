@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { ConversationMetadataFlyout } from '../../../../flyout/conversation_metadata_flyout';
 
 const labels = {
   chatInfo: i18n.translate('xpack.agentBuilder.chatInfoButton.label', {
@@ -19,22 +19,30 @@ const labels = {
 
 export const ChatInfoButton: React.FC = () => {
   const conversationId = useConversationId();
-  const { openConversationMetadata } = useAgentBuilderServices();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   if (!conversationId) {
     return null;
   }
 
   return (
-    <EuiButton
-      size="s"
-      color="text"
-      fill={false}
-      iconType="info"
-      onClick={() => openConversationMetadata({ conversationId })}
-      data-test-subj="agentBuilderChatInfoButton"
-    >
-      {labels.chatInfo}
-    </EuiButton>
+    <>
+      <EuiButton
+        size="s"
+        color="text"
+        fill={false}
+        iconType="info"
+        onClick={() => setIsFlyoutOpen(true)}
+        data-test-subj="agentBuilderChatInfoButton"
+      >
+        {labels.chatInfo}
+      </EuiButton>
+      {isFlyoutOpen && (
+        <ConversationMetadataFlyout
+          conversationId={conversationId}
+          onClose={() => setIsFlyoutOpen(false)}
+        />
+      )}
+    </>
   );
 };
