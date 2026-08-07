@@ -18,6 +18,7 @@ import {
   entityRiskScoreTool,
   getEntityTool,
   getEntityGraphTool,
+  entityRelationshipHistoryTool,
   listWatchlistsTool,
   getWatchlistIdTool,
   removeEntitiesFromWatchlistTool,
@@ -72,6 +73,7 @@ export const registerTools = (
   agentBuilder.tools.register(
     getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)
   );
+  agentBuilder.tools.register(entityRelationshipHistoryTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(

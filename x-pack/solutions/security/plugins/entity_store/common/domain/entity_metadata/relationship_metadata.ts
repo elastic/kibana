@@ -40,3 +40,21 @@ export type RelationshipMetadataDoc = {
 } & {
   [K in RelationshipTargetKey]?: string;
 };
+
+/**
+ * Projects a raw metadata doc into `{ kind, target, timestamp, source }`.
+ * Returns `undefined` when the doc has no recognized relationship target field.
+ */
+export const normalizeRelationshipRecord = (doc: RelationshipMetadataDoc) => {
+  for (const kind of RELATIONSHIP_KINDS) {
+    const target = doc[`entity.relationships.${kind}.target`];
+    if (target) {
+      return {
+        kind,
+        target,
+        timestamp: doc['@timestamp'],
+        source: doc['entity.source'],
+      };
+    }
+  }
+};

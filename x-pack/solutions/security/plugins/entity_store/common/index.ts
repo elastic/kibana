@@ -179,7 +179,10 @@ export type {
   ListEntitiesResponse,
 } from './api_types';
 
-export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
+export {
+  RELATIONSHIP_KINDS,
+  normalizeRelationshipRecord,
+} from './domain/entity_metadata/relationship_metadata';
 export type {
   RelationshipKind,
   RelationshipMetadataDoc,
