@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CONVERSATION_CATEGORY_COLORS, type RecommendedAction } from '@kbn/pnd-common';
-import { CONVERSATION_QUEUE_CATEGORIES } from '../../conversation_queue';
+import {
+  CONVERSATION_CATEGORY_COLORS,
+  CONVERSATION_QUEUE_CATEGORIES,
+  type RecommendedAction,
+} from '@kbn/pnd-common';
 import { ALL_CATEGORIES } from './translations';
 
 interface CategoryFilterProps {

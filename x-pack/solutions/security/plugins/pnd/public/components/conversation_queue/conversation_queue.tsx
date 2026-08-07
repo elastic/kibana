@@ -7,7 +7,12 @@
 
 import React, { memo } from 'react';
 import styled from '@emotion/styled';
-import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
+import {
+  CONVERSATION_QUEUE_LABELS,
+  CONVERSATION_CATEGORY_COLORS,
+  type Investigation,
+  type RecommendedAction,
+} from '@kbn/pnd-common';
 import {
   EuiAccordion,
   EuiBadge,
@@ -19,15 +24,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CONVERSATION_QUEUE_LABELS, EMPTY_CONVERSATION_QUEUE } from './translations';
+import { EMPTY_CONVERSATION_QUEUE } from './translations';
 import { ConversationCard } from '../conversation_card';
-
-const CONVERSATION_QUEUE_CATEGORY_COLORS: Record<RecommendedAction, string> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'primary',
-  tune: 'accent',
-};
 
 interface ConversationQueueProps {
   briefingId: string;
@@ -60,7 +58,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={CONVERSATION_QUEUE_CATEGORY_COLORS[briefingType]}>
+          <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>
             {briefingList.length}
           </EuiBadge>
         </EuiFlexItem>

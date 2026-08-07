@@ -6,4 +6,3 @@
  */
 
 export { ConversationQueue } from './conversation_queue';
-export { CONVERSATION_QUEUE_CATEGORIES } from './translations';

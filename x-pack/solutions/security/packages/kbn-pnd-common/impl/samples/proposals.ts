@@ -11,7 +11,7 @@ import {
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   TEMPLATE_ID_PROPOSAL,
 } from '../../constants';
-import type { Proposal, RecommendedAction } from '../schemas/components/investigation.gen';
+import type { Proposal } from '../schemas/components/investigation.gen';
 
 export const MOCK_PROPOSALS: Proposal[] = [
   {
@@ -187,11 +187,3 @@ export const getMockProposalsByInvestigationId = (investigationId: string): Prop
 
 export const getMockProposalById = (id: string): Proposal | undefined =>
   MOCK_PROPOSALS.find((proposal) => proposal.id === id);
-
-
-export const CONVERSATION_CATEGORY_COLORS: Record<RecommendedAction, 'danger' | 'warning' | 'primary' | 'accent'> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'primary',
-  tune: 'accent',
-};

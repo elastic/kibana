@@ -17,16 +17,17 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
+import {
+  CONVERSATION_QUEUE_CATEGORIES,
+  type Investigation,
+  type RecommendedAction,
+} from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { BRIEFING_PAGE_INFO } from './translations';
-import {
-  ConversationQueue,
-  CONVERSATION_QUEUE_CATEGORIES,
-} from '../../components/conversation_queue';
+import { ConversationQueue } from '../../components/conversation_queue';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
