@@ -241,6 +241,9 @@ steps:
     type: if
     condition: '${{ steps.run_discovery_agent.error == null and steps.count_written_rules.output.writtenCount > 0 }}'
     steps:
+      # The rule filter must be a should alongside `exists: processed_by` — markers carry no
+      # rule_uuid, so a bare terms filter drops them before the processed_count semijoin and
+      # every backlog detection gets re-stamped each cycle (nightshift-program#961).
       - name: get_written_rules_backlog
         type: elasticsearch.esql.query
         with:
@@ -254,8 +257,13 @@ steps:
               filter:
                 - term:
                     kibana.space_ids: '{{ variables.spaceId }}'
-                - terms:
-                    rule_uuid: '${{ variables.written_rule_uuids }}'
+                - bool:
+                    should:
+                      - terms:
+                          rule_uuid: '${{ variables.written_rule_uuids }}'
+                      - exists:
+                          field: processed_by
+                    minimum_should_match: 1
                 - range:
                     '@timestamp':
                       gte: '{{ inputs.detectionLookback }}'

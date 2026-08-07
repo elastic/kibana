@@ -103,6 +103,20 @@ describe('significant events fair batch selection', () => {
     expect(discovery.steps.some(({ if: stepIf }) => Boolean(stepIf))).toBe(false);
   });
 
+  it('keeps markers visible to the backlog dedup semijoin (rule filter is a should, not a bare terms)', () => {
+    // Markers carry no rule_uuid; a bare terms filter drops them before the processed_count
+    // join and every backlog detection gets re-stamped each cycle (nightshift-program#961).
+    const gate = getStep(DISCOVERY_YAML, 'maybe_stamp_processed');
+    const backlog = gate.steps?.find(({ name }) => name === 'get_written_rules_backlog');
+    const filter = JSON.stringify(backlog?.with?.filter);
+
+    expect(filter).toContain('"should"');
+    expect(filter).toContain('"exists":{"field":"processed_by"}');
+    expect(filter).toContain('"minimum_should_match":1');
+    expect(backlog?.with?.query).toContain('INLINE STATS processed_count');
+    expect(backlog?.with?.query).toContain('processed_count == 0');
+  });
+
   it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {
     const discovery = parse(DISCOVERY_YAML) as {
       outputs: Array<{ name: string }>;
