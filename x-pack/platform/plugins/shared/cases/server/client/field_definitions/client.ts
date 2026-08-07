@@ -49,11 +49,16 @@ export const createFieldDefinitionsSubClient = (
   const fieldDefinitionsSubClient: FieldDefinitionsSubClient = {
     getFieldDefinitions: async (params: FieldDefinitionsFindRequest) => {
       const owners = params.owner ? castArray(params.owner) : [];
+      if (owners.length === 0) {
+        throw Boom.badRequest('owner is required');
+      }
       await authorization.ensureAuthorized({
-        operation: Operations.manageTemplate,
+        operation: Operations.getFieldDefinitions,
         entities: owners.map((owner) => ({ owner, id: owner })),
       });
-      return fieldDefinitionsService.getFieldDefinitions(owners);
+      return fieldDefinitionsService.getFieldDefinitions(owners, {
+        isGlobal: params.isGlobal,
+      });
     },
 
     getFieldDefinition: async (id: string) => {
@@ -90,6 +95,8 @@ export const createFieldDefinitionsSubClient = (
       return fieldDefinitionsService.createFieldDefinition(input);
     },
 
+    // Field definitions are library-level objects, not case-level objects. They are
+    // not part of any case's audit trail so no UserAction is created for mutations.
     updateFieldDefinition: async (id: string, input: UpdateFieldDefinitionInput) => {
       const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
       await authorization.ensureAuthorized({
@@ -124,6 +131,20 @@ export const createFieldDefinitionsSubClient = (
         operation: Operations.manageTemplate,
         entities: [{ owner: fieldDef.attributes.owner, id: fieldDef.id }],
       });
+
+      const { templatesService } = services;
+      const referencingTemplates = await templatesService.getActiveTemplatesReferencingField(
+        fieldDef.attributes.owner,
+        fieldDef.attributes.name
+      );
+
+      if (referencingTemplates.length > 0) {
+        const names = referencingTemplates.map(({ name }) => `"${name}"`).join(', ');
+        throw Boom.conflict(
+          `Cannot delete field definition "${fieldDef.attributes.name}": it is referenced by ${referencingTemplates.length} active template(s): ${names}`
+        );
+      }
+
       return fieldDefinitionsService.deleteFieldDefinition(id);
     },
   };

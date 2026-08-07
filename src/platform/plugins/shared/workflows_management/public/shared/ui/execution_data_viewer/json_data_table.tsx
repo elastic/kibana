@@ -128,6 +128,12 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
       changePageIndex(0);
     }, [searchTerm, changePageIndex]);
 
+    // Reset to page 0 when the data prop changes (e.g. switching between execution steps
+    // that have different row counts) so stale page indices don't go out of bounds.
+    useEffect(() => {
+      changePageIndex(0);
+    }, [data, changePageIndex]);
+
     const fieldCellActions = useMemo(() => {
       const cellActions: EuiDataGridColumnCellAction[] = [];
       const closePopover = () => dataGridRef.current?.closeCellPopover();
@@ -279,9 +285,12 @@ const getCopyCellActionComponent = (
   React.memo(function CopyCellAction({ rowIndex, Component }) {
     const record = records[rowIndex];
     const copy = useCallback(() => {
+      if (!record) return;
       copyToClipboard(appendKeyPath(fieldPathPrefix, record.field));
       closePopover();
-    }, [record.field]);
+    }, [record]);
+
+    if (!record) return null;
 
     return (
       <Component onClick={copy} iconType="copy" aria-label={CopyFieldPathText}>

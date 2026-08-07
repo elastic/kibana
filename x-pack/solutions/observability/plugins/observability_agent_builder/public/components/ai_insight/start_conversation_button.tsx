@@ -8,10 +8,13 @@
 import React from 'react';
 import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AiButton, type AiButtonProps } from '@kbn/shared-ux-ai-components';
+import { AiButton, type AiButtonDefaultProps } from '@kbn/shared-ux-ai-components';
 import type { InsightType } from '../../analytics';
 
-type StartConversationButtonProps = AiButtonProps & {
+type StartConversationButtonProps = Omit<
+  AiButtonDefaultProps,
+  'variant' | 'iconType' | 'size' | 'children'
+> & {
   insightType: InsightType;
 };
 

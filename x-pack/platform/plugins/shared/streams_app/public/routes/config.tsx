@@ -16,7 +16,9 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
+import { SignificantEventsAppRedirect } from '../components/significant_events_app_redirect';
+import { StreamsLayout } from '../components/streams_layout';
+import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 
 /**
  * Optional time range query params.
@@ -29,13 +31,11 @@ const timeRangeQueryParams = t.partial({
 
 /**
  * Extended query params for management routes that may include
- * additional feature-specific params (e.g., significant events flyout).
+ * additional feature-specific params (e.g., data quality page state).
  */
 const managementQueryParams = t.partial({
   rangeFrom: t.string,
   rangeTo: t.string,
-  // Significant events flyout params
-  openFlyout: t.string,
   // Data quality page state
   pageState: t.string,
 });
@@ -75,7 +75,7 @@ const streamsAppRoutes = {
             element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
           },
           '/_discovery/{tab}': {
-            element: <SignificantEventsDiscoveryPage />,
+            element: <SignificantEventsAppRedirect />,
             params: t.intersection([
               t.type({
                 path: t.type({
@@ -93,7 +93,37 @@ const streamsAppRoutes = {
                   stream: t.union([t.string, t.array(t.string)]),
                   showComputed: t.string,
                   selectedItem: t.string,
+                  selectedEvent: t.string,
                 }),
+              }),
+            ]),
+          },
+        },
+      },
+      /**
+       * Declared before `/{key}` so the literal path wins over a stream name.
+       */
+      '/new-experience': {
+        element: <Outlet />,
+        children: {
+          '/new-experience': {
+            element: (
+              <RedirectTo
+                path="/new-experience/{tab}"
+                params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+              />
+            ),
+          },
+          '/new-experience/{tab}': {
+            element: <StreamsLayout />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: timeRangeQueryParams,
               }),
             ]),
           },

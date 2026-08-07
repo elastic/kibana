@@ -34,6 +34,7 @@ describe('fetchEsql', () => {
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
     scopedProfilesManager,
+    isApproximate: false,
   };
 
   it('resolves with returned records', async () => {
@@ -115,6 +116,82 @@ describe('fetchEsql', () => {
     }
   });
 
+  it('should generate identical stable ids across two fetches when _id and _index are present', async () => {
+    jest.useFakeTimers();
+
+    try {
+      const hits = [
+        { _index: 'i', _id: '1', foo: 'bar' },
+        { _index: 'i', _id: '2', foo: 'baz' },
+      ] as unknown as EsHitRecord[];
+
+      const mockExecute = () =>
+        ({
+          cancel: jest.fn(),
+          getData: jest.fn(() =>
+            of({
+              result: {
+                columns: ['_id', '_index', 'foo'],
+                rows: hits,
+              },
+            })
+          ),
+        } as unknown as ExecutionContract);
+
+      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+
+      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+      expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
+      const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
+
+      // Advance time to simulate a later refresh
+      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
+      expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
+      const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
+
+      expect(firstFetch[0].id).toBe(secondFetch[0].id);
+      expect(firstFetch[1].id).toBe(secondFetch[1].id);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('should generate different ids across two fetches when _index is absent', async () => {
+    jest.useFakeTimers();
+
+    try {
+      const hits = [{ _id: '1', foo: 'bar' }] as unknown as EsHitRecord[];
+
+      const mockExecute = () =>
+        ({
+          cancel: jest.fn(),
+          getData: jest.fn(() =>
+            of({
+              result: {
+                columns: ['_id', 'foo'],
+                rows: hits,
+              },
+            })
+          ),
+        } as unknown as ExecutionContract);
+
+      const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+
+      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 46));
+      expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
+      const { records: firstFetch } = await fetchEsql(fetchEsqlMockProps);
+
+      // Advance time to simulate a later refresh
+      jest.setSystemTime(new Date(2026, 4, 7, 22, 34, 47));
+      expressionsExecuteSpy.mockReturnValueOnce(mockExecute());
+      const { records: secondFetch } = await fetchEsql(fetchEsqlMockProps);
+
+      expect(firstFetch[0].id).not.toBe(secondFetch[0].id);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('should use inputTimeRange if provided', () => {
     const timeRange: TimeRange = { from: 'now-15m', to: 'now' };
     const result = getTextBasedQueryStateToAstProps({ ...fetchEsqlMockProps, timeRange });
@@ -133,6 +210,24 @@ describe('fetchEsql', () => {
     const result = getTextBasedQueryStateToAstProps(fetchEsqlMockProps);
 
     expect(result.time).toEqual(absoluteTimeRange);
+  });
+
+  it('passes isApproximate to the expression searchContext', async () => {
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() => of({ result: { columns: [], rows: [] } })),
+    } as unknown as ExecutionContract);
+
+    await fetchEsql({ ...fetchEsqlMockProps, isApproximate: true });
+
+    expect(expressionsExecuteSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      null,
+      expect.objectContaining({
+        searchContext: expect.objectContaining({ isApproximate: true }),
+      })
+    );
   });
 
   it('should add inline_highlights to the raw record when inline highlights are present', async () => {

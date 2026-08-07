@@ -25,14 +25,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiCodeBlockFullScreen.fullscreenExpand\\": \\"Expand\\",
     \\"euiCollapsedItemActions.allActionsTooltip\\": \\"All actions\\",
     \\"euiCollapsedItemActions.allActionsDisabled\\": \\"Individual item actions are disabled when rows are being selected.\\",
-    \\"euiCollapsibleNavBeta.ariaLabel\\": \\"Site menu\\",
-    \\"euiCollapsibleNavButton.ariaLabelExpand\\": \\"Expand navigation\\",
-    \\"euiCollapsibleNavButton.ariaLabelCollapse\\": \\"Collapse navigation\\",
-    \\"euiCollapsibleNavButton.ariaLabelClose\\": \\"Close navigation\\",
-    \\"euiCollapsibleNavButton.ariaLabelOpen\\": \\"Open navigation\\",
-    \\"euiCollapsibleNavKibanaSolution.switcherTitle\\": \\"Solution view\\",
-    \\"euiCollapsibleNavKibanaSolution.switcherAriaLabel\\": \\"- click to switch to another solution\\",
-    \\"euiCollapsibleNavKibanaSolution.groupLabel\\": \\"Navigate to solution\\",
     \\"euiColorPicker.alphaLabel\\": \\"Alpha channel (opacity) value\\",
     \\"euiColorPicker.ariaLabel\\": \\"Select a color\\",
     \\"euiColorPicker.colorLabel\\": \\"Color value\\",
@@ -296,7 +288,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiTableSortMobile.sorting\\": \\"Sorting\\",
     \\"euiToast.dismissToast\\": \\"Dismiss toast\\",
     \\"euiToast.newNotification\\": \\"A new notification appears\\",
-    \\"euiToast.notification\\": \\"Notification\\",
     \\"euiTourFooter.endTour\\": \\"End tour\\",
     \\"euiTourFooter.skipTour\\": \\"Skip tour\\",
     \\"euiTourFooter.closeTour\\": \\"Close tour\\",
@@ -313,7 +304,9 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiHue.ariaValueText\\": \\"Hue\\",
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
     \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
-    \\"euiContextMenuPanelTitle.ariaLabel\\": \\"Close current panel:\\"
+    \\"euiContextMenuPanelTitle.ariaLabel\\": \\"Close current panel:\\",
+    \\"euiFlyoutMenu.pagination.previous\\": \\"Previous\\",
+    \\"euiFlyoutMenu.pagination.next\\": \\"Next\\"
   }
 }"
 `;

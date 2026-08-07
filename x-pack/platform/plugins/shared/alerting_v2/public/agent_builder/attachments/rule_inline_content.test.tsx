@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleInlineContent } from './rule_inline_content';
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
   id: 'att-1',
-  type: 'rule' as const,
+  type: RULE_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin: overrides.origin,
@@ -20,7 +21,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1', 'tag2'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    evaluation: { query: { kql: 'host.name: *' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     state_transition: null,
     enabled: overrides.enabled,
   } as any,

@@ -16,6 +16,7 @@ import {
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import type { ActionType as ConnectorType } from '../types';
 import { ConnectorUsageCollector } from '../types';
@@ -293,13 +294,14 @@ const mockUser = {
   profile_uid: '123',
   roles: ['superuser'],
   username: 'coolguy',
+  http_authentication_scheme: null,
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   jest.clearAllMocks();
   mockGetRequestBodyByte.mockReturnValue(0);
-  spacesMock.getSpaceId.mockReturnValue('some-namespace');
+  spacesMock.getSpaceId.mockReturnValue(asSpaceId('some-namespace'));
   loggerMock.get.mockImplementation(() => loggerMock);
   securityMockStart.authc.getCurrentUser.mockImplementation(() => mockUser);
 
@@ -1715,6 +1717,72 @@ describe('Action Executor', () => {
       expect(result.message).toMatch(/error validating connector type config/);
       expect(result.errorSource).toBe(TaskErrorSource.FRAMEWORK);
       expect(typeWithStringBar.executor).not.toHaveBeenCalled();
+    });
+
+    test('writes execute-start and failed execute event log entries when params fail Zod validation', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      await actionExecutor.execute({
+        ...executeParams,
+        params: { foo: 'not-a-boolean' },
+      });
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute-start' }),
+          message: 'action started: test:1: 1',
+        })
+      );
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute', outcome: 'failure' }),
+          message: 'action execution failure: test:1: 1',
+          error: expect.objectContaining({
+            message: expect.stringMatching(/error validating action params/),
+          }),
+        })
+      );
+    });
+
+    test('writes execute-start and failed execute event log entries when config fails Zod validation', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      const typeWithStringBar: jest.Mocked<ConnectorType> = {
+        ...connectorType,
+        validate: {
+          ...connectorType.validate,
+          config: { schema: z.object({ bar: z.string() }) },
+        },
+      };
+      connectorTypeRegistry.get.mockReturnValueOnce(typeWithStringBar);
+
+      await actionExecutor.execute(executeParams);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute-start' }),
+          message: 'action started: test:1: 1',
+        })
+      );
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'execute', outcome: 'failure' }),
+          message: 'action execution failure: test:1: 1',
+          error: expect.objectContaining({
+            message: expect.stringMatching(/error validating connector type config/),
+          }),
+        })
+      );
     });
   });
 });

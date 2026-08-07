@@ -81,7 +81,8 @@ export const useApplicationConnectionsTableColumns = ({
       width: '40px',
       align: 'right',
       isExpander: true,
-      render: ({ client }) => {
+      render: ({ client, connections }) => {
+        if (connections.length === 0) return null;
         const isOpen = expandedRows.has(client.id);
         return (
           <EuiToolTip

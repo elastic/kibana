@@ -17,6 +17,18 @@ export enum DateUnitSelector {
   Hours = 'h',
 }
 
+const DATE_UNIT_LABELS: Record<DateUnitSelector, string> = {
+  [DateUnitSelector.Seconds]: 'Seconds',
+  [DateUnitSelector.Minutes]: 'Minutes',
+  [DateUnitSelector.Hours]: 'Hours',
+};
+
+export interface RefreshConfig {
+  interval: string;
+  units: string;
+  isPaused: boolean;
+}
+
 export class DatePicker {
   private readonly quickMenuButton;
   private readonly toggleRefreshButton;
@@ -41,20 +53,31 @@ export class DatePicker {
    * container (useful when the only DateRangePicker lives inside a panel).
    */
   private async isNewDateRangePicker(containerLocator?: Locator): Promise<boolean> {
-    try {
-      await this.getTestSubjLocator('dateRangePickerControlButton', containerLocator).waitFor({
-        timeout: 5000,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    const root = containerLocator ?? this.page;
+    const newPicker = root.getByTestId('dateRangePickerControlButton');
+    const legacyPicker = root.getByTestId('superDatePickerToggleQuickMenuButton');
+    // Wait until either variant has mounted. `waitFor` is not a strict-mode
+    // action, so it tolerates pages that render multiple pickers (e.g. several
+    // data source cards in a flyout); `getAttribute` on the combined locator
+    // would throw there — see the sibling note in `waitToBeHidden()`.
+    await newPicker.or(legacyPicker).waitFor({ timeout: 10_000 });
+    // `count()` likewise never throws on multiple matches. The variant is
+    // globally flag-driven, so any `dateRangePickerControlButton` on the page
+    // means the new picker is active.
+    return (await newPicker.count()) > 0;
   }
 
   private getTestSubjLocator(selector: string, containerLocator?: Locator) {
     return containerLocator
       ? containerLocator.getByTestId(selector)
       : this.page.testSubj.locator(selector);
+  }
+
+  private getDateRangePresetTestSubject(label: string) {
+    return `dateRangePickerPresetItem-${label
+      .replace(/→/g, '-')
+      .replace(/["'&]/g, '')
+      .replace(/\s+/g, '_')}`;
   }
 
   // ---------------------------------------------------------------------------
@@ -111,21 +134,26 @@ export class DatePicker {
     const getTestSubjLocator = (selector: string) =>
       this.getTestSubjLocator(selector, containerLocator);
 
+    /**
+     * Clears the input, types the value and submits with `Enter`.
+     * Same approach as the `time_picker.ts` for FTR.
+     */
+    const commitTypedDate = async (value: string) => {
+      const input = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
+      await input.clear();
+      await input.pressSequentially(value);
+      await input.press('Enter');
+    };
+
     // we start with end date
     await getTestSubjLocator('superDatePickerendDatePopoverButton').click();
     await this.openAbsoluteTab();
-    const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await inputFrom.clear();
-    await inputFrom.fill(to);
-    await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
+    await commitTypedDate(to);
     await this.page.keyboard.press('Escape');
     // and later change start date
     await getTestSubjLocator('superDatePickerstartDatePopoverButton').click();
     await this.openAbsoluteTab();
-    const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await inputTo.clear();
-    await inputTo.fill(from);
-    await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
+    await commitTypedDate(from);
     await this.page.keyboard.press('Escape');
 
     if (validateDates) {
@@ -160,6 +188,36 @@ export class DatePicker {
     }
   }
 
+  async openDateRangePickerPresetsPanel() {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error(
+        'openDateRangePickerPresetsPanel is only supported by the new DateRangePicker'
+      );
+    }
+
+    await this.ensurePickerVisible();
+    // Clicking the control button toggles the popover, so bail out when the
+    // panel is already open — otherwise this click would close it (e.g. right
+    // after saving a preset, which leaves the panel open). This guard assumes
+    // the panel is in a settled state: callers that close it must wait for it
+    // to be hidden first (see `closeDateRangePickerPresetsPanel`), otherwise a
+    // still-closing panel reads as visible here and we skip re-opening it.
+    const mainPanel = this.page.testSubj.locator('dateRangePickerMainPanel');
+    if (await mainPanel.isVisible()) return;
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    await mainPanel.waitFor();
+  }
+
+  async closeDateRangePickerPresetsPanel() {
+    const mainPanel = this.page.testSubj.locator('dateRangePickerMainPanel');
+    if (!(await mainPanel.isVisible())) return;
+    // Escape closes the popover, but the keypress resolves before React
+    // unmounts it — wait for the panel to actually be gone so a following
+    // `openDateRangePickerPresetsPanel` doesn't race the close.
+    await this.page.keyboard.press('Escape');
+    await mainPanel.waitFor({ state: 'hidden' });
+  }
+
   private async openCustomRangePanel(containerLocator?: Locator) {
     await this.ensurePickerVisible(containerLocator);
     // Click the control button scoped to the container
@@ -192,6 +250,9 @@ export class DatePicker {
     // Dialog elements render as a portal at the page root
     await this.setDatePart('Start', from);
     await this.setDatePart('End', to);
+    // The apply button submits the custom-range form, which calls `applyRange`
+    // and forwards to the query bar's `onSubmit` — so this also submits the
+    // query and no separate querySubmitButton click is needed.
     await this.page.testSubj.locator('dateRangePickerCustomRangeApplyButton').click();
 
     if (validateDates) {
@@ -207,8 +268,25 @@ export class DatePicker {
         `Date picker should reflect the updated time range`
       ).toBeVisible();
     }
+  }
 
-    await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
+  private async openDateRangePickerSettingsPanel() {
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
+    await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor({ state: 'visible' });
+  }
+
+  private async closeDateRangePickerSettingsPanel() {
+    await this.page.testSubj.locator('dateRangePickerSubPanelBackButton').click();
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'visible' });
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
+  }
+
+  private async openLegacyQuickMenu() {
+    await this.quickMenuButton.click();
+    await this.refreshIntervalInput.waitFor({ state: 'visible' });
   }
 
   // ---------------------------------------------------------------------------
@@ -219,7 +297,13 @@ export class DatePicker {
     if (await this.isNewDateRangePicker()) {
       await this.page.testSubj.locator('dateRangePickerControlButton').click();
       await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
-      const presetItem = this.page.testSubj.locator(`dateRangePickerPresetItem-${option}`);
+      // The new picker's `toTestSubj` replaces every whitespace run with an
+      // underscore, whereas EUI's legacy quick-menu only replaces the first
+      // space. Callers pass the legacy form (e.g. "Last_15 minutes"), so
+      // normalise the remaining whitespace here for the new picker.
+      const presetItem = this.page.testSubj.locator(
+        `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`
+      );
       await expect(presetItem).toBeVisible();
       await presetItem.click();
     } else {
@@ -230,6 +314,56 @@ export class DatePicker {
       await expect(commonlyUsedOption).toBeVisible();
       await commonlyUsedOption.click();
     }
+  }
+
+  async setTextRange(value: string) {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('setTextRange is only supported by the new DateRangePicker');
+    }
+
+    await this.ensurePickerVisible();
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    const input = this.page.testSubj.locator('dateRangePickerInput');
+    await input.clear();
+    await input.fill(value);
+    // Enter applies the range and submits the query on its own — the picker's
+    // `onInputKeyDown` calls `applyRange`, which the query bar's `onChange`
+    // forwards to `onSubmit`. No separate querySubmitButton click is needed.
+    await input.press('Enter');
+    // `applyRange` sets `isEditing=false`, which unmounts the input and closes
+    // the popover. Wait for edit mode to end so a following open/read isn't
+    // racing that close.
+    await input.waitFor({ state: 'hidden' });
+  }
+
+  async saveCurrentRangeAsPreset() {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('saveCurrentRangeAsPreset is only supported by the new DateRangePicker');
+    }
+
+    await this.openDateRangePickerPresetsPanel();
+    await this.page.testSubj.locator('dateRangePickerSavePresetButton').click();
+    // Saving applies the range (`applyRange`), which closes the popover. Wait
+    // for the panel to be gone so a following open isn't racing the close — the
+    // idempotent opener would otherwise read the still-closing panel as "open"
+    // and skip re-opening it.
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'hidden' });
+  }
+
+  getDateRangePreset(label: string) {
+    return this.page.testSubj.locator(this.getDateRangePresetTestSubject(label));
+  }
+
+  async deleteDateRangePreset(label: string) {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('deleteDateRangePreset is only supported by the new DateRangePicker');
+    }
+
+    await this.openDateRangePickerPresetsPanel();
+    const preset = this.getDateRangePreset(label);
+    await preset.waitFor();
+    await preset.hover();
+    await preset.getByTestId('dateRangePickerDeletePresetButton').click();
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
@@ -306,11 +440,82 @@ export class DatePicker {
     return { start, end };
   }
 
+  async getRefreshConfig(): Promise<RefreshConfig> {
+    if (await this.isNewDateRangePicker()) {
+      await this.openDateRangePickerSettingsPanel();
+
+      const interval =
+        (await this.page.testSubj
+          .locator('dateRangePickerAutoRefreshIntervalCount')
+          .getAttribute('value')) ?? '';
+      const unit = (await this.page.testSubj
+        .locator('dateRangePickerAutoRefreshIntervalUnit')
+        .inputValue()) as DateUnitSelector;
+      const toggleChecked =
+        (await this.page.testSubj
+          .locator('dateRangePickerAutoRefreshToggle')
+          .getAttribute('aria-checked')) === 'true';
+
+      await this.closeDateRangePickerSettingsPanel();
+
+      return {
+        interval,
+        units: DATE_UNIT_LABELS[unit],
+        isPaused: !toggleChecked,
+      };
+    }
+
+    await this.openLegacyQuickMenu();
+    const interval = (await this.refreshIntervalInput.getAttribute('value')) ?? '';
+    const unit = (await this.refreshIntervalUnitSelect.inputValue()) as DateUnitSelector;
+    const toggleChecked = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
+    await this.quickMenuButton.click();
+
+    return {
+      interval,
+      units: DATE_UNIT_LABELS[unit],
+      isPaused: !toggleChecked,
+    };
+  }
+
+  /**
+   * Returns the human-readable time range label shown by whichever picker is
+   * active.
+   *
+   * - New DateRangePicker: the value-display node renders the full label
+   *   (e.g. "Last 24 hours", "30 days ago → 10 days ago").
+   * - Legacy EuiSuperDatePicker: joins the start/end popover button labels when
+   *   an explicit start/end range is shown, otherwise returns the quick-range
+   *   "show dates" label.
+   */
+  async getTimeRangeText(containerLocator?: Locator): Promise<string> {
+    if (await this.isNewDateRangePicker(containerLocator)) {
+      const valueDisplay = this.getTestSubjLocator('dateRangePickerValueDisplay', containerLocator);
+      return (await valueDisplay.innerText()).trim();
+    }
+
+    const startButton = this.getTestSubjLocator(
+      'superDatePickerstartDatePopoverButton',
+      containerLocator
+    );
+    if (await startButton.isVisible()) {
+      const start = (await startButton.innerText()).trim();
+      const end = (
+        await this.getTestSubjLocator(
+          'superDatePickerendDatePopoverButton',
+          containerLocator
+        ).innerText()
+      ).trim();
+      return `${start} - ${end}`;
+    }
+    return (
+      await this.getTestSubjLocator('superDatePickerShowDatesButton', containerLocator).innerText()
+    ).trim();
+  }
+
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
     if (await this.isNewDateRangePicker()) {
-      await this.page.testSubj.locator('dateRangePickerControlButton').click();
-      await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
-      await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor();
+      await this.openDateRangePickerSettingsPanel();
 
       const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
       const isPaused = (await toggle.getAttribute('aria-checked')) !== 'true';
@@ -325,9 +530,9 @@ export class DatePicker {
         .locator('dateRangePickerAutoRefreshIntervalUnit')
         .selectOption({ value: dateUnit });
 
-      await this.page.keyboard.press('Escape');
+      await this.closeDateRangePickerSettingsPanel();
     } else {
-      await this.quickMenuButton.click();
+      await this.openLegacyQuickMenu();
       const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
       if (isPaused) {
         await this.toggleRefreshButton.click();
@@ -340,13 +545,59 @@ export class DatePicker {
     }
   }
 
-  async waitToBeHidden() {
+  async pauseAutoRefresh() {
     if (await this.isNewDateRangePicker()) {
-      await this.page.testSubj
-        .locator('dateRangePickerCustomRangePanel')
-        .waitFor({ state: 'hidden' });
+      await this.openDateRangePickerSettingsPanel();
+
+      const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
+      const isRunning = (await toggle.getAttribute('aria-checked')) === 'true';
+
+      if (isRunning) {
+        await toggle.click();
+      }
+
+      await this.closeDateRangePickerSettingsPanel();
     } else {
-      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
+      await this.openLegacyQuickMenu();
+      const isRunning = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true';
+
+      if (isRunning) {
+        await this.toggleRefreshButton.click();
+      }
+
+      await this.quickMenuButton.click();
     }
+  }
+
+  async waitToBeHidden() {
+    // Wait for both picker variants' popovers to be hidden. We don't call
+    // `isNewDateRangePicker()` first because pages can render multiple pickers
+    // (e.g. several data source cards in a flyout) which trip its strict-mode
+    // check. Both popover bodies are unmounted on close, so the locators
+    // resolve to zero elements and `waitFor({ state: 'hidden' })` succeeds.
+    await this.page.testSubj
+      .locator('dateRangePickerCustomRangePanel')
+      .waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
+  }
+
+  getTimePickerControl(): Locator {
+    return this.page.testSubj.locator('dateRangePickerControlButton').or(this.quickMenuButton);
+  }
+
+  getDisabledDatePickerIndicator(): Locator {
+    return this.page.testSubj.locator('kbnQueryBar-datePicker-disabled');
+  }
+
+  async timePickerExists(): Promise<boolean> {
+    // Some views have no time picker at all (e.g. a data view without a time
+    // field), so this must resolve to `false` rather than throw. Don't delegate
+    // to `isNewDateRangePicker()`: it waits up to 10s for a picker to mount and
+    // throws when none does. Probe both variant markers directly with a short,
+    // non-throwing wait — either one present means a time picker exists.
+    return this.getTimePickerControl()
+      .waitFor({ state: 'visible', timeout: 1000 })
+      .then(() => true)
+      .catch(() => false);
   }
 }

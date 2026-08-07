@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, type MouseEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -21,6 +21,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
+  EuiToolTip,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutResizable,
@@ -33,12 +35,22 @@ import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
+  useDatasets,
   useEvaluationExperiment,
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import type {
+  LaunchedExperimentConfig,
+  RunExperimentRequest,
+} from '../../../common/experiments/run_experiment';
+import { useWorkflowExecutions } from '../../hooks/use_experiments_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
+import { WorkflowRunProgress } from '../../components/workflow_run_progress';
+import { LaunchedConfigSummary } from '../../components/launched_config_summary';
+import { SaveAsWorkflowButton } from '../../components/save_as_workflow_button';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
@@ -49,6 +61,10 @@ interface DatasetStatsGroup {
   stats: EvaluatorStats[];
 }
 
+// Poll cadence for a live run, shared by the aggregate stats and the per-dataset example rows so
+// both refresh in lockstep.
+const RUN_POLL_INTERVAL_MS = 3000;
+
 interface DatasetStatsAccordionProps {
   experimentId: string;
   executionId?: string;
@@ -56,11 +72,11 @@ interface DatasetStatsAccordionProps {
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   experimentLoading: boolean;
   isOpen: boolean;
+  isRunning: boolean;
+  datasetExists: boolean;
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
-  onDatasetClick: (datasetId: string) => void;
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
-  onExampleClick: (exampleId: string) => void;
 }
 
 const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
@@ -70,17 +86,32 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   statsColumns,
   experimentLoading,
   isOpen,
+  isRunning,
+  datasetExists,
   selectedExampleId,
   onTraceClick,
-  onDatasetClick,
   onDatasetToggle,
-  onExampleClick,
 }) => {
+  const history = useHistory();
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
     error: examplesError,
-  } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId);
+    refetch: refetchExamples,
+  } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId, {
+    refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
+    staleTime: isRunning ? 0 : undefined,
+  });
+
+  // When the run settles and polling stops, pull the final example set once in case the last poll
+  // fired just before the last example's scores were indexed.
+  const wasRunningRef = useRef(isRunning);
+  useEffect(() => {
+    if (wasRunningRef.current && !isRunning && isOpen) {
+      refetchExamples();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, isOpen, refetchExamples]);
 
   return (
     <>
@@ -91,15 +122,24 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <h4>
-                  <EuiLink
-                    onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onDatasetClick(group.datasetId);
-                    }}
-                  >
-                    {group.datasetName}
-                  </EuiLink>
+                  {datasetExists ? (
+                    <EuiLink
+                      {...reactRouterNavigate(
+                        history,
+                        `/datasets/${group.datasetId}`,
+                        (event: MouseEvent<HTMLAnchorElement>) => event.stopPropagation()
+                      )}
+                    >
+                      {group.datasetName}
+                    </EuiLink>
+                  ) : (
+                    <EuiToolTip content={i18n.DELETED_DATASET_TOOLTIP}>
+                      <span tabIndex={0}>
+                        {group.datasetName}{' '}
+                        <EuiTextColor color="subdued">{i18n.DELETED_DATASET_SUFFIX}</EuiTextColor>
+                      </span>
+                    </EuiToolTip>
+                  )}
                 </h4>
               </EuiText>
             </EuiFlexItem>
@@ -128,7 +168,6 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <ExampleScoresTable
             examples={datasetExamples?.examples ?? []}
             selectedExampleId={selectedExampleId}
-            onExampleClick={onExampleClick}
             onTraceClick={onTraceClick}
           />
         )}
@@ -149,6 +188,12 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   );
 };
 
+// Upper bound on datasets fetched solely to resolve which referenced datasets
+// still exist (for the "(deleted)" label). Above this, existence is treated as
+// undetermined and links are kept. A server-side existence flag is the proper
+// long-term fix
+const MAX_DATASETS_FOR_EXISTENCE_CHECK = 1000;
+
 export const ExperimentDetailPage: React.FC = () => {
   const { experimentId } = useParams<{ experimentId: string }>();
   const history = useHistory();
@@ -157,12 +202,55 @@ export const ExperimentDetailPage: React.FC = () => {
 
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const executionId = searchParams.get('execution_id') ?? undefined;
+  const workflowExecutionIds = useMemo(
+    () => searchParams.getAll('workflow_execution_id'),
+    [searchParams]
+  );
+
+  // While a launch is in flight the experiment document is created asynchronously
+  // by the workflow (an experiment only exists once scores are ingested). A single
+  // hook polls every launched execution and tells us whether the run has settled
+  // and how many scores have landed so far.
+  const isLaunching = workflowExecutionIds.length > 0;
+  const {
+    executions: workflowExecutions,
+    allSettled: runSettled,
+    scoresIngested,
+  } = useWorkflowExecutions(workflowExecutionIds);
+  const anyScoresIngested = scoresIngested > 0;
+  const runInProgress = isLaunching && !runSettled;
+
+  // The submitted form, forwarded via router state on "Run now", so the config
+  // stays visible while the run has not produced queryable results yet.
+  const launchedConfig = useMemo(
+    () =>
+      (location.state as { experimentConfig?: LaunchedExperimentConfig } | null)?.experimentConfig,
+    [location.state]
+  );
+
+  const launchedRequest = useMemo(
+    () =>
+      (location.state as { experimentRequest?: RunExperimentRequest } | null)?.experimentRequest,
+    [location.state]
+  );
 
   const {
     data: experimentDetail,
     isLoading: experimentLoading,
     error: experimentError,
-  } = useEvaluationExperiment(experimentId, executionId);
+    refetch: refetchExperiment,
+  } = useEvaluationExperiment(experimentId, executionId, {
+    refetchInterval: runInProgress ? RUN_POLL_INTERVAL_MS : false,
+    enabled: !isLaunching || anyScoresIngested,
+  });
+
+  // Fetch the experiment as soon as scores appear, and once more when the run
+  // settles, without waiting for the next poll tick.
+  useEffect(() => {
+    if (isLaunching && (anyScoresIngested || runSettled)) {
+      refetchExperiment();
+    }
+  }, [isLaunching, anyScoresIngested, runSettled, refetchExperiment]);
 
   const openDatasetId = searchParams.get('dataset_id');
   const selectedExampleId = searchParams.get('example_id');
@@ -179,7 +267,7 @@ export const ExperimentDetailPage: React.FC = () => {
     return pr ? resolvePrUrl(pr) : null;
   }, [experimentDetail?.ci?.pull_request]);
 
-  const experimentName = experimentDetail?.experiment_name;
+  const experimentName = experimentDetail?.experiment_name ?? launchedConfig?.name;
   const suiteId = experimentDetail?.suite_id;
 
   const pageTitle = suiteId
@@ -196,9 +284,10 @@ export const ExperimentDetailPage: React.FC = () => {
       history.push({
         pathname: location.pathname,
         search: search ? `?${search}` : '',
+        state: location.state,
       });
     },
-    [history, location.pathname, location.search]
+    [history, location.pathname, location.search, location.state]
   );
 
   const setOpenDatasetId = useCallback(
@@ -216,19 +305,6 @@ export const ExperimentDetailPage: React.FC = () => {
     [updateSearchParams]
   );
 
-  const setSelectedExample = useCallback(
-    (exampleId: string | null) => {
-      updateSearchParams((params) => {
-        if (exampleId) {
-          params.set('example_id', exampleId);
-        } else {
-          params.delete('example_id');
-        }
-      });
-    },
-    [updateSearchParams]
-  );
-
   const setSelectedTrace = useCallback(
     (traceId: string | null, exampleId?: string) => {
       updateSearchParams((params) => {
@@ -236,14 +312,29 @@ export const ExperimentDetailPage: React.FC = () => {
           params.set('trace_id', traceId);
           if (exampleId) {
             params.set('example_id', exampleId);
+          } else {
+            params.delete('example_id');
           }
         } else {
           params.delete('trace_id');
+          params.delete('example_id');
         }
       });
     },
     [updateSearchParams]
   );
+
+  const { data: datasetsData } = useDatasets({ perPage: MAX_DATASETS_FOR_EXISTENCE_CHECK });
+
+  // A null set means existence is undetermined (still loading, or there are more
+  // datasets than we fetched), in which case we keep the link to avoid rendering
+  // a false "(deleted)" label.
+  const existingDatasetIds = useMemo(() => {
+    if (!datasetsData || datasetsData.total > datasetsData.datasets.length) {
+      return null;
+    }
+    return new Set(datasetsData.datasets.map((dataset) => dataset.id));
+  }, [datasetsData]);
 
   const datasetStatsGroups = useMemo(() => {
     const groupedStats = new Map<string, DatasetStatsGroup>();
@@ -268,6 +359,30 @@ export const ExperimentDetailPage: React.FC = () => {
     return Array.from(groupedStats.values()).sort((a, b) =>
       a.datasetName.localeCompare(b.datasetName)
     );
+  }, [experimentDetail?.stats]);
+
+  // Live progress derived from the scores already aggregated in Elasticsearch —
+  // the same source the results table streams from. The workflow step's own
+  // counters advance only per batch (and read 0 during a single in-flight batch),
+  // so we use these to floor the run-progress line and keep it consistent with
+  // the results shown below it.
+  const streamedProgress = useMemo(() => {
+    const stats = experimentDetail?.stats;
+    if (!stats || stats.length === 0) {
+      return undefined;
+    }
+    const esScoresIngested = stats.reduce((sum, stat) => sum + (stat.stats.count ?? 0), 0);
+    const exampleCountByDataset = new Map<string, number>();
+    for (const stat of stats) {
+      if (!exampleCountByDataset.has(stat.dataset_id)) {
+        exampleCountByDataset.set(stat.dataset_id, stat.example_count ?? 0);
+      }
+    }
+    const esExamplesDone = Array.from(exampleCountByDataset.values()).reduce(
+      (sum, value) => sum + value,
+      0
+    );
+    return { scoresIngested: esScoresIngested, examplesDone: esExamplesDone };
   }, [experimentDetail?.stats]);
 
   const statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>> = useMemo(
@@ -312,7 +427,7 @@ export const ExperimentDetailPage: React.FC = () => {
     []
   );
 
-  if (experimentLoading) {
+  if (experimentLoading && !isLaunching) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiLoadingSpinner size="xl" />
@@ -320,9 +435,10 @@ export const ExperimentDetailPage: React.FC = () => {
     );
   }
 
-  if (experimentError) {
-    const isNotFound =
-      isHttpFetchError(experimentError) && experimentError.response?.status === 404;
+  const isNotFound = isHttpFetchError(experimentError) && experimentError.response?.status === 404;
+  const showLaunchView = isLaunching && !experimentDetail;
+
+  if (experimentError && !showLaunchView) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
@@ -355,6 +471,15 @@ export const ExperimentDetailPage: React.FC = () => {
           <h2>{pageTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
+
+        {/* While launching, stand in for the not-yet-existent experiment document.
+        Dropped once the real detail loads so it doesn't duplicate the stat cards below. */}
+        {showLaunchView && launchedConfig && (
+          <>
+            <LaunchedConfigSummary config={launchedConfig} />
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {experimentDetail && (
           <>
@@ -440,28 +565,83 @@ export const ExperimentDetailPage: React.FC = () => {
           </>
         )}
 
-        <EuiText size="s">
-          <h3>{i18n.SECTION_DATASETS}</h3>
-        </EuiText>
-        <EuiSpacer size="m" />
-        {datasetStatsGroups.map((group) => (
-          <DatasetStatsAccordion
-            key={group.datasetId}
-            experimentId={experimentId}
-            executionId={executionId}
-            group={group}
-            statsColumns={statsColumns}
-            experimentLoading={experimentLoading}
-            isOpen={openDatasetId === group.datasetId}
-            selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
-            onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
-            onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
-            onDatasetToggle={(targetDatasetId, nextIsOpen) =>
-              setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
-            }
-            onExampleClick={(exampleId) => setSelectedExample(exampleId)}
-          />
-        ))}
+        {isLaunching && (
+          <>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <h3>{i18n.SECTION_RUN_PROGRESS}</h3>
+                </EuiText>
+              </EuiFlexItem>
+              {runSettled && launchedRequest && (
+                <EuiFlexItem grow={false}>
+                  <SaveAsWorkflowButton request={launchedRequest} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <WorkflowRunProgress executions={workflowExecutions} progressFloor={streamedProgress} />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {showLaunchView ? (
+          runSettled && !anyScoresIngested ? (
+            <EuiEmptyPrompt
+              color="warning"
+              iconType="warning"
+              title={<h2>{i18n.EXPERIMENT_NO_RESULTS_TITLE}</h2>}
+              body={<p>{i18n.EXPERIMENT_NO_RESULTS_BODY}</p>}
+              actions={[
+                <EuiButton onClick={() => history.push('/')}>{i18n.BACK_TO_EXPERIMENTS}</EuiButton>,
+              ]}
+            />
+          ) : anyScoresIngested ? (
+            // Scores landed but the experiment document isn't fetched yet
+            <EuiEmptyPrompt
+              color="subdued"
+              icon={<EuiLoadingSpinner size="xl" />}
+              title={<h2>{i18n.EXPERIMENT_LOADING_RESULTS_TITLE}</h2>}
+              body={<p>{i18n.EXPERIMENT_LOADING_RESULTS_BODY}</p>}
+            />
+          ) : (
+            <EuiEmptyPrompt
+              color="subdued"
+              icon={<EuiLoadingSpinner size="xl" />}
+              title={<h2>{i18n.EXPERIMENT_PREPARING_TITLE}</h2>}
+              body={<p>{i18n.EXPERIMENT_PREPARING_BODY}</p>}
+            />
+          )
+        ) : (
+          experimentDetail && (
+            <>
+              <EuiText size="s">
+                <h3>{i18n.SECTION_DATASETS}</h3>
+              </EuiText>
+              <EuiSpacer size="m" />
+              {datasetStatsGroups.map((group) => (
+                <DatasetStatsAccordion
+                  key={group.datasetId}
+                  experimentId={experimentId}
+                  executionId={executionId}
+                  group={group}
+                  statsColumns={statsColumns}
+                  experimentLoading={experimentLoading}
+                  isOpen={openDatasetId === group.datasetId}
+                  isRunning={runInProgress}
+                  datasetExists={
+                    existingDatasetIds ? existingDatasetIds.has(group.datasetId) : true
+                  }
+                  selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
+                  onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
+                  onDatasetToggle={(targetDatasetId, nextIsOpen) =>
+                    setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
+                  }
+                />
+              ))}
+            </>
+          )
+        )}
       </EuiPageSection>
 
       {selectedTraceId && (

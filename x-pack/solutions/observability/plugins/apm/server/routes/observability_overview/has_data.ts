@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { type ObservabilityOverviewHasDataResponse } from '@kbn/apm-api-shared';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface HasDataResponse {
-  hasData: boolean;
-  indices: Readonly<{
-    error: string;
-    onboarding: string;
-    span: string;
-    transaction: string;
-    metric: string;
-  }>;
-}
 
 export async function getHasData({
   indices,
@@ -26,7 +16,7 @@ export async function getHasData({
 }: {
   indices: APMIndices;
   apmEventClient: APMEventClient;
-}): Promise<HasDataResponse> {
+}): Promise<ObservabilityOverviewHasDataResponse> {
   try {
     const params = {
       apm: {

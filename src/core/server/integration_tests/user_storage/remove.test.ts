@@ -25,6 +25,9 @@ import {
 import type { UserStorageDefinition, IUserStorageClient } from '@kbn/core-user-storage-common';
 
 const PROFILE_UID = 'integration-test-profile-uid';
+// space-scoped keys use {namespace}:{profileUid} as the SO document id;
+// namespace undefined → 'default', matching namespaceToString() in the server client.
+const SPACE_DOC_ID = `default:${PROFILE_UID}`;
 
 describe('UserStorage remove() / null-merge behavior', () => {
   let servers: TestUtils;
@@ -84,7 +87,7 @@ describe('UserStorage remove() / null-merge behavior', () => {
 
     const doc = await savedObjectsClient.get<{ data: Record<string, unknown> }>(
       USER_STORAGE_SO_TYPE,
-      PROFILE_UID
+      SPACE_DOC_ID
     );
     expect(doc.attributes.data).toHaveProperty('test:string_a', null);
   });

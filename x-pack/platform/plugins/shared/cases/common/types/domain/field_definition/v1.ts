@@ -33,12 +33,26 @@ export const FieldDefinitionSchema = z.object({
    * Optional human-readable description of the field's purpose
    */
   description: z.string().optional(),
+
+  /**
+   * When true, this field is rendered in every case regardless of which template
+   * (if any) the case uses. Values are stored in extended_fields alongside
+   * template-specific fields.
+   */
+  isGlobal: z.boolean().optional(),
+
+  /**
+   * The position of a global field in the case details view. It is assigned by
+   * the server and changed from the Field Library reorder controls.
+   */
+  displayOrder: z.number().int().nonnegative().optional(),
 });
 
 export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;
 
 export const CreateFieldDefinitionInputSchema = FieldDefinitionSchema.omit({
   fieldDefinitionId: true,
+  displayOrder: true,
 });
 
 export type CreateFieldDefinitionInput = z.infer<typeof CreateFieldDefinitionInputSchema>;

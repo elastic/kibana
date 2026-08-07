@@ -80,7 +80,14 @@ export class EMSFileSelect extends Component<Props, State> {
 
   _renderSelect() {
     if (!this.state.hasLoadedOptions) {
-      return <EuiSelect isLoading />;
+      return (
+        <EuiSelect
+          isLoading
+          aria-label={i18n.translate('xpack.maps.emsFileSelect.loadingAriaLabel', {
+            defaultMessage: 'Loading EMS boundaries',
+          })}
+        />
+      );
     }
 
     const selectedOption = this.state.emsFileOptions.find(
@@ -91,6 +98,9 @@ export class EMSFileSelect extends Component<Props, State> {
 
     return (
       <EuiComboBox
+        aria-label={i18n.translate('xpack.maps.emsFileSelect.comboBoxAriaLabel', {
+          defaultMessage: 'Select EMS boundaries',
+        })}
         placeholder={i18n.translate('xpack.maps.emsFileSelect.selectPlaceholder', {
           defaultMessage: 'Select EMS boundaries',
         })}

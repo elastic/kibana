@@ -19,7 +19,7 @@ client.indices.create(
     index="my-vectors",
     mappings={
         "properties": {
-            "vector": {"type": "dense_vector", "dims": 384, "similarity": "cosine"},
+            "vector": {"type": "dense_vector"},
             "text": {"type": "text"},
         }
     },
@@ -43,7 +43,7 @@ await client.indices.create({
   index: "my-vectors",
   mappings: {
     properties: {
-      vector: { type: "dense_vector", dims: 384, similarity: "cosine" },
+      vector: { type: "dense_vector" },
       text: { type: "text" },
     },
   },
@@ -72,7 +72,7 @@ ElasticsearchClient client = new ElasticsearchClient(
 client.indices().create(c -> c
     .index("my-vectors")
     .mappings(m -> m
-        .properties("vector", p -> p.denseVector(d -> d.dims(384).similarity("cosine")))
+        .properties("vector", p -> p.denseVector(d -> d))
         .properties("text", p -> p.text(t -> t))
     )
 );
@@ -101,7 +101,7 @@ func main() {
         es.Indices.Create.WithBody(strings.NewReader(\`{
             "mappings": {
                 "properties": {
-                    "vector": { "type": "dense_vector", "dims": 384, "similarity": "cosine" },
+                    "vector": { "type": "dense_vector" },
                     "text":   { "type": "text" }
                 }
             }
@@ -129,7 +129,7 @@ client.indices()
     .body(json!({
         "mappings": {
             "properties": {
-                "vector": { "type": "dense_vector", "dims": 384, "similarity": "cosine" },
+                "vector": { "type": "dense_vector" },
                 "text":   { "type": "text" }
             }
         }
@@ -152,7 +152,7 @@ var client = new ElasticsearchClient(settings);
 await client.Indices.CreateAsync("my-vectors", c => c
     .Mappings(m => m
         .Properties(p => p
-            .DenseVector("vector", v => v.Dims(384).Similarity("cosine"))
+            .DenseVector("vector", v => v)
             .Text("text")
         )
     )
@@ -170,8 +170,6 @@ export const HAVE_VECTORS_SEARCH_SNIPPETS: SnippetSet = {
     knn={
         "field": "vector",
         "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
-        "k": 10,
-        "num_candidates": 100,
     },
 )
 print(result["hits"]["hits"])`,
@@ -180,8 +178,6 @@ print(result["hits"]["hits"])`,
   knn: {
     field: "vector",
     query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
-    k: 10,
-    num_candidates: 100,
   },
 });
 console.log(result.hits.hits);`,
@@ -190,8 +186,6 @@ console.log(result.hits.hits);`,
     .knn(k -> k
         .field("vector")
         .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
-        .k(10)
-        .numCandidates(100)
     ),
     JsonData.class
 );
@@ -201,9 +195,7 @@ result.hits().hits().forEach(h -> System.out.println(h.source()));`,
     es.Search.WithBody(strings.NewReader(\`{
         "knn": {
             "field": "vector",
-            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
-            "k": 10,
-            "num_candidates": 100
+            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
         }
     }\`)),
 )
@@ -214,9 +206,7 @@ let response = client.search(SearchParts::Index(&["my-vectors"]))
     .body(json!({
         "knn": {
             "field": "vector",
-            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
-            "k": 10,
-            "num_candidates": 100
+            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
         }
     }))
     .send().await?;
@@ -228,8 +218,139 @@ println!("{:#?}", body["hits"]["hits"]);`,
     .Knn(k => k
         .Field("vector")
         .QueryVector(new[] { 0.10f, -0.02f, 0.91f, 0.18f, 0.60f })
-        .k(10)
-        .NumCandidates(100)
+    )
+);
+
+foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+};
+
+// TODO: placeholder examples — replace with the final hybrid search examples
+export const HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS: SnippetSet = {
+  python: `result = client.search(
+    index="my-vectors",
+    retriever={
+        "rrf": {
+            "retrievers": [
+                {
+                    "knn": {
+                        "field": "vector",
+                        "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60],
+                    }
+                },
+                {
+                    "standard": {
+                        "query": {"match": {"text": "what is elasticsearch?"}}
+                    }
+                },
+            ]
+        }
+    },
+)
+print(result["hits"]["hits"])`,
+  javascript: `const result = await client.search({
+  index: "my-vectors",
+  retriever: {
+    rrf: {
+      retrievers: [
+        {
+          knn: {
+            field: "vector",
+            query_vector: [0.10, -0.02, 0.91, 0.18, 0.60],
+          },
+        },
+        {
+          standard: {
+            query: { match: { text: "what is elasticsearch?" } },
+          },
+        },
+      ],
+    },
+  },
+});
+console.log(result.hits.hits);`,
+  java: `SearchResponse<JsonData> result = client.search(s -> s
+    .index("my-vectors")
+    .retriever(r -> r
+        .rrf(rrf -> rrf
+            .retrievers(k -> k
+                .knn(knn -> knn
+                    .field("vector")
+                    .queryVector(List.of(0.10f, -0.02f, 0.91f, 0.18f, 0.60f))
+                )
+            )
+            .retrievers(st -> st
+                .standard(std -> std
+                    .query(q -> q.match(m -> m.field("text").query("what is elasticsearch?")))
+                )
+            )
+        )
+    ),
+    JsonData.class
+);
+result.hits().hits().forEach(h -> System.out.println(h.source()));`,
+  go: `res, _ := es.Search(
+    es.Search.WithIndex("my-vectors"),
+    es.Search.WithBody(strings.NewReader(\`{
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "knn": {
+                            "field": "vector",
+                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }\`)),
+)
+defer res.Body.Close()`,
+  rust: `use elasticsearch::SearchParts;
+
+let response = client.search(SearchParts::Index(&["my-vectors"]))
+    .body(json!({
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "knn": {
+                            "field": "vector",
+                            "query_vector": [0.10, -0.02, 0.91, 0.18, 0.60]
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }))
+    .send().await?;
+
+let body = response.json::<serde_json::Value>().await?;
+println!("{:#?}", body["hits"]["hits"]);`,
+  csharp: `var response = await client.SearchAsync<object>(s => s
+    .Indices("my-vectors")
+    .Retriever(r => r
+        .Rrf(rrf => rrf
+            .Retrievers(
+                rt => rt.Knn(k => k
+                    .Field("vector")
+                    .QueryVector(new[] { 0.10f, -0.02f, 0.91f, 0.18f, 0.60f })
+                ),
+                rt => rt.Standard(st => st
+                    .Query(q => q.Match(m => m.Field("text").Query("what is elasticsearch?")))
+                )
+            )
+        )
     )
 );
 
@@ -400,6 +521,147 @@ println!("{:#?}", body["hits"]["hits"]);`,
         .Field("text")
         .Query("what is elasticsearch?")
     ))
+);
+
+foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
+};
+
+// TODO: placeholder examples — replace with the final hybrid search examples
+export const GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS: SnippetSet = {
+  python: `result = client.search(
+    index="my-vectors",
+    retriever={
+        "rrf": {
+            "retrievers": [
+                {
+                    "standard": {
+                        "query": {
+                            "semantic": {
+                                "field": "text",
+                                "query": "what is elasticsearch?",
+                            }
+                        }
+                    }
+                },
+                {
+                    "standard": {
+                        "query": {"match": {"text": "what is elasticsearch?"}}
+                    }
+                },
+            ]
+        }
+    },
+)
+print(result["hits"]["hits"])`,
+  javascript: `const result = await client.search({
+  index: "my-vectors",
+  retriever: {
+    rrf: {
+      retrievers: [
+        {
+          standard: {
+            query: {
+              semantic: { field: "text", query: "what is elasticsearch?" },
+            },
+          },
+        },
+        {
+          standard: {
+            query: { match: { text: "what is elasticsearch?" } },
+          },
+        },
+      ],
+    },
+  },
+});
+console.log(result.hits.hits);`,
+  java: `SearchResponse<JsonData> result = client.search(s -> s
+    .index("my-vectors")
+    .retriever(r -> r
+        .rrf(rrf -> rrf
+            .retrievers(sem -> sem
+                .standard(std -> std
+                    .query(q -> q.semantic(se -> se.field("text").query("what is elasticsearch?")))
+                )
+            )
+            .retrievers(lex -> lex
+                .standard(std -> std
+                    .query(q -> q.match(m -> m.field("text").query("what is elasticsearch?")))
+                )
+            )
+        )
+    ),
+    JsonData.class
+);
+result.hits().hits().forEach(h -> System.out.println(h.source()));`,
+  go: `res, _ := es.Search(
+    es.Search.WithIndex("my-vectors"),
+    es.Search.WithBody(strings.NewReader(\`{
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "standard": {
+                            "query": {
+                                "semantic": { "field": "text", "query": "what is elasticsearch?" }
+                            }
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }\`)),
+)
+defer res.Body.Close()`,
+  rust: `use elasticsearch::SearchParts;
+
+let response = client.search(SearchParts::Index(&["my-vectors"]))
+    .body(json!({
+        "retriever": {
+            "rrf": {
+                "retrievers": [
+                    {
+                        "standard": {
+                            "query": {
+                                "semantic": { "field": "text", "query": "what is elasticsearch?" }
+                            }
+                        }
+                    },
+                    {
+                        "standard": {
+                            "query": { "match": { "text": "what is elasticsearch?" } }
+                        }
+                    }
+                ]
+            }
+        }
+    }))
+    .send().await?;
+
+let body = response.json::<serde_json::Value>().await?;
+println!("{:#?}", body["hits"]["hits"]);`,
+  csharp: `var response = await client.SearchAsync<object>(s => s
+    .Indices("my-vectors")
+    .Retriever(r => r
+        .Rrf(rrf => rrf
+            .Retrievers(
+                rt => rt.Standard(st => st
+                    .Query(q => q.Semantic(sem => sem
+                        .Field("text")
+                        .Query("what is elasticsearch?")
+                    ))
+                ),
+                rt => rt.Standard(st => st
+                    .Query(q => q.Match(m => m.Field("text").Query("what is elasticsearch?")))
+                )
+            )
+        )
+    )
 );
 
 foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,

@@ -36,7 +36,6 @@ export type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'metrics'
     | 'nodes'
     | 'infrastructure'
-    | 'service-map'
     | 'logs'
     | 'alerts'
     | 'profiling'
@@ -51,7 +50,6 @@ const apmOrderedTabs: Array<Tab['key']> = [
   'errors',
   'metrics',
   'infrastructure',
-  'service-map',
   'logs',
   'alerts',
   'profiling',
@@ -172,16 +170,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         agentName,
         serverlessType,
         isInfraTabAvailable,
-      }),
-    },
-    {
-      key: 'service-map',
-      href: router.link('/services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-        defaultMessage: 'Service map',
       }),
     },
     {

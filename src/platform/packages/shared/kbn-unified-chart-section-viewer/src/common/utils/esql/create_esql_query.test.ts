@@ -627,4 +627,74 @@ TS edge-case-gauge-to-counter
       );
     });
   });
+
+  describe('gridSettings overrides', () => {
+    it('applies a custom simple aggregation for counter instruments', () => {
+      const query = createESQLQuery({
+        metricItem: mockCounterMetric,
+        gridSettings: {
+          counterAggregation: 'max',
+          gaugeAggregation: 'avg',
+          histogramPercentile: 'p95',
+        },
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS MAX(RATE(requests.count)) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('applies a custom simple aggregation for gauge instruments', () => {
+      const query = createESQLQuery({
+        metricItem: { ...mockMetric, metricTypes: ['gauge'] },
+        gridSettings: {
+          counterAggregation: 'sum',
+          gaugeAggregation: 'sum',
+          histogramPercentile: 'p95',
+        },
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS SUM(cpu.usage) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('applies a custom percentile for legacy histogram instruments', () => {
+      const query = createESQLQuery({
+        metricItem: mockLegacyHistogramMetric,
+        gridSettings: {
+          counterAggregation: 'sum',
+          gaugeAggregation: 'avg',
+          histogramPercentile: 'p90',
+        },
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 90) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('applies a custom percentile for tdigest instruments', () => {
+      const query = createESQLQuery({
+        metricItem: mockTdigestMetric,
+        gridSettings: {
+          counterAggregation: 'sum',
+          gaugeAggregation: 'avg',
+          histogramPercentile: 'p50',
+        },
+      });
+      expect(query).toBe(
+        `
+TS metrics-*
+  | STATS PERCENTILE(http.request.duration, 50) BY TBUCKET(100)
+`.trim()
+      );
+    });
+  });
 });

@@ -63,6 +63,19 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.aggregations).toBeDefined();
     });
 
+    it('should fetch attack alerts by ids', async () => {
+      const attackId = '40980216-cf98-4447-af57-894c0e7c39b4';
+      const { body } = await supertest
+        .post(DETECTION_ENGINE_ATTACKS_SEARCH_URL)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
+        .send({ query: { ids: { values: [attackId] } } })
+        .expect(200);
+
+      expect(body.hits.total.value).toEqual(1);
+      expect(body.hits.hits).toEqual([expectedAttackAlerts[0]]);
+    });
+
     it('should return 400 when the request body is empty', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_ATTACKS_SEARCH_URL)

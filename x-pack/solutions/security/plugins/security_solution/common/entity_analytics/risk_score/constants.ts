@@ -13,3 +13,6 @@ export const PUBLIC_RISK_SCORE_URL = '/api/risk_score' as const;
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview` as const;
 export const RISK_SCORE_ENTITY_CALCULATION_URL =
   `${INTERNAL_RISK_SCORE_URL}/calculation/entity` as const;
+export const RISK_SCORE_ENTITY_CALCULATION_V2_URL =
+  `${INTERNAL_RISK_SCORE_URL}/calculation/entity_v2` as const;
+export const RISK_SCORE_HISTORY_URL = `${PUBLIC_RISK_SCORE_URL}/history` as const;

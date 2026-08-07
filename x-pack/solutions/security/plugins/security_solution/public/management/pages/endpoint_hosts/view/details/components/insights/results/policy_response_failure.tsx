@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import type { SecurityWorkflowInsight } from '../../../../../../../../../common/endpoint/types/workflow_insights';
+import { toExternalDocLink } from '../../../../../../../../../common/endpoint/utils/external_doc_link';
 import { WORKFLOW_INSIGHTS } from '../../../../translations';
 
 interface WorkflowInsightsPolicyResponseFailureResultProps {
@@ -37,6 +38,8 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     120
   );
 
+  const safeLink = toExternalDocLink(insight.remediation.link);
+
   return (
     <EuiPanel
       paddingSize="m"
@@ -47,7 +50,13 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
     >
       <EuiFlexGroup alignItems={'flexStart'} gutterSize={'m'}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="globe" size="l" color="warning" css={{ marginTop: '18px' }} />
+          <EuiIcon
+            type="globe"
+            size="l"
+            color="warning"
+            aria-hidden={true}
+            css={{ marginTop: '18px' }}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -72,10 +81,11 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
             data-test-subj={`workflowInsightsResult-${index}-remediation`}
             aria-label={ariaLabel}
             iconType="external"
-            href={insight.remediation.link}
+            href={safeLink}
             target="_blank"
+            rel="noopener noreferrer"
             css={{
-              visibility: insight.remediation.link ? 'visible' : 'hidden',
+              visibility: safeLink ? 'visible' : 'hidden',
               marginTop: '10px',
             }}
           >

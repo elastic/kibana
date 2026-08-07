@@ -80,6 +80,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible={false}
       />
     );
 
@@ -128,6 +129,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible={false}
       />
     );
 
@@ -180,6 +182,7 @@ describe('ManageSpacePage', () => {
         allowFeatureVisibility
         allowSolutionVisibility
         eventTracker={eventTracker}
+        isCpsTierEligible={false}
       />
     );
 
@@ -210,6 +213,7 @@ describe('ManageSpacePage', () => {
         allowFeatureVisibility
         allowSolutionVisibility={false}
         eventTracker={eventTracker}
+        isCpsTierEligible={false}
       />
     );
 
@@ -240,6 +244,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible={false}
       />
     );
 
@@ -274,6 +279,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility={false}
         allowSolutionVisibility
+        isCpsTierEligible={false}
       />
     );
 
@@ -307,6 +313,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible={false}
       />
     );
 
@@ -337,6 +344,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible
       />
     );
 
@@ -347,7 +355,7 @@ describe('ManageSpacePage', () => {
     expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
   });
 
-  it('shows CustomizeCps component when project_routing.manage_space_default capability is true', async () => {
+  it('shows CustomizeCps component when project_routing.manage_space_default capability is true and project is on a CPS-eligible tier', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
@@ -368,6 +376,7 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible
       />
     );
 
@@ -399,6 +408,39 @@ describe('ManageSpacePage', () => {
         eventTracker={eventTracker}
         allowFeatureVisibility
         allowSolutionVisibility
+        isCpsTierEligible
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('hides CustomizeCps component when project_routing.manage_space_default capability is true but project is not on a CPS-eligible tier', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    renderWithIntl(
+      <CreateSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+          project_routing: { manage_space_default: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+        isCpsTierEligible={false}
       />
     );
 
@@ -465,6 +507,7 @@ describe('ManageSpacePage', () => {
           eventTracker={eventTracker}
           allowFeatureVisibility
           allowSolutionVisibility
+          isCpsTierEligible
         />
       </KibanaContextProvider>
     );

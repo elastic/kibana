@@ -17,13 +17,16 @@ import type {
   ServiceNowSecretConfigurationType,
   ServiceNowPublicConfigurationType,
 } from '@kbn/connector-schemas/servicenow';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,
   ResponseError,
   ErrorMessageFormat,
+  RequestContext,
 } from './types';
+import { ServiceNowApiError } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
 
@@ -92,15 +95,59 @@ const createErrorMessage = (error: ResponseError): ErrorMessageFormat => {
   return { error: '', reason: '' };
 };
 
-export const addServiceMessageToError = (error: ResponseError, message: string): AxiosError => {
+export const isServiceNowApiError = (err: unknown): err is ServiceNowApiError =>
+  err instanceof ServiceNowApiError;
+
+const isMaxContentLengthError = (error: AxiosError | Error): boolean => {
+  if (!('isAxiosError' in error) || !error.isAxiosError) {
+    return false;
+  }
+  if (error.code !== 'ERR_BAD_RESPONSE') {
+    return false;
+  }
+
+  // Axios internal error message format - no typed error code is exposed for this case,
+  // so matching the message is the only reliable detection method.
+  return typeof error.message === 'string' && error.message.includes('maxContentLength');
+};
+export const addServiceMessageToError = (
+  error: ResponseError,
+  message: string,
+  context?: RequestContext
+): AxiosError => {
   const { error: errorPart, reason } = createErrorMessage(error);
 
   const parts = [`${message}.`, 'Error:', errorPart];
   if (reason) parts.push('Reason:', reason);
 
+  if (context) {
+    const status =
+      error.response?.status ??
+      (isServiceNowApiError(error) ? error.status : undefined) ??
+      error.code ??
+      'none';
+    parts.push(`[status=${status}]`);
+    if (context.method) {
+      parts.push(`[method=${context.method}]`);
+    }
+    parts.push(`[endpoint=${context.endpoint}]`);
+  }
+
   error.message = getErrorMessage(i18n.SERVICENOW, parts.join(' '));
+  if (isMaxContentLengthError(error)) {
+    createTaskRunError(error, TaskErrorSource.USER);
+  }
   return error;
 };
+
+export const createServiceNowApiError = (
+  message: string,
+  options: { status: number; body?: unknown }
+): ServiceNowApiError =>
+  createTaskRunError(
+    new ServiceNowApiError(message, options),
+    TaskErrorSource.USER
+  ) as ServiceNowApiError;
 
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null) {

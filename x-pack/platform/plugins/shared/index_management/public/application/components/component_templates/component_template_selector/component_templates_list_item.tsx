@@ -12,14 +12,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiLink,
+  EuiButtonEmpty,
   EuiIcon,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import type { ComponentTemplateListItem } from '../../../../../common';
 import { TemplateContentIndicator } from '../../shared';
+
+const frozenOrDeletePhaseDisabledTooltip = i18n.translate(
+  'xpack.idxMgmt.componentTemplatesListItem.frozenOrDeletePhaseDisabledTooltip',
+  {
+    defaultMessage:
+      'This component template is only compatible with index templates that create a data stream.',
+  }
+);
 
 interface Action {
   label: string;
@@ -32,6 +42,7 @@ const useStyles = ({ isSelected }: { isSelected: boolean }) => {
 
   return {
     listItem: css`
+      width: 100%;
       background-color: ${euiTheme.colors.body};
       padding: ${euiTheme.size.m};
       border-bottom: ${euiTheme.border.thin};
@@ -52,6 +63,11 @@ const useStyles = ({ isSelected }: { isSelected: boolean }) => {
         }
       `}
     `,
+    nameButton: css`
+      block-size: auto;
+      min-block-size: 0;
+      line-height: ${euiTheme.font.lineHeightMultiplier};
+    `,
     contentIndicator: css`
       flex-direction: row;
     `,
@@ -70,6 +86,7 @@ export interface Props {
   onViewDetail: (component: ComponentTemplateListItem) => void;
   actions?: Action[];
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  createsDataStream?: boolean;
 }
 
 export const ComponentTemplatesListItem = ({
@@ -78,16 +95,19 @@ export const ComponentTemplatesListItem = ({
   actions,
   isSelected = false,
   dragHandleProps,
+  createsDataStream = true,
 }: Props) => {
   const hasActions = actions && actions.length > 0;
   const isSelectedValue = typeof isSelected === 'function' ? isSelected(component) : isSelected;
   const isDraggable = Boolean(dragHandleProps);
+  const canBeSelected = createsDataStream || !component.hasFrozenOrDeletePhase;
+  const isDisabled = !canBeSelected || isSelectedValue;
   const styles = useStyles({ isSelected: isSelectedValue });
 
-  return (
+  const itemContent = (
     <div css={styles.listItem} data-test-subj="item">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center">
             {isDraggable && (
               <EuiFlexItem>
@@ -97,24 +117,30 @@ export const ComponentTemplatesListItem = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} data-test-subj="name">
-              {/* <EuiText>{component.name}</EuiText> */}
-              <EuiLink onClick={() => onViewDetail(component)} disabled={isSelectedValue}>
+              <EuiButtonEmpty
+                flush="both"
+                color="primary"
+                size="s"
+                css={styles.nameButton}
+                onClick={() => onViewDetail(component)}
+                disabled={isDisabled}
+              >
                 {component.name}
-              </EuiLink>
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={styles.contentIndicator}>
               <TemplateContentIndicator
                 settings={component.hasSettings}
                 mappings={component.hasMappings}
                 aliases={component.hasAliases}
-                isDisabled={isSelectedValue}
+                isDisabled={isDisabled}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
 
         {/* Actions */}
-        {hasActions && !isSelectedValue && (
+        {hasActions && !isSelectedValue && canBeSelected && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs">
               {actions!.map((action, i) => (
@@ -140,4 +166,21 @@ export const ComponentTemplatesListItem = ({
       )}
     </div>
   );
+
+  if (!canBeSelected) {
+    return (
+      <EuiToolTip
+        content={frozenOrDeletePhaseDisabledTooltip}
+        position="left"
+        anchorProps={{
+          css: css({ display: 'block' }),
+          'data-test-subj': 'disabledReasonTooltip',
+        }}
+      >
+        {itemContent}
+      </EuiToolTip>
+    );
+  }
+
+  return itemContent;
 };

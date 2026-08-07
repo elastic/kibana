@@ -295,6 +295,16 @@ export function useContextSwitcher(): ReactNode {
   return useObservable(content$, null);
 }
 
+/**
+ * Returns the current project picker content set via
+ * `chrome.next.projectPicker.set()`, or null if not set.
+ */
+export function useProjectPicker(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.projectPicker.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
@@ -305,4 +315,14 @@ export function useHasInlineAppHeader(): boolean {
 export function useInternalLegacyActionMenu(): MountPoint | undefined {
   const { legacyActionMenu$ } = useChromeService().componentDeps;
   return useObservable(legacyActionMenu$, undefined);
+}
+
+/**
+ * Returns the current user menu content set via
+ * `chrome.next.userMenu.set()`, or null if not set.
+ */
+export function useUserMenu(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
 }

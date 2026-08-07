@@ -6,10 +6,11 @@
  */
 
 import path from 'node:path';
-import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { unflattenObject } from '@kbn/object-utils';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -54,42 +55,44 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
-            query: buildRouteValidationWithZod(querySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
+            query: buildStrictRouteValidationWithZod(querySchema),
           },
         },
         options: {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_bulk_update.yaml'),
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { logger, crudClient } = entityStoreCtx;
+      wrapMiddlewares<never, z.infer<typeof querySchema>, z.infer<typeof bodySchema>>(
+        async (ctx, req, res): Promise<IKibanaResponse> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { logger, crudClient } = entityStoreCtx;
 
-        logger.debug('CRUD Bulk Update api called');
+          logger.debug('CRUD Bulk Update api called');
 
-        try {
-          const errors = await crudClient.bulkUpdateEntity({
-            objects: req.body.entities,
-            force: req.query.force,
-          });
-          return res.ok({
-            body: {
-              ok: true,
-              errors,
-            },
-          });
-        } catch (error) {
-          if (error instanceof EntityStoreNotInstalledError) {
-            return res.badRequest({ body: error });
+          try {
+            const errors = await crudClient.bulkUpdateEntity({
+              objects: req.body.entities,
+              force: req.query.force,
+            });
+            return res.ok({
+              body: {
+                ok: true,
+                errors,
+              },
+            });
+          } catch (error) {
+            if (error instanceof EntityStoreNotInstalledError) {
+              return res.badRequest({ body: error });
+            }
+            if (error instanceof BadCRUDRequestError) {
+              return res.badRequest({ body: error });
+            }
+
+            logger.error(error);
+            throw error;
           }
-          if (error instanceof BadCRUDRequestError) {
-            return res.badRequest({ body: error });
-          }
-
-          logger.error(error);
-          throw error;
         }
-      })
+      )
     );
 }

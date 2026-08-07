@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
@@ -39,7 +40,7 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
-import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
+import type { ServiceMapEmbeddableState } from '../../../common/embeddable/service_map_embeddable_schema';
 import type { EmbeddableDeps } from '../types';
 import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
@@ -66,7 +67,6 @@ import {
 interface KueryInputProps {
   kuery: string;
   onChange: (kuery: string) => void;
-  /** Fired on submit / auto-submit (debounced), not on every keystroke. */
   onSubmit?: (kuery: string) => void;
   deps: EmbeddableDeps;
 }
@@ -185,6 +185,9 @@ function getEnvironmentOptions(environments: string[]) {
 const DEFAULT_RANGE_FROM = 'now-15m';
 const DEFAULT_RANGE_TO = 'now';
 
+/** Debounce window for applying the KQL draft to the live preview + filter counts. */
+const KUERY_PREVIEW_DEBOUNCE_MS = 300;
+
 /** Flex shell so header/body/footer lay out inside Core flyouts without changing `OverlayMountWrapper`. */
 const serviceMapFlyoutShellStyle: React.CSSProperties = {
   display: 'flex',
@@ -266,10 +269,20 @@ export function ServiceMapEditorFlyout({
     initialState?.environment ?? ENVIRONMENT_ALL.value
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
-  // KQL applied to the live preview — only updated on submit / auto-submit (not per
-  // keystroke) so typing doesn't trigger a service-map refetch on every character.
+  // Debounced KQL applied to the preview so the map doesn't refetch on every keystroke.
   const [previewKuery, setPreviewKuery] = useState(initialState?.kuery ?? '');
-  const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
+  useDebounce(() => setPreviewKuery(kuery), KUERY_PREVIEW_DEBOUNCE_MS, [kuery]);
+  const [serviceName, setServiceName] = useState(() => {
+    // Prefer multi-highlight when both are present (mutually exclusive with service_name).
+    const highlights = initialState?.highlighted_service_names ?? [];
+    if (highlights.length > 0) {
+      return '';
+    }
+    return initialState?.service_name ?? '';
+  });
+  const [highlightedServiceNames, setHighlightedServiceNames] = useState<string[]>(
+    initialState?.highlighted_service_names ?? []
+  );
   const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
     initialState?.sync_with_dashboard_filters ?? false
   );
@@ -282,8 +295,6 @@ export function ServiceMapEditorFlyout({
   const [connectionFilter, setConnectionFilter] = useState<ConnectionFilter[]>(
     initialState?.connection_filter ?? []
   );
-  // Schema types the array as a string-literal union; cast at the boundary into the enum type the
-  // graph + filter helpers consume. The literal values are identical to the enum values.
   const [anomalySeverityFilter, setAnomalySeverityFilter] = useState<ML_ANOMALY_SEVERITY[]>(
     (initialState?.anomaly_severity_filter as ML_ANOMALY_SEVERITY[] | undefined) ?? []
   );
@@ -293,7 +304,14 @@ export function ServiceMapEditorFlyout({
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
-  >(serviceName ? [{ value: serviceName, label: serviceName }] : []);
+  >(() => {
+    const fromHighlight = initialState?.highlighted_service_names ?? [];
+    if (fromHighlight.length > 0) {
+      return fromHighlight.map((name) => ({ value: name, label: name }));
+    }
+    const single = initialState?.service_name;
+    return single ? [{ value: single, label: single }] : [];
+  });
   const [selectedEnvironmentOption, setSelectedEnvironmentOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([{ value: environment, label: getEnvironmentLabel(environment) }]);
@@ -340,13 +358,8 @@ export function ServiceMapEditorFlyout({
     [environmentTerms]
   );
 
-  // Filter (count) badges + disable-zero-count UX requires a live service-map fetch
-  // scoped to the user's current env / time / KQL / service-name. To avoid kicking that
-  // fetch on every flyout open (the user may never touch the filter rows), only mount
-  // the resolver after the user focuses any filter combobox — see `onFilterFocus`.
+  // Lazy-enable the filter-count fetch: start on focus, or immediately when filters are pre-selected.
   const [filterCountsEnabled, setFilterCountsEnabled] = useState<boolean>(
-    // Already-selected filters are a strong signal the user cares about counts; pre-warm
-    // the fetch so the badges are ready by the time they open a dropdown to change one.
     () =>
       alertStatusFilter.length > 0 ||
       sloStatusFilter.length > 0 ||
@@ -387,15 +400,20 @@ export function ServiceMapEditorFlyout({
   );
 
   const onServiceNameSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    if (changedOptions.length === 0) {
+    const names = changedOptions
+      .map((opt) => opt.value)
+      .filter((value): value is string => Boolean(value));
+    setSelectedServiceOption(names.map((name) => ({ value: name, label: name })));
+    if (names.length === 1) {
+      setServiceName(names[0]);
+      setHighlightedServiceNames([]);
+    } else if (names.length > 1) {
       setServiceName('');
-      setSelectedServiceOption([]);
-    } else if (changedOptions.length === 1 && changedOptions[0].value) {
-      setServiceName(changedOptions[0].value);
-      setSelectedServiceOption(changedOptions);
+      setHighlightedServiceNames(names);
+    } else {
+      setServiceName('');
+      setHighlightedServiceNames([]);
     }
-    setEnvironment(ENVIRONMENT_ALL.value);
-    setSelectedEnvironmentOption([ENVIRONMENT_ALL]);
   };
 
   const onServiceNameCreateOption = (searchValue: string) => {
@@ -403,8 +421,10 @@ export function ServiceMapEditorFlyout({
     if (!value) {
       return;
     }
-
-    onServiceNameSelect([{ value, label: value }]);
+    if (selectedServiceOption.some((opt) => opt.value === value)) {
+      return;
+    }
+    onServiceNameSelect([...selectedServiceOption, { value, label: value }]);
   };
 
   const onEnvironmentSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -419,8 +439,9 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kueryValue.trim() ? kueryValue : undefined,
       service_name: serviceName || undefined,
+      highlighted_service_names:
+        highlightedServiceNames.length > 1 ? highlightedServiceNames : undefined,
       sync_with_dashboard_filters: syncWithDashboardFilters,
-      // Empty arrays drop to undefined so they're omitted from the saved object payload.
       alert_status_filter: alertStatusFilter.length ? alertStatusFilter : undefined,
       slo_status_filter: sloStatusFilter.length ? sloStatusFilter : undefined,
       connection_filter: connectionFilter.length ? connectionFilter : undefined,
@@ -430,6 +451,7 @@ export function ServiceMapEditorFlyout({
     [
       environment,
       serviceName,
+      highlightedServiceNames,
       syncWithDashboardFilters,
       alertStatusFilter,
       sloStatusFilter,
@@ -439,19 +461,13 @@ export function ServiceMapEditorFlyout({
     ]
   );
 
-  // Tracks whether the flyout closed via Save, so the unmount cleanup knows whether to revert.
   const savedRef = useRef(false);
 
   const handleSave = useCallback(() => {
     savedRef.current = true;
-    // Use the current input text (not just the last-submitted preview) so unsubmitted KQL
-    // edits are still saved.
     onSave(buildState(kuery));
   }, [buildState, kuery, onSave]);
 
-  // Preview-until-save: push the in-progress state onto the panel live whenever a control
-  // changes (KQL only on submit, via `previewKuery`). Skip the initial mount so opening the
-  // flyout doesn't re-apply the unchanged state.
   const didApplyInitialRef = useRef(false);
   useEffect(() => {
     if (!didApplyInitialRef.current) {
@@ -461,8 +477,6 @@ export function ServiceMapEditorFlyout({
     onPreview?.(buildState(previewKuery));
   }, [buildState, previewKuery, onPreview]);
 
-  // Revert the live preview on any close-without-save (Cancel, Esc, outside-click, X), all of
-  // which unmount the flyout. A ref keeps the latest `onRevert` without re-running the effect.
   const onRevertRef = useRef(onRevert);
   onRevertRef.current = onRevert;
   useEffect(() => {
@@ -500,7 +514,7 @@ export function ServiceMapEditorFlyout({
             })}
             helpText={i18n.translate('xpack.apm.serviceMapEditor.serviceNameHelpText', {
               defaultMessage:
-                'Filter to show only a specific service and its connections. Leave blank to show all services.',
+                'Select one service to filter the map to that service and its connections. Select multiple to highlight those services on the full map.',
             })}
             fullWidth
           >
@@ -518,7 +532,6 @@ export function ServiceMapEditorFlyout({
               placeholder={i18n.translate('xpack.apm.serviceMapEditor.serviceNamePlaceholder', {
                 defaultMessage: 'Search for a service...',
               })}
-              singleSelection={{ asPlainText: true }}
               options={serviceNameOptions}
               selectedOptions={selectedServiceOption}
               onChange={onServiceNameSelect}
@@ -752,7 +765,7 @@ export function ServiceMapEditorFlyout({
         {filterCountsEnabled && (
           <FlyoutFilterOptionCountsResolver
             environment={environment}
-            kuery={kuery}
+            kuery={previewKuery}
             start={start}
             end={end}
             serviceName={serviceName}

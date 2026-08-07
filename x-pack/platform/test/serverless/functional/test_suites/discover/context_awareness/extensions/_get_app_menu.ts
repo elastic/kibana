@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/context_awareness/extensions/_get_app_menu.ts
+
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { appMenu, common, discover, header, timePicker, svlCommonPage } = getPageObjects([
+  const { appMenu, common, discover, svlCommonPage } = getPageObjects([
     'appMenu',
     'common',
     'timePicker',
     'discover',
-    'header',
-    'timePicker',
     'svlCommonPage',
   ]);
   const esArchiver = getService('esArchiver');
@@ -44,9 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ensureCurrentUrl: false,
       });
       await discover.waitUntilSearchingHasFinished();
-      await timePicker.setDefaultAbsoluteRange();
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
       await appMenu.existOrFail('discoverNewButton');
       await testSubjects.click('app-menu-overflow-button');
       await testSubjects.existOrFail('discoverAlertsButton');
@@ -60,9 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToActualUrl('discover', `?_a=${state}`, {
         ensureCurrentUrl: false,
       });
-      await discover.waitUntilSearchingHasFinished();
-      await timePicker.setDefaultAbsoluteRange();
-      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await appMenu.existOrFail('discoverNewButton');
       await testSubjects.click('app-menu-overflow-button');

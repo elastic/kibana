@@ -1,0 +1,142 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-16
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-16
+entries:
+- file:
+    name: 277354.yaml
+    checksum: 2efacc901b4a1a2a0bbecc70348dbc2e24f46f05
+  type: bug-fix
+  title: Fix missing additional context for flat dotted fields in threshold rules
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  description: Flat dotted keys in source data are now included in alert context for threshold rules.
+  prs:
+  - https://github.com/elastic/kibana/pull/277354
+  issues:
+  - https://github.com/elastic/kibana/issues/193779
+- file:
+    name: 277322.yaml
+    checksum: 897f5575970a64ecbda4bdfde6e75189fa6e6bb3
+  type: bug-fix
+  title: Fix empty grouped table pages when results exceed 10,000 groups
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  prs:
+  - https://github.com/elastic/kibana/pull/277322
+- file:
+    name: 277007.yaml
+    checksum: 21f5a60a0702ba11cb92ee4f94a81cec2b0bf096
+  type: bug-fix
+  title: Fix multi-line code editor corruption on Windows after refresh
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  description: On Windows, edits in the Dev Tools Console could corrupt multi-line text after autosave and refresh. Text is now preserved correctly.
+  areas:
+  - Search and data
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/277007
+  issues:
+  - https://github.com/elastic/kibana/issues/276552
+- file:
+    name: 277580.yaml
+    checksum: 023eccc0c59b9a81f32fbd8d88f4fcd1b241f18e
+  type: enhancement
+  title: Add cases analytics skill for Agent Builder
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/277580
+- file:
+    name: 277703.yaml
+    checksum: 67a323955aee740dd12fdefc2d358ade5ddf9494
+  type: bug-fix
+  title: Fix source event preview errors for alerts with restored indices
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  prs:
+  - https://github.com/elastic/kibana/pull/277703
+- file:
+    name: 277833.yaml
+    checksum: dfa5663e2c8e2dbcc0a1a14370345b55de745cc5
+  type: bug-fix
+  title: Fix missing cell actions in attack flyout
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  prs:
+  - https://github.com/elastic/kibana/pull/277833
+- file:
+    name: 272407.yaml
+    checksum: 7526e240a49bf720cad6dfdd0bf4c08d2b65bb3c
+  type: feature
+  title: Add support for progress bars in tables
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/272407
+- file:
+    name: 275842.yaml
+    checksum: e44acfed10098472a4ce059ceb4adc7d82cc0efc
+  type: bug-fix
+  title: Fix AI agent completions ignoring `max-step-size` limit
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  prs:
+  - https://github.com/elastic/kibana/pull/275842
+- file:
+    name: 277259.yaml
+    checksum: d00837c70ee44313f79d6ceba9b642b489585619
+  type: bug-fix
+  title: Fix requests with comments failing when the request body contains triple-quote strings
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  description: Console requests containing comments and triple-quote strings no longer fail with `x_content_e_o_f_exception`.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/277259
+  issues:
+  - https://github.com/elastic/kibana/issues/277160
+- file:
+    name: 276999.yaml
+    checksum: 647b2d00380503a17306fc7b35f1de12bd5e5fc8
+  type: enhancement
+  title: Propagate approximation setting to Vega ES|QL charts
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/276999
+- file:
+    name: 277815.yaml
+    checksum: 821f54cdba3e40acc88b55cc91798c2999ab2a99
+  type: bug-fix
+  title: Fix Index Management crash when assigning rollover policy to an index without aliases
+  products:
+  - product: cloud-serverless
+    target: 2026-07-16
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/277815
+  issues:
+  - https://github.com/elastic/kibana/issues/277765

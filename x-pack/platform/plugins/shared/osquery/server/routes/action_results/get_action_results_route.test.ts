@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getActionResultsRoute } from './get_action_results_route';
 import {
   Direction,
@@ -28,6 +29,16 @@ import {
   createMockActionResultsResponse,
 } from './mocks';
 
+jest.mock('../../utils/find_osquery_action_metadata', () => ({
+  findOsqueryActionMetadata: jest.fn(),
+}));
+
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
+
+const mockFindOsqueryActionMetadata = findOsqueryActionMetadata as jest.MockedFunction<
+  typeof findOsqueryActionMetadata
+>;
+
 describe('getActionResultsRoute', () => {
   let mockOsqueryContext: OsqueryAppContext;
   let mockRouter: ReturnType<typeof createMockRouter>;
@@ -40,7 +51,7 @@ describe('getActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   beforeEach(() => {
@@ -60,6 +71,7 @@ describe('getActionResultsRoute', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockFindOsqueryActionMetadata.mockReset();
   });
 
   describe('Route handler behavior', () => {
@@ -560,6 +572,27 @@ describe('getActionResultsRoute', () => {
       });
     });
 
+    it('propagates a non-500 statusCode from the search strategy', async () => {
+      const message = 'User is not authorized to access Osquery search results';
+      const mockSearchFn = jest.fn().mockImplementation(() => {
+        throw Object.assign(new Error(message), { statusCode: 403 });
+      });
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: { agentIds: 'agent-1' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message },
+      });
+    });
+
     it('should handle missing aggregations in action results response', async () => {
       const mockSearchFn = createMockSearchStrategy({
         edges: [],
@@ -590,6 +623,216 @@ describe('getActionResultsRoute', () => {
           },
         }),
       });
+    });
+  });
+
+  describe('space scoping', () => {
+    it('passes the active default space to the search strategy', async () => {
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'test-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' }),
+        expectedSearchOptions
+      );
+    });
+
+    it('passes a named active space to the search strategy', async () => {
+      // Re-register the route against a context whose active space is named.
+      const namedSpaceContext = createMockOsqueryContext();
+      (namedSpaceContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
+        id: 'my-space',
+        name: 'My Space',
+      });
+      const namedRouter = createMockRouter();
+      getActionResultsRoute(namedRouter, namedSpaceContext);
+      const namedHandler = namedRouter.versioned.getRoute(
+        'get',
+        '/api/osquery/action_results/{actionId}'
+      ).versions['2023-10-31']!.handler;
+
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'test-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await namedHandler(mockContext, mockRequest, mockResponse);
+
+      expect(namedSpaceContext.service.getActiveSpace).toHaveBeenCalled();
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'my-space' }),
+        expectedSearchOptions
+      );
+    });
+  });
+
+  describe('CPS metadata gate', () => {
+    const mockEsClient = {
+      indices: { exists: jest.fn().mockResolvedValue(true) },
+    };
+
+    beforeEach(() => {
+      mockFindOsqueryActionMetadata.mockResolvedValue(true);
+    });
+
+    const createCpsContext = (mockSearchFn: jest.Mock) => {
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
+      const context = createMockOsqueryContext();
+      (context as { cpsEnabled: boolean }).cpsEnabled = true;
+      const mockSavedObjectsClient = {
+        find: jest.fn(),
+        get: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      };
+      (context.getStartServices as jest.Mock).mockResolvedValue([
+        {
+          savedObjects: {
+            getScopedClient: jest.fn().mockReturnValue(mockSavedObjectsClient),
+            createInternalRepository: jest.fn(),
+          },
+          http: {
+            basePath: {
+              set: jest.fn(),
+              get: jest.fn().mockReturnValue(''),
+            },
+          },
+          elasticsearch: {
+            client: {
+              asInternalUser: mockEsClient,
+              asScoped: jest.fn().mockReturnValue({ asCurrentUser: { search: jest.fn() } }),
+            },
+          },
+        },
+        { data: { search: { asScoped: mockCpsSearch } } },
+      ]);
+
+      return context;
+    };
+
+    it('returns 404 when no space-stamped action metadata exists under CPS', async () => {
+      mockFindOsqueryActionMetadata.mockResolvedValue(false);
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const cpsContext = createCpsContext(mockSearchFn);
+      const cpsRouter = createMockRouter();
+      getActionResultsRoute(cpsRouter, cpsContext);
+      const handler = cpsRouter.versioned.getRoute('get', '/api/osquery/action_results/{actionId}')
+        .versions['2023-10-31']!.handler;
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'unknown-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await handler(mockContext, mockRequest, mockResponse);
+
+      expect(mockFindOsqueryActionMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({ actionId: 'unknown-action-id', spaceId: 'default' })
+      );
+      expect(mockSearchFn).not.toHaveBeenCalled();
+      expect(mockResponse.notFound).toHaveBeenCalledWith({
+        body: { message: 'Action not found' },
+      });
+    });
+
+    it('proceeds with action results when metadata exists under CPS', async () => {
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const cpsContext = createCpsContext(mockSearchFn);
+      const cpsRouter = createMockRouter();
+      getActionResultsRoute(cpsRouter, cpsContext);
+      const handler = cpsRouter.versioned.getRoute('get', '/api/osquery/action_results/{actionId}')
+        .versions['2023-10-31']!.handler;
+
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'authorized-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await handler(mockContext, mockRequest, mockResponse);
+
+      expect(mockFindOsqueryActionMetadata).toHaveBeenCalled();
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionId: 'authorized-action-id',
+          factoryQueryType: OsqueryQueries.actionResults,
+        }),
+        expectedSearchOptions
+      );
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('skips the metadata gate when CPS is disabled', async () => {
+      const mockSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({ actionId: 'test-action-id', query: {} });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockFindOsqueryActionMetadata).not.toHaveBeenCalled();
+      expect(mockSearchFn).toHaveBeenCalled();
+    });
+  });
+
+  describe('when CPS is enabled', () => {
+    it('uses the CPS-scoped search client for action results', async () => {
+      mockFindOsqueryActionMetadata.mockResolvedValue(true);
+
+      const mockCpsSearchFn = createMockSearchStrategy(createMockActionResultsResponse(1));
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = jest.fn();
+
+      const cpsContext = createMockOsqueryContext();
+      (cpsContext as { cpsEnabled: boolean }).cpsEnabled = true;
+      const mockSavedObjectsClient = {
+        find: jest.fn(),
+        get: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      };
+      (cpsContext.getStartServices as jest.Mock).mockResolvedValue([
+        {
+          savedObjects: {
+            getScopedClient: jest.fn().mockReturnValue(mockSavedObjectsClient),
+            createInternalRepository: jest.fn(),
+          },
+          http: {
+            basePath: {
+              set: jest.fn(),
+              get: jest.fn().mockReturnValue(''),
+            },
+          },
+          elasticsearch: {
+            client: {
+              asInternalUser: {
+                search: jest.fn(),
+                indices: { exists: jest.fn().mockResolvedValue(true) },
+              },
+              asScoped: jest.fn().mockReturnValue({ asCurrentUser: { search: jest.fn() } }),
+            },
+          },
+        },
+        { data: { search: { asScoped: mockCpsSearch } } },
+      ]);
+
+      const cpsRouter = createMockRouter();
+      getActionResultsRoute(cpsRouter, cpsContext);
+      const handler = cpsRouter.versioned.getRoute('get', '/api/osquery/action_results/{actionId}')
+        .versions['2023-10-31']!.handler;
+
+      await handler(
+        createMockContext(contextSearchFn),
+        createMockRequest({ actionId: 'authorized-action-id', query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockCpsSearch).toHaveBeenCalledWith(expect.anything(), { projectRouting: 'space' });
+      expect(mockCpsSearchFn).toHaveBeenCalled();
+      expect(contextSearchFn).not.toHaveBeenCalled();
     });
   });
 });

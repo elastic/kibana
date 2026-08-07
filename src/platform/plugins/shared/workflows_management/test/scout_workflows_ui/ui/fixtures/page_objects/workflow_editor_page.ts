@@ -20,6 +20,8 @@ export class WorkflowEditorPage {
   public acceptAllButton: Locator;
   public declineAllButton: Locator;
   public bulkBar: Locator;
+  public graphCanvas: Locator;
+  public graphYamlErrorCallout: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -35,6 +37,8 @@ export class WorkflowEditorPage {
     this.acceptAllButton = this.page.testSubj.locator('wfDiffAcceptAllButton');
     this.declineAllButton = this.page.testSubj.locator('wfDiffDeclineAllButton');
     this.bulkBar = this.page.testSubj.locator('wfDiffBulkBar');
+    this.graphCanvas = this.page.testSubj.locator('workflowGraphCanvas');
+    this.graphYamlErrorCallout = this.page.testSubj.locator('workflowGraphYamlErrorCallout');
   }
 
   /**
@@ -78,6 +82,23 @@ export class WorkflowEditorPage {
    */
   async waitForEditorToLoad() {
     await this.yamlEditor.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch to the graph view by clicking the bottom bar toggle.
+   * Waits for the graph canvas to become visible.
+   * Requires the `workflows:experimentalFeatures` UI setting to be true.
+   */
+  async switchToGraphView(): Promise<void> {
+    await this.page.testSubj.click('workflowEditorViewToggle-graph');
+    await this.graphCanvas.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch back to the YAML view by clicking the bottom bar toggle.
+   */
+  async switchToYamlView(): Promise<void> {
+    await this.page.testSubj.click('workflowEditorViewToggle-yaml');
   }
 
   /**
@@ -246,7 +267,8 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Wait for the test bridge to be available (set by useAgentBuilderIntegration).
+   * Wait for the test bridge to be available (set by useAgentBuilderIntegration
+   * when experimental features are enabled and embeddable chat access resolves).
    */
   async waitForTestBridge(): Promise<void> {
     await this.page.waitForFunction(
@@ -261,6 +283,49 @@ export class WorkflowEditorPage {
     return this.page.locator(
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
     );
+  }
+
+  /**
+   * Wait until the step type's inline decoration renders its icon in the ::after box.
+   *
+   * Scrolls the step's `type:` line into the Monaco viewport first — Monaco virtualizes
+   * off-screen lines, so the decoration span may not exist in the DOM until revealed.
+   * Then polls the computed ::after style via page.waitForFunction until the icon URL
+   * is applied via mask-image (the correct routing for monochrome step-type glyphs).
+   *
+   * This approach is deterministic: waitForFunction retries internally until the condition
+   * holds or the timeout fires, so it does not compete with a separate waitFor budget and
+   * does not depend on a fixed sleep.
+   */
+  async waitForStepTypeIconStyled(
+    stepType: string,
+    timeout = 15_000
+  ): Promise<{ backgroundImage: string; maskImage: string }> {
+    // Reveal the step's type: line so Monaco renders the decoration span into the DOM.
+    await this.setCursorToText(`type: ${stepType}`);
+    const typeClass = stepType.replaceAll('.', '-');
+    const selector = `.monaco-editor .view-line span.type-inline-highlight.type-${typeClass}`;
+    const handle = await this.page.waitForFunction(
+      (sel: string) => {
+        const element = document.querySelector(sel);
+        if (!element) return null;
+        const s = getComputedStyle(element, '::after');
+        // Chromium may populate only the vendor-prefixed property — coalesce both.
+        const unprefixed = s.getPropertyValue('mask-image');
+        const maskImage =
+          unprefixed && unprefixed !== 'none'
+            ? unprefixed
+            : s.getPropertyValue('-webkit-mask-image') || 'none';
+        const backgroundImage = s.backgroundImage;
+        const hasImage = (v: string) => v.includes('data:image') || v.includes('.svg');
+        // Return non-null only once the icon is actually applied to the ::after box.
+        if (!hasImage(maskImage) && !hasImage(backgroundImage)) return null;
+        return { backgroundImage, maskImage };
+      },
+      selector,
+      { timeout }
+    );
+    return handle.jsonValue() as Promise<{ backgroundImage: string; maskImage: string }>;
   }
 
   /**
@@ -282,7 +347,7 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
-    await this.runButton.click();
+    await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',
     });

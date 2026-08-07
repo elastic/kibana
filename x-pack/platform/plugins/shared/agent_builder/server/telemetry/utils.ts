@@ -30,12 +30,16 @@ function sha256Hex(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function toCustomHashedId(value: string): string {
-  return `${CUSTOM_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
+export function toHashedId(value: string): string {
+  return sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH);
+}
+
+export function toCustomHashedId(value: string): string {
+  return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 function toPluginHashedId(value: string): string {
-  return `${PLUGIN_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
+  return `${PLUGIN_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 /**
@@ -105,8 +109,9 @@ export function normalizeSkillIdForTelemetry(skill: {
  *   it's a read-only built-in skill, otherwise `custom`.
  * - `solution_area`: derived from `basePath` for built-ins
  *   (`skills/security/...` → `security`, `skills/observability/...` →
- *   `observability`, `skills/search/...` → `search`, `skills/platform/...` →
- *   `platform`); literal `custom` for user-created; `plugin` for plugin-backed.
+ *   `observability`, `skills/ml/...` → `ml`, `skills/search/...` → `search`,
+ *   `skills/platform/...` → `platform`); literal `custom` for user-created;
+ *   `plugin` for plugin-backed.
  */
 export function classifySkill(
   skill: Pick<InternalSkillDefinition, 'readonly' | 'plugin_id' | 'basePath'>
@@ -130,6 +135,9 @@ function solutionAreaFromBasePath(basePath: string): SkillSolutionArea {
   }
   if (normalized.startsWith('skills/observability')) {
     return 'observability';
+  }
+  if (normalized.startsWith('skills/ml')) {
+    return 'ml';
   }
   if (normalized.startsWith('skills/search')) {
     return 'search';

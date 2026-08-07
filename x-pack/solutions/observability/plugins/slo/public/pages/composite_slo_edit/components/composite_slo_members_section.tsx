@@ -9,7 +9,6 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -280,6 +280,10 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
                   isClearable={false}
                   compressed
                   data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
+                  aria-label={i18n.translate(
+                    'xpack.slo.compositeSloEdit.members.instanceAriaLabel',
+                    { defaultMessage: 'Select SLO instance' }
+                  )}
                 />
               );
             }}

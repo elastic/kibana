@@ -14,6 +14,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const { canvas } = getPageObjects(['canvas']);
 
+  /**
+   * Purpose: Canvas accessibility test
+   *
+   * Migration: Remove test and migrate a11y validation to existing canvas tests
+   */
   describe('Canvas Accessibility', () => {
     before(async () => {
       await kibanaServer.importExport.load(

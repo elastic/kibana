@@ -9,13 +9,24 @@
 
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FavoriteButton } from '@kbn/favorite-button';
 import { i18n } from '@kbn/i18n';
-import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, { useMemo } from 'react';
+import type { AppHeaderFavoriteAction } from '../types';
 import type { ShareAction } from './hooks';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const SHARE_ARIA_LABEL = i18n.translate('core.ui.chrome.appHeader.shareAriaLabel', {
   defaultMessage: 'Share',
+});
+
+const ADD_TO_STARRED_LABEL = i18n.translate('core.ui.chrome.appHeader.favoriteAddLabel', {
+  defaultMessage: 'Add to Starred',
+});
+
+const REMOVE_FROM_STARRED_LABEL = i18n.translate('core.ui.chrome.appHeader.favoriteRemoveLabel', {
+  defaultMessage: 'Remove from Starred',
 });
 
 const useTitleActionsStyles = () => {
@@ -31,6 +42,8 @@ const useTitleActionsStyles = () => {
 
     const iconButton = css`
       color: ${euiTheme.colors.textSubdued};
+      block-size: 24px;
+      inline-size: 24px;
     `;
 
     const favoriteSlot = css`
@@ -51,7 +64,7 @@ const useTitleActionsStyles = () => {
 
 export interface TitleActionsProps {
   shareAction?: ShareAction;
-  favorite?: ReactNode;
+  favorite?: AppHeaderFavoriteAction;
 }
 
 export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favorite }) => {
@@ -62,15 +75,15 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
   }
 
   const shareTooltipContent = shareAction?.tooltipContent ?? SHARE_ARIA_LABEL;
-  const hasCustomTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
+  const hasCustomShareTooltip = !!shareAction?.tooltipContent || !!shareAction?.tooltipTitle;
 
   return (
-    <div css={styles.root} data-test-subj="appHeaderTitleActions">
+    <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.titleActions}>
       {shareAction ? (
         <EuiToolTip
           content={shareTooltipContent}
           title={shareAction.tooltipTitle}
-          {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
+          {...(!hasCustomShareTooltip && { disableScreenReaderOutput: true })}
         >
           <EuiButtonIcon
             iconType="share"
@@ -79,7 +92,10 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
             size="xs"
             css={styles.iconButton}
             aria-label={SHARE_ARIA_LABEL}
-            data-test-subj={`appHeaderShare ${shareAction.testId ?? ''}`.trim()}
+            isDisabled={shareAction.isDisabled}
+            data-test-subj={`${APP_HEADER_TEST_SUBJECTS.sharePrefix} ${
+              shareAction.testId ?? ''
+            }`.trim()}
             onClick={(event: ReactMouseEvent<HTMLButtonElement>) =>
               shareAction.onClick(event.currentTarget)
             }
@@ -87,11 +103,20 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
         </EuiToolTip>
       ) : null}
       {favorite ? (
-        // Temporary slot: favorite is still a caller-owned React node.
-        // Replace with a typed app-header action before treating it as a stable API.
-        // https://github.com/elastic/kibana/issues/271402
-        <div css={styles.favoriteSlot} data-test-subj="appHeaderFavorite">
-          {favorite}
+        <div css={styles.favoriteSlot} data-test-subj={APP_HEADER_TEST_SUBJECTS.favorite}>
+          <FavoriteButton
+            status={favorite.status}
+            onClick={favorite.onToggle}
+            isDisabled={favorite.isDisabled}
+            addLabel={ADD_TO_STARRED_LABEL}
+            removeLabel={REMOVE_FROM_STARRED_LABEL}
+            data-test-subj={[
+              APP_HEADER_TEST_SUBJECTS.favoriteButton,
+              favorite.status === 'favorited' || favorite.status === 'removing'
+                ? 'unfavoriteButton'
+                : 'favoriteButton',
+            ].join(' ')}
+          />
         </div>
       ) : null}
     </div>

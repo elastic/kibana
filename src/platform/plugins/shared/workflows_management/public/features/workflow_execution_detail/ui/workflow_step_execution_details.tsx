@@ -23,11 +23,15 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
-import type { ChildWorkflowExecutionItem, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ForeachIterationStepList } from './foreach_iteration_step_list';
-import { ResumeExecutionButton } from './resume_execution_button';
+import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -39,10 +43,13 @@ interface WorkflowStepExecutionDetailsProps {
   stepExecution?: WorkflowStepExecutionDto;
   allStepExecutions?: WorkflowStepExecutionDto[];
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps, shown on the overview pseudo-step. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
   isLoadingStepData?: boolean;
   workflowExecutionStatus?: ExecutionStatus;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
+  approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
@@ -58,10 +65,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     stepExecution,
     allStepExecutions,
     workflowExecutionDuration,
+    workflowExecutionUsage,
     isLoadingStepData,
     workflowExecutionStatus,
     resumeMessage,
     resumeSchema,
+    approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
     childWorkflowExecution,
@@ -175,10 +184,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          workflowExecutionUsage={workflowExecutionUsage}
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
+          approvalLabels={approvalLabels}
           shouldAutoResume={shouldAutoResume}
           waitingStepExecutionId={waitingStepExecutionId}
         />
@@ -256,6 +267,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             stepStartedAt={stepExecution?.startedAt}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
+                            approvalLabels={approvalLabels}
                             autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}
                           />

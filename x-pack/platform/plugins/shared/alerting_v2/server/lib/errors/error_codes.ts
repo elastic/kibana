@@ -6,15 +6,22 @@
  */
 
 /**
- * Catalog of stable, machine-readable error codes returned by the routes.
- * These codes are part of the public API contract. Adding new codes is
- * backwards compatible, while renaming or removing a code is a breaking change.
+ * This file hosts two distinct catalogs:
  *
- * Each code's metadata (HTTP status, when it's thrown, `details` shape) is
- * documented in the README at
- * `x-pack/platform/plugins/shared/alerting_v2/server/lib/errors/README.md`.
+ * - {@link ALERTING_ERROR_CODES} — codes that travel out over HTTP. Part
+ *   of the public API contract; see the README at
+ *   `x-pack/platform/plugins/shared/alerting_v2/server/lib/errors/README.md`
+ *   for status / details shape per code.
+ * - {@link ALERTING_LOG_CODES} — codes attached to `logger.error(...)` /
+ *   `logger.warn(...)` calls for fire-and-forget failure paths (degraded but
+ *   recoverable). Stable identifiers for log-based monitoring; never
+ *   serialized into HTTP responses.
+ *
+ * Both catalogs treat renaming or removing a code as a breaking change to
+ * downstream consumers (API clients in one case, observability tooling in
+ * the other). Adding new codes is backwards compatible.
  */
-export const ALERTING_V2_ERROR_CODES = {
+export const ALERTING_ERROR_CODES = {
   // ────────────────────────── Rules ──────────────────────────
   /** A rule with the given identifier does not exist. */
   RULE_NOT_FOUND: 'RULE_NOT_FOUND',
@@ -26,14 +33,50 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
-  /** Bulk rule operation params combine `ids` with `filter` / `search`. */
-  INVALID_BULK_PARAMS: 'INVALID_BULK_PARAMS',
+  /**
+   * A by-query bulk operation was submitted with `force: true` and the filter
+   * matched more resources than a single request may process. Rejected before
+   * any resource is mutated so the caller sees an all-or-nothing outcome (no
+   * partial execution) — the caller must narrow the filter or split the
+   * operation into multiple requests.
+   */
+  BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */
   INVALID_FILTER_FIELD: 'INVALID_FILTER_FIELD',
   /** Filter expression used an unsupported KQL function. */
   UNSUPPORTED_FILTER_FUNCTION: 'UNSUPPORTED_FILTER_FUNCTION',
+  /** The rule's `schedule.every` is shorter than the configured minimum interval. */
+  SCHEDULE_INTERVAL_TOO_SHORT: 'SCHEDULE_INTERVAL_TOO_SHORT',
+  /** Scheduling the rule would exceed the configured maximum rule runs per minute. */
+  MAX_SCHEDULES_PER_MINUTE_EXCEEDED: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
+  /**
+   * A bulk operation persisted the rule saved object, but the paired Task
+   * Manager call failed, leaving the rule's task state diverged from its saved object.
+   * The saved-object change already committed; this entry flags the drift so the client
+   * can detect and (optionally) retry.
+   */
+  TASK_MANAGER_DRIFT: 'TASK_MANAGER_DRIFT',
+  /** A manual "run now" was requested for a disabled rule (it has no executor task to run). */
+  RULE_DISABLED: 'RULE_DISABLED',
+  /** A manual "run now" was requested for a rule whose executor task is already running. */
+  RULE_ALREADY_RUNNING: 'RULE_ALREADY_RUNNING',
+  /** A manual "run now" raced with another writer updating the executor task; retry. */
+  RULE_RUN_CONFLICT: 'RULE_RUN_CONFLICT',
+  /**
+   * A manual "run now" failed for an unexpected reason (e.g. the executor task
+   * is missing despite the rule being enabled). Catch-all for `runSoon` errors
+   * that are not already-running or conflict.
+   */
+  RULE_RUN_ERROR: 'RULE_RUN_ERROR',
+  /** A rule change-history event with the given identifier does not exist. */
+  RULE_CHANGE_NOT_FOUND: 'RULE_CHANGE_NOT_FOUND',
+  /**
+   * The rule change-history data stream is not initialized (or change history
+   * is disabled), so history cannot be read.
+   */
+  RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
@@ -44,23 +87,273 @@ export const ALERTING_V2_ERROR_CODES = {
   ACTION_POLICY_VERSION_CONFLICT: 'ACTION_POLICY_VERSION_CONFLICT',
   /** The submitted action policy body failed schema validation. */
   INVALID_ACTION_POLICY_DATA: 'INVALID_ACTION_POLICY_DATA',
-  /** A `single_rule` action policy referenced a rule that does not exist. */
-  RULE_NOT_FOUND_FOR_POLICY: 'RULE_NOT_FOUND_FOR_POLICY',
   /** A user-supplied date string failed ISO-8601 parsing. */
   INVALID_DATE_STRING: 'INVALID_DATE_STRING',
+  /**
+   * A delete could not queue the action policy's API key for invalidation, so
+   * the policy was left in place rather than deleted. The single delete throws
+   * it; bulk delete reports it per item.
+   */
+  API_KEY_INVALIDATION_FAILED: 'API_KEY_INVALIDATION_FAILED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
+  /**
+   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
+   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
+   * superseded episode) so a client can tell the two apart per item.
+   */
+  ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
+  /**
+   * The `group_hash` resolved to a latest alert event, but its `episode_id`
+   * did not match the one the item targeted (the episode was superseded).
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   */
+  ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  /** The requested action is incompatible with the episode's current `episode.status`. */
+  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */
   INSIGHT_NOT_FOUND: 'INSIGHT_NOT_FOUND',
+
+  // ───────────────────────── Engine state ────────────────────
+  /**
+   * The alerting engine is administratively disabled via the
+   * `alerting:v2:enabled` advanced setting. Emitted by every HTTP route
+   * with status 503 before any route-specific work runs.
+   */
+  ALERTING_DISABLED: 'ALERTING_DISABLED',
 
   // ──────────────────────────── Generic ──────────────────────
   /** Catch-all 5xx code when no domain-specific code applies. */
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
 } as const;
 
-export type AlertingV2ErrorCode =
-  (typeof ALERTING_V2_ERROR_CODES)[keyof typeof ALERTING_V2_ERROR_CODES];
+export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALERTING_ERROR_CODES];
+
+/**
+ * Catalog of stable, machine-readable codes attached to `logger.error(...)` /
+ * `logger.warn(...)` calls for fire-and-forget failure paths. These never
+ * become part of an HTTP response — they exist so log-based monitoring can
+ * group and alert on specific degraded code paths without parsing free-form
+ * `message` strings.
+ *
+ * Naming convention: `<DOMAIN>_<WHAT_FAILED>`. Read-path failures that
+ * degrade gracefully should encode the degradation (e.g.
+ * `*_LOOKUP_FAILED` — the page was still returned, just without that piece
+ * of enrichment).
+ */
+export const ALERTING_LOG_CODES = {
+  // ──────────────── Action policy API key invalidation ───────────────
+  /**
+   * A delete refused to remove one or more action policies because their API
+   * keys could not be queued for invalidation. Nothing was destroyed, so the
+   * keys are still referenced and a retry can invalidate them — but the
+   * pending-invalidation saved object store is failing writes and needs
+   * attention.
+   */
+  ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION:
+    'ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION',
+  /**
+   * A delete queued action policy API keys for invalidation and then failed
+   * to remove the matching policies. The policies survive with keys that are
+   * about to be invalidated, so they will stop being able to dispatch until
+   * their keys are rotated.
+   */
+  ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED: 'ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED',
+
+  // ─────────────── Execution history (graceful degradation) ──────────────
+  /**
+   * One or more `task-run` hits returned by Elasticsearch on the rule
+   * executions read path failed structural normalization (missing hit id,
+   * malformed `kibana.task.id`, missing `event.start`, unrecognized
+   * `event.outcome`). The upstream filter on `kibana.task.type` is meant
+   * to prevent this. Emission of this code signals that the invariant
+   * has been violated and the read path silently shrank a page.
+   */
+  EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
+  /**
+   * Action-policy id resolution failed while building the search filter for
+   * the action-policy execution-history search. The search proceeds without
+   * policy-id matches contributed by the search term.
+   */
+  EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED: 'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED',
+  /**
+   * Rule id resolution failed while building the search filter for the
+   * action-policy execution-history search. The search proceeds without
+   * rule-id matches contributed by the search term.
+   */
+  EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED: 'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED',
+  /**
+   * Action-policy name lookup failed while enriching a page of action-policy
+   * execution events. The page is still returned; affected policy names
+   * degrade to `null`.
+   */
+  EXECUTION_HISTORY_POLICY_LOOKUP_FAILED: 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED',
+  /**
+   * Rule name lookup failed while enriching a page of action-policy
+   * execution events. The page is still returned; affected rule names
+   * degrade to `null`.
+   */
+  EXECUTION_HISTORY_RULE_LOOKUP_FAILED: 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED',
+  /**
+   * Workflow name lookup failed while enriching a page of action-policy
+   * execution events. The page is still returned; affected workflow names
+   * degrade to `null`.
+   */
+  EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED: 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED',
+
+  // ────────── Domain event bus, subscribers & publishers (fan-out) ─────────
+  /**
+   * The underlying event-bus emitter surfaced an `'error'` event (e.g. an
+   * unhandled rejection captured by `captureRejections`). Caught by the bus's
+   * permanent defensive listener so it can never crash the process.
+   */
+  EVENT_BUS_EMITTER_ERROR: 'EVENT_BUS_EMITTER_ERROR',
+  /**
+   * A subscribed handler threw (sync throw or rejected promise) while
+   * processing a published domain event. The failure is isolated: sibling
+   * handlers for the same event still run and the publisher is unaffected.
+   */
+  EVENT_BUS_HANDLER_FAILURE: 'EVENT_BUS_HANDLER_FAILURE',
+  /**
+   * The rule-lifecycle → workflow subscriber failed to emit a workflow event
+   * for a rule domain event. The originating rule operation already
+   * succeeded; only the workflow fan-out for this event was lost.
+   */
+  RULE_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_WORKFLOW_SUBSCRIBER_FAILURE',
+  /**
+   * The alert-action → workflow subscriber failed to emit a workflow event
+   * for an alert-action domain event. The originating action already
+   * succeeded; only the workflow fan-out for this event was lost.
+   */
+  ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE: 'ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE',
+  /**
+   * The rule-executor → workflow subscriber failed to emit a workflow event
+   * for a rule-execution domain event. The rule run already completed; only
+   * the workflow fan-out for this event was lost.
+   */
+  RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE',
+  /**
+   * The rule-changes-history subscriber failed to record a change entry for a
+   * rule domain event. The rule operation itself already succeeded; only the
+   * audit entry for this change was lost.
+   */
+  RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE: 'RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE',
+  /**
+   * A domain event was refused by the bus because its `type` collides with a
+   * reserved emitter event name. The publisher continued; no subscriber ran.
+   */
+  EVENT_BUS_PUBLISH_REJECTED: 'EVENT_BUS_PUBLISH_REJECTED',
+
+  // ──────────────────────────── Dispatcher ───────────────────────────
+  /**
+   * The action policy backing a dispatch group has no API key, so the group
+   * cannot be dispatched under the policy owner's credentials. The group is
+   * skipped; the rest of the dispatch tick continues.
+   */
+  DISPATCH_POLICY_MISSING_API_KEY: 'DISPATCH_POLICY_MISSING_API_KEY',
+  /**
+   * The workflow referenced by an action policy destination no longer exists.
+   * The group is skipped; the rest of the dispatch tick continues.
+   */
+  DISPATCH_WORKFLOW_NOT_FOUND: 'DISPATCH_WORKFLOW_NOT_FOUND',
+  /**
+   * The workflow referenced by an action policy destination exists but is
+   * disabled. The group is skipped until an operator enables the workflow.
+   */
+  DISPATCH_WORKFLOW_DISABLED: 'DISPATCH_WORKFLOW_DISABLED',
+  /** Scheduling a workflow execution for a dispatch group failed. */
+  DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
+  /**
+   * A dispatch group failed for a reason not covered by a more specific code
+   * (outer catch of the per-group dispatch loop). Sibling groups still run.
+   */
+  DISPATCH_GROUP_UNHANDLED_ERROR: 'DISPATCH_GROUP_UNHANDLED_ERROR',
+
+  // ────────────────────────── Action policies ────────────────────────
+  /**
+   * An action policy's KQL matcher failed to evaluate against an alert event.
+   * The policy is treated as a no-match so one malformed matcher cannot block
+   * the evaluation of the remaining policies.
+   */
+  POLICY_MATCHER_KQL_INVALID: 'POLICY_MATCHER_KQL_INVALID',
+
+  // ─────────────────────────── Rule executor ─────────────────────────
+  /**
+   * A rule-execution pipeline step threw. The failing step's name is carried
+   * in `labels.step` — this code stays stable across steps so a single filter
+   * returns every step failure.
+   */
+  RULE_EXECUTION_STEP_FAILED: 'RULE_EXECUTION_STEP_FAILED',
+  /**
+   * A metrics recorder threw while observing a pipeline step. Instrumentation
+   * only: the rule execution itself is unaffected.
+   */
+  RULE_EXECUTION_METRICS_RECORDER_FAILED: 'RULE_EXECUTION_METRICS_RECORDER_FAILED',
+  /**
+   * A rule-execution lifecycle event could not be published because the
+   * pipeline finished without the state the event is built from.
+   */
+  RULE_EXECUTION_EVENT_PUBLISH_SKIPPED: 'RULE_EXECUTION_EVENT_PUBLISH_SKIPPED',
+  /**
+   * Publishing a rule-execution lifecycle event to the domain event bus
+   * failed. The rule run itself already completed.
+   */
+  RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+
+  // ──────────────────────────── Rules client ─────────────────────────
+  /**
+   * A rule saved object was persisted but its paired Task Manager call
+   * failed, leaving the rule's task state diverged from its saved object.
+   */
+  RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+
+  // ────────────────────────── Storage & queries ──────────────────────
+  /** A bulk index request into an alerting datastream failed or was rejected. */
+  STORAGE_BULK_INDEX_FAILED: 'STORAGE_BULK_INDEX_FAILED',
+  /** An ES|QL query issued by the plugin failed to execute. */
+  QUERY_ESQL_EXECUTION_FAILED: 'QUERY_ESQL_EXECUTION_FAILED',
+
+  // ────────────────────────────── Resources ──────────────────────────
+  /**
+   * An Elasticsearch resource (datastream, index template, ES|QL view)
+   * failed to bootstrap. Rule execution stays degraded until it succeeds.
+   */
+  RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
+
+  // ──────────────────────── Maintenance windows ──────────────────────
+  /** Fetching active maintenance windows failed. */
+  MAINTENANCE_WINDOW_FETCH_FAILED: 'MAINTENANCE_WINDOW_FETCH_FAILED',
+  /**
+   * A maintenance window saved object could not be interpreted (missing or
+   * malformed events array) and was excluded from the active set.
+   */
+  MAINTENANCE_WINDOW_DOCUMENT_INVALID: 'MAINTENANCE_WINDOW_DOCUMENT_INVALID',
+  /**
+   * The point-in-time finder used to page maintenance windows failed to
+   * close. The windows were still read; the PIT expires on its own.
+   */
+  MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
+
+  // ─────────────────────────── Agent Builder ─────────────────────────
+  /** `refresh_episode` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
+  /** `get_rule` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
+  /** Episode attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
+  /** Episode attachment isStale check failed; returns false. */
+  AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
+
+  // ─────────────────────────────── Tasks ─────────────────────────────
+  /**
+   * A telemetry task run failed. Usage data for the interval is lost; the
+   * task retries on its next scheduled run.
+   */
+  TASKS_TELEMETRY_RUN_FAILED: 'TASKS_TELEMETRY_RUN_FAILED',
+} as const;
+
+export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

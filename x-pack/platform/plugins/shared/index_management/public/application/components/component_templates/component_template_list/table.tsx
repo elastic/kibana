@@ -255,9 +255,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
-    tableCaption: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.tableCaption', {
-      defaultMessage: 'Component templates list',
-    }),
     itemId: 'name',
     'data-test-subj': 'componentTemplatesTable',
     sorting,
@@ -430,5 +427,12 @@ export const ComponentTable: FunctionComponent<Props> = ({
     items: filteredComponentTemplates,
   };
 
-  return <EuiInMemoryTable {...tableProps} />;
+  return (
+    <EuiInMemoryTable
+      {...tableProps}
+      tableCaption={i18n.translate('xpack.idxMgmt.componentTemplatesList.table.tableCaption', {
+        defaultMessage: 'Component templates list',
+      })}
+    />
+  );
 };

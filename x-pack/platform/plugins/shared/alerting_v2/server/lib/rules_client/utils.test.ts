@@ -21,6 +21,7 @@ const serverFields = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
+  version: 1,
 };
 
 const baseCreateData: CreateRuleData = {
@@ -28,7 +29,7 @@ const baseCreateData: CreateRuleData = {
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
 
 describe('utils', () => {
@@ -78,6 +79,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('original');
@@ -95,6 +97,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('renamed');
@@ -112,6 +115,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toBeNull();
@@ -126,6 +130,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 3 });
@@ -140,6 +145,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 5 });
@@ -156,6 +162,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -166,12 +173,13 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        evaluation: { query: { base: 'FROM new-index | LIMIT 1' } },
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -182,13 +190,14 @@ describe('utils', () => {
         metadata: { name: 'test-rule', builder_type: 'threshold' },
       });
       const updateData: UpdateRuleData = {
-        evaluation: { query: { base: 'FROM new-index | LIMIT 1' } },
+        query: { format: 'standalone', breach: { query: 'FROM new-index | LIMIT 1' } },
         metadata: { builder_type: 'threshold' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -205,6 +214,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -213,15 +223,16 @@ describe('utils', () => {
     it('does not auto-clear metadata.builder_type when same query is sent', () => {
       const existing = createRuleSoAttributes({
         metadata: { name: 'test-rule', builder_type: 'threshold' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
       });
       const updateData: UpdateRuleData = {
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -289,6 +300,20 @@ describe('utils', () => {
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
       expect(result.version).toBeUndefined();
+    });
+
+    it('exposes the persisted version as metadata.version on the API response', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: 7 } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(7);
+    });
+
+    it('falls back to the baseline version when the rule has no version yet', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: undefined } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(1);
     });
   });
 

@@ -328,19 +328,24 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {canNavigate && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType={icon}
-                    display="empty"
-                    size="xs"
-                    aria-label={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
-                    data-test-subj="entityAttachmentTableOpenEntity"
-                    onClick={() => handleOpenEntity(row)}
-                  />
+                  <EuiToolTip
+                    content={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType={icon}
+                      display="empty"
+                      size="xs"
+                      aria-label={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
+                      data-test-subj="entityAttachmentTableOpenEntity"
+                      onClick={() => handleOpenEntity(row)}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={tooltipContent}>
-                  <EuiText size="xs" data-test-subj="entityAttachmentTableName">
+                  <EuiText size="xs" data-test-subj="entityAttachmentTableName" tabIndex={0}>
                     <strong>{label}</strong>
                   </EuiText>
                 </EuiToolTip>
@@ -457,7 +462,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
       ))}
       <div css={tableScrollStyles}>
         <EuiBasicTable
-          aria-label={i18n.translate(
+          tableCaption={i18n.translate(
             'xpack.securitySolution.agentBuilder.entityAttachment.table.caption',
             { defaultMessage: 'Entities referenced in this message' }
           )}

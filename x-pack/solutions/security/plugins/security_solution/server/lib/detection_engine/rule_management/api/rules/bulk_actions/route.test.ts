@@ -25,14 +25,20 @@ import {
   getPerformBulkActionDuplicateSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { DETECTION_RULE_DUPLICATE_EVENT } from '../../../../../telemetry/event_based/events';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
+import { duplicateExceptions as _duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 
 jest.mock('../../../../../machine_learning/authz');
+jest.mock('../../../logic/actions/duplicate_exceptions');
 
 let bulkGetRulesMock: jest.Mock;
 
 const validateRuleResponseActionsMock = _validateRuleResponseActions as jest.Mock;
+const duplicateExceptionsMock = _duplicateExceptions as jest.Mock;
 
 jest.mock('../../../../../../endpoint/services', () => {
   const actualModule = jest.requireActual('../../../../../../endpoint/services');
@@ -65,6 +71,8 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
+    clients.rulesClient.create.mockResolvedValue(mockRule);
+    duplicateExceptionsMock.mockResolvedValue([]);
     performBulkActionRoute(server.router, ml);
   });
 
@@ -816,6 +824,143 @@ describe('Perform bulk action route', () => {
         rulePayload: {},
         existingRule: mockRule,
       });
+    });
+  });
+
+  describe('rule duplication', () => {
+    beforeEach(() => {
+      bulkGetRulesMock.mockResolvedValue({ rules: [mockRule], errors: [] });
+    });
+
+    it('creates the duplicate rule with cloned exceptions when include_exceptions is true', async () => {
+      const clonedExceptions = [
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ];
+      duplicateExceptionsMock.mockResolvedValue(clonedExceptions);
+      const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+      context.securitySolution.getAnalytics.mockReturnValue(analytics);
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(duplicateExceptionsMock).toHaveBeenCalledTimes(1);
+      expect(clients.rulesClient.create).toHaveBeenCalledTimes(1);
+      expect(clients.rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({ exceptionsList: clonedExceptions }),
+          }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+          }),
+        })
+      );
+      expect(clients.rulesClient.update).not.toHaveBeenCalled();
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        DETECTION_RULE_DUPLICATE_EVENT.eventType,
+        expect.objectContaining({ ruleType: 'query' })
+      );
+    });
+
+    it('creates the duplicate rule with empty exceptions when include_exceptions is false', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(duplicateExceptionsMock).not.toHaveBeenCalled();
+      expect(clients.rulesClient.create).toHaveBeenCalledTimes(1);
+      expect(clients.rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({ exceptionsList: [] }),
+          }),
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+          }),
+        })
+      );
+      expect(clients.rulesClient.update).not.toHaveBeenCalled();
+    });
+
+    it('deletes cloned rule_default exception lists when rule creation fails', async () => {
+      const clonedExceptions = [
+        {
+          id: 'shared-list-id',
+          list_id: 'shared-list',
+          namespace_type: 'single' as const,
+          type: 'detection' as const,
+        },
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ];
+      duplicateExceptionsMock.mockResolvedValue(clonedExceptions);
+      clients.rulesClient.create.mockRejectedValue(new Error('create failed'));
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.lists.exceptionListClient.deleteExceptionList).toHaveBeenCalledTimes(1);
+      expect(clients.lists.exceptionListClient.deleteExceptionList).toHaveBeenCalledWith({
+        id: 'cloned-list-id',
+        listId: undefined,
+        namespaceType: 'single',
+      });
+    });
+
+    it('does not delete exception lists when rule creation succeeds', async () => {
+      duplicateExceptionsMock.mockResolvedValue([
+        {
+          id: 'cloned-list-id',
+          list_id: 'cloned-list',
+          namespace_type: 'single' as const,
+          type: 'rule_default' as const,
+        },
+      ]);
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionDuplicateSchemaMock(),
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.lists.exceptionListClient.deleteExceptionList).not.toHaveBeenCalled();
     });
   });
 

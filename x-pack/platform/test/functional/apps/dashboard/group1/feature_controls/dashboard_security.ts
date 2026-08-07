@@ -36,6 +36,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
+  /**
+   * Purpose: Dashboard permissions test
+   *
+   * Migration: Migrate to scout
+   */
   // Failing: See https://github.com/elastic/kibana/issues/257665
   describe.skip('dashboard feature controls security', () => {
     before(async () => {

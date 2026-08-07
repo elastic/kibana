@@ -43,11 +43,14 @@ export type {
   UiamOAuthClientResponse,
   UiamOAuthClientLogo,
   UiamOAuthClientType,
+  UiamOAuthProjectType,
   UiamOAuthConnectionsSummary,
   UiamOAuthConnectionResponse,
   CreateUiamOAuthClientParams,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
+  UiamUserInfo,
+  UiamResolvedUsersResponse,
 } from './oauth';
 
 export { HTTPAuthorizationHeader } from './http_authentication';

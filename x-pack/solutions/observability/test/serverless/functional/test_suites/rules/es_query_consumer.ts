@@ -88,7 +88,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(doesConfirmModalExist).toBe(true);
       });
       await testSubjects.click('confirmModalConfirmButton');
-      const name = await testSubjects.getVisibleText('ruleName');
+      const name = await testSubjects.getVisibleText('appHeaderTitle');
       expect(name).toEqual(ruleName);
     });
   }

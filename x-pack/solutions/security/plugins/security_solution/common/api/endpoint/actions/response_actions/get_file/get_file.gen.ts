@@ -28,7 +28,7 @@ export const GetFileRouteRequestBody = lazySchema(() =>
         /**
          * The full file path to retrieve from the endpoint.
          */
-        path: z.string(),
+        path: z.string().min(1).max(4096),
       }),
     })
   )
