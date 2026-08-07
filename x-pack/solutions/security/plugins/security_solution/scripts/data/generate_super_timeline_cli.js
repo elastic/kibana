@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-evals-phoenix-executor'],
-};
+require('@kbn/setup-node-env');
+require('@kbn/swc-register').install();
+
+require('./generate_super_timeline');
