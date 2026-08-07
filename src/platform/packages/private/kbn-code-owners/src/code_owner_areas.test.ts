@@ -53,7 +53,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/stack-monitoring',
     'elastic/workflows-eng',
   ],
-  search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-kibana'],
+  search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-ml-ux'],
   observability: [
     'elastic/actionable-obs-team',
     'elastic/apm-agent-approvers',
@@ -99,8 +99,8 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-threat-hunting',
     'elastic/security-threat-hunting-investigations',
   ],
-  workplaceai: ['elastic/search-kibana', 'elastic/workchat-eng'],
-  vectordb: ['elastic/search-kibana'],
+  workplaceai: ['elastic/search-ml-ux', 'elastic/workchat-eng'],
+  vectordb: ['elastic/search-ml-ux'],
 };
 
 /** Mirrors the legacy `findAreaForCodeOwner`: first area (in order) containing the handle. */
@@ -129,7 +129,7 @@ describe('code owner areas (registry-backed)', () => {
     it.each(CODE_OWNER_AREAS)(
       'contains exactly the historical handles for area %s (incl. multi-area teams)',
       (area) => {
-        // Multi-area teams (e.g. elastic/search-kibana under search, workplaceai
+        // Multi-area teams (e.g. elastic/search-ml-ux under search, workplaceai
         // and vectordb) must still appear under every one of their areas.
         expect([...getCodeOwnerAreaMappings()[area]].sort()).toEqual(
           [...LEGACY_CODE_OWNER_AREA_MAPPINGS[area]].sort()
