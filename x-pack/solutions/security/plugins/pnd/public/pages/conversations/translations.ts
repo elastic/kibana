@@ -7,39 +7,39 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BRIEFING_PAGE_INFO = Object.freeze({
-  pageTitle: i18n.translate('xpack.pnd.brief.pageTitle', {
-    defaultMessage: 'Brief',
+export const QUEUE_PAGE_INFO = Object.freeze({
+  pageTitle: i18n.translate('xpack.pnd.queue.pageTitle', {
+    defaultMessage: 'PND - Proposals queue',
   }),
   greetingEmphasis: (count: number) =>
-    i18n.translate('xpack.pnd.brief.greetingEmphasis', {
+    i18n.translate('xpack.pnd.queue.greetingEmphasis', {
       defaultMessage:
         '{count, plural, one {# investigation needs} other {# investigations need}} you.',
       values: { count },
     }),
-  greetingPrefix: i18n.translate('xpack.pnd.brief.greetingPrefix', {
+  greetingPrefix: i18n.translate('xpack.pnd.queue.greetingPrefix', {
     defaultMessage: 'Good afternoon.',
   }),
   autonomousSubline: (count: number) =>
-    i18n.translate('xpack.pnd.brief.autonomousSubline', {
+    i18n.translate('xpack.pnd.queue.autonomousSubline', {
       defaultMessage:
         'While you were away I resolved {count, plural, one {# investigation} other {# investigations}} on my own.',
       values: { count },
     }),
-  clearSubline: i18n.translate('xpack.pnd.brief.clearSubline', {
+  clearSubline: i18n.translate('xpack.pnd.queue.clearSubline', {
     defaultMessage:
       'Nothing was resolved autonomously — the queue below is everything that needs you.',
   }),
-  affectedSurfaces: i18n.translate('xpack.pnd.brief.affectedSurfaces', {
+  affectedSurfaces: i18n.translate('xpack.pnd.queue.affectedSurfaces', {
     defaultMessage: 'Affected surfaces',
   }),
-  loading: i18n.translate('xpack.pnd.brief.loading', {
+  loading: i18n.translate('xpack.pnd.queue.loading', {
     defaultMessage: 'Loading investigations...',
   }),
-  loadError: i18n.translate('xpack.pnd.brief.loadError', {
+  loadError: i18n.translate('xpack.pnd.queue.loadError', {
     defaultMessage: 'Unable to load the investigation queue.',
   }),
-  emptyBriefingQueue: i18n.translate('xpack.pnd.brief.emptyBucket', {
+  emptyQueue: i18n.translate('xpack.pnd.queue.emptyQueue', {
     defaultMessage: 'No items in the queue.',
   }),
 });

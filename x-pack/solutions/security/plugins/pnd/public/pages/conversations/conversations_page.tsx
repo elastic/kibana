@@ -26,7 +26,7 @@ import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
-import { BRIEFING_PAGE_INFO } from './translations';
+import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
@@ -42,7 +42,7 @@ export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useInvestigations();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
-  usePndDocTitle(BRIEFING_PAGE_INFO.pageTitle);
+  usePndDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
@@ -108,20 +108,20 @@ export const ConversationsPage: React.FC = () => {
       <PndPageHeader
         title={
           <>
-            {BRIEFING_PAGE_INFO.greetingPrefix}{' '}
+            {QUEUE_PAGE_INFO.greetingPrefix}{' '}
             <span
               css={css`
                 font-weight: 700;
               `}
             >
-              {BRIEFING_PAGE_INFO.greetingEmphasis(sortedConversations.length)}
+              {QUEUE_PAGE_INFO.greetingEmphasis(sortedConversations.length)}
             </span>
           </>
         }
         subtitle={
           autoResolvedCount > 0
-            ? BRIEFING_PAGE_INFO.autonomousSubline(autoResolvedCount)
-            : BRIEFING_PAGE_INFO.clearSubline
+            ? QUEUE_PAGE_INFO.autonomousSubline(autoResolvedCount)
+            : QUEUE_PAGE_INFO.clearSubline
         }
       />
 
@@ -133,7 +133,7 @@ export const ConversationsPage: React.FC = () => {
             wrap
             responsive={false}
             alignItems="center"
-            aria-label={BRIEFING_PAGE_INFO.affectedSurfaces}
+            aria-label={QUEUE_PAGE_INFO.affectedSurfaces}
           >
             {surfaces.map((surface) => (
               <EuiFlexItem key={surface} grow={false}>
@@ -178,20 +178,17 @@ export const ConversationsPage: React.FC = () => {
       {isLoading ? (
         <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" aria-label={BRIEFING_PAGE_INFO.loading} />
+            <EuiLoadingSpinner size="xl" aria-label={QUEUE_PAGE_INFO.loading} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
 
       {error ? (
-        <EuiEmptyPrompt iconType="alert" title={<h2>{BRIEFING_PAGE_INFO.loadError}</h2>} />
+        <EuiEmptyPrompt iconType="alert" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
       ) : null}
 
       {!isLoading && !error && filteredQueueItems.length === 0 ? (
-        <EuiEmptyPrompt
-          iconType="visTagCloud"
-          title={<h2>{BRIEFING_PAGE_INFO.emptyBriefingQueue}</h2>}
-        />
+        <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>} />
       ) : null}
 
       {!isLoading && !error
