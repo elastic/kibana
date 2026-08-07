@@ -71,6 +71,7 @@ dependsOn:
   - '@kbn/security-solution-features'
   - '@kbn/core-spaces-common'
   - '@kbn/entity-store'
+  - '@kbn/ml-common-types'
 tags:
   - functional-tests
   - package
