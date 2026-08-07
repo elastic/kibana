@@ -53,7 +53,7 @@ export const AskUserQuestionFlyout: React.FC<AskUserQuestionFlyoutProps> = ({
     <EuiFlyout
       onClose={onClose}
       aria-labelledby="askUserQuestionFlyoutTitle"
-      size="m"
+      size="600px"
       ownFocus={false}
     >
       <EuiFlyoutHeader hasBorder>

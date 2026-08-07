@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import type { AnyAction } from 'redux';
+import type { AnyAction } from 'redux-v4';
 import type { MapStoreState } from './store';
 
 export type NonSerializableState = {

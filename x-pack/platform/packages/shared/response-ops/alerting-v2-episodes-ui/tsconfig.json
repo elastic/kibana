@@ -7,6 +7,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/alerting-v2-common-queries",
     "@kbn/alerting-v2-schemas",
     "@kbn/datemath",
     "@kbn/core",

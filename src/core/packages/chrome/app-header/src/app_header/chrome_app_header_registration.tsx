@@ -37,11 +37,20 @@ export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
 };
 
 export const ChromeAppHeaderRegistration = React.memo<AppHeaderConfig>((props) => {
-  const { title, back, tabs, badges, menu, favorite, metadata } = props;
+  const { title, back, tabs, badges, menu, favorite, description, metadata, spacing } = props;
 
-  const config = useMemo(
-    () => ({ title, back, tabs, badges, menu, favorite, metadata }),
-    [title, back, tabs, badges, menu, favorite, metadata]
+  const config = useMemo<AppHeaderConfig>(
+    () => ({
+      title,
+      back,
+      tabs,
+      badges,
+      menu,
+      favorite,
+      ...(description ? { description } : { metadata }),
+      spacing,
+    }),
+    [title, back, tabs, badges, menu, favorite, description, metadata, spacing]
   );
 
   useChromeAppHeaderRegistration(config);

@@ -1,5 +1,5 @@
 {
-  "sha1": "c3fec88ed2b1f7330e13c216dc4f7334beb89b45",
+  "sha1": "f8ec4376d98434e7ffe20c28ba3dfcec9a542be1",
   "tests": [
     {
       "id": "7e6ddec5039370c-37b029d2fd41663",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
-        "line": 39,
+        "line": 44,
         "column": 7
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
-        "line": 74,
+        "line": 89,
         "column": 7
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/ui/tests/a11y.spec.ts",
-        "line": 110,
+        "line": 121,
         "column": 7
       }
     }

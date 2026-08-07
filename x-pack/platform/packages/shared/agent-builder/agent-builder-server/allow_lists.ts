@@ -8,9 +8,10 @@
 import {
   platformCoreTools,
   platformCoreCasesTools,
-  platformStreamsSigEventsTools,
+  platformSignificantEventsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -22,7 +23,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Cases CRUD tools, registered by the Cases plugin
   ...Object.values(platformCoreCasesTools),
   // Streams / Significant Events
-  ...Object.values(platformStreamsSigEventsTools),
+  ...Object.values(platformSignificantEventsTools),
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
@@ -45,6 +46,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
 
+  // ML anomaly detection (Agent Builder skill tools)
+  `${internalNamespaces.ml}.ad_get_job_info`,
+  `${internalNamespaces.ml}.ad_create_job`,
+  `${internalNamespaces.ml}.ad_manage_job_state`,
+  `${internalNamespaces.ml}.ad_update_job_config`,
+  `${internalNamespaces.ml}.query_anomalies`,
+
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
@@ -52,8 +60,19 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.add_entities_to_watchlist`,
+  `${internalNamespaces.security}.create_watchlist`,
+  `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.get_entity_graph`,
+  `${internalNamespaces.security}.list_watchlists`,
+  `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.update_watchlist`,
+  `${internalNamespaces.security}.list_leads`,
+  `${internalNamespaces.security}.generate_leads`,
+  `${internalNamespaces.security}.dismiss_lead`,
+  `${internalNamespaces.security}.set_asset_criticality`,
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
@@ -61,6 +80,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.alert-triage`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -71,6 +91,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.update_stream`,
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
+
+  // Custom content panels
+  'custom_content_update_panel',
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -92,19 +115,32 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
-  `${internalNamespaces.streams}.significant-events.discovery.judge`,
-  `${internalNamespaces.streams}.investigation`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
 
-export const isAllowedBuiltinTool = (toolName: string) => {
+export const isAllowedBuiltinTool = (toolName: string): toolName is AgentBuilderBuiltinTool => {
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
 };
 
-export const isAllowedBuiltinAgent = (agentName: string) => {
+export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuilderBuiltinAgent => {
   return (AGENT_BUILDER_BUILTIN_AGENTS as readonly string[]).includes(agentName);
+};
+
+/**
+ * This is a manually maintained list of all agent types registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new agent type.
+ */
+export const AGENT_BUILDER_AGENT_TYPES = [
+  chatAgentTypeId,
+  `${internalNamespaces.platformSignificantEvents}.investigation-type`,
+  `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+] as const;
+
+export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
+
+export const isAllowedAgentType = (typeId: string): typeId is AgentBuilderAgentType => {
+  return (AGENT_BUILDER_AGENT_TYPES as readonly string[]).includes(typeId);
 };
 
 /**
@@ -120,9 +156,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Cases
   'cases-management',
+  'cases-analytics',
 
   // Platform – Alerting
   'rule-management',
+  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -134,6 +172,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'significant-events-management',
+  'significant-events-changepoint-analysis',
+  'significant-events-ki-grounding',
+  'significant-events-assessment',
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
@@ -143,25 +184,43 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-onboarding',
   'streams-gap-detection',
 
+  // Platform – Context Engine
+  'ki-automation-generation',
+  'ki-retrieval',
+
   // Platform – Workflows
   'workflow-authoring',
 
+  // Evals
+  'eval-experiment-authoring',
+
   // Security Solution
+  'entity-analytics-leads',
   'find-security-ml-jobs',
   'automatic_troubleshooting',
   'entity-analytics',
+  'manage-watchlists',
   'alert-analysis',
+  'alert-triage',
   'detection-rule-edit',
   'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
+  'endpoint-forensic-analysis',
+  'investigate-rule',
   'siem-readiness',
+  'attack-discovery-alert-retrieval-builder',
+  'attack-discovery-generator',
+  'attack-discovery-workflow-troubleshooting',
 
   // O11Y
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+
+  // ML
+  `${internalNamespaces.ml}.anomaly-detection`,
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
@@ -171,13 +230,13 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
   `${internalNamespaces.search}.elasticsearch-tutorial`,
-  'skill-authoring',
+  'skill-management',
   'connector-authoring',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
 
-export const isAllowedBuiltinSkill = (skillId: string) => {
+export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderBuiltinSkill => {
   return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };
 
@@ -189,6 +248,87 @@ export const AGENT_BUILDER_BUILTIN_PLUGINS = [] as const;
 
 export type AgentBuilderBuiltinPlugin = (typeof AGENT_BUILDER_BUILTIN_PLUGINS)[number];
 
-export const isAllowedBuiltinPlugin = (pluginId: string) => {
+export const isAllowedBuiltinPlugin = (pluginId: string): pluginId is AgentBuilderBuiltinPlugin => {
   return (AGENT_BUILDER_BUILTIN_PLUGINS as readonly string[]).includes(pluginId);
+};
+
+/**
+ * This is a manually maintained list of all built-in attachment types registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new attachment type.
+ */
+export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
+  // Platform (agent_builder_platform)
+  'text',
+  'screen_context',
+  'esql',
+  'graph',
+  'connector',
+  'connector_setup',
+  'skill',
+
+  // Platform – Visualizations
+  'visualization',
+
+  // Platform – Dashboards
+  'platform.dashboard.dashboard_state',
+
+  // Platform – Streams (significant events)
+  'platform.sig_event',
+  'platform.ki_feature',
+  'platform.sig_event_detection',
+
+  // Platform – Discover
+  'esql.query_results',
+
+  // Platform – Workflows
+  'workflow.yaml',
+  'workflow.yaml.diff',
+
+  // Platform – Cases
+  'case',
+  'cases',
+
+  // Platform – Alerting v2
+  'platform.alerting.rule',
+  'platform.alerting.action_policy',
+
+  // Security Solution
+  'security.alert',
+  'security.alerts',
+  'security.entity',
+  'security.entity_analytics_dashboard',
+  'security.entity_graph',
+  'security.rule',
+  'security.siem_readiness',
+  // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
+  'security.rule.preview',
+
+  // Security Solution – Attack Discovery (discoveries plugin)
+  // gated behind the workflows feature flag
+  'diagnostic_report',
+
+  // Observability
+  'observability.ai_insight',
+  'observability.error',
+  'observability.alert',
+  'observability.log',
+  'observability.service',
+  'observability.slo',
+  'observability.host',
+  'observability.transaction',
+  'observability.synthetics_monitor',
+
+  // Observability – APM
+  'observability.service-map',
+
+  // Platform – Custom Content
+  'platform.custom_content.panel_context',
+] as const;
+
+export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
+
+export const isAllowedBuiltinAttachment = (
+  attachmentTypeId: string
+): attachmentTypeId is AgentBuilderBuiltinAttachment => {
+  return (AGENT_BUILDER_BUILTIN_ATTACHMENTS as readonly string[]).includes(attachmentTypeId);
 };

@@ -101,7 +101,7 @@ describe('CaseViewTimelines', () => {
     expect(screen.getByTestId('timelines-table')).toBeInTheDocument();
   });
 
-  it('forwards the outer search term to the hook', () => {
+  it('does not forward the tab search term to the hook (attachments are filtered client-side)', () => {
     render(
       <TestProviders>
         <CaseViewTimelines
@@ -114,6 +114,6 @@ describe('CaseViewTimelines', () => {
     );
 
     const args = mockedUseGetTimelinesByIds.mock.calls[0][0];
-    expect(args.search).toBe('phishing');
+    expect(args.search).toBeUndefined();
   });
 });

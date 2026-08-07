@@ -41,6 +41,10 @@ exports.EcsCustomPropertyMappings = {
               },
             },
           },
+          // arbitrary consumer-provided data for the current task run, owned by task manager.
+          data: {
+            type: 'flattened',
+          },
         },
       },
       // alerting specific fields

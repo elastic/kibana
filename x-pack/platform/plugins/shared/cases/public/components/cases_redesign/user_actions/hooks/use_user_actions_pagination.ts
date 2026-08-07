@@ -62,6 +62,11 @@ export const useUserActionsPagination = ({
     return Math.max(lastPageData.total - loadedCount, 0);
   }, [caseInfiniteUserActionsData]);
 
+  // The `total` reported by the API reflects the current type/author/search
+  // filters, unlike `userActionsStats` which is always unfiltered. It's the
+  // same across all fetched pages, so the first one is enough.
+  const total = caseInfiniteUserActionsData?.pages?.[0]?.total ?? 0;
+
   return {
     isLoadingInfiniteUserActions,
     infiniteCaseUserActions: infiniteCaseUserActions.userActions,
@@ -70,5 +75,6 @@ export const useUserActionsPagination = ({
     fetchNextPage,
     isFetchingNextPage,
     remainingActionCount,
+    total,
   };
 };

@@ -597,3 +597,47 @@ export const DestructiveItems: Story = {
     config: destructiveItemConfig,
   },
 };
+
+const selectedItemsConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'executionsToggle',
+      order: 1,
+      label: 'Executions',
+      run: action('executions-toggle-clicked'),
+      iconType: 'branch',
+      testId: 'executionsToggleButton',
+      isSelected: true,
+    },
+    {
+      id: 'inspectToggle',
+      order: 2,
+      overflow: true,
+      label: 'Inspect',
+      run: action('inspect-toggle-clicked'),
+      iconType: 'inspect',
+      testId: 'inspectToggleButton',
+      isSelected: true,
+    },
+  ],
+  primaryActionItem: {
+    run: action('run-workflow-clicked'),
+    id: 'runWorkflow',
+    label: 'Run workflow',
+    testId: 'runWorkflowButton',
+    iconType: 'play',
+  },
+};
+
+/**
+ * `isSelected` renders a toggle-style item in a "pressed" state. When the item is displayed
+ * inline it uses `aria-pressed` (see "Executions"), and when it collapses into the overflow
+ * "More" menu the pressed state is shown with a trailing check icon (open the "More" menu to
+ * see "Inspect"). Resize below the `xl` breakpoint to move both items into the overflow menu.
+ */
+export const SelectedItems: Story = {
+  name: 'Selected items - inline and overflow',
+  args: {
+    config: selectedItemsConfig,
+  },
+};

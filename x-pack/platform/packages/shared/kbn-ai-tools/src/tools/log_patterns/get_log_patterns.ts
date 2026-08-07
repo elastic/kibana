@@ -24,6 +24,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 import {
   buildCategorizeWithSampleQuery,
@@ -433,6 +434,7 @@ export async function getSigEventsLogPatternsEsql({
     index: samplingSource,
     start,
     end,
+    signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
   });
   // ES|QL normalizes the `text` family in `column.type`: both `text` and
   // `match_only_text` mappings report as `text`.

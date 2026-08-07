@@ -23,20 +23,14 @@ export interface BuildWorkflowExecutionDocumentParams {
   defaultTriggeredBy: string;
   authenticatedUser: string;
   now: Date;
-  workflowVersioningEnabled: boolean;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
 }
 
 const stampExecutionWorkflowVersion = (
   workflowExecution: WorkflowExecutionForInputRendering,
-  workflow: WorkflowExecutionEngineModel,
-  workflowVersioningEnabled: boolean
+  workflow: WorkflowExecutionEngineModel
 ): void => {
-  if (!workflowVersioningEnabled) {
-    return;
-  }
-
   const { version } = pickWorkflowDocumentVersion(workflow);
   if (version !== undefined) {
     workflowExecution.version = version;
@@ -52,7 +46,6 @@ export const buildWorkflowExecutionDocument = (
     defaultTriggeredBy,
     authenticatedUser,
     now,
-    workflowVersioningEnabled,
     maxEventChainDepth,
     getConcurrencyGroupKey,
   } = params;
@@ -97,7 +90,7 @@ export const buildWorkflowExecutionDocument = (
     ...(dispatchEventId ? { dispatchEventId } : {}),
   };
 
-  stampExecutionWorkflowVersion(workflowExecution, workflow, workflowVersioningEnabled);
+  stampExecutionWorkflowVersion(workflowExecution, workflow);
 
   const concurrencyGroupKey = getConcurrencyGroupKey(workflowExecution);
   if (concurrencyGroupKey) {

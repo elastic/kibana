@@ -237,6 +237,89 @@ describe('applyFieldEvaluations', () => {
       'entity.namespace': 'local',
     });
   });
+
+  it('should map cloud.provider to aws, gcp, or entra_id when event.kind is asset, event.module is asset_discovery, and local namespace gate does not match', () => {
+    const assetCloudBase = {
+      user: { name: 'inventory-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+    };
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'aws' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'aws' });
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'gcp' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'gcp' });
+    expect(
+      applyFieldEvaluations({ ...assetCloudBase, cloud: { provider: 'azure' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('should prefer local namespace over cloud.provider when asset event satisfies local namespace gate', () => {
+    expect(
+      applyFieldEvaluations(
+        {
+          user: { name: 'alice' },
+          host: { id: 'host-1' },
+          event: { kind: 'asset', module: 'asset_inventory' },
+          cloud: { provider: 'aws' },
+        },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': USER_ENTITY_NAMESPACE.Local });
+  });
+
+  describe('cloud.provider field-mapping whenClause', () => {
+    const assetBase = {
+      user: { name: 'cloud-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+    };
+
+    it('maps cloud.provider aws → aws namespace', () => {
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'aws' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'aws' });
+    });
+
+    it('maps cloud.provider gcp → gcp namespace', () => {
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'gcp' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'gcp' });
+    });
+
+    it('maps cloud.provider azure → entra_id namespace', () => {
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'azure' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'entra_id' });
+    });
+
+    it('falls through to source value when cloud.provider is not in the mapping', () => {
+      // event.module = 'asset_discovery' becomes the namespace when provider is unknown
+      expect(
+        applyFieldEvaluations({ ...assetBase, cloud: { provider: 'ibm' } }, userEvaluations)
+      ).toEqual({ 'entity.namespace': 'asset_discovery' });
+    });
+
+    it('falls through to source value when cloud.provider is absent', () => {
+      expect(applyFieldEvaluations(assetBase, userEvaluations)).toEqual({
+        'entity.namespace': 'asset_discovery',
+      });
+    });
+
+    it('does not apply cloud.provider mapping when event.kind is not asset', () => {
+      // event.module and cloud.provider intentionally differ: if the mapping incorrectly fired,
+      // the result would be 'aws'; the correct result is 'custom-module' (from event.module source).
+      expect(
+        applyFieldEvaluations(
+          {
+            user: { name: 'regular-user' },
+            event: { kind: 'event', module: 'custom-module' },
+            cloud: { provider: 'aws' },
+          },
+          userEvaluations
+        )
+      ).toEqual({ 'entity.namespace': 'custom-module' });
+    });
+  });
 });
 
 describe('shared entity.source field evaluation', () => {
@@ -408,5 +491,107 @@ describe('getSourceMatchSpec', () => {
         and: expect.any(Array),
       }),
     });
+  });
+
+  it('should return compound condition when asset_discovery + cloud.provider field-mapping whenClause wins', () => {
+    // The returned condition narrows to the full outer condition (event.kind AND event.module)
+    // plus the specific cloud.provider, so per-document filters are provider-specific.
+    const outerCondition = {
+      and: [
+        { field: 'event.kind', includes: 'asset' },
+        { field: 'event.module', includes: 'asset_discovery' },
+      ],
+    };
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'asset_discovery' },
+          cloud: { provider: 'gcp' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'gcp' }] },
+    });
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'asset_discovery' },
+          cloud: { provider: 'aws' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'aws' }] },
+    });
+
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'asset_discovery' },
+          cloud: { provider: 'azure' },
+        },
+        userEval
+      )
+    ).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'azure' }] },
+    });
+  });
+
+  it('should not fire cloud.provider mapping when event.module is not asset_discovery', () => {
+    // Another integration sending event.kind=asset but a different module must NOT be routed
+    // via cloud.provider — it falls through to sourceMatchesAny / raw source value.
+    expect(
+      getSourceMatchSpec(
+        {
+          user: { name: 'u' },
+          event: { kind: 'asset', module: 'other_integration' },
+          cloud: { provider: 'aws' },
+        },
+        userEval
+      )
+    ).toEqual({ type: 'values', values: ['other_integration'] });
+  });
+
+  it('should produce different compound conditions for two docs sharing user.name but differing in cloud.provider', () => {
+    const awsDoc = {
+      user: { name: 'shared-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+      cloud: { provider: 'aws' },
+    };
+    const gcpDoc = {
+      user: { name: 'shared-user' },
+      event: { kind: 'asset', module: 'asset_discovery' },
+      cloud: { provider: 'gcp' },
+    };
+
+    const awsSpec = getSourceMatchSpec(awsDoc, userEval);
+    const gcpSpec = getSourceMatchSpec(gcpDoc, userEval);
+
+    const outerCondition = {
+      and: [
+        { field: 'event.kind', includes: 'asset' },
+        { field: 'event.module', includes: 'asset_discovery' },
+      ],
+    };
+    expect(awsSpec).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'aws' }] },
+    });
+    expect(gcpSpec).toEqual({
+      type: 'condition',
+      condition: { and: [outerCondition, { field: 'cloud.provider', eq: 'gcp' }] },
+    });
+
+    // The two specs differ — an AWS entity's filter will not accidentally match a GCP doc.
+    expect(awsSpec).not.toEqual(gcpSpec);
   });
 });

@@ -38,6 +38,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({ idSelected, onChange }) 
       onChange={handleChange}
       buttonSize="m"
       isIconOnly
+      data-test-subj="cases-view-toggle"
     />
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegendValue } from '@elastic/charts';
+import { ChartLegendValue } from '@kbn/chart-expressions-common';
 
 import type { LensPartitionLayerState, LensPartitionVisualizationState } from '@kbn/lens-common';
 
@@ -33,7 +33,7 @@ export function convertPartitionToLegendStats(
     if ('showValuesInLegend' in l) {
       l.legendStats = [
         ...new Set([
-          ...(l.showValuesInLegend ? [LegendValue.Value] : []),
+          ...(l.showValuesInLegend ? [ChartLegendValue.Value] : []),
           ...(l.legendStats ?? []),
         ]),
       ];

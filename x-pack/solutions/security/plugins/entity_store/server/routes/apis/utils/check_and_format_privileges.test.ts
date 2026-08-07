@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { formatPrivileges, hasReadWritePermissions } from './check_and_format_privileges';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  checkAndFormatPrivileges,
+  formatPrivileges,
+  hasReadWritePermissions,
+} from './check_and_format_privileges';
 
 const TEST_INDEX_PATTERN = 'test-index-pattern-*';
 describe('formatPrivileges', () => {
@@ -202,5 +208,73 @@ describe('formatPrivileges', () => {
       has_read_permissions: true,
       has_write_permissions: false,
     });
+  });
+});
+
+describe('checkAndFormatPrivileges', () => {
+  const buildSecurityMock = (kibanaAuthorized: Array<{ privilege: string; authorized: boolean }>) =>
+    ({
+      authz: {
+        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(
+          jest.fn().mockResolvedValue({
+            hasAllRequested: kibanaAuthorized.every(({ authorized }) => authorized),
+            privileges: {
+              elasticsearch: { cluster: [], index: {} },
+              kibana: kibanaAuthorized,
+            },
+          })
+        ),
+      },
+    } as unknown as SecurityPluginStart);
+
+  it('sets has_kibana_feature_access to true when all requested kibana privileges are authorized', async () => {
+    const security = buildSecurityMock([
+      { privilege: 'api:securitySolution', authorized: true },
+      { privilege: 'api:securitySolution-entity-analytics', authorized: true },
+    ]);
+
+    const result = await checkAndFormatPrivileges({
+      request: {} as KibanaRequest,
+      security,
+      indexPatterns: [],
+      privilegesToCheck: {
+        elasticsearch: { cluster: [], index: {} },
+        kibana: ['api:securitySolution', 'api:securitySolution-entity-analytics'],
+      },
+    });
+
+    expect(result.has_kibana_feature_access).toBe(true);
+  });
+
+  it('sets has_kibana_feature_access to false when a requested kibana privilege is unauthorized', async () => {
+    const security = buildSecurityMock([
+      { privilege: 'api:securitySolution', authorized: true },
+      { privilege: 'api:securitySolution-entity-analytics', authorized: false },
+    ]);
+
+    const result = await checkAndFormatPrivileges({
+      request: {} as KibanaRequest,
+      security,
+      indexPatterns: [],
+      privilegesToCheck: {
+        elasticsearch: { cluster: [], index: {} },
+        kibana: ['api:securitySolution', 'api:securitySolution-entity-analytics'],
+      },
+    });
+
+    expect(result.has_kibana_feature_access).toBe(false);
+  });
+
+  it('omits has_kibana_feature_access when no kibana privileges were requested', async () => {
+    const security = buildSecurityMock([]);
+
+    const result = await checkAndFormatPrivileges({
+      request: {} as KibanaRequest,
+      security,
+      indexPatterns: [],
+      privilegesToCheck: { elasticsearch: { cluster: [], index: {} } },
+    });
+
+    expect(result.has_kibana_feature_access).toBeUndefined();
   });
 });

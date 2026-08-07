@@ -22,7 +22,7 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
-        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'false'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main

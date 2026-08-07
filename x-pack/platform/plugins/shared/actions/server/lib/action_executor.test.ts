@@ -16,6 +16,7 @@ import {
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import type { ActionType as ConnectorType } from '../types';
 import { ConnectorUsageCollector } from '../types';
@@ -293,13 +294,14 @@ const mockUser = {
   profile_uid: '123',
   roles: ['superuser'],
   username: 'coolguy',
+  http_authentication_scheme: null,
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   jest.clearAllMocks();
   mockGetRequestBodyByte.mockReturnValue(0);
-  spacesMock.getSpaceId.mockReturnValue('some-namespace');
+  spacesMock.getSpaceId.mockReturnValue(asSpaceId('some-namespace'));
   loggerMock.get.mockImplementation(() => loggerMock);
   securityMockStart.authc.getCurrentUser.mockImplementation(() => mockUser);
 

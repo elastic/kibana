@@ -33,3 +33,7 @@ export const TRACES_DOC_VIEWER_EBT_DETAILS = {
   SPAN_DOC: 'spanDoc',
   LOG_DOC: 'logDoc',
 } as const;
+
+export const TRACES_DOC_VIEWER_EBT_SOURCES = {
+  ABOUT: 'docViewerAbout',
+} as const;

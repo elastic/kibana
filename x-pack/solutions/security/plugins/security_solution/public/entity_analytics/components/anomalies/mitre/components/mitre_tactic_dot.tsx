@@ -52,6 +52,7 @@ interface ChipRowProps {
   isChipVisible: boolean;
   isHovered: boolean;
   isSelected: boolean;
+  alignDotToEnd: boolean;
   tactic: string;
 }
 
@@ -67,6 +68,7 @@ const ChipRow: React.FC<ChipRowProps> = ({
   isHovered,
   isSelected,
   tactic,
+  alignDotToEnd,
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -82,7 +84,6 @@ const ChipRow: React.FC<ChipRowProps> = ({
         aria-hidden
         css={css`
           position: absolute;
-          left: 4px;
           bottom: 0;
           width: 1px;
           height: ${TICK_HEIGHT}px;
@@ -91,6 +92,14 @@ const ChipRow: React.FC<ChipRowProps> = ({
           transition: opacity 120ms ease;
           z-index: ${Number(euiTheme.levels.content) + 3};
           pointer-events: none;
+          ${alignDotToEnd
+            ? css`
+                right: 4px;
+                left: auto;
+              `
+            : css`
+                left: 4px;
+              `}
         `}
       />
       <div
@@ -98,7 +107,7 @@ const ChipRow: React.FC<ChipRowProps> = ({
         className="mitreTacticDotV3__hoverChip"
         css={css`
           position: absolute;
-          ${flipToRight
+          ${alignDotToEnd || flipToRight
             ? css`
                 right: calc(100% - 4px);
                 left: auto;
@@ -190,6 +199,7 @@ interface MitreTacticDotProps {
   isLast?: boolean;
   isPersistentDefault?: boolean;
   isSelected?: boolean;
+  alignDotToEnd?: boolean;
   onClick?: () => void;
   onHoverChange?: (tactic: string, isHovered: boolean) => void;
   showLabel: boolean;
@@ -203,6 +213,7 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
   isAnotherDotHovered = false,
   isClickable = false,
   isLast = false,
+  alignDotToEnd = false,
   isPersistentDefault = false,
   isSelected = false,
   onClick,
@@ -330,6 +341,7 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
   return (
     <div
       {...hoverHandlers}
+      data-test-subj={`mitreTacticDot-${tactic.replace(/\s+/g, '')}`}
       onClick={handleActivate}
       onKeyDown={handleActivate ? handleDotKeyDown : undefined}
       role={handleActivate ? 'button' : undefined}
@@ -352,6 +364,7 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
           isChipVisible={isChipVisible}
           isHovered={isHovered}
           isSelected={isSelected}
+          alignDotToEnd={alignDotToEnd}
           tactic={tactic}
         />
       )}
@@ -367,7 +380,6 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
           data-test-subj="mitreInnerCircle"
           css={css`
             position: absolute;
-            left: 0;
             top: 0;
             width: 8px;
             height: 8px;
@@ -375,6 +387,14 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
             border: 2px solid ${color};
             border-radius: 50%;
             z-index: ${Number(euiTheme.levels.content) + 2};
+            ${alignDotToEnd
+              ? css`
+                  right: 0;
+                  left: auto;
+                `
+              : css`
+                  left: 0;
+                `}
           `}
         />
         {/* Outer halo — full opacity + expanded when selected. */}
@@ -382,7 +402,6 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
           data-test-subj="mitreOuterCircle"
           css={css`
             position: absolute;
-            left: ${haloOffset}px;
             top: ${haloOffset}px;
             width: ${haloSize}px;
             height: ${haloSize}px;
@@ -392,21 +411,38 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
             opacity: ${haloOpacity};
             z-index: ${Number(euiTheme.levels.content) + 1};
             transition: width 120ms ease, height 120ms ease, opacity 120ms ease, left 120ms ease,
-              top 120ms ease;
+              right 120ms ease, top 120ms ease;
+            ${alignDotToEnd
+              ? css`
+                  right: ${haloOffset}px;
+                  left: auto;
+                `
+              : css`
+                  left: ${haloOffset}px;
+                `}
           `}
         />
         {/* Connector line — 4 px stub when last, full cell otherwise. */}
         <div
           css={
             isLast
-              ? css`
-                  position: absolute;
-                  left: 0;
-                  width: 4px;
-                  top: 3px;
-                  border-bottom: 1px solid ${euiTheme.colors.lightShade};
-                  height: 0;
-                `
+              ? alignDotToEnd
+                ? css`
+                    position: absolute;
+                    right: 4px;
+                    width: 4px;
+                    top: 3px;
+                    border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                    height: 0;
+                  `
+                : css`
+                    position: absolute;
+                    left: 0;
+                    width: 4px;
+                    top: 3px;
+                    border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                    height: 0;
+                  `
               : css`
                   position: absolute;
                   left: 0;

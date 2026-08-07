@@ -11,6 +11,10 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP } from '../translations';
 import type { TableRow } from './types';
 import { useAnomalyTableRowActions } from '../../../api/hooks/use_anomaly_table_row_actions';
+import {
+  ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID,
+  ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX,
+} from '../test_ids';
 
 interface AnomalyRowActionsMenuProps {
   row: TableRow;
@@ -32,6 +36,7 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
           name: action.label,
           icon: action.icon,
           onClick: action.onClick,
+          'data-test-subj': `${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${action.key}`,
         })),
       },
     ],
@@ -41,6 +46,7 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
   const button = (
     <EuiToolTip content={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP} disableScreenReaderOutput>
       <EuiButtonIcon
+        data-test-subj={ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID}
         iconType="boxesVertical"
         aria-label={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP}
         onClick={togglePopover}

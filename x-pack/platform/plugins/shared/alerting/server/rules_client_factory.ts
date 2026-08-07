@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   KibanaRequest,
   Logger,
@@ -392,6 +393,7 @@ export class RulesClientFactory {
       .asScopedToNamespace(spaceId);
 
     return new RulesClient({
+      request,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,
@@ -486,6 +488,18 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
+          // A raw UIAM credential (`essu_...`) means the request was authenticated with a
+          // user-created organization-level API key. Unlike framework-granted UIAM keys
+          // (encoded as `base64(id:key)`), it carries no key id, so it cannot be persisted on
+          // the rule for execution and invalidation bookkeeping.
+          if (isUiamCredential(authorizationHeader)) {
+            throw Boom.badRequest(
+              `Cannot use an organization-level API key to create or enable rule "${name}". ` +
+                `Organization-level API keys are not supported for rule operations; ` +
+                `use a project-scoped Elasticsearch API key instead.`
+            );
+          }
+
           const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
@@ -527,6 +541,19 @@ export class RulesClientFactory {
         await factory.invalidateApiKeyNow(params);
       },
       async cloneAPIKey(name: string) {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        // UIAM keys can't be cloned (native ES /_security/api_key/clone rejects essu_ keys),
+        // so mint a fresh framework-owned UIAM key instead.
+        if (authorizationHeader && isUiamCredential(authorizationHeader)) {
+          const uiamResult = await factory.createUiamApiKey(request, name);
+          if (!uiamResult) {
+            throw new Error('Failed to grant UIAM API key for cloned alerting rule');
+          }
+          return {
+            apiKeysEnabled: true,
+            uiamResult,
+          };
+        }
         const cloneResult = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
           name,
           metadata: { managed: true, kibana: { type: 'alerting_rule' } },

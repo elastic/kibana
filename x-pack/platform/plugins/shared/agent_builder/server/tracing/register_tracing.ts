@@ -22,7 +22,6 @@ import {
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
 import {
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -67,7 +66,6 @@ const createCachedTracingSettings = async (
       const client = core.uiSettings.asScopedToClient(internalClient);
       const [
         enabled,
-        experimentalFeaturesEnabled,
         includeUserPrompts,
         includeLlmResponses,
         includeToolDetails,
@@ -76,7 +74,6 @@ const createCachedTracingSettings = async (
         includeRealIds,
       ] = await Promise.all([
         client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
-        client.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
         client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
@@ -85,7 +82,7 @@ const createCachedTracingSettings = async (
         client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
       ]);
       settings = {
-        enabled: enabled && experimentalFeaturesEnabled,
+        enabled,
         includeUserPrompts,
         includeLlmResponses,
         includeToolDetails,

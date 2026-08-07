@@ -8,6 +8,7 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
+import { buildIndexNamesWithNamespaces } from '../../../../utils/build_index_name_with_namespace';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 import { buildSpaceIdFilter } from '../../../../utils/build_space_id_filter';
 
@@ -17,6 +18,7 @@ export const buildScheduledActionResultsQuery = ({
   spaceId,
   sort,
   pagination,
+  integrationNamespaces,
   ccsEnabled,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   // Top-level hit scoping is enforced centrally in the search strategy
@@ -32,7 +34,7 @@ export const buildScheduledActionResultsQuery = ({
   ];
 
   const index = prefixIndexPatternsWithCcs(
-    `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+    buildIndexNamesWithNamespaces(`${ACTION_RESPONSES_DATA_STREAM_INDEX}*`, integrationNamespaces),
     ccsEnabled ?? false
   );
 

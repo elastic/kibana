@@ -28,45 +28,115 @@ import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
 import type {
-  AssistantMessageEvent,
-  ChoiceEvent,
+  GenAIInputMessage,
+  GenAIMessagePart,
+  GenAIOutputMessage,
   GenAISemConvAttributes,
-  MessageEvent,
-  SystemMessageEvent,
-  ToolMessageEvent,
-  UserMessageEvent,
+  GenAITextPart,
 } from './types';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
-import { flattenAttributes } from './util/flatten_attributes';
 
-function addEvent(span: Span, event: MessageEvent) {
-  if (!span.isRecording()) {
-    return span;
-  }
-  const flattened = flattenAttributes(event.body);
-  return span.addEvent(event.name, {
-    ...flattened,
-    ...event.attributes,
+function buildInputMessages(messages: Message[]): GenAIInputMessage[] {
+  return messages.map((message) => {
+    switch (message.role) {
+      case MessageRole.User:
+        return buildUserInputMessage(message);
+      case MessageRole.Assistant:
+        return buildAssistantInputMessage(message);
+      case MessageRole.Tool:
+        return buildToolInputMessage(message);
+    }
   });
 }
 
-export function setChoice(
+function buildUserInputMessage(message: UserMessage): GenAIInputMessage {
+  const content =
+    typeof message.content === 'string' ? message.content : JSON.stringify(message.content);
+  return {
+    role: 'user',
+    parts: [{ type: 'text', content }],
+  };
+}
+
+function buildAssistantInputMessage(message: AssistantMessage): GenAIInputMessage {
+  const parts: GenAIMessagePart[] = [];
+  if (message.content) {
+    parts.push({ type: 'text', content: message.content });
+  }
+  if (message.toolCalls) {
+    for (const toolCall of message.toolCalls) {
+      parts.push({
+        type: 'tool_call',
+        id: toolCall.toolCallId,
+        name: toolCall.function.name,
+        arguments:
+          typeof toolCall.function.arguments === 'string'
+            ? toolCall.function.arguments
+            : JSON.stringify(toolCall.function.arguments),
+      });
+    }
+  }
+  return { role: 'assistant', parts };
+}
+
+function buildToolInputMessage(message: ToolMessage): GenAIInputMessage {
+  const response =
+    typeof message.response === 'string' ? message.response : JSON.stringify(message.response);
+  return {
+    role: 'tool',
+    parts: [{ type: 'tool_call_response', id: message.toolCallId, response }],
+  };
+}
+
+function buildSystemInstructions(system: string): GenAITextPart[] {
+  return [{ type: 'text', content: system }];
+}
+
+function buildOutputMessages({
+  content,
+  toolCalls,
+}: {
+  content: string;
+  toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall>;
+}): GenAIOutputMessage[] {
+  const parts: GenAIMessagePart[] = [];
+  if (content) {
+    parts.push({ type: 'text', content });
+  }
+  for (const toolCall of toolCalls) {
+    parts.push({
+      type: 'tool_call',
+      id: toolCall.toolCallId,
+      name: toolCall.function.name,
+      arguments:
+        typeof toolCall.function.arguments === 'string'
+          ? toolCall.function.arguments
+          : JSON.stringify(toolCall.function.arguments),
+    });
+  }
+  return [
+    {
+      role: 'assistant',
+      finish_reason: toolCalls.length ? 'tool_calls' : 'stop',
+      parts,
+    },
+  ];
+}
+
+function setOutputMessages(
   span: Span,
   {
     content,
     toolCalls,
   }: { content: string; toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall> }
 ) {
-  addEvent(span, {
-    name: GenAISemanticConventions.GenAIChoice,
-    body: {
-      finish_reason: toolCalls.length ? 'tool_calls' : 'stop',
-      index: 0,
-      message: {
-        ...mapAssistantResponse({ content, toolCalls }),
-      },
-    },
-  } satisfies ChoiceEvent);
+  if (!span.isRecording()) {
+    return;
+  }
+  span.setAttribute(
+    GenAISemanticConventions.GenAIOutputMessages,
+    JSON.stringify(buildOutputMessages({ content, toolCalls }))
+  );
 }
 
 function setTokens(
@@ -76,11 +146,14 @@ function setTokens(
   if (!span.isRecording()) {
     return;
   }
-  span.setAttributes({
+  const attributes: Record<string, number> = {
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
     [GenAISemanticConventions.GenAIUsageOutputTokens]: completion,
-    [GenAISemanticConventions.GenAIUsageCacheReadInputTokens]: cached ?? 0,
-  } satisfies GenAISemConvAttributes);
+  };
+  if (cached != null) {
+    attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
+  }
+  span.setAttributes(attributes);
 }
 
 function setResponseModel(span: Span, { modelName }: { modelName?: string }) {
@@ -98,65 +171,6 @@ interface InferenceGenerationOptions {
   messages: Message[];
   tools?: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice;
-}
-
-function getUserMessageEvent(message: UserMessage): UserMessageEvent {
-  return {
-    name: GenAISemanticConventions.GenAIUserMessage,
-    body: {
-      content:
-        typeof message.content === 'string' ? message.content : JSON.stringify(message.content),
-      role: 'user',
-    },
-  };
-}
-
-function getAssistantMessageEvent(message: AssistantMessage): AssistantMessageEvent {
-  return {
-    name: GenAISemanticConventions.GenAIAssistantMessage,
-    body: mapAssistantResponse({
-      content: message.content,
-      toolCalls: message.toolCalls,
-    }),
-  };
-}
-
-function getToolMessageEvent(message: ToolMessage): ToolMessageEvent {
-  return {
-    name: GenAISemanticConventions.GenAIToolMessage,
-    body: {
-      role: 'tool',
-      id: message.toolCallId,
-      content:
-        typeof message.response === 'string' ? message.response : JSON.stringify(message.response),
-    },
-  };
-}
-
-function mapAssistantResponse({
-  content,
-  toolCalls,
-}: {
-  content?: string | null;
-  toolCalls?: Array<ToolCall> | Array<UnvalidatedToolCall>;
-}) {
-  return {
-    content: content || null,
-    role: 'assistant' as const,
-    tool_calls: toolCalls?.map((toolCall) => {
-      return {
-        function: {
-          name: toolCall.function.name,
-          arguments:
-            typeof toolCall.function.arguments === 'string'
-              ? toolCall.function.arguments
-              : JSON.stringify(toolCall.function.arguments),
-        },
-        id: toolCall.toolCallId,
-        type: 'function' as const,
-      };
-    }),
-  };
 }
 
 /**
@@ -198,31 +212,16 @@ export function withChatCompleteSpan(
       }
 
       if (system) {
-        addEvent(span, {
-          name: GenAISemanticConventions.GenAISystemMessage,
-          body: {
-            content: system,
-            role: 'system',
-          },
-        } satisfies SystemMessageEvent);
+        span.setAttribute(
+          GenAISemanticConventions.GenAISystemInstructions,
+          JSON.stringify(buildSystemInstructions(system))
+        );
       }
 
-      messages
-        .map((message) => {
-          switch (message.role) {
-            case MessageRole.User:
-              return getUserMessageEvent(message);
-
-            case MessageRole.Assistant:
-              return getAssistantMessageEvent(message);
-
-            case MessageRole.Tool:
-              return getToolMessageEvent(message);
-          }
-        })
-        .forEach((event) => {
-          addEvent(span, event);
-        });
+      span.setAttribute(
+        GenAISemanticConventions.GenAIInputMessages,
+        JSON.stringify(buildInputMessages(messages))
+      );
 
       const result = cb(span);
 
@@ -231,7 +230,7 @@ export function withChatCompleteSpan(
           tap({
             next: (value) => {
               if (isChatCompletionMessageEvent(value)) {
-                setChoice(span, {
+                setOutputMessages(span, {
                   content: value.content,
                   toolCalls: value.toolCalls,
                 });
@@ -246,7 +245,7 @@ export function withChatCompleteSpan(
 
       if (isPromise(result)) {
         return result.then((value) => {
-          setChoice(span, {
+          setOutputMessages(span, {
             content: value.content,
             toolCalls: value.toolCalls,
           });

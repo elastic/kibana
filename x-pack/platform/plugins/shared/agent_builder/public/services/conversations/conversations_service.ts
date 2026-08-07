@@ -10,9 +10,11 @@ import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
+  MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
 } from '../../../common/http_api/conversations';
+import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
@@ -68,6 +70,32 @@ export class ConversationsService {
     return await this.http.post<MarkReadConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_mark_read`,
       { body: JSON.stringify({ read }) }
+    );
+  }
+
+  async updatePinnedStatus({
+    conversationId,
+    pinned,
+  }: {
+    conversationId: string;
+    pinned: boolean;
+  }): Promise<MarkPinnedConversationResponse> {
+    return await this.http.post<MarkPinnedConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_set_pinned`,
+      { body: JSON.stringify({ pinned }) }
+    );
+  }
+
+  async readWorkspaceFile({
+    conversationId,
+    path,
+  }: {
+    conversationId: string;
+    path: string;
+  }): Promise<ReadWorkspaceFileResponse> {
+    return await this.http.get<ReadWorkspaceFileResponse>(
+      `${internalApiPath}/conversations/${conversationId}/files`,
+      { query: { path } }
     );
   }
 }

@@ -86,7 +86,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     parentAlert,
   } = props;
 
-  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
   const cellRenderers: AlertCellRenderers = {
     [ALERT_STATUS]: (value) => {

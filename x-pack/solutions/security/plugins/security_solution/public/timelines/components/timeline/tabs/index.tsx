@@ -9,7 +9,7 @@ import { EuiBadge, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';

@@ -16,9 +16,16 @@ import {
   buildSourcePickerEsql,
   buildDestinationFieldEsql,
   buildOneFieldEvaluationEsql,
+  getHostScopedUserEuidEsql,
 } from './esql';
-import type { EuidRankingBranch, FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EuidRankingBranch,
+  FieldEvaluation,
+  FieldEvaluationWhenClause,
+} from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinition } from '../definitions/registry';
+import { userEntityDefinition } from '../definitions/user';
 
 const normalize = (s: string) =>
   s
@@ -529,6 +536,61 @@ describe('buildDestinationFieldEsql', () => {
         ')'
     );
   });
+
+  describe('field-mapping then', () => {
+    // Use the real user definition as source of truth so this block stays in sync
+    // with user.ts automatically — no duplicate manual copy to drift.
+    const { identityField } = userEntityDefinition;
+    if (isSingleFieldIdentity(identityField)) throw new Error('expected multi-field identity');
+    const { fieldEvaluations } = identityField;
+    if (!fieldEvaluations?.length) throw new Error('expected fieldEvaluations');
+    const cloudProviderClause = fieldEvaluations[0].whenClauses[1] as FieldEvaluationWhenClause & {
+      condition: object;
+      then: { field: string; mapping: Record<string, string> };
+    };
+
+    it('emits a precompute column for the condition and a nested CASE for the mapping', () => {
+      const { expression, conditionPrecomputes } = buildDestinationFieldEsql(
+        '_src',
+        '_eval_dest',
+        '"unknown"',
+        [cloudProviderClause]
+      );
+
+      expect(conditionPrecomputes).toHaveLength(1);
+      expect(conditionPrecomputes[0].colName).toBe('_eval_dest_arm0');
+      // The precomputed condition covers both fields from the real user.ts compound condition.
+      expect(conditionPrecomputes[0].esql).toContain('event.kind');
+      expect(conditionPrecomputes[0].esql).toContain('asset_discovery');
+
+      // Outer CASE guards on the condition column; inner CASE maps cloud.provider values.
+      // When condition is true but cloud.provider is absent or not in the mapping,
+      // the inner CASE returns NULL → COALESCE falls through to the next arm.
+      // The expression structure is stable regardless of the condition shape.
+      expect(expression).toBe(
+        'COALESCE(' +
+          'CASE(COALESCE(_eval_dest_arm0, FALSE), CASE(MV_FIRST(TO_STRING(cloud.provider)) == "aws", "aws", MV_FIRST(TO_STRING(cloud.provider)) == "gcp", "gcp", MV_FIRST(TO_STRING(cloud.provider)) == "azure", "entra_id")), ' +
+          'CASE(_src IS NULL OR _src == "", "unknown"), ' +
+          '_src' +
+          ')'
+      );
+    });
+
+    it('inner mapping CASE has no fallback arm so unmapped values produce NULL (fall-through)', () => {
+      // The inner CASE has exactly 3 explicit condition→value pairs and no trailing fallback.
+      // An unmapped provider (e.g. "ibm") or absent cloud.provider yields NULL,
+      // which causes the outer COALESCE to try the next arm instead of assigning a namespace.
+      const { expression } = buildDestinationFieldEsql('_src', '_eval_dest', '"unknown"', [
+        cloudProviderClause,
+      ]);
+      // Inner CASE maps exactly the 3 declared providers.
+      expect(expression).toContain('"aws", "aws"');
+      expect(expression).toContain('"gcp", "gcp"');
+      expect(expression).toContain('"azure", "entra_id"');
+      // No trailing catch-all default inside the inner CASE.
+      expect(expression).not.toContain('"ibm"');
+    });
+  });
 });
 
 describe('buildOneFieldEvaluationEsql', () => {
@@ -600,5 +662,91 @@ describe('buildOneFieldEvaluationEsql', () => {
     expect(() => buildOneFieldEvaluationEsql(evaluation)).toThrow(
       'buildOneFieldEvaluationEsql: field evaluation "entity.source" has no sources'
     );
+  });
+});
+
+describe('getHostScopedUserEuidEsql', () => {
+  describe('evalAssignment', () => {
+    it('emits the canonical user:<user.name>@<host.id>@local EUID', () => {
+      const { evalAssignment } = getHostScopedUserEuidEsql();
+
+      expect(evalAssignment).toBe(
+        'CONCAT("user:", TO_STRING(`user.name`), "@", TO_STRING(`host.id`), "@local")'
+      );
+    });
+
+    it('never falls back to user.email — that would reference an IDP EUID', () => {
+      const { evalAssignment } = getHostScopedUserEuidEsql();
+
+      // The host-scoped ranking branch has a single arm gated on user.name being
+      // non-empty, so a fallback could only fire for documents extraction classifies
+      // as IDP users. Emitting `user:alice@corp.com@h1@local` would reference an EUID
+      // that does not exist in the store and 404 on every write.
+      expect(evalAssignment).not.toContain('user.email');
+      expect(evalAssignment).not.toContain('COALESCE');
+    });
+
+    it('keeps host.id and the @local namespace in the canonical positions', () => {
+      const { evalAssignment } = getHostScopedUserEuidEsql();
+
+      expect(evalAssignment.indexOf('`user.name`')).toBeLessThan(
+        evalAssignment.indexOf('`host.id`')
+      );
+      expect(evalAssignment.endsWith('"@local")')).toBe(true);
+    });
+
+    it('emits no entity.namespace derivation chain', () => {
+      const { evalAssignment } = getHostScopedUserEuidEsql();
+
+      // The whole point of this helper: skip the namespace/EUID EVAL chain.
+      expect(evalAssignment).not.toContain('entity.namespace');
+      expect(evalAssignment).not.toContain('CASE(');
+      expect(evalAssignment).not.toContain('MV_FIRST');
+    });
+
+    it('matches the host-scoped branch of the user entity definition euidRanking', () => {
+      // Guards against the definition drifting away from what this helper emits.
+      const { identityField } = userEntityDefinition;
+      if (isSingleFieldIdentity(identityField)) {
+        throw new Error('expected userEntityDefinition to use euidRanking');
+      }
+      const hostScopedBranch = identityField.euidRanking.branches[0];
+
+      // Exactly one arm — this is what makes emitting user.name with no COALESCE
+      // fallback correct. A second arm would mean the EUID has alternatives that
+      // this helper is silently ignoring.
+      expect(hostScopedBranch.ranking).toHaveLength(1);
+      expect(hostScopedBranch.when).toEqual({ field: 'entity.namespace', eq: 'local' });
+
+      const hostScopedBranchFields = hostScopedBranch.ranking[0]
+        .filter((attr): attr is { field: string } => 'field' in attr)
+        .map((attr) => attr.field);
+
+      expect(hostScopedBranchFields).toEqual(['user.name', 'host.id', 'entity.namespace']);
+    });
+  });
+
+  describe('presenceGate', () => {
+    it('requires every field the EUID composes, AND-joined', () => {
+      const { presenceGate } = getHostScopedUserEuidEsql();
+
+      // Both fields are mandatory — a document missing either is an IDP user that
+      // extraction indexed under a different EUID, so admitting it would build an id
+      // the entity store does not hold.
+      expect(presenceGate).toBe(
+        '(`user.name` IS NOT NULL AND `user.name` != "") AND (`host.id` IS NOT NULL AND `host.id` != "")'
+      );
+    });
+
+    it('gates on exactly the fields the EUID reads', () => {
+      const { evalAssignment, presenceGate } = getHostScopedUserEuidEsql();
+
+      for (const field of ['user.name', 'host.id']) {
+        expect(evalAssignment).toContain(`\`${field}\``);
+        expect(presenceGate).toContain(`\`${field}\``);
+      }
+      // user.email belongs to the IDP ranking branch, not this one.
+      expect(presenceGate).not.toContain('user.email');
+    });
   });
 });

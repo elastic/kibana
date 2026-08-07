@@ -6,6 +6,8 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import { setAttackStatusStepDefinition } from './set_attack_status_step';
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../common/constants';
 import type { setAttackStatusInputSchema } from '../../../../common/workflows/step_types/set_attack_status_step/set_attack_status_step_common';
@@ -123,17 +125,27 @@ describe('setAttackStatusStepDefinition', () => {
     });
   });
 
-  it('throws ExecutionError on API failure (>= 400)', async () => {
-    mockContextManager.callKibanaApi.mockResolvedValue({
-      status: 400,
-      headers: {},
-      body: { message: 'Bad request' },
-    });
+  it('persists only status (not the raw body/headers) when callKibanaApi throws on a non-2xx', async () => {
+    mockContextManager.callKibanaApi.mockRejectedValue(
+      new KibanaApiCallError({
+        status: 500,
+        headers: { 'x-leaky-header': 'header-value' },
+        body: { sensitive: 'partial-success-payload', items: [{ id: 'attack-1' }] },
+        message: 'HTTP 500: bulk action partially failed',
+      })
+    );
 
-    await expect(setAttackStatusStepDefinition.handler(mockContext)).rejects.toMatchObject({
-      type: 'ApiError',
-      message: 'Failed to set attack status: HTTP 400',
-    });
+    const error = await setAttackStatusStepDefinition
+      .handler(mockContext)
+      .then(() => undefined)
+      .catch((e) => e);
+
+    expect(error).toBeInstanceOf(ExecutionError);
+    const serialized = (error as ExecutionError).toSerializableObject();
+    expect(serialized.type).toBe('ApiError');
+    expect(serialized.details).toEqual({ status: 500 });
+    expect(JSON.stringify(serialized.details)).not.toContain('partial-success-payload');
+    expect(JSON.stringify(serialized.details)).not.toContain('x-leaky-header');
   });
 
   it('wraps generic errors in ExecutionError', async () => {

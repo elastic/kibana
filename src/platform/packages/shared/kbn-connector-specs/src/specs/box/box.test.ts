@@ -63,9 +63,10 @@ describe('Box', () => {
       expect(Box.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('should support both workflows and agentBuilder feature IDs', () => {
+    it('should support workflows, agentBuilder, and contextEngine feature IDs', () => {
       expect(Box.metadata.supportedFeatureIds).toContain('workflows');
       expect(Box.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(Box.metadata.supportedFeatureIds).toContain('contextEngine');
     });
 
     it('should be marked as technical preview', () => {

@@ -55,11 +55,38 @@ import {
   AnomalyScoreBadge,
   AnomalyRowActionsMenu,
 } from './table';
+import {
+  ANOMALIES_TAB_TABLE_TEST_ID,
+  ANOMALIES_TAB_TABLE_GRID_TEST_ID,
+  ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID,
+  ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID,
+} from './test_ids';
+import { AnomaliesTableEmptyMessage } from './table/empty_message';
+import { AnomaliesTableLoadingSkeleton } from './table/loading_skeleton';
 
 export interface TableChangeEvent {
   page?: { index: number; size: number };
   sort?: { field: TableSortField; direction: TableSortDirection };
 }
+
+const compactPaginationSpacerCss = css`
+  .euiBasicTable > div > .euiSpacer.euiSpacer--m {
+    block-size: 8px;
+    height: 8px;
+  }
+`;
+
+// Applied only when the table has no items, so the sole rendered `.euiTableRow`
+// is guaranteed to be the no-items message row (never a real data row).
+const noItemsRowCss = css`
+  .euiTableRow {
+    pointer-events: none;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+`;
 
 interface AnomalyTabTableSectionProps {
   anomalies: AnomalySummaryEntry[];
@@ -71,6 +98,7 @@ interface AnomalyTabTableSectionProps {
   sortDirection: TableSortDirection;
   timeRange: { from: string; to: string };
   total: number;
+  isLoading?: boolean;
 }
 
 export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
@@ -83,6 +111,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
   sortDirection,
   timeRange,
   total,
+  isLoading = false,
 }) => {
   const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(() => new Set());
 
@@ -137,6 +166,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
           return (
             <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
+                data-test-subj={ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID}
                 aria-label={label}
                 aria-expanded={isExpanded}
                 iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -213,7 +243,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
                 type="question"
                 content={ENTITY_ANOMALY_TABLE_SCORE_COLUMN_TOOLTIP}
                 position="top"
-                data-test-subj="entity-anomalies-table-score-column-tooltip"
+                data-test-subj={ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -279,6 +309,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
     <div>
       <EuiAccordion
         id="entity-anomalies-tab-table-accordion"
+        data-test-subj={ANOMALIES_TAB_TABLE_TEST_ID}
         initialIsOpen
         buttonContent={
           <EuiTitle size="xs">
@@ -287,29 +318,45 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         }
       >
         <EuiSpacer size="m" />
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnomalies.tab.page"
-            defaultMessage="Showing {from}-{to} of {total} anomalies"
-            values={{
-              from: <strong>{from}</strong>,
-              to: <strong>{to}</strong>,
-              total: <strong>{total}</strong>,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          tableCaption={ENTITY_ANOMALY_TABLE_CAPTION}
-          items={rows}
-          itemId="id"
-          columns={columns}
-          sorting={sorting}
-          pagination={pagination}
-          onChange={handleChange}
-          compressed
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        />
+        {isLoading ? (
+          <AnomaliesTableLoadingSkeleton />
+        ) : (
+          <>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.entityAnomalies.tab.page"
+                defaultMessage="Showing {from}-{to} of {total} anomalies"
+                values={{
+                  from: <strong>{from}</strong>,
+                  to: <strong>{to}</strong>,
+                  total: <strong>{total}</strong>,
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+            <div
+              css={
+                rows.length === 0
+                  ? [compactPaginationSpacerCss, noItemsRowCss]
+                  : compactPaginationSpacerCss
+              }
+            >
+              <EuiBasicTable
+                data-test-subj={ANOMALIES_TAB_TABLE_GRID_TEST_ID}
+                tableCaption={ENTITY_ANOMALY_TABLE_CAPTION}
+                items={rows}
+                itemId="id"
+                columns={columns}
+                sorting={sorting}
+                pagination={pagination}
+                onChange={handleChange}
+                compressed
+                itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                noItemsMessage={<AnomaliesTableEmptyMessage />}
+              />
+            </div>
+          </>
+        )}
       </EuiAccordion>
     </div>
   );

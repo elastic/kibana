@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -24,28 +24,35 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ensureApproximationLicense } from '@kbn/esql-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 const POPOVER_WIDTH = 320;
 
 const getLabels = (
+  invalidLicense: boolean,
   disabled: boolean | undefined,
-  useApproximation: boolean,
+  isApproximate: boolean,
   additionalText?: string
 ) => {
-  if (disabled) {
+  if (invalidLicense || disabled) {
     const ariaLabel = i18n.translate('unifiedSearch.esqlApproximationToggle.unavailable', {
       defaultMessage: 'Fast mode unavailable',
     });
+    const additionalDisabledText = invalidLicense
+      ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
+          defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
+        })
+      : additionalText;
     return {
       tooltipContent: (
         <>
           <strong>{ariaLabel}</strong>
-          {additionalText && (
+          {additionalDisabledText && (
             <>
               <br />
               <br />
-              {additionalText}
+              {additionalDisabledText}
             </>
           )}
         </>
@@ -57,7 +64,7 @@ const getLabels = (
     };
   }
 
-  if (useApproximation) {
+  if (isApproximate) {
     return {
       tooltipContent: i18n.translate('unifiedSearch.esqlApproximationToggle.button.tooltip.on', {
         defaultMessage: 'Fast mode: ON',
@@ -85,28 +92,47 @@ const getLabels = (
 };
 
 interface EsqlApproximationToggleProps {
-  useApproximation: boolean;
-  onChange: (useApproximation: boolean) => void;
+  isApproximate: boolean;
+  onChange: (isApproximate: boolean) => void;
   additionalText?: string;
   disabled?: boolean;
 }
 
 export const EsqlApproximationToggle = ({
-  useApproximation,
+  isApproximate,
   onChange,
   additionalText,
   disabled,
 }: EsqlApproximationToggleProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana<IUnifiedSearchPluginServices>();
-  const learnMoreUrl = services.docLinks.links.query.queryESQLApproximateResults;
+  const {
+    services: { docLinks, licensing },
+  } = useKibana<IUnifiedSearchPluginServices>();
+  const learnMoreUrl = docLinks.links.query.queryESQLApproximateResults;
 
-  const { tooltipContent, ariaLabel, switchLabel } = getLabels(
-    disabled,
-    useApproximation,
-    additionalText
-  );
+  const [invalidLicense, setInvalidLicense] = useState<boolean>(false);
+  useEffect(() => {
+    if (!licensing) {
+      setInvalidLicense(true);
+      return;
+    }
+
+    let cancelled = false;
+    licensing.getLicense().then((license) => {
+      if (!cancelled) {
+        setInvalidLicense(!ensureApproximationLicense(license));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [licensing]);
+
+  const { tooltipContent, ariaLabel, switchLabel } = useMemo(() => {
+    return getLabels(invalidLicense, disabled, isApproximate, additionalText);
+  }, [disabled, isApproximate, additionalText, invalidLicense]);
 
   return (
     <EuiFlexItem grow={false}>
@@ -117,9 +143,9 @@ export const EsqlApproximationToggle = ({
               iconType="bolt"
               aria-label={ariaLabel}
               size="s"
-              color={useApproximation ? 'success' : 'text'}
+              color={isApproximate ? 'success' : 'text'}
               display="base"
-              disabled={disabled}
+              disabled={invalidLicense || disabled}
               data-test-subj="esqlApproximationToggleButton"
               onClick={() => setIsPopoverOpen((open) => !open)}
             />
@@ -154,7 +180,7 @@ export const EsqlApproximationToggle = ({
               <EuiFlexItem grow={false}>
                 <EuiSwitch
                   label={switchLabel}
-                  checked={useApproximation}
+                  checked={isApproximate}
                   onChange={(e) => onChange(e.target.checked)}
                   data-test-subj="esqlApproximationToggleSwitch"
                 />

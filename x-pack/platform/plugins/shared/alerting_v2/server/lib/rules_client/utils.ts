@@ -12,6 +12,7 @@ import { IMMUTABLE_RULE_FIELDS, type ImmutableRuleField } from '@kbn/alerting-v2
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
 
 /**
  * Source-of-truth helpers driven by {@link IMMUTABLE_RULE_FIELDS}. They keep
@@ -99,8 +100,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     createdAt: string;
     updatedBy: string | null;
     updatedAt: string;
+    version: number;
   }
 ): RuleSavedObjectAttributes {
+  const { version, ...restServerFields } = serverFields;
   return {
     kind: data.kind,
     metadata: {
@@ -109,6 +112,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       owner: data.metadata.owner,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
+      version,
     },
     time_field: data.time_field,
     schedule: {
@@ -121,7 +125,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
-    ...serverFields,
+    ...restServerFields,
   };
 }
 
@@ -166,14 +170,16 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string }
+  serverFields: { updatedBy: string | null; updatedAt: string; version: number }
 ): RuleSavedObjectAttributes {
+  const { version, ...restServerFields } = serverFields;
   return {
     ...existingAttrs,
     metadata: {
       ...existingAttrs.metadata,
       ...updateData.metadata,
       builder_type: resolveBuilderType(updateData, existingAttrs),
+      version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
@@ -194,11 +200,13 @@ export function buildUpdateRuleAttributes(
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
-    enabled: updateData.enabled ?? existingAttrs.enabled,
+    // `enabled` is never writable via update — lifecycle transitions are owned
+    // exclusively by enableRule/disableRule, so the stored value is preserved.
+    enabled: existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
-    ...serverFields,
+    ...restServerFields,
     // Immutable fields are forced from storage last, so no preceding override
     // can leak through if someone adds a new immutable field to the registry.
     ...pickImmutable(existingAttrs),
@@ -223,6 +231,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
+      version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
     },
     time_field: attrs.time_field,
     schedule: {

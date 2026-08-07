@@ -29,7 +29,7 @@ import type {
   EncryptedSyntheticsMonitorAttributes,
   Ping,
 } from '../../../common/runtime_types';
-import { ConfigKey } from '../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../common/runtime_types';
 import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { SyntheticsEsClient } from '../../lib';
@@ -85,7 +85,18 @@ export class TLSRuleExecutor {
   async getMonitors() {
     const HTTP_OR_TCP = `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
 
-    const baseFilter = `${syntheticsMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
+    // Lightweight HTTP/TCP monitors expose a per-monitor "TLS alert" toggle, so
+    // we keep gating them on it. This clause is intentionally byte-for-byte the
+    // previous behavior so existing rules are undisturbed (asserted by tests).
+    const lightweightFilter = `${syntheticsMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
+
+    // Browser monitors have no TLS-alert toggle in the UI, so their inclusion is
+    // governed entirely by the rule-level `includeBrowserCerts` flag plus the
+    // monitor/tag/location/project filters applied below. When the flag is off
+    // the filter remains exactly the lightweight one.
+    const baseFilter = this.params.includeBrowserCerts
+      ? `(${lightweightFilter}) or (${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: ${MonitorTypeEnum.BROWSER})`
+      : lightweightFilter;
 
     const configIds = await queryFilterMonitors({
       spaceId: this.spaceId,
@@ -181,6 +192,13 @@ export class TLSRuleExecutor {
       direction: 'desc',
       filters,
       monitorIds: enabledMonitorQueryIds,
+      // Browser-certificate evaluation. When `includeBrowserCerts` is off these
+      // are all undefined/empty, so the query collapses on the sha256
+      // fingerprint exactly as before (lightweight-only behavior preserved).
+      includeBrowserCerts: this.params.includeBrowserCerts,
+      certOrigin: this.params.certOrigin,
+      browserResourceTypes: this.params.browserResourceTypes,
+      issuers: this.params.issuers,
     });
 
     this.debug(
@@ -209,6 +227,15 @@ export class TLSRuleExecutor {
       latestPingsMap.set(ping.config_id!, ping);
     });
     return certs.filter((cert) => {
+      // The "resolved" check compares against the monitor's latest summary ping,
+      // which only carries TLS for lightweight HTTP/TCP monitors. Browser
+      // certificates live on per-resource network events (not summary pings) and
+      // a single config emits many of them, so this per-config comparison does
+      // not apply. Their recovery is driven by the alerting framework instead
+      // (the cert id simply stops being reported once it is no longer expiring).
+      if (!cert.sha256) {
+        return true;
+      }
       const lPing = latestPingsMap.get(cert.configId);
       if (!lPing) {
         return true;

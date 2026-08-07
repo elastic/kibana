@@ -20,8 +20,50 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const toasts = getService('toasts');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
 
   return {
+    /**
+     * Reads the layout variant rendered by `CasesPageLayout`. `compact` is emitted by the redesign,
+     * `legacy` by the old UI. The value is per-route (list/details/settings), so it reflects whichever
+     * redesign flag applies to the current page.
+     */
+    async getActiveVariant(): Promise<'legacy' | 'compact' | 'fullHeight'> {
+      const variant = await testSubjects.getAttribute('casesPageLayout', 'data-layout-variant');
+      return (variant as 'legacy' | 'compact' | 'fullHeight' | null) ?? 'legacy';
+    },
+
+    /**
+     * Whether the current cases page is rendered with the redesign (compact) layout.
+     */
+    async isRedesignEnabled(): Promise<boolean> {
+      return (await this.getActiveVariant()) === 'compact';
+    },
+
+    /**
+     * Reveals the legacy custom-fields section on Create Case / Settings / Case Details.
+     * Templates v2 hides it behind a per-owner local-storage switch (default off); flipping
+     * it on keeps legacy custom-field coverage valid regardless of the templates flag. No-op
+     * when templates is off (legacy fields are always shown). Requires the cases app origin
+     * to be loaded first (e.g. after navigating to the app).
+     */
+    async showLegacyCustomFields(owner: string): Promise<void> {
+      await browser.setLocalStorageItem(`${owner}.cases.showLegacyCustomFields`, 'true');
+    },
+
+    /**
+     * Waits for the case view page to load in either design (legacy `case-view-title` or the
+     * redesign app header title).
+     */
+    async waitForCaseViewToLoad() {
+      await retry.waitFor('the case view page to load', async () => {
+        return (
+          (await testSubjects.exists('case-view-title')) ||
+          (await testSubjects.exists('appHeaderTitle'))
+        );
+      });
+    },
+
     /**
      * Opens the create case page pressing the "create case" button.
      *
@@ -39,10 +81,25 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await this.openCaseSetStatusDropdown();
       await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();
+
+      // The redesign renders the status as an app-header badge (`case-view-status-badge`), while the
+      // legacy UI renders a popover button per status.
+      if (await this.isRedesignEnabled()) {
+        await testSubjects.existOrFail('case-view-status-badge');
+        return;
+      }
+
       await testSubjects.existOrFail(`case-status-badge-popover-button-${status}`);
     },
 
     async openCaseSetStatusDropdown() {
+      // The redesign opens the status menu from the app-header badge; the legacy UI uses the action-bar
+      // dropdown. Both expose the same `case-view-status-dropdown-${status}` menu items.
+      if (await this.isRedesignEnabled()) {
+        await testSubjects.click('case-view-status-badge');
+        return;
+      }
+
       const button = await find.byCssSelector(
         '[data-test-subj="case-view-status-dropdown"] button'
       );
@@ -85,12 +142,64 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await this.assertRadioGroupValue(testSubject, value);
     },
 
+    /**
+     * Asserts the configured closure option regardless of design. The legacy UI uses a radio group
+     * (`closure-options-radio-group`); the redesign uses a switch (`automatic-closure-switch`) where
+     * checked means `close-by-pushing` and unchecked means `close-by-user`.
+     */
+    async assertClosureOption(expectedValue: 'close-by-user' | 'close-by-pushing') {
+      if (await this.isRedesignEnabled()) {
+        await retry.waitFor('assertClosureOption: closure switch to exist', async () => {
+          return await testSubjects.exists('automatic-closure-switch');
+        });
+        await retry.waitFor(
+          `assertClosureOption: closure switch to reflect "${expectedValue}"`,
+          async () => {
+            const checked = await testSubjects.getAttribute(
+              'automatic-closure-switch',
+              'aria-checked'
+            );
+            const isPushing = checked === 'true';
+            return expectedValue === 'close-by-pushing' ? isPushing : !isPushing;
+          }
+        );
+        return;
+      }
+
+      await this.assertRadioGroupValue('closure-options-radio-group', expectedValue);
+    },
+
+    async selectClosureOption(value: 'close-by-user' | 'close-by-pushing') {
+      if (await this.isRedesignEnabled()) {
+        const checked = await testSubjects.getAttribute('automatic-closure-switch', 'aria-checked');
+        const isPushing = checked === 'true';
+        const shouldBePushing = value === 'close-by-pushing';
+
+        if (isPushing !== shouldBePushing) {
+          await testSubjects.click('automatic-closure-switch');
+          await header.waitUntilLoadingHasFinished();
+        }
+
+        await this.assertClosureOption(value);
+        return;
+      }
+
+      await this.selectRadioGroupValue('closure-options-radio-group', value);
+    },
+
     async selectSeverity(severity: CaseSeverity) {
       await common.clickAndValidate(
         'case-severity-selection',
         `case-severity-selection-${severity}`
       );
       await testSubjects.click(`case-severity-selection-${severity}`);
+
+      // The redesign sidebar stages the change and requires an explicit confirm before it is
+      // submitted; the legacy UI commits on selection.
+      if (await this.isRedesignEnabled()) {
+        await testSubjects.click('template-field-confirm-severity');
+        await header.waitUntilLoadingHasFinished();
+      }
     },
 
     async expectToasterToContain(content: string) {
@@ -150,6 +259,95 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
         await comboBox.setCustom('comboBoxInput', `${tag}-${index}`);
       }
 
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Edits the case title from the case view page in either design. The legacy UI uses an inline
+     * editable title with a submit button; the redesign edits the title in the app header, committing
+     * on Enter with no submit button.
+     */
+    async editCaseTitle(newTitle: string) {
+      if (await this.isRedesignEnabled()) {
+        await testSubjects.click('appHeaderTitleButton');
+        await testSubjects.setValue('appHeaderTitleInput', newTitle);
+        await browser.pressKeys(browser.keys.ENTER);
+        await header.waitUntilLoadingHasFinished();
+        return;
+      }
+
+      await testSubjects.click('editable-title-header-value');
+      await testSubjects.setValue('editable-title-input-field', newTitle);
+      await testSubjects.click('editable-title-submit-btn');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Asserts the case view title equals the expected value in either design (legacy
+     * `editable-title-header-value` or the redesign `appHeaderTitle`).
+     */
+    async assertCaseTitle(expectedTitle: string) {
+      const titleSubject = (await this.isRedesignEnabled())
+        ? 'appHeaderTitle'
+        : 'editable-title-header-value';
+
+      await retry.tryForTime(5000, async () => {
+        const title = await testSubjects.find(titleSubject);
+        expect(await title.getVisibleText()).equal(expectedTitle);
+      });
+    },
+
+    /**
+     * Adds a category to a case from the case view sidebar in either design. The legacy UI opens an
+     * edit form (`category-edit-button` + `edit-category-submit`); the redesign edits an always-visible
+     * combo box (`categories-list`) confirmed via `template-field-confirm-category`.
+     */
+    async addCategory(category: string) {
+      if (await this.isRedesignEnabled()) {
+        await comboBox.setCustom('categories-list', category);
+        await testSubjects.click('template-field-confirm-category');
+        await header.waitUntilLoadingHasFinished();
+        return;
+      }
+
+      await testSubjects.click('category-edit-button');
+      await comboBox.setCustom('comboBoxInput', category);
+      await testSubjects.click('edit-category-submit');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Removes the category from a case in either design. The legacy UI has a dedicated remove button;
+     * the redesign clears the combo box and confirms the change.
+     */
+    async removeCategory() {
+      if (await this.isRedesignEnabled()) {
+        await comboBox.clear('categories-list');
+        await testSubjects.click('template-field-confirm-category');
+        await header.waitUntilLoadingHasFinished();
+        return;
+      }
+
+      await testSubjects.click('category-remove-button');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Adds a tag to a case from the case view sidebar in either design. The legacy UI opens an edit
+     * form (`tag-list-edit-button` + `edit-tags-submit`); the redesign edits an always-visible combo
+     * box (`case-tags`) confirmed via `template-field-confirm-tags`.
+     */
+    async addTag(tag: string) {
+      if (await this.isRedesignEnabled()) {
+        await comboBox.setCustom('case-tags', tag);
+        await testSubjects.click('template-field-confirm-tags');
+        await header.waitUntilLoadingHasFinished();
+        return;
+      }
+
+      await testSubjects.click('tag-list-edit-button');
+      await comboBox.setCustom('comboBoxInput', tag);
+      await testSubjects.click('edit-tags-submit');
       await header.waitUntilLoadingHasFinished();
     },
   };

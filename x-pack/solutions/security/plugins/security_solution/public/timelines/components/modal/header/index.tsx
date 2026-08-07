@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
@@ -73,7 +73,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
     const dispatch = useDispatch();
 
     const { dataView } = useDataView(PageScope.timeline);
-    const browserFields = useBrowserFields(PageScope.timeline);
+    const browserFields = useBrowserFields(dataView);
 
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);

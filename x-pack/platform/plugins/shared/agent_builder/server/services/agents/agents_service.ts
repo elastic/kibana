@@ -14,7 +14,10 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
+import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { createConfigurationResolver } from './resolve_configuration';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
   AgentsServiceSetup,
@@ -32,7 +35,8 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
-import { createClient } from './persisted/client';
+import { createAgentTypeRegistry } from './types/registry';
+import { createClient, createSystemClient } from './persisted/client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -49,15 +53,21 @@ export interface AgentsServiceStartDeps {
 
 export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
+  private typeRegistry: AgentTypeRegistry;
+  /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
 
   private setupDeps?: AgentsServiceSetupDeps;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
+    this.typeRegistry = createAgentTypeRegistry();
   }
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
+
+    this.typeRegistry.register({ id: chatAgentTypeId, baseConfiguration: {} });
 
     return {
       register: (agent) => {
@@ -67,7 +77,20 @@ export class AgentsService {
         }
         this.builtinRegistry.register(agent);
       },
+      registerType: (type) => {
+        this.typeRegistry.register(type);
+      },
     };
+  }
+
+  private validateAgentTypes() {
+    for (const agent of this.builtinRegistry.list()) {
+      if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
+        throw new Error(
+          `Built-in agent with id "${agent.id}" references unknown agent type "${agent.type}". Register the type via agents.registerType().`
+        );
+      }
+    }
   }
 
   start(startDeps: AgentsServiceStartDeps): AgentsServiceStart {
@@ -78,12 +101,20 @@ export class AgentsService {
     const { logger } = this.setupDeps;
     const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
 
+    this.validateAgentTypes();
+
+    const configurationResolver = createConfigurationResolver({
+      typeRegistry: this.typeRegistry,
+      logger,
+    });
+
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
       security,
       toolsService,
       logger,
+      availabilityByAgentId: this.availabilityByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -105,8 +136,39 @@ export class AgentsService {
         spaceId: space,
         uiSettings,
         savedObjects,
+        typeRegistry: this.typeRegistry,
         builtinProvider: await builtinProviderFn({ request, space }),
         persistedProvider: await persistedProviderFn({ request, space }),
+      });
+    };
+
+    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
+      if (this.builtinRegistry.has(agent.id)) {
+        throw new Error(
+          `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
+        );
+      }
+      if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
+        throw new Error(`Cannot ensure agent "${agent.id}": unknown agent type "${agent.type}"`);
+      }
+
+      if (availability) {
+        this.availabilityByAgentId.set(agent.id, availability);
+      }
+
+      const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });
+      await systemClient.ensureAgent(agent);
+    };
+
+    const resolveAgentConfiguration: AgentsServiceStart['resolveAgentConfiguration'] = ({
+      agent,
+      request,
+    }) => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      return configurationResolver({
+        agentType: agent.type,
+        configuration: agent.configuration,
+        ctx: { request, spaceId },
       });
     };
 
@@ -160,6 +222,8 @@ export class AgentsService {
 
     return {
       getRegistry,
+      ensure,
+      resolveAgentConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
       removePluginRefsFromAgents,

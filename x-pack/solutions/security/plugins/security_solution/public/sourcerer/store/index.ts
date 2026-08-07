@@ -7,7 +7,6 @@
 
 import * as sourcererActions from './actions';
 import * as sourcererModel from './model';
-import * as sourcererSelectors from './selectors';
 
-export { sourcererActions, sourcererModel, sourcererSelectors };
+export { sourcererActions, sourcererModel };
 export * from './reducer';

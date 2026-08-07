@@ -8,7 +8,10 @@
  */
 
 export type { ProjectPickerProps } from './components/project_picker';
-export type { ProjectPickerContentProps } from './components/project_picker_content';
+export type {
+  ProjectPickerContentProps,
+  ProjectPickerControlsState,
+} from './components/project_picker_content';
 export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,

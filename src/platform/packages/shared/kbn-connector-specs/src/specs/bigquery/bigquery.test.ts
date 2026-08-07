@@ -42,9 +42,10 @@ describe('BigQuery', () => {
       expect(BigQuery.auth?.types).toEqual(['gcp_service_account']);
     });
 
-    it('should support workflows and agentBuilder features', () => {
+    it('should support workflows, agentBuilder, and contextEngine features', () => {
       expect(BigQuery.metadata.supportedFeatureIds).toContain('workflows');
       expect(BigQuery.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(BigQuery.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 

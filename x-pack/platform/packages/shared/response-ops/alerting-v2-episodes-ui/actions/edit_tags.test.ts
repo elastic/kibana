@@ -15,8 +15,7 @@ import { QueryClient } from '@kbn/react-query';
 import { createEditTagsAction } from './edit_tags';
 import * as flyout from '../components/tags_flyout';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -62,7 +61,7 @@ describe('createEditTagsAction', () => {
   it('execute: opens flyout, POSTs deduped TAG items with tags array, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha', 'beta']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
 
     await createEditTagsAction(deps).execute({
@@ -89,7 +88,7 @@ describe('createEditTagsAction', () => {
   it('execute: passes last_tags into flyout when a single episode is selected', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
 
     await createEditTagsAction(deps).execute({
       episodes: [makeEpisode({ last_tags: ['existing', 'tags'] })],

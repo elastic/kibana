@@ -10,8 +10,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { createUnresolveAction } from './unresolve';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -32,46 +31,24 @@ const makeDeps = () => ({
 describe('createUnresolveAction', () => {
   beforeEach(() => jest.restoreAllMocks());
 
-  it('compatible when some episode is not activated and not already ACTIVE', () => {
+  it('compatible when at least one episode is INACTIVE', () => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: undefined })],
+        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE })],
       })
     ).toBe(true);
   });
 
-  it('not compatible when every episode is already activated', () => {
+  it.each([
+    ALERT_EPISODE_STATUS.ACTIVE,
+    ALERT_EPISODE_STATUS.RECOVERING,
+    ALERT_EPISODE_STATUS.PENDING,
+  ] as const)('not compatible when every episode is %s', (status) => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: 'activate' })],
+        episodes: [makeEpisode({ 'episode.status': status })],
       })
     ).toBe(false);
-  });
-
-  it('not compatible when every episode has status ACTIVE', () => {
-    expect(
-      createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-            last_deactivate_action: undefined,
-          }),
-        ],
-      })
-    ).toBe(false);
-  });
-
-  it('compatible when last_deactivate_action is deactivate even if episode.status is stale ACTIVE', () => {
-    expect(
-      createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.ACTIVE, // stale — not yet refreshed from ES
-            last_deactivate_action: 'deactivate',
-          }),
-        ],
-      })
-    ).toBe(true);
   });
 
   it('not compatible on empty selection', () => {
@@ -80,7 +57,7 @@ describe('createUnresolveAction', () => {
 
   it('execute: POSTs unique-by-group ACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createUnresolveAction(deps).execute({
       episodes: [

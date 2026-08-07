@@ -181,8 +181,6 @@ function TemplateWithContext({
             ),
             children: (
               <ServiceHeaderBadges
-                serviceName={serviceName}
-                environment={environment}
                 start={start}
                 end={end}
                 onSloClick={onSloClick}

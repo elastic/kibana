@@ -1708,7 +1708,9 @@ describe('ManifestManager', () => {
       ]);
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
-        new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
+        new EndpointError(
+          `Policy [${TEST_POLICY_ID_1}][endpoint-1] in space(s) [default] has no 'inputs[0].config'!`
+        ),
       ]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
@@ -1959,7 +1961,7 @@ describe('ManifestManager', () => {
     test(`Should return partial errors`, async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
-      const error = new Error();
+      const error = new Error('foo');
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
@@ -1996,7 +1998,9 @@ describe('ManifestManager', () => {
         failedPolicies: [{ packagePolicy: policy1, error }],
       });
 
-      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
+        new EndpointError(`Update of policy [${policy1.id}][endpoint-1] failed with: foo`),
+      ]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
     });
@@ -2115,7 +2119,11 @@ describe('ManifestManager', () => {
         failedPolicies: [{ error, packagePolicy: policy }],
       });
 
-      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toEqual([
+        expect.objectContaining({
+          meta: error,
+        }),
+      ]);
 
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
     });

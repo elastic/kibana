@@ -11,9 +11,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
-import { alertingTools } from '../../common/constants';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -31,7 +31,7 @@ const manageRuleSchema = z.object({
 });
 
 export const manageRuleTool = (): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
-  id: alertingTools.manageRule,
+  id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 rule in the conversation.
 
@@ -49,7 +49,7 @@ Use operations[] to:
      - composed: required "base" (ES|QL string) + "breach: { segment }", optional "recovery: { segment }" (only when recovery_strategy is "query")
      - standalone: required "breach: { query }", optional "recovery: { query }" (only when recovery_strategy is "query") and "no_data: { query }" (only when no_data_strategy is not "none")
    - recovery_strategy (optional): "no_breach" | "query" | "none" — "no_breach" recovers when breach stops, "query" runs a separate recovery query, "none" disables recovery. Signal rules cannot set this.
-   - no_data_strategy (optional): "last_known_status" | "emit" | "recover" | "none" — controls behaviour when no data is present; requires a "no_data" block in standalone queries. Signal rules cannot set this.
+   - no_data_strategy (optional): "last_known_status" | "recover" | "none" — controls behaviour when no data is present; requires a "no_data" block in standalone queries. Signal rules cannot set this. ("emit" is not currently accepted by the create/update API — do not use it.)
 5. set_grouping — set fields to group alerts by
 6. set_state_transition — set consecutive breaches threshold
 7. validate — validate the accumulated rule against the API request schema; throws if not ready to save`,

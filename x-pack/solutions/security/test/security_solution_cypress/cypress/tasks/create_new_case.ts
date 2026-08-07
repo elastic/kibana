@@ -40,9 +40,17 @@ import {
   SELECT_URGENCY,
 } from '../screens/edit_connector';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { CASES_URL } from '../urls/navigation';
+import { visit } from './navigation';
 
 export const backToCases = () => {
-  cy.get(BACK_TO_CASES_BTN).click({ force: true });
+  cy.get('body').then(($body) => {
+    if ($body.find(BACK_TO_CASES_BTN).length > 0) {
+      cy.get(BACK_TO_CASES_BTN).click();
+    } else {
+      visit(CASES_URL);
+    }
+  });
 };
 
 export const filterStatusOpen = () => {
@@ -79,7 +87,9 @@ export const attachTimeline = (newCase: TestCase) => {
         }
       });
     },
-    { interval: 500, timeout: 12000 }
+    // The timeline is created via the API right before this and can take a while to show up in
+    // the selector's search on slower environments (serverless MKI).
+    { interval: 500, timeout: 30000 }
   );
   cy.get(TIMELINE).first().click();
 };

@@ -37,7 +37,11 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
   app: [],
   order: FEATURE_ORDER,
   management: {
-    insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
+    insightsAndAlerting: [
+      'triggersActionsRules',
+      'triggersActionsAlerts',
+      'triggersActionsConnectors',
+    ],
   },
   privileges: {
     all: {
@@ -45,7 +49,11 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
       api: [OAUTH_API_TAG],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
+        insightsAndAlerting: [
+          'triggersActionsRules',
+          'triggersActionsAlerts',
+          'triggersActionsConnectors',
+        ],
       },
       savedObject: {
         all: [
@@ -64,7 +72,11 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
       api: [OAUTH_API_TAG],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
+        insightsAndAlerting: [
+          'triggersActionsRules',
+          'triggersActionsAlerts',
+          'triggersActionsConnectors',
+        ],
       },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`

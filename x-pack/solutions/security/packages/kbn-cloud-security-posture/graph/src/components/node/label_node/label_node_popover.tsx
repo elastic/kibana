@@ -94,6 +94,7 @@ const AlertBadge: React.FC<{ count: number }> = ({ count }) => (
       color="danger"
       size="s"
       data-test-subj="label-node-tooltip-alert-icon"
+      aria-hidden={true}
     />
     <CountText testSubj="label-node-tooltip-alert-count">{getAbbreviatedNumber(count)}</CountText>
   </RoundedBadge>

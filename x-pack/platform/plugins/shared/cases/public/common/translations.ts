@@ -64,6 +64,13 @@ export const APPLY_TEMPLATE_MODAL_APPLY = i18n.translate(
   }
 );
 
+export const APPLY_TEMPLATE_MODAL_CONNECTOR_NOTICE = i18n.translate(
+  'xpack.cases.caseView.applyTemplateModal.connectorNotice',
+  {
+    defaultMessage: "Applying a template does not change this case's connector.",
+  }
+);
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -134,6 +141,10 @@ export const EDIT = i18n.translate('xpack.cases.caseView.edit', {
 
 export const OPTIONAL = i18n.translate('xpack.cases.caseView.optional', {
   defaultMessage: 'Optional',
+});
+
+export const REQUIRED_ON_CLOSE = i18n.translate('xpack.cases.caseView.requiredOnClose', {
+  defaultMessage: 'Required on close',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
@@ -237,6 +248,10 @@ export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldR
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.cases.configureCasesButton', {
   defaultMessage: 'Settings',
+});
+
+export const TEMPLATES_BUTTON = i18n.translate('xpack.cases.templatesButton', {
+  defaultMessage: 'Templates',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.cases.caseView.comment.addComment', {

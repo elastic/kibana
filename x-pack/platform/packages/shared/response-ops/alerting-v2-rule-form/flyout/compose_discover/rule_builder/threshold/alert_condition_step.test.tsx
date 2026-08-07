@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { getDatasets } from '@kbn/esql-utils';
 import { createTestQueryClient, createMockServices } from '../../../../test_utils';
+import { useDataFields } from '../../../../form/hooks/use_data_fields';
+import { useIndexSources } from '../../../../form/hooks/use_index_sources';
+import { useResolveTimeField } from '../../use_resolve_time_field';
 import { RuleFormProvider } from '../../../../form/contexts';
 import { BuilderStateProvider } from '../builder_state_context';
 import { RuleBuilderAlertConditionStep } from './alert_condition_step';
@@ -37,6 +41,20 @@ jest.mock('../../../../form/hooks/use_data_fields', () => ({
       '@timestamp': { name: '@timestamp', type: 'date' },
       'service.name': { name: 'service.name', type: 'keyword' },
     },
+    isError: false,
+    isLoading: false,
+  })),
+}));
+
+jest.mock('@kbn/esql-utils', () => ({
+  getDatasets: jest.fn(() => Promise.resolve({ datasets: [] })),
+  getESQLTimeFieldFromQuery: jest.fn(() => Promise.resolve(undefined)),
+}));
+
+jest.mock('../../use_resolve_time_field', () => ({
+  useResolveTimeField: jest.fn(() => ({
+    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    isTimeFieldResolved: true,
   })),
 }));
 
@@ -400,6 +418,106 @@ describe('RuleBuilderAlertConditionStep', () => {
     expect(afterRemove.evaluations).toHaveLength(0);
   });
 
+  it('updates evaluation expression suggestions when a stat is renamed, added, or removed', async () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
+
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddEvaluation'));
+    const afterAddEval = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterAddEval} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).toBeInTheDocument();
+
+    // Renaming the stat should replace it in the suggestions.
+    fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+      target: { value: 'errors' },
+    });
+    const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).not.toBeInTheDocument();
+
+    // Adding a stat should add it to the suggestions.
+    fireEvent.click(screen.getByTestId('ruleBuilderAddStat'));
+    const afterAddStat = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterAddStat} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    // The new stat gets the default label "count" (the only one still unused after the rename).
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).toBeInTheDocument();
+
+    // Removing the newly-added stat should drop it from the suggestions again.
+    fireEvent.click(screen.getByTestId('ruleBuilderRemoveStat-1'));
+    const afterRemoveStat = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterRemoveStat} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).not.toBeInTheDocument();
+  });
+
   it('sets and displays filter input value', () => {
     const onBuilderStateChange = jest.fn();
     const builderState = makeBuilderState();
@@ -494,6 +612,187 @@ describe('RuleBuilderAlertConditionStep', () => {
     );
 
     expect(screen.queryByTestId('ruleBuilderConditionThresholdTo-0')).not.toBeInTheDocument();
+  });
+
+  describe('hook wiring', () => {
+    beforeEach(() => {
+      (useDataFields as jest.Mock).mockReturnValue({
+        data: {
+          '@timestamp': { name: '@timestamp', type: 'date' },
+          'service.name': { name: 'service.name', type: 'keyword' },
+        },
+        isError: false,
+        isLoading: false,
+      });
+      (useResolveTimeField as jest.Mock).mockReturnValue({
+        timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+        isTimeFieldResolved: true,
+      });
+    });
+
+    it('passes services.data.search.search to useDataFields', () => {
+      const services = createMockServices();
+      const builderState = makeBuilderState();
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={services}
+          />
+        </Wrapper>
+      );
+
+      expect(useDataFields).toHaveBeenCalledWith(
+        expect.objectContaining({ search: services.data.search.search })
+      );
+    });
+
+    it('passes a getDatasets callback using services.http to useIndexSources', () => {
+      const services = createMockServices();
+      const builderState = makeBuilderState();
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={services}
+          />
+        </Wrapper>
+      );
+
+      const { getDatasets: passedGetDatasets } = (useIndexSources as jest.Mock).mock.calls.at(
+        -1
+      )?.[0] as { getDatasets: () => Promise<unknown> };
+      expect(typeof passedGetDatasets).toBe('function');
+
+      passedGetDatasets();
+      expect(getDatasets).toHaveBeenCalledWith(services.http);
+    });
+
+    it('shows a warning callout when field discovery fails', () => {
+      (useDataFields as jest.Mock).mockReturnValue({
+        data: {},
+        isError: true,
+        isLoading: false,
+      });
+
+      const builderState = makeBuilderState();
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByText('Could not load fields for this data source')).toBeInTheDocument();
+    });
+
+    it('does not show the warning callout when field discovery succeeds', () => {
+      const builderState = makeBuilderState();
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(
+        screen.queryByText('Could not load fields for this data source')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not auto-correct timeField while field map is loading', async () => {
+      (useDataFields as jest.Mock).mockReturnValue({
+        data: {},
+        isError: false,
+        isLoading: true,
+      });
+
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({ timeField: 'event.start' });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      await act(async () => {});
+
+      const timeFieldChangeCalls = onBuilderStateChange.mock.calls.filter(
+        (args) => args[0]?.timeField !== undefined && args[0]?.timeField !== 'event.start'
+      );
+      expect(timeFieldChangeCalls).toHaveLength(0);
+    });
+
+    it('wires useResolveTimeField with the FROM query, current timeField, and search service', () => {
+      const services = createMockServices();
+      const builderState = makeBuilderState({ indexPattern: 'logs-*', timeField: '@timestamp' });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={services}
+          />
+        </Wrapper>
+      );
+
+      expect(useResolveTimeField).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'FROM logs-*',
+          timeField: '@timestamp',
+          search: services.data.search.search,
+          http: services.http,
+          dataViews: services.dataViews,
+        })
+      );
+    });
+
+    it('renders time-field options from useResolveTimeField', () => {
+      (useResolveTimeField as jest.Mock).mockReturnValue({
+        timeFieldOptions: [
+          { value: 'event_time', text: 'event_time' },
+          { value: '@timestamp', text: '@timestamp' },
+        ],
+        isTimeFieldResolved: true,
+      });
+
+      const builderState = makeBuilderState({
+        indexPattern: 'federation.orders',
+        timeField: 'event_time',
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      const select = screen.getByTestId('ruleBuilderTimeField') as HTMLSelectElement;
+      const options = Array.from(select.options).map((o) => o.value);
+      expect(options).toEqual(['event_time', '@timestamp']);
+    });
   });
 
   it('disables preview button when childOpen is true', () => {
@@ -668,6 +967,133 @@ describe('RuleBuilderAlertConditionStep', () => {
       expect(after.evaluations).toHaveLength(0);
       expect(after.alertConditions[0].metric).toBe('count');
       expect(after.recovery?.conditions[0].metric).toBe('count');
+    });
+  });
+
+  describe('evaluation expression reference warning', () => {
+    it('shows a warning when the expression references an unknown label', () => {
+      const builderState = makeBuilderState({
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'errors / total * 100' }],
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByText('References unknown labels: errors, total')).toBeInTheDocument();
+    });
+
+    it('does not show a warning when the expression only references known labels', () => {
+      const builderState = makeBuilderState({
+        stats: [
+          { id: 'stat-1', label: 'count', aggregation: Aggregation.COUNT },
+          { id: 'stat-2', label: 'errors', aggregation: Aggregation.COUNT },
+        ],
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'errors / count * 100' }],
+      });
+
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
+    });
+
+    it('clears the warning once a renamed stat matches the referenced label', () => {
+      let builderState = makeBuilderState({
+        evaluations: [{ id: 'eval-1', label: 'rate', expression: 'renamed_count' }],
+      });
+      const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+        builderState = next;
+      });
+
+      const { rerender } = render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByText('References unknown label: renamed_count')).toBeInTheDocument();
+
+      fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+        target: { value: 'renamed_count' },
+      });
+      const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+      rerender(
+        <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
+    });
+
+    it('debounces the warning while the user is still typing the expression', () => {
+      jest.useFakeTimers();
+      try {
+        let builderState = makeBuilderState({
+          evaluations: [{ id: 'eval-1', label: 'rate', expression: 'count' }],
+        });
+        const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+          builderState = next;
+        });
+
+        const { rerender } = render(
+          <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+            <RuleBuilderAlertConditionStep
+              state={createState()}
+              dispatch={dispatch}
+              services={createMockServices()}
+            />
+          </Wrapper>
+        );
+
+        fireEvent.change(screen.getByTestId('ruleBuilderEvalExpression-0'), {
+          target: { value: 'unknown_field' },
+        });
+        const afterTyping = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+
+        rerender(
+          <Wrapper builderState={afterTyping} onBuilderStateChange={onBuilderStateChange}>
+            <RuleBuilderAlertConditionStep
+              state={createState()}
+              dispatch={dispatch}
+              services={createMockServices()}
+            />
+          </Wrapper>
+        );
+
+        expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
+
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+
+        expect(screen.getByText('References unknown label: unknown_field')).toBeInTheDocument();
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 });

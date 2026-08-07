@@ -9,20 +9,38 @@
 
 import React from 'react';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import { getWorkflowChangeHistoryCompareIndicator } from './get_workflow_change_history_compare_indicator';
 import { getWorkflowYamlFromSnapshot } from './get_workflow_yaml_from_snapshot';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
+const getYamlFromChange = (change: Parameters<ChangeHistoryPreviewRenderFn>[0]['change']): string =>
+  getWorkflowYamlFromSnapshot(change.snapshot);
+
 export const renderWorkflowChangeHistoryPreview: ChangeHistoryPreviewRenderFn = ({
   change,
-  previousChange,
+  compareSpec,
   isLoadingCompareContext,
-}) => (
-  <WorkflowChangeHistoryMonacoPreview
-    yaml={getWorkflowYamlFromSnapshot(change.snapshot)}
-    compareYaml={
-      !isLoadingCompareContext && previousChange
-        ? getWorkflowYamlFromSnapshot(previousChange.snapshot)
-        : undefined
-    }
-  />
-);
+  diffTelemetry,
+}) => {
+  if (!compareSpec) {
+    return <WorkflowChangeHistoryMonacoPreview targetYaml={getYamlFromChange(change)} />;
+  }
+
+  const baselineYaml = getYamlFromChange(compareSpec.baseline);
+  const targetYaml = getYamlFromChange(compareSpec.target);
+
+  if (isLoadingCompareContext) {
+    return <WorkflowChangeHistoryMonacoPreview targetYaml={targetYaml} />;
+  }
+
+  // Monaco diff: original (baseline) → modified (target), same as `git diff baseline target`.
+  return (
+    <WorkflowChangeHistoryMonacoPreview
+      baselineYaml={baselineYaml}
+      targetYaml={targetYaml}
+      validationYaml={targetYaml}
+      diffTelemetry={diffTelemetry}
+      compareIndicator={getWorkflowChangeHistoryCompareIndicator(compareSpec)}
+    />
+  );
+};

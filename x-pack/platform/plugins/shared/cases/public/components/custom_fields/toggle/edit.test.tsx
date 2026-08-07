@@ -121,3 +121,32 @@ describe('Edit ', () => {
     });
   });
 });
+
+describe('Edit inline variant', () => {
+  const onSubmit = jest.fn();
+  const customField = customFieldsMock[1] as CaseCustomFieldToggle;
+  const customFieldConfiguration = customFieldsConfigurationMock[1];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders with form-row label (no h4 header rule layout)', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(screen.getByText(customFieldConfiguration.label)).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeChecked();
+    expect(screen.queryByRole('heading', { level: 4 })).not.toBeInTheDocument();
+  });
+});

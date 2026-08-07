@@ -5,11 +5,26 @@
  * 2.0.
  */
 
+import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
+import { SLO_STATUS_PRIORITY } from '@kbn/apm-types';
+import type { SloStatus } from '@kbn/apm-types';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
+
+function getWorstSloStatus(
+  total: number,
+  statusCounts: Partial<Record<SloStatus, number>> | undefined
+): { sloStatus: SloStatus | 'noSLOs'; sloCount: number } {
+  if (total === 0 || !statusCounts) return { sloStatus: 'noSLOs', sloCount: 0 };
+  for (const priority of SLO_STATUS_PRIORITY) {
+    const count = statusCounts[priority] ?? 0;
+    if (count > 0) return { sloStatus: priority, sloCount: count };
+  }
+  return { sloStatus: 'noSLOs', sloCount: 0 };
+}
 
 interface ServiceBadgesDataParams {
   serviceName: string;
@@ -20,7 +35,8 @@ interface ServiceBadgesDataParams {
 
 interface ServiceBadgesData {
   alertsCount?: number;
-  anomalyScore?: number;
+  anomalyData?: ServiceAnomalyScoreResponse;
+  sloData?: { sloStatus: SloStatus | 'noSLOs'; sloCount: number };
 }
 
 export function useServiceBadgesData({
@@ -29,15 +45,18 @@ export function useServiceBadgesData({
   rangeFrom,
   rangeTo,
 }: ServiceBadgesDataParams): ServiceBadgesData {
-  const { core, plugins } = useApmPluginContext();
+  const {
+    deps: { core, alerting },
+  } = useServiceFlyoutContext();
   const { capabilities } = core.application;
-  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
-  const { start = '', end = '' } = useTimeRange({ rangeFrom, rangeTo });
+  const { canReadAlerts } = getAlertingCapabilities({ alerting }, capabilities);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
+  const canReadSlos = !!capabilities.slo?.read;
 
   const { data: alertsData, status: alertsStatus } = useFetcher(
     (callApmApi) => {
-      if (!(isAlertingAvailable && canReadAlerts)) return;
+      if (!canReadAlerts || !start || !end) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
         params: {
@@ -48,13 +67,13 @@ export function useServiceBadgesData({
         .then((res) => ({ alertsCount: res.alertsCount }))
         .catch((): { alertsCount?: number } => ({}));
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
+    [serviceName, start, end, environment, canReadAlerts],
     { showToastOnError: false }
   );
 
   const { data: anomalyData, status: anomalyStatus } = useFetcher(
     (callApmApi) => {
-      if (!canReadMlJobs) return;
+      if (!canReadMlJobs || !start || !end) return;
 
       return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
         params: {
@@ -62,23 +81,43 @@ export function useServiceBadgesData({
           query: { start, end, environment },
         },
       })
-        .then((res) => ({ anomalyScore: res.anomalyScore }))
-        .catch((): { anomalyScore?: number } => ({}));
+        .then((res) => res)
+        .catch((): Partial<ServiceAnomalyScoreResponse> => ({}));
     },
     [serviceName, start, end, environment, canReadMlJobs],
     { showToastOnError: false }
   );
 
+  const { data: slosData, status: slosStatus } = useFetcher(
+    (callApmApi) => {
+      if (!canReadSlos) return;
+      return callApmApi('GET /internal/apm/services/{serviceName}/slos', {
+        params: {
+          path: { serviceName },
+          query: { environment, page: 0, perPage: 1 },
+        },
+      }).catch(() => undefined);
+    },
+    [serviceName, environment, canReadSlos],
+    { showToastOnError: false }
+  );
+
   const alertsResolved = alertsStatus === FETCH_STATUS.SUCCESS;
   const alertsCount = alertsResolved ? alertsData?.alertsCount ?? 0 : 0;
-  const canShowAlerts = isAlertingAvailable && canReadAlerts && alertsResolved && alertsCount > 0;
+  const canShowAlerts = canReadAlerts && alertsResolved && alertsCount > 0;
 
   const anomalyResolved = anomalyStatus === FETCH_STATUS.SUCCESS;
-  const anomalyScore = anomalyResolved ? anomalyData?.anomalyScore : undefined;
-  const canShowAnomaly = canReadMlJobs && anomalyResolved && anomalyScore !== undefined;
+  const canShowAnomaly =
+    canReadMlJobs && anomalyResolved && anomalyData?.anomalyScore !== undefined;
+
+  const slosResolved = slosStatus === FETCH_STATUS.SUCCESS;
+  const canShowSlo = canReadSlos && slosResolved;
 
   return {
     alertsCount: canShowAlerts ? alertsCount : undefined,
-    anomalyScore: canShowAnomaly ? anomalyScore : undefined,
+    anomalyData: canShowAnomaly ? anomalyData : undefined,
+    sloData: canShowSlo
+      ? getWorstSloStatus(slosData?.total ?? 0, slosData?.statusCounts)
+      : undefined,
   };
 }

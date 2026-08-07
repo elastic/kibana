@@ -12,7 +12,7 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { Observable } from 'rxjs';
 import type { EventReporter } from '../telemetry';
 
-export const SEARCH_MODAL_SELECTOR_PREFIX = 'chromeProjectNextSearchModal';
+export const SEARCH_MODAL_SELECTOR_PREFIX = 'chromeNextSearchModal';
 export const SEARCH_MODAL_HEIGHT_VH = 50;
 export const SEARCH_MODAL_WIDTH_PX = 800;
 export const SEARCH_MODAL_ROW_HEIGHT_PX = 68;

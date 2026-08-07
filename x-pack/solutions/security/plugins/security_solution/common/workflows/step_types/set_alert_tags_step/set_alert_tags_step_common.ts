@@ -14,7 +14,7 @@ import { MAX_ALERT_ID_LENGTH, MAX_WORKFLOW_MESSAGE_LENGTH } from '../common/cons
 
 export const SetAlertTagsStepId = 'security.setAlertTags' as const;
 
-const tagsArray = z.array(AlertTag).default([]);
+const tagsArray = z.array(AlertTag);
 
 const alertIdsBase = z.object({
   alert_ids: z
@@ -30,12 +30,12 @@ const alertIdsBase = z.object({
 // generation. Follow-up: elastic/security-team#17984.
 export const setAlertTagsInputSchema = z.union([
   alertIdsBase.extend({
-    tags_to_add: z.array(AlertTag).min(1).describe('Tags to add to the specified alerts'),
-    tags_to_remove: tagsArray.describe('Tags to remove from the specified alerts'),
+    tags_to_add: tagsArray.min(1).describe('Tags to add to the specified alerts'),
+    tags_to_remove: tagsArray.default([]).describe('Tags to remove from the specified alerts'),
   }),
   alertIdsBase.extend({
-    tags_to_add: tagsArray.describe('Tags to add to the specified alerts'),
-    tags_to_remove: z.array(AlertTag).min(1).describe('Tags to remove from the specified alerts'),
+    tags_to_add: tagsArray.default([]).describe('Tags to add to the specified alerts'),
+    tags_to_remove: tagsArray.min(1).describe('Tags to remove from the specified alerts'),
   }),
 ]);
 

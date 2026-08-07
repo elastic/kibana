@@ -7,14 +7,20 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
-import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
+import { DEPLOYMENT_STATS_PATH, WORKFLOWS_STATS_PATH } from '../../common/constants';
 
-export interface DeploymentStats {
+interface WorkflowsStats {
+  workflows?: { enabled?: number; disabled?: number };
+}
+
+interface DeploymentStatsResponse {
   indicesCount: number | null;
   vectorDocsCount: number | null;
   storeSizeBytes: number | null;
-  workflowsCount: number | null;
   dashboardsCount: number | null;
+}
+interface DeploymentStats extends DeploymentStatsResponse {
+  workflowsCount: number | null;
 }
 
 const initialStats: DeploymentStats = {
@@ -34,17 +40,8 @@ export const useDeploymentStats = () => {
     queryKey: ['deploymentStats'],
     queryFn: async () => {
       const [esStats, workflowsResponse] = await Promise.all([
-        http
-          .get<{
-            indicesCount: number;
-            vectorDocsCount: number;
-            storeSizeBytes: number;
-            dashboardsCount: number;
-          }>(DEPLOYMENT_STATS_PATH)
-          .catch(() => null),
-        http
-          .get<{ workflows?: { enabled?: number; disabled?: number } }>('/api/workflows/stats')
-          .catch(() => null),
+        http.get<DeploymentStatsResponse>(DEPLOYMENT_STATS_PATH).catch(() => null),
+        http.get<WorkflowsStats>(WORKFLOWS_STATS_PATH).catch(() => null),
       ]);
 
       return {
@@ -58,19 +55,8 @@ export const useDeploymentStats = () => {
       };
     },
     refetchOnWindowFocus: false,
+    staleTime: 60_000,
   });
 
   return { stats: data ?? initialStats, isLoading };
 };
-
-export const formatBytes = (bytes: number | null): string => {
-  if (bytes === null) return '—';
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
-  const value = bytes / Math.pow(1024, i);
-  return `${value.toFixed(value >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
-};
-
-export const formatNumber = (n: number | null): string =>
-  n === null ? '—' : new Intl.NumberFormat().format(n);

@@ -12,7 +12,6 @@ import { debounce, range } from 'lodash';
 import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
 import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/console/utils';
@@ -20,6 +19,7 @@ import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { normalizeUrl } from '../../../lib/utils';
+import { getKibanaApiDocLinks } from '../../../lib/kb';
 import { sendRequest } from '../../hooks';
 import type { Actions } from '../../stores/request';
 
@@ -30,6 +30,7 @@ import {
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
+  getKibanaApiDocLink,
   getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
@@ -45,9 +46,8 @@ import {
 
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
-import { StorageQuotaError } from '../../components/storage_quota_error';
 import type { ContextValue } from '../../contexts';
-import { containsComments, indentData } from './utils/requests_utils';
+import { containsComments, removeCommentsFromData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
@@ -275,8 +275,10 @@ export class MonacoEditorActionsProvider {
       if (requestTextFromEditor && requestTextFromEditor.data.length > 0) {
         requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
           if (containsComments(dataString)) {
-            // parse and stringify to remove comments
-            dataString = indentData(dataString);
+            // Comments must be removed before the request is sent since the body is
+            // flattened into a single line and a line comment would otherwise
+            // comment out the rest of the body (see https://github.com/elastic/kibana/issues/277160)
+            dataString = removeCommentsFromData(dataString);
           }
           return collapseLiteralStrings(dataString);
         });
@@ -307,7 +309,6 @@ export class MonacoEditorActionsProvider {
         autocompleteInfo,
         esHostService,
       },
-      ...startServices
     } = context;
     const { toasts } = notifications;
     try {
@@ -429,19 +430,26 @@ export class MonacoEditorActionsProvider {
                     'Request history is full. Clear the console history or disable saving new requests.',
                 }
               ),
-              text: toMountPoint(
-                StorageQuotaError({
-                  onClearHistory: () => {
+              actionProps: {
+                secondary: {
+                  onClick: () => {
                     history.clearHistory();
                     notifications.toasts.remove(toast);
                   },
-                  onDisableSavingToHistory: () => {
+                  children: i18n.translate('console.notification.clearHistory', {
+                    defaultMessage: 'Clear history',
+                  }),
+                },
+                primary: {
+                  onClick: () => {
                     settings.setIsHistoryEnabled(false);
                     notifications.toasts.remove(toast);
                   },
-                }),
-                startServices
-              ),
+                  children: i18n.translate('console.notification.disableSavingToHistory', {
+                    defaultMessage: 'Disable saving',
+                  }),
+                },
+              },
             });
           } else {
             // Best effort, but still notify the user.
@@ -487,12 +495,33 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  public async getDocumentationLink(docLinkVersion: string): Promise<string | null> {
+  public async getDocumentationLink(
+    docLinkVersion: string,
+    kibanaApiReferenceLink?: string
+  ): Promise<string | null> {
     const requests = await this.getRequests();
     if (requests.length < 1) {
       return null;
     }
     const request = requests[0];
+
+    // Kibana requests (kbn:) aren't matched by the Elasticsearch autocomplete
+    // definitions, so we resolve their documentation separately: try to deep
+    // link to the specific operation, falling back to the general Kibana API
+    // reference instead of showing "Documentation page is not yet available
+    // for this API".
+    if (request.url.startsWith(KIBANA_API_PREFIX)) {
+      if (!kibanaApiReferenceLink) {
+        return null;
+      }
+      const operationLink = getKibanaApiDocLink(
+        request.method,
+        request.url,
+        getKibanaApiDocLinks(),
+        kibanaApiReferenceLink
+      );
+      return operationLink ?? kibanaApiReferenceLink;
+    }
 
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }

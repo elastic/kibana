@@ -6,7 +6,9 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { z as z4 } from '@kbn/zod/v4';
 
 import type {
   ActionTypeParams,
@@ -21,22 +23,49 @@ import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
 
+const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
+  if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
+    throw new Error(
+      `Connector spec "${spec.metadata.id}" defines a reserved action key "${TEST_CONNECTOR_SUB_ACTION}".`
+    );
+  }
+
+  const baseActions = spec.actions ?? {};
+
+  if (!spec.test?.enabled) {
+    return baseActions;
+  }
+
+  return {
+    ...baseActions,
+    [TEST_CONNECTOR_SUB_ACTION]: {
+      handler: spec.test.handler,
+      input: z4.unknown().optional(),
+    },
+  };
+};
+
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
 
+  const hasTest = Boolean(spec.test?.enabled);
   const hasActions = Boolean(spec.actions);
+  const executableActions = buildExecutableActions(spec);
+  const hasExecutableActions = hasActions || hasTest;
 
-  const executor = hasActions
+  const executor = hasExecutableActions
     ? generateExecutorFunction({
-        actions: spec.actions,
+        actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
       })
     : undefined;
 
-  const paramsValidator = hasActions ? generateParamsSchema(spec.actions) : undefined;
+  const paramsValidator = hasExecutableActions
+    ? generateParamsSchema(executableActions)
+    : undefined;
 
   return {
     id: spec.metadata.id,
@@ -53,5 +82,6 @@ export const createConnectorTypeFromSpec = (
     source: ACTION_TYPE_SOURCES.spec,
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
+    isTestable: Boolean(spec.test?.enabled),
   };
 };

@@ -68,6 +68,7 @@ import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
   CasesAnalyticsV2WriterContract,
+  CasesAttachmentsV2WriterContract,
 } from '../cases_analytics_v2';
 
 interface CasesClientFactoryArgs {
@@ -107,6 +108,13 @@ interface CasesClientFactoryArgs {
    * user-actions SO service to mirror writes to `.cases-activity`.
    */
   analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getAttachmentsWriter()`.
+   * Same lifetime + semantics as `analyticsV2Writer`; consumed by the
+   * AttachmentService for create / patch / delete mirrors and by the
+   * CasesService for cascade-on-case-delete.
+   */
+  analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
   /**
    * Stable callback returned by `CasesAnalyticsV2Service.getDataViewRefresher()`.
    * Always resolvable — when v2 is disabled, defaults to
@@ -253,6 +261,7 @@ export class CasesClientFactory {
       log: this.logger,
       unsecuredSavedObjectsClient,
       config: this.options.config,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const spaceId =
@@ -270,16 +279,21 @@ export class CasesClientFactory {
         savedObjectsClient: unsecuredSavedObjectsClient,
       });
 
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
+    });
+
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
       namespace,
       refreshAnalyticsV2DataView,
-    });
-
-    const fieldDefinitionsService = new FieldDefinitionsService({
-      unsecuredSavedObjectsClient,
+      getFieldDefinitionsForOwner: (owner) =>
+        fieldDefinitionsService
+          .getFieldDefinitions(owner)
+          .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
     const caseService = new CasesService({
@@ -288,6 +302,7 @@ export class CasesClientFactory {
       attachmentService,
       analyticsV2Writer: this.options.analyticsV2Writer,
       analyticsV2ActivityWriter: this.options.analyticsV2ActivityWriter,
+      analyticsV2AttachmentsWriter: this.options.analyticsV2AttachmentsWriter,
     });
 
     const licensingService = new LicensingService(

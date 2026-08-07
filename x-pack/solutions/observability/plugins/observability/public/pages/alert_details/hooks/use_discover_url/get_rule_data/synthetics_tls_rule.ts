@@ -25,6 +25,8 @@ export function syntheticsTlsAlertParamsToKqlQuery(params: TLSRuleParams): strin
     certExpirationThreshold,
     search,
     kqlQuery,
+    // Browser-certificate params are not monitor-document filters, so they are
+    // not mapped into the related-documents Discover query.
     includeBrowserCerts,
     certOrigin,
     browserResourceTypes,

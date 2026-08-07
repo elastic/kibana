@@ -29,7 +29,10 @@ import { OverrideSettingsModal } from '../data_phases/override_settings_modal/ov
 import { EditDslStepsFlyout } from '../data_phases/edit_dsl_steps_flyout/edit_dsl_steps_flyout';
 import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
-import { buildLifecyclePhases } from '../common/data_lifecycle/lifecycle_types';
+import {
+  buildLifecyclePhases,
+  getFrozenPhaseLabel,
+} from '../common/data_lifecycle/lifecycle_types';
 import {
   dslLifecycleSummaryUiReducer,
   initialDslLifecycleSummaryUiState,
@@ -145,10 +148,11 @@ export const useDslLifecycleSummary = ({
       : hasPhaseStats
       ? phaseStats.hot?.docs_count ?? 0
       : stats?.totalDocs;
-    const frozenSizeInBytes =
-      canShowPerPhaseStats && hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
-    const frozenDocsCount =
-      canShowPerPhaseStats && hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
+    // Frozen fields only ever come from per-phase stats, so guard them on `hasPhaseStats` alone.
+    // (Hot uses `canShowPerPhaseStats` because it can also fall back to whole-stream totals before
+    // per-phase stats resolve; frozen has no such fallback.)
+    const frozenSizeInBytes = hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
+    const frozenDocsCount = hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
 
     return buildLifecyclePhases({
       label: isServerless
@@ -162,9 +166,7 @@ export const useDslLifecycleSummary = ({
       size: hotSizeInBytes !== undefined ? formatBytes(hotSizeInBytes) : undefined,
       retentionPeriod,
       frozenAfter,
-      frozenLabel: i18n.translate('xpack.streams.streamDetailLifecycle.frozen', {
-        defaultMessage: 'Frozen',
-      }),
+      frozenLabel: getFrozenPhaseLabel(),
       frozenColor: ilmPhases.frozen.color,
       frozenDescription: ilmPhases.frozen.description,
       frozenSize: frozenSizeInBytes !== undefined ? formatBytes(frozenSizeInBytes) : undefined,

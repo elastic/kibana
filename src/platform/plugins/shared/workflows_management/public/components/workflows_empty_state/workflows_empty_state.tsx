@@ -17,9 +17,11 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
+import { useLibraryEnabled } from '@kbn/workflows-ui';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { PrivilegesFooter } from '../workflows_required_priveleges_footer';
 interface WorkflowsEmptyStateProps {
@@ -27,7 +29,14 @@ interface WorkflowsEmptyStateProps {
 }
 
 export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStateProps) {
-  const { http } = useKibana().services;
+  const { http, application } = useKibana().services;
+  const isLibraryEnabled = useLibraryEnabled();
+
+  const navigateToLibrary = useCallback(
+    () => application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
+    [application]
+  );
+
   return (
     <EuiEmptyPrompt
       icon={
@@ -69,18 +78,32 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href="https://github.com/elastic/workflows"
-                target="_blank"
-                iconType="external"
-                iconSide="right"
-                aria-label="Example workflows"
-              >
-                <FormattedMessage
-                  id="workflows.emptyState.exampleWorkflowsButton"
-                  defaultMessage="Example workflows"
-                />
-              </EuiButtonEmpty>
+              {isLibraryEnabled ? (
+                <EuiButtonEmpty
+                  onClick={navigateToLibrary}
+                  iconType="arrowRight"
+                  iconSide="right"
+                  aria-label="Explore library"
+                >
+                  <FormattedMessage
+                    id="workflows.emptyState.exploreLibraryButton"
+                    defaultMessage="Explore library"
+                  />
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty
+                  href="https://github.com/elastic/workflows"
+                  target="_blank"
+                  iconType="external"
+                  iconSide="right"
+                  aria-label="Example workflows"
+                >
+                  <FormattedMessage
+                    id="workflows.emptyState.exampleWorkflowsButton"
+                    defaultMessage="Example workflows"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null

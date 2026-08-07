@@ -8,10 +8,20 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { useRunWorkflow, useWorkflows, WorkflowSelector } from '@kbn/workflows-ui';
+import {
+  useRunWorkflow,
+  useWorkflows,
+  useWorkflowsCapabilities,
+  WorkflowSelector,
+} from '@kbn/workflows-ui';
+import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { RenderingService } from '@kbn/core-rendering-browser';
@@ -28,6 +38,12 @@ export interface RunWorkflowPanelProps {
   sortTriggerType: string;
   /** data-test-subj prefix for the execute button. */
   executeButtonTestSubj: string;
+  /**
+   * Managed workflows are excluded from the list unless the caller opts in with a matching
+   * visibility. Pass the selector(s)/solution(s) the surfacing context maps to (e.g.
+   * `{ selectors: ['rule_action'] }`) to include managed workflows tagged with that context.
+   */
+  visibility?: WorkflowSelectorVisibility;
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -38,6 +54,7 @@ export const RunWorkflowPanel = ({
   inputs,
   sortTriggerType,
   executeButtonTestSubj,
+  visibility,
   onClose,
   onExecute,
 }: RunWorkflowPanelProps) => {
@@ -52,8 +69,27 @@ export const RunWorkflowPanel = ({
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
 
+  const { canReadManagedWorkflow } = useWorkflowsCapabilities();
+  // Mirror the visibility-context derivation WorkflowSelector runs internally so both queries share
+  // a react-query cache key (one fetch) and the selected managed workflow resolves below.
+  const visibilityContext = useMemo(() => {
+    if (!visibility) return undefined;
+    const contexts = [
+      ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+      ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+    ];
+    return contexts.length > 0 ? contexts : undefined;
+  }, [visibility]);
+
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
-  const { data: workflowsData } = useWorkflows({ size: 1000, page: 1, query: '' });
+  const { data: workflowsData } = useWorkflows({
+    size: 1000,
+    page: 1,
+    query: '',
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
+      : {}),
+  });
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
     [workflowsData, selectedId]
@@ -140,6 +176,7 @@ export const RunWorkflowPanel = ({
     () => (
       <WorkflowSelector
         config={{
+          visibility,
           filterFunction: (workflows) => workflows.filter((w) => w.enabled),
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
@@ -159,7 +196,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, sortTriggerType]
+    [selectedId, sortTriggerType, visibility]
   );
 
   return (

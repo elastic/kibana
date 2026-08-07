@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useRevokeOAuthClient } from '../../hooks/oauth_clients/use_revoke_oauth_client';
 import { useToasts } from '../../hooks/use_toasts';
 import { labels } from '../../utils/i18n';
@@ -110,6 +112,11 @@ export const RevokeMcpClientModal = ({
           isLoading={isRevoking}
           disabled={!isConfirmed || isRevoking}
           data-test-subj="mcpClientRevokeConfirmButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_REVOKE_CONFIRM,
+            detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+          })}
         >
           {labels.tools.mcpClients.revoke.revokeButton}
         </EuiButton>

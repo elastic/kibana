@@ -134,6 +134,12 @@ export const APPLIED_TEMPLATE_LABEL = i18n.translate(
   { defaultMessage: 'applied template' }
 );
 
+export const APPLIED_NAMED_TEMPLATE_LABEL = (name: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.appliedNamedTemplateLabel', {
+    values: { name },
+    defaultMessage: 'applied {name} template',
+  });
+
 export const REMOVED_TEMPLATE_LABEL = i18n.translate(
   'xpack.cases.caseView.userActions.removedTemplateLabel',
   { defaultMessage: 'removed applied template' }

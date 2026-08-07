@@ -28,6 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  /**
+   * Purpose: Dashboard integration smoke test
+   *
+   * Migration: migrate to scout - try to simplify test cases
+   */
   describe('Interactions between options list and dashboard', () => {
     let controlId: string;
 

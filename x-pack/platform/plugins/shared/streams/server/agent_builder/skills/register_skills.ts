@@ -6,41 +6,18 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
-import type { MemoryToolsOptions } from '../tools/memory';
 import { streamsManagementSkill } from './streams_management_skill';
-import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
-import { createKiIdentificationManagementSkill } from './ki_identification_management';
-import { sigEventsManagementSkill } from './significant_events_management';
-import { createSigEventsOnboardingSkill } from './significant_events_onboarding_skill';
-import { createGapDetectionSkill } from './memory';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
-  telemetry,
-  streamsKIsOnboardingClient,
-  memoryToolsOptions,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-  memoryToolsOptions: MemoryToolsOptions;
 }): void => {
   if (!agentBuilder) {
     return;
   }
 
-  const streamsSkills = [
-    streamsManagementSkill,
-    knowledgeIndicatorsManagementSkill,
-    sigEventsManagementSkill,
-    ...(streamsKIsOnboardingClient
-      ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
-      : []),
-    createSigEventsOnboardingSkill(memoryToolsOptions),
-    createGapDetectionSkill(memoryToolsOptions),
-  ];
+  const streamsSkills = [streamsManagementSkill];
 
   for (const skill of streamsSkills) {
     agentBuilder.skills.register(skill);

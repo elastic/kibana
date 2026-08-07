@@ -20,6 +20,7 @@ import {
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
+  type Evaluator,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -60,6 +61,43 @@ export type EvaluateDataset = ({
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+/**
+ * Builds a deterministic CODE evaluator that asserts the final assistant message contains every
+ * string listed under `metadata[metadataKey]`. Returns score 1 when the metadata key is absent or
+ * empty, so datasets that don't opt in are unaffected. Matching is case-insensitive, and `missing`
+ * is derived with the same rule so the debug metadata never contradicts the score.
+ */
+const createRequiredTermsEvaluator = ({
+  name,
+  metadataKey,
+}: {
+  name: string;
+  metadataKey: string;
+}): Evaluator => ({
+  name,
+  kind: 'CODE',
+  evaluate: async ({ output, metadata }) => {
+    const raw = metadata?.[metadataKey];
+    const required = Array.isArray(raw)
+      ? (raw as unknown[]).filter((term): term is string => typeof term === 'string')
+      : [];
+    if (required.length === 0) return { score: 1 };
+
+    const answer = getFinalAssistantMessage(output as TaskOutput);
+    const lowerAnswer = answer.toLowerCase();
+    const missing = required.filter((term) => !lowerAnswer.includes(term.toLowerCase()));
+
+    return {
+      score: missing.length === 0 ? 1 : 0,
+      metadata: {
+        [metadataKey]: required,
+        missing,
+        answerPreview: answer.slice(0, 600),
+      },
+    };
+  },
+});
 
 function configureExperiment({
   evaluators,
@@ -207,6 +245,14 @@ function configureExperiment({
         };
       },
     },
+    // Asserts seeded alert _ids appear verbatim in the final response (alert-triage grounded evals).
+    createRequiredTermsEvaluator({
+      name: 'RequiredAlertIdsInResponse',
+      metadataKey: 'requiredAlertIds',
+    }),
+    // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
+    // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
+    createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...ragEvaluators,

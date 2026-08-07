@@ -17,6 +17,7 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui
 dependsOn:
+  - '@kbn/alerting-v2-common-queries'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/datemath'
   - '@kbn/core'

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
@@ -16,6 +17,7 @@ import { useGetCaseConnectors } from '../../../../../containers/use_get_case_con
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import { useStatusAction } from '../../../../actions/status/use_status_action';
+import { useAddCaseToChat } from '../../../../../agent_builder/use_add_case_to_chat';
 
 jest.mock('../../../../../containers/use_get_case_connectors');
 jest.mock('../../../../../containers/use_delete_cases');
@@ -23,13 +25,14 @@ jest.mock('../../../../actions/status/use_should_disable_status');
 jest.mock('../../../../actions/status/use_status_action');
 jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../agent_builder/use_add_case_to_chat');
 jest.mock('../../../../case_view/use_on_refresh_case_view_page');
 
 jest.mock('../../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
 
-jest.mock('../case_settings_popover', () => ({
+jest.mock('./case_settings_popover', () => ({
   CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
 }));
 
@@ -37,6 +40,11 @@ jest.mock('../case_settings_popover', () => ({
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
 (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
 (useStatusAction as jest.Mock).mockReturnValue({ handleUpdateCaseStatus: jest.fn() });
+(useAddCaseToChat as jest.Mock).mockReturnValue({
+  addToChat: jest.fn(),
+  summarizeCase: jest.fn(),
+  isAddToChatAvailable: false,
+});
 
 describe('CaseDetailsAppHeader', () => {
   const onUpdateField = jest.fn();
@@ -55,6 +63,11 @@ describe('CaseDetailsAppHeader', () => {
     (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
     (useStatusAction as jest.Mock).mockReturnValue({ handleUpdateCaseStatus: jest.fn() });
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat: jest.fn(),
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: false,
+    });
   });
 
   it('renders the app header with case title', async () => {
@@ -120,5 +133,36 @@ describe('CaseDetailsAppHeader', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
     });
+  });
+
+  it('adds the case to chat from the chat actions dropdown', async () => {
+    const addToChat = jest.fn();
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat,
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: true,
+    });
+
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId('case-chat-actions'));
+    fireEvent.click(await screen.findByTestId('case-chat-action-add-to-chat'));
+
+    expect(addToChat).toHaveBeenCalled();
+  });
+
+  it('renders summarize case in the chat actions dropdown', async () => {
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat: jest.fn(),
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: true,
+    });
+
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId('case-chat-actions'));
+
+    expect(await screen.findByTestId('case-chat-action-add-to-chat')).toBeInTheDocument();
+    expect(screen.getByTestId('case-chat-action-summarize')).toBeInTheDocument();
   });
 });

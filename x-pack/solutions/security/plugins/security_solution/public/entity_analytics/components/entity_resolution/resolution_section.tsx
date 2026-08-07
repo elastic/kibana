@@ -16,6 +16,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useResolutionGroup } from './hooks/use_resolution_group';
 import { ResolutionGroupTable } from './resolution_group_table';
 import {
@@ -32,6 +35,17 @@ interface ResolutionSectionProps {
   scopeId: string;
   /** When omitted, the header renders as plain, non-clickable text (no link, no arrow). */
   openDetailsPanel?: (path: EntityDetailsPath) => void;
+  /**
+   * When provided, clicking a related entity name is delegated to this callback (used by the
+   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /** When true, hides the chevron icon in the resolution group header. Used by the v2 flyout. */
+  hideHeaderIcons?: boolean;
 }
 
 export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
@@ -39,6 +53,8 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
   entityType,
   scopeId,
   openDetailsPanel,
+  onShowEntity,
+  hideHeaderIcons = false,
 }) => {
   const {
     data: group,
@@ -49,7 +65,9 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
     enabled: !!entityId,
   });
 
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
 
   const handleOpenResolutionTab = useCallback(() => {
     openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP });
@@ -59,24 +77,37 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
     (entity: Record<string, unknown>) => {
       const clickedEntityId = getEntityId(entity);
       const clickedEntityName = getEntityName(entity);
+
+      if (onShowEntity) {
+        onShowEntity({
+          engineType: entityType as string,
+          entityId: clickedEntityId,
+          entityName: clickedEntityName,
+        });
+        return;
+      }
+
+      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
+
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: entityType,
+          entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+          ...sharedParams,
+        });
+        return;
+      }
+
       const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-
-      if (!panelKey || !panelParam) return;
-
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: clickedEntityName,
-            entityId: clickedEntityId,
-            contextID: scopeId,
-            scopeId,
-          },
-        },
-      });
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, entityType, scopeId]
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
   );
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
@@ -96,13 +127,13 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
       <ExpandablePanel
         header={{
           title: RESOLUTION_GROUP_LINK_TITLE,
-          // link + arrow only when navigation is wired up
+          // link only when navigation is wired up; arrow icon hidden for the v2 flyout
           ...(openDetailsPanel && {
             link: {
               callback: handleOpenResolutionTab,
               tooltip: RESOLUTION_GROUP_LINK_TOOLTIP,
             },
-            iconType: 'arrowStart',
+            iconType: hideHeaderIcons ? undefined : 'arrowStart',
           }),
         }}
         expand={{ expandable: false }}

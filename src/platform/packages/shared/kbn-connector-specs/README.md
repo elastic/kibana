@@ -114,7 +114,9 @@ export const MyConnector: ConnectorSpec = {
     displayName: 'My Connector',
     description: 'A custom connector example',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    // See "Intermediate release state" below: a new connector type ships with
+    // ['agentBuilder'] and gains its remaining feature IDs in a follow-up PR.
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -213,6 +215,19 @@ metadata: {
 }
 ```
 
+#### Intermediate release state
+
+A new connector type must reach Production-NonCanary before it can declare user-facing
+features. Serverless rollouts and rollbacks leave nodes on different Kibana versions for a
+while, and a user action referencing a connector type that a node does not have breaks on
+that node. So adding a connector takes two PRs:
+
+1. Ship the connector with `supportedFeatureIds: ['agentBuilder']`.
+2. Once the connector is registered in every Production-NonCanary version, add `'workflows'`
+   and any other user-facing feature IDs in a follow-up PR.
+
+Mention the required follow-up PR in the first PR's description so it is not forgotten.
+
 ### Auth Type
 
 Specify which standard auth schemas (if any) are supported by this connector. If none
@@ -276,17 +291,22 @@ actions: {
 
 ### Test
 
-Optional connection test:
+Optional connection test shown in the connector Test tab when `enabled: true`:
 
 ```typescript
 test: {
   handler: async (ctx) => {
-    // Test connection logic
-    return { ok: boolean, message?: string };
+    await ctx.client.get(`${ctx.config.url}/health`);
+    return {};
   },
   description?: string,
+  enabled?: boolean, // requires throw-on-failure handler contract below
 }
 ```
+
+Test handler contract: **throw on failure**; do not return an `{ ok }` flag. A resolved
+return value (including `{}` or optional data) is treated as success. Set `enabled: true` only
+after migrating the handler to this contract.
 
 ### Policies (Optional)
 

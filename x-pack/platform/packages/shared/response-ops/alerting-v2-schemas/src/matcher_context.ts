@@ -17,7 +17,7 @@ export interface MatcherContext {
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
   severity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
-  rule: MatcherContextRule;
+  rule?: MatcherContextRule;
   data?: Record<string, unknown>;
 }
 

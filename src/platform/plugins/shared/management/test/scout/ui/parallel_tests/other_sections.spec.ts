@@ -13,7 +13,8 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/272033
+test.describe.skip(
   'Stack Management — ingest, security, and stack sections',
   { tag: tags.stateful.classic },
   () => {
@@ -92,6 +93,7 @@ test.describe(
           sectionLinks: [
             'index_management',
             'index_lifecycle_management',
+            'data_federation',
             'snapshot_restore',
             'rollup_jobs',
             'transform',

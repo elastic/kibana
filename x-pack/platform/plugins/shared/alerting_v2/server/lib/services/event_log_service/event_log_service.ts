@@ -20,10 +20,7 @@ import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
 import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
 import { EventLoggerToken } from './tokens';
-import {
-  buildCountActionPolicyEventsQuery,
-  buildFindActionPolicyEventsQuery,
-} from './queries/action_policy_events_query';
+import { buildFindActionPolicyEventsQuery } from './queries/action_policy_events_query';
 import { buildRuleExecutionsQuery } from './queries/rule_executions_query';
 import { normalizeRuleExecution } from './normalizers/rule_execution_normalizer';
 import type { FindRuleExecutionsQuery, PaginatedResult, RuleExecution } from './types';
@@ -36,9 +33,11 @@ export interface FindActionPolicyExecutionEventsParams {
   startDate: string;
   page?: number;
   perPage?: number;
-  outcome?: PolicyExecutionOutcome;
+  outcomes?: PolicyExecutionOutcome[];
   policyIds?: string[];
   ruleIds?: string[];
+  mandatoryRuleIds?: string[];
+  episodeIds?: string[];
 }
 
 export interface FindActionPolicyExecutionEventsResult {
@@ -48,26 +47,11 @@ export interface FindActionPolicyExecutionEventsResult {
   total: number;
 }
 
-export interface CountActionPolicyExecutionEventsSinceParams {
-  spaceId: string;
-  since: string;
-  outcome?: PolicyExecutionOutcome;
-  policyIds?: string[];
-  ruleIds?: string[];
-}
-
-export interface CountActionPolicyExecutionEventsSinceResult {
-  count: number;
-}
-
 export interface EventLogServiceContract {
   logEvent(event: IEvent, id?: string): void;
   findActionPolicyExecutionEvents(
     params: FindActionPolicyExecutionEventsParams
   ): Promise<FindActionPolicyExecutionEventsResult>;
-  countActionPolicyExecutionEventsSince(
-    params: CountActionPolicyExecutionEventsSinceParams
-  ): Promise<CountActionPolicyExecutionEventsSinceResult>;
   findRuleExecutions(query: FindRuleExecutionsQuery): Promise<PaginatedResult<RuleExecution>>;
 }
 
@@ -90,16 +74,20 @@ export class EventLogService implements EventLogServiceContract {
     startDate,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PAGE_SIZE,
-    outcome,
+    outcomes,
     policyIds,
     ruleIds,
+    mandatoryRuleIds,
+    episodeIds,
   }: FindActionPolicyExecutionEventsParams): Promise<FindActionPolicyExecutionEventsResult> {
     const body = buildFindActionPolicyEventsQuery({
       spaceId,
       startDate,
-      outcome,
+      outcomes,
       policyIds,
       ruleIds,
+      mandatoryRuleIds,
+      episodeIds,
       page,
       perPage,
     });
@@ -115,27 +103,6 @@ export class EventLogService implements EventLogServiceContract {
       perPage,
       total: extractTotal(response.hits.total),
     };
-  }
-
-  public async countActionPolicyExecutionEventsSince({
-    spaceId,
-    since,
-    outcome,
-    policyIds,
-    ruleIds,
-  }: CountActionPolicyExecutionEventsSinceParams): Promise<CountActionPolicyExecutionEventsSinceResult> {
-    const body = buildCountActionPolicyEventsQuery({
-      spaceId,
-      startDate: since,
-      outcome,
-      policyIds,
-      ruleIds,
-    });
-    const index = this.eventLogService.getIndexPattern();
-
-    const response = await this.esClient.search<IValidatedEvent>({ index, ...body });
-
-    return { count: extractTotal(response.hits.total) };
   }
 
   /**

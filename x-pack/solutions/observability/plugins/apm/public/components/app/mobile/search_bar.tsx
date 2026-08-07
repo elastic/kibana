@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EuiFlexGroupProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
 import { css } from '@emotion/react';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TimeComparison } from '../../shared/time_comparison';
+import { useSecondaryFiltersWidthStyle } from '../../shared/search_bar/use_secondary_filters_width_style';
 import { MobileFilters } from './service_overview/filters';
 import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 import { AnomalyThresholdSelect } from '../../shared/anomaly_threshold_select';
@@ -39,69 +39,68 @@ export function MobileSearchBar({
   showAnomalyThresholdSelector = false,
   searchBarPlaceholder,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXXL } = useBreakpoints();
+  const { isMedium } = useBreakpoints();
+  const hasSecondaryFilters =
+    showEnvironmentFilter ||
+    showTimeComparison ||
+    showMobileFilters ||
+    showAnomalyThresholdSelector;
+
+  const { secondaryFiltersWidthStyle, setSearchBarContainerRef } = useSecondaryFiltersWidthStyle({
+    isMedium,
+    enabled: showUnifiedSearchBar && showQueryInput,
+  });
 
   if (hidden) {
     return null;
   }
 
-  const searchBarDirection: EuiFlexGroupProps['direction'] =
-    isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
-
-  const filterControlCss = css`
-    width: ${isSmall ? '100%' : '225px'};
-  `;
-
   return (
-    <>
-      <EuiFlexGroup gutterSize="s" responsive={false} direction={searchBarDirection}>
-        <EuiFlexGroup
-          direction={isLarge ? 'columnReverse' : 'row'}
-          gutterSize="s"
-          responsive={false}
-        >
-          {showUnifiedSearchBar && (
-            <EuiFlexItem>
-              <UnifiedSearchBar
-                placeholder={searchBarPlaceholder}
-                showQueryInput={showQueryInput}
-                showFilterBar={showFilterBar}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup
-        gutterSize={isMedium ? 's' : 'm'}
-        direction={isLarge || isMedium ? 'column' : 'row'}
-      >
-        {showEnvironmentFilter && (
-          <EuiFlexItem grow={isSmall}>
-            <ApmEnvironmentFilter
-              fullWidth
-              compressed
-              cssOverride={isLarge ? {} : filterControlCss}
-            />
-          </EuiFlexItem>
-        )}
-        {showTimeComparison && (
-          <EuiFlexItem grow={isSmall} css={filterControlCss}>
-            <TimeComparison fullWidth compressed />
-          </EuiFlexItem>
-        )}
-        {showAnomalyThresholdSelector && (
-          <EuiFlexItem grow={isSmall} css={filterControlCss}>
-            <AnomalyThresholdSelect compressed fullWidth />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      {showMobileFilters && (
+    <div ref={setSearchBarContainerRef}>
+      {showUnifiedSearchBar && (
+        <UnifiedSearchBar
+          placeholder={searchBarPlaceholder}
+          showQueryInput={showQueryInput}
+          showFilterBar={showFilterBar}
+        />
+      )}
+      {hasSecondaryFilters && (
         <>
           <EuiSpacer size="s" />
-          <MobileFilters />
+          <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
+            <EuiFlexItem grow={false} style={secondaryFiltersWidthStyle}>
+              <EuiFlexGrid
+                columns={!isMedium ? 3 : 1}
+                gutterSize="s"
+                css={css`
+                  width: 100%;
+                  max-width: 100%;
+                `}
+              >
+                {showEnvironmentFilter && (
+                  <EuiFlexItem>
+                    <ApmEnvironmentFilter compressed fullWidth />
+                  </EuiFlexItem>
+                )}
+
+                {showTimeComparison && (
+                  <EuiFlexItem>
+                    <TimeComparison compressed fullWidth />
+                  </EuiFlexItem>
+                )}
+
+                {showAnomalyThresholdSelector && (
+                  <EuiFlexItem>
+                    <AnomalyThresholdSelect compressed fullWidth />
+                  </EuiFlexItem>
+                )}
+
+                {showMobileFilters && <MobileFilters />}
+              </EuiFlexGrid>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
-    </>
+    </div>
   );
 }

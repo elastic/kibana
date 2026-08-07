@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/nightshift-plugin",
+  "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/nightshift-sre-agent-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Nightshift UI",
+  "plugin": {
+    "id": "nightshift",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "dataViews",
+      "lens",
+      "observabilityShared",
+      "share",
+      "streams",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": ["agentBuilder", "serverless", "spaces"],
+    "requiredBundles": ["kibanaReact", "significantEvents"]
+  }
+}

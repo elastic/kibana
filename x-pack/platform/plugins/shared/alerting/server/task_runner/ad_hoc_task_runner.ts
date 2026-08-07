@@ -15,6 +15,7 @@ import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
 import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
@@ -62,6 +63,7 @@ export interface AdHocTaskRunnerConstructorParams {
 
 interface RunParams {
   adHocRunData: AdHocRun;
+  effectiveApiKey: string | null;
   fakeRequest: KibanaRequest;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
@@ -101,7 +103,7 @@ export class AdHocTaskRunner implements CancellableTask {
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null = null;
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
-  private apiKeyToUse: string | null = null;
+  private fakeRequest: KibanaRequest | null = null;
 
   constructor({
     context,
@@ -172,6 +174,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private async runRule({
     adHocRunData,
+    effectiveApiKey,
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
@@ -181,19 +184,22 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule, apiKeyToUse, apiKeyId } = adHocRunData;
+    const { rule, apiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
+    // spaceId is persisted on the ad-hoc run saved object, written by validated
+    // request handlers. Brand it once here at the SO load boundary.
+    const spaceId = brandSpaceId(adHocRunData.spaceId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
-      namespace: this.context.spaceIdToNamespace(adHocRunData.spaceId),
+      namespace: this.context.spaceIdToNamespace(spaceId),
       logger: this.logger,
       request: fakeRequest,
       ruleId: rule.id,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
-      spaceId: adHocRunData.spaceId,
+      spaceId,
       isServerless: this.context.isServerless,
       shouldGrantUiam: this.context.shouldGrantUiam,
     };
@@ -237,7 +243,7 @@ export class AdHocTaskRunner implements CancellableTask {
         name: rule.name,
         alertTypeId: rule.alertTypeId,
         id: rule.id,
-        spaceId: adHocRunData.spaceId,
+        spaceId,
       },
       ruleTaskTimeout: ruleType.ruleTaskTimeout,
     });
@@ -288,7 +294,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey: apiKeyToUse,
+      apiKey: effectiveApiKey,
       apiKeyId,
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
@@ -383,8 +389,7 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
-      this.apiKeyToUse = apiKeyToUse;
+      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
       this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -473,13 +478,27 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      // Generate fake request with API key
-      const { fakeRequest } = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse, {
-        ruleId: rule.id,
-      });
+      // Generate fake request with API key. Threading the UIAM key (and owner
+      // metadata) mirrors the regular rule runner so backfills authenticate with
+      // the UIAM key in UIAM deployments instead of falling back to the ES key.
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        this.context,
+        spaceId,
+        apiKeyToUse,
+        {
+          uiamApiKey,
+          apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+          apiKeyOwner: rule.apiKeyOwner,
+          ruleId: rule.id,
+        }
+      );
+      // Stash the built request so the cleanup path (updateGapsAfterBackfillComplete)
+      // reuses the exact same credentials instead of rebuilding it from scratch.
+      this.fakeRequest = fakeRequest;
 
       return {
         adHocRunData,
+        effectiveApiKey,
         fakeRequest,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,
@@ -698,17 +717,12 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   private async updateGapsAfterBackfillComplete() {
-    if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
+    if (this.scheduleToRunIndex < 0 || !this.adHocRange || !this.fakeRequest) return null;
 
-    const { fakeRequest } = getFakeKibanaRequest(
-      this.context,
-      this.taskInstance.params.spaceId,
-      this.apiKeyToUse,
-      { ruleId: this.ruleId }
+    const eventLogClient = await this.context.getEventLogClient(this.fakeRequest);
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(
+      this.fakeRequest
     );
-
-    const eventLogClient = await this.context.getEventLogClient(fakeRequest);
-    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
     return updateGaps({
       ruleId: this.ruleId,
       start: new Date(this.adHocRange.start),

@@ -62,21 +62,27 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.createdAt).toBe(created.createdAt);
       expect(response.body.createdBy).toBe(created.createdBy);
       expect(response.body.updatedAt).not.toBe(created.updatedAt);
+      expect(response.body.metadata.version).toBe(created.metadata.version + 1);
     }
   );
 
-  apiTest('update: should toggle the enabled field', async ({ apiClient, apiServices }) => {
-    const created = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'rule-to-disable' } })
-    );
-    expect(created.enabled).toBe(true);
-    const response = await apiClient.patch(getRuleUrl(created.id), {
-      headers: writerHeaders,
-      body: { enabled: false },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.enabled).toBe(false);
-  });
+  apiTest(
+    'update: should reject a body containing enabled and never toggle lifecycle',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-disable' } })
+      );
+      expect(created.enabled).toBe(true);
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { enabled: false },
+      });
+      expect(response).toHaveStatusCode(400);
+
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.enabled).toBe(true);
+    }
+  );
 
   apiTest(
     'update: should update schedule.lookback while preserving schedule.every',
@@ -120,7 +126,10 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         format: 'standalone',
         breach: { query: 'FROM new-index-* | LIMIT 100' },
       });
-      expect(response.body.metadata).toStrictEqual(created.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...created.metadata,
+        version: created.metadata.version + 1,
+      });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );
@@ -177,7 +186,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: {
-          no_data_strategy: 'emit',
+          no_data_strategy: 'last_known_status',
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -187,7 +196,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.no_data_strategy).toBe('emit');
+      expect(response.body.no_data_strategy).toBe('last_known_status');
       expect(response.body.query).toStrictEqual({
         format: 'standalone',
         breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -272,6 +281,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { version: created.version, metadata: { name: 'second-rename' } },
       });
       expect(staleUpdate).toHaveStatusCode(409);
+      expect(staleUpdate.body.code).toBe('RULE_VERSION_CONFLICT');
     }
   );
 
@@ -305,6 +315,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       body: { metadata: { name: 'whatever' } },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('RULE_NOT_FOUND');
   });
 
   apiTest(
@@ -316,6 +327,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { name: 'whatever' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -330,6 +342,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { name: 'a'.repeat(MAX_NAME_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -344,6 +357,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { name: '' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -358,6 +372,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -372,6 +387,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -386,6 +402,22 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { unknownField: 'nope' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'validation: should reject body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-strict-top-level' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadta: { name: 'typo field' } },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -400,6 +432,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { schedule: { every: '1s' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -425,6 +458,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { state_transition: { pending_count: 3, pending_timeframe: '5m' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_STATE_TRANSITION');
     }
   );
 

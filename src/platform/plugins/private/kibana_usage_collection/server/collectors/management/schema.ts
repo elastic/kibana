@@ -148,6 +148,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableNewFlyout': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
+  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -170,6 +174,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableSiemReadiness': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable the SIEM Readiness feature.' },
+  },
   'securitySolution:enableCloudConnector': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -177,6 +185,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:enableAlertsAndAttacksAlignment': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableAttackDiscoveryWorkflows': {
+    type: 'boolean',
+    _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
+  },
+  'securitySolution:enableRuleChangesHistory': {
+    type: 'boolean',
+    _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
@@ -244,6 +260,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'discover:sampleRowsPerPage': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
+    },
   },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
@@ -793,18 +816,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Maximum number of cases the Cases connector can open during a single rule run.',
     },
   },
-  'observability:streamsEnableSignificantEvents': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable significant events in streams.',
-    },
-  },
-  'observability:streamsEnableSignificantEventsDiscovery': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Significant events discovery in Streams.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
@@ -842,6 +853,66 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether scheduled Significant Events discovery is enabled.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection bucket interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection lookback window (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events target coverage window (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events review interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events discovery batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events triage batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events maximum review passes.',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
@@ -873,6 +944,58 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Switches the Entity Store Engine to v2',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether the managed alert analysis workflow is enabled' },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Auto-close alerts validated as false positives by the alert analysis workflow',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMinThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Minimum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowAutoCloseConfidenceScoreMaxThreshold': {
+    type: 'float',
+    _meta: {
+      description: 'Maximum false positive confidence score for auto-closing alerts',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowConnectorId': {
+    type: 'keyword',
+    _meta: { description: 'AI connector used by the alert analysis workflow' },
+  },
+  'securitySolution:alertAnalysisWorkflowAgentId': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent used by the alert analysis workflow (value is redacted; the setting is sensitive)',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowCreateConversation': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowTagPrefix': {
+    type: 'keyword',
+    _meta: {
+      description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
+    },
+  },
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
     },
   },
   'elasticRamen:enabled': {

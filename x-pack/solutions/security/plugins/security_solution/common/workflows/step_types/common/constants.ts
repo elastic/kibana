@@ -26,5 +26,9 @@ export const MAX_WORKFLOW_MESSAGE_LENGTH = 1000;
  */
 export const MAX_USER_ID_LENGTH = 256;
 
-// Matches MAX_ALERT_ID_LENGTH because both alert and attack IDs are Elasticsearch IDs
+/**
+ * Maximum length for attack IDs.
+ * Attack IDs are typically Elasticsearch-generated UUIDs (~36 characters).
+ * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
+ */
 export const MAX_ATTACK_ID_LENGTH = 256;

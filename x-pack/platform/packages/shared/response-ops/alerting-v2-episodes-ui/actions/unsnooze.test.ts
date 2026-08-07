@@ -9,8 +9,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createUnsnoozeAction } from './unsnooze';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -47,13 +46,26 @@ describe('createUnsnoozeAction', () => {
     ).toBe(false);
   });
 
+  it('not compatible when snooze has expired', () => {
+    expect(
+      createUnsnoozeAction(makeDeps()).isCompatible({
+        episodes: [
+          makeEpisode({
+            last_snooze_action: 'snooze',
+            snooze_expiry: '2020-01-01T00:00:00.000Z',
+          }),
+        ],
+      })
+    ).toBe(false);
+  });
+
   it('not compatible on empty selection', () => {
     expect(createUnsnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
   it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 2, total: 2 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [

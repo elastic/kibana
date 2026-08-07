@@ -66,14 +66,17 @@ export const platformCoreCasesTools = {
  * - {entity} is a more granular entity withing the {feature} scope, for example Feature KI or Query KI.
  * - {action} the action to perform on the entity
  */
-export const platformStreamsSigEventsTools = {
+export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
+  eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
+
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
+  reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
 
 export const attachmentTools = {
@@ -89,6 +92,7 @@ export const internalTools = {
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
+  searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
   listFiles: 'list_files',

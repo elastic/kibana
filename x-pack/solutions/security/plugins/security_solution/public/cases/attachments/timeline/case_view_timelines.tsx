@@ -43,10 +43,7 @@ const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']):
   return ids;
 };
 
-export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
-  caseData,
-  searchTerm,
-}) => {
+export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);
@@ -63,7 +60,6 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({
   const { timelines, totalCount, loading } = useGetTimelinesByIds({
     ids: timelineIds,
     pageInfo,
-    search: searchTerm,
     sort,
   });
 

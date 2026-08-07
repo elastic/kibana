@@ -45,7 +45,6 @@ import {
   getSettingValue,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
-  getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
 import { resolveLocale } from './resolve_locale';
@@ -76,6 +75,7 @@ export class RenderingService {
   private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private exposeNavDependencies: boolean = false;
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -121,6 +121,12 @@ export class RenderingService {
     this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
     ).catch(() => true);
+
+    this.exposeNavDependencies = await firstValueFrom(
+      this.coreContext.configService.atPath<{ exposeNavDependencies?: boolean }>('plugins')
+    )
+      .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
+      .catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -191,6 +197,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
+      exposeNavDependencies: this.exposeNavDependencies,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -279,25 +286,17 @@ export class RenderingService {
     });
     const themeName = this.themeName$.getValue();
 
-    const scriptPaths = getScriptPaths({
-      themeName,
-      darkMode,
-      baseHref: staticAssetsHrefBase,
-    });
-
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
     const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
       configuredLocales: availableLocales.map((entry) => entry.id),
       translationHashes,
-      isServerless,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
     });
@@ -348,7 +347,6 @@ export class RenderingService {
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
-      scriptPaths,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { AnomalyThreshold } from '@kbn/apm-types';
-import { anomalyThresholdRt } from '@kbn/apm-types';
+import { anomalyThresholdSchema, type AnomalyThreshold } from '@kbn/apm-types';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
-export { anomalyThresholdRt, type AnomalyThreshold } from '@kbn/apm-types';
+export { anomalyThresholdSchema, type AnomalyThreshold };
 
 export const DEFAULT_ANOMALY_THRESHOLD = ML_ANOMALY_SEVERITY.MAJOR;
 
@@ -26,5 +25,5 @@ export const getAnomalyThreshold = (value: string | null | undefined): AnomalyTh
 };
 
 function ensureAnomalyThreshold(value: string): value is AnomalyThreshold {
-  return anomalyThresholdRt.is(value);
+  return anomalyThresholdSchema.safeParse(value).success;
 }

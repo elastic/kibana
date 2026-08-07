@@ -49,7 +49,7 @@ describe('runWorkflowYamlValidations', () => {
     model.dispose();
   });
 
-  it('excludes editor-only connector and ES|QL validators from the preview subset', () => {
+  it('does not run connector or ES|QL validators in the structural layer', () => {
     const yaml = [
       'name: connector-workflow',
       'steps:',

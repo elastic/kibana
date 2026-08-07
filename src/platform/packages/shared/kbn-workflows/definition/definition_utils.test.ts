@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { collectAllSteps, getStepByNameFromNestedSteps } from './definition_utils';
+import {
+  collectAllSteps,
+  getNestedStepGroups,
+  getStepByNameFromNestedSteps,
+  stripNestedStepContentForComparison,
+  visitNestedSteps,
+} from './definition_utils';
 import type { Step } from '../spec/schema';
 
 // Step is a discriminated union (foreach | if | while | switch | ...).
@@ -72,6 +78,18 @@ describe('collectAllSteps', () => {
     ]);
   });
 
+  it('collects steps inside a dynamic parallel (foreach) body', () => {
+    const steps = [
+      {
+        name: 'par',
+        type: 'parallel',
+        foreach: '{{ steps.list.output }}',
+        steps: [waitStep('item_step')],
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['par', 'item_step']);
+  });
+
   it('collects steps inside merge', () => {
     const steps = [
       { name: 'mrg', type: 'merge', sources: ['b1'], steps: [waitStep('inner')] },
@@ -130,6 +148,176 @@ describe('collectAllSteps', () => {
       'deep',
     ]);
   });
+
+  it('collects steps inside on-failure fallback', () => {
+    const steps = [
+      {
+        name: 'risky',
+        type: 'console',
+        'on-failure': { fallback: [waitStep('fallback')] },
+      },
+    ] as unknown as Step[];
+    expect(collectAllSteps(steps).map((s) => s.name)).toEqual(['risky', 'fallback']);
+  });
+});
+
+describe('getNestedStepGroups', () => {
+  it('returns path suffixes for all nested step locations', () => {
+    const step = {
+      name: 'route',
+      type: 'switch',
+      expression: '{{ x }}',
+      cases: [{ match: 'a', steps: [waitStep('case_a')] }],
+      default: [waitStep('default_step')],
+    } as unknown as Step;
+
+    expect(getNestedStepGroups(step).map(({ pathSuffix }) => pathSuffix)).toEqual([
+      '.case[0]',
+      '.default',
+    ]);
+  });
+
+  it('includes on-failure fallback steps for any step type', () => {
+    const step = {
+      name: 'risky',
+      type: 'console',
+      'on-failure': { fallback: [waitStep('fallback')] },
+    } as unknown as Step;
+
+    expect(getNestedStepGroups(step)).toEqual([
+      expect.objectContaining({ pathSuffix: '.on-failure.fallback' }),
+    ]);
+  });
+});
+
+describe('visitNestedSteps', () => {
+  it('builds stable paths for nested steps', () => {
+    const steps = [
+      {
+        name: 'check',
+        type: 'if',
+        condition: 'true',
+        steps: [waitStep('then_step')],
+        else: [waitStep('else_step')],
+      },
+    ] as unknown as Step[];
+
+    const paths: string[] = [];
+    visitNestedSteps(steps, ({ path }) => paths.push(path), { requireValidName: true });
+
+    expect(paths).toEqual(['check', 'check.then_step', 'check.else.else_step']);
+  });
+
+  it('disambiguates duplicate sibling step names', () => {
+    const steps = [waitStep('foo'), waitStep('foo')] as unknown as Step[];
+
+    const paths: string[] = [];
+    visitNestedSteps(steps, ({ path }) => paths.push(path), { requireValidName: true });
+
+    expect(paths).toEqual(['foo[0]', 'foo[1]']);
+  });
+});
+
+describe('stripNestedStepContentForComparison', () => {
+  it('removes nested step trees from container steps', () => {
+    const step = {
+      name: 'check',
+      type: 'if',
+      condition: 'true',
+      steps: [waitStep('then_step')],
+      else: [waitStep('else_step')],
+    } as unknown as Step;
+
+    expect(stripNestedStepContentForComparison(step)).toEqual({
+      name: 'check',
+      type: 'if',
+      condition: 'true',
+    });
+  });
+
+  it('preserves branch and case metadata while stripping nested steps', () => {
+    const step = {
+      name: 'route',
+      type: 'switch',
+      expression: '{{ x }}',
+      cases: [{ match: 'a', steps: [waitStep('case_a')] }],
+      default: [waitStep('default_step')],
+    } as unknown as Step;
+
+    expect(stripNestedStepContentForComparison(step)).toEqual({
+      name: 'route',
+      type: 'switch',
+      expression: '{{ x }}',
+      cases: [{ match: 'a' }],
+    });
+  });
+
+  it('strips on-failure fallback steps while preserving other on-failure config', () => {
+    const step = {
+      name: 'risky',
+      type: 'console',
+      'on-failure': {
+        retry: { attempts: 2 },
+        fallback: [waitStep('fallback')],
+      },
+    } as unknown as Step;
+
+    expect(stripNestedStepContentForComparison(step)).toEqual({
+      name: 'risky',
+      type: 'console',
+      'on-failure': { retry: { attempts: 2 } },
+    });
+  });
+});
+
+describe('nested step traversal parity', () => {
+  const containerFixtures: Step[] = [
+    {
+      name: 'loop',
+      type: 'foreach',
+      foreach: '{{ items }}',
+      steps: [waitStep('inner')],
+    },
+    {
+      name: 'check',
+      type: 'if',
+      condition: 'true',
+      steps: [waitStep('then_step')],
+      else: [waitStep('else_step')],
+    },
+    {
+      name: 'route',
+      type: 'switch',
+      expression: '{{ x }}',
+      cases: [{ match: 'a', steps: [waitStep('case_a')] }],
+      default: [waitStep('default_step')],
+    },
+    {
+      name: 'par',
+      type: 'parallel',
+      branches: [{ name: 'b1', steps: [waitStep('branch_step')] }],
+    },
+    {
+      name: 'risky',
+      type: 'console',
+      'on-failure': { fallback: [waitStep('fallback')] },
+    },
+  ] as unknown as Step[];
+
+  it.each(containerFixtures.map((step) => [step.name, step] as const))(
+    'stripNestedStepContentForComparison removes every nested group from %s',
+    (_name, step) => {
+      const nestedNames = collectAllSteps(getNestedStepGroups(step).flatMap(({ steps }) => steps))
+        .map(({ name }) => name)
+        .filter((name) => name !== step.name);
+
+      const stripped = stripNestedStepContentForComparison(step);
+
+      for (const nestedName of nestedNames) {
+        expect(JSON.stringify(stripped)).not.toContain(`"${nestedName}"`);
+      }
+    }
+  );
 });
 
 describe('getStepByNameFromNestedSteps', () => {
