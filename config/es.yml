@@ -7,7 +7,7 @@
 #
 # To actually apply settings:
 #   - Uncomment the lines you need right here, if you want them to become the shared
-#     default for everyone who runs `es` (only do this via a PR, since it's checked in), or
+#     default for everyone who runs `es`, or
 #   - Copy them into `config/es.dev.yml` instead (git-ignored, also auto-loaded by every
 #     run mode, analogous to `config/kibana.dev.yml`) to apply them only on your own
 #     machine, or

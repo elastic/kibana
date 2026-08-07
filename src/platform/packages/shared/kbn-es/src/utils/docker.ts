@@ -650,15 +650,13 @@ export function resolveEsArgs(
   }
 
   // config/es.yml, if present, overrides the defaults (and ssl defaults) above.
-  // It's the checked-in, shared base config (mirrors config/kibana.yml).
   for (const arg of loadEsConfigEsArgs()) {
     const [key, ...value] = arg.split('=');
     esArgs.set(key.trim(), value.join('=').trim());
   }
 
-  // config/es.dev.yml, if present, overrides config/es.yml above. It's the
-  // git-ignored, local-only dev config (mirrors config/kibana.dev.yml), and is
-  // itself overridden by explicit customEsArgs (-E/--env flags) below
+  // config/es.dev.yml, if present, overrides config/es.yml and is
+  // itself overridden by explicit customEsArgs (-E/--env flags)
   if (devConfig !== false) {
     for (const arg of loadEsDevConfigEsArgs()) {
       const [key, ...value] = arg.split('=');
@@ -1583,16 +1581,14 @@ async function runDockerContainerInSnapshotMode(
 
   const esArgsMap = new Map<string, string>(DEFAULT_DOCKER_SNAPSHOT_ESARGS);
 
-  // config/es.yml, if present, overrides the defaults above. It's the
-  // checked-in, shared base config (mirrors config/kibana.yml).
+  // config/es.yml, if present, overrides the defaults above.
   for (const arg of loadEsConfigEsArgs(log)) {
     const [key, ...value] = arg.split('=');
     esArgsMap.set(key.trim(), value.join('=').trim());
   }
 
-  // config/es.dev.yml, if present, overrides config/es.yml above. It's the
-  // git-ignored, local-only dev config (mirrors config/kibana.dev.yml), and is
-  // itself overridden by --license/--password and explicit -E settings below
+  // config/es.dev.yml, if present, overrides config/es.yml above, and is
+  // itself overridden by --license/--password and explicit -E settings
   if (options.devConfig !== false) {
     for (const arg of loadEsDevConfigEsArgs(log)) {
       const [key, ...value] = arg.split('=');

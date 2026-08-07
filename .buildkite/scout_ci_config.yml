@@ -89,6 +89,7 @@ plugins:
     - unified_search
     - upgrade_assistant
     - uptime
+    - usage_collection
     - ux
     - vis_types/timeseries
     - watcher

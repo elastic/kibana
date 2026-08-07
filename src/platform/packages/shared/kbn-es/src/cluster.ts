@@ -405,15 +405,13 @@ export class Cluster {
     }
 
     // config/es.yml, if present, overrides the default esArg values above.
-    // It's the checked-in, shared base config (mirrors config/kibana.yml).
     for (const arg of loadEsConfigEsArgs(this.log)) {
       const [key, ...value] = arg.split('=');
       esArgs.set(key.trim(), value.join('=').trim());
     }
 
-    // config/es.dev.yml, if present, overrides config/es.yml above. It's the
-    // git-ignored, local-only dev config (mirrors config/kibana.dev.yml), and
-    // is itself overridden by explicit options.esArgs (-E flags) below
+    // config/es.dev.yml, if present, overrides config/es.yml above, and
+    // is itself overridden by explicit options.esArgs (-E flags)
     if (options.devConfig !== false) {
       for (const arg of loadEsDevConfigEsArgs(this.log)) {
         const [key, ...value] = arg.split('=');
