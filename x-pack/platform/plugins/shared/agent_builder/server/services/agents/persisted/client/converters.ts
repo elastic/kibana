@@ -58,6 +58,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       workflow_ids: configuration.workflow_ids,
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
+      ai_indices: configuration.ai_indices,
     },
   };
 };
@@ -95,6 +96,7 @@ export const createRequestToEs = ({
       workflow_ids: profile.configuration.workflow_ids,
       plugin_ids: profile.configuration.plugin_ids,
       connector_ids: profile.configuration.connector_ids,
+      ai_indices: profile.configuration.ai_indices,
     },
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),

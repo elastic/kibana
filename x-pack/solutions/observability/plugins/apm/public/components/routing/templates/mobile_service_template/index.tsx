@@ -96,12 +96,9 @@ function TemplateWithContext({
       },
       ...(selectedTab
         ? [
+            // No href on the current entity — Chrome Next Back would self-link.
             {
               title: serviceName,
-              href: router.link('/mobile-services/{serviceName}', {
-                path: { serviceName },
-                query,
-              }),
             },
             {
               title: selectedTab.label,
@@ -110,7 +107,7 @@ function TemplateWithContext({
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceName, servicesLink],
+    [selectedTab, serviceName, servicesLink],
     {
       omitRootOnServerless: true,
     }

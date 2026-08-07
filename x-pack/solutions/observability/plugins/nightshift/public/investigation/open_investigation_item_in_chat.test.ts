@@ -23,7 +23,7 @@ describe('open_investigation_item_in_chat', () => {
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this blind spot: Missing trace coverage',
       attachments: [
         {
@@ -49,7 +49,7 @@ describe('open_investigation_item_in_chat', () => {
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this recommendation: Roll back checkout deployment',
       attachments: [
         {
@@ -75,7 +75,7 @@ describe('open_investigation_item_in_chat', () => {
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this hypothesis: Checkout deploy regression',
       attachments: [
         {

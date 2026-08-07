@@ -282,6 +282,7 @@ export class CasePlugin
       getCasesClient,
       this.unifiedAttachmentTypeRegistry,
       this.caseConfig.attachments?.enabled === true,
+      this.caseConfig.templates?.enabled === true,
       () => core.getStartServices()
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
@@ -289,6 +290,7 @@ export class CasePlugin
     if (plugins.agentBuilder) {
       registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core, {
         analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+        templatesEnabled: this.caseConfig.templates?.enabled === true,
       });
     }
 
