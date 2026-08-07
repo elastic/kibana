@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   AttachmentFormatContext,
   BuiltinAttachmentBoundedTool,
@@ -13,9 +14,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ALERTING_NAMESPACE, RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { ruleAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
-import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
+import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { RulesClient } from '../../../lib/rules_client';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 
 const getRuleSchema = z.object({});
 
@@ -27,8 +31,9 @@ export interface GetRuleToolParams {
   attachmentId: string;
   episodeId: string;
   ruleId: string;
-  logger: Logger;
+  logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
+  getPrivilegeChecker: (context: { request: AttachmentFormatContext['request'] }) => PrivilegeChecker;
 }
 
 export const getRuleTool = ({
@@ -37,12 +42,23 @@ export const getRuleTool = ({
   ruleId,
   logger,
   getRulesClient,
+  getPrivilegeChecker,
 }: GetRuleToolParams): BuiltinAttachmentBoundedTool<typeof getRuleSchema> => ({
   id: getRuleToolId(attachmentId),
   type: ToolType.builtin,
   description: `Fetch rule "${ruleId}" associated with episode "${episodeId}" (attachment "${attachmentId}"), including name, schedule, query, enabled state, and metadata. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
   schema: getRuleSchema,
   handler: async (_args, toolContext) => {
+    const unauthorized = await ensureToolPrivilege({
+      privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
+      feature: 'rules',
+      level: 'read',
+      action: 'fetch rule for episode',
+    });
+    if (unauthorized) {
+      return unauthorized;
+    }
+
     try {
       const rulesClient = getRulesClient({
         request: toolContext.request,
@@ -61,7 +77,19 @@ export const getRuleTool = ({
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.warn(`Failed to fetch rule "${ruleId}" for episode "${episodeId}": ${message}`);
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to fetch rule for episode',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
+          labels: {
+            rule_id: ruleId,
+            episode_id: episodeId,
+            space_id: toolContext.spaceId,
+          },
+          error,
+        });
+      }
       return {
         results: [
           {

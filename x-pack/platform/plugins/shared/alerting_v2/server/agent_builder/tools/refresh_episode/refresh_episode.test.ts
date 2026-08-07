@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createLoggerService } from '../../../lib/services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -15,6 +16,7 @@ import {
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodesClient } from '../../../lib/episodes_client';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import { refreshEpisodeTool, refreshEpisodeToolId } from './refresh_episode';
 
 const baseEpisodeData: EpisodeAttachmentData = {
@@ -31,20 +33,31 @@ const baseEpisodeData: EpisodeAttachmentData = {
 };
 
 describe('refreshEpisodeTool', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let get: jest.Mock;
+  let canRead: jest.Mock;
+
+  const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
+    canRead = jest.fn().mockResolvedValue(canReadResult);
+    return {
+      canRead,
+      canWrite: jest.fn().mockResolvedValue(true),
+    } as unknown as PrivilegeChecker;
+  };
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
+    ({ loggerService, mockLogger } = createLoggerService());
     get = jest.fn();
   });
 
-  const createTool = () =>
+  const createTool = (canReadResult: boolean = true) =>
     refreshEpisodeTool({
       attachmentId: 'attach-1',
       episodeId: 'ep-1',
-      logger,
+      logger: loggerService,
       getEpisodesClient: () => ({ get } as unknown as EpisodesClient),
+      getPrivilegeChecker: () => createPrivilegeCheckerMock(canReadResult),
     });
 
   describe('id', () => {
@@ -158,9 +171,48 @@ describe('refreshEpisodeTool', () => {
           },
         ],
       });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to refresh episode "ep-1"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to refresh episode',
+        expect.objectContaining({
+          labels: {
+            episode_id: 'ep-1',
+            space_id: 'default',
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
+    });
+
+    it('returns an unauthorized error when user lacks Alerts: Read', async () => {
+      const result = await createTool(false).handler(
+        {},
+        agentBuilderMocks.tools.createHandlerContext()
+      );
+
+      expect(get).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: expect.stringContaining('Missing Kibana privilege: Alerts: Read'),
+              metadata: { missingPrivileges: ['Alerts: Read'] },
+            },
+          },
+        ],
+      });
+    });
+
+    it('checks Alerts: Read before refreshing', async () => {
+      get.mockResolvedValueOnce(baseEpisodeData);
+
+      await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
+
+      expect(canRead).toHaveBeenCalledWith('alerts');
     });
   });
 });

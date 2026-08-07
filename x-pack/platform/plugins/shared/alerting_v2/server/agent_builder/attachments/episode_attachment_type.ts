@@ -17,17 +17,20 @@ import {
   episodeAttachmentDataSchema,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
-import type { Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleTool, getRuleToolId } from '../tools/get_rule';
 import { refreshEpisodeTool, refreshEpisodeToolId } from '../tools/refresh_episode';
 
 interface CreateEpisodeAttachmentTypeOptions {
-  logger: Logger;
+  logger: LoggerServiceContract;
   getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
+  getPrivilegeChecker: (context: { request: AttachmentResolveContext['request'] }) => PrivilegeChecker;
 }
 
 const formatEpisodeDescription = ({
@@ -87,6 +90,7 @@ export const createEpisodeAttachmentType = ({
   logger,
   getEpisodesClient,
   getRulesClient,
+  getPrivilegeChecker,
 }: CreateEpisodeAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof EPISODE_ATTACHMENT_TYPE,
   EpisodeAttachmentData
@@ -106,13 +110,28 @@ export const createEpisodeAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<EpisodeAttachmentData | undefined> => {
     try {
+      const privilegeChecker = getPrivilegeChecker({ request: context.request });
+      const canRead = await privilegeChecker.canRead('alerts');
+      if (!canRead) {
+        logger.debug({
+          message: 'Unauthorized to resolve episode attachment',
+          labels: { episode_id: episodeId, space_id: context.spaceId },
+        });
+        return undefined;
+      }
+
       const episode = await getEpisodesClient(context).get(episodeId);
       if (!episode) {
         return undefined;
       }
       return episodeAttachmentDataSchema.parse(alertEpisodeToEpisodeAttachment(episode));
     } catch (error) {
-      logger.warn(`Failed to resolve episode attachment for origin "${episodeId}": ${error}`);
+      logger.warn({
+        message: 'Failed to resolve episode attachment',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
+        labels: { episode_id: episodeId, space_id: context.spaceId },
+        error,
+      });
       return undefined;
     }
   },
@@ -133,9 +152,12 @@ export const createEpisodeAttachmentType = ({
       if (!latestVersion) return true;
       return episode.last_timestamp !== latestVersion.data.last_timestamp;
     } catch (error) {
-      logger.warn(
-        `Failed to check staleness for episode attachment "${attachment.origin}": ${error}`
-      );
+      logger.warn({
+        message: 'Failed to check episode attachment staleness',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
+        labels: { episode_id: attachment.origin, space_id: context.spaceId },
+        error,
+      });
       return false;
     }
   },
@@ -162,6 +184,7 @@ export const createEpisodeAttachmentType = ({
           episodeId,
           logger,
           getEpisodesClient,
+          getPrivilegeChecker,
         }),
         getRuleTool({
           attachmentId: attachment.id,
@@ -169,6 +192,7 @@ export const createEpisodeAttachmentType = ({
           ruleId,
           logger,
           getRulesClient,
+          getPrivilegeChecker,
         }),
       ],
     };

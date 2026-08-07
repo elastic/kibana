@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createLoggerService } from '../../../lib/services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import Boom from '@hapi/boom';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { RulesClient } from '../../../lib/rules_client';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import { getRuleTool, getRuleToolId } from './get_rule';
 
 const baseRuleData: RuleAttachmentData = {
@@ -37,21 +40,32 @@ const baseRuleData: RuleAttachmentData = {
 };
 
 describe('getRuleTool', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let getRule: jest.Mock;
+  let canRead: jest.Mock;
+
+  const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
+    canRead = jest.fn().mockResolvedValue(canReadResult);
+    return {
+      canRead,
+      canWrite: jest.fn().mockResolvedValue(true),
+    } as unknown as PrivilegeChecker;
+  };
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
+    ({ loggerService, mockLogger } = createLoggerService());
     getRule = jest.fn();
   });
 
-  const createTool = () =>
+  const createTool = (canReadResult: boolean = true) =>
     getRuleTool({
       attachmentId: 'attach-1',
       episodeId: 'ep-1',
       ruleId: 'rule-1',
-      logger,
+      logger: loggerService,
       getRulesClient: () => ({ getRule } as unknown as RulesClient),
+      getPrivilegeChecker: () => createPrivilegeCheckerMock(canReadResult),
     });
 
   describe('id', () => {
@@ -97,8 +111,8 @@ describe('getRuleTool', () => {
       });
     });
 
-    it('returns an error when getRule throws', async () => {
-      getRule.mockRejectedValueOnce(new Error('not found'));
+    it('returns an error without logging when getRule returns 404', async () => {
+      getRule.mockRejectedValueOnce(Boom.notFound('Rule not found'));
 
       const result = await createTool().handler(
         {},
@@ -110,14 +124,75 @@ describe('getRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule "rule-1" for episode "ep-1": not found',
+              message: 'Failed to fetch rule "rule-1" for episode "ep-1": Rule not found',
             },
           },
         ],
       });
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to fetch rule "rule-1" for episode "ep-1"')
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns an error and logs a warning when getRule throws unexpectedly', async () => {
+      getRule.mockRejectedValueOnce(new Error('boom'));
+
+      const result = await createTool().handler(
+        {},
+        agentBuilderMocks.tools.createHandlerContext()
       );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Failed to fetch rule "rule-1" for episode "ep-1": boom',
+            },
+          },
+        ],
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to fetch rule for episode',
+        expect.objectContaining({
+          labels: {
+            rule_id: 'rule-1',
+            episode_id: 'ep-1',
+            space_id: 'default',
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
+      );
+    });
+
+    it('returns an unauthorized error when user lacks Rules: Read', async () => {
+      const result = await createTool(false).handler(
+        {},
+        agentBuilderMocks.tools.createHandlerContext()
+      );
+
+      expect(getRule).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: expect.stringContaining('Missing Kibana privilege: Rules: Read'),
+              metadata: { missingPrivileges: ['Rules: Read'] },
+            },
+          },
+        ],
+      });
+    });
+
+    it('checks Rules: Read before fetching', async () => {
+      getRule.mockResolvedValueOnce(baseRuleData);
+
+      await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
+
+      expect(canRead).toHaveBeenCalledWith('rules');
     });
   });
 });
