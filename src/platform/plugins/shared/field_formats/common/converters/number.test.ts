@@ -27,12 +27,12 @@ describe('NumberFormat', () => {
   test('alwaysShowSign only adds the sign when the value does not round to zero', () => {
     const formatter = new NumberFormat({ pattern: '0,0', alwaysShowSign: true }, getConfig);
 
-    expect(formatter.convertToText(10)).toBe('+10');
-    expect(formatter.convertToText(-10)).toBe('-10');
-    expect(formatter.convertToText(0)).toBe('0');
+    expect(formatter.convert(10)).toBe('+10');
+    expect(formatter.convert(-10)).toBe('-10');
+    expect(formatter.convert(0)).toBe('0');
     // values that round to zero under the pattern must not gain a misleading sign
-    expect(formatter.convertToText(0.0001)).toBe('0');
-    expect(formatter.convertToText(-0.0001)).toBe('0');
+    expect(formatter.convert(0.0001)).toBe('0');
+    expect(formatter.convert(-0.0001)).toBe('0');
   });
 
   test('custom pattern', () => {
