@@ -118,7 +118,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
       actions: { addFilter: props.onFilter },
-      dataView: props.dataView,
+      dataSource: gridProps.dataSource,
       density:
         gridProps.dataGridDensityState ?? getDataGridDensity(props.services.storage, 'discover'),
       rowHeight: getRowHeight({
@@ -131,7 +131,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   }, [
     getCellRenderersAccessor,
     props.onFilter,
-    props.dataView,
+    gridProps.dataSource,
     props.services.storage,
     props.configRowHeight,
     gridProps.dataGridDensityState,

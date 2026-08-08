@@ -28,6 +28,7 @@ import type {
 } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 
@@ -181,9 +182,9 @@ export interface DocViewerExtensionParams {
  */
 export interface RowIndicatorExtensionParams {
   /**
-   * The current data view
+   * The current data source. Present for both DSL and ES|QL queries.
    */
-  dataView: DataView;
+  dataSource: DataSource | undefined;
 }
 
 /**
@@ -277,9 +278,9 @@ export interface CellRenderersExtensionParams {
     addFilter?: DocViewFilterFn;
   };
   /**
-   * The current data view. Optional because ES|QL mode may not carry a persisted DataView.
+   * The current data source. Present for both DSL and ES|QL queries.
    */
-  dataView?: DataView;
+  dataSource: DataSource | undefined;
   /**
    * The current density applied to the data grid component
    */
@@ -295,9 +296,9 @@ export interface CellRenderersExtensionParams {
  */
 export interface RowControlsExtensionParams {
   /**
-   * The current data view
+   * The current data source. Present for both DSL and ES|QL queries.
    */
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   /**
    * The current query
    */

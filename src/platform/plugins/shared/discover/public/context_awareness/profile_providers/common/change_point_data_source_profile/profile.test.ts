@@ -9,7 +9,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType } from '../../../../../common/data_sources';
 import type { ContextWithProfileId } from '../../../profile_service';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
@@ -185,7 +184,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       return getCellRenderers({
         actions: { addFilter: jest.fn() },
         rowHeight: 1,
-        dataView: {} as DataView,
+        dataSource: undefined,
         density: undefined,
       });
     };
@@ -206,7 +205,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const renderers = getCellRenderers({
         actions: { addFilter: jest.fn() },
         rowHeight: 1,
-        dataView: {} as DataView,
+        dataSource: undefined,
         density: undefined,
       });
       expect(renderers).toBe(prevRenderers);

@@ -10,6 +10,7 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { IndexPatternSource } from '@kbn/data-source';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -130,6 +131,7 @@ describe('logsDataSourceProfileProvider', () => {
 
   const dataViewWithLogLevel = createStubIndexPattern({
     spec: {
+      id: 'data-view-with-log-level',
       title: VALID_IMPLICIT_DATA_INDEX_PATTERN,
       fields: {
         'log.level': {
@@ -149,9 +151,14 @@ describe('logsDataSourceProfileProvider', () => {
 
   const dataViewWithoutLogLevel = createStubIndexPattern({
     spec: {
+      id: 'data-view-without-log-level',
       title: VALID_IMPLICIT_DATA_INDEX_PATTERN,
     },
   });
+
+  const dataSourceWithLogLevel = new IndexPatternSource(dataViewWithLogLevel);
+  const dataSourceWithoutLogLevel = new IndexPatternSource(dataViewWithoutLogLevel);
+  const dataSourceWithTimefieldMock = new IndexPatternSource(dataViewWithTimefieldMock);
 
   describe('getRowIndicator', () => {
     it('should return the correct color for a given log level', () => {
@@ -163,7 +170,7 @@ describe('logsDataSourceProfileProvider', () => {
           toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
-        dataView: dataViewWithLogLevel,
+        dataSource: dataSourceWithLogLevel,
       });
 
       expect(getRowIndicator).toBeDefined();
@@ -179,7 +186,7 @@ describe('logsDataSourceProfileProvider', () => {
           toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
-        dataView: dataViewWithLogLevel,
+        dataSource: dataSourceWithLogLevel,
       });
 
       expect(getRowIndicator).toBeDefined();
@@ -193,7 +200,7 @@ describe('logsDataSourceProfileProvider', () => {
           toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const getRowIndicator = getRowIndicatorProvider?.({
-        dataView: dataViewWithoutLogLevel,
+        dataSource: dataSourceWithoutLogLevel,
       });
 
       expect(getRowIndicator).toBeUndefined();
@@ -215,7 +222,7 @@ describe('logsDataSourceProfileProvider', () => {
       );
       const getCellRenderersParams = {
         actions: { addFilter: jest.fn() },
-        dataView: dataViewWithTimefieldMock,
+        dataSource: dataSourceWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,
       };
@@ -244,7 +251,7 @@ describe('logsDataSourceProfileProvider', () => {
           toolkit,
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
-        dataView: dataViewWithLogLevel,
+        dataSource: dataSourceWithLogLevel,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(2);
@@ -259,7 +266,7 @@ describe('logsDataSourceProfileProvider', () => {
           toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
-        dataView: dataViewWithLogLevel,
+        dataSource: dataSourceWithLogLevel,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(0);

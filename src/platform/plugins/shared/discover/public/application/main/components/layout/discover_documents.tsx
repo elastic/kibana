@@ -398,11 +398,11 @@ function DiscoverDocumentsComponent({
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
-      dataView,
+      dataSource: currentDataSource,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
+    [onAddFilter, currentDataSource, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');

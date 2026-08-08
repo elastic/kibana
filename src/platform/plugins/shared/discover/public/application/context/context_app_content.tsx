@@ -141,6 +141,8 @@ export function ContextAppContent({
     return [[dataView.timeFieldName!, SortDirection.desc]];
   }, [dataView]);
 
+  const currentDataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
+
   const renderDocumentView = useCallback(
     (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
@@ -161,6 +163,7 @@ export function ContextAppContent({
     ),
     [
       addFilter,
+      currentDataSource,
       dataView,
       docViewerRef,
       initialDocViewerTabId,
@@ -178,12 +181,13 @@ export function ContextAppContent({
   );
 
   const configRowHeight = services.uiSettings.get(ROW_HEIGHT_OPTION);
+  const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
       actions: { addFilter },
-      dataView,
+      dataSource: currentDataSource,
       density: getDataGridDensity(services.storage, 'discover'),
       rowHeight: getRowHeight({
         storage: services.storage,
@@ -191,10 +195,7 @@ export function ContextAppContent({
         configRowHeight,
       }),
     });
-  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
-
-  const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
-  const currentDataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
+  }, [addFilter, configRowHeight, currentDataSource, getCellRenderersAccessor, services.storage]);
   const { filters } = useQuerySubscriber({ data: services.data });
   const timeRange = useObservable(
     services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),

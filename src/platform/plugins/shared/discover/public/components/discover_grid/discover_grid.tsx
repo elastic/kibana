@@ -28,8 +28,8 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   /**
    * DSL-only. For ES|QL queries the {@link UnifiedDataTable} works from the
-   * `dataSource` alone — leave this undefined. Used here only for row indicator
-   * and row leading controls profile accessors.
+   * `dataSource` alone — leave this undefined. Used here only for the
+   * cascaded-documents layout, which hasn't migrated off `DataView` yet.
    */
   dataView?: DataView;
   query?: DiscoverAppState['query'];
@@ -52,22 +52,20 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   }) => {
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      if (!dataView) return undefined;
-      return getRowIndicatorProvider(() => undefined)({ dataView });
-    }, [getRowIndicatorProvider, dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataSource: props.dataSource });
+    }, [getRowIndicatorProvider, props.dataSource]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'
     );
     const rowAdditionalLeadingControls = useMemo(() => {
-      if (!dataView) return customRowAdditionalLeadingControls;
       return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-        dataView,
+        dataSource: props.dataSource,
         query,
       });
     }, [
       customRowAdditionalLeadingControls,
-      dataView,
+      props.dataSource,
       getRowAdditionalLeadingControlsAccessor,
       query,
     ]);

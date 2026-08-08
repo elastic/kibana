@@ -8,6 +8,7 @@
  */
 
 import { DataGridDensity } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { AppliedProfile } from './composable_profile';
 import { getMergedAccessor } from './composable_profile';
 import type { Profile } from './types';
@@ -15,7 +16,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 
 const getCellRenderersParams = {
   actions: { addFilter: jest.fn() },
-  dataView: dataViewWithTimefieldMock,
+  dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
   density: DataGridDensity.COMPACT,
   rowHeight: 0,
 };
