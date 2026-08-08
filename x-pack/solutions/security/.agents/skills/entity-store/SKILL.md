@@ -26,7 +26,7 @@ Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggr
 - **Kibana Task** runs ESQL queries with timestamp-based pagination (~10s batches)
 - **Upsert with conflict retry** — never overwrites entire documents
 - **LOOKUP JOIN + COALESCE** for field retention — preserves API-set fields across extraction runs
-- **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` (from `@kbn/entity-store-plugin`). Also ES stored scripts.
+- **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` from `@kbn/entity-store/common/euid_helpers` (there is no `@kbn/entity-store-plugin`). Browser code must not import that synchronously — it pulls in `@kbn/streamlang`; use `loadEuidApi()` / `euid_browser` instead. Also ES stored scripts.
 - **Single shared index** — `.entities.v2.latest.security_{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
 - **Auto-enabled** — installs on Security Solution navigation. `entityStore` is a required plugin dependency of `securitySolution`.
 
@@ -96,6 +96,7 @@ x-pack/solutions/security/plugins/entity_store/
 - **EUID stored scripts must be registered** before entity store init — they're deployed during install.
 - **CCS indices excluded** from extraction queries — cross-cluster data handled by separate `ccsLogsExtractionClient`.
 - **bucket_sort VALUE_NULL** — grouping queries using `bucket_sort` with pagination error if `from` is null. Always coalesce to 0: `from: pageIndex * pageSize || 0`. Manifests as `EsError: [bucket_sort] from doesn't support values of type: VALUE_NULL`.
+- **Never re-export a *value* from `common/index.ts`** — `kibana.jsonc` lists that barrel under `extraPublicDirs`, so kbn-optimizer makes it a bundle entry, and `BundleRemoteUsedExportsPlugin` marks every one of its exports as used (cross-plugin consumers resolve it at runtime via `__kbnBundles__`). Nothing there can be tree-shaken, so a value re-export ships its entire source module — plus that module's runtime imports — on every page load, even when the only consumer is server code. Re-exporting `ENTITY_CREATED_BY` from `domain/definitions/common_fields` cost +4.9KB (+46% over the `entityStore` page-load limit) and failed CI. Server-only values belong in a deep import at the call site (e.g. `@kbn/entity-store/common/domain/definitions/common_fields`); `export type` is free. Verify with `node scripts/build_kibana_platform_plugins.js --focus entityStore --dist`, then read `page load bundle size` in `x-pack/solutions/security/plugins/entity_store/target/public/metrics.json` (~5s on a warm cache).
 - **ES bulk `update` with partial `doc` does NOT run `default_pipeline`** — known upstream bug ([elastic/elasticsearch#105804](https://github.com/elastic/elasticsearch/issues/105804), fix targeted for ES v9.4.0). The latest index has a `dot_expander` pipeline, but it's bypassed by partial updates. Always use `unflattenObject` from `@kbn/object-utils` when writing partial docs with dotted keys (see `bulkUpdateEntityDocs` in `infra/elasticsearch/resolution.ts`).
 
 ## Licensing

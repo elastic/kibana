@@ -107,7 +107,7 @@ From `scoreBaseEntities` (`maintainer/steps/score_base_entities.ts`):
 
 ## Provenance: `entity.created_by`
 
-New `managedValue` keyword field (`ENTITY_CREATED_BY_FIELD = 'entity.created_by'`), values from `ENTITY_CREATED_BY` (`@kbn/entity-store/common`):
+New `managedValue` keyword field (`ENTITY_CREATED_BY_FIELD = 'entity.created_by'`), values from `ENTITY_CREATED_BY`. Deep-import it from `@kbn/entity-store/common/domain/definitions/common_fields`, **not** the `common` barrel — see the page-load gotcha in [SKILL.md](../SKILL.md):
 
 ```typescript
 export const ENTITY_CREATED_BY = {

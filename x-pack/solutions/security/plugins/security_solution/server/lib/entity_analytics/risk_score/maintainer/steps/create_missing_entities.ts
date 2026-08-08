@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient, CreateEntityFromSourceRequest } from '@kbn/entity-store/server';
-import { ENTITY_CREATED_BY } from '@kbn/entity-store/common';
+import { ENTITY_CREATED_BY } from '@kbn/entity-store/common/domain/definitions/common_fields';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_analytics/common';
 import { fetchAlertIdentityDocs } from '../utils/fetch_alert_identity_docs';
