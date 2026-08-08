@@ -43,7 +43,7 @@ export const getKibanaConfigError = (docLinks: DocLinksStart) => ({
   title: i18n.PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE,
   description: (
     <FormattedMessage
-      defaultMessage="The kibana.yml file is configured to only allow specific connectors. To enable opening a case in external systems, add .[actionTypeId] (ex: .servicenow | .jira) to the xpack.actions.enabledActiontypes setting. For more information, see {link}."
+      defaultMessage="The kibana.yml file is configured to only allow specific connectors. To enable opening a case in external systems, add .[actionTypeId] (ex: .servicenow | .jira) to the xpack.actions.enabledActionTypes setting. For more information, see {link}."
       id="xpack.cases.caseView.pushToServiceDisableByConfigDescription"
       values={{
         link: (
