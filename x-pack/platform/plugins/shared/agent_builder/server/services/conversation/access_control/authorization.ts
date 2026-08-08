@@ -40,10 +40,6 @@ const isPublicConversation = ({
 
 /**
  * Checks whether the conversation was shared with the current user.
- *
- * Entries are matched on the stable id the same way `isConversationOwner` matches owners: an entry
- * that stored an id never falls back to the username, so a grant cannot be consumed by a
- * same-username principal from another realm. Legacy documents carry no `entries`.
  */
 export const isConversationMember = ({
   conversation,
