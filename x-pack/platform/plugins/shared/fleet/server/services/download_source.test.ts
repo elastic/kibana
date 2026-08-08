@@ -1157,7 +1157,7 @@ describe('Download Service', () => {
       );
 
       await expect(downloadSourceService.delete('download-source-preconfigured')).rejects.toThrow(
-        'Preconfigured Download source download-source-preconfigured cannot be deleted.'
+        'Preconfigured download source download-source-preconfigured cannot be deleted outside of kibana config file.'
       );
     });
 

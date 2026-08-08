@@ -436,11 +436,13 @@ class DownloadSourceService {
     const targetDS = await this.get(id);
 
     if (targetDS.is_default) {
-      throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
+      throw new DownloadSourceError(`Default download source ${id} cannot be deleted.`);
     }
 
     if (targetDS.is_preconfigured && !options?.fromPreconfiguration) {
-      throw new DownloadSourceError(`Preconfigured Download source ${id} cannot be deleted.`);
+      throw new DownloadSourceError(
+        `Preconfigured download source ${id} cannot be deleted outside of kibana config file.`
+      );
     }
 
     await agentPolicyService.removeDefaultSourceFromAll(
