@@ -19,7 +19,7 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',
-  // service entity does not require conditional logic for creation from a single representative document
+  // No additional creation condition is required for service entities.
   creatableFromDocument: {},
   fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [

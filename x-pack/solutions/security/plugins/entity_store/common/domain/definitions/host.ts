@@ -37,11 +37,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   },
   entityTypeFallback: 'Host',
   indexPatterns: [],
-  /**
-   * Creation from a single representative document is restricted to hosts carrying `host.id`.
-   * Name-only alerts risk minting duplicates of entities already keyed by `host.id`, so they stay
-   * lookup-only.
-   */
+  /** Requires `host.id`; name-only documents remain lookup-only to avoid duplicate entities. */
   creatableFromDocument: {
     requires: { field: 'host.id', exists: true },
     rejectionReason: 'host_missing_host_id',

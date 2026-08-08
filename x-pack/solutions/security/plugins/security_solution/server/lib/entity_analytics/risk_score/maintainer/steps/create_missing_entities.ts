@@ -26,33 +26,19 @@ interface CreateMissingEntitiesParams {
   abortSignal?: AbortSignal;
 }
 
-/** EUID + reason, so logs and metrics can name the affected score's identifier. */
 export interface CreateMissingEntitiesOutcome {
   euid: string;
   reason: string;
 }
 
 export interface CreateMissingEntitiesResult {
-  /**
-   * EUIDs newly created. Their create document already carries `entity.risk.*`, so callers
-   * should route their scores to the risk index but skip the redundant entity-store update.
-   */
+  /** Newly created EUIDs; their documents already include `entity.risk.*`. */
   created: string[];
-  /**
-   * EUIDs that already existed by the time the bulk create ran (raced with another creator,
-   * e.g. logs extraction). Callers should fall back to the normal update path for these.
-   */
+  /** EUIDs that lost a create race and must use the normal update path. */
   alreadyExists: string[];
-  /**
-   * Scores never attempted because the creation policy would reject (or did reject) them:
-   * `no_alert_document` (no representative alert document was found) or an
-   * `EntityCreationRejectionReason` from `createEntitiesFromSource`.
-   */
+  /** Scores with no representative alert or rejected by policy; neither reached Elasticsearch. */
   skipped: CreateMissingEntitiesOutcome[];
-  /**
-   * Scores that were policy-eligible but didn't end up written: `euid_mismatch`,
-   * `reserved_field`, or `bulk_create_failed` from `createEntitiesFromSource`.
-   */
+  /** Requests rejected by EUID/field validation or bulk creation. */
   failed: CreateMissingEntitiesOutcome[];
 }
 
@@ -65,15 +51,7 @@ const emptyResult = (): CreateMissingEntitiesResult => ({
   failed: [],
 });
 
-/**
- * Create-if-missing path for base scoring: for EUID-valid scores with no entity store record,
- * fetch a representative alert document per EUID and attempt a policy-gated create instead of
- * silently dropping the score (see `creatable_from_document.ts` in the entity_store plugin).
- *
- * The maintainer's own EUID can't be trusted for gating (the ES|QL base-scoring query applies
- * only `documentsFilter`, not `postAggFilter`), so this re-derives everything from a real source
- * document via `fetchAlertIdentityDocs` + `createEntitiesFromSource`.
- */
+/** Revalidates missing score EUIDs against representative alerts because base scoring omits `postAggFilter`, then attempts policy-gated creation. */
 export const createMissingEntities = async ({
   esClient,
   crudClient,

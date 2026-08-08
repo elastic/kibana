@@ -23,14 +23,7 @@ import {
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-/**
- * Smoke test for the create-if-missing path: base scoring finds an alert-derived EUID
- * with no entity store record and, when `riskScoreCreateMissingEntitiesEnabled` is on, creates
- * the entity via `createEntitiesFromSource` instead of dropping the score. This spec is loaded
- * from two configs — the tier's default `ess.config.ts` (flag off) and
- * `configs/ess.create_missing_entities.config.ts` (flag on) — and asserts the opposite outcome
- * in each, rather than duplicating the scenario per config.
- */
+/** Runs the same missing-host scenario under both flag-off and flag-on FTR configs. */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -114,11 +107,8 @@ export default ({ getService }: FtrProviderContext): void => {
         riskScore: 42,
       });
 
-      // Install the entity store scoped to `user` only: extraction never runs for `host`, so
-      // this host EUID stays genuinely absent from the entity store when the maintainer scores
-      // it below — the shared entities index/mappings are installed for every type regardless
-      // of which `entityTypes` are requested here (see `installSharedElasticsearchAssets`), so
-      // a `host` entity can still be created into it.
+      // Install only user extraction so the host stays absent; the shared index still accepts
+      // host creation.
       await entityStoreUtils.installEntityStoreV2({
         entityTypes: ['user'],
         dataViewPattern: testLogsIndex,

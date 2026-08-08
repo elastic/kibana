@@ -44,9 +44,9 @@ export function isEntityTypeCreatableFromDocument(entityType: EntityType): boole
 }
 
 /**
- * Evaluates whether one entity type is creatable from one source document (i.e a
- * representative alert `_source`), per the entity type's own `creatableFromDocument` definition.
- *  Returns the EUID and identity fields to seed a new entity document when accepted, or a rejection reason otherwise.
+ * Evaluates whether one entity type is creatable from one source document (for example, a
+ * representative alert `_source`) per its `creatableFromDocument` definition, returning the EUID
+ * and identity fields to seed a new entity document or a rejection reason.
  */
 export function getEntityCreationCandidate(
   entityType: EntityType,

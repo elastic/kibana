@@ -38,25 +38,13 @@ interface ScoreBaseEntitiesParams {
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
   abortSignal?: AbortSignal;
-  /**
-   * Create-if-missing opt-in, forwarded to `fetchEntitiesByIds` as `strict`: with creation
-   * enabled, a lookup failure must not be silently treated as "every score on this page is
-   * missing" (see `fetchEntitiesByIds`). Required (not defaulted) so every call site makes a
-   * conscious choice about a path that mints entities, rather than silently inheriting
-   * best-effort lookups by omitting the parameter.
-   */
+  /** Explicit creation opt-in; also makes lookup failures fatal so they cannot be treated as misses. */
   createMissingEntities: boolean;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
-  /**
-   * Create-if-missing opt-in (`idBasedRiskScoringEnabled &&
-   * riskScoreCreateMissingEntitiesEnabled`, computed by the caller, both default to enabling
-   * dual-write only). When false, scores for EUIDs absent from the entity store are dropped,
-   * matching pre-existing behaviour.
-   */
   createMissingEntities: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
   /** When true, populate `scores` in the summary. Omit for full-population runs. */
@@ -67,35 +55,16 @@ export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
   scoresWrittenRiskIndex: number;
   scoresCalculated: number;
-  /**
-   * Final drop count: not_in_store scores never recovered by the create-if-missing path (no
-   * representative alert document, the creation policy rejected the candidate, or the bulk
-   * create itself failed). Equals `scoresMissingFromStore` when `createMissingEntities` is false,
-   * since nothing is recovered without evaluating a policy in that case.
-   */
+  /** Missing-at-lookup scores not recovered by creation; equals `scoresMissingFromStore` when disabled. */
   scoresDroppedNotInStore: number;
   scores: Record<string, number>;
-  /**
-   * Scores whose entity_id was absent from the entity store at lookup time, before any
-   * create-if-missing attempt. A superset of `entityCreationsSkipped` + `entityCreationsFailed`
-   * (and, when creation is enabled, includes recovered created/raced scores that are not
-   * otherwise dropped).
-   */
+  /** Scores absent at lookup time, including entities later created or found through a create race. */
   scoresMissingFromStore: number;
   /** EUID-valid scores whose entity was created via the create-if-missing path. */
   entitiesCreated: number;
-  /**
-   * not_in_store scores the create-if-missing path never attempted to write: no representative
-   * alert document was found, or the creation policy rejected the candidate. Always 0 when
-   * `createMissingEntities` is false, since scores are dropped without evaluating a policy in
-   * that case.
-   */
+  /** Missing scores not written because no alert was found or policy rejected them. */
   entityCreationsSkipped: number;
-  /**
-   * not_in_store scores that were policy-eligible but didn't end up written: the re-derived EUID
-   * didn't match the score's `id_value`, or the bulk create itself failed. Always 0 when
-   * `createMissingEntities` is false.
-   */
+  /** Missing scores rejected by EUID/field validation or bulk creation. */
   entityCreationsFailed: number;
 }
 
@@ -216,16 +185,8 @@ export const scoreBaseEntities = async ({
   })) {
     pagesProcessed += 1;
     scoresCalculated += page.scores.length;
-    // The composite aggregation discovers EUIDs from alerts, which can include
-    // identifiers with no canonical store entity (host.id variations, synthetic
-    // identifiers, alerts that name an entity the entity store has no record
-    // of). Writing those to the risk index produces phantom score documents
-    // that have no anchor on the entity, no place on the entity flyout, and
-    // bloat trend graphs, so by default (and always for out-of-scope entity
-    // types/policies) they're dropped, as the V1 maintainer did in
-    // `categorizePhase1Entities`. When enabled, the create-if-missing path
-    // (`createEntitiesFromSource`) re-evaluates each one against a real alert
-    // document and creates it instead of dropping the score.
+    // Scores without a canonical entity would create orphaned risk documents. Create eligible
+    // entities from a representative alert when enabled; otherwise drop their scores.
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
     const missingScores = page.scores.filter((score) => !page.entities.has(score.id_value));
     scoresMissingFromStore += missingScores.length;
@@ -252,8 +213,7 @@ export const scoreBaseEntities = async ({
 
         const createdSet = new Set(createResult.created);
         const alreadyExistsSet = new Set(createResult.alreadyExists);
-        // Created docs already carry entity.risk.* from createEntitiesFromSource, so only the
-        // raced (already-exists) set needs the redundant entity-store update.
+        // Created docs already contain the score; raced docs still require an entity-store update.
         const createdScores = missingScores.filter((score) => createdSet.has(score.id_value));
         const racedScores = missingScores.filter((score) => alreadyExistsSet.has(score.id_value));
 

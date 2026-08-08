@@ -50,9 +50,7 @@ export type EntityRelationshipKey = (typeof ENTITY_RELATIONSHIP_COLLECT_LEAVES)[
 export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_SOURCE_FIELD = 'entity.source';
 
-/**
- * Provenance stamp identifying which engine created an entity. Written once - never overwritten afterwards by dual-write updates.
- */
+/** Identifies the engine that created the entity; dual-write updates preserve the initial value. */
 export const ENTITY_CREATED_BY_FIELD = 'entity.created_by';
 
 /**

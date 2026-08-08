@@ -462,17 +462,12 @@ interface Phase1BaseScoringSummary extends StageSummaryBase {
   stage: 'phase1_base_scoring';
   pagesProcessed?: number;
   scoresWritten?: number;
-  /**
-   * Raw count of scores whose entity_id was absent from the entity store at lookup time,
-   * before any create-if-missing attempt. Kept here (risk-score-specific) rather than in the
-   * shared entity-maintainers funnel's `droppedNotInStore`, which the framework defines as
-   * 404 bulk-write errors, not pre-write lookup misses.
-   */
+  /** Pre-create lookup misses; the funnel reserves `droppedNotInStore` for write-time 404s. */
   scoresMissingFromStore?: number;
   entitiesCreated?: number;
-  /** not_in_store scores the create-if-missing path never attempted to write (no representative alert document, or policy-rejected). */
+  /** Missing scores not written because no alert was found or policy rejected them. */
   entityCreationsSkipped?: number;
-  /** not_in_store scores that were policy-eligible but didn't end up written (euid_mismatch, reserved_field, or bulk create failure). */
+  /** Missing scores rejected by EUID/field validation or bulk creation. */
   entityCreationsFailed?: number;
 }
 

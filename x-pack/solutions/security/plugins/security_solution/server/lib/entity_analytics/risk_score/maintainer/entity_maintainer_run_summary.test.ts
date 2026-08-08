@@ -201,8 +201,6 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         entityType: 'host',
         metrics: emptyMetrics({
           scoresCalculatedBase: 10,
-          // 5 EUIDs were absent from the store at lookup; 3 got created and 2 were
-          // policy-rejected, so only the 2 rejected ones remain in the skip count.
           scoresMissingFromStoreBase: 5,
           entitiesCreated: 3,
           entitiesCreateSkipped: 2,
@@ -229,9 +227,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         entityType: 'host',
         metrics: emptyMetrics({
           scoresCalculatedBase: 6,
-          // 2 EUIDs were absent from the store; both had a representative alert document and
-          // passed policy (so neither is skipped), but one hit `euid_mismatch` on write, which
-          // still counts toward `scoresDroppedNotInStore` (it never reached the risk index).
+          // The failed create remains dropped but qualified, not skipped.
           scoresMissingFromStoreBase: 2,
           scoresDroppedNotInStore: 1,
           entitiesCreated: 1,
@@ -253,9 +249,6 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
   });
 
   it('keeps the funnel balanced with create-if-missing disabled (skipped = raw not-in-store misses)', () => {
-    // With the flag off, `scoreBaseEntities` never attempts a create, so every
-    // `entitiesCreate*` metric stays 0 and `scoresDroppedNotInStore` collapses to the raw
-    // not-in-store miss count — this is the scenario the funnel used to lose track of.
     expect(
       buildRiskScoreEntityMaintainerRunSummary({
         entityType: 'host',

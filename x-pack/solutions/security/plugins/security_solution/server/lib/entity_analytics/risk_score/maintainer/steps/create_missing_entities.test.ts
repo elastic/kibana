@@ -41,8 +41,6 @@ const buildScore = (
 
 const DEFAULT_MOCK_FIRST_SEEN = '2025-12-01T00:00:00.000Z';
 
-// Mocks a `by_entity_id` terms+top_hits(+first_seen min-agg) aggregation response for
-// fetchAlertIdentityDocs.
 const mockAlertDocsResponse = (
   esClient: ElasticsearchClient,
   docsByEuid: Record<string, Record<string, unknown>>

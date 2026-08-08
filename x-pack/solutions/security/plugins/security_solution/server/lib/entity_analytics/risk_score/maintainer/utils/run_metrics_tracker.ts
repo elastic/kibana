@@ -17,10 +17,9 @@ export interface RunMetrics {
   scoresWrittenEntityStoreResetToZero: number;
   // Phase 1 scores calculated from alerts before the not_in_store filter
   scoresCalculatedBase: number;
-  // Phase 1 scores for EUIDs absent from the entity store, never recovered by create-if-missing
+  // Missing-at-lookup scores not recovered by creation
   scoresDroppedNotInStore: number;
-  // Phase 1 scores for EUIDs absent from the entity store at lookup time, before any
-  // create-if-missing attempt (a superset of scoresDroppedNotInStore)
+  // Scores missing at lookup time, before creation
   scoresMissingFromStoreBase: number;
   scoresFailedBase: number;
   scoresFailedResolution: number;
@@ -29,15 +28,9 @@ export interface RunMetrics {
   lookupPrunedDocs: number;
   /** Entities created by the create-if-missing path during base scoring. */
   entitiesCreated: number;
-  /**
-   * not_in_store scores the create-if-missing path never attempted to write during base
-   * scoring: no representative alert document, or the creation policy rejected the candidate.
-   */
+  /** Missing scores not written because no alert was found or policy rejected them. */
   entitiesCreateSkipped: number;
-  /**
-   * not_in_store scores that were policy-eligible but didn't end up written during base
-   * scoring: `euid_mismatch`, `reserved_field`, or the bulk create itself failed.
-   */
+  /** Missing scores rejected by EUID/field validation or bulk creation. */
   entitiesCreateFailed: number;
 }
 

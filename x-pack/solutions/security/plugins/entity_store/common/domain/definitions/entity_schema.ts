@@ -161,9 +161,9 @@ export const creationRejectionReasonSchema = z.enum([
 export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
 
 /**
- * Opt-in gate for creation from a single representative document (i.e a representative document `_source`).
- * The union enforces that both `requires` and `rejectionReason` are present, when a conditional logic is needed
- * or empty when no conditional logic is needed.
+ * Opt-in gate for creation from a representative document `_source`.
+ * The union requires both `requires` and `rejectionReason` for conditional logic, or an empty
+ * object when no condition is needed.
  */
 const creatableFromDocumentSchema = z.union([
   z.strictObject({

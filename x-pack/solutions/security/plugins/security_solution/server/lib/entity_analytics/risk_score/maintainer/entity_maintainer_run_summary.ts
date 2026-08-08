@@ -88,33 +88,7 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
   };
 };
 
-/**
- * Builds the entity-maintainers framework run-summary payload for one
- * risk-score entity-type sub-run.
- *
- * Funnel is the base-scoring entity-store path only
- * - stages[] = base / resolution / reset_to_zero applied + status/duration
- *
- * With the create-if-missing path (#280948):
- * - scanned   = scores calculated from alerts
- * - qualified = scanned minus `skipped`, i.e. entities that were either already in the store,
- *               successfully created/raced, or policy-eligible but write-failed (write failures
- *               stay qualified — they were never rejected up front, see `failed` below)
- * - applied   = successful existing-entity updates plus successful creates, counted exactly once
- * - skipped   = `scoresDroppedNotInStore` minus create-if-missing write failures (already
- *               counted in `failed` below, so subtracted here to avoid double-counting). With
- *               the flag on this equals `entitiesCreateSkipped` exactly (write failures are the
- *               only other contributor to `scoresDroppedNotInStore`); with the flag off — where
- *               nothing is ever attempted, so `entitiesCreateFailed` is always 0 — this is the
- *               raw not-in-store miss count, keeping the funnel balanced in both states
- * - failed    = entity-store update failures plus create-if-missing write failures
- *               (`euid_mismatch`, `reserved_field`, `bulk_create_failed`)
- *
- * `droppedNotInStore` is deliberately omitted here: the framework defines that field as 404
- * bulk-write errors, not pre-write lookup misses. The raw missing-before-create count
- * (`scoresMissingFromStoreBase`) is reported instead on the risk-score-specific
- * `phase1_base_scoring` stage-summary event.
- */
+/** Builds an entity-type summary whose funnel covers base-scoring entity-store outcomes and keeps create failures qualified rather than skipped. */
 export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
   metrics,
@@ -129,6 +103,8 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
   const failedBase = metrics.scoresFailedBase + metrics.entitiesCreateFailed;
 
+  // `droppedNotInStore` is reserved for write-time 404s; lookup misses are emitted separately
+  // from `metrics.scoresMissingFromStoreBase` as `phase1_base_scoring.scoresMissingFromStore`.
   return {
     scope: { kind: 'entity_type', value: entityType },
     iterations: metrics.pagesProcessed,

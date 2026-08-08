@@ -43,11 +43,7 @@ import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_even
 
 const RETRY_ON_CONFLICT = 3;
 
-/**
- * Dot-paths `buildEntityFromSource` sets itself (identity, provenance, type scoping, name, and
- * lifecycle bounds). `fields` is merged last in `buildEntityFromSource`, so without this guard a
- * caller-supplied `fields` entry could silently overwrite any of them before the bulk write.
- */
+// `fields` is merged last, so reserve builder-owned paths to prevent caller overrides.
 const RESERVED_CREATE_FROM_SOURCE_FIELDS: ReadonlySet<string> = new Set([
   'entity.id',
   'entity.created_by',
@@ -109,67 +105,42 @@ interface BulkUpdateEntityParams {
 
 export interface CreateEntityFromSourceRequest {
   type: EntityType;
-  /** Representative source document (e.g. an alert `_source`) used to derive identity + policy gates. */
+  /** Source document used to derive identity and evaluate creation policy. */
   source: unknown;
-  /**
-   * EUID the caller has already routed other data under for this entity (e.g. a risk score's
-   * `id_value`). The EUID re-derived from `source` must match this exactly, or the request is
-   * rejected with `euid_mismatch` — otherwise a divergence between the caller's routing key and
-   * the source document's identity fields (e.g. a multivalued field ranked differently) would
-   * create an orphan entity while the caller's own record still fails to land on it.
-   */
+  /** EUID already used to key related data; must match the source-derived EUID to prevent orphans. */
   expectedEntityId: string;
   /** Provenance stamp written to `entity.created_by`. */
   createdBy: EntityCreatedBy;
-  /**
-   * Earliest known `@timestamp` for this EUID, written to `entity.lifecycle.first_seen`. Omit
-   * when unknown — see `buildEntityFromSource` for why leaving it unset (rather than guessing) is
-   * preferable in that case.
-   */
+  /** Upper bound on the entity's true first-seen; omit when unknown. */
   firstSeen?: string;
   /** Additional dot-path fields to merge onto the created doc (e.g. `entity.risk.calculated_score`). */
   fields?: Record<string, unknown>;
 }
 
-/**
- * `EntityCreationRejectionReason` values are policy rejections that never reach Elasticsearch —
- * see {@link CreateEntitiesFromSourceResult.skipped}.
- * `euid_mismatch`, `reserved_field`, and `bulk_create_failed` are requests that would otherwise
- * have written but didn't — see {@link CreateEntitiesFromSourceResult.failed}.
- */
 export type CreateEntityFromSourceRejectionReason =
   | EntityCreationRejectionReason
   | 'euid_mismatch'
   | 'reserved_field'
   | 'bulk_create_failed';
 
-/** One request's outcome, keyed by `expectedEntityId` so logs and metrics can name the affected EUID. */
 export interface CreateEntityFromSourceOutcome {
+  /** The request's `expectedEntityId`, including when `reason` is `euid_mismatch`. */
   euid: string;
   reason: CreateEntityFromSourceRejectionReason;
 }
 
 export interface CreateEntitiesFromSourceResult {
-  /** EUIDs successfully created. */
   created: string[];
-  /** EUIDs that already existed by the time the bulk create ran (race with another creator). */
+  /** EUIDs rejected by bulk create because the entity already exists. */
   alreadyExists: string[];
-  /**
-   * Requests the creation policy rejected before anything reached Elasticsearch (see
-   * `EntityCreationRejectionReason` / `getEntityCreationCandidate`).
-   */
+  /** Policy rejections made before the bulk request. */
   skipped: CreateEntityFromSourceOutcome[];
-  /**
-   * Requests that were policy-eligible but didn't end up written: the re-derived EUID didn't
-   * match `expectedEntityId`, `fields` supplied a reserved dot-path, or the bulk create itself
-   * failed for a reason other than a 409 conflict.
-   */
+  /** Request-validation and non-conflict bulk failures. */
   failed: CreateEntityFromSourceOutcome[];
 }
 
-// EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
-// except create/delete. createEntitiesFromSource is intentionally included — it is a scoped,
-// policy-gated create path (see creatable_from_document.ts), not the unrestricted createEntity.
+// Maintainer-safe surface; createEntitiesFromSource remains available because it enforces
+// per-type policy and create-only writes.
 export type EntityUpdateClient = Omit<CRUDClient, 'createEntity' | 'deleteEntity'>;
 
 export class CRUDClient {
@@ -522,23 +493,7 @@ export class CRUDClient {
     }
   }
 
-  /**
-   * Scoped, policy-gated create path for maintainers (e.g. the risk score maintainer's
-   * create-if-missing step). Unlike {@link createEntity}, callers never supply a document
-   * directly: each request's `source` (a representative alert `_source`) is run through
-   * {@link getEntityCreationCandidate} first, so only EUID-valid, policy-accepted identifiers
-   * (e.g. medium-confidence local users, hosts with `host.id`) are ever written.
-   *
-   * Issues one `create`-only bulk request so a document that already exists (e.g. created
-   * concurrently by logs extraction) surfaces as a per-item 409 in `alreadyExists`, rather than
-   * silently overwriting it — callers should fall back to the update path for those ids.
-   *
-   * Does not wait for a refresh: nothing in the same maintainer run reads these documents back
-   * from the latest index, so the extra ES-side cost of `wait_for` isn't warranted here. Per-item
-   * write failures are logged and reported back to the caller as `failed` (see
-   * `CreateEntitiesFromSourceResult`); a request-level failure (the bulk call itself rejecting)
-   * propagates as a thrown error, same as every other bulk method on this client.
-   */
+  /** Bulk-creates policy-accepted entities without overwriting or waiting for refresh; request-level failures throw and per-item outcomes are returned. */
   public async createEntitiesFromSource(
     requests: CreateEntityFromSourceRequest[]
   ): Promise<CreateEntitiesFromSourceResult> {

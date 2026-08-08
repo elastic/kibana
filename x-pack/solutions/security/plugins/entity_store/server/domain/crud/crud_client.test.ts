@@ -78,8 +78,6 @@ describe('CRUDClient', () => {
       esClient.indices.exists.mockResolvedValue(true);
     });
 
-    // esClient.bulk's `operations` request field is optional in the ES client types; every
-    // assertion below relies on it having been passed.
     const getBulkOperations = (callIndex: number) => {
       const operations = esClient.bulk.mock.calls[callIndex][0].operations;
       if (!operations) {
@@ -92,7 +90,7 @@ describe('CRUDClient', () => {
       const result = await client.createEntitiesFromSource([
         {
           type: 'host',
-          source: { host: { name: 'server1' } }, // no host.id
+          source: { host: { name: 'server1' } },
           expectedEntityId: 'host:server1',
           createdBy: 'risk_score_maintainer',
         },
@@ -112,7 +110,7 @@ describe('CRUDClient', () => {
         {
           type: 'host',
           source: { host: { id: 'host-1', name: 'server1' } },
-          expectedEntityId: 'host:host-2', // caller expected a different EUID
+          expectedEntityId: 'host:host-2',
           createdBy: 'risk_score_maintainer',
         },
       ]);
@@ -130,11 +128,7 @@ describe('CRUDClient', () => {
     });
 
     it('rejects on a multivalued identity field ranked differently than the caller expected', async () => {
-      // `getFieldValue` always takes the *first* array element when re-deriving the EUID here.
-      // A caller whose own routing key (`expectedEntityId`, e.g. a risk score's `id_value`) was
-      // computed from the same multivalued field via a different selection (e.g. an ES|QL query
-      // that picked a different element) would diverge from that re-derivation — this must be
-      // caught as a mismatch rather than silently creating an entity under the "wrong" EUID.
+      // Re-derivation selects the first array value; reject a caller keyed to another value.
       const result = await client.createEntitiesFromSource([
         {
           type: 'host',
@@ -214,7 +208,7 @@ describe('CRUDClient', () => {
       const result = await client.createEntitiesFromSource([
         {
           type: 'host',
-          source: { host: { id: 'host-1' } }, // no host.name
+          source: { host: { id: 'host-1' } },
           expectedEntityId: 'host:host-1',
           createdBy: 'risk_score_maintainer',
         },

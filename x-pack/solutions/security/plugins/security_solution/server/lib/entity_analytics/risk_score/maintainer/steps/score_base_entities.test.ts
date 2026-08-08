@@ -542,7 +542,6 @@ describe('score_base_entities', () => {
         ...baseParams,
       });
 
-      // No lookup for a representative alert doc, no create call.
       expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1); // composite agg page only
       expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];

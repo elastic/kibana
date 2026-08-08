@@ -14,13 +14,7 @@ interface FetchEntitiesByIdsParams {
   entityIds: string[];
   logger: ScopedLogger;
   errorContext: string;
-  /**
-   * When true, propagate a lookup failure instead of returning an empty map. Callers that treat
-   * a missing entity as authoritative (e.g. base scoring with create-if-missing enabled) must
-   * not let a transient ES error be misread as "every score on this page is missing", which
-   * would route the whole page through the create path with no criticality or watchlist
-   * modifiers applied. Defaults to false, preserving the pre-existing best-effort behaviour.
-   */
+  /** Throw on lookup failure so an empty fallback cannot route the page through entity creation without criticality or watchlist modifiers. */
   strict?: boolean;
 }
 
