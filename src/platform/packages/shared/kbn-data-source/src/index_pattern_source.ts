@@ -10,6 +10,10 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { getFieldIconType } from '@kbn/field-utils';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Column, DataSource, SerializedDataSource } from './types';
 import { columnFromDataViewField } from './to_column';
 
@@ -70,6 +74,23 @@ export class IndexPatternSource implements DataSource {
   public getColumn(name: string): Column | undefined {
     const field = this.dataView.fields.getByName(name);
     return field ? columnFromDataViewField(field) : undefined;
+  }
+
+  public getColumnIconType(name: string): string | undefined {
+    const field = this.dataView.fields.getByName(name);
+    return field ? getFieldIconType(field) : undefined;
+  }
+
+  public getFormatter(name: string, fieldFormats: FieldFormatsStart): FieldFormat {
+    const field = this.dataView.fields.getByName(name);
+    if (field) {
+      return this.dataView.getFormatterForField(field);
+    }
+    return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+  }
+
+  public getColumnLabel(name: string): string {
+    return this.dataView.fields.getByName(name)?.displayName ?? name;
   }
 
   public isTimeBased(): boolean {

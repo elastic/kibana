@@ -14,6 +14,7 @@ interface MockField {
   name: string;
   type: string;
   esTypes?: string[];
+  displayName?: string;
 }
 
 function makeDataViewMock(
@@ -33,6 +34,7 @@ function makeDataViewMock(
     getName: jest.fn(() => overrides.name ?? 'My Data View'),
     getIndexPattern: jest.fn(() => overrides.indexPattern ?? 'logs-*'),
     isPersisted: jest.fn(() => overrides.persisted ?? true),
+    getFormatterForField: jest.fn((field: MockField) => ({ id: `formatter-for-${field.name}` })),
     fields: {
       getAll: jest.fn(() => fields),
       getByName: jest.fn((n: string) => fields.find((f) => f.name === n)),
@@ -123,6 +125,65 @@ describe('IndexPatternSource', () => {
       const source = new IndexPatternSource(dv);
 
       expect(source.getColumn('does-not-exist')).toBeUndefined();
+    });
+  });
+
+  describe('getColumnIconType', () => {
+    it('returns an icon type for a known field', () => {
+      const dv = makeDataViewMock({
+        fields: [{ name: 'bytes', type: 'number' }],
+      });
+      const source = new IndexPatternSource(dv);
+
+      expect(source.getColumnIconType('bytes')).toBe('number');
+    });
+
+    it('returns undefined for an unknown field', () => {
+      const source = new IndexPatternSource(makeDataViewMock({ fields: [] }));
+
+      expect(source.getColumnIconType('does-not-exist')).toBeUndefined();
+    });
+  });
+
+  describe('getFormatter', () => {
+    it('delegates to the DataView formatter when the field is found', () => {
+      const dv = makeDataViewMock({ fields: [{ name: 'bytes', type: 'number' }] });
+      const source = new IndexPatternSource(dv);
+      const fieldFormats = { getDefaultInstance: jest.fn() } as any;
+
+      const formatter = source.getFormatter('bytes', fieldFormats);
+
+      expect(dv.getFormatterForField).toHaveBeenCalledWith(dv.fields.getByName('bytes' as never));
+      expect(formatter).toEqual({ id: 'formatter-for-bytes' });
+      expect(fieldFormats.getDefaultInstance).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the default string formatter when the field is not found', () => {
+      const source = new IndexPatternSource(makeDataViewMock({ fields: [] }));
+      const defaultFormatter = { id: 'default-string' };
+      const fieldFormats = { getDefaultInstance: jest.fn(() => defaultFormatter) } as any;
+
+      const formatter = source.getFormatter('does-not-exist', fieldFormats);
+
+      expect(fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
+      expect(formatter).toBe(defaultFormatter);
+    });
+  });
+
+  describe('getColumnLabel', () => {
+    it('returns the field displayName when present', () => {
+      const dv = makeDataViewMock({
+        fields: [{ name: 'bytes', type: 'number', displayName: 'Bytes' }],
+      });
+      const source = new IndexPatternSource(dv);
+
+      expect(source.getColumnLabel('bytes')).toBe('Bytes');
+    });
+
+    it('falls back to the column name when the field is not found', () => {
+      const source = new IndexPatternSource(makeDataViewMock({ fields: [] }));
+
+      expect(source.getColumnLabel('does-not-exist')).toBe('does-not-exist');
     });
   });
 

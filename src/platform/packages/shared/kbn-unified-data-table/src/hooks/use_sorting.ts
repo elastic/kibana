@@ -10,15 +10,13 @@
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
-import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 
 export const useSorting = ({
   rows,
@@ -50,24 +48,26 @@ export const useSorting = ({
   }, [sort, visibleColumns]);
 
   const comparators = useMemo(() => {
-    if (!isInMemorySortEnabled || !isPlainRecord || !rows || !sortingColumns.length) {
+    if (
+      !isInMemorySortEnabled ||
+      !isPlainRecord ||
+      !rows ||
+      !sortingColumns.length ||
+      !dataSource
+    ) {
       return;
     }
-    const dataView =
-      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getFieldFromDataSource(dataSource, id);
+        const column = dataSource.getColumn(id);
 
-        if (!field) {
+        if (!column) {
           return acc;
         }
 
-        const formatter = dataView
-          ? dataView.getFormatterForField(field)
-          : fieldFormats.getDefaultInstance(field.type as KBN_FIELD_TYPES);
-        const sortField = getSortingCriteria(field.type, id, formatter);
+        const formatter = dataSource.getFormatter(id, fieldFormats);
+        const sortField = getSortingCriteria(column.type, id, formatter);
 
         acc.push((a, b) => sortField(a.flattened, b.flattened, direction as 'asc' | 'desc'));
 

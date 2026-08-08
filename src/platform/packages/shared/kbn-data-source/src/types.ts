@@ -10,6 +10,8 @@
 import type { DataViewBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 /**
  * Discriminator for the two implementations of {@link DataSource}.
@@ -95,6 +97,33 @@ export interface DataSource extends DataViewBase {
 
   /** Lookup by column name. Returns `undefined` if not found. */
   getColumn(name: string): Column | undefined;
+
+  /**
+   * Icon type for rendering this column (e.g. via `<FieldIcon type={...} />`).
+   * `undefined` if the column doesn't exist or has no associated icon.
+   *
+   * Answered natively by both implementations from data they already hold —
+   * no synthesized data. Callers needing DSL-only icon fallbacks (e.g. nested
+   * field parents) should narrow to `IndexPatternSource` via `getDataView()`.
+   */
+  getColumnIconType(name: string): string | undefined;
+
+  /**
+   * Value formatter for this column.
+   *
+   * `IndexPatternSource` prefers the DataView's per-field formatter;
+   * `EsqlSource` has no DataView, so it always returns the default formatter
+   * for the column's type. Falls back to a string formatter if the column
+   * isn't found.
+   */
+  getFormatter(name: string, fieldFormats: FieldFormatsStart): FieldFormat;
+
+  /**
+   * Display label for this column. `IndexPatternSource` returns the
+   * DataView field's `displayName` (customLabel or field name); `EsqlSource`
+   * has no custom-label concept, so it returns the column name unchanged.
+   */
+  getColumnLabel(name: string): string;
 
   /**
    * True iff a time field is configured for this source.

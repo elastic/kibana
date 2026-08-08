@@ -11,6 +11,10 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getTextBasedColumnIconType } from '@kbn/field-utils';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Column, DataSource, SerializedDataSource } from './types';
 import { columnFromDatatableColumn } from './to_column';
 import { sha256 } from './sha256';
@@ -100,6 +104,22 @@ export class EsqlSource implements DataSource {
 
   public getColumn(name: string): Column | undefined {
     return this.columnsByName.get(name);
+  }
+
+  public getColumnIconType(name: string): string | undefined {
+    const column = this.resultColumns.find((c) => c.name === name);
+    if (!column) return undefined;
+    const iconType = getTextBasedColumnIconType(column.meta);
+    return iconType && iconType !== 'unknown' ? iconType : undefined;
+  }
+
+  public getFormatter(name: string, fieldFormats: FieldFormatsStart): FieldFormat {
+    const column = this.getColumn(name);
+    return fieldFormats.getDefaultInstance(column?.type ?? KBN_FIELD_TYPES.STRING);
+  }
+
+  public getColumnLabel(name: string): string {
+    return name;
   }
 
   public isTimeBased(): boolean {

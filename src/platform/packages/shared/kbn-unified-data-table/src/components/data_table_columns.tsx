@@ -154,8 +154,7 @@ function buildEuiGridColumn({
   const dataViewField = getFieldFromDataSource(dataSource, columnName);
   // DSL-only: only IndexPatternSource exposes a real DataView. Edit-field and
   // time-column header require it.
-  const dataView =
-    dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -183,7 +182,7 @@ function buildEuiGridColumn({
 
   const columnDisplayName = getColumnDisplayName(
     columnName,
-    dataViewField?.displayName,
+    dataSource?.getColumnLabel(columnName),
     columnDisplay
   );
 

@@ -22,6 +22,8 @@
     "@kbn/field-types",
     "@kbn/core-saved-objects-common",
     "@kbn/crypto-browser",
-    "@kbn/data-view-utils"
+    "@kbn/data-view-utils",
+    "@kbn/field-utils",
+    "@kbn/field-formats-plugin"
   ]
 }

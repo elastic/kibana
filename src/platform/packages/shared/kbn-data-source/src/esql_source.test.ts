@@ -190,6 +190,57 @@ describe('EsqlSource', () => {
     });
   });
 
+  describe('getColumnIconType', () => {
+    it('derives an icon type from the result column metadata', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('bytes', 'number', 'long')],
+      });
+      expect(source.getColumnIconType('bytes')).toBe('number');
+    });
+
+    it('returns undefined for an unknown column', async () => {
+      const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
+      expect(source.getColumnIconType('does-not-exist')).toBeUndefined();
+    });
+  });
+
+  describe('getFormatter', () => {
+    it('returns the default formatter for the column type', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('bytes', 'number', 'long')],
+      });
+      const defaultFormatter = { id: 'default-number' };
+      const fieldFormats = { getDefaultInstance: jest.fn(() => defaultFormatter) } as any;
+
+      const formatter = source.getFormatter('bytes', fieldFormats);
+
+      expect(fieldFormats.getDefaultInstance).toHaveBeenCalledWith('number');
+      expect(formatter).toBe(defaultFormatter);
+    });
+
+    it('falls back to the default string formatter for an unknown column', async () => {
+      const source = await EsqlSource.create({ query: 'FROM logs-*', resultColumns: [] });
+      const fieldFormats = { getDefaultInstance: jest.fn() } as any;
+
+      source.getFormatter('does-not-exist', fieldFormats);
+
+      expect(fieldFormats.getDefaultInstance).toHaveBeenCalledWith('string');
+    });
+  });
+
+  describe('getColumnLabel', () => {
+    it('returns the column name unchanged — ES|QL has no custom-label concept', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('bytes', 'number')],
+      });
+      expect(source.getColumnLabel('bytes')).toBe('bytes');
+      expect(source.getColumnLabel('does-not-exist')).toBe('does-not-exist');
+    });
+  });
+
   describe('isTimeBased', () => {
     it('returns true when timeFieldName is set', async () => {
       const source = await EsqlSource.create({

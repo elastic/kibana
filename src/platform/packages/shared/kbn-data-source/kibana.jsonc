@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/data-source",
   "owner": [
     "@elastic/kibana-data-discovery"
