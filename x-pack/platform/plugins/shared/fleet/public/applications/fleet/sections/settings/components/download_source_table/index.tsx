@@ -65,7 +65,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
                     'xpack.fleet.settings.downloadSourcesTable.managedTooltip',
                     {
                       defaultMessage:
-                        'This download source is managed outside of Fleet. Please refer to your kibana config file for more info.',
+                        'This download source is managed outside of Fleet. Refer to your Kibana config file for more information.',
                     }
                   )}
                   type="lock"

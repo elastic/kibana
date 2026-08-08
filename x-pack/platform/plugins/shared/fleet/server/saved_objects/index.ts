@@ -1734,6 +1734,22 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                source_id: schema.maybe(schema.string()),
+                name: schema.maybe(schema.string()),
+                is_default: schema.maybe(schema.boolean()),
+                is_preconfigured: schema.maybe(schema.boolean()),
+                host: schema.maybe(schema.string()),
+                proxy_id: schema.maybe(schema.string()),
+                ssl: schema.maybe(schema.string()),
+                auth: schema.maybe(schema.string()),
+                secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
     },
