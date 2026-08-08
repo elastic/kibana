@@ -130,6 +130,9 @@ describe('scoreToolUsage', () => {
       detectionCount: 1,
     });
     expect(result).toMatchObject({ score: 0.75, label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls` });
+    expect(result.explanation).toBe(
+      `${TOOL_ID_EVENTS_WRITE} was called 2 times without one justified partial-failure retry`
+    );
   });
 
   it('allows one retry after an event bulk item fails', () => {

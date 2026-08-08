@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
+import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
@@ -20,8 +21,14 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { EpisodesClient } from '../lib/episodes_client';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../lib/services/logger_service/logger_service';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -66,6 +73,18 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
+  );
+  bind(AttachmentTypeToken).toResolvedValue(
+    (loggerService: LoggerServiceContract, injection) =>
+      createEpisodeAttachmentType({
+        logger: loggerService.forSubsystem('agentBuilder'),
+        getEpisodesClient: (context) =>
+          resolveRequestScoped(injection, context.request, EpisodesClient),
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
+      }) as AttachmentTypeDefinition,
+    [LoggerServiceToken, CoreStart('injection')]
   );
 
   bind(OnSetup).toConstantValue((container) => {
