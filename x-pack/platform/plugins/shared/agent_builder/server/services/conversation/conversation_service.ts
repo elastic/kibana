@@ -61,13 +61,9 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   /**
-   * Returns the author of a conversation round.
-   * Every round is attributed, whatever the conversation's access mode: authorship is recorded when
-   * the round is written and cannot be reconstructed later, so a conversation that starts private
-   * and is shared afterwards would otherwise lose the authorship of everything said before sharing.
-   * External origins (e.g. Slack) provide their own author and take precedence; otherwise the author
-   * is the authenticated Kibana user that initiated the round, including rounds from an external
-   * origin that omits `author`.
+   * Returns the author of a conversation round: the origin's own author if it provides one,
+   * otherwise the authenticated Kibana user. Every round is attributed, whatever the conversation's
+   * access mode, since authorship cannot be reconstructed once a conversation is shared.
    */
   async getConversationRoundAuthor({
     request,
