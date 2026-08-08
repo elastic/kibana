@@ -38,9 +38,6 @@ const isPublicConversation = ({
   return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
 };
 
-/**
- * Checks whether the conversation was shared with the current user.
- */
 export const isConversationMember = ({
   conversation,
   user,
