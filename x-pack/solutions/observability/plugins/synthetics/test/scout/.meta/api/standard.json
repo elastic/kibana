@@ -1,5 +1,9 @@
 {
-  "sha1": "4f59c565d21df4387d38c3993af41636d1c76705",
+  "sha1": "c7f4680b05425e07f98e8ee50b542eb161645d52",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "0e89de24e8ff3a8-faf07b914e53ca6",
@@ -3180,6 +3184,34 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
         "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "61927bc1cd4c925-fa52f188bdb4d91",
+      "title": "MaintenanceWindowsRoute returns only monitor-referenced windows to a read-only user, projecting the UI fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/maintenance_windows_route.spec.ts",
+        "line": 112,
+        "column": 12
+      }
+    },
+    {
+      "id": "61927bc1cd4c925-814df6954500a4e",
+      "title": "MaintenanceWindowsRoute only returns maintenance windows from the caller space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/maintenance_windows_route.spec.ts",
+        "line": 152,
         "column": 12
       }
     },
