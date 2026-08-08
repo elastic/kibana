@@ -98,6 +98,34 @@ export class DataGrid {
     });
   }
 
+  /**
+   * Closes the row-details flyout opened via `openDocumentDetails`.
+   */
+  async closeFlyout() {
+    await this.page.testSubj.click('euiFlyoutCloseButton');
+  }
+
+  /**
+   * Hovers a data cell (identified by `columnId`, so control columns are
+   * never in play) and clicks its "Filter for" action.
+   * Mirrors the FTR `dataGrid.clickCellFilterForButtonExcludingControlColumns`.
+   */
+  async clickCellFilterFor(rowIndex: number, columnId: string) {
+    const cell = this.getCell(rowIndex, columnId);
+    await cell.hover();
+    await cell.locator('[data-test-subj="filterForButton"]').click();
+  }
+
+  /**
+   * Same as {@link clickCellFilterFor}, but clicks the "Filter out" (negate)
+   * action. Mirrors the FTR `dataGrid.clickCellFilterOutButtonExcludingControlColumns`.
+   */
+  async clickCellFilterOut(rowIndex: number, columnId: string) {
+    const cell = this.getCell(rowIndex, columnId);
+    await cell.hover();
+    await cell.locator('[data-test-subj="filterOutButton"]').click();
+  }
+
   async closeInTableSearch() {
     const input = this.getInTableSearchInput();
 
