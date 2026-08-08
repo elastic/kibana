@@ -175,10 +175,7 @@ describe('Test column actions', () => {
   describe('Summary column coexistence', () => {
     it('keeps _source when adding another column', () => {
       const setAppState = jest.fn();
-      const actions = getStateColumnAction(
-        { columns: ['message', '_source'] },
-        setAppState
-      );
+      const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
 
       actions.onAddColumn('extension');
 
@@ -191,10 +188,7 @@ describe('Test column actions', () => {
 
     it('collapses to empty columns when only _source remains', () => {
       const setAppState = jest.fn();
-      const actions = getStateColumnAction(
-        { columns: ['message', '_source'] },
-        setAppState
-      );
+      const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
 
       actions.onRemoveColumn('message');
 

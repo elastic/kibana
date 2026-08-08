@@ -175,10 +175,7 @@ describe('getProfileAppStateDefaults', () => {
       } = createContextAwarenessMocks();
 
       dataSourceProfileProviderMock.profile.getDefaultAppState = jest.fn(() => () => ({
-        columns: [
-          { name: 'message', width: 100 },
-          { name: '_source' },
-        ],
+        columns: [{ name: 'message', width: 100 }, { name: '_source' }],
       }));
 
       const scopedProfilesManagerWithSummary = profilesManager.createScopedProfilesManager({
