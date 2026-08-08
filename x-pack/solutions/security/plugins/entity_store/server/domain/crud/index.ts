@@ -15,4 +15,4 @@ export {
   type CreateEntityFromSourceOutcome,
   type CreateEntityFromSourceRejectionReason,
 } from './crud_client';
-export type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_document';
+export type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_single_document';

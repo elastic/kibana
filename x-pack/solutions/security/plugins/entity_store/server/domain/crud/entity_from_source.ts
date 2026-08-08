@@ -24,7 +24,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_SOURCE_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
-import type { EntityCreationAccepted } from '../../../common/domain/definitions/creatable_from_document';
+import type { EntityCreationAccepted } from '../../../common/domain/definitions/creatable_from_single_document';
 import { ENTITY_TYPE_FIELD } from '../logs_extraction/query_builder_commons';
 
 export interface BuildEntityFromSourceParams {

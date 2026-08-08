@@ -27,8 +27,8 @@ import {
   EntityStoreNotInstalledError,
 } from '../errors';
 import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
-import { getEntityCreationCandidate } from '../../../common/domain/definitions/creatable_from_document';
-import type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_document';
+import { getEntityCreationCandidate } from '../../../common/domain/definitions/creatable_from_single_document';
+import type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_single_document';
 import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
 import { validateAndTransformDoc } from './utils';
 import { buildEntityFromSource } from './entity_from_source';

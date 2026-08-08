@@ -67,7 +67,7 @@ describe('fetchAlertIdentityDocs', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('skips the query entirely for an entity type with no creatableFromDocument (generic)', async () => {
+  it('skips the query entirely for an entity type with no creatableFromSingleDocument (generic)', async () => {
     const result = await fetchAlertIdentityDocs({
       esClient,
       logger,

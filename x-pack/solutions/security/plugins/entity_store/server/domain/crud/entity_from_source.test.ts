@@ -6,8 +6,8 @@
  */
 
 import { buildEntityFromSource } from './entity_from_source';
-import { getEntityCreationCandidate } from '../../../common/domain/definitions/creatable_from_document';
-import type { EntityCreationAccepted } from '../../../common/domain/definitions/creatable_from_document';
+import { getEntityCreationCandidate } from '../../../common/domain/definitions/creatable_from_single_document';
+import type { EntityCreationAccepted } from '../../../common/domain/definitions/creatable_from_single_document';
 
 const acceptedCandidateFor = (source: unknown): EntityCreationAccepted => {
   const candidate = getEntityCreationCandidate('host', source);

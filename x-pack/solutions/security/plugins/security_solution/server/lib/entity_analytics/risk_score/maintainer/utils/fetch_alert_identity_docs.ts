@@ -9,7 +9,7 @@ import { chunk } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
-import { isEntityTypeCreatableFromDocument } from '@kbn/entity-store/server';
+import { isEntityTypeCreatableFromSingleDocument } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { ScopedLogger } from './with_log_context';
 
@@ -56,7 +56,7 @@ export const fetchAlertIdentityDocs = async ({
   abortSignal,
 }: FetchAlertIdentityDocsParams): Promise<Map<string, AlertIdentityDoc>> => {
   const result = new Map<string, AlertIdentityDoc>();
-  if (euids.length === 0 || !isEntityTypeCreatableFromDocument(entityType)) {
+  if (euids.length === 0 || !isEntityTypeCreatableFromSingleDocument(entityType)) {
     return result;
   }
 

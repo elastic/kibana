@@ -38,7 +38,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   entityTypeFallback: 'Host',
   indexPatterns: [],
   /** Requires `host.id`; name-only documents remain lookup-only to avoid duplicate entities. */
-  creatableFromDocument: {
+  creatableFromSingleDocument: {
     requires: { field: 'host.id', exists: true },
     rejectionReason: 'host_missing_host_id',
   },

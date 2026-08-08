@@ -152,7 +152,7 @@ export const setFieldsByConditionSchema = z.object({
 });
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 
-// Rejection reasons a definition can attach to its own `creatableFromDocument.requires` gate.
+// Rejection reasons a definition can attach to its own `creatableFromSingleDocument.requires` gate.
 // Kept separate from the shared, non-definitional reasons so each definition can only report a reason it actually owns.
 export const creationRejectionReasonSchema = z.enum([
   'user_not_local_namespace',
@@ -161,18 +161,21 @@ export const creationRejectionReasonSchema = z.enum([
 export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
 
 /**
- * Opt-in gate for creation from a representative document `_source`.
+ * Opt-in gate for creating an entity from a single document `_source`, as opposed to logs
+ * extraction's aggregation over the whole corpus. Omitting it denies creation outright, so every
+ * type that wants this path must state its terms.
+ *
  * The union requires both `requires` and `rejectionReason` for conditional logic, or an empty
  * object when no condition is needed.
  */
-const creatableFromDocumentSchema = z.union([
+const creatableFromSingleDocumentSchema = z.union([
   z.strictObject({
     requires: streamlangConditionSchema,
     rejectionReason: creationRejectionReasonSchema,
   }),
   z.strictObject({}),
 ]);
-export type CreatableFromDocument = z.infer<typeof creatableFromDocumentSchema>;
+export type CreatableFromSingleDocument = z.infer<typeof creatableFromSingleDocumentSchema>;
 
 export const entitySchema = z.object({
   id: z.string(),
@@ -192,8 +195,8 @@ export const entitySchema = z.object({
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
-  // Opt-in gate for creation from a single representative document.
-  creatableFromDocument: z.optional(creatableFromDocumentSchema),
+  // Opt-in gate for creation from a single document; absent means never creatable this way.
+  creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
