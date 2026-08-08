@@ -15,7 +15,11 @@ import {
   createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
-import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
+import {
+  createEvidenceDescriptionEvaluator,
+  createNarrativeFieldsEvaluator,
+  createSignalEvidenceConsistencyEvaluator,
+} from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
@@ -56,6 +60,8 @@ export const createDiscoveryEvaluators = (
     createStatusCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
+    createNarrativeFieldsEvaluator({ criteriaFn }),
+    createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
     createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
