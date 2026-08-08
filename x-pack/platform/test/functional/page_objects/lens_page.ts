@@ -249,10 +249,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
         if (opts.isPreviousIncompatible) {
           // Incomplete → field must commit before close, or close discards the transition.
-          await retry.waitFor('incompatible field transition to complete', async () => {
-            const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-            return await comboBox.isOptionSelected(fieldCombo, opts.field!);
-          });
+          // Wait on Lens commit signals (op loses `incompatible`, params appear), not picker text alone.
+          await this.waitForIncompatibleFieldTransition(opts.operation);
+          await header.waitUntilLoadingHasFinished();
         }
       }
 
@@ -674,6 +673,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.waitFor('aria pressed to be true', async () => {
         const ariaPressedStatus = await getAriaPressed();
         return ariaPressedStatus === 'true';
+      });
+    },
+
+    /**
+     * Waits until an incompatible operation + field selection has been committed by Lens.
+     * Closing the editor before this clears incompleteColumns and reverts the previous column.
+     */
+    async waitForIncompatibleFieldTransition(operation: string) {
+      await retry.waitFor('incompatible field transition to complete', async () => {
+        // Compatible op button (without `incompatible`) only appears after incompleteColumns clears.
+        const compatibleOpExists = await testSubjects.exists(
+          `lns-indexPatternDimension-${operation}`,
+          { timeout: 500 }
+        );
+        if (!compatibleOpExists) {
+          return false;
+        }
+        const opEl = await testSubjects.find(`lns-indexPatternDimension-${operation}`);
+        if ((await opEl.getAttribute('aria-pressed')) !== 'true') {
+          return false;
+        }
+        // last_value param editors only render when !incompleteInfo
+        if (operation === 'last_value') {
+          return await testSubjects.exists('lns-indexPattern-lastValue-sortField', {
+            timeout: 500,
+          });
+        }
+        return true;
       });
     },
 

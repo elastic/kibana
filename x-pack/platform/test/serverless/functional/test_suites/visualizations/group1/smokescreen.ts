@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const config = getService('config');
+  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     before(async () => {
@@ -447,12 +448,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasChartSwitchWarning('bar')).to.eql(false);
       await PageObjects.lens.switchToVisualization('bar');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
-        '@timestamp'
-      );
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
-      );
+      // Chart switch remaps dimensions asynchronously; wait for triggers to settle.
+      await retry.try(async () => {
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          '@timestamp'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          'Average of bytes'
+        );
+      });
     });
 
     it('should create a valid XY chart with references', async () => {

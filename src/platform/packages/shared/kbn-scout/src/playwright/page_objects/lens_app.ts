@@ -203,6 +203,9 @@ export class LensApp {
     }
     if (opts.field) {
       await this.selectField(opts.field);
+      if (opts.isPreviousIncompatible) {
+        await this.waitForIncompatibleFieldTransition(opts.operation);
+      }
     }
     if (opts.formula) {
       await this.typeInFormula(opts.formula, { replace: true });
@@ -246,6 +249,33 @@ export class LensApp {
 
   private async selectField(field: string) {
     await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
+  }
+
+  /**
+   * Waits until an incompatible operation + field selection has been committed by Lens.
+   * Closing the editor before this clears incompleteColumns and reverts the previous column.
+   */
+  private async waitForIncompatibleFieldTransition(operation: string) {
+    const compatibleOpSelector = `lns-indexPatternDimension-${operation}`;
+    await this.page.waitForFunction(
+      ({ opSelector, checkLastValueParams }) => {
+        const opEl = document.querySelector(`[data-test-subj="${opSelector}"]`);
+        if (opEl?.getAttribute('aria-pressed') !== 'true') {
+          return false;
+        }
+        if (!checkLastValueParams) {
+          return true;
+        }
+        return Boolean(
+          document.querySelector('[data-test-subj="lns-indexPattern-lastValue-sortField"]')
+        );
+      },
+      {
+        opSelector: compatibleOpSelector,
+        checkLastValueParams: operation === 'last_value',
+      },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**
