@@ -7,8 +7,8 @@
 
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
-import { TRAINING_PERCENT_MIN } from '@kbn/ml-data-frame-analytics-utils';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * Page object for the Data Frame Analytics section of Stack Management ML.
@@ -33,37 +33,17 @@ export class DataFrameAnalyticsPage {
     );
   }
 
-  private async waitForJobListResponses(timeoutMs = 60_000): Promise<void> {
-    await Promise.all([
-      this.page.waitForResponse(
-        (response) =>
-          response.request().method() === 'GET' &&
-          response.ok() &&
-          new URL(response.url()).pathname.endsWith('/internal/ml/data_frame/analytics'),
-        { timeout: timeoutMs }
-      ),
-      this.page.waitForResponse(
-        (response) =>
-          response.request().method() === 'GET' &&
-          response.ok() &&
-          new URL(response.url()).pathname.endsWith('/internal/ml/data_frame/analytics/_stats'),
-        { timeout: timeoutMs }
-      ),
-    ]);
-  }
-
   // ── Navigation ────────────────────────────────────────────────────────────
 
   async gotoJobList(): Promise<void> {
-    const jobListResponses = this.waitForJobListResponses(60_000);
     await this.page.goto(
       this.kbnUrl.app('management/ml/analytics?_g=(refreshInterval:(pause:!t,value:30000))')
     );
-    await jobListResponses;
-    // Short settle for React to mount after both APIs succeed; do not restack a second 60s budget.
+    // List renders null until the first ML API fetch completes; works for empty and
+    // non-clean CI lists. 60 s covers cold-start and same-URL remounts.
     await this.page.testSubj
       .locator('mlAnalyticsJobList')
-      .waitFor({ state: 'visible', timeout: 10_000 });
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   // ── Creation wizard ───────────────────────────────────────────────────────
@@ -394,17 +374,36 @@ export class DataFrameAnalyticsPage {
   async setTrainingPercent(percent: number): Promise<void> {
     const slider = this.page.testSubj.locator('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     await slider.waitFor({ state: 'visible' });
-    const explainResponse = this.waitForExplainResponse(`"training_percent":${percent}`);
-    await slider.press('Home');
-    for (let value = TRAINING_PERCENT_MIN; value < percent; value++) {
-      await slider.press('ArrowRight');
-    }
-    await explainResponse;
 
-    const actual = Number(await slider.getAttribute('value'));
-    if (actual !== percent) {
-      throw new Error(`setTrainingPercent: expected ${percent}, got ${actual}`);
+    // FTR parity (mlCommonUI.setSliderValue): nudge until the controlled value matches.
+    const deadline = Date.now() + 60_000;
+    while (Date.now() < deadline) {
+      const currentValue = Number(await slider.getAttribute('value'));
+      if (currentValue === percent) {
+        return;
+      }
+
+      const diff = currentValue - percent;
+      const key =
+        diff > 0
+          ? Math.abs(diff) >= 10
+            ? 'PageDown'
+            : 'ArrowLeft'
+          : Math.abs(diff) >= 10
+          ? 'PageUp'
+          : 'ArrowRight';
+
+      await slider.press(key);
+      await expect
+        .poll(async () => Number(await slider.getAttribute('value')), { timeout: 5_000 })
+        .not.toBe(currentValue);
     }
+
+    throw new Error(
+      `setTrainingPercent: timed out waiting for ${percent} (got ${await slider.getAttribute(
+        'value'
+      )})`
+    );
   }
 
   // ── Map view: job badge & details flyout (regression) ─────────────────────
