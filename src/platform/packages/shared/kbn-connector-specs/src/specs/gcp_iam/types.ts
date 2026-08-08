@@ -68,22 +68,34 @@ const keyId = () =>
       'The key id: the last path segment of a key resource name, a 40-character hex string. Obtain it from listServiceAccountKeys.'
     );
 
-/** Which resource level an IAM policy call targets. Folders use the v2 API, the others v1. */
+/**
+ * Which resource an IAM policy call targets. Projects, folders and organizations are served by
+ * Cloud Resource Manager (folders from v2, the rest from v1); a service account's own policy is
+ * served by the IAM API instead.
+ *
+ * A service-account policy answers "who may impersonate this identity", which is a different
+ * question from "what may this identity do". Revoking an impersonator is a containment step in
+ * its own right, and it is far narrower than editing a whole project's policy.
+ */
 export const ResourceTypeSchema = z
-  .enum(['projects', 'folders', 'organizations'])
+  .enum(['projects', 'folders', 'organizations', 'serviceAccounts'])
   .describe(
-    'The resource level the policy is attached to. Use "projects" for a project, "folders" for a folder, "organizations" for an org.'
+    'What the policy is attached to. Use "projects", "folders" or "organizations" for a resource-hierarchy policy, or "serviceAccounts" for the policy on a single service account, which controls who can impersonate it.'
   );
 
 const resourceId = () =>
   z
     .string()
-    .max(64)
-    .regex(/^[a-z0-9][a-z0-9-]{2,62}$/, {
-      message: 'Must be a project id, or the numeric id of a folder or organization',
-    })
+    .max(320)
+    .regex(
+      /^([a-z0-9][a-z0-9-]{2,62}|[0-9]{1,32}|[a-zA-Z0-9-_.]+@[a-zA-Z0-9-.]+\.(iam\.)?gserviceaccount\.com)$/,
+      {
+        message:
+          'Must be a project id, the numeric id of a folder or organization, or a service account email',
+      }
+    )
     .describe(
-      'The id of the target resource: a project id for "projects", or the numeric id for "folders" and "organizations".'
+      'The target: a project id for "projects", the numeric id for "folders" and "organizations", or the service account email for "serviceAccounts".'
     );
 
 // --- Service account reads -------------------------------------------------------------

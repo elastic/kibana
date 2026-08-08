@@ -51,11 +51,17 @@ const IAM_API = 'https://iam.googleapis.com/v1';
 const CRM_API = 'https://cloudresourcemanager.googleapis.com';
 
 /**
- * Cloud Resource Manager serves folders from v2 and projects/organizations from v1. Calling a
- * folder through v1 returns 404, so the version is derived from the resource type rather than
- * hardcoded.
+ * Resolve the policy endpoint for a target.
+ *
+ * Two different services are involved. A service account's own policy lives on the IAM API, while
+ * a project, folder or organization policy lives on Cloud Resource Manager, which serves folders
+ * from v2 and the other two from v1. Calling a folder through v1 returns 404, so the version is
+ * derived from the resource type rather than hardcoded.
  */
-const crmUrl = (resourceType: string, resourceId: string, verb: string): string => {
+const policyUrl = (resourceType: string, resourceId: string, verb: string): string => {
+  if (resourceType === 'serviceAccounts') {
+    return `${IAM_API}/projects/-/serviceAccounts/${encodeURIComponent(resourceId)}:${verb}`;
+  }
   const version = resourceType === 'folders' ? 'v2' : 'v1';
   return `${CRM_API}/${version}/${resourceType}/${encodeURIComponent(resourceId)}:${verb}`;
 };
@@ -174,7 +180,7 @@ const readPolicyForUpdate = async (
   resourceType: string,
   resourceId: string
 ): Promise<IamPolicyResponse> => {
-  const response = await ctx.client.post(crmUrl(resourceType, resourceId, 'getIamPolicy'), {
+  const response = await ctx.client.post(policyUrl(resourceType, resourceId, 'getIamPolicy'), {
     options: { requestedPolicyVersion: 3 },
   });
   return response.data as IamPolicyResponse;
@@ -192,7 +198,7 @@ const writePolicy = async (
   etag: string | undefined,
   version: number
 ) => {
-  const response = await ctx.client.post(crmUrl(resourceType, resourceId, 'setIamPolicy'), {
+  const response = await ctx.client.post(policyUrl(resourceType, resourceId, 'setIamPolicy'), {
     policy: { version, bindings, ...(etag ? { etag } : {}) },
   });
   return trimPolicy(response.data as IamPolicyResponse);
@@ -244,13 +250,15 @@ Containment flow for a compromised service account:
 4. testIamPermissions afterwards to confirm the revocation actually took effect.
 
 Access revocation flow:
-1. getIamPolicy on the project, folder, or organization to see who holds what.
+1. getIamPolicy on the target to see who holds what.
 2. removeIamPolicyBinding to revoke one role from one member, or addIamPolicyBinding to grant one.
 3. getIamPolicy again to confirm.
 
+Pick the narrowest scope that solves the problem. resourceType: serviceAccounts targets the policy ON a single service account, which controls who may impersonate it (roles/iam.serviceAccountTokenCreator, roles/iam.serviceAccountUser). If an attacker reached a workload by impersonating a service account, revoking that binding contains the attack without touching project-wide access anybody else depends on. resourceType: projects, folders and organizations edit the resource-hierarchy policy instead, which is what governs what members may do across everything under it.
+
 Gotchas:
 - addIamPolicyBinding and removeIamPolicyBinding are read-modify-write under the hood: they fetch the policy, edit one binding, and write it back with the etag. If the write races another change it fails rather than clobbering it; re-run the action to retry against the fresh policy.
-- setIamPolicy REPLACES the entire policy. Only reach for it for bulk remediation, and always build its bindings from a getIamPolicy response rather than from memory. Prefer the add/remove binding actions for single changes.
+- setIamPolicy REPLACES the entire policy for whatever it targets. Only reach for it for bulk remediation, and always build its bindings from a getIamPolicy response rather than from memory. Prefer the add/remove binding actions for single changes. On a project, folder or organization this rewrites access for every member, so treat it as a high-blast-radius action; on a service account it only rewrites that one identity's impersonators.
 - A role name always carries its prefix: "roles/editor", not "editor".
 - A member always carries its type prefix: "user:a@b.com", "serviceAccount:x@y.iam.gserviceaccount.com".
 - Folders are served by a different API version than projects and organizations. The connector handles that; just pass the right resourceType.
@@ -454,8 +462,9 @@ Gotchas:
     getIamPolicy: {
       isTool: true,
       description:
-        'Read the IAM allow policy on a project, folder, or organization: every role binding with its members, any IAM conditions, and the etag. ' +
-        'Use it before acting to see who holds which roles, and afterwards to confirm a change landed. ' +
+        'Read an IAM allow policy: every role binding with its members, any IAM conditions, and the etag. ' +
+        'Targets a project, folder, or organization to see who holds which roles there, or a single service account to see who may impersonate it. ' +
+        'Use it before acting, and afterwards to confirm a change landed. ' +
         'Requests policy version 3 so conditional bindings are visible rather than silently omitted.',
       input: GetIamPolicyInputSchema,
       handler: async (ctx, input: GetIamPolicyInput) => {
@@ -471,7 +480,8 @@ Gotchas:
     addIamPolicyBinding: {
       isTool: false,
       description:
-        'Grant one role to one member on a project, folder, or organization, leaving every other binding untouched. ' +
+        'Grant one role to one member, leaving every other binding untouched. ' +
+        'Targets a project, folder, or organization, or a single service account to let a member impersonate it. ' +
         'Use it to restore access after a rollback or to open break-glass access. ' +
         'Implemented as read-modify-write with the policy etag, so a concurrent policy change makes this fail rather than overwrite. ' +
         'Adding a member to a role that already exists is a no-op rather than an error.',
@@ -528,7 +538,8 @@ Gotchas:
     removeIamPolicyBinding: {
       isTool: false,
       description:
-        'Revoke one role from one member on a project, folder, or organization, leaving every other binding untouched. The core access-revocation response. ' +
+        'Revoke one role from one member, leaving every other binding untouched. The core access-revocation response. ' +
+        'Targets a project, folder, or organization, or a single service account to cut off an impersonator, which is the narrowest containment move available here. ' +
         'Implemented as read-modify-write with the policy etag, so a concurrent policy change makes this fail rather than overwrite. ' +
         'Removes the member from matching bindings including conditional ones, and drops a binding that ends up with no members. ' +
         'Reports changed: false when the member did not hold the role, so a workflow can tell a no-op from a revocation.',
@@ -586,8 +597,9 @@ Gotchas:
       // Replaces the whole policy: the highest-blast-radius action in the connector.
       isTool: false,
       description:
-        'Replace the entire IAM allow policy on a project, folder, or organization in one call. For bulk remediation only. ' +
+        'Replace an entire IAM allow policy in one call. For bulk remediation only. ' +
         'This REPLACES every binding, so any binding missing from the input is revoked. Always build the bindings from a getIamPolicy response and pass back its etag. ' +
+        'Scope matters enormously here: targeting a project, folder, or organization rewrites access for everyone on it, while targeting a service account only rewrites who may impersonate that one identity. ' +
         'For a single grant or revocation use addIamPolicyBinding or removeIamPolicyBinding instead, which do the read-modify-write safely.',
       input: SetIamPolicyInputSchema,
       handler: async (ctx, input: SetIamPolicyInput) => {
@@ -609,13 +621,13 @@ Gotchas:
     testIamPermissions: {
       isTool: true,
       description:
-        'Check which of the given permissions the caller holds on a project, folder, or organization. Only the held subset is returned, so an empty list means none. ' +
+        'Check which of the given permissions the caller holds on a project, folder, organization, or service account. Only the held subset is returned, so an empty list means none. ' +
         'Use it to confirm a revocation took effect, to verify least privilege, or to check the connector itself can perform an action before attempting it.',
       input: TestIamPermissionsInputSchema,
       handler: async (ctx, input: TestIamPermissionsInput) => {
         try {
           const response = await ctx.client.post(
-            crmUrl(input.resourceType, input.resourceId, 'testIamPermissions'),
+            policyUrl(input.resourceType, input.resourceId, 'testIamPermissions'),
             { permissions: input.permissions }
           );
           const data = response.data as { permissions?: string[] };

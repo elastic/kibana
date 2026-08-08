@@ -420,6 +420,25 @@ describe('GcpIam', () => {
       );
     });
 
+    it('routes a serviceAccounts target to the IAM API, not Cloud Resource Manager', async () => {
+      // A service-account policy controls who may IMPERSONATE that identity, and it lives on
+      // iam.googleapis.com rather than cloudresourcemanager.googleapis.com. It is also the
+      // narrowest possible scope: editing it cannot affect anyone else's project access.
+      mockClient.post.mockResolvedValue({ data: { etag: 'ACAB' } });
+
+      await getAction('getIamPolicy').handler(mockContext, {
+        resourceType: 'serviceAccounts',
+        resourceId: SA_EMAIL,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${IAM}/projects/-/serviceAccounts/${encodeURIComponent(SA_EMAIL)}:getIamPolicy`,
+        { options: { requestedPolicyVersion: 3 } }
+      );
+      const [url] = mockClient.post.mock.calls[0];
+      expect(url).not.toContain('cloudresourcemanager');
+    });
+
     it('preserves conditions on returned bindings', async () => {
       mockClient.post.mockResolvedValue({
         data: {
@@ -648,6 +667,86 @@ describe('GcpIam', () => {
           },
         }
       );
+    });
+  });
+
+  describe('service-account-scoped policy writes', () => {
+    it('setIamPolicy targets the service account, so no project access is touched', async () => {
+      mockClient.post.mockResolvedValue({ data: { etag: 'ACAB2', bindings: [] } });
+
+      await getAction('setIamPolicy').handler(mockContext, {
+        resourceType: 'serviceAccounts',
+        resourceId: SA_EMAIL,
+        bindings: [
+          {
+            role: 'roles/iam.serviceAccountTokenCreator',
+            members: ['user:responder@example.com'],
+          },
+        ],
+        etag: 'ACAB',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${IAM}/projects/-/serviceAccounts/${encodeURIComponent(SA_EMAIL)}:setIamPolicy`,
+        {
+          policy: {
+            version: 3,
+            etag: 'ACAB',
+            bindings: [
+              {
+                role: 'roles/iam.serviceAccountTokenCreator',
+                members: ['user:responder@example.com'],
+              },
+            ],
+          },
+        }
+      );
+    });
+
+    it('removeIamPolicyBinding can cut an impersonator off a single service account', async () => {
+      mockClient.post
+        .mockResolvedValueOnce({
+          data: {
+            version: 3,
+            etag: 'ACAB',
+            bindings: [
+              {
+                role: 'roles/iam.serviceAccountTokenCreator',
+                members: ['user:attacker@example.com', 'user:legit@example.com'],
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({ data: { etag: 'ACAB2', bindings: [] } });
+
+      const result = (await getAction('removeIamPolicyBinding').handler(mockContext, {
+        resourceType: 'serviceAccounts',
+        resourceId: SA_EMAIL,
+        member: 'user:attacker@example.com',
+        role: 'roles/iam.serviceAccountTokenCreator',
+      })) as { changed: boolean };
+
+      expect(result.changed).toBe(true);
+      const [url, body] = mockClient.post.mock.calls[1];
+      expect(url).toBe(
+        `${IAM}/projects/-/serviceAccounts/${encodeURIComponent(SA_EMAIL)}:setIamPolicy`
+      );
+      expect(body.policy.bindings[0].members).toEqual(['user:legit@example.com']);
+    });
+
+    it('accepts a service account email as the resourceId', () => {
+      const schema = getAction('getIamPolicy').input;
+      expect(
+        schema?.safeParse({ resourceType: 'serviceAccounts', resourceId: SA_EMAIL }).success
+      ).toBe(true);
+      // A project id must still be accepted for the hierarchy scopes.
+      expect(
+        schema?.safeParse({ resourceType: 'projects', resourceId: 'my-project-123' }).success
+      ).toBe(true);
+      expect(
+        schema?.safeParse({ resourceType: 'serviceAccounts', resourceId: '../../etc/passwd' })
+          .success
+      ).toBe(false);
     });
   });
 
