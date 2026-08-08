@@ -152,22 +152,14 @@ export const setFieldsByConditionSchema = z.object({
 });
 export type SetFieldsByCondition = z.infer<typeof setFieldsByConditionSchema>;
 
-// Rejection reasons a definition can attach to its own `creatableFromSingleDocument.requires` gate.
-// Kept separate from the shared, non-definitional reasons so each definition can only report a reason it actually owns.
+// Definition-owned reasons stay separate so a rule can only report a reason it owns.
 export const creationRejectionReasonSchema = z.enum([
   'user_not_local_namespace',
   'host_missing_host_id',
 ]);
 export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSchema>;
 
-/**
- * Opt-in gate for creating an entity from a single document `_source`, as opposed to logs
- * extraction's aggregation over the whole corpus. Omitting it denies creation outright, so every
- * type that wants this path must state its terms.
- *
- * The union requires both `requires` and `rejectionReason` for conditional logic, or an empty
- * object when no condition is needed.
- */
+/** Conditional rules require both `requires` and `rejectionReason`; `{}` opts in unconditionally. */
 const creatableFromSingleDocumentSchema = z.union([
   z.strictObject({
     requires: streamlangConditionSchema,
@@ -195,7 +187,7 @@ export const entitySchema = z.object({
   whenConditionTrueSetFieldsPreAgg: z.optional(z.array(setFieldsByConditionSchema)),
   // Post-STATS EVAL in logs ESQL (recent.* vs plain). Single-doc paths re-apply entries after pre-agg for parity.
   whenConditionTrueSetFieldsAfterStats: z.optional(z.array(setFieldsByConditionSchema)),
-  // Opt-in gate for creation from a single document; absent means never creatable this way.
+  // Omission disables single-document creation for the entity type.
   creatableFromSingleDocument: z.optional(creatableFromSingleDocumentSchema),
 });
 

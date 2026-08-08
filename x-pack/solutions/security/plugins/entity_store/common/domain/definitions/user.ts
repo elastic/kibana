@@ -193,10 +193,8 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   },
 
   /**
-   * Creation from a single document is restricted to medium-confidence local-namespace users.
-   * Rationale: an accidental non-local creation would mint a high-confidence entity with no authoritative
-   * IdP evidence, since `entity.confidence` is stamped from the namespace above. One document cannot
-   * supply that evidence whatever index it came from, so this holds for any single-document caller.
+   * Restricts single-document creation to local users; other namespaces would mint a
+   * high-confidence entity without authoritative IdP evidence.
    */
   creatableFromSingleDocument: {
     requires: { field: 'entity.namespace', eq: USER_ENTITY_NAMESPACE.Local },

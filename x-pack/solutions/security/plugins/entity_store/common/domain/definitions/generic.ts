@@ -17,8 +17,8 @@ import {
 // GCP Resource Names, Kubernetes pods) sourced from CSP integrations that populate `entity.id`.
 // They are consumed by Graph (entity and event flyout visualizations) and Asset Inventory.
 // Customers without CSP integrations will not produce any generic entities.
-// Deliberately no `creatableFromSingleDocument`: generic's EUID is `entity.id` verbatim with no
-// gates, so creating it from any single document would be an arbitrary-string minting operation.
+// Single-document creation is disabled because using `entity.id` verbatim would let arbitrary
+// strings mint entities.
 export const genericEntityDefinition = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
