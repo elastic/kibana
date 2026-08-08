@@ -448,7 +448,6 @@ export const PagerdutyConnector: ConnectorSpec = {
         return {};
       });
     },
-    enabled: true,
   },
 
   skill: [
