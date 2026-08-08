@@ -250,14 +250,23 @@ describe('UrlFormat', () => {
       expect(url.convertToReact('url')).toBe('url');
     });
 
-    test('percent-encodes RFC 3986 sub-delims so values survive rison URL contexts', () => {
+    test('risonValue escapes rison delimiters so values survive Kibana app URL templates', () => {
       const url = new UrlFormat({
-        urlTemplate: "http://elastic.co/app/kibana#/dashboard?_a=(query:'{{value}}')",
+        urlTemplate: "http://elastic.co/app/kibana#/dashboard?_a=(query:'{{risonValue}}')",
       });
 
+      // identical to how Kibana itself encodes this value in its own URLs
       expect(url.convertToText("Roady's Jump (Start) *Travel!* Center")).toBe(
-        "http://elastic.co/app/kibana#/dashboard?_a=(query:'Roady%27s%20Jump%20%28Start%29%20%2ATravel%21%2A%20Center')"
+        "http://elastic.co/app/kibana#/dashboard?_a=(query:'Roady!'s%20Jump%20(Start)%20*Travel!!*%20Center')"
       );
+    });
+
+    test('value stays plain encodeURIComponent-encoded', () => {
+      const url = new UrlFormat({
+        urlTemplate: 'http://elastic.co/?q={{value}}',
+      });
+
+      expect(url.convertToText("Roady's Travel!")).toBe("http://elastic.co/?q=Roady's%20Travel!");
     });
 
     test('rawValue in url template is not URL-encoded (unlike value)', () => {
@@ -638,7 +647,7 @@ describe('UrlFormat', () => {
       });
       expect(url.convertToReact('<script>alert("test")</script>')).toMatchInlineSnapshot(`
         <a
-          href="http://example.com/%3Cscript%3Ealert%28%22test%22%29%3C%2Fscript%3E"
+          href="http://example.com/%3Cscript%3Ealert(%22test%22)%3C%2Fscript%3E"
           rel="noopener noreferrer"
           target="_blank"
         >

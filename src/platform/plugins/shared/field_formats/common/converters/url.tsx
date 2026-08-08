@@ -25,15 +25,14 @@ const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
 
 /**
- * encodeURIComponent leaves !'()* unencoded; percent-encode them too so templated
- * values stay intact in any URL context — e.g. an apostrophe inside the rison state
- * of a Kibana app URL would otherwise break the target URL
+ * Escapes a value for embedding inside a single-quoted rison string: rison
+ * protects its delimiters with `!`, so `'` becomes `!'` and `!` becomes `!!`.
+ * Composed with encodeURIComponent this reproduces exactly how Kibana itself
+ * encodes such values in its app URLs, making `{{risonValue}}` safe to place
+ * inside the rison state of a Kibana URL template (e.g. `query:'{{risonValue}}'`)
+ * where a plain `{{value}}` would break the rison parser.
  */
-const encodeUriComponentStrict = (value: string): string =>
-  encodeURIComponent(value).replace(
-    /[!'()*]/g,
-    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}`
-  );
+const risonEscape = (value: string): string => value.replace(/[!']/g, (char) => `!${char}`);
 
 const URL_TYPES = [
   {
@@ -109,7 +108,8 @@ export class UrlFormat extends FieldFormat {
     if (!template) return strValue;
 
     return this.compileTemplate(template)({
-      value: encodeUriComponentStrict(strValue),
+      value: encodeURIComponent(strValue),
+      risonValue: encodeURIComponent(risonEscape(strValue)),
       rawValue: value,
     });
   }
