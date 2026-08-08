@@ -39,7 +39,7 @@ describe('indexTemplateNameField', () => {
     expect(validate('has space')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_TEMPLATE_NAME',
-      message: 'name must not contain a space',
+      message: 'Name must not contain a space.',
     });
   });
 
@@ -47,7 +47,7 @@ describe('indexTemplateNameField', () => {
     expect(validate('has,comma')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_TEMPLATE_NAME',
-      message: "name must not contain a ','",
+      message: "Name must not contain a ','.",
     });
   });
 
@@ -55,7 +55,7 @@ describe('indexTemplateNameField', () => {
     expect(validate('has#hash')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_TEMPLATE_NAME',
-      message: "name must not contain a '#'",
+      message: "Name must not contain a '#'.",
     });
   });
 
@@ -63,7 +63,7 @@ describe('indexTemplateNameField', () => {
     expect(validate('has*star')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_TEMPLATE_NAME',
-      message: "name must not contain a '*'",
+      message: "Name must not contain a '*'.",
     });
   });
 
@@ -71,7 +71,7 @@ describe('indexTemplateNameField', () => {
     expect(validate('_starts_with_underscore')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_TEMPLATE_NAME',
-      message: "name must not start with '_'",
+      message: "Name must not start with '_'.",
     });
   });
 
@@ -79,7 +79,7 @@ describe('indexTemplateNameField', () => {
     expect(validate('HasUpperCase')).toMatchObject({
       code: 'ERR_FIELD_FORMAT',
       formatType: 'INDEX_TEMPLATE_NAME',
-      message: 'name must be lower cased',
+      message: 'Name must be lower case.',
     });
   });
 

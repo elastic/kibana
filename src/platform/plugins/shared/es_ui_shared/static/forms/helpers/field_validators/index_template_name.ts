@@ -30,7 +30,7 @@ export const indexTemplateNameField =
         code: 'ERR_FIELD_FORMAT',
         formatType: 'INDEX_TEMPLATE_NAME',
         message: i18n.translate('esUi.forms.fieldValidation.indexTemplateName.spaceError', {
-          defaultMessage: 'name must not contain a space',
+          defaultMessage: 'Name must not contain a space.',
         }),
       };
     }
@@ -40,7 +40,7 @@ export const indexTemplateNameField =
         code: 'ERR_FIELD_FORMAT',
         formatType: 'INDEX_TEMPLATE_NAME',
         message: i18n.translate('esUi.forms.fieldValidation.indexTemplateName.commaError', {
-          defaultMessage: "name must not contain a ','",
+          defaultMessage: "Name must not contain a ','.",
         }),
       };
     }
@@ -50,7 +50,7 @@ export const indexTemplateNameField =
         code: 'ERR_FIELD_FORMAT',
         formatType: 'INDEX_TEMPLATE_NAME',
         message: i18n.translate('esUi.forms.fieldValidation.indexTemplateName.hashError', {
-          defaultMessage: "name must not contain a '#'",
+          defaultMessage: "Name must not contain a '#'.",
         }),
       };
     }
@@ -60,7 +60,7 @@ export const indexTemplateNameField =
         code: 'ERR_FIELD_FORMAT',
         formatType: 'INDEX_TEMPLATE_NAME',
         message: i18n.translate('esUi.forms.fieldValidation.indexTemplateName.asteriskError', {
-          defaultMessage: "name must not contain a '*'",
+          defaultMessage: "Name must not contain a '*'.",
         }),
       };
     }
@@ -72,7 +72,7 @@ export const indexTemplateNameField =
         message: i18n.translate(
           'esUi.forms.fieldValidation.indexTemplateName.startsWithUnderscoreError',
           {
-            defaultMessage: "name must not start with '_'",
+            defaultMessage: "Name must not start with '_'.",
           }
         ),
       };
@@ -83,7 +83,7 @@ export const indexTemplateNameField =
         code: 'ERR_FIELD_FORMAT',
         formatType: 'INDEX_TEMPLATE_NAME',
         message: i18n.translate('esUi.forms.fieldValidation.indexTemplateName.lowercaseError', {
-          defaultMessage: 'name must be lower cased',
+          defaultMessage: 'Name must be lower case.',
         }),
       };
     }
