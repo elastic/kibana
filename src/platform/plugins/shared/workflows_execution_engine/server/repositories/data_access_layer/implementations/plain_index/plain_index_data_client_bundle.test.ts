@@ -81,7 +81,7 @@ describe('PlainIndexDataClientBundle', () => {
     const logger = loggerMock.create();
     const bundle = new PlainIndexDataClientBundle({ source: 'system_index', logger });
 
-    bundle.initStart(coreStart);
+    void bundle.initStart(coreStart);
 
     const workflowClient = bundle.createWorkflowDataClient();
     const searchPromise = workflowClient.search({ query: { match_all: {} } });
