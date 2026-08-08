@@ -10,7 +10,6 @@ export enum ConversationAccessControlMode {
   Public = 'public',
 }
 
-/** Conversations have a single flat role: rename, delete and manage-access stay owner-only. */
 export enum ConversationAccessControlRole {
   Member = 'member',
 }
