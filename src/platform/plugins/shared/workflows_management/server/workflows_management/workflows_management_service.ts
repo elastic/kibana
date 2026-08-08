@@ -170,15 +170,17 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(
+  /**
+   * Parses and validates a workflow YAML, returning the prepared document and metadata.
+   * Shared by createWorkflow and bulkCreateWorkflows.
+   */
+  private prepareWorkflowDocument(
     workflow: CreateWorkflowCommand,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<WorkflowDetailDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
-
+    zodSchema: z.ZodType,
+    authenticatedUser: string,
+    now: Date,
+    spaceId: string
+  ): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } {
     let workflowToCreate: EsWorkflowCreate = {
       name: 'Untitled workflow',
       description: undefined,
@@ -187,25 +189,25 @@ export class WorkflowsService {
       definition: undefined,
       valid: false,
     };
-    const parsedYaml = parseWorkflowYamlToJSON(
-      workflow.yaml,
-      await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
-    );
+
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
     if (parsedYaml.success) {
-      // The type of parsedYaml.data is validated by getWorkflowZodSchema (strict mode), so this assertion is safe.
       workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
         parsedYaml.data as unknown as WorkflowYaml
       );
 
-      // Validate step name uniqueness
       const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
       if (!stepValidation.isValid) {
         workflowToCreate.valid = false;
         workflowToCreate.definition = undefined;
       }
     }
-    const authenticatedUser = getAuthenticatedUser(request, this.security);
-    const now = new Date();
+
+    const id = workflow.id || this.generateWorkflowId();
+
+    if (workflow.id) {
+      this.validateWorkflowId(workflow.id);
+    }
 
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
@@ -223,11 +225,61 @@ export class WorkflowsService {
       updated_at: now.toISOString(),
     };
 
-    const id = workflow.id || this.generateWorkflowId();
+    return { id, workflowData, definition: workflowToCreate.definition };
+  }
+
+  /**
+   * Schedules triggers for a workflow. Used by both createWorkflow and bulkCreateWorkflows.
+   */
+  private async scheduleWorkflowTriggers(
+    workflowId: string,
+    definition: WorkflowYaml | undefined,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const { taskScheduler } = this;
+    if (!taskScheduler || !definition?.triggers) {
+      return;
+    }
+
+    const scheduledTriggers = definition.triggers.filter((t) => t.type === 'scheduled');
+    await Promise.allSettled(
+      scheduledTriggers.map((trigger) =>
+        taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request)
+      )
+    ).then((results) => {
+      results.forEach((result, i) => {
+        if (result.status === 'rejected') {
+          this.logger.warn(
+            `Failed to schedule trigger for workflow ${workflowId}: ${result.reason}`
+          );
+        }
+      });
+    });
+  }
+
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    if (!this.workflowStorage) {
+      throw new Error('WorkflowsService not initialized');
+    }
+
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const now = new Date();
+
+    const { id, workflowData, definition } = this.prepareWorkflowDocument(
+      workflow,
+      zodSchema,
+      authenticatedUser,
+      now,
+      spaceId
+    );
 
     if (workflow.id) {
-      this.validateWorkflowId(workflow.id);
-
       const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
       if (existingWorkflow) {
         throw new WorkflowConflictError(
@@ -242,16 +294,109 @@ export class WorkflowsService {
       document: workflowData,
     });
 
-    // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition?.triggers) {
-      for (const trigger of workflowToCreate.definition.triggers) {
-        if (trigger.type === 'scheduled') {
-          await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
-        }
+    await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
+
+    return this.transformStorageDocumentToWorkflowDto(id, workflowData);
+  }
+
+  public async bulkCreateWorkflows(
+    workflows: CreateWorkflowCommand[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{
+    created: WorkflowDetailDto[];
+    failed: Array<{ index: number; error: string }>;
+  }> {
+    if (!this.workflowStorage) {
+      throw new Error('WorkflowsService not initialized');
+    }
+
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const now = new Date();
+
+    const created: WorkflowDetailDto[] = [];
+    const failed: Array<{ index: number; error: string }> = [];
+    const bulkOperations: Array<{
+      index: { _id: string; document: WorkflowProperties };
+    }> = [];
+    const validWorkflows: Array<{
+      idx: number;
+      id: string;
+      workflowData: WorkflowProperties;
+      definition?: WorkflowYaml;
+    }> = [];
+
+    // Phase 1: Validate all workflows and prepare bulk operations
+    for (let i = 0; i < workflows.length; i++) {
+      try {
+        const prepared = this.prepareWorkflowDocument(
+          workflows[i],
+          zodSchema,
+          authenticatedUser,
+          now,
+          spaceId
+        );
+
+        bulkOperations.push({
+          index: { _id: prepared.id, document: prepared.workflowData },
+        });
+        validWorkflows.push({
+          idx: i,
+          id: prepared.id,
+          workflowData: prepared.workflowData,
+          definition: prepared.definition,
+        });
+      } catch (error) {
+        failed.push({
+          index: i,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 
-    return this.transformStorageDocumentToWorkflowDto(id, workflowData);
+    // Phase 2: Bulk index all valid workflows using op_type: create to reject duplicates
+    if (bulkOperations.length > 0) {
+      const bulkResponse = await this.workflowStorage.getClient().bulk({
+        operations: bulkOperations,
+        refresh: true,
+      });
+
+      // Process bulk response
+      bulkResponse.items.forEach((item, itemIndex) => {
+        const operation = item.index;
+        const validWorkflow = validWorkflows[itemIndex];
+
+        if (operation?.error) {
+          failed.push({
+            index: validWorkflow.idx,
+            error:
+              typeof operation.error === 'object' && 'reason' in operation.error
+                ? operation.error.reason ?? JSON.stringify(operation.error)
+                : JSON.stringify(operation.error),
+          });
+        } else {
+          created.push(
+            this.transformStorageDocumentToWorkflowDto(validWorkflow.id, validWorkflow.workflowData)
+          );
+        }
+      });
+    }
+
+    // Phase 3: Schedule triggers for successfully created workflows (in parallel)
+    const workflowsToSchedule = validWorkflows.filter(
+      (vw) =>
+        created.some((w) => w.id === vw.id) &&
+        vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+    );
+
+    await Promise.allSettled(
+      workflowsToSchedule.map((vw) =>
+        this.scheduleWorkflowTriggers(vw.id, vw.definition, spaceId, request)
+      )
+    );
+
+    return { created, failed };
   }
 
   // eslint-disable-next-line complexity
