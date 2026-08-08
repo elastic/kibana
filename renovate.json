@@ -7,7 +7,7 @@
   ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
-  "baseBranches": ["main", "9.4", "9.3", "8.19"],
+  "baseBranches": ["main", "9.5", "9.4", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -148,7 +149,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
+      "matchDepNames": ["simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:nightshift-context-and-research"],
@@ -2394,8 +2395,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "express",
-      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
+      "groupName": "zod-to-json-schema",
+      "matchDepNames": ["zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],
