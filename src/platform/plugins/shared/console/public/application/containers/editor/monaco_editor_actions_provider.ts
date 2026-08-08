@@ -9,12 +9,16 @@
 
 import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider, ParsedRequest } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
-import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/console/utils';
+import {
+  checkForTripleQuotesAndEsqlQuery,
+  findRequestLineNumber,
+  getFallbackRequestStartPosition,
+} from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -187,7 +191,9 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  private async getSelectedParsedRequests(): Promise<AdjustedParsedRequest[]> {
+  private async getSelectedParsedRequests(
+    parsedRequests?: ParsedRequest[]
+  ): Promise<AdjustedParsedRequest[]> {
     const model = this.editor.getModel();
 
     if (!model) {
@@ -199,24 +205,25 @@ export class MonacoEditorActionsProvider {
       return Promise.resolve([]);
     }
     const { startLineNumber, endLineNumber } = selection;
-    return this.getRequestsBetweenLines(model, startLineNumber, endLineNumber);
+    return this.getRequestsBetweenLines(model, startLineNumber, endLineNumber, parsedRequests);
   }
 
   private async getRequestsBetweenLines(
     model: monaco.editor.ITextModel,
     startLineNumber: number,
-    endLineNumber: number
+    endLineNumber: number,
+    parsedRequests?: ParsedRequest[]
   ): Promise<AdjustedParsedRequest[]> {
     if (!model) {
       return [];
     }
-    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const requests = parsedRequests ?? (await this.parsedRequestsProvider.getRequests());
     const selectedRequests: AdjustedParsedRequest[] = [];
-    for (const [index, parsedRequest] of parsedRequests.entries()) {
+    for (const [index, parsedRequest] of requests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
       const requestEndLineNumber = getRequestEndLineNumber({
         parsedRequest,
-        nextRequest: parsedRequests.at(index + 1),
+        nextRequest: requests.at(index + 1),
         model,
         startLineNumber,
       });
@@ -623,6 +630,19 @@ export class MonacoEditorActionsProvider {
     position: monaco.Position,
     context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
+    // A triple-quoted string holds raw content (e.g. a Painless script), so Console has nothing
+    // to suggest inside one. `triggerSuggestions` already suppresses its own auto-trigger there,
+    // but this provider is also invoked directly (manual Ctrl+Space, Monaco trigger characters),
+    // so the same guard must apply here. ES|QL query values are handled by the language provider
+    // before it delegates to this one.
+    const { insideTripleQuotes, insideEsqlQuery } = await this.isPositionInsideTripleQuotesAndQuery(
+      model,
+      position
+    );
+    if (insideTripleQuotes && !insideEsqlQuery) {
+      return { suggestions: [] };
+    }
+
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -875,16 +895,34 @@ export class MonacoEditorActionsProvider {
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
-    const selectedRequests = await this.getSelectedParsedRequests();
+    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const requestsAtPosition = await this.getRequestsBetweenLines(
+      model,
+      position.lineNumber,
+      position.lineNumber,
+      parsedRequests
+    );
+    const fallbackRequestStartPosition = getFallbackRequestStartPosition(
+      parsedRequests,
+      model,
+      position.lineNumber,
+      position.column
+    );
 
-    for (const request of selectedRequests) {
+    for (const request of requestsAtPosition) {
       if (
         request.startLineNumber <= position.lineNumber &&
         request.endLineNumber >= position.lineNumber
       ) {
+        const selectedRequestStartPosition = model.getPositionAt(request.startOffset);
+        const requestStartPosition =
+          fallbackRequestStartPosition !== undefined &&
+          model.getOffsetAt(fallbackRequestStartPosition) < request.startOffset
+            ? fallbackRequestStartPosition
+            : selectedRequestStartPosition;
         const requestContentBefore = model.getValueInRange({
-          startLineNumber: request.startLineNumber,
-          startColumn: 1,
+          startLineNumber: requestStartPosition.lineNumber,
+          startColumn: requestStartPosition.column,
           endLineNumber: position.lineNumber,
           endColumn: position.column,
         });
@@ -902,8 +940,70 @@ export class MonacoEditorActionsProvider {
       }
     }
 
+    const requestContentBefore = this.getRequestContentBeforePosition(
+      model,
+      position,
+      fallbackRequestStartPosition
+    );
+    if (requestContentBefore) {
+      const { insideTripleQuotes, insideEsqlQuery } =
+        checkForTripleQuotesAndEsqlQuery(requestContentBefore);
+      return {
+        insideTripleQuotes,
+        insideEsqlQuery,
+      };
+    }
+
     // Return false if the position is not inside a request
     return { insideTripleQuotes: false, insideEsqlQuery: false };
+  }
+
+  private getRequestContentBeforePosition(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    rangeStartPosition?: monaco.IPosition
+  ): string | undefined {
+    if (rangeStartPosition) {
+      return model.getValueInRange({
+        startLineNumber: rangeStartPosition.lineNumber,
+        startColumn: rangeStartPosition.column,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      });
+    }
+    const requestLineNumber = findRequestLineNumber(
+      (lineNumber) => model.getLineContent(lineNumber),
+      position.lineNumber,
+      { direction: 'document' }
+    );
+    if (requestLineNumber === undefined) {
+      return;
+    }
+
+    return model.getValueInRange({
+      startLineNumber: requestLineNumber,
+      startColumn: 1,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+  }
+
+  /**
+   * True when the editor moved on (model swapped, content edited, or cursor moved) since the
+   * given snapshot was taken, so an async answer computed for it must not be acted upon.
+   */
+  private hasEditorStateChanged(
+    model: monaco.editor.ITextModel,
+    modelVersionId: number,
+    position: monaco.Position
+  ): boolean {
+    const currentPosition = this.editor.getPosition();
+    return (
+      this.editor.getModel() !== model ||
+      model.getVersionId() !== modelVersionId ||
+      !currentPosition ||
+      !monaco.Position.equals(currentPosition, position)
+    );
   }
 
   private triggerSuggestions() {
@@ -912,6 +1012,7 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
+    const modelVersionId = model.getVersionId();
 
     // Don't trigger (and visually open) the suggestions widget inside comments.
     // Even when our completion provider returns 0 results, Monaco can still surface
@@ -922,6 +1023,10 @@ export class MonacoEditorActionsProvider {
 
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideEsqlQuery }) => {
+        if (this.hasEditorStateChanged(model, modelVersionId, position)) {
+          return;
+        }
+
         if (insideTripleQuotes && !insideEsqlQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings
           return;

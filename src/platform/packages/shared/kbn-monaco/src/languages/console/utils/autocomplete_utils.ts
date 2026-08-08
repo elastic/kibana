@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { monaco } from '../../../monaco_imports';
+import type { ParsedRequest } from '../types';
+
 /**
  * This function takes a Console text up to the current position and determines whether
  * the current position is:
@@ -22,6 +25,8 @@ const TRIPLE_QUOTES = '"""';
 const QUERY_KEY = '"query"';
 const ESQL_QUERY_REQUEST_LINE_RE = /^post\s+\/?_query(?:\/async)?(?:\s|\?|$)/i;
 const HTTP_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH'] as const;
+const MAX_REQUEST_LINE_LOOKBACK_LINES = 2000;
+const MAX_REQUEST_LINE_LOOKBACK_CHARS = 100_000;
 
 const ASCII = {
   A_UPPER: 65,
@@ -65,6 +70,14 @@ const isStartOfLine = (text: string, index: number): boolean => {
   }
   const previousChar = text[index - 1];
   return previousChar === '\n';
+};
+
+const isEscaped = (text: string, index: number): boolean => {
+  let precedingBackslashes = 0;
+  for (let previousIndex = index - 1; text[previousIndex] === '\\'; previousIndex--) {
+    precedingBackslashes++;
+  }
+  return precedingBackslashes % 2 === 1;
 };
 
 /**
@@ -164,18 +177,23 @@ const scanRequestLineFrom = (
   return { nextIndex, isEsqlQueryRequest };
 };
 
-export const checkForTripleQuotesAndEsqlQuery = (
-  text: string
+const analyzeTripleQuotesAndEsqlQuery = (
+  text: string,
+  { trackJsonValue = false }: { trackJsonValue?: boolean } = {}
 ): {
   insideTripleQuotes: boolean;
   insideEsqlQuery: boolean;
   esqlQueryIndex: number;
+  insideTripleQuotedJsonValue: boolean;
 } => {
   // Quote tracking for the JSON body:
   // - inDoubleQuoteString: between unescaped `" ... "`
   // - inTripleQuoteString: between `""" ... """` (only toggled when not already in double quotes)
   let inDoubleQuoteString = false;
   let inTripleQuoteString = false;
+  let tripleQuoteIsJsonValue = false;
+  const jsonContainers: Array<'object' | 'array'> | undefined = trackJsonValue ? [] : undefined;
+  let lastSignificantJsonChar: string | undefined;
 
   // Tracks whether the *current* string (double or triple) is the value for `"query"`.
   let inQueryValueString = false;
@@ -192,8 +210,34 @@ export const checkForTripleQuotesAndEsqlQuery = (
       const requestLineScan = scanRequestLineFrom(text, index);
       if (requestLineScan) {
         inEsqlQueryRequest = requestLineScan.isEsqlQueryRequest;
+        if (jsonContainers) {
+          jsonContainers.length = 0;
+          lastSignificantJsonChar = undefined;
+        }
         index = requestLineScan.nextIndex;
         continue;
+      }
+    }
+
+    // Console comments can contain quote-like text that must not affect string state.
+    if (!inDoubleQuoteString && !inTripleQuoteString) {
+      const currentChar = text[index];
+      if (currentChar === '#') {
+        const newlineIndex = text.indexOf('\n', index);
+        index = newlineIndex === -1 ? text.length : newlineIndex + 1;
+        continue;
+      }
+      if (currentChar === '/') {
+        if (text[index + 1] === '/') {
+          const newlineIndex = text.indexOf('\n', index);
+          index = newlineIndex === -1 ? text.length : newlineIndex + 1;
+          continue;
+        }
+        if (text[index + 1] === '*') {
+          const commentEndIndex = text.indexOf('*/', index + 2);
+          index = commentEndIndex === -1 ? text.length : commentEndIndex + 2;
+          continue;
+        }
       }
     }
 
@@ -201,9 +245,18 @@ export const checkForTripleQuotesAndEsqlQuery = (
     if (!inDoubleQuoteString && text.startsWith(TRIPLE_QUOTES, index)) {
       inTripleQuoteString = !inTripleQuoteString;
       if (inTripleQuoteString) {
+        if (jsonContainers) {
+          tripleQuoteIsJsonValue =
+            (jsonContainers.at(-1) === 'object' && lastSignificantJsonChar === ':') ||
+            (jsonContainers.at(-1) === 'array' &&
+              (lastSignificantJsonChar === '[' || lastSignificantJsonChar === ','));
+        }
         esqlQueryStartIndex = getQueryValueStartIndex(text, index, 3);
         inQueryValueString = esqlQueryStartIndex !== -1;
       } else {
+        if (jsonContainers) {
+          lastSignificantJsonChar = '"';
+        }
         inQueryValueString = false;
         esqlQueryStartIndex = -1;
       }
@@ -212,17 +265,33 @@ export const checkForTripleQuotesAndEsqlQuery = (
     }
 
     // Standard JSON string quotes (unescaped only, and only when not in triple quotes).
-    if (!inTripleQuoteString && text[index] === '"' && text[index - 1] !== '\\') {
+    if (!inTripleQuoteString && text[index] === '"' && !isEscaped(text, index)) {
       inDoubleQuoteString = !inDoubleQuoteString;
       if (inDoubleQuoteString) {
         esqlQueryStartIndex = getQueryValueStartIndex(text, index, 1);
         inQueryValueString = esqlQueryStartIndex !== -1;
       } else {
+        if (jsonContainers) {
+          lastSignificantJsonChar = '"';
+        }
         inQueryValueString = false;
         esqlQueryStartIndex = -1;
       }
       index++;
       continue;
+    }
+
+    if (jsonContainers && !inDoubleQuoteString && !inTripleQuoteString) {
+      if (text[index] === '{') {
+        jsonContainers.push('object');
+      } else if (text[index] === '[') {
+        jsonContainers.push('array');
+      } else if (text[index] === '}' || text[index] === ']') {
+        jsonContainers.pop();
+      }
+      if (!isWhitespace(text[index])) {
+        lastSignificantJsonChar = text[index];
+      }
     }
 
     index++;
@@ -232,7 +301,88 @@ export const checkForTripleQuotesAndEsqlQuery = (
     insideTripleQuotes: inTripleQuoteString,
     insideEsqlQuery: inEsqlQueryRequest && inQueryValueString,
     esqlQueryIndex: inEsqlQueryRequest ? esqlQueryStartIndex : -1,
+    insideTripleQuotedJsonValue:
+      jsonContainers !== undefined && inTripleQuoteString && tripleQuoteIsJsonValue,
   };
+};
+
+export const checkForTripleQuotesAndEsqlQuery = (
+  text: string
+): {
+  insideTripleQuotes: boolean;
+  insideEsqlQuery: boolean;
+  esqlQueryIndex: number;
+} => {
+  const { insideTripleQuotedJsonValue, ...result } = analyzeTripleQuotesAndEsqlQuery(text);
+  return result;
+};
+
+export const isInsideTripleQuotedJsonValue = (text: string): boolean =>
+  text.length <= MAX_REQUEST_LINE_LOOKBACK_CHARS &&
+  analyzeTripleQuotesAndEsqlQuery(text, { trackJsonValue: true }).insideTripleQuotedJsonValue;
+
+/**
+ * Safeguards for request-line lookup. We scan backwards from the cursor until we find the nearest
+ * request method line (GET/POST/...), but we cap the amount of work to avoid a potentially large
+ * number of `getLineContent()` calls on very long documents.
+ *
+ * The character cap is not redundant with the line cap: pasted JSON with huge string fields can
+ * hold millions of characters in only a handful of lines, and callers scan the text we return
+ * character by character (see https://github.com/elastic/kibana/pull/251173).
+ */
+const REQUEST_METHOD_LINE_RE = /^\s*(GET|POST|PUT|DELETE|HEAD|PATCH)\b/i;
+const REQUEST_LINE_WITH_URL_RE = /^[ \t]*(GET|POST|PUT|DELETE|HEAD|PATCH)[ \t]+\S/i;
+
+const isRequestMethodLine = (line: string): boolean => REQUEST_METHOD_LINE_RE.test(line);
+export const isRequestLineWithUrl = (line: string): boolean => REQUEST_LINE_WITH_URL_RE.test(line);
+
+/**
+ * Scans backwards from `positionLineNumber` for a request method line
+ * (`GET`/`POST`/...), returning its line number. The default returns the nearest match.
+ * The `document` direction returns the range start only after the whole requested range is scanned
+ * and a request line is found, so classifiers receive context around untrusted request-like text.
+ *
+ * Returns `undefined` when no request line is found within the lookback safeguards, so callers
+ * can fall back instead of acting on a partially scanned buffer.
+ */
+export const findRequestLineNumber = (
+  getLineContent: (lineNumber: number) => string,
+  positionLineNumber: number,
+  {
+    direction = 'nearest',
+    rangeStartLineNumber = 1,
+  }: {
+    direction?: 'nearest' | 'document';
+    rangeStartLineNumber?: number;
+  } = {}
+): number | undefined => {
+  let foundRequestLine = false;
+  let lineNumber = positionLineNumber;
+  let scannedLines = 0;
+  let scannedChars = 0;
+  for (
+    ;
+    lineNumber >= rangeStartLineNumber &&
+    scannedLines < MAX_REQUEST_LINE_LOOKBACK_LINES &&
+    scannedChars < MAX_REQUEST_LINE_LOOKBACK_CHARS;
+    lineNumber--, scannedLines++
+  ) {
+    const line = getLineContent(lineNumber);
+    scannedChars += line.length + 1;
+    if (scannedChars > MAX_REQUEST_LINE_LOOKBACK_CHARS) {
+      return undefined;
+    }
+    if (isRequestMethodLine(line)) {
+      if (direction === 'nearest') {
+        return lineNumber;
+      }
+      foundRequestLine = true;
+    }
+  }
+
+  return direction === 'document' && lineNumber < rangeStartLineNumber && foundRequestLine
+    ? rangeStartLineNumber
+    : undefined;
 };
 
 /**
@@ -240,4 +390,119 @@ export const checkForTripleQuotesAndEsqlQuery = (
  */
 export const unescapeInvalidChars = (str: string): string => {
   return str.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+};
+
+const getRangeText = (
+  model: monaco.editor.ITextModel,
+  start: monaco.IPosition,
+  end: monaco.IPosition
+): string =>
+  model.getValueInRange({
+    startLineNumber: start.lineNumber,
+    startColumn: start.column,
+    endLineNumber: end.lineNumber,
+    endColumn: end.column,
+  });
+
+/** Index of the last request whose `startOffset` is at or before `offset` (requests are sorted). */
+const findLastRequestIndexAtOrBefore = (
+  requests: ParsedRequest[],
+  offset: number,
+  lowerIndex = 0,
+  upperIndex = requests.length - 1,
+  bestIndex = -1
+): number => {
+  if (lowerIndex > upperIndex) {
+    return bestIndex;
+  }
+  const middleIndex = Math.floor((lowerIndex + upperIndex) / 2);
+  return requests[middleIndex].startOffset <= offset
+    ? findLastRequestIndexAtOrBefore(requests, offset, middleIndex + 1, upperIndex, middleIndex)
+    : findLastRequestIndexAtOrBefore(requests, offset, lowerIndex, middleIndex - 1, bestIndex);
+};
+
+/**
+ * A request that begins mid-line right where the previous request ends is a parser recovery
+ * artifact of malformed input (e.g. `{"x"} POST _query`), not a real anchor.
+ */
+const isSameLineRecoveryArtifact = (
+  model: monaco.editor.ITextModel,
+  startPosition: monaco.IPosition,
+  previousRequest: ParsedRequest | undefined
+): boolean =>
+  startPosition.column > 1 &&
+  previousRequest !== undefined &&
+  model.getPositionAt(previousRequest.endOffset ?? previousRequest.startOffset).lineNumber ===
+    startPosition.lineNumber;
+
+/** Indexes from `fromIndex` down towards 0, at most `limit` of them. */
+const backwardIndexesFrom = (fromIndex: number, limit: number): number[] =>
+  Array.from(
+    { length: Math.max(0, Math.min(fromIndex + 1, limit)) },
+    (_, step) => fromIndex - step
+  );
+
+/**
+ * Walks the parsed requests backwards from the cursor and returns the start position of the
+ * request the cursor most plausibly belongs to. When an earlier request's content shows that a
+ * later "request" is really text inside its triple-quoted JSON value, that earlier request wins,
+ * so parser recovery artifacts inside strings never become anchors. All model reads are capped.
+ */
+export const getFallbackRequestStartPosition = (
+  parsedRequests: ParsedRequest[],
+  model: monaco.editor.ITextModel,
+  positionLineNumber: number,
+  positionColumn = model.getLineContent(positionLineNumber).length + 1
+): monaco.IPosition | undefined => {
+  const positionOffset = model.getOffsetAt({
+    lineNumber: positionLineNumber,
+    column: positionColumn,
+  });
+  const lastRequestIndex = findLastRequestIndexAtOrBefore(parsedRequests, positionOffset);
+
+  let remainingChars = MAX_REQUEST_LINE_LOOKBACK_CHARS;
+  let fallback: monaco.IPosition | undefined;
+
+  for (const index of backwardIndexesFrom(lastRequestIndex, MAX_REQUEST_LINE_LOOKBACK_LINES)) {
+    const request = parsedRequests[index];
+    const startPosition = model.getPositionAt(request.startOffset);
+    if (startPosition.lineNumber > positionLineNumber) {
+      continue;
+    }
+    if (isSameLineRecoveryArtifact(model, startPosition, parsedRequests[index - 1])) {
+      continue;
+    }
+
+    const line = model.getLineContent(startPosition.lineNumber).slice(startPosition.column - 1);
+    remainingChars -= line.length + 1;
+    if (remainingChars < 0) {
+      break;
+    }
+    if (!isRequestLineWithUrl(line)) {
+      continue;
+    }
+    if (positionOffset - request.startOffset > MAX_REQUEST_LINE_LOOKBACK_CHARS) {
+      break;
+    }
+    if (request.endOffset === undefined) {
+      fallback ??= startPosition;
+      continue;
+    }
+
+    const requestEndOffset = Math.min(request.endOffset + 1, positionOffset);
+    remainingChars -= requestEndOffset - request.startOffset;
+    if (remainingChars < 0) {
+      break;
+    }
+    fallback ??= startPosition;
+    const requestContent = getRangeText(
+      model,
+      startPosition,
+      model.getPositionAt(requestEndOffset)
+    );
+    if (isInsideTripleQuotedJsonValue(requestContent)) {
+      return startPosition;
+    }
+  }
+  return fallback;
 };
