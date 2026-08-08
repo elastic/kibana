@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useBreadcrumbs, useLink } from '../../../../hooks';
+import { useBreadcrumbs, useLink, useAuthz, useGetSettingsQuery } from '../../../../hooks';
 import { WithoutHeaderLayout } from '../../../../layouts';
 import { PackageCard } from '../../components/package_card';
 import { INTEGRATION_GROUPS } from '../home/integration_groups';
@@ -32,8 +32,18 @@ export const CollectionDetailPage: React.FC = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const groupConfig = INTEGRATION_GROUPS[groupId];
 
-  // Re-uses the same React Query cache as the browse page — no extra network request.
-  const { allCards, isLoading } = useAvailablePackages({ prereleaseIntegrationsEnabled: false });
+  const authz = useAuthz();
+  const { search } = useLocation();
+  const prereleaseQueryParam = useMemo(
+    () => new URLSearchParams(search).get('prerelease') === 'true',
+    [search]
+  );
+  const { data: settings } = useGetSettingsQuery({ enabled: authz.fleet.readSettings });
+  const prereleaseIntegrationsEnabled =
+    prereleaseQueryParam || (settings?.item.prerelease_integrations_enabled ?? false);
+
+  // Shares the same React Query cache as the browse page when prereleaseIntegrationsEnabled matches.
+  const { allCards, isLoading } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const memberCards = useMemo(() => {
     const collectionCard = allCards.find((c) => c.isCollectionCard && c.name === groupId);
