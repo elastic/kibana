@@ -386,7 +386,7 @@ export const buildColumnSuggestions = (
     const suggestion: ISuggestionItem = {
       label: column.name,
       text:
-        getSafeInsertText(column.name) +
+        getSafeInsertText(column.name, { asExpression: column.userDefined }) +
         (options?.addComma ? ',' : '') +
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',

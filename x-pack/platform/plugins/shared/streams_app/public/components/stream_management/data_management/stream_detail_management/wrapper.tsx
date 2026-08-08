@@ -353,7 +353,6 @@ export function Wrapper({
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        padding="m"
       />
       {Object.keys(tabs).map((tabName) => {
         const tourStepId = TAB_TO_TOUR_STEP_ID[tabName];
@@ -382,7 +381,7 @@ export function Wrapper({
         );
       })}
       <StreamsAppPageTemplate.Body
-        noPadding={tab === 'partitioning' || tab === 'processing' || tab === 'canvas'}
+        noPadding={tab === 'partitioning' || tab === 'processing'}
         paddingSize="m"
       >
         {topContent}

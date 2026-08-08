@@ -47,14 +47,14 @@ export class OrphanSummaryCleanupTask {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
           };
         },
@@ -102,11 +102,7 @@ export class OrphanSummaryCleanupTask {
     }
   }
 
-  public async runTask(
-    taskInstance: ConcreteTaskInstance,
-    core: CoreSetup,
-    abortController: AbortController
-  ) {
+  public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup, signal: AbortSignal) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -135,7 +131,7 @@ export class OrphanSummaryCleanupTask {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
-        abortController,
+        signal,
       });
 
       if (summaryResult.aborted) {
@@ -155,7 +151,7 @@ export class OrphanSummaryCleanupTask {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
-        abortController,
+        signal,
       });
 
       if (transformResult.aborted) {
@@ -174,7 +170,7 @@ export class OrphanSummaryCleanupTask {
         esClient,
         soClient: internalSoClient,
         logger: this.logger,
-        abortController,
+        signal,
       });
 
       if (pipelineResult.aborted) {

@@ -22,28 +22,28 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(printed).toContain('group_hash IN ("hash-a", "hash-b")');
     expect(printed).toContain('STATS');
 
-    const alertScope = 'WHERE\\s+type == "alert" AND episode\\.status IS NOT NULL';
-    expect(printed).toMatch(new RegExp(`last_status = LAST\\(status, @timestamp\\) ${alertScope}`));
+    const alertScope = '\\s+WHERE\\s+type == "alert" AND episode\\.status IS NOT NULL';
+    expect(printed).toMatch(new RegExp(`last_status = LAST\\(status, @timestamp\\)${alertScope}`));
     expect(printed).toMatch(
-      new RegExp(`last_episode_id = LAST\\(episode\\.id, @timestamp\\) ${alertScope}`)
+      new RegExp(`last_episode_id = LAST\\(episode\\.id, @timestamp\\)${alertScope}`)
     );
     expect(printed).toMatch(
-      new RegExp(`last_episode_status = LAST\\(episode\\.status, @timestamp\\) ${alertScope}`)
+      new RegExp(`last_episode_status = LAST\\(episode\\.status, @timestamp\\)${alertScope}`)
     );
     expect(printed).toMatch(
       new RegExp(
-        `last_episode_status_count = LAST\\(episode\\.status_count, @timestamp\\) ${alertScope}`
+        `last_episode_status_count = LAST\\(episode\\.status_count, @timestamp\\)${alertScope}`
       )
     );
     expect(printed).toMatch(
-      new RegExp(`last_episode_timestamp = MAX\\(@timestamp\\) ${alertScope}`)
+      new RegExp(`last_episode_timestamp = MAX\\(@timestamp\\)${alertScope}`)
     );
 
     expect(printed).toMatch(
-      /last_action_episode_id = LAST\(episode_id, @timestamp\) WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
+      /last_action_episode_id = LAST\(episode_id, @timestamp\)\s+WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
     );
     expect(printed).toMatch(
-      /last_action_type = LAST\(action_type, @timestamp\) WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
+      /last_action_type = LAST\(action_type, @timestamp\)\s+WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
     );
     expect(printed).toContain('BY group_hash');
     expect(printed).toContain('KEEP');

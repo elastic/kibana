@@ -15,6 +15,8 @@ import {
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
   DURATION,
+  GEN_AI_USAGE_INPUT_TOKENS,
+  GEN_AI_USAGE_OUTPUT_TOKENS,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
   KIND,
@@ -194,6 +196,8 @@ export async function getUnifiedTraceItems({
         event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
       ),
       docType: event[PROCESSOR_EVENT] === ProcessorEvent.transaction ? 'transaction' : 'span',
+      inputTokens: event[GEN_AI_USAGE_INPUT_TOKENS],
+      outputTokens: event[GEN_AI_USAGE_OUTPUT_TOKENS],
     } satisfies TraceItem;
     if (!event[SPAN_DESTINATION_SERVICE_RESOURCE]) {
       noDestinationTraceItems.add(item);

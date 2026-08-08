@@ -14,6 +14,7 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
@@ -31,6 +32,8 @@ export interface RulesListTableContainerProps {
   sortField?: RulesListTableSortField;
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
+  /** When false, write affordances (create/edit/clone/delete/enable/bulk) are hidden. */
+  canWrite: boolean;
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
   onEditInFlyout: (rule: RuleApiResponse) => void;
   onCloneInFlyout: (rule: RuleApiResponse) => void;
@@ -47,6 +50,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   sortField,
   sortDirection,
   isLoading,
+  canWrite,
   onTableChange,
   onEditInFlyout,
   onCloneInFlyout,
@@ -65,6 +69,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const bulkEnableMutation = useBulkEnableRules();
   const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
+  const runRuleMutation = useRunRule();
 
   const {
     isAllSelected,
@@ -111,9 +116,22 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     if (!ruleToDelete) {
       return;
     }
+    const deletedId = ruleToDelete.id;
     deleteRuleMutation.mutate(
-      { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+      { id: deletedId, name: ruleToDelete.metadata.name },
       {
+        /*
+         * Drop the deleted row from whichever set holds it: unselect it in
+         * inclusion mode, or clear its exclusion in select-all mode, so a
+         * stale ID cannot leak into a later bulk action or skew the count.
+         * A row that is merely *selected* in select-all mode (i.e. absent
+         * from the exclusion set) is left alone to avoid double-counting.
+         */
+        onSuccess: () => {
+          if (isAllSelected ? !isRowSelected(deletedId) : isRowSelected(deletedId)) {
+            onSelectRow(deletedId);
+          }
+        },
         onSettled: () => {
           setRuleToDelete(null);
           setExpandedRuleId(null);
@@ -134,6 +152,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         sortField={sortField}
         sortDirection={sortDirection}
         isLoading={isLoading}
+        canWrite={canWrite}
         selectedCount={selectedCount}
         isAllSelected={isAllSelected}
         isPageSelected={isPageSelected}
@@ -152,6 +171,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        onRun={(r) => runRuleMutation.mutate({ id: r.id })}
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -161,6 +181,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
       {expandedRule ? (
         <RuleSummaryFlyout
           rule={expandedRule}
+          canWrite={canWrite}
           onClose={() => setExpandedRuleId(null)}
           onQuickEdit={(r) => {
             setExpandedRuleId(null);
@@ -176,6 +197,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           }}
           onDelete={(r) => setRuleToDelete(r)}
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+          onRun={(r) => runRuleMutation.mutate({ id: r.id })}
         />
       ) : null}
       {ruleToDelete ? (

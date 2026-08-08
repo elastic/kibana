@@ -9,21 +9,14 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { HostPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { Host } from '../../../../../flyout_v2/entity/host/main';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
   contextId: string;
@@ -45,16 +38,10 @@ const HostNameComponent: React.FC<Props> = ({
   entityId,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { openHostFlyout } = useFlyoutApi();
   const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const isInSecurityApp = useIsInSecurityApp();
-
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
@@ -73,19 +60,7 @@ const HostNameComponent: React.FC<Props> = ({
       }
 
       if (newFlyoutSystemEnabled) {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Host hostName={hostName} entityId={entityId} />,
-          }),
-          {
-            ...defaultDocumentFlyoutProperties,
-            historyKey,
-            session: 'start',
-          }
-        );
+        openHostFlyout({ hostName, entityId });
       } else {
         const { timelineID } = eventContext;
         openFlyout({
@@ -110,12 +85,7 @@ const HostNameComponent: React.FC<Props> = ({
       openFlyout,
       contextId,
       newFlyoutSystemEnabled,
-      overlays,
-      services,
-      store,
-      history,
-      historyKey,
-      defaultDocumentFlyoutProperties,
+      openHostFlyout,
     ]
   );
 

@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('adding a filter that excludes all data', () => {
-      before(async () => {
+      before(async function () {
         await populateDashboard();
         await addFilterAndRefresh();
       });
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('using a pinned filter that excludes all data', () => {
-      before(async () => {
+      before(async function () {
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
         await addFilterAndRefresh();
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
       });
 
-      after(async () => {
+      after(async function () {
         await filterBar.toggleFilterPinned('bytes');
         await dashboard.gotoDashboardLandingPage();
       });
@@ -159,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('disabling a filter unfilters the data on', function () {
-      before(async () => {
+      before(async function () {
         // Functional tests clear session storage after each suite, so it is important to repopulate unsaved panels
         await populateDashboard();
         await addFilterAndRefresh();

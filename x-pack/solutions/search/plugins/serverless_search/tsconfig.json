@@ -60,6 +60,7 @@
     "@kbn/management-settings-ids",
     "@kbn/alerting-v2-utils",
     "@kbn/deeplinks-workflows",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/navigation-plugin"
   ]
 }

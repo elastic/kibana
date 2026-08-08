@@ -23,6 +23,7 @@
       "cloud"
     ],
     "requiredBundles": [
+      "kibanaReact"
     ]
   }
 }

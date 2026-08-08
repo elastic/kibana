@@ -323,4 +323,9 @@ export const getConnectorSpecResponseBodySchema = schema.object({
         'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
     },
   }),
+  is_testable: schema.boolean({
+    meta: {
+      description: 'When true, this connector type supports the reserved test sub-action.',
+    },
+  }),
 });

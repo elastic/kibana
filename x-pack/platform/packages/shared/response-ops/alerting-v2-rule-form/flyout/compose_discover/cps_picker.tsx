@@ -95,7 +95,7 @@ export const CpsPicker = () => {
           projectRouting={cpsDefaultRouting}
           onProjectRoutingChange={() => {}}
           projects={cpsProjects}
-          isReadonly
+          controlsState="disabled"
         />
       </EuiPopover>
     </EuiFlexItem>

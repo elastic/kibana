@@ -17,10 +17,36 @@ import type { ConfigurationPersistedAttributes } from '../../common/types/config
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { toFieldNames, trimFieldDefaults } from '../../services/templates/utils';
-import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
+import { toFieldDefinitions, trimFieldDefaults } from '../../services/templates/utils';
+import {
+  buildFieldDefinitionYaml,
+  buildFieldDefinitionNameIndex,
+  normalizeFieldDefinitionName,
+} from '../../common/utils/field_definitions';
 import { buildTemplateYaml } from './build_template_yaml';
 import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types';
+
+/**
+ * Fetches every `cases-field-definition` SO for the given owner/namespace.
+ * perPage: 10000 is intentionally unbounded for this one-shot scan — field-definitions per
+ * owner are expected to be O(10s).
+ */
+const findFieldDefinitionsForOwner = async (
+  repo: ISavedObjectsRepository,
+  owner: string,
+  nsOption: string | undefined
+): Promise<Array<SavedObject<FieldDefinition>>> => {
+  const result = await repo.find<FieldDefinition>({
+    type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+    namespaces: nsOption ? [nsOption] : ['default'],
+    perPage: 10000,
+    page: 1,
+    // owner is one of cases/securitySolution/observability — a controlled enum, not user input
+    filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${owner}"`,
+  });
+
+  return result.saved_objects;
+};
 
 /** Fetches every `cases-configure` SO across all spaces (there are only O(spaces) of them). */
 export const findAllConfigurations = async (
@@ -70,27 +96,27 @@ const migrateFieldDefinitions = async (
   legacyCustomFields: LegacyCustomField[],
   executionId: string,
   log: Logger
-): Promise<{ refNamesByKey: Map<string, string>; created: number; reused: number }> => {
+): Promise<{
+  refNamesByKey: Map<string, string>;
+  created: number;
+  reused: number;
+  libraryDefs: FieldDefinition[];
+}> => {
   const refNamesByKey = new Map<string, string>();
+  const libraryDefs: FieldDefinition[] = [];
   let created = 0;
   let reused = 0;
 
-  // perPage: 10000 is intentionally unbounded for this one-shot scan — field-definitions per owner
-  // are expected to be O(10s).
-  const existingFieldDefs = await repo.find<FieldDefinition>({
-    type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
-    namespaces: nsOption ? [nsOption] : ['default'],
-    perPage: 10000,
-    page: 1,
-    // owner is one of cases/securitySolution/observability — a controlled enum, not user input
-    filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${owner}"`,
-  });
-  const existingByName = new Map(
-    existingFieldDefs.saved_objects.map((fd) => [fd.attributes.name, fd])
+  const existingFieldDefs = await findFieldDefinitionsForOwner(repo, owner, nsOption);
+  // Case-insensitive index (first-wins on pre-existing duplicates), matching the
+  // uniqueness semantics enforced by the field-definitions sub-client at the API layer.
+  const existingByName = buildFieldDefinitionNameIndex(
+    existingFieldDefs,
+    (so) => so.attributes.name
   );
 
   for (const cf of legacyCustomFields) {
-    const existingDef = existingByName.get(cf.key);
+    const existingDef = existingByName.get(normalizeFieldDefinitionName(cf.key));
     if (existingDef) {
       const existingParsed = parseYaml(existingDef.attributes.definition ?? '') as Record<
         string,
@@ -114,24 +140,37 @@ const migrateFieldDefinitions = async (
         );
       }
       refNamesByKey.set(cf.key, cf.key);
+      libraryDefs.push(existingDef.attributes);
       reused++;
     } else {
       try {
         const { yaml } = buildFieldDefinitionYaml(cf);
         const fdId = uuidv4();
-        await repo.create<FieldDefinition>(
+        const attributes: FieldDefinition = {
+          fieldDefinitionId: fdId,
+          name: cf.key,
+          owner,
+          definition: yaml,
+          description: cf.label,
+          isGlobal: true,
+        };
+        const createdSo = await repo.create<FieldDefinition>(
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          attributes,
           {
-            fieldDefinitionId: fdId,
-            name: cf.key,
-            owner,
-            definition: yaml,
-            description: cf.label,
-            isGlobal: true,
-          },
-          { id: fdId, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
+            id: fdId,
+            ...(nsOption ? { namespace: nsOption } : {}),
+            // Use 'wait_for' so a concurrent configure PATCH's find sees this definition
+            // and avoids creating a duplicate. Field definitions per owner are O(10s) so
+            // the per-document refresh cost is negligible for this one-shot task.
+            refresh: 'wait_for',
+          }
         );
+        // Insert into the index so intra-request duplicate custom-field keys (which the
+        // API blocks but imported/legacy SOs may contain) only produce one SO.
+        existingByName.set(normalizeFieldDefinitionName(cf.key), createdSo);
         refNamesByKey.set(cf.key, cf.key);
+        libraryDefs.push(attributes);
         created++;
       } catch (err) {
         log.error(
@@ -143,7 +182,12 @@ const migrateFieldDefinitions = async (
     }
   }
 
-  return { refNamesByKey, created, reused };
+  return {
+    refNamesByKey,
+    created,
+    reused,
+    libraryDefs,
+  };
 };
 
 /**
@@ -158,6 +202,7 @@ const migrateTemplates = async (
   nsOption: string | undefined,
   legacyTemplates: LegacyTemplate[],
   refNamesByKey: Map<string, string>,
+  libraryDefs: readonly FieldDefinition[],
   executionId: string,
   log: Logger
 ): Promise<{ created: number; reused: number }> => {
@@ -223,8 +268,11 @@ const migrateTemplates = async (
             tags: legacyTemplate.tags,
             author: 'system',
             fieldCount: parsedDefinition.fields.length,
-            fieldNames: toFieldNames(parsedDefinition.fields),
+            fieldDefinitions: toFieldDefinitions(parsedDefinition.fields, libraryDefs),
             isEnabled: true,
+            // Preserve the v1 identity so a rule storing this legacy key resolves back to exactly
+            // this migrated template, even when another v1 template shared the same name.
+            legacyKey: legacyTemplate.key,
           } as Template,
           { id, ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
         );
@@ -272,6 +320,7 @@ export const migrateOneConfigure = async (
   let fieldDefsCreated = 0;
   let fieldDefsReused = 0;
   let refNamesByKey = new Map<string, string>();
+  let libraryDefs: FieldDefinition[] = [];
 
   if (!attributes.legacyCustomFieldsMigrated && legacyCustomFields.length > 0) {
     const result = await migrateFieldDefinitions(
@@ -286,10 +335,16 @@ export const migrateOneConfigure = async (
     refNamesByKey = result.refNamesByKey;
     fieldDefsCreated = result.created;
     fieldDefsReused = result.reused;
+    libraryDefs = result.libraryDefs;
   } else {
     // Already migrated or no custom fields — build the ref map from legacy keys for the template phase.
     for (const cf of legacyCustomFields) {
       refNamesByKey.set(cf.key, cf.key);
+    }
+    if (legacyTemplates.length > 0 && legacyCustomFields.length > 0) {
+      // Templates still need the library defs to populate fieldDefinitions for `$ref` fields.
+      const existingFieldDefs = await findFieldDefinitionsForOwner(repo, owner, nsOption);
+      libraryDefs = existingFieldDefs.map((fd) => fd.attributes);
     }
   }
 
@@ -305,6 +360,7 @@ export const migrateOneConfigure = async (
       nsOption,
       legacyTemplates,
       refNamesByKey,
+      libraryDefs,
       executionId,
       log
     );

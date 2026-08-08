@@ -1,0 +1,8 @@
+java.lang.RuntimeException: Chained exception
+	at co.elastic.otel.android.integration.Crasher.deepCrash(Crasher.kt:31)
+	at co.elastic.otel.android.integration.Crasher.crash(Crasher.kt:24)
+	at android.os.Handler.handleCallback(Handler.java:789)
+Caused by: java.lang.IllegalArgumentException: Root cause
+	at co.elastic.otel.android.integration.Crasher.rootCause(Crasher.kt:36)
+	at co.elastic.otel.android.integration.Crasher.deepCrash(Crasher.kt:29)
+	... 2 more

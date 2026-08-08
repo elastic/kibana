@@ -19,3 +19,14 @@ export const PROJECT_ROUTING = {
 } as const;
 
 export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
+
+/**
+ * Returns `true` when the provided value represents a non-default project
+ * routing expression (i.e. anything other than `_alias:*` or undefined).
+ *
+ * An explicitly stored `_alias:*` is treated as "default" because it is
+ * functionally equivalent to having no NPRE configured — the server already
+ * coalesces a missing NPRE to `_alias:*` when returning a space.
+ */
+export const isCustomProjectRouting = (value: string | undefined): boolean =>
+  value !== undefined && value !== PROJECT_ROUTING.ALL;

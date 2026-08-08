@@ -23,8 +23,13 @@ import React, { memo } from 'react';
  * making the bypass lane appear continuous regardless of the rendered height.
  */
 function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
-  const { targetPosition = Position.Top, sourcePosition = Position.Bottom } = props;
+  const { targetPosition = Position.Top, sourcePosition = Position.Bottom, data } = props;
   const { euiTheme } = useEuiTheme();
+
+  // When this empty branch is the one that executed, tint the bridge line with
+  // the same `success` token as traversed edges so the lane reads as one
+  // continuous green path.
+  const traversed = (data as { traversed?: boolean } | undefined)?.traversed ?? false;
 
   return (
     <>
@@ -38,7 +43,7 @@ function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
           height: 12,
           width: 1,
           transform: 'translateX(-50%)',
-          background: euiTheme.colors.borderBasePlain,
+          background: traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain,
           pointerEvents: 'none',
         }}
       />

@@ -151,7 +151,7 @@ describe('TemplatesMigrationTaskManager', () => {
     const taskDef = call[0][CASES_TEMPLATES_MIGRATION_TASK_TYPE];
     const runner = taskDef.createTaskRunner({
       taskInstance: { state: state ?? {} },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     } as unknown as RunContext);
     return runner.run();
   };
@@ -160,7 +160,9 @@ describe('TemplatesMigrationTaskManager', () => {
     const call = taskManagerSetupMock.registerTaskDefinitions.mock.calls[0];
     const taskDefs = call[0];
     const taskDef = taskDefs[CASES_TEMPLATES_MIGRATION_TASK_TYPE];
-    return taskDef.createTaskRunner({} as unknown as RunContext);
+    return taskDef.createTaskRunner({
+      signal: new AbortController().signal,
+    } as unknown as RunContext);
   };
 
   const buildAndSchedule = async (
@@ -278,6 +280,13 @@ describe('TemplatesMigrationTaskManager', () => {
         name: 'My Template',
         owner: 'cases',
         isLatest: true,
+        fieldDefinitions: [
+          expect.objectContaining({
+            name: 'cf_text',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+          }),
+        ],
       });
 
       // The field/template phase writes those two flags together...
@@ -331,8 +340,8 @@ describe('TemplatesMigrationTaskManager', () => {
 
       expect(textDef.metadata?.default).toBe('hello');
       expect(numDef.metadata?.default).toBe(42);
-      expect(toggleDef.control).toBe('RADIO_GROUP');
-      expect(toggleDef.metadata?.default).toBe('true');
+      expect(toggleDef.control).toBe('TOGGLE');
+      expect(toggleDef.metadata?.default).toBe(true);
     });
 
     it('preserves template metadata while keeping case defaults as top-level definition keys', async () => {
@@ -394,7 +403,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
     it('migrates a legacy template with a Jira connector into a valid, connector-preserving definition', async () => {
       // Regression guard for the desk-test finding "migration is not picking up connector fields
-      // → preview error". Exercise the full task path and assert the persisted definition (a) is
+      // ? preview error". Exercise the full task path and assert the persisted definition (a) is
       // valid per ParsedTemplateDefinitionSchema (so the template is created, not skipped) and
       // (b) preserves the Jira connector's fields, dropping only the resolved `name`.
       const configSO = buildConfigureSO({
@@ -442,7 +451,7 @@ describe('TemplatesMigrationTaskManager', () => {
       }
     });
 
-    it('fully migrates a fleshed-out v1 template: identity → attributes; connector (all sub-fields), settings & case defaults → definition', async () => {
+    it('fully migrates a fleshed-out v1 template: identity ? attributes; connector (all sub-fields), settings & case defaults ? definition', async () => {
       // The core GA guarantee: a complete legacy template — template identity (name/description/tags),
       // every case default, a fully-populated Jira connector (all sub-fields incl. the free-form
       // otherFields), and both settings — migrates COMPLETELY and losslessly to v2.
@@ -608,7 +617,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
     it('logs a warning when a reused field definition has a mismatched control type', async () => {
       const configSO = buildConfigureSO({
-        customFields: [buildLegacyCustomField('cf_text')], // TEXT → expects INPUT_TEXT
+        customFields: [buildLegacyCustomField('cf_text')], // TEXT ? expects INPUT_TEXT
       });
 
       const existingFieldDef = {
@@ -641,9 +650,68 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
+    it('reuses an existing field definition when only casing differs (case-insensitive dedup)', async () => {
+      const configSO = buildConfigureSO({
+        // Legacy key is all-lowercase
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [],
+      });
+
+      const existingFieldDef = {
+        id: 'existing-fd',
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          // Stored with uppercase first letter
+          name: 'CF_Text',
+          owner: 'cases',
+          definition: 'name: CF_Text\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          fieldDefinitionId: 'x',
+          isGlobal: true,
+        },
+      };
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [existingFieldDef], total: 1 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // Field is reused by case-insensitive match — no new field-def SO created
+      expect(repo.create).not.toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('creates field definitions with refresh: wait_for to avoid races with concurrent configure PATCHes', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const fieldDefCreate = repo.create.mock.calls.find(
+        ([type]) => type === CASE_FIELD_DEFINITION_SAVED_OBJECT
+      );
+      expect(fieldDefCreate).toBeDefined();
+      // The options object (third argument) must carry refresh: 'wait_for'
+      expect(fieldDefCreate![2]).toMatchObject({ refresh: 'wait_for' });
+    });
+
     it('reuses existing templates by name and does not duplicate', async () => {
       const configSO = buildConfigureSO({
-        // no customFields → skips field-def find; only templates find is made
+        // no customFields ? skips field-def find; only templates find is made
         templates: [buildLegacyTemplate('Existing Template')],
       });
 
@@ -980,6 +1048,120 @@ describe('TemplatesMigrationTaskManager', () => {
       ]);
     });
 
+    it('preserves a v2 value deliberately cleared while the space was still unflagged', async () => {
+      // Field definitions become visible before a space's backfill completes (phase 1 runs
+      // first, and the configure mirror hook can create them even earlier), so a user can clear
+      // a v2 value ('' write) while legacyCasesMigrated is still unset — including between
+      // backfill retries or across restarts. The '' must win over the stale legacy value.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      const caseSO = buildCaseSO(
+        'case-1',
+        [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'stale-legacy' }],
+        { cf_text_as_keyword: '' }
+      );
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // Nothing to fill — the cleared value is preserved — and the space still completes.
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+    });
+
+    it('retries from fresh data when a case changes after the PIT read (409 version conflict)', async () => {
+      // The backfill computes its merged extended_fields map from a PIT snapshot; without the
+      // snapshot version an update landing between the read and the write would be silently
+      // replaced. The write must carry the version, the 409 must not flag the space, and the
+      // retry must recompute from fresh data so the user's value survives.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      const legacyCustomFields = [
+        { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'stale-legacy' },
+      ];
+      let scan = 0;
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          scan++;
+          if (scan === 1) {
+            // First scan: the case has no v2 value yet, at version v1.
+            return Promise.resolve({
+              saved_objects: [
+                { ...buildCaseSO('case-1', legacyCustomFields), version: 'v1', sort: [1] },
+              ],
+              total: 1,
+              pit_id: 'pit-1',
+            });
+          }
+          // Retry scan: a user set their own value in the meantime (version bumped).
+          return Promise.resolve({
+            saved_objects: [
+              {
+                ...buildCaseSO('case-1', legacyCustomFields, { cf_text_as_keyword: 'user-value' }),
+                version: 'v2',
+                sort: [1],
+              },
+            ],
+            total: 1,
+            pit_id: 'pit-2',
+          });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+      repo.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'case-1',
+            type: CASE_SAVED_OBJECT,
+            error: { statusCode: 409, message: 'version conflict' },
+          },
+        ],
+      });
+
+      const manager = await buildAndSchedule();
+      const first = await getTaskRunner(manager).run();
+
+      // The guarded write carried the snapshot version...
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({ id: 'case-1', version: 'v1' }),
+      ]);
+      // ...and the conflict left the space unflagged, rescheduling a retry.
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(first).toEqual(expect.objectContaining({ runAt: expect.any(Date) }));
+
+      // The retry recomputes from a fresh read: the user's value is present, so nothing is
+      // written over it and the space completes.
+      await getTaskRunner(manager).run();
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+    });
+
     it('does not update cases that already have all their extended_fields', async () => {
       const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
       const caseSO = buildCaseSO(
@@ -1011,15 +1193,45 @@ describe('TemplatesMigrationTaskManager', () => {
         CASE_SAVED_OBJECT,
         expect.objectContaining({ namespaces: ['my-space'] })
       );
-      // ...and the case scan filters by owner within that PIT.
+      // ...and the case scan filters by owner within that PIT, scoped to the same namespace as the
+      // PIT. `namespaces` must be on the `find` too: the migration's internal repo is unscoped (no
+      // spaces extension), and without it `find` defaults to the `default` space — returning the
+      // wrong space's cases, which then 404 on bulkUpdate against this space.
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(
         expect.objectContaining({
           type: CASE_SAVED_OBJECT,
+          namespaces: ['my-space'],
           filter: `${CASE_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
           pit: expect.objectContaining({ id: 'pit-1' }),
         })
       );
+    });
+
+    it('backfills a non-default space in its own namespace (find + bulkUpdate stay on the same space)', async () => {
+      // Regression guard for the "37/37 not found (404)" bug: the find must be scoped to the space's
+      // namespace, and the resulting bulkUpdate must target that same namespace so the cases the
+      // scan returned actually resolve.
+      const configSO = buildConfigureSO({
+        owner: 'securitySolution',
+        namespaces: ['analytics-1'],
+        customFields: [buildLegacyCustomField('cf_text')],
+      });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind?.[0]).toEqual(expect.objectContaining({ namespaces: ['analytics-1'] }));
+
+      // The update lands in the space's namespace — not the default namespace.
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({ id: 'case-1', namespace: 'analytics-1' }),
+      ]);
     });
 
     it('backfills cases for a space a prior release already marked field/template-migrated', async () => {
@@ -1046,6 +1258,35 @@ describe('TemplatesMigrationTaskManager', () => {
         { legacyCasesMigrated: true },
         expect.anything()
       );
+    });
+
+    it('never rescans a space already flagged as migrated — a deliberately cleared v2 value is preserved', async () => {
+      // The space completed its one-shot backfill in an earlier release; since then a user
+      // explicitly cleared the v2 mirror key (extended_fields value '') while the legacy
+      // customFields value remains. The backfill must NOT revisit the space — rerunning it
+      // with the ''-fills-as-empty semantics would silently restore the stale legacy value
+      // over the deliberate clear.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+        legacyCasesMigrated: true,
+      });
+      const caseSO = buildCaseSO(
+        'case-1',
+        [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'stale-legacy' }],
+        { cf_text_as_keyword: '' }
+      );
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // No case scan, no case writes, no flag rewrites: the cleared '' value stays cleared.
+      const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
+      expect(caseFind).toBeUndefined();
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+      expect(repo.update).not.toHaveBeenCalled();
     });
 
     it('skips the case-backfill phase when the space has no custom fields', async () => {
@@ -1102,7 +1343,7 @@ describe('TemplatesMigrationTaskManager', () => {
     const PAGE_SIZE = 1000;
     const SCAN_BUDGET = 25000;
 
-    // A full page of trivial cases (no customFields → scanned but not updated), reused across finds.
+    // A full page of trivial cases (no customFields ? scanned but not updated), reused across finds.
     const fullPage = (sortValue: number) => ({
       saved_objects: Array.from({ length: PAGE_SIZE }, (_, i) => ({
         id: `case-${sortValue}-${i}`,
@@ -1160,7 +1401,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(caseFinds).toHaveLength(2);
       expect(caseFinds[1][0]).toEqual(expect.objectContaining({ searchAfter: [1] }));
 
-      // Exhausted → PIT closed, flag set, task deleted (no reschedule).
+      // Exhausted ? PIT closed, flag set, task deleted (no reschedule).
       expect(repo.closePointInTime).toHaveBeenCalled();
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
@@ -1201,7 +1442,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
     it('resumes from a persisted cursor without reopening a PIT', async () => {
       const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
-      // Partial page → exhausts immediately once resumed.
+      // Partial page ? exhausts immediately once resumed.
       routeConfigureAndCases(configSO, [{ saved_objects: [], total: 0, pit_id: 'pit-resumed' }]);
 
       const manager = await buildAndSchedule();
@@ -1217,7 +1458,7 @@ describe('TemplatesMigrationTaskManager', () => {
         },
       });
 
-      // Resumed → no new PIT opened, and the scan continues from the saved search_after.
+      // Resumed ? no new PIT opened, and the scan continues from the saved search_after.
       expect(repo.openPointInTimeForType).not.toHaveBeenCalled();
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind?.[0]).toEqual(
@@ -1450,7 +1691,7 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('resets failedRuns after a run that stops only for budget (no failures)', async () => {
-      // 1000-case pages that never fail → the scan budget is what stops the run (a clean pause),
+      // 1000-case pages that never fail ? the scan budget is what stops the run (a clean pause),
       // so a prior failure streak must reset to zero.
       const fullPage = {
         saved_objects: Array.from({ length: 1000 }, (_, i) => ({
@@ -1516,7 +1757,7 @@ describe('TemplatesMigrationTaskManager', () => {
           if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
             return Promise.resolve({ saved_objects: [cfg], total: 1 });
           }
-          // No sortField → order by array index (the unique `_shard_doc`-like tiebreaker).
+          // No sortField ? order by array index (the unique `_shard_doc`-like tiebreaker).
           const after = opts.searchAfter ? opts.searchAfter[0] : -1;
           const start = after + 1;
           const pageDocs = docs.slice(start, start + opts.perPage).map((d, i) => ({
@@ -1555,7 +1796,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(docs[TOTAL - 1].attributes.extended_fields).toEqual({
         cf_text_as_keyword: `v-${TOTAL - 1}`,
       });
-      // Fully done → task deleted, space flagged.
+      // Fully done ? task deleted, space flagged.
       expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
@@ -1590,7 +1831,7 @@ describe('TemplatesMigrationTaskManager', () => {
           saved_objects: [buildConfigureSO({ customFields: [buildLegacyCustomField('cf')] })],
           total: 1,
         })
-        // field-def find throws → migrateOneConfigure propagates the error
+        // field-def find throws ? migrateOneConfigure propagates the error
         .mockRejectedValueOnce(new Error('network error'));
 
       await getTaskRunner(
@@ -1628,6 +1869,194 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(counter.incrementCounter).not.toHaveBeenCalledWith(
         expect.objectContaining({ counterName: 'configureMigrationSuccess' })
       );
+    });
+  });
+
+  // The onCaseBackfillComplete hook is how the templates migration tells cases-analytics v2 to run a
+  // one-time full re-index once existing cases' extended_fields are backfilled. It must fire exactly
+  // once per real migration, never on a no-op restart (which would trigger an expensive full re-index
+  // every startup), and never break or retry the migration task if it fails.
+  describe('analytics backfill completion hook (onCaseBackfillComplete)', () => {
+    const buildCaseSO = (
+      id: string,
+      customFields: unknown[],
+      extendedFields?: Record<string, unknown> | null
+    ) => ({
+      id,
+      type: CASE_SAVED_OBJECT,
+      references: [],
+      attributes: { owner: 'cases', customFields, extended_fields: extendedFields ?? null },
+    });
+
+    const mockFindByType = (configSO: unknown, caseSOs: unknown[]) => {
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: caseSOs, total: caseSOs.length });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+    };
+
+    const buildWithHook = async (hook: () => Promise<void> | void) => {
+      const manager = new TemplatesMigrationTaskManager(
+        taskManagerSetupMock,
+        logger,
+        undefined,
+        hook
+      );
+      await manager.scheduleMigrationTask(
+        taskManagerStartMock as unknown as TaskManagerStartContract,
+        core as unknown as CoreStart
+      );
+      return manager;
+    };
+
+    it('fires once when a completing run backfilled existing cases', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('fires when the space had pending backfill work even if this run wrote nothing (multi-run finish / post-restart re-scan)', async () => {
+      // Space is pending (customFields present, legacyCasesMigrated not set) but every case already
+      // has its extended_fields — the boundary case where the completing run writes 0 cases yet the
+      // migration genuinely finished outstanding work. The hook must still fire, keyed on the
+      // restart-durable pending flags rather than a per-run write count.
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'x' }], {
+          cf_text_as_keyword: 'x',
+        }),
+      ]);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('does NOT fire on a no-op restart where every space is already fully migrated', async () => {
+      // Custom fields present, but the space was already backfilled in a prior run — the exact shape
+      // of every Kibana restart after the migration is done. Firing here would run a full analytics
+      // re-index on every single startup.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyTemplatesMigrated: true,
+        legacyCustomFieldsMigrated: true,
+        legacyCasesMigrated: true,
+      });
+      mockFindByType(configSO, []);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('does NOT fire when no space has custom fields (nothing to backfill)', async () => {
+      const configSO = buildConfigureSO({
+        customFields: [],
+        templates: [buildLegacyTemplate('T')],
+      });
+      mockFindByType(configSO, []);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('does NOT fire while the backfill is still rescheduling (not a terminal run)', async () => {
+      // Full 1000-case pages so the scan budget stops the run mid-backfill: it reschedules rather
+      // than completing, so the analytics re-index must wait for the terminal run.
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const fullPage = {
+        saved_objects: Array.from({ length: 1000 }, (_, i) => ({
+          id: `c-${i}`,
+          type: CASE_SAVED_OBJECT,
+          references: [],
+          attributes: { owner: 'cases', customFields: [], extended_fields: null },
+          sort: [i],
+        })),
+        total: 1000,
+        pit_id: 'pit-1',
+      };
+      repo.find.mockImplementation((opts: { type: string }) =>
+        opts.type === CASE_CONFIGURE_SAVED_OBJECT
+          ? Promise.resolve({ saved_objects: [configSO], total: 1 })
+          : opts.type === CASE_SAVED_OBJECT
+          ? Promise.resolve(fullPage)
+          : Promise.resolve({ saved_objects: [], total: 0 })
+      );
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      expect(result).toEqual(expect.objectContaining({ runAt: expect.any(Date) }));
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('fires on the give-up path when there was pending backfill work', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('c1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }]),
+      ]);
+      // Every update fails ? resuming one run short of the cap makes this run give up and delete.
+      repo.bulkUpdate.mockResolvedValue({
+        saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
+      });
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await runTask(await buildWithHook(hook), {
+        state: { failedRuns: MAX_CASE_BACKFILL_FAILED_RUNS - 1 },
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
+    it('swallows a hook rejection and still completes + deletes the task (no retry loop)', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+      const hook = jest.fn().mockRejectedValue(new Error('analytics down'));
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      // The migration is unaffected: it still reports complete and deletes the one-shot task, so
+      // Task Manager does not retry and re-fire the hook.
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('onCaseBackfillComplete hook failed'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
+
+    it('does not require a hook — a completing backfill with no hook configured still deletes the task', async () => {
+      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+
+      const manager = await buildAndSchedule(); // constructed without an onCaseBackfillComplete hook
+      const result = await getTaskRunner(manager).run();
+
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
     });
   });
 });

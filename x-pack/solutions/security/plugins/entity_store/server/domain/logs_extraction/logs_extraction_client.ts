@@ -29,7 +29,6 @@ import {
 } from './log_pagination_probe_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
-  buildRemainingLogsCountQuery,
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
@@ -76,7 +75,7 @@ interface LogsExtractionOptions {
     fromDateISO: string;
     toDateISO: string;
   };
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }
 
 interface ExtractedLogsSummarySuccess {
@@ -224,41 +223,6 @@ export class LogsExtractionClient {
     return mergedConfig;
   }
 
-  public async getRemainingLogsCount(type: EntityType): Promise<number> {
-    try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const indexPatterns = await this.getLocalIndexPatterns(
-        config.additionalIndexPatterns,
-        config.excludedIndexPatterns
-      );
-      const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
-      const toDateISO = moment().utc().toISOString();
-      const logsPageCursorStart = paginationFromOptionalFields(engineState.checkpointTimestamp);
-      const query = buildRemainingLogsCountQuery({
-        indexPatterns,
-        type,
-        fromDateISO,
-        toDateISO,
-        logsPageCursorStart,
-      });
-      const esqlResponse = await executeEsqlQuery({
-        esClient: this.esClient,
-        query,
-      });
-      const countColumnIdx = esqlResponse.columns.findIndex((col) => col.name === 'document_count');
-      if (countColumnIdx === -1 || esqlResponse.values.length === 0) {
-        return 0;
-      }
-      const count = esqlResponse.values[0][countColumnIdx];
-
-      return Number(count);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Failed to get remaining logs count for entity type "${type}": ${message}`);
-      throw error;
-    }
-  }
-
   private async runQueryAndIngestDocs({
     type,
     config,
@@ -313,7 +277,7 @@ export class LogsExtractionClient {
       maxTimeWindowSize: config.maxTimeWindowSize,
       maxLogsPerWindow: config.maxLogsPerWindow,
       maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
-      abortController: opts?.abortController,
+      signal: opts?.signal,
       windowOverride: opts?.specificWindow,
     });
 
@@ -435,7 +399,7 @@ export class LogsExtractionClient {
 
     let hasNextPage = true;
     while (hasNextPage) {
-      if (opts?.abortController?.signal.aborted) {
+      if (opts?.signal?.aborted) {
         break;
       }
       if (currentFromDateISO >= effectiveWindowEnd) {
@@ -579,7 +543,7 @@ export class LogsExtractionClient {
         remote: false,
       });
     };
-    opts?.abortController?.signal.addEventListener('abort', onAbort);
+    opts?.signal?.addEventListener('abort', onAbort);
 
     /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
     let recoveryId = initialEngineState.paginationId ?? undefined;
@@ -690,7 +654,7 @@ export class LogsExtractionClient {
         }
       } while (!lastLogsPages);
     } finally {
-      opts?.abortController?.signal.removeEventListener('abort', onAbort);
+      opts?.signal?.removeEventListener('abort', onAbort);
     }
 
     return {
@@ -741,7 +705,7 @@ export class LogsExtractionClient {
     const logPaginationCursorProbeResponse = await executeEsqlQuery({
       esClient: this.esClient,
       query: logPaginationCursorProbeQuery,
-      abortController: opts?.abortController,
+      signal: opts?.signal,
       telemetry: {
         name: 'probe_query',
         namespace: this.namespace,
@@ -842,7 +806,7 @@ export class LogsExtractionClient {
       const esqlResponse = await executeEsqlQuery({
         esClient: this.esClient,
         query,
-        abortController: opts?.abortController,
+        signal: opts?.signal,
         telemetry: {
           name: 'extraction_query',
           namespace: this.namespace,
@@ -870,7 +834,7 @@ export class LogsExtractionClient {
         fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
         targetIndex: latestIndex,
         logger: this.logger,
-        abortController: opts?.abortController,
+        signal: opts?.signal,
         refresh: true,
         onDropped: () =>
           entityStoreMetrics.extractionBulkDropped.add(1, {

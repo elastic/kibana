@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import { EuiCommentList } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -186,7 +187,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'logoSecurity',
         getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
         getAttachmentRemovalObject: () => ({ event: 'removed endpoint attachment' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getExternalReferenceUserAction({
@@ -222,7 +223,7 @@ describe('createCommentUserActionBuilder', () => {
         displayName: 'Endpoint',
         icon: 'logoSecurity',
         getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getExternalReferenceUserAction({
@@ -281,7 +282,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'bell',
         getAttachmentViewObject: () => ({ event: 'added an event' }),
         getAttachmentRemovalObject: () => ({ event: 'removed event' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getEventUserAction({
@@ -317,7 +318,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'bell',
         getAttachmentViewObject: () => ({ event: 'added an event' }),
         getAttachmentRemovalObject: () => ({ event: 'removed event' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getEventUserAction({ action: UserActionActions.delete });
@@ -647,7 +648,7 @@ describe('createCommentUserActionBuilder', () => {
           event: 'added an event',
           timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
         }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getEventUserAction();
@@ -797,6 +798,7 @@ describe('createCommentUserActionBuilder', () => {
             timelineAvatar: 'lensApp',
             children: React.lazy(SpyLazyFactory),
           }),
+          schema: z.object({}),
         });
 
         const userAction = getPersistableStateUserAction();
@@ -889,6 +891,7 @@ describe('createCommentUserActionBuilder', () => {
             event: 'added an embeddable',
             timelineAvatar: 'lensApp',
           }),
+          schema: z.object({}),
         });
 
         const userAction = getPersistableStateUserAction();

@@ -298,6 +298,12 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.operator_privileges.enabled', 'true'],
 
+  // Serverless ES throttles indexing when free disk drops below this reserve (defaults to 20% of total
+  // disk). CI agents share an overlay filesystem that can already sit above 80% full at ES startup, which
+  // trips the throttle immediately and stalls Kibana startup/migrations. Pin to an absolute 1gb for tests.
+  // Note: this must stay above the Lucene indexing buffer (~161mb here) or ES refuses to start; 1gb is safe.
+  ['stateless.indices.disk.reserved_bytes', '1gb'],
+
   ['xpack.security.transport.ssl.enabled', 'true'],
 
   [
@@ -728,7 +734,6 @@ export function resolveEsArgs(
         ].join(',')
       );
 
-      esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
       esArgs.set('serverless.project_type', esProjectTypeFromKbn.get(options.projectType)!);
       esArgs.set('serverless.project_id', projectIdOverride ?? MOCK_IDP_UIAM_PROJECT_ID);
 
@@ -1280,6 +1285,8 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
       _id: linkedProject.projectId,
       _organization: MOCK_IDP_UIAM_ORGANIZATION_ID,
       _type: esProjectType,
+      _csp: 'aws',
+      _region: 'eu-west-1',
       env: 'local',
     },
   };
@@ -1417,6 +1424,8 @@ async function getOperatorVolume(
   };
   const projectTags = {
     ...Object.fromEntries(Object.entries(projectInfo).map(([key, value]) => [`_${key}`, value])),
+    _csp: 'aws',
+    _region: 'eu-west-1',
     env: 'local',
   };
 

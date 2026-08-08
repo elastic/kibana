@@ -11,6 +11,7 @@ import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
+import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
@@ -20,8 +21,14 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { EpisodesClient } from '../lib/episodes_client';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../lib/services/logger_service/logger_service';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -42,7 +49,7 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  *
  * - SML types are registered during setup (synchronously) so the agent context
  *   layer can schedule their crawler tasks during its own start phase. Gated on
- *   the optional `agentContextLayer` plugin.
+ *   the optional `agentBuilderSml` plugin.
  * - Attachment types are bound to {@link AttachmentTypeToken} (deps resolved via
  *   DI) and registered during start. Skills are registered alongside them.
  *
@@ -67,21 +74,33 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       }) as AttachmentTypeDefinition,
     [Logger, CoreStart('injection')]
   );
+  bind(AttachmentTypeToken).toResolvedValue(
+    (loggerService: LoggerServiceContract, injection) =>
+      createEpisodeAttachmentType({
+        logger: loggerService.forSubsystem('agentBuilder'),
+        getEpisodesClient: (context) =>
+          resolveRequestScoped(injection, context.request, EpisodesClient),
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
+      }) as AttachmentTypeDefinition,
+    [LoggerServiceToken, CoreStart('injection')]
+  );
 
   bind(OnSetup).toConstantValue((container) => {
     if (!getAgentBuilder(container)) {
       return;
     }
 
-    const agentContextLayerToken =
-      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentContextLayer']>>(
-        'agentContextLayer'
+    const agentBuilderSmlToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilderSml']>>(
+        'agentBuilderSml'
       );
-    if (!container.isBound(agentContextLayerToken)) {
+    if (!container.isBound(agentBuilderSmlToken)) {
       return;
     }
 
-    const agentContextLayer = container.get(agentContextLayerToken);
+    const agentBuilderSml = container.get(agentBuilderSmlToken);
 
     // Resolved lazily at crawl time (start phase) so the SML hooks reflect the
     // current value of the `alerting:v2:enabled` global advanced setting on
@@ -93,7 +112,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     // registration happens at setup, but their clients/repositories must be
     // resolved lazily at crawl time (start phase), so deps cannot be eagerly
     // injected at bind/resolution time.
-    agentContextLayer.registerType(
+    agentBuilderSml.registerType(
       createRuleSmlType({
         getScopedRulesClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
@@ -104,7 +123,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         getIsAlertingV2Enabled,
       })
     );
-    agentContextLayer.registerType(
+    agentBuilderSml.registerType(
       createActionPolicySmlType({
         getScopedActionPolicyClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),

@@ -13,9 +13,9 @@ interface RegionSelectionToolbarProps {
   totalSelected: number;
   totalRegions: number;
   allSelected: boolean;
-  isAllExpanded: boolean;
+  isAllExpanded?: boolean;
   onSelectAll: () => void;
-  onExpandAll: () => void;
+  onExpandAll?: () => void;
 }
 
 export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
@@ -28,9 +28,9 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
 }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size="xs" data-test-subj="manageRegionsSelectionCount">
             <strong>
               {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.selectionCount', {
                 defaultMessage: '{selected} of {total} selected',
@@ -42,7 +42,6 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            flush="left"
             onClick={onSelectAll}
             data-test-subj="manageRegionsSelectAllButton"
           >
@@ -58,16 +57,22 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
       </EuiFlexGroup>
     </EuiFlexItem>
 
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty size="xs" onClick={onExpandAll} data-test-subj="manageRegionsExpandAllButton">
-        {isAllExpanded
-          ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.collapseAll', {
-              defaultMessage: 'Collapse all',
-            })
-          : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.expandAll', {
-              defaultMessage: 'Expand all',
-            })}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
+    {onExpandAll && (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          onClick={onExpandAll}
+          data-test-subj="manageRegionsExpandAllButton"
+        >
+          {isAllExpanded
+            ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.collapseAll', {
+                defaultMessage: 'Collapse all',
+              })
+            : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.expandAll', {
+                defaultMessage: 'Expand all',
+              })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );

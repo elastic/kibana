@@ -15,14 +15,23 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyId,
+  DispatchFailure,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
   Rule,
   RuleId,
 } from '../types';
-import { ACTION_POLICY_EVENT_ACTIONS, type ActionPolicyEventAction } from './constants';
+import {
+  ACTION_POLICY_EVENT_ACTIONS,
+  type ActionPolicyEventAction,
+  type DispatchFailureReason,
+} from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { episodeSubject } from './utils/subject';
+
+/** Index of workflow ids that recorded a dispatch failure, keyed by action group id. */
+type FailedDestinations = ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 
 const RULE_REF_CAP = 50;
 
@@ -60,7 +69,27 @@ interface UnmatchedDispatcherFields {
   episode_ids: string[];
 }
 
-type DispatcherFields = PolicySummaryDispatcherFields | UnmatchedDispatcherFields;
+interface DispatchFailureDispatcherFields {
+  failure_reason: DispatchFailureReason;
+  action_group_count: number;
+  action_group_ids: ActionGroupId[];
+  workflow_ids: string[];
+  episode_count: number;
+  episode_ids: string[];
+  rule_count: number;
+  rule_ids?: string[];
+}
+
+type DispatcherFields =
+  | PolicySummaryDispatcherFields
+  | UnmatchedDispatcherFields
+  | DispatchFailureDispatcherFields;
+
+interface UnmatchedGroup {
+  episodeIds: Set<string>;
+  space_id: string;
+  ruleId: RuleId | null;
+}
 
 @injectable()
 export class StoreExecutionHistoryStep implements DispatcherStep {
@@ -77,18 +106,30 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       throttled = [],
       dispatchable = [],
       dispatchedExecutions,
+      dispatchFailures = [],
       rules,
       input,
     } = state;
 
-    if (dispatch.length === 0 && throttled.length === 0 && dispatchable.length === 0) {
+    if (
+      dispatch.length === 0 &&
+      throttled.length === 0 &&
+      dispatchable.length === 0 &&
+      dispatchFailures.length === 0
+    ) {
       return { type: 'continue' };
     }
 
     const timestamp = input.startedAt.toISOString();
     const { executionUuid } = input;
 
-    for (const summary of aggregateByPolicy(dispatch, dispatchedExecutions).values()) {
+    const failedDestinations = indexFailedDestinations(dispatchFailures);
+
+    for (const summary of aggregateByPolicy(
+      dispatch,
+      dispatchedExecutions,
+      failedDestinations
+    ).values()) {
       this.emitPolicySummary({
         timestamp,
         executionUuid,
@@ -108,11 +149,18 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
-    const unmatched = aggregateUnmatchedByRule(
+    // Pass the full `dispatch` list — including fully-failed groups — so that
+    // their episodes are not double-reported as `unmatched`. Those episodes did
+    // match a policy; `dispatch_failed` already carries their episode_ids.
+    const unmatched = aggregateUnmatchedBySubject(
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
-    for (const [ruleId, episodeIds] of unmatched) {
-      this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
+    for (const group of unmatched) {
+      this.emitUnmatchedSummary({ timestamp, executionUuid, group });
+    }
+
+    for (const failure of dispatchFailures) {
+      this.emitDispatchFailure({ timestamp, executionUuid, failure, rules });
     }
 
     return { type: 'continue' };
@@ -132,16 +180,12 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     rules: Map<RuleId, Rule> | undefined;
   }): void {
     const ruleIds = Array.from(summary.ruleIds);
-    const capped = ruleIds.slice(0, RULE_REF_CAP);
-    const spillOver = ruleIds.slice(RULE_REF_CAP);
-
-    const refs: SavedObjectRef[] = [
-      policyRef({ id: summary.policyId, spaceId: summary.spaceId }),
-      ...capped.map((id) => {
-        const rule = rules?.get(id);
-        return ruleRef({ id, spaceId: rule?.spaceId ?? summary.spaceId });
-      }),
-    ];
+    const { refs, spillOver } = buildPolicyAndRuleRefs(
+      summary.policyId,
+      summary.spaceId,
+      ruleIds,
+      rules
+    );
 
     this.eventLogService.logEvent(
       buildEvent({
@@ -167,27 +211,73 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   private emitUnmatchedSummary({
     timestamp,
     executionUuid,
-    ruleId,
-    episodeIds,
-    rules,
+    group,
   }: {
     timestamp: string;
     executionUuid: string;
-    ruleId: RuleId;
-    episodeIds: Set<string>;
-    rules: Map<RuleId, Rule> | undefined;
+    group: UnmatchedGroup;
   }): void {
-    const rule = rules?.get(ruleId);
+    const savedObjects: SavedObjectRef[] =
+      group.ruleId != null ? [ruleRef({ id: group.ruleId, spaceId: group.space_id })] : [];
     this.eventLogService.logEvent(
       buildEvent({
         timestamp,
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
-        spaceId: rule?.spaceId ?? 'default',
-        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId })],
+        spaceId: group.space_id,
+        savedObjects,
         dispatcherFields: {
-          episode_count: episodeIds.size,
-          episode_ids: Array.from(episodeIds),
+          episode_count: group.episodeIds.size,
+          episode_ids: Array.from(group.episodeIds),
+        },
+      })
+    );
+  }
+
+  private emitDispatchFailure({
+    timestamp,
+    executionUuid,
+    failure,
+    rules,
+  }: {
+    timestamp: string;
+    executionUuid: string;
+    failure: DispatchFailure;
+    rules: Map<RuleId, Rule> | undefined;
+  }): void {
+    const ruleIdSet = new Set<string>();
+    const episodeIdSet = new Set<string>();
+    for (const { rule_id, episode_id } of failure.episodes) {
+      if (rule_id != null) ruleIdSet.add(rule_id);
+      episodeIdSet.add(episode_id);
+    }
+    const ruleIds = Array.from(ruleIdSet);
+    const episodeIds = Array.from(episodeIdSet);
+    const { refs, spillOver } = buildPolicyAndRuleRefs(
+      failure.policyId,
+      failure.spaceId,
+      ruleIds,
+      rules
+    );
+
+    this.eventLogService.logEvent(
+      buildEvent({
+        timestamp,
+        executionUuid,
+        action: ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
+        outcome: 'failure',
+        error: failure.message,
+        spaceId: failure.spaceId,
+        savedObjects: refs,
+        dispatcherFields: {
+          failure_reason: failure.reason,
+          action_group_count: 1,
+          action_group_ids: [failure.actionGroupId],
+          workflow_ids: [failure.workflowId],
+          episode_count: episodeIds.length,
+          episode_ids: episodeIds,
+          rule_count: ruleIds.length,
+          rule_ids: spillOver.length > 0 ? spillOver : undefined,
         },
       })
     );
@@ -196,10 +286,28 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
 
 function aggregateByPolicy(
   groups: readonly ActionGroup[],
-  dispatchedExecutions?: Map<ActionGroupId, string[]>
+  dispatchedExecutions?: Map<ActionGroupId, string[]>,
+  failedDestinations?: FailedDestinations
 ): Map<ActionPolicyId, PolicySummary> {
   const summaries = new Map<ActionPolicyId, PolicySummary>();
   for (const group of groups) {
+    // Compute the subset of destinations that were successfully dispatched.
+    // When failedDestinations is provided (dispatched path), destinations that
+    // recorded a DispatchFailure are excluded. Groups with at least one
+    // destination but no delivered destinations (total failure) are skipped
+    // entirely — their episodes and rules are already captured in
+    // `dispatch_failed` events and must not appear in the `dispatched` summary.
+    const failed = failedDestinations?.get(group.id);
+    const delivered =
+      failed != null
+        ? group.destinations.filter((destination) => !failed.has(destination.id))
+        : group.destinations;
+
+    if (group.destinations.length > 0 && delivered.length === 0) {
+      // All destinations failed — skip this group entirely for this summary.
+      continue;
+    }
+
     let summary = summaries.get(group.policyId);
     if (!summary) {
       summary = {
@@ -214,7 +322,7 @@ function aggregateByPolicy(
       summaries.set(group.policyId, summary);
     }
     summary.actionGroupIds.add(group.id);
-    for (const destination of group.destinations) {
+    for (const destination of delivered) {
       summary.workflowIds.add(destination.id);
     }
     for (const executionId of dispatchedExecutions?.get(group.id) ?? []) {
@@ -222,25 +330,57 @@ function aggregateByPolicy(
     }
     for (const episode of group.episodes) {
       summary.episodeIds.add(episode.episode_id);
-      summary.ruleIds.add(episode.rule_id);
+      if (episode.rule_id != null) {
+        summary.ruleIds.add(episode.rule_id);
+      }
     }
   }
   return summaries;
 }
 
-function aggregateUnmatchedByRule(
-  unmatched: ReturnType<typeof getUnmatchedEpisodes>
-): Map<RuleId, Set<string>> {
-  const byRule = new Map<RuleId, Set<string>>();
-  for (const episode of unmatched) {
-    let ids = byRule.get(episode.rule_id);
-    if (!ids) {
-      ids = new Set();
-      byRule.set(episode.rule_id, ids);
-    }
-    ids.add(episode.episode_id);
+function buildPolicyAndRuleRefs(
+  policyId: ActionPolicyId,
+  spaceId: string,
+  ruleIds: string[],
+  rules: Map<RuleId, Rule> | undefined
+): { refs: SavedObjectRef[]; spillOver: string[] } {
+  const capped = ruleIds.slice(0, RULE_REF_CAP);
+  const spillOver = ruleIds.slice(RULE_REF_CAP);
+  const refs: SavedObjectRef[] = [
+    policyRef({ id: policyId, spaceId }),
+    ...capped.map((id) => ruleRef({ id, spaceId: rules?.get(id)?.spaceId ?? spaceId })),
+  ];
+  return { refs, spillOver };
+}
+
+function indexFailedDestinations(failures: readonly DispatchFailure[]): FailedDestinations {
+  const index = new Map<ActionGroupId, Set<string>>();
+  for (const { actionGroupId, workflowId } of failures) {
+    let ids = index.get(actionGroupId);
+    if (!ids) index.set(actionGroupId, (ids = new Set()));
+    ids.add(workflowId);
   }
-  return byRule;
+  return index;
+}
+
+function aggregateUnmatchedBySubject(
+  unmatched: ReturnType<typeof getUnmatchedEpisodes>
+): UnmatchedGroup[] {
+  const bySubject = new Map<string, UnmatchedGroup>();
+  for (const episode of unmatched) {
+    const subject = episodeSubject(episode);
+    let group = bySubject.get(subject);
+    if (!group) {
+      group = {
+        episodeIds: new Set(),
+        space_id: episode.space_id,
+        ruleId: episode.rule_id,
+      };
+      bySubject.set(subject, group);
+    }
+    group.episodeIds.add(episode.episode_id);
+  }
+  return [...bySubject.values()];
 }
 
 function ruleRef({ id, spaceId }: { id: string; spaceId: string | undefined }): SavedObjectRef {
@@ -266,6 +406,8 @@ function buildEvent({
   timestamp,
   executionUuid,
   action,
+  outcome = 'success',
+  error,
   spaceId,
   savedObjects,
   dispatcherFields,
@@ -273,13 +415,16 @@ function buildEvent({
   timestamp: string;
   executionUuid: string;
   action: ActionPolicyEventAction;
+  outcome?: 'success' | 'failure';
+  error?: string;
   spaceId: string;
   savedObjects: SavedObjectRef[];
   dispatcherFields: DispatcherFields;
 }): IEvent {
   return {
     '@timestamp': timestamp,
-    event: { action, outcome: 'success' },
+    event: { action, outcome },
+    ...(error ? { error: { message: error } } : {}),
     kibana: {
       saved_objects: savedObjects,
       space_ids: [spaceId],

@@ -22,17 +22,10 @@ import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import type { ManagementTabs } from './wrapper';
 import { QueryStreamPartitioning } from '../stream_detail_routing/query_stream_partitioning';
 
-const queryStreamManagementSubTabs = [
-  'overview',
-  'partitioning',
-  'schema',
-  'significantEvents',
-  'attachments',
-] as const;
+const queryStreamManagementSubTabs = ['overview', 'partitioning', 'schema', 'attachments'] as const;
 
 type QueryStreamManagementSubTab = (typeof queryStreamManagementSubTabs)[number];
 
@@ -62,17 +55,12 @@ export function QueryStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const { rangeFrom, rangeTo } = useTimeRange();
-  const streamsPrivileges = useStreamsPrivileges();
+  const { ui } = useStreamsPrivileges();
 
-  const canDeleteQueryStream = streamsPrivileges.ui[STREAMS_UI_PRIVILEGES.manage];
+  const canDeleteQueryStream = ui[STREAMS_UI_PRIVILEGES.manage];
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const abortController = useAbortController();
-
-  const { significantEvents } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
-  });
 
   const tabs: ManagementTabs = {};
 
@@ -107,10 +95,6 @@ export function QueryStreamDetailManagement({
       defaultMessage: 'Attachments',
     }),
   };
-
-  if (significantEvents) {
-    tabs.significantEvents = significantEvents;
-  }
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -199,7 +183,6 @@ export function QueryStreamDetailManagement({
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        padding="m"
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
       {showDeleteModal && (

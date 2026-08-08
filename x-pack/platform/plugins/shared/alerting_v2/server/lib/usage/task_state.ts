@@ -93,6 +93,30 @@ const stateSchemaV2 = stateSchemaV1.extends({
   action_policies_count_agent_builder_assisted: schema.maybe(schema.number()),
 });
 
+const stateSchemaV3 = stateSchemaV2.extends({
+  count_by_query_format: schema.maybe(
+    schema.object({
+      composed: schema.maybe(schema.number()),
+      standalone: schema.maybe(schema.number()),
+    })
+  ),
+  count_by_recovery_strategy: schema.maybe(
+    schema.object({
+      no_breach: schema.maybe(schema.number()),
+      query: schema.maybe(schema.number()),
+      none: schema.maybe(schema.number()),
+    })
+  ),
+  count_by_no_data_strategy: schema.maybe(
+    schema.object({
+      last_known_status: schema.maybe(schema.number()),
+      emit: schema.maybe(schema.number()),
+      recover: schema.maybe(schema.number()),
+      none: schema.maybe(schema.number()),
+    })
+  ),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -146,9 +170,18 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV2,
   },
+  3: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      count_by_query_format: state.count_by_query_format ?? undefined,
+      count_by_recovery_strategy: state.count_by_recovery_strategy ?? undefined,
+      count_by_no_data_strategy: state.count_by_no_data_strategy ?? undefined,
+    }),
+    schema: stateSchemaV3,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[2].schema;
+const latestTaskStateSchema = stateSchemaByVersion[3].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

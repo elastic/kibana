@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React from 'react';
 import {
-  EuiConfirmModal,
+  EuiButton,
+  EuiButtonEmpty,
   EuiIconTip,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -25,7 +32,7 @@ export interface TemplateFieldSummary {
 
 export interface TemplateSummary {
   name: string;
-  fieldNames?: TemplateFieldSummary[];
+  fieldDefinitions?: TemplateFieldSummary[];
 }
 
 export interface ConfirmChangeTemplateModalProps {
@@ -33,6 +40,11 @@ export interface ConfirmChangeTemplateModalProps {
   oldTemplate?: TemplateSummary;
   /** The template the user picked, if any (omitted when the user is clearing the selection). */
   newTemplate?: TemplateSummary;
+  /**
+   * Optional field form rendered inside the modal body (e.g. `TemplateFieldsFormReady` in batch
+   * mode) so the user can fill required fields before confirming the template change.
+   */
+  fieldsNode?: ReactNode;
   isLoading?: boolean;
   isConfirmDisabled?: boolean;
   onConfirm: () => void;
@@ -45,7 +57,7 @@ const TemplateNameWithFields: FC<{ template: TemplateSummary }> = ({ template })
   return (
     <EuiText component="span" style={{ fontWeight: euiTheme.font.weight.bold }}>
       {template.name}{' '}
-      {template.fieldNames && template.fieldNames.length > 0 ? (
+      {template.fieldDefinitions && template.fieldDefinitions.length > 0 ? (
         <EuiIconTip
           type="list"
           size="s"
@@ -54,7 +66,7 @@ const TemplateNameWithFields: FC<{ template: TemplateSummary }> = ({ template })
           anchorProps={{ 'data-test-subj': 'confirm-change-template-modal-fields-icon' }}
           content={
             <div data-test-subj="confirm-change-template-modal-fields-tooltip">
-              {template.fieldNames.map((field, idx) => (
+              {template.fieldDefinitions.map((field, idx) => (
                 <div key={`${field.name}-${idx}`}>{field.label}</div>
               ))}
             </div>
@@ -122,6 +134,7 @@ const getConfirmButtonText = (oldTemplate?: TemplateSummary, newTemplate?: Templ
 export const ConfirmChangeTemplateModal: FC<ConfirmChangeTemplateModalProps> = ({
   oldTemplate,
   newTemplate,
+  fieldsNode,
   isLoading = false,
   isConfirmDisabled = false,
   onConfirm,
@@ -130,21 +143,44 @@ export const ConfirmChangeTemplateModal: FC<ConfirmChangeTemplateModalProps> = (
   const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiConfirmModal
-      title={redesignI18n.CHANGE_TEMPLATE_MODAL_TITLE}
-      titleProps={{ id: modalTitleId }}
+    <EuiModal
+      onClose={onCancel}
       aria-labelledby={modalTitleId}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText={commonI18n.CANCEL}
-      confirmButtonText={getConfirmButtonText(oldTemplate, newTemplate)}
-      confirmButtonDisabled={isConfirmDisabled}
-      isLoading={isLoading}
-      defaultFocusedButton="confirm"
       data-test-subj="confirm-change-template-modal"
     >
-      <ConfirmChangeTemplateModalDescription oldTemplate={oldTemplate} newTemplate={newTemplate} />
-    </EuiConfirmModal>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {redesignI18n.CHANGE_TEMPLATE_MODAL_TITLE}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <ConfirmChangeTemplateModalDescription
+          oldTemplate={oldTemplate}
+          newTemplate={newTemplate}
+        />
+        {fieldsNode && (
+          <>
+            <EuiSpacer size="m" />
+            {fieldsNode}
+          </>
+        )}
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onCancel} data-test-subj="confirm-change-template-modal-cancel">
+          {commonI18n.CANCEL}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          autoFocus
+          onClick={onConfirm}
+          isDisabled={isConfirmDisabled}
+          isLoading={isLoading}
+          data-test-subj="confirm-change-template-modal-confirm"
+        >
+          {getConfirmButtonText(oldTemplate, newTemplate)}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 

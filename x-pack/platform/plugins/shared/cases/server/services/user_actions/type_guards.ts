@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { TypeOf } from 'io-ts';
 import { isString } from 'lodash';
 import type { CaseAssignees, CaseCustomFields, CaseSettings } from '../../../common/types/domain';
 import {
   CaseAssigneesRt,
   CaseCustomFieldsRt,
   CaseSettingsRt,
+  CaseTemplate,
   ExtendedFieldsRt,
 } from '../../../common/types/domain';
 
@@ -32,4 +34,8 @@ export const isCaseSettings = (value: unknown): value is CaseSettings => {
 
 export const isExtendedFields = (value: unknown): value is Record<string, string> => {
   return ExtendedFieldsRt.is(value);
+};
+
+export const isCaseTemplate = (value: unknown): value is TypeOf<typeof CaseTemplate> => {
+  return CaseTemplate.is(value);
 };

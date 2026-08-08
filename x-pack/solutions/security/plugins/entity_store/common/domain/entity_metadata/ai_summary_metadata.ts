@@ -48,6 +48,7 @@ export interface AiSummaryMetadataDoc {
   'entity.id': string;
   'entity.type': string;
   'Ai_summary.generated_by': string;
+  'Ai_summary.author_profile_uid'?: string;
   'Ai_summary.generated_at': number;
   'Ai_summary.highlights': AiSummaryHighlightItem[];
   'Ai_summary.recommended_actions'?: string[] | null;

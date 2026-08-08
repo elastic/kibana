@@ -31,4 +31,6 @@ export interface RetentionOption {
   badge?: string;
   /** When true, renders an inspect button on the row. */
   inspectable?: boolean;
+  /** When true, renders a "Managed" badge indicating this is a system-managed policy. */
+  isManaged?: boolean;
 }

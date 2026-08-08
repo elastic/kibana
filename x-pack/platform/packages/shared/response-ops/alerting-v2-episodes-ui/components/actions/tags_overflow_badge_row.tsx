@@ -10,9 +10,9 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-// Shared by both the rule and episode summary badge rows: once the combined (non-tag + tag)
-// badge count exceeds OVERFLOW_THRESHOLD, only MAX_VISIBLE_BADGES stay visible and the rest
-// collapse into a single "+N" badge. Mirrors the app header's own badge row (`AppBadges`).
+// Used by the rule summary badge row: once the combined (non-tag + tag) badge count exceeds
+// OVERFLOW_THRESHOLD, only MAX_VISIBLE_BADGES stay visible and the rest collapse into a single
+// "+N" badge. Mirrors the app header's own badge row (`AppBadges`).
 export const BADGE_ROW_MAX_VISIBLE_BADGES = 2;
 export const BADGE_ROW_OVERFLOW_THRESHOLD = 3;
 
@@ -36,11 +36,10 @@ export interface TagsOverflowBadgeRowProps {
 
 /**
  * Renders tags as hollow badges, collapsing into a "+N" popover once they exceed `overflowSize`.
- * Used by both the rule summary flyout and the episode details flyout badge rows — no existing
- * chrome/sharedux component covers "plain string tags with a +N overflow badge" (the closest,
- * `@kbn/content-management-tags`, is bound to the saved-object tag registry and doesn't
- * implement overflow), so this is the shared home for that behavior instead of duplicating it
- * per consumer.
+ * Used by the rule summary flyout badge row — no existing chrome/sharedux component covers
+ * "plain string tags with a +N overflow badge" (the closest, `@kbn/content-management-tags`, is
+ * bound to the saved-object tag registry and doesn't implement overflow), so this package owns
+ * that behavior and can be reused by future consumers instead of duplicating it.
  */
 export const TagsOverflowBadgeRow: React.FC<TagsOverflowBadgeRowProps> = ({
   tags,

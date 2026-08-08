@@ -32,7 +32,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService } from './execution/callback_delivery_service';
+import { CallbackDeliveryService } from './execution/callback';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -153,6 +153,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      securityPlugin,
     });
 
     const skillsServiceStart = this.services.skills.start({

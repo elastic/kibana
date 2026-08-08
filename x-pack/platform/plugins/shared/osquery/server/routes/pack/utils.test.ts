@@ -7,11 +7,15 @@
 
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
   fetchAllPackagePolicies,
+  groupAgentPolicyIdsByPackagePolicy,
+  resolveSharedPackagePolicyShard,
+  DEFAULT_PACK_SHARD,
   validatePackScheduleFields,
   validateRruleConfig,
   isValidRfc3339,
@@ -1524,5 +1528,95 @@ describe('hasQueries (shared mint/reconcile emptiness predicate)', () => {
       expect(mintGuardSkips).toBe(!nonEmpty);
       expect(reconcileIncludes).toBe(nonEmpty);
     }
+  });
+});
+
+// Fixes the duplicate-schedule race (elastic/kibana#269475): a Fleet package
+// policy's `policy_ids` can span multiple of a pack's agent policies, so
+// resolving per-agent-policy-id and writing without deduping issues
+// concurrent updates against the same package-policy id from a stale base.
+describe('groupAgentPolicyIdsByPackagePolicy (dedup write targets)', () => {
+  const packagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
+    ({ id, policy_ids: policyIds } as PackagePolicy);
+
+  it('groups two agent policy ids that resolve to the same package policy into one entry', () => {
+    const sharedPolicy = packagePolicy('pp-shared', ['agent-a', 'agent-b']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-b'], [sharedPolicy]);
+
+    expect(groups.size).toBe(1);
+    const target = groups.get('pp-shared');
+    expect(target?.packagePolicy).toBe(sharedPolicy);
+    expect(target?.agentPolicyIds).toEqual(['agent-a', 'agent-b']);
+  });
+
+  it('keeps distinct package policies as separate entries (regression: common 1:1 case)', () => {
+    const policyA = packagePolicy('pp-a', ['agent-a']);
+    const policyB = packagePolicy('pp-b', ['agent-b']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-b'], [policyA, policyB]);
+
+    expect(groups.size).toBe(2);
+    expect(groups.get('pp-a')?.agentPolicyIds).toEqual(['agent-a']);
+    expect(groups.get('pp-b')?.agentPolicyIds).toEqual(['agent-b']);
+  });
+
+  it('skips an agent policy id that resolves to no package policy', () => {
+    const policyA = packagePolicy('pp-a', ['agent-a']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-unknown'], [policyA]);
+
+    expect(groups.size).toBe(1);
+    expect(groups.has('pp-a')).toBe(true);
+  });
+
+  it('returns an empty map for an empty agent-policy-id list', () => {
+    const groups = groupAgentPolicyIdsByPackagePolicy([], [packagePolicy('pp-a', ['agent-a'])]);
+
+    expect(groups.size).toBe(0);
+  });
+});
+
+describe('resolveSharedPackagePolicyShard (deterministic shard for a shared package policy)', () => {
+  it('returns the single agent policy shard unchanged for 1:1 targeting (no behavior change)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': 42 })).toBe(42);
+  });
+
+  it('falls back to DEFAULT_PACK_SHARD when no shard is set', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], {})).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('preserves a single negative shard (no clamping to 0 — parity with the pre-dedup path)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': -5 })).toBe(-5);
+  });
+
+  it('returns DEFAULT_PACK_SHARD for an empty agent-policy-id list', () => {
+    expect(resolveSharedPackagePolicyShard([], { 'agent-a': 25 })).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('returns the shared shard value when every targeting agent policy agrees', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 30, 'agent-b': 30 })
+    ).toBe(30);
+  });
+
+  it('resolves differing shards deterministically via the max rule', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 25, 'agent-b': 75 })
+    ).toBe(75);
+  });
+
+  it('is independent of agent-policy-id ordering (repeat operations agree)', () => {
+    const shards = { 'agent-a': 25, 'agent-b': 75, 'agent-c': 50 };
+    const forward = resolveSharedPackagePolicyShard(['agent-a', 'agent-b', 'agent-c'], shards);
+    const reversed = resolveSharedPackagePolicyShard(['agent-c', 'agent-b', 'agent-a'], shards);
+
+    expect(forward).toBe(75);
+    expect(reversed).toBe(forward);
+  });
+
+  it('mixes explicit and default-shard agent policies using the max rule', () => {
+    // agent-b has no explicit shard (defaults to 100), which wins over agent-a's 40.
+    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 40 })).toBe(100);
   });
 });

@@ -53,6 +53,16 @@ export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
     documentation: 'ID of the rule that produced this episode.',
   },
   {
+    path: 'source',
+    detail: 'string',
+    documentation: 'Origin of the alert events for this episode (e.g. `internal`).',
+  },
+  {
+    path: 'space_id',
+    detail: 'string',
+    documentation: 'ID of the space the episode belongs to.',
+  },
+  {
     path: 'group_hash',
     detail: 'string',
     documentation: 'Hash identifying the alert group.',
@@ -66,6 +76,11 @@ export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
     path: 'episode_status',
     detail: "'inactive' | 'pending' | 'active' | 'recovering'",
     documentation: 'Current lifecycle status of the episode.',
+  },
+  {
+    path: 'severity',
+    detail: "'info' | 'low' | 'medium' | 'high' | 'critical'",
+    documentation: 'Severity of the episode. Optional — may be absent if not set by the rule.',
   },
   {
     path: 'data',

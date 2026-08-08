@@ -74,6 +74,12 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
     padding: 0 ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.xxxl};
   `;
 
+  const accordionButtonStyles = css`
+    .euiAccordion__buttonContent {
+      inline-size: 100%;
+    }
+  `;
+
   const toggleIconCss = css`
     transform: ${isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
     transition: transform 150ms ease-in-out;
@@ -122,7 +128,7 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
         onToggle={setIsOpen}
         paddingSize="none"
         arrowDisplay="none"
-        buttonProps={{ paddingSize: 'l' }}
+        buttonProps={{ paddingSize: 'l', css: accordionButtonStyles }}
       >
         {content.length > 0 && (
           <EuiFlexGroup

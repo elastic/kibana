@@ -125,19 +125,13 @@ export function useFetchMetricsData({
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
-      const sortedMetrics: ParsedMetrics = {
-        metricItems: [...parsed.metricItems].sort((a, b) =>
-          a.metricName.localeCompare(b.metricName)
-        ),
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
-      };
-
       if (!signal.aborted) {
         trackMetricsInfo(parsed.telemetry);
       }
 
       return {
-        ...sortedMetrics,
+        metricItems: parsed.metricItems,
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
         activeDimensions: appliedDimensions ?? [],
       };
     },

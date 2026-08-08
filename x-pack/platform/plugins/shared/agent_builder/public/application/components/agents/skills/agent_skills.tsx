@@ -36,6 +36,7 @@ import { queryKeys } from '../../../query_keys';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
+import { getActiveSkills, isSkillAutoIncluded } from '../../../utils/tool_selection_utils';
 import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
 import { ActiveSkillRow } from './active_skill_row';
@@ -92,21 +93,19 @@ export const AgentSkills: React.FC = () => {
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
-  const builtinSkills = useMemo(() => allSkills.filter((s) => s.readonly), [allSkills]);
+  const autoIncludedBuiltinSkills = useMemo(
+    () => allSkills.filter((skill) => isSkillAutoIncluded(skill, enableElasticCapabilities)),
+    [allSkills, enableElasticCapabilities]
+  );
 
-  const builtinSkillIdSet = useMemo(() => new Set(builtinSkills.map((s) => s.id)), [builtinSkills]);
+  const builtinSkillIdSet = useMemo(
+    () => new Set(autoIncludedBuiltinSkills.map((skill) => skill.id)),
+    [autoIncludedBuiltinSkills]
+  );
 
   const activeSkills = useMemo(() => {
-    if (!agentSkillIdSet) {
-      return enableElasticCapabilities ? builtinSkills : [];
-    }
-    if (enableElasticCapabilities) {
-      const explicitSkills = allSkills.filter((s) => agentSkillIdSet.has(s.id));
-      const builtinNotExplicit = builtinSkills.filter((s) => !agentSkillIdSet.has(s.id));
-      return [...explicitSkills, ...builtinNotExplicit];
-    }
-    return allSkills.filter((s) => agentSkillIdSet.has(s.id));
-  }, [allSkills, agentSkillIdSet, enableElasticCapabilities, builtinSkills]);
+    return getActiveSkills(allSkills, agentSkillIds, enableElasticCapabilities);
+  }, [allSkills, agentSkillIds, enableElasticCapabilities]);
 
   useEffect(() => {
     if (agentLoading || skillsLoading) return;
@@ -153,7 +152,7 @@ export const AgentSkills: React.FC = () => {
   };
 
   const handleToggleSkill = (skill: PublicSkillSummary, isActive: boolean) => {
-    if (enableElasticCapabilities && skill.readonly) return;
+    if (isSkillAutoIncluded(skill, enableElasticCapabilities)) return;
     if (isActive) {
       handleAddSkill(skill);
     } else {
@@ -165,7 +164,7 @@ export const AgentSkills: React.FC = () => {
     if (!selectedSkillId) return;
     const skill = activeSkills.find((s) => s.id === selectedSkillId);
     if (skill) {
-      if (enableElasticCapabilities && skill.readonly) return;
+      if (isSkillAutoIncluded(skill, enableElasticCapabilities)) return;
       handleRemoveSkillWithReport(skill);
     }
   };
@@ -344,7 +343,7 @@ export const AgentSkills: React.FC = () => {
                         isSelected={selectedSkillId === skill.id}
                         onSelect={(s) => handleSelectSkill(s.id)}
                         onRemove={handleRemoveSkillWithReport}
-                        isAutoIncluded={enableElasticCapabilities && skill.readonly}
+                        isAutoIncluded={isSkillAutoIncluded(skill, enableElasticCapabilities)}
                         canEditAgent={canEditAgent}
                       />
                     </EuiFlexItem>
@@ -359,10 +358,11 @@ export const AgentSkills: React.FC = () => {
                   skillId={selectedSkillId}
                   onEdit={() => setEditingSkillId(selectedSkillId)}
                   onRemove={handleRemoveSelectedSkill}
-                  isAutoIncluded={
-                    enableElasticCapabilities &&
-                    (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
-                  }
+                  isAutoIncluded={activeSkills.some(
+                    (skill) =>
+                      skill.id === selectedSkillId &&
+                      isSkillAutoIncluded(skill, enableElasticCapabilities)
+                  )}
                   canEditAgent={canEditAgent}
                   canManageSkills={manageSkills}
                 />

@@ -11,7 +11,6 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentAccessControl,
   AgentAccessControlMode,
-  AgentType,
   ToolSelection,
 } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -51,6 +50,7 @@ const storageSettings = {
           plugin_ids: types.keyword({}),
           skill_ids: types.keyword({}),
           connector_ids: types.keyword({}),
+          ai_indices: types.keyword({}),
         },
         dynamic: false,
       }),
@@ -63,7 +63,7 @@ const storageSettings = {
 export interface AgentProperties {
   id: string;
   name: string;
-  type: AgentType;
+  type: string;
   space: string;
   description: string;
   labels?: string[];
@@ -89,6 +89,7 @@ export interface AgentConfigurationProperties {
   workflow_ids?: string[];
   plugin_ids?: string[];
   connector_ids?: string[];
+  ai_indices?: string[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

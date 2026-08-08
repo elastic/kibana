@@ -17,7 +17,7 @@ Some Kibana features are gated behind feature flags or experimental configuratio
 | **Toggle per suite**   | Yes                           | No — fixed at server start                           |
 | **When to use**        | **Preferred** for most flags  | Settings required at boot (e.g., route registration) |
 
-For custom server configs, reach out to the AppEx QA team before creating one (see [below](#scout-feature-flags-custom-servers)).
+For custom server configs, reach out to the Apps DX team before creating one (see [below](#scout-feature-flags-custom-servers)).
 
 ## Enabling feature flags at runtime [scout-feature-flags-runtime]
 
@@ -96,8 +96,10 @@ When using `feature_flags.overrides`, the keys must match the feature flag IDs r
 Some settings — such as those used during the plugin `setup` lifecycle (e.g., HTTP route registration) — cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
 
 ::::::{warning}
-⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
+⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the Apps DX team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
 ::::::
+
+Before creating a set, check the existing sets under `config_sets/` first: if one already boots with a similar purpose (overlapping `serverArgs`), reuse it, or ask its owners whether it can be extended with a small adjustment when no existing consumer is negatively impacted. A set that duplicates another's purpose multiplies CI cost for no benefit.
 
 ### How custom configs work [scout-feature-flags-custom-configs-how]
 
