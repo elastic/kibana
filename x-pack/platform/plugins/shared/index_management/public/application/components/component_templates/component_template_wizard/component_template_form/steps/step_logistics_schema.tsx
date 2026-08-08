@@ -37,6 +37,12 @@ export const logisticsFormSchema: FormSchema = {
     label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.nameFieldLabel', {
       defaultMessage: 'Name',
     }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameHelpText"
+        defaultMessage="Must not contain uppercase characters, a space, comma, hash, asterisk, or start with an underscore."
+      />
+    ),
     type: FIELD_TYPES.TEXT,
     validations: [
       {
