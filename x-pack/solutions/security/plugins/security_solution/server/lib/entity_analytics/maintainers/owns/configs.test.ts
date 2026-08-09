@@ -222,7 +222,10 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     });
 
     it('reads the Entra ID log index, not the entity index', () => {
-      expect(entraConfig().indexPattern('myns')).toBe('logs-entityanalytics_entra_id.entity-myns');
+      expect(entraConfig().indexPattern('myns')).toBe('logs-entityanalytics_entra_id.device-myns');
+      // The index pattern targets the device data stream directly, so no
+      // data_stream.dataset filter is needed to separate device from user docs.
+      expect(entraConfig().indexPattern('myns')).not.toContain('.entity-');
       expect(entraConfig().indexPattern('default')).not.toContain('.entities.v2.latest');
     });
 
@@ -241,11 +244,8 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       ]);
     });
 
-    it('Step 1 narrows to device documents, requires host.id, and gates on owner presence', () => {
+    it('Step 1 requires host.id and gates on owner presence', () => {
       const filters = entraConfig().compositeAggAdditionalFilters ?? [];
-      expect(filters).toContainEqual({
-        term: { 'data_stream.dataset': 'entityanalytics_entra_id.device' },
-      });
       expect(filters).toContainEqual({ exists: { field: 'host.id' } });
 
       const ownerGate = filters.find((f) => JSON.stringify(f).includes('registered_owners'));

@@ -61,11 +61,10 @@ const OKTA_OWNS_RULES: DirectEuidRule[] = [{ field: 'host.id', euidType: 'host' 
  * is the losing half of each union pair, not a regression.
  */
 function buildEntraIdOwnsEsqlQuery(namespace: string): string {
-  const logIndex = `logs-${ENTRA_ID_ENTITY_SOURCE}.entity-${namespace}`;
+  const logIndex = `logs-${ENTRA_ID_DEVICE_DATASET}-${namespace}`;
 
   return `FROM ${logIndex}
-| WHERE data_stream.dataset == "${ENTRA_ID_DEVICE_DATASET}"
-    AND host.id IS NOT NULL
+| WHERE host.id IS NOT NULL
     AND (${OWNER_MAIL_FIELD} IS NOT NULL OR ${OWNER_ID_FIELD} IS NOT NULL)
 | EVAL targetEntityId = CONCAT("host:", TO_STRING(host.id))
 | EVAL ownerKey = CASE(${OWNER_MAIL_FIELD} IS NULL, ${OWNER_ID_FIELD}, ${OWNER_ID_FIELD} IS NULL, ${OWNER_MAIL_FIELD}, MV_APPEND(${OWNER_MAIL_FIELD}, ${OWNER_ID_FIELD}))
@@ -123,11 +122,11 @@ export function buildOwnsConfigs(lastProcessedTimestamp?: string): RelationshipI
       kind: 'override',
       id: ENTRA_ID_ENTITY_SOURCE,
       name: 'Entra ID Entity Analytics',
-      // Log-based source: device documents live in the integration's log index,
-      // NOT the entity index. Ownership exists only on the device object, so the
-      // maintainer reads devices and inverts device→user (see
+      // Log-based source: device documents live in the integration's device log
+      // data stream, NOT the entity index. Ownership exists only on the device
+      // object, so the maintainer reads devices and inverts device→user (see
       // buildEntraIdOwnsEsqlQuery).
-      indexPattern: (ns) => `logs-${ENTRA_ID_ENTITY_SOURCE}.entity-${ns}`,
+      indexPattern: (ns) => `logs-${ENTRA_ID_DEVICE_DATASET}-${ns}`,
       targetEntityType: 'host',
       relationshipKey: RELATIONSHIP_KEY,
       // Actors are owner identifiers on the device doc, not ECS user.* fields.
@@ -145,8 +144,8 @@ export function buildOwnsConfigs(lastProcessedTimestamp?: string): RelationshipI
       // correct freshness signal. Relationship writes merge rather than append,
       // so re-scanning the trailing window each run is idempotent.
       compositeAggAdditionalFilters: [
-        // Device and user documents share this index; select devices only.
-        { term: { 'data_stream.dataset': ENTRA_ID_DEVICE_DATASET } },
+        // The index pattern already scopes to the device dataset, so no
+        // data_stream.dataset term is needed here.
         { exists: { field: 'host.id' } },
         {
           bool: {

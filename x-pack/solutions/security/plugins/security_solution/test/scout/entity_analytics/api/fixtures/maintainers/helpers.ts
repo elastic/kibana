@@ -458,7 +458,7 @@ export const triggerMaintainerRun = async (
 };
 
 /** Entra ID integration log index (device + user documents share it). */
-const ENTRA_ID_LOG_INDEX = 'logs-entityanalytics_entra_id.entity-default';
+const ENTRA_ID_LOG_INDEX = 'logs-entityanalytics_entra_id.device-default';
 
 interface SeedEntraIdDeviceLogOptions {
   /** Device object id — becomes host.id and the `host:<id>` target EUID. */

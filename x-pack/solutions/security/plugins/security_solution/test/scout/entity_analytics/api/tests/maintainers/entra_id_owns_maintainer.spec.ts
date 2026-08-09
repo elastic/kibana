@@ -27,7 +27,7 @@ import {
 const MAINTAINER_ID = 'owns';
 const RELATIONSHIP_KEY = 'owns';
 const ENTRA_ID_NAMESPACE = 'entra_id';
-const ENTRA_ID_LOG_INDEX = 'logs-entityanalytics_entra_id.entity-default';
+const ENTRA_ID_LOG_INDEX = 'logs-entityanalytics_entra_id.device-default';
 
 apiTest.describe(
   'Entity Store owns maintainer (Entra ID device logs)',
