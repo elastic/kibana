@@ -58,7 +58,6 @@ import { createParser } from '@kbn/monaco/src/languages/console/parser';
 import { sendRequest } from '../../hooks';
 import { serviceContextMock } from '../../contexts/services_context.mock';
 import { _test as kbTest } from '../../../lib/kb';
-import { getFallbackRequestStartPosition } from '@kbn/monaco/src/languages/console/utils';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -962,84 +961,6 @@ describe('Editor actions provider', () => {
       await triggerSuggestions();
 
       expect(editor.trigger).not.toHaveBeenCalled();
-    });
-
-    it('caps malformed parsed-request inspection', () => {
-      const lines = new Array(2501).fill('"""');
-      const model = createModel(lines);
-      const parsedRequests = lines.map((_, index) => ({ startOffset: index * 4 }));
-
-      const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
-
-      expect(result).toBeUndefined();
-      expect(model.getPositionAt).toHaveBeenCalledTimes(2000);
-    });
-
-    it('caps parsed-request inspection by source characters', () => {
-      const lines = ['GET /one', 'x'.repeat(100_001)];
-      const model = createModel(lines);
-      const parsedRequests = [{ startOffset: 0 }, { startOffset: lines[0].length + 1 }];
-
-      const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
-
-      expect(result).toBeUndefined();
-      expect(model.getPositionAt).toHaveBeenCalledTimes(1);
-    });
-
-    it('caps cumulative parsed-request materialization', () => {
-      const lines = [
-        `GET /${'one'.repeat(16_667)}`,
-        `GET /${'two'.repeat(16_667)}`,
-        `GET /${'three'.repeat(3_333)}`,
-      ];
-      const model = createModel(lines);
-      const secondStartOffset = lines[0].length + 1;
-      const thirdStartOffset = secondStartOffset + lines[1].length + 1;
-      const parsedRequests = [
-        { startOffset: 0, endOffset: lines[0].length },
-        { startOffset: secondStartOffset, endOffset: secondStartOffset + lines[1].length },
-        { startOffset: thirdStartOffset, endOffset: thirdStartOffset + lines[2].length },
-      ];
-
-      const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
-
-      expect(result).toEqual({ lineNumber: 3, column: 1 });
-      expect(model.getValueInRange).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not return an oversized unterminated request as the fallback start', () => {
-      const lines = ['GET /foo', 'x'.repeat(100_001)];
-      const model = createModel(lines);
-      const parsedRequests = [{ startOffset: 0 }];
-
-      const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
-
-      expect(result).toBeUndefined();
-      expect(model.getValueInRange).not.toHaveBeenCalled();
-    });
-
-    it('excludes an inline comment prefix from parsed request materialization', () => {
-      const prefix = `/*${'x'.repeat(100_000)}*/ `;
-      const lines = [`${prefix}GET /foo`, '{"field": true}'];
-      const model = createModel(lines);
-      const parsedRequests = [{ startOffset: prefix.length, endOffset: lines.join('\n').length }];
-
-      const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
-
-      expect(result).toEqual({ lineNumber: 1, column: prefix.length + 1 });
-      expect(model.getValueInRange).toHaveBeenCalledWith(
-        expect.objectContaining({ startLineNumber: 1, startColumn: prefix.length + 1 })
-      );
-    });
-
-    it('continues past a parsed request without an end offset', () => {
-      const lines = ['POST _query', '{"script":"""', 'POST _query', '{'];
-      const model = createModel(lines);
-      const parsedRequests = [{ startOffset: 0, endOffset: 24 }, { startOffset: 26 }];
-
-      const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
-
-      expect(result).toEqual({ lineNumber: 1, column: 1 });
     });
 
     it('stops inspecting parsed requests after passing the cursor', async () => {

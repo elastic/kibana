@@ -9,12 +9,10 @@
 
 import {
   checkForTripleQuotesAndEsqlQuery,
-  findRequestLineNumber,
   isInsideTripleQuotedJsonValue,
-  unescapeInvalidChars,
-} from './autocomplete_utils';
+} from './triple_quote_scanner';
 
-describe('autocomplete_utils', () => {
+describe('triple_quote_scanner', () => {
   describe('checkForTripleQuotesAndQueries', () => {
     it('returns false for all flags for an empty string', () => {
       expect(checkForTripleQuotesAndEsqlQuery('')).toEqual({
@@ -283,112 +281,5 @@ describe('autocomplete_utils', () => {
   it('does not retain container state for oversized fallback input', () => {
     const request = `POST _search\n${'['.repeat(100_001)}"""`;
     expect(isInsideTripleQuotedJsonValue(request)).toBe(false);
-  });
-
-  describe('unescapeInvalidChars', () => {
-    it('should return the original string if there are no escape sequences', () => {
-      const input = 'simple string';
-      expect(unescapeInvalidChars(input)).toBe('simple string');
-    });
-
-    it('should unescape escaped double quotes', () => {
-      const input = '\\"hello\\"';
-      expect(unescapeInvalidChars(input)).toBe('"hello"');
-    });
-
-    it('should unescape escaped backslashes', () => {
-      const input = 'path\\\\to\\\\file';
-      expect(unescapeInvalidChars(input)).toBe('path\\to\\file');
-    });
-
-    it('should unescape both escaped backslashes and quotes', () => {
-      const input = 'say: \\"hello\\" and path: C:\\\\Program Files\\\\App';
-      expect(unescapeInvalidChars(input)).toBe('say: "hello" and path: C:\\Program Files\\App');
-    });
-
-    it('should handle mixed content correctly', () => {
-      const input = 'log: \\"User \\\\\\"admin\\\\\\" logged in\\"';
-      expect(unescapeInvalidChars(input)).toBe('log: "User \\"admin\\" logged in"');
-    });
-
-    it('should leave already unescaped characters alone', () => {
-      const input = '"already unescaped" \\ and /';
-      expect(unescapeInvalidChars(input)).toBe('"already unescaped" \\ and /');
-    });
-
-    it('should not over-unescape multiple backslashes', () => {
-      const input = '\\\\\\\\"test\\\\"';
-      // \\\\"test\\" becomes \\"test\"
-      expect(unescapeInvalidChars(input)).toBe('\\\\"test\\"');
-    });
-  });
-
-  describe('findRequestLineNumber', () => {
-    const fromLines = (lines: string[]) => (lineNumber: number) => lines[lineNumber - 1] ?? '';
-
-    it('returns the cursor line when it is itself the request line', () => {
-      expect(findRequestLineNumber(fromLines(['GET _search']), 1)).toBe(1);
-    });
-
-    it('scans backwards to the nearest request line', () => {
-      const lines = ['POST _query', '{', '\t"script": """', ''];
-      expect(findRequestLineNumber(fromLines(lines), 4)).toBe(1);
-    });
-
-    it('returns the nearest request line when several precede the cursor', () => {
-      const lines = ['GET _search', '{}', 'POST _query', '{', ''];
-      expect(findRequestLineNumber(fromLines(lines), 5)).toBe(3);
-    });
-
-    it('can return the document start after fully scanning a range with a request line', () => {
-      const lines = ['# comment', 'POST _query', '{', '"script": """', 'GET /not-a-request', ''];
-      expect(findRequestLineNumber(fromLines(lines), 6, { direction: 'document' })).toBe(1);
-    });
-
-    it('does not return the document start from a partially scanned range', () => {
-      const lines = ['GET _search', ...new Array(2500).fill('  "filler": 1,')];
-      expect(
-        findRequestLineNumber(fromLines(lines), lines.length, { direction: 'document' })
-      ).toBeUndefined();
-    });
-
-    it('does not return the document start when the final scanned line exceeds the character cap', () => {
-      const lines = ['x'.repeat(150_000), 'POST _query', '{', '"query": """', 'GET /inside-string'];
-      expect(
-        findRequestLineNumber(fromLines(lines), lines.length, { direction: 'document' })
-      ).toBeUndefined();
-    });
-
-    it('does not return the document start when the fully scanned range has no request line', () => {
-      const lines = ['# comment', '{', '"field": true', '}'];
-      expect(
-        findRequestLineNumber(fromLines(lines), lines.length, { direction: 'document' })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined when no request line precedes the cursor', () => {
-      expect(findRequestLineNumber(fromLines(['{', '"a": 1', '}']), 3)).toBeUndefined();
-    });
-
-    it('gives up past the line lookback cap instead of scanning the whole buffer', () => {
-      // Request line sits far above the cursor, beyond the 2000-line cap.
-      const lines = ['GET _search', ...new Array(2500).fill('  "filler": 1,')];
-      expect(findRequestLineNumber(fromLines(lines), lines.length)).toBeUndefined();
-    });
-
-    it('gives up past the character lookback cap even when the line count is small', () => {
-      // Regression guard for https://github.com/elastic/kibana/pull/251173: pasted JSON can hold
-      // millions of characters in a handful of lines. Without a character cap, the returned text is
-      // scanned character by character on a keystroke path.
-      const hugeLine = 'x'.repeat(60_000);
-      const lines = ['GET _search', hugeLine, hugeLine, hugeLine];
-      expect(findRequestLineNumber(fromLines(lines), lines.length)).toBeUndefined();
-    });
-
-    it('still finds a nearby request line when the scanned text stays under the caps', () => {
-      const smallLine = 'x'.repeat(1_000);
-      const lines = ['GET _search', smallLine, smallLine];
-      expect(findRequestLineNumber(fromLines(lines), lines.length)).toBe(1);
-    });
   });
 });

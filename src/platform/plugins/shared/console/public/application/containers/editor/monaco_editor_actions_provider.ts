@@ -14,11 +14,6 @@ import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
-import {
-  checkForTripleQuotesAndEsqlQuery,
-  findRequestLineNumber,
-  getFallbackRequestStartPosition,
-} from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -46,7 +41,9 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  getTripleQuoteContext,
 } from './utils';
+import type { TripleQuoteContext } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
@@ -894,7 +891,7 @@ export class MonacoEditorActionsProvider {
   private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
+  ): Promise<TripleQuoteContext> {
     const parsedRequests = await this.parsedRequestsProvider.getRequests();
     const requestsAtPosition = await this.getRequestsBetweenLines(
       model,
@@ -902,90 +899,7 @@ export class MonacoEditorActionsProvider {
       position.lineNumber,
       parsedRequests
     );
-    const fallbackRequestStartPosition = getFallbackRequestStartPosition(
-      parsedRequests,
-      model,
-      position.lineNumber,
-      position.column
-    );
-
-    for (const request of requestsAtPosition) {
-      if (
-        request.startLineNumber <= position.lineNumber &&
-        request.endLineNumber >= position.lineNumber
-      ) {
-        const selectedRequestStartPosition = model.getPositionAt(request.startOffset);
-        const requestStartPosition =
-          fallbackRequestStartPosition !== undefined &&
-          model.getOffsetAt(fallbackRequestStartPosition) < request.startOffset
-            ? fallbackRequestStartPosition
-            : selectedRequestStartPosition;
-        const requestContentBefore = model.getValueInRange({
-          startLineNumber: requestStartPosition.lineNumber,
-          startColumn: requestStartPosition.column,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const { insideTripleQuotes, insideEsqlQuery } =
-          checkForTripleQuotesAndEsqlQuery(requestContentBefore);
-        return {
-          insideTripleQuotes,
-          insideEsqlQuery,
-        };
-      }
-      if (request.startLineNumber > position.lineNumber) {
-        // Stop iteration once we pass the cursor position
-        return { insideTripleQuotes: false, insideEsqlQuery: false };
-      }
-    }
-
-    const requestContentBefore = this.getRequestContentBeforePosition(
-      model,
-      position,
-      fallbackRequestStartPosition
-    );
-    if (requestContentBefore) {
-      const { insideTripleQuotes, insideEsqlQuery } =
-        checkForTripleQuotesAndEsqlQuery(requestContentBefore);
-      return {
-        insideTripleQuotes,
-        insideEsqlQuery,
-      };
-    }
-
-    // Return false if the position is not inside a request
-    return { insideTripleQuotes: false, insideEsqlQuery: false };
-  }
-
-  private getRequestContentBeforePosition(
-    model: monaco.editor.ITextModel,
-    position: monaco.Position,
-    rangeStartPosition?: monaco.IPosition
-  ): string | undefined {
-    if (rangeStartPosition) {
-      return model.getValueInRange({
-        startLineNumber: rangeStartPosition.lineNumber,
-        startColumn: rangeStartPosition.column,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column,
-      });
-    }
-    const requestLineNumber = findRequestLineNumber(
-      (lineNumber) => model.getLineContent(lineNumber),
-      position.lineNumber,
-      { direction: 'document' }
-    );
-    if (requestLineNumber === undefined) {
-      return;
-    }
-
-    return model.getValueInRange({
-      startLineNumber: requestLineNumber,
-      startColumn: 1,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column,
-    });
+    return getTripleQuoteContext(model, position, requestsAtPosition, parsedRequests);
   }
 
   /**
