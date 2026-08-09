@@ -259,7 +259,6 @@ export interface DiscoverInternalState {
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   defaultProfileEsqlQuery: DefaultEsqlQueryConfig | undefined;
-  isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
