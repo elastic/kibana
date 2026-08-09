@@ -98,7 +98,7 @@ export const getChildWorkflowExecutions = async ({
     await workflowExecutionsDataClient.getByIds([parentExecutionId], {
       sourceIncludes: [...PARENT_SOURCE_INCLUDES],
     });
-
+    console.log({ items: parentItems, missing: parentMissing });
   // Throw so callers can distinguish "parent doesn't exist" from "parent has no
   // child executions" — both cases would otherwise silently return [].
   if (parentMissing.includes(parentExecutionId)) {

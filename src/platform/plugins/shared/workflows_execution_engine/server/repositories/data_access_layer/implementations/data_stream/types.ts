@@ -9,23 +9,57 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { GetFieldsOf } from '@kbn/es-mappings';
-import type {
+import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from '../../mappings';
+import type { MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
+import { STEP_USAGE_MAPPING_PROPS } from '../../mappings/common';
+
+// The shared STEP_USAGE_MAPPING in common.ts uses `type: 'nested'`, which is not in
+// @kbn/es-mappings's SupportedMappingPropertyType and therefore cannot satisfy the
+// MappingsDefinition constraint required by GetFieldsOf / IDataStreamClient. Nested
+// semantics are unnecessary here — stepUsage is only written and read from _source,
+// never queried with nested path syntax — so object is equivalent for our purposes.
+const STEP_USAGE_MAPPING = mappings.object({
+  properties: STEP_USAGE_MAPPING_PROPS,
+});
+
+// Shadow the shared mapping constants to replace the nested-typed stepUsage field with
+// the object-typed override above, making the full mapping satisfy MappingsDefinition.
+export const DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
+  ...WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+  properties: {
+    ...WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties,
+    '@timestamp': mappings.date(),
+    stepUsage: STEP_USAGE_MAPPING,
+  },
+} satisfies MappingsDefinition;
+
+export const DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
+  ...WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+  properties: {
+    '@timestamp': mappings.date(),
+    ...WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties,
+    stepUsage: STEP_USAGE_MAPPING,
+  },
+} satisfies MappingsDefinition;
 
 export type EsWorkflowStepExecutionEntry = GetFieldsOf<
-  typeof WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS
+  typeof DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS
 >;
 
 export type StepExecutionsDataStreamClient = IDataStreamClient<
-  typeof WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+  typeof DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   EsWorkflowStepExecutionEntry
 >;
 
-export type EsWorkflowExecutionEntry = GetFieldsOf<typeof WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS>;
+export type EsWorkflowExecutionEntry = GetFieldsOf<
+  typeof DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS
+>;
 
 export type WorkflowExecutionsDataStreamClient = IDataStreamClient<
-  typeof WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+  typeof DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   EsWorkflowExecutionEntry
 >;

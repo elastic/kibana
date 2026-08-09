@@ -14,8 +14,10 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
 } from './constants';
 import { DataStreamExecutionsDataAccess } from './data_stream_executions_data_access';
-import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../..';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
+import {
+  DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+  DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+} from './types';
 import type {
   CreateDataClientDeps,
   DataClientBundle,
@@ -37,7 +39,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       version: 1,
       hidden: true,
       template: {
-        mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+        mappings: DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
       },
     });
     coreSetup.dataStreams.registerDataStream({
@@ -45,7 +47,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
       version: 1,
       hidden: true,
       template: {
-        mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+        mappings: DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
       },
     });
   }
@@ -73,6 +75,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
             versionsCollector: new Map<string, Required<DocumentVersionFields>>(),
             additionalIndexesToQuery: ['.workflows-executions'],
             logger: this.deps.logger,
+            dateField: 'createdAt',
           })
       )
     );
@@ -91,6 +94,7 @@ export class DataStreamDataClientBundle implements DataClientBundle {
             versionsCollector: new Map<string, Required<DocumentVersionFields>>(),
             additionalIndexesToQuery: ['.workflows-step-executions'],
             logger: this.deps.logger,
+            dateField: 'startedAt',
           })
       )
     );

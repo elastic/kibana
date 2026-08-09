@@ -28,26 +28,28 @@ import type {
   ScriptUpdateRequest,
   ScriptUpdateResponse,
 } from '../../types';
+import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 
 const notImplemented = (method: string): never => {
   throw new Error(`DataStreamExecutionsDataAccess.${method} is not implemented`);
 };
 
-export interface DataStreamExecutionsDataAccessDeps {
+export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
   dataStreamName: string;
   versionsCollector?: Map<string, Required<DocumentVersionFields>>;
   additionalIndexesToQuery?: string[];
-  logger?: Logger;
+  dateField: keyof TExecution;
+  logger: Logger;
 }
-
+  
 export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   implements DataClient<TExecution>
 {
   private additionalIndexesToQuery: string[];
   private versionsCollector: Map<string, Required<DocumentVersionFields>> | undefined;
 
-  constructor(private readonly deps: DataStreamExecutionsDataAccessDeps) {
+  constructor(private readonly deps: DataStreamExecutionsDataAccessDeps<TExecution>) {
     this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
     this.versionsCollector = deps.versionsCollector;
   }
@@ -55,11 +57,15 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    const searchResponse: estypes.SearchResponse<TExecution> = await this.deps.esClient.search({
-      index: [this.deps.dataStreamName, ...this.additionalIndexesToQuery],
-      ...request,
-      ignore_unavailable: true,
-    });
+    const searchResponse: estypes.SearchResponse<TExecution> = await retryTransientEsErrors(
+      () =>
+        this.deps.esClient.search({
+          index: [this.deps.dataStreamName, ...this.additionalIndexesToQuery],
+          ...request,
+          ignore_unavailable: true,
+        }),
+      { logger: this.deps.logger }
+    );
 
     searchResponse.hits.hits.forEach((hit) => {
       if (hit._id && hit?._source && hit._seq_no !== undefined && hit._primary_term !== undefined) {
@@ -74,10 +80,14 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
-    return this.deps.esClient.count({
-      index: this.deps.dataStreamName,
-      ...request,
-    });
+    return await retryTransientEsErrors(
+      () =>
+        this.deps.esClient.count({
+          index: this.deps.dataStreamName,
+          ...request,
+        }),
+      { logger: this.deps.logger }
+    );
   }
 
   public async getByIds(
@@ -113,12 +123,20 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   }
 
   public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    const items = await this.resolveBulkItemVersions(request.items);
+    // Datastream requires a timestamp field to be present in the document, so we need to assign it before sending the bulk request.
+    // We take it from the document's dateField, which is specified in the deps. If the dateField is not present, we don't assign a timestamp.
+    // startedAt for StepExeucutions and createdAt for WorkflowExecutions are the dateFields that are used to assign the timestamp.
+    const itemsWithTimestamp = await this.assignTimestampToItems(request.items);
+    const itemsWithVersion = await this.resolveBulkItemVersions(itemsWithTimestamp);
 
-    const bulkResponse = await sharedBulk(this.deps.esClient, {
-      ...request,
-      items,
-    });
+    const bulkResponse = await sharedBulk(
+      this.deps.esClient,
+      {
+        ...request,
+        items: itemsWithVersion,
+      },
+      this.deps.logger
+    );
 
     bulkResponse.items.forEach((item) => {
       if (item.error || item.seqNo === undefined || item.primaryTerm === undefined) {
@@ -142,6 +160,30 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     _request: ExecutionsDeleteByQueryRequest
   ): Promise<estypes.DeleteByQueryResponse> {
     return notImplemented('deleteByQuery');
+  }
+
+  private async assignTimestampToItems(
+    items: BulkItem<TExecution>[]
+  ): Promise<BulkItem<TExecution>[]> {
+    if (!this.deps.dateField) {
+      return items;
+    }
+
+    return items.map((item) => {
+      const timestampValue = item.document[this.deps.dateField];
+
+      if (typeof timestampValue !== 'string') {
+        return item;
+      }
+
+      return {
+        ...item,
+        document: {
+          ...item.document,
+          ...(timestampValue ? { ['@timestamp']: timestampValue } : {}),
+        },
+      };
+    });
   }
 
   private async resolveBulkItemVersions(
@@ -213,9 +255,13 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   }
 
   private async resolveWriteIndex(): Promise<string> {
-    const { data_streams: dataStreams } = await this.deps.esClient.indices.getDataStream({
-      name: this.deps.dataStreamName,
-    });
+    const { data_streams: dataStreams } = await retryTransientEsErrors(
+      () =>
+        this.deps.esClient.indices.getDataStream({
+          name: this.deps.dataStreamName,
+        }),
+      { logger: this.deps.logger }
+    );
 
     const writeIndex = dataStreams[0]?.indices.at(-1)?.index_name;
     if (!writeIndex) {
@@ -232,7 +278,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     if (ids.length === 0) {
       return { items: [], missing: [] };
     }
-    const idsWithResolvedIndexes: { id: string; index: string[] }[] = [];
+    const idsWithResolvedIndexes: { id: string; index: string }[] = [];
 
     const map: Map<string, GetExecutionByIdsItem<TExecution> | undefined> = ids.reduce(
       (acc, id) => {
@@ -251,9 +297,9 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         if (!resolvedWriteIndex) {
           resolvedWriteIndex = await this.resolveWriteIndex();
         }
-        idsWithResolvedIndexes.push({ id: item, index: [resolvedWriteIndex] });
+        idsWithResolvedIndexes.push({ id: item, index: resolvedWriteIndex });
       } else if (item.id && item.index) {
-        idsWithResolvedIndexes.push({ id: item.id, index: [item.index] });
+        idsWithResolvedIndexes.push({ id: item.id, index: item.index });
       }
     }
 
@@ -262,6 +308,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
       ids: idsWithResolvedIndexes,
       defaultIndex: this.deps.dataStreamName,
       options,
+      logger: this.deps.logger,
     });
 
     getByIdsResponse.items.forEach((item) => {
