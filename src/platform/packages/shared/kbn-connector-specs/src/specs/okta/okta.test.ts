@@ -89,6 +89,28 @@ describe('Okta', () => {
       );
     });
 
+    it('should throw when Org URL includes /api/v1', async () => {
+      const ctx = {
+        ...mockContext,
+        config: { orgUrl: 'https://example.okta.com/api/v1/' },
+      } as unknown as ActionContext;
+      await expect(Okta.actions.getUser.handler(ctx, { userId: '00u1' })).rejects.toThrow(
+        'Okta Org URL must be the organization base URL without /api/v1'
+      );
+    });
+
+    it('should strip trailing slashes from Org URL', async () => {
+      mockClient.get.mockResolvedValue({ data: { id: '00u1' } });
+      const ctx = {
+        ...mockContext,
+        config: { orgUrl: 'https://example.okta.com/' },
+      } as unknown as ActionContext;
+
+      await Okta.actions.getUser.handler(ctx, { userId: '00u1' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${ORG_URL}/api/v1/users/00u1`, {});
+    });
+
     it('should format Okta API error payloads', async () => {
       mockClient.get.mockRejectedValue({
         response: {

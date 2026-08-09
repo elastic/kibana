@@ -74,7 +74,14 @@ const getOrgUrl = (ctx: ActionContext): string => {
   if (!orgUrl) {
     throw new Error('Okta connector is missing the required Org URL configuration field.');
   }
-  return orgUrl.replace(/\/+$/, '');
+  const normalized = orgUrl.replace(/\/+$/, '');
+  // Handlers append /api/v1/...; reject a base URL that already includes that path.
+  if (/\/api\/v1(\/|$)/i.test(normalized)) {
+    throw new Error(
+      'Okta Org URL must be the organization base URL without /api/v1 (for example https://your-okta-domain.okta.com).'
+    );
+  }
+  return normalized;
 };
 
 /**
@@ -157,7 +164,7 @@ const userPath = (orgUrl: string, userId: string): string =>
 const groupUserPath = (orgUrl: string, groupId: string, userId: string): string =>
   `${orgUrl}/api/v1/groups/${encodeURIComponent(groupId)}/users/${encodeURIComponent(userId)}`;
 
-const parseLinkHeader = (linkHeader: unknown): string | undefined => {
+const getLinkHeaderString = (linkHeader: unknown): string | undefined => {
   if (typeof linkHeader !== 'string' || !linkHeader) {
     return undefined;
   }
@@ -581,7 +588,7 @@ export const Okta: ConnectorSpec = {
           );
           return {
             users: response.data,
-            link: parseLinkHeader(response.headers?.link ?? response.headers?.Link),
+            link: getLinkHeaderString(response.headers?.link ?? response.headers?.Link),
           };
         } catch (error) {
           throw formatOktaError('listUsers', error);
@@ -613,7 +620,7 @@ export const Okta: ConnectorSpec = {
           );
           return {
             users: response.data,
-            link: parseLinkHeader(response.headers?.link ?? response.headers?.Link),
+            link: getLinkHeaderString(response.headers?.link ?? response.headers?.Link),
           };
         } catch (error) {
           throw formatOktaError('searchUsers', error);
@@ -645,7 +652,7 @@ export const Okta: ConnectorSpec = {
           );
           return {
             events: response.data,
-            link: parseLinkHeader(response.headers?.link ?? response.headers?.Link),
+            link: getLinkHeaderString(response.headers?.link ?? response.headers?.Link),
           };
         } catch (error) {
           throw formatOktaError('getLogs', error);

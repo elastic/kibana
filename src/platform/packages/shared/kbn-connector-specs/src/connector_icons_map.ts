@@ -347,5 +347,5 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
   ],
 
-  ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconokta" */ './specs/okta/icon'))],
+  ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
 ]);
