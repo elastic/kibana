@@ -42,6 +42,19 @@ import {
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
 
+const SOURCE_INDICES_UNAVAILABLE_ERROR = 'Source indices have been deleted or closed.';
+
+export const sourceIndexUnavailableMessage = i18n.translate(
+  'xpack.transform.preview.sourceIndexUnavailableMessage',
+  {
+    defaultMessage:
+      'No source indices match the selected data view in the selected project scope. Select another project scope or choose a data view that exists in this scope.',
+  }
+);
+
+export const isSourceIndexUnavailableError = (error: unknown): boolean =>
+  getErrorMessage(error).includes(SOURCE_INDICES_UNAVAILABLE_ERROR);
+
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
@@ -172,7 +185,13 @@ export const useTransformConfigData = (
       setNoDataMessage('');
       setStatus(INDEX_STATUS.LOADING);
     } else if (isError) {
-      setErrorMessage(getErrorMessage(previewError));
+      if (isSourceIndexUnavailableError(previewError)) {
+        setErrorMessage('');
+        setNoDataMessage(sourceIndexUnavailableMessage);
+      } else {
+        setErrorMessage(getErrorMessage(previewError));
+        setNoDataMessage('');
+      }
       setTableItems([]);
       setRowCountInfo({
         rowCount: 0,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCombinedProperties } from './use_transform_config_data';
+import { getCombinedProperties, isSourceIndexUnavailableError } from './use_transform_config_data';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 describe('getCombinedProperties', () => {
@@ -74,5 +74,28 @@ describe('getCombinedProperties', () => {
         type: 'long',
       },
     });
+  });
+});
+
+describe('isSourceIndexUnavailableError', () => {
+  test('matches transform preview source index status errors', () => {
+    expect(
+      isSourceIndexUnavailableError({
+        body: {
+          message:
+            'Bad Request: [[status_exception] Source indices have been deleted or closed.]: Source indices have been deleted or closed.',
+        },
+      })
+    ).toBe(true);
+  });
+
+  test('does not match other preview errors', () => {
+    expect(
+      isSourceIndexUnavailableError({
+        body: {
+          message: 'Bad Request: some other transform preview error',
+        },
+      })
+    ).toBe(false);
   });
 });
