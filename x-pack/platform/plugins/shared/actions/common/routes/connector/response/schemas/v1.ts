@@ -343,6 +343,7 @@ export const getConnectorSpecResponseBodySchema = schema.object({
       }),
     }),
     {
+      maxSize: 500,
       meta: {
         description: 'The actions available on this connector type.',
       },
