@@ -228,6 +228,7 @@ export interface ActionTypeCoreFields<
 > {
   id: string;
   name: string;
+  featureUsageName?: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];

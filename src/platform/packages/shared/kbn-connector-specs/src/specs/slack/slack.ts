@@ -281,6 +281,7 @@ export const Slack: ConnectorSpec = {
   metadata: {
     id: '.slack2',
     displayName: 'Slack',
+    featureUsageName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
         'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send messages in Slack',

@@ -37,6 +37,9 @@ describe('connector spec contracts', () => {
     expect(metadata.id).toMatch(CONNECTOR_ID_PATTERN);
     expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_ID_LENGTH);
     expect(metadata.displayName.trim()).not.toHaveLength(0);
+    if (metadata.featureUsageName !== undefined) {
+      expect(metadata.featureUsageName.trim()).not.toHaveLength(0);
+    }
     expect(metadata.description.trim()).not.toHaveLength(0);
     // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).
     // Non-empty entries must be valid feature ID strings.

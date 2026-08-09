@@ -89,6 +89,24 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBe(true);
   });
 
+  it('sets featureUsageName independently from the display name', () => {
+    const spec = createMockSpec({
+      metadata: {
+        id: 'connector-with-feature-usage-name',
+        displayName: 'Slack',
+        featureUsageName: 'Slack (v2)',
+        description: 'd',
+        minimumLicense: 'enterprise',
+        supportedFeatureIds: ['alerting'],
+      },
+    });
+
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(connectorType.name).toBe('Slack');
+    expect(connectorType.featureUsageName).toBe('Slack (v2)');
+  });
+
   it('sets description from metadata.description', () => {
     const spec = createMockSpec({
       metadata: {

@@ -170,6 +170,21 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    test('uses the feature usage name when it differs from the display name', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          name: 'Slack',
+          featureUsageName: 'Slack (v2)',
+          minimumLicenseRequired: 'enterprise',
+        })
+      );
+      expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
+        'Connector: Slack (v2)',
+        'enterprise'
+      );
+    });
+
     test(`doesn't register basic connector types to the licensing feature usage API`, () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(getConnectorType());
