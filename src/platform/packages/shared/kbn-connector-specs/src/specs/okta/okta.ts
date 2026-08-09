@@ -203,7 +203,7 @@ export const Okta: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.okta.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read, assign an admin role, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
+                    'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read (groups.manage is required for add/remove group membership or those calls return 403), assign an admin role that can manage users and groups, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
                 }
               ),
             },
@@ -526,7 +526,7 @@ export const Okta: ConnectorSpec = {
     addUserToGroup: {
       isTool: true,
       description:
-        'Add a user to a group (for example a quarantine group) as a remediation lever. Uses PUT and returns 204 on success.',
+        'Add a user to a group (for example a quarantine group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Uses PUT and returns 204 on success.',
       input: AddUserToGroupInputSchema,
       handler: async (ctx, input: AddUserToGroupInput) => {
         const orgUrl = getOrgUrl(ctx);
@@ -546,7 +546,7 @@ export const Okta: ConnectorSpec = {
     removeUserFromGroup: {
       isTool: true,
       description:
-        'Remove a user from a group (for example strip a privileged group) as a remediation lever. Returns 204 on success.',
+        'Remove a user from a group (for example strip a privileged group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Returns 204 on success.',
       input: RemoveUserFromGroupInputSchema,
       handler: async (ctx, input: RemoveUserFromGroupInput) => {
         const orgUrl = getOrgUrl(ctx);
@@ -677,6 +677,7 @@ export const Okta: ConnectorSpec = {
     '- `search` and `filter` must not be combined on `searchUsers`.',
     '- Okta rejects `sortBy` on `listUsers` and on `q`/`filter`-only searches; use `searchUsers` with a `search` expression when sorting.',
     '- Prefer OAuth private_key_jwt (RS256 + kid) over SSWS tokens.',
+    '- Grant okta.groups.manage (and a group-capable admin role) for addUserToGroup / removeUserFromGroup; missing scope returns HTTP 403.',
     '- If token requests fail with invalid_dpop_proof, disable Require DPoP on the Okta API Services app (Kibana does not send DPoP proofs yet).',
   ].join('\n'),
 

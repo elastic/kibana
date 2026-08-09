@@ -53,7 +53,15 @@ Authentication
 
 ## Required permissions [okta-required-permissions]
 
-Grant these OAuth scopes on the service app (or equivalent admin privileges for an SSWS token): `okta.users.manage`, `okta.groups.manage`, and `okta.logs.read`. Assign an admin role to the OAuth service app (for example User Administrator or a custom role with lifecycle and group permissions). Session revoke uses `okta.users.manage`.
+Grant these OAuth scopes on the service app (or equivalent admin privileges for an SSWS token):
+
+| Scope | Required for |
+| ----- | ------------ |
+| `okta.users.manage` | User lifecycle and credentials (`getUser`, suspend/unsuspend, deactivate/activate, sessions, factors, password actions, list/search users) |
+| `okta.groups.manage` | Group membership writes (`addUserToGroup`, `removeUserFromGroup`). Without this scope those actions return HTTP 403. |
+| `okta.logs.read` | System Log queries (`getLogs`) |
+
+Assign an admin role to the OAuth service app (**Admin roles** on the app). User Administrator covers most user actions; for group membership changes also grant a role that can manage groups (for example Group Administrator or Super Administrator), or a custom role with equivalent permissions. After changing scopes or roles, run **Test connector** again so {{kib}} obtains a new access token.
 
 ## Connector networking configuration [okta-connector-networking-configuration]
 
@@ -67,8 +75,8 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 2. Create an **API Services** app integration (**Applications > Applications > Create App Integration**).
 3. Set client authentication to **Public key / Private key**, register your public JWKS key (note the `kid`), and store the matching private key securely. When Okta shows the generated key, copy the **PEM** private key (not only the JSON public key). Okta may show the private key only once.
 4. Disable **Require Demonstrating Proof of Possession (DPoP)** on the app (see [Disable DPoP for the service app](#okta-disable-dpop)). New API Services apps often enable this by default; {{kib}} does not send DPoP proofs yet.
-5. On **Okta API Scopes**, grant `okta.users.manage`, `okta.groups.manage`, and `okta.logs.read`.
-6. Assign an admin role to the service app (**Admin roles** on the app), for example User Administrator with a resource set that covers the users you will manage.
+5. On **Okta API Scopes**, grant `okta.users.manage`, `okta.groups.manage`, and `okta.logs.read`. Do not skip `okta.groups.manage` if you plan to add or remove users from groups - user lifecycle can succeed while group membership calls fail with 403.
+6. Assign an admin role to the service app (**Admin roles** on the app). Use User Administrator (or equivalent) for lifecycle actions, and Group Administrator / Super Administrator (or a custom role with group membership permissions) when using `addUserToGroup` / `removeUserFromGroup`. Ensure the resource set covers the users and groups you will manage.
 7. In {{kib}}, create the connector with Org URL, Token URL `https://your-okta-domain.okta.com/oauth2/v1/token`, Client ID, Key ID, and private key PEM.
 
 ### Disable DPoP for the service app [okta-disable-dpop]
