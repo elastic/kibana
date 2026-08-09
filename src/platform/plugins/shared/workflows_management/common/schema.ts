@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getConnectorSpec, isSelectedActionEnabled } from '@kbn/connector-specs';
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
@@ -29,6 +28,16 @@ import { z } from '@kbn/zod/v4';
 
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
+
+// Lazily loaded — same boundary as getConnectorSchemas() to avoid eagerly pulling
+// @kbn/connector-specs at startup (see #264175).
+let _connectorSpecsModule: typeof import('@kbn/connector-specs') | null = null;
+function getConnectorSpecsModule(): typeof import('@kbn/connector-specs') {
+  if (_connectorSpecsModule === null) {
+    _connectorSpecsModule = require('@kbn/connector-specs');
+  }
+  return _connectorSpecsModule as typeof import('@kbn/connector-specs');
+}
 
 // Defers ~16 MB of zod-schema heap until the first workflow edit/execute call.
 // connector_action_schema.ts eagerly builds Maps of Zod schemas from
@@ -203,12 +212,16 @@ function convertDynamicConnectorsToContractsInternal(
 
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
-        const spec = getConnectorSpec(connectorType.actionTypeId);
+        const spec = getConnectorSpecsModule().getConnectorSpec(connectorType.actionTypeId);
         connectorType.subActions.forEach((subAction) => {
           const hasPermittedInstance =
             connectorType.instances.length === 0 ||
             connectorType.instances.some(({ config }) =>
-              isSelectedActionEnabled(subAction.name, config?.selectedActions, spec?.actions)
+              getConnectorSpecsModule().isSelectedActionEnabled(
+                subAction.name,
+                config?.selectedActions,
+                spec?.actions
+              )
             );
           if (!hasPermittedInstance) {
             return;

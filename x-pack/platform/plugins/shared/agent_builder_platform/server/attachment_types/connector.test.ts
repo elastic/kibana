@@ -230,6 +230,7 @@ describe('connector attachment type', () => {
               handler: jest.fn(),
             },
           },
+          test: { handler: jest.fn(), enabled: false },
         });
         formatSchemaForLlmMock.mockReturnValue('query (string, required): Search query');
 
