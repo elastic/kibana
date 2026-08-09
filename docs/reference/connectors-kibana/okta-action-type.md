@@ -47,8 +47,8 @@ Authentication
 | `expirePassword` | Force password change at next sign-in; optional temporary password. Parameters: `userId` (required), `tempPassword`. |
 | `addUserToGroup` | Add a user to a group (for example quarantine). Parameters: `userId`, `groupId` (required). |
 | `removeUserFromGroup` | Remove a user from a group. Parameters: `userId`, `groupId` (required). |
-| `listUsers` | List users with pagination/sort. Parameters: `limit`, `after`, `sortBy`, `sortOrder`. |
-| `searchUsers` | Find users by `q`, `search`, or `filter` (do not combine `search` and `filter`). Parameters: `q`, `search`, `filter`, `limit`, `after`. |
+| `listUsers` | List users with pagination only. Parameters: `limit`, `after`. Okta does not allow `sortBy` on list queries. |
+| `searchUsers` | Find users by `q`, `search`, or `filter` (do not combine `search` and `filter`). Parameters: `q`, `search`, `filter`, `limit`, `after`, `sortBy`, `sortOrder`. `sortBy` requires `search`. |
 | `getLogs` | Query System Log events. Parameters: `since`, `until`, `filter`, `q`, `limit`, `sortOrder`, `after`. |
 
 ## Required permissions [okta-required-permissions]

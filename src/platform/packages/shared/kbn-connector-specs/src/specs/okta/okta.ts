@@ -565,7 +565,7 @@ export const Okta: ConnectorSpec = {
     listUsers: {
       isTool: true,
       description:
-        'List users with pagination and optional sort. Use searchUsers when you have an email, login keyword, or attribute filter. Returns users plus the raw Link header for the next page when present.',
+        'List users with pagination only (limit/after). Okta does not allow sortBy on non-search list queries - use searchUsers with a search expression when you need sorting. Returns users plus the raw Link header for the next page when present.',
       input: ListUsersInputSchema,
       handler: async (ctx, input: ListUsersInput) => {
         const orgUrl = getOrgUrl(ctx);
@@ -576,8 +576,6 @@ export const Okta: ConnectorSpec = {
               params: {
                 ...(input.limit !== undefined ? { limit: input.limit } : {}),
                 ...(input.after ? { after: input.after } : {}),
-                ...(input.sortBy ? { sortBy: input.sortBy } : {}),
-                ...(input.sortOrder ? { sortOrder: input.sortOrder } : {}),
               },
             })
           );
@@ -594,7 +592,7 @@ export const Okta: ConnectorSpec = {
     searchUsers: {
       isTool: true,
       description:
-        'Find users by keyword (q), advanced search expression, or SCIM filter. Use to resolve identities in bulk from partial alert identifiers. Do not combine search and filter in one call.',
+        'Find users by keyword (q), advanced search expression, or SCIM filter. Use to resolve identities in bulk from partial alert identifiers. Do not combine search and filter in one call. sortBy/sortOrder require the search parameter (Okta rejects sort on q/filter-only or list queries).',
       input: SearchUsersInputSchema,
       handler: async (ctx, input: SearchUsersInput) => {
         const orgUrl = getOrgUrl(ctx);
@@ -608,6 +606,8 @@ export const Okta: ConnectorSpec = {
                 ...(input.filter ? { filter: input.filter } : {}),
                 ...(input.limit !== undefined ? { limit: input.limit } : {}),
                 ...(input.after ? { after: input.after } : {}),
+                ...(input.sortBy ? { sortBy: input.sortBy } : {}),
+                ...(input.sortOrder ? { sortOrder: input.sortOrder } : {}),
               },
             })
           );
@@ -675,6 +675,7 @@ export const Okta: ConnectorSpec = {
     '- Suspend already clears sessions; still call `clearUserSessions` when you need oauthTokens or forgetDevices options.',
     '- User path segments accept id, login, or unambiguous shortname - always prefer the id from `getUser` for writes.',
     '- `search` and `filter` must not be combined on `searchUsers`.',
+    '- Okta rejects `sortBy` on `listUsers` and on `q`/`filter`-only searches; use `searchUsers` with a `search` expression when sorting.',
     '- Prefer OAuth private_key_jwt (RS256 + kid) over SSWS tokens.',
     '- If token requests fail with invalid_dpop_proof, disable Require DPoP on the Okta API Services app (Kibana does not send DPoP proofs yet).',
   ].join('\n'),

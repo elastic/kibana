@@ -193,15 +193,6 @@ export const ListUsersInputSchema = lazySchema(() =>
       .max(MAX_FILTER_LENGTH)
       .optional()
       .describe('Pagination cursor from the previous response Link header (rel=next after=…).'),
-    sortBy: z
-      .string()
-      .max(128)
-      .optional()
-      .describe('Field to sort by, for example status or lastUpdated.'),
-    sortOrder: z
-      .enum(['asc', 'desc'])
-      .optional()
-      .describe('Sort direction when sortBy is set. Defaults to asc.'),
   })
 );
 export type ListUsersInput = z.infer<typeof ListUsersInputSchema>;
@@ -221,7 +212,7 @@ export const SearchUsersInputSchema = lazySchema(() =>
         .max(MAX_FILTER_LENGTH)
         .optional()
         .describe(
-          'Advanced search expression. Example: profile.email eq "alice@example.com". Prefer this for precise attribute matches.'
+          'Advanced search expression. Example: profile.email eq "alice@example.com". Prefer this for precise attribute matches. Required when using sortBy.'
         ),
       filter: z
         .string()
@@ -242,10 +233,25 @@ export const SearchUsersInputSchema = lazySchema(() =>
         .max(MAX_FILTER_LENGTH)
         .optional()
         .describe('Pagination cursor from a previous Link header.'),
+      sortBy: z
+        .string()
+        .max(128)
+        .optional()
+        .describe(
+          'Field to sort by (for example status or lastUpdated). Okta only allows sortBy with the search parameter, not with q, filter, or listUsers.'
+        ),
+      sortOrder: z
+        .enum(['asc', 'desc'])
+        .optional()
+        .describe('Sort direction when sortBy is set. Defaults to asc.'),
     })
     .refine((value) => !(value.search && value.filter), {
       message: 'Do not combine search and filter in the same Okta users request',
       path: ['filter'],
+    })
+    .refine((value) => !value.sortBy || Boolean(value.search), {
+      message: 'sortBy requires the search parameter (Okta rejects sort on non-search queries)',
+      path: ['sortBy'],
     })
 );
 export type SearchUsersInput = z.infer<typeof SearchUsersInputSchema>;

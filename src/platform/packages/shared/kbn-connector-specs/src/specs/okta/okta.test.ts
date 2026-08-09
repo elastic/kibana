@@ -344,7 +344,7 @@ describe('Okta', () => {
   });
 
   describe('listUsers and searchUsers', () => {
-    it('should list users with sort and pagination params', async () => {
+    it('should list users with pagination params only (no sortBy)', async () => {
       mockClient.get.mockResolvedValue({
         data: [{ id: '00u1' }],
         headers: { link: '<https://example.okta.com/api/v1/users?after=cursor>; rel="next"' },
@@ -353,12 +353,10 @@ describe('Okta', () => {
       const result = await Okta.actions.listUsers.handler(mockContext, {
         limit: 50,
         after: 'cursor',
-        sortBy: 'status',
-        sortOrder: 'desc',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${ORG_URL}/api/v1/users`, {
-        params: { limit: 50, after: 'cursor', sortBy: 'status', sortOrder: 'desc' },
+        params: { limit: 50, after: 'cursor' },
       });
       expect(result).toEqual({
         users: [{ id: '00u1' }],
@@ -378,6 +376,34 @@ describe('Okta', () => {
       expect(mockClient.get).toHaveBeenCalledWith(`${ORG_URL}/api/v1/users`, {
         params: { q: 'alice', search: 'profile.department eq "SOC"', limit: 25 },
       });
+    });
+
+    it('should allow sortBy with search on searchUsers', async () => {
+      mockClient.get.mockResolvedValue({ data: [], headers: {} });
+
+      await Okta.actions.searchUsers.handler(mockContext, {
+        search: 'status eq "ACTIVE"',
+        sortBy: 'lastUpdated',
+        sortOrder: 'desc',
+        limit: 10,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${ORG_URL}/api/v1/users`, {
+        params: {
+          search: 'status eq "ACTIVE"',
+          sortBy: 'lastUpdated',
+          sortOrder: 'desc',
+          limit: 10,
+        },
+      });
+    });
+
+    it('should reject sortBy without search on searchUsers input', () => {
+      const result = SearchUsersInputSchema.safeParse({
+        q: 'alice',
+        sortBy: 'lastUpdated',
+      });
+      expect(result.success).toBe(false);
     });
   });
 
