@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-server/tools/handler';
 import {
   getConnectorSpec,
+  isSelectedActionEnabled,
   isToolAction,
   OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   EARS_AUTH_ID,
@@ -29,10 +30,14 @@ import type { ConnectorToolsOptions } from './types';
 jest.mock('@kbn/connector-specs', () => ({
   ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
+  isSelectedActionEnabled: jest.fn(),
   isToolAction: jest.fn(),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
+const isSelectedActionEnabledMock = isSelectedActionEnabled as jest.MockedFunction<
+  typeof isSelectedActionEnabled
+>;
 const isToolActionMock = isToolAction as jest.MockedFunction<typeof isToolAction>;
 
 const mockExecute = jest.fn();
@@ -90,6 +95,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       test: { handler: jest.fn(), enabled: false },
     });
     isToolActionMock.mockReturnValue(true);
+    isSelectedActionEnabledMock.mockReturnValue(true);
     mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.unprompted });
     mockAskForAuthorization.mockImplementation((definition) => ({
       prompt: { type: AgentPromptType.authorization, ...definition },
