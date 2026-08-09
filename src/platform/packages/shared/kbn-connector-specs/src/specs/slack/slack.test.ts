@@ -1567,6 +1567,8 @@ describe('Slack', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = Slack.test;
+
     it('should send a test message for incoming webhook auth', async () => {
       mockClient.post.mockResolvedValue({ data: 'ok' });
       const webhookContext = {
@@ -1577,17 +1579,14 @@ describe('Slack', () => {
         },
       } as unknown as ActionContext;
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(webhookContext);
+      const result = await testSpec.handler(webhookContext);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://hooks.slack.com/services/test',
         { text: 'Elastic Slack connector test message' },
         expect.any(Object)
       );
-      expect(result.ok).toBe(true);
+      expect(result).toEqual({});
     });
 
     it('should return success when API is accessible', async () => {
@@ -1603,17 +1602,13 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/auth.test');
-      expect(result.ok).toBe(true);
-      expect(result.message).toContain('My Team');
+      expect(result).toEqual({});
     });
 
-    it('should return failure when Slack API returns error', async () => {
+    it('should throw when Slack API returns error', async () => {
       const mockResponse = {
         data: {
           ok: false,
@@ -1622,25 +1617,13 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('invalid_auth');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should return failure on network error', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!Slack.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await Slack.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });
