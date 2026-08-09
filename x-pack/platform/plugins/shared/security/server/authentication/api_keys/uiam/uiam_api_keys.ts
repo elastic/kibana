@@ -78,7 +78,14 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
+      // UIAM rejects an external key accompanied by client authentication (shared secret or mTLS).
+      // Fake requests carry internal Task Manager credentials and still require client
+      // authentication.
+      const includeClientAuthentication =
+        authorization.scheme !== 'ApiKey' || request.isFakeRequest;
+      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params, {
+        includeClientAuthentication,
+      });
 
       result = {
         id,

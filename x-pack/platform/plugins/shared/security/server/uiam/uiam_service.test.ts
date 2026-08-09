@@ -597,6 +597,26 @@ describe('UiamService', () => {
         key: 'essu_api_key_from_grant',
         description: 'api-key-from-grant',
       };
+      const mtlsUiamService = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: {
+                certificateAuthorities: '/some/ca/path',
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
+      );
+      agentSpy.mockClear();
 
       fetchSpy.mockResolvedValue({
         ok: true,
@@ -604,9 +624,13 @@ describe('UiamService', () => {
       });
 
       await expect(
-        uiamService.grantApiKey(new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'), {
-          name: 'api-key-from-grant',
-        })
+        mtlsUiamService.grantApiKey(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
+          {
+            name: 'api-key-from-grant',
+          },
+          { includeClientAuthentication: false }
+        )
       ).resolves.toEqual(mockResponse);
 
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
@@ -626,11 +650,17 @@ describe('UiamService', () => {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'Kibana/9.0.0',
-          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'ApiKey essu_api_key',
         },
         body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
+      });
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
       });
     });
 

@@ -58,6 +58,10 @@ export interface GrantUiamApiKeyRequestBody {
   };
 }
 
+export interface GrantUiamApiKeyOptions {
+  includeClientAuthentication?: boolean;
+}
+
 /**
  * Represents the response from granting an API key via UIAM.
  */
@@ -205,7 +209,8 @@ export interface UiamServicePublic {
    */
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
-    params: GrantUiamAPIKeyParams
+    params: GrantUiamAPIKeyParams,
+    options?: GrantUiamApiKeyOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -358,6 +363,8 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  #unauthenticatedDispatcher: Agent | undefined;
+  #unauthenticatedDispatcherInitialized = false;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -532,7 +539,11 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.grantApiKey}.
    */
-  async grantApiKey(authorization: HTTPAuthorizationHeader, params: GrantUiamAPIKeyParams) {
+  async grantApiKey(
+    authorization: HTTPAuthorizationHeader,
+    params: GrantUiamAPIKeyParams,
+    { includeClientAuthentication = true }: GrantUiamApiKeyOptions = {}
+  ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
     );
@@ -552,20 +563,24 @@ export class UiamService implements UiamServicePublic {
           },
         },
       };
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify(body),
+        dispatcher: includeClientAuthentication
+          ? this.#dispatcher
+          : this.#getUnauthenticatedDispatcher(),
+      };
 
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: authorization.toString(),
-          },
-          body: JSON.stringify(body),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_grant`, requestOptions)
       );
 
       this.#logger.debug(`Successfully granted API key with id ${response.id}`);
@@ -1063,14 +1078,18 @@ export class UiamService implements UiamServicePublic {
   /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
    */
-  #createFetchDispatcher() {
+  #createFetchDispatcher(includeClientCertificate = true) {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
 
     const readFile = (file: string) => readFileSync(file, 'utf8');
 
     // Read client certificate and key for mTLS from PEM files.
-    const cert = this.#config.ssl.certificate ? readFile(this.#config.ssl.certificate) : undefined;
-    const key = this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
+    const cert =
+      includeClientCertificate && this.#config.ssl.certificate
+        ? readFile(this.#config.ssl.certificate)
+        : undefined;
+    const key =
+      includeClientCertificate && this.#config.ssl.key ? readFile(this.#config.ssl.key) : undefined;
 
     // Read CA certificate(s) from the file paths defined in the config.
     const ca = certificateAuthorities
@@ -1101,6 +1120,15 @@ export class UiamService implements UiamServicePublic {
         ...(verificationMode === 'certificate' ? { checkServerIdentity: () => undefined } : {}),
       },
     });
+  }
+
+  #getUnauthenticatedDispatcher() {
+    if (!this.#unauthenticatedDispatcherInitialized) {
+      this.#unauthenticatedDispatcher = this.#createFetchDispatcher(false);
+      this.#unauthenticatedDispatcherInitialized = true;
+    }
+
+    return this.#unauthenticatedDispatcher;
   }
 
   /**

@@ -139,7 +139,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-key',
           expiration: '7d',
-        }
+        },
+        { includeClientAuthentication: false }
       );
 
       expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key');
@@ -171,7 +172,30 @@ describe('UiamAPIKeys', () => {
         }),
         {
           name: 'test-key',
-        }
+        },
+        { includeClientAuthentication: false }
+      );
+    });
+
+    it('includes client authentication when granting from an internal fake request', async () => {
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_internal_credential_123' },
+      });
+      mockUiam.grantApiKey.mockResolvedValue({
+        id: 'new_key_id',
+        key: 'essu_new_key_value',
+        description: 'My Test Key',
+      });
+
+      await uiamApiKeys.grant(request, { name: 'test-key' });
+
+      expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheme: 'ApiKey',
+          credentials: 'essu_internal_credential_123',
+        }),
+        { name: 'test-key' },
+        { includeClientAuthentication: true }
       );
     });
 
@@ -226,7 +250,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-bearer-key',
           expiration: '30d',
-        }
+        },
+        { includeClientAuthentication: true }
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });
