@@ -24,6 +24,12 @@ export type {
   WorkflowsExecutionEnginePluginStart,
 } from './types';
 
+export {
+  registerHitlLifecycleAuditor,
+  type HitlLifecycleAuditor,
+  type HitlLifecycleEvent,
+} from './step/wait_for_input_step/hitl_lifecycle_auditor';
+
 export type {
   LogsRepository,
   WorkflowLogEvent,

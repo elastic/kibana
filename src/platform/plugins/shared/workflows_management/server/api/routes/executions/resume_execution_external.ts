@@ -84,12 +84,14 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
           audit.logExecutionResumed(request, {
             executionId,
             resumedBy,
+            channel: 'external',
           });
 
           return htmlSuccess(response);
         } catch (error) {
           audit.logExecutionResumed(request, {
             executionId: request.params.executionId,
+            channel: 'external',
             error,
           });
           return handleExternalResumeError(response, error, logger);
@@ -162,12 +164,14 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
           audit.logExecutionResumed(request, {
             executionId,
             resumedBy,
+            channel: 'external',
           });
 
           return htmlSuccess(response);
         } catch (error) {
           audit.logExecutionResumed(request, {
             executionId: request.params.executionId,
+            channel: 'external',
             error,
           });
           return handleExternalResumeError(response, error, logger);

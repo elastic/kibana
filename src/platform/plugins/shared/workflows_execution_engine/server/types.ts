@@ -109,7 +109,7 @@ export type CancelAllActiveWorkflowExecutions = (params: {
   spaceId: string;
   workflowId: string;
   schedulingRequest: KibanaRequest;
-}) => Promise<void>;
+}) => Promise<{ cancelledIds: string[] }>;
 
 export type ResumeWorkflowExecution = (
   executionId: string,

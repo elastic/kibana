@@ -1495,6 +1495,7 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
       await this.initialize(coreStart);
 
+      const cancelledIds: string[] = [];
       let searchAfter: estypes.SortResults | undefined;
 
       do {
@@ -1514,18 +1515,22 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         outcomes.forEach((outcome, index) => {
-          if (outcome.status === 'rejected') {
-            const executionId = page.results[index];
-            const message =
-              outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
-            this.logger.warn(
-              `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
-            );
+          const executionId = page.results[index];
+          if (outcome.status === 'fulfilled') {
+            cancelledIds.push(executionId);
+            return;
           }
+          const message =
+            outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+          this.logger.warn(
+            `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
+          );
         });
 
         searchAfter = page.nextSearchAfter;
       } while (searchAfter !== undefined);
+
+      return { cancelledIds };
     };
 
     const resumeWorkflowExecution: ResumeWorkflowExecution = async (

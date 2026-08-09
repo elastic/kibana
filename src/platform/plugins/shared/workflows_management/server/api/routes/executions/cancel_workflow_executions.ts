@@ -46,7 +46,9 @@ export function registerCancelWorkflowExecutionsRoute({ router, api, spaces }: R
         try {
           const { workflowId } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          await api.cancelAllActiveWorkflowExecutions(workflowId, spaceId, request);
+          await api.cancelAllActiveWorkflowExecutions(workflowId, spaceId, request, {
+            channel: 'kibana_execution_view',
+          });
           return response.ok();
         } catch (error) {
           return handleRouteError(response, error);

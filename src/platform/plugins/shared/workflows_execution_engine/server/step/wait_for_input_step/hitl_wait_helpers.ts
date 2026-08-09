@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { emitHitlLifecycle } from './hitl_lifecycle_auditor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -69,4 +70,39 @@ export function shouldSkipHitlWaitEntry(stepExecutionRuntime: StepExecutionRunti
 
 export function tryEnterHitlWait(stepExecutionRuntime: StepExecutionRuntime): boolean {
   return stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+}
+
+export function emitHitlWaitingAudit(params: {
+  executionId: string;
+  stepExecutionId: string;
+  stepType: string;
+}): void {
+  emitHitlLifecycle({
+    type: 'waiting',
+    executionId: params.executionId,
+    stepExecutionId: params.stepExecutionId,
+    stepType: params.stepType,
+  });
+}
+
+export function failHitlWaitOnTimeout(params: {
+  stepExecutionRuntime: StepExecutionRuntime;
+  executionId: string;
+  stepType: string;
+  error: Error;
+}): void {
+  const { stepExecutionRuntime, executionId, stepType, error } = params;
+  const respondedAt = new Date().toISOString();
+  stepExecutionRuntime.stampHitlAudit({
+    respondedBy: 'system',
+    respondedAt,
+    channel: 'timeout',
+  });
+  emitHitlLifecycle({
+    type: 'timed_out',
+    executionId,
+    stepExecutionId: stepExecutionRuntime.stepExecutionId,
+    stepType,
+  });
+  stepExecutionRuntime.failStep(error);
 }

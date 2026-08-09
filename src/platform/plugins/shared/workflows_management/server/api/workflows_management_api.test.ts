@@ -1553,5 +1553,102 @@ steps:
         mockRequest
       );
     });
+
+    it('emits resume audit via setAuditLog on success and failure', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+
+      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+        channel: 'agent_builder',
+        stepExecutionId: 'step-exec-1',
+      });
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        resumedBy: 'user',
+        channel: 'agent_builder',
+      });
+
+      audit.logExecutionResumed.mockClear();
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(false);
+
+      await expect(
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          channel: 'inbox',
+          stepExecutionId: 'step-exec-1',
+        })
+      ).rejects.toThrow(WorkflowExecutionInvalidStatusError);
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'inbox',
+        error: expect.any(WorkflowExecutionInvalidStatusError),
+      });
+    });
+  });
+
+  describe('cancelWorkflowExecution / cancelAllActiveWorkflowExecutions audit', () => {
+    it('emits cancel audit with channel on single cancel success and failure', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+      mockWorkflowsExecutionEngine.cancelWorkflowExecution.mockResolvedValue(undefined);
+
+      await api.cancelWorkflowExecution('run-1', 'default', mockRequest, {
+        channel: 'kibana_execution_view',
+      });
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'kibana_execution_view',
+      });
+
+      audit.logExecutionCanceled.mockClear();
+      const boom = new Error('cancel failed');
+      mockWorkflowsExecutionEngine.cancelWorkflowExecution.mockRejectedValueOnce(boom);
+
+      await expect(
+        api.cancelWorkflowExecution('run-1', 'default', mockRequest, {
+          channel: 'kibana_execution_view',
+        })
+      ).rejects.toThrow(boom);
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'kibana_execution_view',
+        error: boom,
+      });
+    });
+
+    it('emits cancel audit per cancelled id from cancelAll', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
+      mockWorkflowsExecutionEngine.cancelAllActiveWorkflowExecutions.mockResolvedValue({
+        cancelledIds: ['run-a', 'run-b'],
+      });
+
+      await api.cancelAllActiveWorkflowExecutions('wf-1', 'default', mockRequest, {
+        channel: 'kibana_execution_view',
+      });
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledTimes(2);
+      expect(audit.logExecutionCanceled).toHaveBeenNthCalledWith(1, mockRequest, {
+        executionId: 'run-a',
+        channel: 'kibana_execution_view',
+      });
+      expect(audit.logExecutionCanceled).toHaveBeenNthCalledWith(2, mockRequest, {
+        executionId: 'run-b',
+        channel: 'kibana_execution_view',
+      });
+    });
   });
 });

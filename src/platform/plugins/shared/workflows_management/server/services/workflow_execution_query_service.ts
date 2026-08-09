@@ -798,7 +798,7 @@ export class WorkflowExecutionQueryService {
     }
   }
 
-  /** Returns the claimable `waitForInput` step currently blocking the run. */
+  /** Returns the claimable HITL wait step currently blocking the run. */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
       const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
@@ -808,7 +808,7 @@ export class WorkflowExecutionQueryService {
             must: [
               { term: { workflowRunId: executionId } },
               { term: { spaceId } },
-              { term: { stepType: 'waitForInput' } },
+              { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
               { term: { status: 'waiting_for_input' } },
             ],
             must_not: [

@@ -1262,7 +1262,7 @@ describe('WorkflowExecutionQueryService', () => {
         expect.arrayContaining([
           { term: { workflowRunId: 'run-1' } },
           { term: { spaceId: 'default' } },
-          { term: { stepType: 'waitForInput' } },
+          { terms: { stepType: ['waitForInput', 'waitForApproval'] } },
           { term: { status: 'waiting_for_input' } },
         ])
       );

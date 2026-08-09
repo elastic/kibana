@@ -73,6 +73,7 @@ import {
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
@@ -255,11 +256,16 @@ const isExecuteInlineWorkflowParams = (
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
   private smlLogger: Logger | null = null;
+  private audit: WorkflowManagementAuditLog | null = null;
 
   constructor(
     private readonly workflowsService: WorkflowsService,
     public readonly isWorkflowsAvailable: boolean
   ) {}
+
+  public setAuditLog(audit: WorkflowManagementAuditLog): void {
+    this.audit = audit;
+  }
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
     return this.workflowsService.getWorkflowsExecutionEngine();
@@ -876,27 +882,53 @@ export class WorkflowsManagementApi {
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { channel?: string }
   ): Promise<void> {
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
+    const channel = options?.channel;
+    try {
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      await workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
+      this.audit?.logExecutionCanceled(request, { executionId: workflowExecutionId, channel });
+    } catch (error) {
+      this.audit?.logExecutionCanceled(request, {
+        executionId: workflowExecutionId,
+        channel,
+        error,
+      });
+      throw error;
+    }
   }
 
   public async cancelAllActiveWorkflowExecutions(
     workflowId: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { channel?: string }
   ): Promise<void> {
+    const channel = options?.channel;
     const workflow = await this.getWorkflow(workflowId, spaceId);
     if (!workflow) {
       throw new WorkflowNotFoundError(workflowId);
     }
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
-      spaceId,
-      workflowId,
-      schedulingRequest: request,
-    });
+    try {
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const { cancelledIds } = await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+        spaceId,
+        workflowId,
+        schedulingRequest: request,
+      });
+      for (const executionId of cancelledIds) {
+        this.audit?.logExecutionCanceled(request, { executionId, channel });
+      }
+    } catch (error) {
+      this.audit?.logExecutionCanceled(request, {
+        executionId: workflowId,
+        channel,
+        error,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -910,28 +942,45 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    const stepExecutionId =
-      options?.stepExecutionId ??
-      (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
+    const channel = options?.channel ?? 'inbox';
+    try {
+      const stepExecutionId =
+        options?.stepExecutionId ??
+        (await this.workflowsService.getWaitingStepExecutionId(executionId, spaceId));
 
-    if (stepExecutionId) {
-      const claimed = await this.workflowsService.markStepAsResponded(
-        stepExecutionId,
-        request,
-        options?.channel ?? 'inbox',
-        spaceId
-      );
-      if (!claimed) {
-        throw new WorkflowExecutionInvalidStatusError(
-          executionId,
-          'already responded to or no longer waiting for input',
-          'waiting_for_input'
+      if (stepExecutionId) {
+        const claimed = await this.workflowsService.markStepAsResponded(
+          stepExecutionId,
+          request,
+          channel,
+          spaceId
         );
+        if (!claimed) {
+          throw new WorkflowExecutionInvalidStatusError(
+            executionId,
+            'already responded to or no longer waiting for input',
+            'waiting_for_input'
+          );
+        }
       }
-    }
 
-    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const result = await workflowsExecutionEngine.resumeWorkflowExecution(
+        executionId,
+        spaceId,
+        input,
+        request
+      );
+      this.audit?.logExecutionResumed(request, {
+        executionId,
+        resumedBy: result.resumedBy,
+        channel,
+      });
+      return result;
+    } catch (error) {
+      this.audit?.logExecutionResumed(request, { executionId, channel, error });
+      throw error;
+    }
   }
 
   /** Cross-workflow listing of active `waitForInput` step executions. */
