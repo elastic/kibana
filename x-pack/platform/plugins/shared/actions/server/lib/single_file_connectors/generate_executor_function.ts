@@ -100,10 +100,13 @@ export const generateExecutorFunction = ({
     try {
       const authType = getConnectorAuthType({ secrets, config });
       if (!isActionSupportedForAuthType(action, authType)) {
+        const customMessage =
+          authType === undefined ? undefined : action.unsupportedAuthTypeMessages?.[authType];
         throw new Error(
-          `Sub-action "${subAction}" is not supported by authentication type "${
-            authType ?? 'unknown'
-          }".`
+          customMessage ??
+            `Sub-action "${subAction}" is not supported by authentication type "${
+              authType ?? 'unknown'
+            }".`
         );
       }
 

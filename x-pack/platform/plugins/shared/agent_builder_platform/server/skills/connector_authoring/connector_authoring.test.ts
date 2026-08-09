@@ -141,7 +141,7 @@ describe('connector-authoring inline tools', () => {
       getConnectorSpecMock.mockReturnValue({
         metadata: {
           id: '.slack2',
-          displayName: 'Slack (v2)',
+          displayName: 'Slack from spec',
           description: 'Slack connector',
           minimumLicense: 'gold',
           supportedFeatureIds: ['agentBuilder'],
@@ -162,7 +162,7 @@ describe('connector-authoring inline tools', () => {
       };
       expect(data.connector_types[0]).toMatchObject({
         connector_type: '.slack2',
-        name: 'Slack (v2)',
+        name: 'Slack from spec',
       });
     });
 

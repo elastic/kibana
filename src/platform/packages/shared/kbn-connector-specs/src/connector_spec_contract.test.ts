@@ -92,6 +92,16 @@ describe('connector spec contracts', () => {
           violations.push(`${actionName} references unknown auth type ${authTypeId}`);
         }
       }
+      for (const [authTypeId, message] of Object.entries(
+        action.unsupportedAuthTypeMessages ?? {}
+      )) {
+        if (!authTypeIds.has(authTypeId)) {
+          violations.push(`${actionName} has a message for unknown auth type ${authTypeId}`);
+        }
+        if (message.trim().length === 0) {
+          violations.push(`${actionName} has an empty message for auth type ${authTypeId}`);
+        }
+      }
     }
 
     expect(violations).toEqual([]);

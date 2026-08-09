@@ -20,7 +20,7 @@ export interface StepPrefixDeprecationInfo {
 
 const SLACK_V1_DEPRECATION: StepDeprecationInfo = {
   message:
-    'The Slack V1 connector is deprecated. Create a Slack (v2) connector and migrate this step.',
+    'This Slack connector is deprecated. Create a new Slack connector and migrate this step.',
 };
 
 export const DEPRECATED_STEP_METADATA: Record<string, StepDeprecationInfo> = {

@@ -48,7 +48,7 @@
 - [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 - [SharePoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 - [SharePoint Server](/reference/connectors-kibana/sharepoint-server-action-type.md): Search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance.
-- [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
+- [Slack](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
 - [Workday](/reference/connectors-kibana/workday-action-type.md): Access Workday HR data across workers, org structure, time off, recruiting, and holidays.

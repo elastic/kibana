@@ -1,15 +1,15 @@
 ---
-navigation_title: "Slack (v2)"
+navigation_title: "Slack"
 type: reference
-description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
-  stack: preview 9.4
-  serverless: preview
+  stack: ga 9.6
+  serverless: ga
 ---
 
-# Slack (v2) connector [slack-v2-action-type]
+# Slack connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels. It supports four authentication methods: EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), Bot Token, and Incoming Webhook URL.
+The Slack connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels. It supports four authentication methods: EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), Bot Token, and Incoming Webhook URL.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -17,7 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [slack-v2-connector-configuration]
 
-Slack (v2) connectors support four authentication methods:
+Slack connectors support four authentication methods:
 
 EARS (recommended)
 :   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
@@ -39,7 +39,7 @@ The **Search messages** action requires a user token and is not available when u
 
 You can test connectors when you create or edit the connector in {{kib}}. Token-based connectors verify connectivity by calling Slack `auth.test`. Incoming webhooks send a test message to their configured channel.
 
-The Slack (v2) connector has the following actions:
+The Slack connector has the following actions:
 
 Search messages
 :   Search for messages in Slack.
@@ -182,7 +182,7 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
    - `users:read.email` — look up users by email (for **Look up user by email**)
 4. Set the **Redirect URL** to your Kibana OAuth redirect URI.
 5. Under **Basic Information**, copy the **Client ID** and **Client Secret**.
-6. In {{kib}}, enter the Client ID and Client Secret when creating the Slack (v2) connector. You will be redirected to Slack to authorize access to your workspace.
+6. In {{kib}}, enter the Client ID and Client Secret when creating the Slack connector. You will be redirected to Slack to authorize access to your workspace.
 
 ::::{note}
 Additional scopes may be required for certain actions. For example, `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.

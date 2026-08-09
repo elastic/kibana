@@ -280,13 +280,12 @@ async function sendMessageViaWebApi(
 export const Slack: ConnectorSpec = {
   metadata: {
     id: '.slack2',
-    displayName: 'Slack (v2)',
+    displayName: 'Slack',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
         'Search messages, list channels and users, read conversation history, list and look up files, look up users by email, and send messages in Slack',
     }),
     minimumLicense: 'enterprise',
-    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
   },
@@ -374,6 +373,12 @@ export const Slack: ConnectorSpec = {
     searchMessages: {
       isTool: true,
       supportedAuthTypes: SLACK_USER_TOKEN_AUTH_TYPES,
+      unsupportedAuthTypeMessages: {
+        bearer: i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
+          defaultMessage:
+            'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
+        }),
+      },
       description:
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,

@@ -172,9 +172,7 @@ describe('getAvailableConnectors', () => {
       ]),
     };
     const actionsClientWithRequest = {
-      listTypes: jest
-        .fn()
-        .mockResolvedValue([mockActionType({ id: '.slack2', name: 'Slack (v2)' })]),
+      listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.slack2', name: 'Slack' })]),
     };
 
     const result = await getAvailableConnectors({

@@ -49,8 +49,9 @@ describe('Slack', () => {
 
   it('should have correct metadata', () => {
     expect(Slack.metadata.id).toBe('.slack2');
-    expect(Slack.metadata.displayName).toBe('Slack (v2)');
+    expect(Slack.metadata.displayName).toBe('Slack');
     expect(Slack.metadata.minimumLicense).toBe('enterprise');
+    expect(Slack.metadata.isTechnicalPreview).toBeUndefined();
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
     expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
   });
@@ -204,11 +205,14 @@ describe('Slack', () => {
       ).rejects.toThrow('Slack searchMessages error: invalid_auth');
     });
 
-    it('supports only user-token auth types', () => {
+    it('declares user-token auth types and a descriptive bot-token error', () => {
       expect(Slack.actions.searchMessages.supportedAuthTypes).toEqual([
         'ears',
         'oauth_authorization_code',
       ]);
+      expect(Slack.actions.searchMessages.unsupportedAuthTypeMessages?.bearer).toBe(
+        'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.'
+      );
     });
   });
 

@@ -213,9 +213,12 @@ describe('generateExecutorFunction', () => {
   });
 
   describe('authentication constraints', () => {
-    const makeConstrainedActions = (): ConnectorSpec['actions'] => ({
+    const makeConstrainedActions = (
+      unsupportedAuthTypeMessages?: Readonly<Record<string, string>>
+    ): ConnectorSpec['actions'] => ({
       constrainedAction: {
         supportedAuthTypes: ['oauth'],
+        ...(unsupportedAuthTypeMessages ? { unsupportedAuthTypeMessages } : {}),
         input: {} as never,
         handler: mockHandler,
       },
@@ -250,6 +253,28 @@ describe('generateExecutorFunction', () => {
       expect(result).toEqual({
         status: 'error',
         message: 'Sub-action "constrainedAction" is not supported by authentication type "bearer".',
+        actionId: connectorId,
+      });
+      expect(mockHandler).not.toHaveBeenCalled();
+      expect(mockGetAxiosInstanceWithAuth).not.toHaveBeenCalled();
+    });
+
+    it('uses the custom message for an unsupported auth type when provided', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeConstrainedActions({
+          bearer: 'Use OAuth to run this action.',
+        }),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        secrets: { authType: 'bearer' },
+      });
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'Use OAuth to run this action.',
         actionId: connectorId,
       });
       expect(mockHandler).not.toHaveBeenCalled();

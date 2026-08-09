@@ -217,6 +217,7 @@ export interface ConnectorPolicies {
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   supportedAuthTypes?: readonly string[];
+  unsupportedAuthTypeMessages?: Readonly<Record<string, string>>;
   input: z.ZodSchema<TInput>;
   output?: z.ZodSchema<TOutput>;
   error?: z.ZodSchema<TError>;

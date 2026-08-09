@@ -30,7 +30,7 @@ const createPropInfo = (path: string[], value: unknown, start: number): StepProp
 const connectorTypes: Record<string, ConnectorTypeInfo> = {
   '.slack2': {
     actionTypeId: '.slack2',
-    displayName: 'Slack (v2)',
+    displayName: 'Slack',
     enabled: true,
     enabledInConfig: true,
     enabledInLicense: true,

@@ -105,7 +105,7 @@ describe('validateDeprecatedStepTypes', () => {
       expect(results[0]).toMatchObject({
         owner: 'deprecated-step-validation',
         severity: 'warning',
-        message: expect.stringContaining('Create a Slack (v2) connector'),
+        message: expect.stringContaining('Create a new Slack connector'),
       });
     }
   );

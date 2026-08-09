@@ -259,7 +259,7 @@ describe('getCompletionItemProvider', () => {
         dynamicConnectorTypes: {
           '.slack2': {
             actionTypeId: '.slack2',
-            displayName: 'Slack (v2)',
+            displayName: 'Slack',
             enabled: true,
             enabledInConfig: true,
             enabledInLicense: true,
