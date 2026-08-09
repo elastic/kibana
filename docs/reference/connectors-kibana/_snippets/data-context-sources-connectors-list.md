@@ -45,7 +45,7 @@
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
 - [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
 - [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
-- [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
+- [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search, read, create, update, and delete records, incidents, and events in ServiceNow.
 - [SharePoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 - [SharePoint Server](/reference/connectors-kibana/sharepoint-server-action-type.md): Search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.

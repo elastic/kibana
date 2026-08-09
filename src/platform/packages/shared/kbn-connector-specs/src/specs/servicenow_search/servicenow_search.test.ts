@@ -27,6 +27,8 @@ describe('ServicenowSearch', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
+    patch: jest.fn(),
+    delete: jest.fn(),
     request: jest.fn(),
   };
 
@@ -694,6 +696,555 @@ describe('ServicenowSearch', () => {
           table: 'incident',
         })
       ).rejects.toThrow('Access denied');
+    });
+  });
+
+  describe('createRecord action', () => {
+    it('should create a record in the given table', async () => {
+      const mockResponse = {
+        data: {
+          result: { sys_id: 'new-rec-1', number: 'CHG0010001', short_description: 'Deploy patch' },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.createRecord.handler(mockContext, {
+        table: 'change_request',
+        fields: { short_description: 'Deploy patch', category: 'Software' },
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/change_request',
+        { short_description: 'Deploy patch', category: 'Software' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Forbidden'));
+
+      await expect(
+        ServicenowSearch.actions.createRecord.handler(mockContext, {
+          table: 'incident',
+          fields: { short_description: 'Test' },
+        })
+      ).rejects.toThrow('Forbidden');
+    });
+  });
+
+  describe('updateRecord action', () => {
+    it('should update a record by sys_id', async () => {
+      const mockResponse = {
+        data: { result: { sys_id: 'rec-1', state: '2', short_description: 'Updated' } },
+      };
+      mockClient.patch.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.updateRecord.handler(mockContext, {
+        table: 'change_request',
+        sysId: 'rec-1',
+        fields: { state: '2' },
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.patch).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/change_request/rec-1',
+        { state: '2' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.patch.mockRejectedValue(new Error('Record not found'));
+
+      await expect(
+        ServicenowSearch.actions.updateRecord.handler(mockContext, {
+          table: 'incident',
+          sysId: 'nonexistent',
+          fields: { state: '2' },
+        })
+      ).rejects.toThrow('Record not found');
+    });
+  });
+
+  describe('createIncident action', () => {
+    it('should create an incident with required and optional fields', async () => {
+      const mockResponse = {
+        data: {
+          result: {
+            sys_id: 'inc-new-1',
+            number: 'INC0020001',
+            short_description: 'Cannot login',
+            impact: '2',
+            urgency: '2',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.createIncident.handler(mockContext, {
+        short_description: 'Cannot login',
+        impact: '2',
+        urgency: '2',
+        caller_id: 'john.doe',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident',
+        { short_description: 'Cannot login', impact: '2', urgency: '2', caller_id: 'john.doe' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should create an incident with only short_description', async () => {
+      const mockResponse = {
+        data: { result: { sys_id: 'inc-new-2', number: 'INC0020002' } },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await ServicenowSearch.actions.createIncident.handler(mockContext, {
+        short_description: 'Printer not working',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident',
+        { short_description: 'Printer not working' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Validation error'));
+
+      await expect(
+        ServicenowSearch.actions.createIncident.handler(mockContext, {
+          short_description: 'Test incident',
+        })
+      ).rejects.toThrow('Validation error');
+    });
+  });
+
+  describe('updateIncident action', () => {
+    it('should update an incident by sys_id', async () => {
+      const mockResponse = {
+        data: { result: { sys_id: 'inc-1', state: '2', assigned_to: 'jane.smith' } },
+      };
+      mockClient.patch.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.updateIncident.handler(mockContext, {
+        sysId: 'inc-1',
+        state: '2',
+        assigned_to: 'jane.smith',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.patch).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident/inc-1',
+        { state: '2', assigned_to: 'jane.smith' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.patch.mockRejectedValue(new Error('Incident not found'));
+
+      await expect(
+        ServicenowSearch.actions.updateIncident.handler(mockContext, {
+          sysId: 'nonexistent',
+          state: '2',
+        })
+      ).rejects.toThrow('Incident not found');
+    });
+  });
+
+  describe('addComment action', () => {
+    it('should add a customer-visible comment to a record', async () => {
+      const mockResponse = {
+        data: { result: { sys_id: 'inc-1', comments: 'User confirmed VPN issue on Monday' } },
+      };
+      mockClient.patch.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.addComment.handler(mockContext, {
+        table: 'incident',
+        sysId: 'inc-1',
+        comment: 'User confirmed VPN issue on Monday',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.patch).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident/inc-1',
+        { comments: 'User confirmed VPN issue on Monday' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.patch.mockRejectedValue(new Error('Record not found'));
+
+      await expect(
+        ServicenowSearch.actions.addComment.handler(mockContext, {
+          table: 'incident',
+          sysId: 'nonexistent',
+          comment: 'test',
+        })
+      ).rejects.toThrow('Record not found');
+    });
+  });
+
+  describe('addWorkNote action', () => {
+    it('should add an internal work note to a record', async () => {
+      const mockResponse = {
+        data: { result: { sys_id: 'inc-1', work_notes: 'Assigned to network team' } },
+      };
+      mockClient.patch.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.addWorkNote.handler(mockContext, {
+        table: 'incident',
+        sysId: 'inc-1',
+        workNote: 'Assigned to network team',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.patch).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident/inc-1',
+        { work_notes: 'Assigned to network team' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.patch.mockRejectedValue(new Error('Access denied'));
+
+      await expect(
+        ServicenowSearch.actions.addWorkNote.handler(mockContext, {
+          table: 'incident',
+          sysId: 'inc-1',
+          workNote: 'test',
+        })
+      ).rejects.toThrow('Access denied');
+    });
+  });
+
+  describe('closeIncident action', () => {
+    it('should close an incident with state 6 (Resolved)', async () => {
+      const mockResponse = {
+        data: { result: { sys_id: 'inc-1', state: '6', close_code: 'Solved (Permanently)' } },
+      };
+      mockClient.patch.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.closeIncident.handler(mockContext, {
+        sysId: 'inc-1',
+        closeCode: 'Solved (Permanently)',
+        closeNotes: 'Reinstalled VPN client and verified connectivity',
+        state: '6',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.patch).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident/inc-1',
+        {
+          state: '6',
+          close_code: 'Solved (Permanently)',
+          close_notes: 'Reinstalled VPN client and verified connectivity',
+        },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.patch.mockRejectedValue(new Error('Invalid state transition'));
+
+      await expect(
+        ServicenowSearch.actions.closeIncident.handler(mockContext, {
+          sysId: 'inc-1',
+          closeCode: 'Solved',
+          closeNotes: 'Fixed',
+          state: '6',
+        })
+      ).rejects.toThrow('Invalid state transition');
+    });
+  });
+
+  describe('createSecurityIncident action', () => {
+    it('should create a security incident in sn_si_incident', async () => {
+      const mockResponse = {
+        data: {
+          result: {
+            sys_id: 'si-new-1',
+            number: 'SIR0010001',
+            short_description: 'Phishing campaign detected',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.createSecurityIncident.handler(mockContext, {
+        short_description: 'Phishing campaign detected',
+        priority: '2',
+        category: 'Phishing',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/sn_si_incident',
+        { short_description: 'Phishing campaign detected', priority: '2', category: 'Phishing' },
+        { params: { sysparm_display_value: 'true' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Table not found'));
+
+      await expect(
+        ServicenowSearch.actions.createSecurityIncident.handler(mockContext, {
+          short_description: 'Test security incident',
+        })
+      ).rejects.toThrow('Table not found');
+    });
+  });
+
+  describe('createEvent action', () => {
+    it('should send an ITOM event with required fields', async () => {
+      const mockResponse = { data: { result: 'inserted 1 events' } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await ServicenowSearch.actions.createEvent.handler(mockContext, {
+        source: 'Elastic',
+        type: 'high_cpu',
+        node: 'web-server-01',
+        severity: '2',
+        description: 'CPU usage exceeded 95%',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/em/event',
+        {
+          records: [
+            {
+              source: 'Elastic',
+              type: 'high_cpu',
+              node: 'web-server-01',
+              severity: '2',
+              description: 'CPU usage exceeded 95%',
+            },
+          ],
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should serialize additional_info as JSON string', async () => {
+      const mockResponse = { data: { result: 'inserted 1 events' } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await ServicenowSearch.actions.createEvent.handler(mockContext, {
+        source: 'Elastic',
+        type: 'alert',
+        additional_info: { alert_id: 'a-123', severity_label: 'critical' },
+      });
+
+      const callArgs = mockClient.post.mock.calls[0];
+      const body = callArgs[1] as { records: Array<Record<string, unknown>> };
+      expect(typeof body.records[0].additional_info).toBe('string');
+      expect(JSON.parse(body.records[0].additional_info as string)).toEqual({
+        alert_id: 'a-123',
+        severity_label: 'critical',
+      });
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Event Management not enabled'));
+
+      await expect(
+        ServicenowSearch.actions.createEvent.handler(mockContext, {
+          source: 'Elastic',
+          type: 'test_event',
+        })
+      ).rejects.toThrow('Event Management not enabled');
+    });
+  });
+
+  describe('uploadAttachment action', () => {
+    it('should upload a base64-encoded file to a record', async () => {
+      const mockResponse = {
+        data: {
+          result: {
+            sys_id: 'att-new-1',
+            file_name: 'screenshot.png',
+            content_type: 'image/png',
+            size_bytes: '1024',
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.uploadAttachment.handler(mockContext, {
+        tableName: 'incident',
+        tableSysId: 'inc-1',
+        fileName: 'screenshot.png',
+        contentType: 'image/png',
+        base64Content:
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      })) as ServiceNowRecordResponse;
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/attachment/file',
+        expect.any(Buffer),
+        expect.objectContaining({
+          params: { table_name: 'incident', table_sys_id: 'inc-1', file_name: 'screenshot.png' },
+          headers: { 'Content-Type': 'image/png' },
+        })
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.post.mockRejectedValue(new Error('Attachment upload failed'));
+
+      await expect(
+        ServicenowSearch.actions.uploadAttachment.handler(mockContext, {
+          tableName: 'incident',
+          tableSysId: 'inc-1',
+          fileName: 'file.txt',
+          contentType: 'text/plain',
+          base64Content: 'aGVsbG8=',
+        })
+      ).rejects.toThrow('Attachment upload failed');
+    });
+  });
+
+  describe('deleteRecord action', () => {
+    it('should delete a record and return confirmation', async () => {
+      mockClient.delete.mockResolvedValue({ status: 204, data: '' });
+
+      const result = (await ServicenowSearch.actions.deleteRecord.handler(mockContext, {
+        table: 'incident',
+        sysId: 'inc-to-delete',
+      })) as { deleted: boolean; table: string; sysId: string };
+
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/incident/inc-to-delete'
+      );
+      expect(result).toEqual({ deleted: true, table: 'incident', sysId: 'inc-to-delete' });
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.delete.mockRejectedValue(new Error('Forbidden'));
+
+      await expect(
+        ServicenowSearch.actions.deleteRecord.handler(mockContext, {
+          table: 'incident',
+          sysId: 'inc-1',
+        })
+      ).rejects.toThrow('Forbidden');
+    });
+  });
+
+  describe('getChoices action', () => {
+    it('should return choice values for an incident field', async () => {
+      const mockResponse = {
+        data: {
+          result: [
+            { value: '1', label: 'New', sequence: '0' },
+            { value: '2', label: 'In Progress', sequence: '1' },
+            { value: '6', label: 'Resolved', sequence: '2' },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.getChoices.handler(mockContext, {
+        tableName: 'incident',
+        fieldName: 'state',
+      })) as ServiceNowListResponse;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/sys_choice',
+        {
+          params: {
+            sysparm_query: 'name=incident^element=state^language=en^inactive=false',
+            sysparm_fields: 'value,label,sequence',
+            sysparm_display_value: 'true',
+            sysparm_limit: 100,
+          },
+        }
+      );
+      expect(result.result).toHaveLength(3);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        ServicenowSearch.actions.getChoices.handler(mockContext, {
+          tableName: 'incident',
+          fieldName: 'state',
+        })
+      ).rejects.toThrow('Unauthorized');
+    });
+  });
+
+  describe('queryUsers action', () => {
+    it('should search users by query string', async () => {
+      const mockResponse = {
+        data: {
+          result: [
+            {
+              sys_id: 'user-1',
+              user_name: 'john.doe',
+              name: 'John Doe',
+              email: 'john.doe@example.com',
+              active: 'true',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.queryUsers.handler(mockContext, {
+        query: 'john',
+        limit: 10,
+      })) as ServiceNowListResponse;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/sys_user',
+        {
+          params: {
+            sysparm_limit: 10,
+            sysparm_fields: 'sys_id,user_name,name,email,department,title,active',
+            sysparm_display_value: 'true',
+            sysparm_query: 'nameLIKEjohn^ORemailLIKEjohn^ORuser_nameLIKEjohn',
+          },
+        }
+      );
+      expect(result.result).toHaveLength(1);
+    });
+
+    it('should list users without a query', async () => {
+      const mockResponse = { data: { result: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await ServicenowSearch.actions.queryUsers.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/sys_user',
+        {
+          params: {
+            sysparm_limit: 20,
+            sysparm_fields: 'sys_id,user_name,name,email,department,title,active',
+            sysparm_display_value: 'true',
+          },
+        }
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Forbidden'));
+
+      await expect(
+        ServicenowSearch.actions.queryUsers.handler(mockContext, { query: 'admin' })
+      ).rejects.toThrow('Forbidden');
     });
   });
 
