@@ -69,7 +69,7 @@ export const getAvailableConnectors = async (params: {
   const connectorTypes: Record<string, ConnectorTypeInfo> = {};
 
   actionTypes.forEach((actionType) => {
-    const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
+    const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id] ?? [];
 
     connectorTypes[actionType.id] = {
       actionTypeId: actionType.id,
@@ -79,7 +79,7 @@ export const getAvailableConnectors = async (params: {
       enabledInConfig: actionType.enabledInConfig,
       enabledInLicense: actionType.enabledInLicense,
       minimumLicenseRequired: actionType.minimumLicenseRequired,
-      ...(subActions && { subActions }),
+      subActions,
     };
   });
 

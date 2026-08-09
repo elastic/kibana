@@ -67,7 +67,10 @@ describe('getAvailableConnectors', () => {
       request,
     });
 
-    expect(result.connectorTypes['.email'].instances).toEqual([]);
+    expect(result.connectorTypes['.email']).toMatchObject({
+      instances: [],
+      subActions: [],
+    });
     expect(result.totalConnectors).toBe(0);
   });
 
