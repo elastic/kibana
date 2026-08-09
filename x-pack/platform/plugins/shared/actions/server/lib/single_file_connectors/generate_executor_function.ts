@@ -12,6 +12,7 @@ import {
   getFinitePositiveNumber,
   getHeaderValue,
   isActionSupportedForAuthType,
+  TEST_CONNECTOR_SUB_ACTION,
 } from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
@@ -102,11 +103,22 @@ export const generateExecutorFunction = ({
       if (!isActionSupportedForAuthType(action, authType)) {
         const customMessage =
           authType === undefined ? undefined : action.unsupportedAuthTypeMessages?.[authType];
+        const availableSubActions = Object.entries(actions)
+          .filter(
+            ([name, candidate]) =>
+              name !== TEST_CONNECTOR_SUB_ACTION &&
+              isActionSupportedForAuthType(candidate, authType)
+          )
+          .map(([name]) => `"${name}"`);
+        const availableSubActionsMessage =
+          availableSubActions.length > 0
+            ? ` Available sub-actions: ${availableSubActions.join(', ')}.`
+            : '';
         throw new Error(
           customMessage ??
             `Sub-action "${subAction}" is not supported by authentication type "${
               authType ?? 'unknown'
-            }".`
+            }".${availableSubActionsMessage}`
         );
       }
 

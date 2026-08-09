@@ -222,6 +222,15 @@ describe('generateExecutorFunction', () => {
         input: {} as never,
         handler: mockHandler,
       },
+      availableAction: {
+        supportedAuthTypes: ['bearer'],
+        input: {} as never,
+        handler: mockHandler,
+      },
+      [TEST_CONNECTOR_SUB_ACTION]: {
+        input: {} as never,
+        handler: mockHandler,
+      },
     });
 
     it('executes when the configured auth type is supported', async () => {
@@ -252,7 +261,8 @@ describe('generateExecutorFunction', () => {
 
       expect(result).toEqual({
         status: 'error',
-        message: 'Sub-action "constrainedAction" is not supported by authentication type "bearer".',
+        message:
+          'Sub-action "constrainedAction" is not supported by authentication type "bearer". Available sub-actions: "availableAction".',
         actionId: connectorId,
       });
       expect(mockHandler).not.toHaveBeenCalled();
