@@ -6,7 +6,7 @@
  */
 
 import type { RuleChangeHistoryDetail } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import { RULE_RESPONSE } from '../rules/rule_oas_shared_examples';
 import { buildOasOperation } from '../oas_utils';
 import type { AlertingOasOperationObject, OasExampleEntry } from '../oas_types';
@@ -39,7 +39,7 @@ export const RULE_CHANGE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'ruleChangeNotFound',
   summary: 'No change-history event exists for the given ID',
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
+    code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
     error: 'Not Found',
     message: 'Rule change with event id "missing-event" not found for rule "rule-1"',
     details: { rule_id: 'rule-1', event_id: 'missing-event' },
