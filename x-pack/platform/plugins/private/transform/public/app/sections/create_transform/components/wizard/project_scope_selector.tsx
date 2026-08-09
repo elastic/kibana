@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFormRow, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFormRow, EuiPopover, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
   getSelectedProjectIdsFromProjectRouting,
@@ -123,16 +123,18 @@ export const ProjectScopeSelector = ({
       <EuiPopover
         aria-label={projectScopeLabel}
         button={
-          <EuiButtonEmpty
+          <EuiButton
+            color="text"
             data-test-subj="transformProjectScopePicker"
-            disabled={isLoading || Boolean(error)}
-            iconType="arrowDown"
-            iconSide="right"
+            fullWidth
+            iconType="crossProjectSearch"
+            isDisabled={isLoading || Boolean(error)}
+            isLoading={isLoading}
             onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-            size="s"
+            size="m"
           >
             {buttonLabel}
-          </EuiButtonEmpty>
+          </EuiButton>
         }
         closePopover={() => setIsPopoverOpen(false)}
         isOpen={isPopoverOpen}
