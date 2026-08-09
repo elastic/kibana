@@ -22,7 +22,7 @@ export type {
   CPSAppAccessResolver,
 } from './types';
 export type { ProjectRoutingValue } from '@kbn/cps-common';
-export { ProjectPicker } from './components/project_picker';
+export { ProjectPicker, DisabledProjectPicker } from './components/project_picker';
 export { ProjectPicker as ProjectScopePicker } from './components/project_picker_update/project_picker';
 export { ProjectPickerContent } from './components/project_picker_content';
 export { ProjectPickerContainer } from './components/project_picker_container';
