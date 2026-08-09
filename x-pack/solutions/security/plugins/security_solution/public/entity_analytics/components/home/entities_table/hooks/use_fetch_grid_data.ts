@@ -25,6 +25,14 @@ import {
 } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 import { DataViewContext } from '..';
+import { getIdentityEsHits } from '../../facelift/data';
+import { useFaceliftFilter } from '../../facelift/filter_context';
+
+/**
+ * EA Facelift design prototype: feed the production Entities table UI with
+ * static mock documents instead of querying Elasticsearch.
+ */
+const USE_FACELIFT_MOCK_ENTITIES = true;
 
 interface UseEntitiesOptions extends BaseEsQuery {
   sort: string[][];
@@ -99,14 +107,37 @@ export function useFetchGridData(options: UseEntitiesOptions) {
   } = useKibana().services;
 
   const { dataView } = useContext(DataViewContext);
+  const activeFilter = useFaceliftFilter();
 
   const dataViewIndexPattern = useMemo(() => {
     return dataView?.getIndexPattern();
   }, [dataView]);
 
+  const faceliftFilterKey = USE_FACELIFT_MOCK_ENTITIES
+    ? activeFilter
+      ? JSON.stringify(activeFilter)
+      : 'none'
+    : undefined;
+
   return useInfiniteQuery(
-    [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GRID_DATA, { params: options }],
+    [
+      QUERY_KEY_ENTITY_ANALYTICS,
+      QUERY_KEY_GRID_DATA,
+      USE_FACELIFT_MOCK_ENTITIES ? 'facelift-mock' : { params: options },
+      faceliftFilterKey,
+    ],
     async ({ pageParam }) => {
+      if (USE_FACELIFT_MOCK_ENTITIES) {
+        const page = getIdentityEsHits(activeFilter).map((hit) =>
+          buildDataTableRecord(hit as unknown as EsHitRecord)
+        );
+        return {
+          page,
+          total: page.length,
+          inspect: { dsl: ['facelift-mock-entities'], response: ['{}'] },
+        };
+      }
+
       const queryParams = getEntitiesQuery(options, pageParam, dataViewIndexPattern);
       const {
         rawResponse,
@@ -124,10 +155,10 @@ export function useFetchGridData(options: UseEntitiesOptions) {
       };
     },
     {
-      enabled: options.enabled && !!dataViewIndexPattern,
+      enabled: options.enabled && (USE_FACELIFT_MOCK_ENTITIES || !!dataViewIndexPattern),
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      getNextPageParam: getEntitiesNextPageParam,
+      getNextPageParam: USE_FACELIFT_MOCK_ENTITIES ? () => undefined : getEntitiesNextPageParam,
     }
   );
 }

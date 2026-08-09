@@ -5,19 +5,47 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useQuery } from '@kbn/react-query';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../api';
+import { USE_FACELIFT_MOCK_FLYOUT } from '../../components/home/facelift/flyout_data';
 
 export const ANOMALY_PRIVILEGES_QUERY_KEY = 'anomaly-privileges';
 
+const FACELIFT_MOCK_ANOMALY_PRIVILEGES: EntityAnalyticsPrivileges = {
+  has_all_required: true,
+  privileges: {
+    elasticsearch: {
+      cluster: {},
+      index: {},
+    },
+    kibana: {},
+  },
+};
+
 export const useAnomalyPrivileges = (enabled = true) => {
   const { fetchAnomalyPrivileges } = useEntityAnalyticsRoutes();
-  return useQuery<EntityAnalyticsPrivileges, SecurityAppError>({
+  const query = useQuery<EntityAnalyticsPrivileges, SecurityAppError>({
     queryKey: [ANOMALY_PRIVILEGES_QUERY_KEY],
     queryFn: fetchAnomalyPrivileges,
-    enabled,
+    enabled: enabled && !USE_FACELIFT_MOCK_FLYOUT,
     retry: 0,
   });
+
+  return useMemo(() => {
+    if (!USE_FACELIFT_MOCK_FLYOUT || !enabled) {
+      return query;
+    }
+    return {
+      ...query,
+      data: FACELIFT_MOCK_ANOMALY_PRIVILEGES,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      status: 'success' as const,
+    };
+  }, [enabled, query]);
 };

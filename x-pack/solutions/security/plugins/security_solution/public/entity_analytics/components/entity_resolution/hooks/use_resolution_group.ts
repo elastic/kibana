@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import {
+  USE_FACELIFT_MOCK_FLYOUT,
+  getFaceliftResolutionGroup,
+} from '../../home/facelift/flyout_data';
 
 export const RESOLUTION_GROUP_ROUTE = ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP;
 export const RESOLUTION_GROUP_QUERY_KEY = 'resolution-group';
@@ -27,7 +32,10 @@ interface UseResolutionGroupOptions {
 export const useResolutionGroup = (entityId: string, options?: UseResolutionGroupOptions) => {
   const { http } = useKibana().services;
 
-  return useQuery<ResolutionGroup, IHttpFetchError>({
+  const mockData =
+    USE_FACELIFT_MOCK_FLYOUT && entityId ? getFaceliftResolutionGroup(entityId) : null;
+
+  const query = useQuery<ResolutionGroup, IHttpFetchError>({
     queryKey: [RESOLUTION_GROUP_QUERY_KEY, entityId],
     queryFn: () =>
       http.fetch<ResolutionGroup>(RESOLUTION_GROUP_ROUTE, {
@@ -35,7 +43,22 @@ export const useResolutionGroup = (entityId: string, options?: UseResolutionGrou
         method: 'GET',
         query: { entity_id: entityId },
       }),
-    enabled: options?.enabled !== false && !!entityId,
+    enabled: options?.enabled !== false && !!entityId && !mockData,
     refetchOnWindowFocus: false,
   });
+
+  return useMemo(() => {
+    if (!mockData) {
+      return query;
+    }
+    return {
+      ...query,
+      data: mockData,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      status: 'success' as const,
+    };
+  }, [mockData, query]);
 };

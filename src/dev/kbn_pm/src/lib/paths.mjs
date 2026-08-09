@@ -8,8 +8,9 @@
  */
 
 import Path from 'path';
+import { fileURLToPath } from 'url';
 
 export const REPO_ROOT = Path.resolve(
-  Path.dirname(new URL(import.meta.url).pathname),
+  Path.dirname(fileURLToPath(import.meta.url)),
   '../../../../..'
 );

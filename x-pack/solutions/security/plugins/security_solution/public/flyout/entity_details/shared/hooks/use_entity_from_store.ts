@@ -17,6 +17,10 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import {
+  USE_FACELIFT_MOCK_FLYOUT,
+  getFaceliftEntityStoreRecord,
+} from '../../../../entity_analytics/components/home/facelift/flyout_data';
 
 export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -201,6 +205,10 @@ export function useEntityFromStore(
 
   const storeFilter = documentFilter ?? identityTermsFilter;
 
+  // EA Facelift prototype: serve rich Entity Store docs instead of querying ES.
+  const mockRecord =
+    USE_FACELIFT_MOCK_FLYOUT && !skip ? getFaceliftEntityStoreRecord(entityId) : null;
+
   const entityStoreFilterKey = useMemo(() => {
     if (entityId) {
       return `id:${entityId}`;
@@ -249,11 +257,11 @@ export function useEntityFromStore(
         },
       });
     },
-    enabled: !skip && (Boolean(entityId) || Boolean(storeFilter)),
+    enabled: !skip && !mockRecord && (Boolean(entityId) || Boolean(storeFilter)),
   });
 
   const { data, isLoading, isInitialLoading, error, refetch } = queryResult;
-  const record = data?.records?.[0] as HostEntity | UserEntity | undefined;
+  const record = (mockRecord ?? data?.records?.[0]) as HostEntity | UserEntity | ServiceEntity | undefined;
   const entityField = record?.entity;
 
   const firstSeen = entityField?.lifecycle?.first_seen ?? null;
@@ -279,9 +287,9 @@ export function useEntityFromStore(
       entityRecord: record ?? null,
       firstSeen,
       lastSeen,
-      isLoading,
-      isInitialLoading,
-      error: error as IHttpFetchError | null,
+      isLoading: mockRecord ? false : isLoading,
+      isInitialLoading: mockRecord ? false : isInitialLoading,
+      error: mockRecord ? null : (error as IHttpFetchError | null),
       inspect: data?.inspect,
       refetch,
     }),
@@ -295,6 +303,7 @@ export function useEntityFromStore(
       error,
       data?.inspect,
       refetch,
+      mockRecord,
     ]
   );
 }

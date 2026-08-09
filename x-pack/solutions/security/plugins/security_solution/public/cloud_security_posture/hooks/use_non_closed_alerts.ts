@@ -11,6 +11,10 @@ import { useSignalIndex } from '../../detections/containers/detection_engine/ale
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
 import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  USE_FACELIFT_MOCK_FLYOUT,
+  getFaceliftAlertsByStatus,
+} from '../../entity_analytics/components/home/facelift/flyout_data';
 
 export const useNonClosedAlerts = ({
   identityFields,
@@ -35,6 +39,12 @@ export const useNonClosedAlerts = ({
    */
   entityType?: string;
 }) => {
+  const mockEntityId = entityRecord?.entity?.id ?? identityFields['entity.id'];
+  const mockAlerts =
+    USE_FACELIFT_MOCK_FLYOUT && !skip && mockEntityId
+      ? getFaceliftAlertsByStatus(mockEntityId)
+      : null;
+
   const { signalIndexName } = useSignalIndex();
 
   const { items: alertsData } = useAlertsByStatus({
@@ -46,8 +56,16 @@ export const useNonClosedAlerts = ({
     to,
     from,
     additionalFilters,
-    skip,
+    skip: skip || Boolean(mockAlerts),
   });
+
+  if (mockAlerts) {
+    const filteredAlertsData = mockAlerts as ParsedAlertsData;
+    return {
+      hasNonClosedAlerts: true,
+      filteredAlertsData,
+    };
+  }
 
   const filteredAlertsData: ParsedAlertsData = alertsData
     ? Object.fromEntries(Object.entries(alertsData).filter(([key]) => key !== FILTER_CLOSED))

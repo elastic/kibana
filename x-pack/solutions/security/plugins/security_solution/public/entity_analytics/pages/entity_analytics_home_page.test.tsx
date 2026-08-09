@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { useLoadConnectors } from '@kbn/inference-connectors';
 import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
-import { TestProviders, kibanaMock } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
@@ -18,10 +17,6 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
-import { HUNT_WITH_AI_PROMPT } from '../prompts';
-import { EntityEventTypes } from '../../common/lib/telemetry';
-import type { StartServices } from '../../types';
-import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -43,10 +38,8 @@ jest.mock('../../common/components/link_to', () => ({
       `/app/security/${deepLinkId}${path}`,
 }));
 
-jest.mock('../components/home/dynamic_risk_level_panel', () => ({
-  DynamicRiskLevelPanel: () => (
-    <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
-  ),
+jest.mock('../components/home/facelift/overview_band', () => ({
+  OverviewBand: () => <div data-test-subj="eaFaceliftOverviewBand">{'Overview band'}</div>,
 }));
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
@@ -54,9 +47,6 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
 }));
 
 jest.mock('../../common/hooks/use_license');
-jest.mock('@kbn/inference-connectors', () => ({
-  useLoadConnectors: jest.fn(() => ({ data: [] })),
-}));
 
 jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(() => ({
@@ -78,6 +68,8 @@ jest.mock('../components/home/entities_table', () => ({
   DataViewContext: {
     Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   },
+  DEFAULT_ENTITIES_TABLE_CONFIG: {},
+  DEFAULT_ENTITIES_TABLE_SORT: [],
   useEntityURLState: jest.fn(() => ({
     sort: [],
     filters: [],
@@ -160,10 +152,6 @@ jest.mock('../components/threat_hunting/top_threat_hunting_leads', () => ({
   ),
 }));
 
-jest.mock('../../onboarding/components/hooks/use_stored_state', () => ({
-  useStoredAssistantConnectorId: jest.fn(() => ['', jest.fn()]),
-}));
-
 jest.mock('../../agent_builder/hooks/use_agent_builder_availability', () => ({
   useAgentBuilderAvailability: jest.fn(() => ({ isAgentChatExperienceEnabled: false })),
 }));
@@ -187,8 +175,6 @@ const mockUseMissingRiskEnginePrivileges = useMissingRiskEnginePrivileges as jes
 const mockUseEntityEnginePrivileges = useEntityEnginePrivileges as jest.Mock;
 const mockUseLeadGenerationPrivileges = useLeadGenerationPrivileges as jest.Mock;
 const mockUseHuntingLeads = useHuntingLeads as jest.Mock;
-const mockUseLoadConnectors = useLoadConnectors as jest.Mock;
-const mockUseStoredAssistantConnectorId = useStoredAssistantConnectorId as jest.Mock;
 
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
@@ -236,9 +222,6 @@ describe('EntityAnalyticsHomePage', () => {
       readPermissionError: false,
       writePermissionError: false,
     });
-
-    mockUseLoadConnectors.mockReturnValue({ data: [] });
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
   });
 
   it('renders the page title', () => {
@@ -264,7 +247,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
-  it('renders the dynamic risk level panel', () => {
+  it('renders the overview band', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -272,18 +255,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
-  });
-
-  it('renders the anomalies placeholder panel', () => {
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    expect(screen.getByTestId('recent-anomalies-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftOverviewBand')).toBeInTheDocument();
   });
 
   it('renders the entities table', () => {
@@ -330,7 +302,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
-    expect(screen.getByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftOverviewBand')).toBeInTheDocument();
   });
 
   it("renders entity store disabled empty prompt when status is 'not_installed'", () => {
@@ -471,7 +443,7 @@ describe('EntityAnalyticsHomePage', () => {
 
     expect(screen.getByTestId('noPrivilegesPage')).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dynamic-risk-level-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('eaFaceliftOverviewBand')).not.toBeInTheDocument();
   });
 
   it('does not render NoPrivileges when entity engine privileges query errors', () => {
@@ -557,7 +529,7 @@ describe('EntityAnalyticsHomePage', () => {
 
     expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
-    expect(screen.queryByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('eaFaceliftOverviewBand')).toBeInTheDocument();
   });
 
   it('renders entity store disabled empty prompt when store is not_installed and no indices exist', () => {
@@ -584,7 +556,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
-  it('renders leads section without callout when lead generation privileges are present', () => {
+  it('does not render threat hunting leads on the facelift overview page', () => {
     mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
       if (flag === 'leadGenerationEnabled') return true;
       if (flag === 'newDataViewPickerEnabled') return false;
@@ -607,117 +579,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.queryByText('Insufficient privileges')).not.toBeInTheDocument();
-    expect(screen.getByTestId('top-threat-hunting-leads')).toBeInTheDocument();
-  });
-
-  it('opens the agent builder chat with the hunt-with-AI prompt when "Hunt with AI" is triggered', () => {
-    mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
-      if (flag === 'leadGenerationEnabled') return true;
-      if (flag === 'newDataViewPickerEnabled') return false;
-      return false;
-    });
-    mockUseLeadGenerationPrivileges.mockReturnValue({
-      isLoading: false,
-      data: {
-        has_all_required: true,
-        has_read_permissions: true,
-        privileges: { elasticsearch: { index: {} } },
-      },
-    });
-
-    const openChat = jest.fn();
-    const reportEvent = jest.fn();
-    const startServices = {
-      ...kibanaMock,
-      telemetry: { ...kibanaMock.telemetry, reportEvent },
-      agentBuilder: { openChat },
-    } as unknown as StartServices;
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      {
-        wrapper: ({ children }) => (
-          <TestProviders startServices={startServices}>{children}</TestProviders>
-        ),
-      }
-    );
-
-    fireEvent.click(screen.getByTestId('mockHuntInChatButton'));
-
-    expect(reportEvent).toHaveBeenCalledTimes(1);
-    expect(reportEvent).toHaveBeenCalledWith(EntityEventTypes.LeadGenerationHuntWithAiClicked, {});
-    expect(openChat).toHaveBeenCalledTimes(1);
-    expect(openChat).toHaveBeenCalledWith({
-      newConversation: true,
-      initialMessage: HUNT_WITH_AI_PROMPT,
-      autoSendInitialMessage: false,
-      sessionTag: 'security',
-    });
-  });
-
-  it('prefers the stored connector when it is still a valid lead_generation connector', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['stored-connector-id', jest.fn()]);
-    mockUseLoadConnectors.mockReturnValue({
-      data: [{ id: 'first-resolved-id' }, { id: 'stored-connector-id' }],
-    });
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    const latestHookCall = mockUseHuntingLeads.mock.calls.at(-1);
-    expect(latestHookCall?.[0]).toBe('stored-connector-id');
-  });
-
-  it('falls back to the first resolved connector on first run when nothing is stored', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
-    mockUseLoadConnectors.mockReturnValue({
-      data: [{ id: 'first-resolved-id' }, { id: 'other-id' }],
-    });
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    const latestHookCall = mockUseHuntingLeads.mock.calls.at(-1);
-    expect(latestHookCall?.[0]).toBe('first-resolved-id');
-  });
-
-  it('falls back to the first resolved connector when the stored connector is no longer available', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['deleted-connector-id', jest.fn()]);
-    mockUseLoadConnectors.mockReturnValue({ data: [{ id: 'first-resolved-id' }] });
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    const latestHookCall = mockUseHuntingLeads.mock.calls.at(-1);
-    expect(latestHookCall?.[0]).toBe('first-resolved-id');
-  });
-
-  it('resolves to an empty connector only when no lead_generation connector exists', () => {
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
-    mockUseLoadConnectors.mockReturnValue({ data: [] });
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    const latestHookCall = mockUseHuntingLeads.mock.calls.at(-1);
-    expect(latestHookCall?.[0]).toBe('');
+    expect(screen.queryByTestId('top-threat-hunting-leads')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftOverviewBand')).toBeInTheDocument();
   });
 });
