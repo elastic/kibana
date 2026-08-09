@@ -699,7 +699,7 @@ export const Okta: ConnectorSpec = {
           `${orgUrl}/api/v1/users`,
           withOktaRequestConfig(ctx, { params: { limit: 1 } })
         );
-        return { ok: true };
+        return {};
       } catch (error) {
         throw formatOktaError('test', error);
       }
