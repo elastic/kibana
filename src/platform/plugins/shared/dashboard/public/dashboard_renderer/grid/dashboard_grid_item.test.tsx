@@ -18,14 +18,25 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { act, render } from '@testing-library/react';
 
+// Alias required so the jest.mock factory can reference useEffect without triggering
+// Babel's hoisting guard (only `mock`-prefixed names are allowed inside factories).
+const mockUseEffect = React.useEffect;
+
+// Captures the onApiAvailable callback from the most-recently-rendered EmbeddableRenderer
+// so tests can simulate the embeddable API becoming available after mount.
+let capturedOnApiAvailable: ((api: DefaultEmbeddableApi) => void) | undefined;
+
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');
 
   return {
     ...original,
-    ReactEmbeddableRenderer: (props: DashboardGridItemProps) => {
+    EmbeddableRenderer: ({ onApiAvailable, maybeId }: any) => {
+      mockUseEffect(() => {
+        capturedOnApiAvailable = onApiAvailable;
+      }, []);
       return (
-        <div className="embedPanel" id={`mockEmbedPanel_${props.id}`}>
+        <div className="embedPanel" id={`mockEmbedPanel_${maybeId}`}>
           mockEmbeddablePanel
         </div>
       );
@@ -33,8 +44,12 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
   };
 });
 
+beforeEach(() => {
+  capturedOnApiAvailable = undefined;
+});
+
 // Value of panel type does not effect test output
-// since test mocks ReactEmbeddableRenderer to render static content regardless of embeddable type
+// since test mocks EmbeddableRenderer to render static content regardless of embeddable type
 const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
 
 const buildMockChildApi = (id: string): DefaultEmbeddableApi =>
@@ -166,4 +181,66 @@ test('renders blurred panel', async () => {
   expect(panelElement).not.toBeNull();
   expect(panelElement!.classList.contains('dshDashboardGrid__item--focused')).toBe(false);
   expect(panelElement!.classList.contains('dshDashboardGrid__item--blurred')).toBe(true);
+});
+
+/**
+ * Waits for the mock EmbeddableRenderer's useEffect to capture onApiAvailable,
+ * then calls it with the given api to simulate the embeddable finishing its setup.
+ */
+const simulateApiAvailable = async (api: DefaultEmbeddableApi) => {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  });
+  await act(async () => {
+    capturedOnApiAvailable?.(api);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  });
+};
+
+describe('cancelRequests on unmount', () => {
+  test('calls cancelRequests when the embeddable supports it', async () => {
+    const cancelRequests = jest.fn();
+    const mockApi = {
+      ...buildMockChildApi('1'),
+      cancelRequests,
+    } as unknown as DefaultEmbeddableApi;
+
+    const { component } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+
+    await simulateApiAvailable(mockApi);
+
+    component.unmount();
+
+    expect(cancelRequests).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not call cancelRequests when the embeddable does not support it', async () => {
+    const mockApi = buildMockChildApi('1'); // no cancelRequests method
+    expect((mockApi as any).cancelRequests).toBeUndefined();
+
+    const { component } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+
+    await simulateApiAvailable(mockApi);
+
+    expect(() => component.unmount()).not.toThrow();
+  });
+
+  test('does not throw when unmounted before the embeddable API is available', () => {
+    const { component } = createAndMountDashboardGridItem({
+      id: '1',
+      key: '1',
+      type: TEST_EMBEDDABLE,
+    });
+
+    // Unmount before onApiAvailable is ever called (embeddable still loading)
+    expect(() => component.unmount()).not.toThrow();
+  });
 });

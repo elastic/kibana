@@ -39,6 +39,7 @@ function getConfig(overrides = {}) {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true },
+    templates: { enabled: true },
     ...overrides,
   };
 }
@@ -255,7 +256,7 @@ describe('Cases Ui Plugin', () => {
           getRelatedCases: expect.any(Function),
         },
         config: {
-          templatesEnabled: false,
+          templatesEnabled: true,
           attachmentsEnabled: false,
           chatEnabled: false,
           casesRedesign: { list: false, details: false, settings: false },
