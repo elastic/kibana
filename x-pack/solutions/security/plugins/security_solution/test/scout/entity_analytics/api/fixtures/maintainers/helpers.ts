@@ -457,75 +457,60 @@ export const triggerMaintainerRun = async (
   }
 };
 
-/** Entra ID integration log index (device + user documents share it). */
-const ENTRA_ID_LOG_INDEX = 'logs-entityanalytics_entra_id.device-default';
-
-interface SeedEntraIdDeviceLogOptions {
-  /** Device object id — becomes host.id and the `host:<id>` target EUID. */
-  deviceId: string;
-  /** Device display name — becomes host.name. Not a resolvable identifier. */
-  deviceName: string;
+interface SeedLogDocumentOptions {
   /**
-   * Registered owners of the device. `mail` is optional so tests can exercise
-   * the non-mailbox-enabled case, where the owner resolves via id alone.
-   *
-   * NOTE: these are written as FLATTENED parallel arrays, mirroring how
-   * Elasticsearch indexes the `type: group` mapping in the real integration.
-   * Per-owner correlation is deliberately absent — a test that relied on
-   * mail[i] pairing with id[i] would not reflect production behaviour.
+   * Data-stream index to write into (e.g. `logs-entityanalytics_entra_id.device-default`).
+   * Must be a `logs-*` target — `op_type: 'create'` is required for data streams.
    */
-  owners: Array<{ id: string; mail?: string }>;
+  index: string;
+  /** Device object id — becomes host.id and the `host:<id>` target EUID. */
+  hostId: string;
+  /** Device display name — written to host.name. Not used as a resolvable identifier. */
+  hostName: string;
+  /**
+   * Integration-specific field bag merged into the document root alongside the
+   * standard ECS fields. Use this to set the inverted-actor fields (e.g.
+   * `entityanalytics_entra_id.device.registered_owners`) that the maintainer's
+   * ES|QL query reads to derive actor EUIDs.
+   *
+   * The caller is responsible for producing the correct shape — particularly for
+   * `type: group` fields, which must be written as flattened parallel arrays to
+   * match how Elasticsearch indexes them at ingest time.
+   */
+  integrationFields: Record<string, unknown>;
   /** @timestamp for the document. Defaults to 5 minutes ago (inside the 30d lookback). */
   timestamp?: string;
 }
 
 /**
- * Seeds one Entra ID device log document, shaped like the integration's
- * post-pipeline output (see
- * packages/entityanalytics_entra_id/data_stream/entity/_dev/test/pipeline/test-device.json-expected.json).
+ * Seeds one log document into a data-stream index, shaped with standard ECS
+ * host fields plus caller-supplied integration-specific fields.
  *
- * Used by the entra_id `owns` maintainer suite, which reads device logs and
- * inverts `registered_owners` into user-keyed `owns.host` edges.
+ * Designed for log-inverted relationship maintainers, where the actor is NOT
+ * the document subject — the document describes a device/resource, and the
+ * actor identifiers (e.g. registered owners) live in a nested field that the
+ * maintainer reads to emit user-keyed relationship writes.
+ *
+ * `op_type: 'create'` is mandatory: `logs-*` indices are claimed by the
+ * built-in `logs` composable template with `data_stream: {}`, and plain index
+ * requests are rejected for data-stream targets.
  */
-export const seedEntraIdDeviceLog = async (
+export const seedLogDocument = async (
   esClient: EsClient,
-  { deviceId, deviceName, owners, timestamp }: SeedEntraIdDeviceLogOptions
+  { index, hostId, hostName, integrationFields, timestamp }: SeedLogDocumentOptions
 ): Promise<void> => {
   const ts = timestamp ?? new Date(Date.now() - 5 * 60_000).toISOString();
 
-  // Flatten to parallel arrays exactly as ES does for a `type: group` field.
-  const ownerIds = owners.map((o) => o.id);
-  const ownerMails = owners.map((o) => o.mail).filter((m): m is string => Boolean(m));
-
-  const registeredOwners: Record<string, string[]> = { id: ownerIds };
-  if (ownerMails.length > 0) {
-    registeredOwners.mail = ownerMails;
-  }
-
   await esClient.index({
-    index: ENTRA_ID_LOG_INDEX,
-    // logs-* is claimed by the built-in `logs` composable index template with
-    // `data_stream: {}`.  Plain index requests are REJECTED for data-stream
-    // targets — op_type: 'create' is required to write into a data stream.
+    index,
     op_type: 'create',
     refresh: 'wait_for',
     document: {
       '@timestamp': ts,
-      data_stream: {
-        dataset: 'entityanalytics_entra_id.device',
-        namespace: 'default',
-        type: 'logs',
-      },
       event: { kind: 'asset', category: ['host'] },
-      host: { id: deviceId, name: deviceName },
-      device: { id: deviceId },
-      entityanalytics_entra_id: {
-        device: {
-          id: deviceId,
-          display_name: deviceName,
-          registered_owners: registeredOwners,
-        },
-      },
+      host: { id: hostId, name: hostName },
+      device: { id: hostId },
+      ...integrationFields,
     },
   });
 };
