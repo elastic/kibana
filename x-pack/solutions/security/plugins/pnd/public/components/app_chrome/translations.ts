@@ -43,14 +43,3 @@ export const NAV_WATCHES = i18n.translate('xpack.pnd.chrome.nav.watches', {
 export const ASK_PND_LABEL = i18n.translate('xpack.pnd.chrome.askPnd', {
   defaultMessage: 'Ask PND',
 });
-
-/** Deep link ids registered on the PND app (excludes platform Discover + Security dashboards). */
-export const PND_DEEP_LINK = {
-  chats: 'chats',
-  alerts: 'alerts',
-  attacks: 'attacks',
-  records: 'records',
-  threatHunt: 'threat_hunt',
-  streams: 'streams',
-  watches: 'watches',
-} as const;

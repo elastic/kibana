@@ -8,18 +8,28 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import type { AutonomyLevel } from '@kbn/pnd-common';
-import { autonomyLabel } from '@kbn/pnd-common';
+import { WATCH_AUTONOMY_LEVELS, type WatchAutonomyLevel } from '@kbn/pnd-common';
+import * as i18n from '../settings_translations';
 
 interface AutonomyMeterProps {
-  level: AutonomyLevel;
+  /** Undefined while the watch's settings are still loading. */
+  level: WatchAutonomyLevel | undefined;
   showLabel?: boolean;
   color?: string;
 }
 
+const EM_DASH = '—';
+
+/**
+ * Compact read-only version of the settings page's autonomy slider, for the Overview cards.
+ *
+ * Steps come from the shared `WATCH_AUTONOMY_LEVELS` scale, so this and the slider can never
+ * disagree about how many levels exist or what they are called.
+ */
 export const AutonomyMeter: React.FC<AutonomyMeterProps> = ({ level, showLabel = true, color }) => {
   const { euiTheme } = useEuiTheme();
   const accent = color ?? euiTheme.colors.primary;
+  const activeIndex = level ? WATCH_AUTONOMY_LEVELS.indexOf(level) : -1;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -32,15 +42,14 @@ export const AutonomyMeter: React.FC<AutonomyMeterProps> = ({ level, showLabel =
           `}
           aria-hidden="true"
         >
-          {[1, 2, 3, 4, 5].map((n) => (
+          {WATCH_AUTONOMY_LEVELS.map((stepLevel, index) => (
             <span
-              key={n}
+              key={stepLevel}
               css={css`
                 width: 10px;
                 height: 4px;
                 border-radius: 2px;
-                background: ${n <= level ? accent : euiTheme.colors.lightShade};
-                border: ${n === level ? `1px dashed ${accent}` : 'none'};
+                background: ${index <= activeIndex ? accent : euiTheme.colors.lightShade};
               `}
             />
           ))}
@@ -49,7 +58,7 @@ export const AutonomyMeter: React.FC<AutonomyMeterProps> = ({ level, showLabel =
       {showLabel ? (
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <strong>{autonomyLabel(level)}</strong>
+            <strong>{level ? i18n.autonomyLevelName(level) : EM_DASH}</strong>
           </EuiText>
         </EuiFlexItem>
       ) : null}

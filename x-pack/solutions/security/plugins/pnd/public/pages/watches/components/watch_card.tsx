@@ -18,6 +18,7 @@ import {
   type IconType,
 } from '@elastic/eui';
 import type { Watch } from '@kbn/pnd-common';
+import { useWatch } from '../../../hooks/use_watches_api';
 import { AutonomyMeter } from './autonomy_meter';
 import { RunSparkline } from './run_sparkline';
 import * as i18n from '../translations';
@@ -39,6 +40,10 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
   const { euiTheme } = useEuiTheme();
   const iconType = ICON_MAP[watch.icon] ?? 'eye';
   const hasMetrics = watch.metrics.runs7d != null;
+
+  // Autonomy lives on the watch's settings, which only the detail endpoint returns. Fetching per card
+  // keeps this in step with the settings page and warms the exact cache that page reads.
+  const { data } = useWatch(watch.id);
 
   return (
     <EuiPanel
@@ -162,7 +167,7 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />
+            <AutonomyMeter level={data?.settings?.autonomy} color={watch.color} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">

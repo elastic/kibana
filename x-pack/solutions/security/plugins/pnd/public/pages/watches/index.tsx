@@ -8,27 +8,22 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PndPageSection } from '../../components/layout/pnd_page_section';
-import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useWatches } from '../../hooks/use_watches_api';
 import { CoverageStrip } from './components/coverage_strip';
 import { WatchCardGrid } from './components/watch_card_grid';
-import {
-  WatchesSectionLayout,
-  WatchesSubnavExpandControl,
-} from './components/watches_section_layout';
+import { WatchesSectionLayout } from './components/watches_section_layout';
+import { WATCHES_NAV_OVERVIEW_ID } from './components/pnd_watches_nav';
 import * as i18n from './translations';
 
 export const WatchesPage: React.FC = () => {
@@ -57,83 +52,89 @@ export const WatchesPage: React.FC = () => {
   }, [data]);
 
   return (
-    <WatchesSectionLayout active="watches">
-      <PndPageSection>
-        <PndPageHeader
-          title={i18n.PAGE_TITLE}
-          subtitle={i18n.PAGE_SUBTITLE}
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-          rightSideItems={[
-            <EuiButton
-              key="new-watch"
-              fill
-              iconType="plusInCircle"
-              onClick={onNewWatch}
-              data-test-subj="pndNewWatchButton"
-            >
-              {i18n.NEW_WATCH}
-            </EuiButton>,
-          ]}
-        />
-
-        {isLoading && !data ? (
-          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+    <WatchesSectionLayout
+      active={WATCHES_NAV_OVERVIEW_ID}
+      title={i18n.PAGE_TITLE}
+      description={i18n.PAGE_SUBTITLE}
+    >
+      <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCHES} />
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                onClick={onNewWatch}
+                data-test-subj="pndNewWatchButton"
+              >
+                {i18n.NEW_WATCH}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+
+        {isLoading && !data ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCHES} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         ) : null}
 
         {error && !data ? (
-          <EuiEmptyPrompt
-            iconType="error"
-            color="danger"
-            title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
-            body={<p>{i18n.LOAD_ERROR_BODY}</p>}
-            actions={
-              <EuiButton onClick={() => refetch()} fill>
-                {i18n.RETRY}
-              </EuiButton>
-            }
-          />
+          <EuiFlexItem grow={false}>
+            <EuiEmptyPrompt
+              iconType="error"
+              color="danger"
+              title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+              body={<p>{i18n.LOAD_ERROR_BODY}</p>}
+              actions={
+                <EuiButton onClick={() => refetch()} fill>
+                  {i18n.RETRY}
+                </EuiButton>
+              }
+            />
+          </EuiFlexItem>
         ) : null}
 
         {data ? (
           <>
             {error ? (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  color="warning"
-                  iconType="warning"
-                  title={i18n.STALE_DATA_WARNING}
-                />
-                <EuiSpacer size="m" />
-              </>
+              <EuiFlexItem grow={false}>
+                <KbnWarningCallout announceOnMount title={i18n.STALE_DATA_WARNING} />
+              </EuiFlexItem>
             ) : null}
-            <CoverageStrip watches={data.watches} onSelectWatch={onSelectWatch} />
-            <EuiSpacer size="l" />
-            <EuiFlexGroup alignItems="baseline" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>{i18n.WATCHES_SECTION_TITLE}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {sectionCount}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <WatchCardGrid
-              watches={data.watches}
-              onSelectWatch={onSelectWatch}
-              onNewWatch={onNewWatch}
-            />
+
+            <EuiFlexItem grow={false}>
+              <CoverageStrip watches={data.watches} onSelectWatch={onSelectWatch} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="baseline" gutterSize="s" wrap>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="s">
+                        <h2>{i18n.WATCHES_SECTION_TITLE}</h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {sectionCount}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <WatchCardGrid watches={data.watches} onSelectWatch={onSelectWatch} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </>
         ) : null}
-      </PndPageSection>
+      </EuiFlexGroup>
     </WatchesSectionLayout>
   );
 };

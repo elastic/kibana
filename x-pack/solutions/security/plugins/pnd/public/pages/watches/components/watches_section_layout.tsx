@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type {
+  AppHeaderBadge,
+  AppHeaderDescription,
+  AppHeaderMenu,
+  AppHeaderTitle,
+} from '@kbn/app-header';
+import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 import { PndWatchesNav, type WatchesSectionId } from './pnd_watches_nav';
+import { WATCHES_HEADER_MENU_ITEMS } from './watches_header_menu';
 import * as i18n from '../translations';
 
 const SUBNAV_COLLAPSED_KEY = 'pnd.watches.subnavCollapsed';
@@ -21,51 +29,32 @@ const readCollapsed = (): boolean => {
   }
 };
 
-interface WatchesSubnavContextValue {
-  isCollapsed: boolean;
-  expand: () => void;
-  collapse: () => void;
-}
-
-const WatchesSubnavContext = createContext<WatchesSubnavContextValue | null>(null);
-
-export const useWatchesSubnav = (): WatchesSubnavContextValue => {
-  const value = useContext(WatchesSubnavContext);
-  if (!value) {
-    throw new Error('useWatchesSubnav must be used within WatchesSectionLayout');
-  }
-  return value;
-};
-
-/** Inline expand control for page headers when the Watches subnav is collapsed. */
-export const WatchesSubnavExpandControl: React.FC = () => {
-  const { isCollapsed, expand } = useWatchesSubnav();
-
-  if (!isCollapsed) {
-    return null;
-  }
-
-  return (
-    <EuiToolTip content={i18n.SUBNAV_EXPAND} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="menuRight"
-        aria-label={i18n.SUBNAV_EXPAND}
-        color="text"
-        display="base"
-        data-test-subj="pndWatchesSubnavExpand"
-        onClick={expand}
-      />
-    </EuiToolTip>
-  );
-};
-
 interface WatchesSectionLayoutProps {
   active: WatchesSectionId;
+  title: AppHeaderTitle;
+  description?: AppHeaderDescription;
+  badges?: AppHeaderBadge[];
+  /** Rendered to the left of the header's overflow menu, e.g. a watch's Enabled toggle. */
+  headerSwitch?: AppHeaderMenu['switch'];
   children: React.ReactNode;
 }
 
-export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ active, children }) => {
-  const { euiTheme } = useEuiTheme();
+/**
+ * Page shell for every Watches route: `EuiPageTemplate` with the watch subnav in its sidebar slot and
+ * an `AppHeader` above the content.
+ *
+ * The subnav collapse state persists in sessionStorage. While collapsed the sidebar is not rendered
+ * at all, so the re-expand control moves into the header's overflow menu — `AppHeader` has no leading
+ * slot for a custom control.
+ */
+export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
+  active,
+  title,
+  description,
+  badges,
+  headerSwitch,
+  children,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(readCollapsed);
 
   const setCollapsed = useCallback((next: boolean) => {
@@ -77,42 +66,46 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({ acti
     }
   }, []);
 
-  const contextValue = useMemo(
+  const menu = useMemo<AppHeaderMenu>(
     () => ({
-      isCollapsed,
-      expand: () => setCollapsed(false),
-      collapse: () => setCollapsed(true),
+      switch: headerSwitch,
+      items: isCollapsed
+        ? [
+            {
+              id: 'pndExpandSubnav',
+              label: i18n.SUBNAV_EXPAND,
+              iconType: 'menuRight',
+              run: () => setCollapsed(false),
+              testId: 'pndWatchesSubnavExpand',
+            },
+            ...WATCHES_HEADER_MENU_ITEMS,
+          ]
+        : WATCHES_HEADER_MENU_ITEMS,
     }),
-    [isCollapsed, setCollapsed]
+    [headerSwitch, isCollapsed, setCollapsed]
   );
 
   return (
-    <WatchesSubnavContext.Provider value={contextValue}>
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        css={css`
-          flex: 1;
-          min-height: 0;
-          height: 100%;
-        `}
-      >
-        {!isCollapsed ? (
-          <EuiFlexItem grow={false}>
-            <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem
-          css={css`
-            min-width: 0;
-            min-height: 0;
-            overflow: auto;
-            background: ${euiTheme.colors.body};
-          `}
-        >
-          {children}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WatchesSubnavContext.Provider>
+    <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="pndWatchesSectionLayout">
+      {!isCollapsed ? (
+        /**
+         * `sticky` must be passed explicitly. The EUI docs claim `EuiPageTemplate` makes its sidebar
+         * sticky by default and that you opt out with `sticky={false}`, but the template never sets
+         * it and `EuiPageSidebar` defaults to `sticky = false`.
+         *
+         * With it, the page scrolls as one inside the chrome's application scroll container while the
+         * subnav stays pinned, and a subnav taller than the viewport scrolls on its own — `sticky`
+         * brings `overflow-y: auto` and `max-height: calc(100vh - offset)` with it. Nothing here may
+         * introduce an `overflow` ancestor; see the note in `app_chrome_layout.tsx`.
+         */
+        <EuiPageTemplate.Sidebar paddingSize="none" minWidth={PND_WATCHES_SUBNAV_WIDTH} sticky>
+          <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
+        </EuiPageTemplate.Sidebar>
+      ) : null}
+      <AppHeader title={title} description={description} badges={badges} menu={menu} />
+      <EuiPageTemplate.Section paddingSize="l" grow>
+        {children}
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };

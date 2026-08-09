@@ -6,51 +6,91 @@
  */
 
 import type { AppDeepLink } from '@kbn/core/public';
-import { PND_DEEP_LINK } from './components/app_chrome/translations';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { SYSTEM_SECURITY_WATCH_CATALOG } from '@kbn/pnd-common';
 import * as i18n from './components/app_chrome/translations';
+import { SUBNAV_SKILLS, SUBNAV_WORKERS } from './pages/watches/translations';
 
-/** Deep links for Security solution nav + global search (Discover + Dashboards are owned elsewhere). */
+/**
+ * One deep link per managed watch, so each watch's settings page is reachable from global search
+ * without waiting on `list_watches`. The managed five are compile-time constants installed at
+ * start-up.
+ *
+ * Ids come from the catalog rather than `SecurityPageName` because they are derived per watch; names
+ * come from it too, since a watch name is catalog data — the same string the API returns — and
+ * translating it here would disagree with the rest of the UI.
+ */
+const watchDeepLinks = (): AppDeepLink[] =>
+  SYSTEM_SECURITY_WATCH_CATALOG.map((watch) => ({
+    id: watch.deepLinkId,
+    title: watch.name,
+    path: `/watches/${watch.id}`,
+    visibleIn: ['globalSearch'],
+  }));
+
+/**
+ * Deep links for Security solution nav + global search (Discover + Dashboards are owned elsewhere).
+ *
+ * Ids are `SecurityPageName` values so the solution navigation can reference the same registry the
+ * rest of Security uses, via `pndLink()`.
+ */
 export const getPndDeepLinks = (): AppDeepLink[] => [
   {
-    id: PND_DEEP_LINK.chats,
+    id: SecurityPageName.pndChats,
     title: i18n.NAV_CHATS,
     path: '/chats',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
-    id: PND_DEEP_LINK.alerts,
+    id: SecurityPageName.alerts,
     title: i18n.NAV_ALERTS,
     path: '/alerts',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
-    id: PND_DEEP_LINK.attacks,
+    id: SecurityPageName.attacks,
     title: i18n.NAV_ATTACKS,
     path: '/attacks',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
-    id: PND_DEEP_LINK.records,
+    id: SecurityPageName.pndRecords,
     title: i18n.NAV_RECORDS,
     path: '/records',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
-    id: PND_DEEP_LINK.threatHunt,
+    id: SecurityPageName.pndThreatHunt,
     title: i18n.NAV_THREAT_HUNT,
     path: '/threat-hunt',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
-    id: PND_DEEP_LINK.streams,
+    id: SecurityPageName.pndStreams,
     title: i18n.NAV_STREAMS,
     path: '/streams',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {
-    id: PND_DEEP_LINK.watches,
+    id: SecurityPageName.pndWatches,
     title: i18n.NAV_WATCHES,
     path: '/watches',
     visibleIn: ['globalSearch', 'projectSideNav'],
+    // Registered but not rendered as nav children — see `pnd_navigation_tree.ts`.
+    deepLinks: [
+      ...watchDeepLinks(),
+      {
+        id: SecurityPageName.pndWatchesWorkers,
+        title: SUBNAV_WORKERS,
+        path: '/watches/workers',
+        visibleIn: ['globalSearch'],
+      },
+      {
+        id: SecurityPageName.pndWatchesSkills,
+        title: SUBNAV_SKILLS,
+        path: '/watches/skills',
+        visibleIn: ['globalSearch'],
+      },
+    ],
   },
 ];
