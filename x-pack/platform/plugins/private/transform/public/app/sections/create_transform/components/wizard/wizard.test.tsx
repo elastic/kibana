@@ -275,7 +275,6 @@ describe('Transform: <Wizard />', () => {
     await waitFor(() => {
       expect(mockStepDefineFormProps.overrides.projectRouting).toBe('_alias:linked_local_project');
       expect(mockProjectScopePickerProps.projectRouting).toBe('_alias:linked_local_project');
-      expect(mockProjectScopePickerProps.requiredProjectId).toBe('origin-id');
     });
   });
 });

@@ -24,7 +24,6 @@ export interface FilterEntry {
 
 export interface ProjectPickerStoredState {
   isReadOnly?: boolean;
-  requiredProjectId?: string;
   filteringDimensions: string[];
   filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;
@@ -65,13 +64,11 @@ export function createStoreReducers() {
       payload: Pick<ProjectPickerState, 'availableProjects' | 'isReadOnly'> & {
         excludedOverrides?: string[];
         filterExpressions?: FilterExpressionValue[];
-        requiredProjectId?: string;
       }
     ) {
       return {
         ..._state,
         isReadOnly: payload.isReadOnly,
-        requiredProjectId: payload.requiredProjectId,
         availableProjects: payload.availableProjects,
         filterExpressions: new Map(
           payload.filterExpressions?.map((expression) => [
@@ -244,9 +241,7 @@ export function createStoreReducers() {
      */
     excludeSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => {
       const includedVisible = getIncludedVisibleProjectIds(state);
-      const toExclude = payload.projects.filter(
-        (id) => includedVisible.includes(id) && id !== state.requiredProjectId
-      );
+      const toExclude = payload.projects.filter((id) => includedVisible.includes(id));
       if (includedVisible.length - toExclude.length < 1) {
         return state;
       }

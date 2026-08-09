@@ -61,7 +61,6 @@ export function ProjectPicker({
   onProjectRoutingChange,
   originProjectId,
   projectRouting,
-  requiredProjectId,
 }: ProjectPickerProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +70,6 @@ export function ProjectPicker({
       initialProjectRouting={projectRouting}
       isReadOnly={isReadOnly}
       originProjectId={originProjectId}
-      requiredProjectId={requiredProjectId}
     >
       <ProjectPickerRoutingObserver
         onProjectRoutingChange={onProjectRoutingChange}

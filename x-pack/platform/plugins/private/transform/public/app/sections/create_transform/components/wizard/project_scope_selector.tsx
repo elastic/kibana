@@ -150,7 +150,6 @@ export const ProjectScopeSelector = ({
             onProjectRoutingChange={onProjectRoutingChange}
             originProjectId={originProjectId}
             projectRouting={effectiveProjectRouting}
-            requiredProjectId={originProjectId}
           />
         )}
       </EuiPopover>

@@ -69,9 +69,7 @@ const defaultProps: Pick<ProjectPickerStateProviderProps, 'availableProjects'> =
 };
 
 const renderComponent = (
-  props: Partial<
-    Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly' | 'requiredProjectId'>
-  > = {}
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>> = {}
 ) => {
   return render(
     <ProjectPickerStateProvider {...defaultProps} {...props}>
@@ -146,32 +144,6 @@ describe('ProjectPickerList', () => {
       expect(error.message).toContain('Unable to perform pointer interaction');
     } finally {
       expect(lastIncludedProjectSwitchElement).toHaveAttribute('aria-checked', 'true');
-    }
-  });
-
-  it('should prevent toggling a required project', async () => {
-    const user = userEvent.setup();
-    renderComponent({
-      availableProjects: [createProject('origin-project'), createProject('linked-project')],
-      requiredProjectId: 'origin-project',
-    });
-
-    const originProjectSwitch = screen.getByTestId('projectPickerListItemSwitch-origin-project');
-    const linkedProjectSwitch = screen.getByTestId('projectPickerListItemSwitch-linked-project');
-
-    expect(originProjectSwitch).toHaveAttribute('aria-checked', 'true');
-    expect(linkedProjectSwitch).toHaveAttribute('aria-checked', 'true');
-
-    await user.click(linkedProjectSwitch);
-    expect(linkedProjectSwitch).toHaveAttribute('aria-checked', 'false');
-
-    try {
-      await user.click(originProjectSwitch);
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-      expect(error.message).toContain('Unable to perform pointer interaction');
-    } finally {
-      expect(originProjectSwitch).toHaveAttribute('aria-checked', 'true');
     }
   });
 

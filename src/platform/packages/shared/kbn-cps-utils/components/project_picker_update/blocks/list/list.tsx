@@ -86,10 +86,6 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
 
   const onToggle = useCallback(
     (project: CPSProject, checked: boolean) => {
-      if (!checked && project._id === state.requiredProjectId) {
-        return;
-      }
-
       if (
         !checked &&
         includedVisibleProjectIds.length === 1 &&
@@ -106,18 +102,12 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
         });
       }
     },
-    [actions, includedVisibleProjectIds, state.requiredProjectId]
+    [actions, includedVisibleProjectIds]
   );
 
-  const lastIncludedProjectMessage = useMemo(() => {
+  const toggleDisabledMessage = useMemo(() => {
     return i18n.translate('cpsUtils.projectPicker.listItem.lastIncludedProject', {
       defaultMessage: 'You must be searching a minimum of one project.',
-    });
-  }, []);
-
-  const requiredProjectMessage = useMemo(() => {
-    return i18n.translate('cpsUtils.projectPicker.listItem.requiredProject', {
-      defaultMessage: 'This project must stay selected.',
     });
   }, []);
 
@@ -170,14 +160,9 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
           <ProjectPickerListItem
             isSelected={state.selectedProjects.includes(project._id)}
             isToggleDisabled={
-              state.selectedProjects.includes(project._id) &&
-              (includedVisibleProjectIds.length === 1 || project._id === state.requiredProjectId)
+              state.selectedProjects.includes(project._id) && includedVisibleProjectIds.length === 1
             }
-            toggleDisabledMessage={
-              project._id === state.requiredProjectId
-                ? requiredProjectMessage
-                : lastIncludedProjectMessage
-            }
+            toggleDisabledMessage={toggleDisabledMessage}
             project={project}
             onContextMenu={onContextMenu}
             onToggle={onToggle}

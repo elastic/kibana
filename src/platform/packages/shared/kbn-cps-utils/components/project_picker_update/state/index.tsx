@@ -33,7 +33,6 @@ export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState
   availableProjects: CPSProject[];
   initialProjectRouting?: ProjectRouting;
   originProjectId?: string;
-  requiredProjectId?: string;
 }
 
 export const createProjectPickerContext = once(() =>
@@ -64,7 +63,6 @@ export const ProjectPickerStateProvider = ({
   initialProjectRouting,
   isReadOnly,
   originProjectId,
-  requiredProjectId,
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
@@ -78,23 +76,16 @@ export const ProjectPickerStateProvider = ({
     [availableProjects, initialProjectRouting, originProjectId]
   );
   const excludedOverrides = useMemo(
-    () => {
-      const selectedIds =
-        requiredProjectId && !selectedProjectIds.includes(requiredProjectId)
-          ? [...selectedProjectIds, requiredProjectId]
-          : selectedProjectIds;
-
-      return availableProjects
+    () =>
+      availableProjects
         .map((project) => project._id)
-        .filter((projectId) => !selectedIds.includes(projectId));
-    },
-    [availableProjects, requiredProjectId, selectedProjectIds]
+        .filter((projectId) => !selectedProjectIds.includes(projectId)),
+    [availableProjects, selectedProjectIds]
   );
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
       isReadOnly,
-      requiredProjectId,
       filterExpressions: new Map(),
       filteringDimensions: [],
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
@@ -113,9 +104,8 @@ export const ProjectPickerStateProvider = ({
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
       excludedOverrides,
       filterExpressions: [],
-      requiredProjectId,
     });
-  }, [availableProjects, excludedOverrides, isReadOnly, requiredProjectId, store.actions]);
+  }, [availableProjects, excludedOverrides, isReadOnly, store.actions]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };
