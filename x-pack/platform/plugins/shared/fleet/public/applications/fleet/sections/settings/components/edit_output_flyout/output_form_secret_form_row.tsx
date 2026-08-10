@@ -175,12 +175,12 @@ export const SecretFormRow: React.FC<{
           announceOnMount
           size="s"
           title={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.secretConvertedCalloutTitle',
+            'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle',
             { defaultMessage: 'Migrating to secret storage' }
           )}
           text={
             <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
+              id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody"
               defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v{minVersion} and above."
               values={{ minVersion }}
             />

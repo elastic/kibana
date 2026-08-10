@@ -23978,7 +23978,7 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel": "クライアントSSL証明書鍵",
     "xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder": "証明書鍵を指定",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle": "このフィールドはシークレットストレージを使用しており、Fleet Server v{minVersion}以上が必要です。",
-    "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle": "このフィールドは、プレーンテキストストレージからシークレットストレージを使用して再保存されます。シークレットストレージにはFleetサーバーV{minVersion}以上が必要です。",
+    "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody": "このフィールドは、プレーンテキストストレージからシークレットストレージを使用して再保存されます。シークレットストレージにはFleetサーバーV{minVersion}以上が必要です。",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "証明書鍵を指定",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "クライアントSSL証明書鍵",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "この値はシークレットとして保存され、一度保存された値は二度と表示できません。",

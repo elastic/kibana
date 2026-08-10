@@ -23984,7 +23984,7 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel": "客户端 SSL 证书密钥",
     "xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder": "指定证书密钥",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle": "此字段使用秘密存储，并需要 Fleet 服务器 v{minVersion} 和更高版本。",
-    "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle": "此字段将从纯文本存储重新保存到机密存储中。密钥存储需要 Fleet Server v{minVersion} 及更高版本。",
+    "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody": "此字段将从纯文本存储重新保存到机密存储中。密钥存储需要 Fleet Server v{minVersion} 及更高版本。",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "指定证书密钥",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "客户端 SSL 证书密钥",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "此值将作为机密存储，意味着一旦保存，将无法再查看该值",

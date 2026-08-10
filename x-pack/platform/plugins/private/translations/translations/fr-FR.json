@@ -23834,7 +23834,7 @@
     "xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel": "Clé du certificat SSL client",
     "xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder": "Indiquer la clé du certificat",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle": "Ce champ utilise un stockage secret et nécessite un serveur Fleet v{minVersion} ou version ultérieure.",
-    "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle": "Ce champ sera réenregistré en utilisant le stockage secret à partir du stockage en texte clair. Le stockage secret nécessite un serveur Fleet v{minVersion} ou version ultérieure.",
+    "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody": "Ce champ sera réenregistré en utilisant le stockage secret à partir du stockage en texte clair. Le stockage secret nécessite un serveur Fleet v{minVersion} ou version ultérieure.",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder": "Indiquer la clé du certificat",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle": "Clé du certificat SSL client",
     "xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip": "Cette valeur sera stockée comme un secret, ce qui signifie qu'une fois qu'elle est sauvegardée, la valeur ne peut pas être affichée",
