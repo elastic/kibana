@@ -557,7 +557,7 @@ src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-cps-server-utils @elastic/kibana-core
-src/platform/packages/shared/kbn-cps-utils @elastic/appex-sharedux
+src/platform/packages/shared/kbn-cps-utils @elastic/kibana-presentation
 src/platform/packages/shared/kbn-crypto @elastic/kibana-security
 src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-css-utils @elastic/appex-sharedux
