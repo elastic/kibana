@@ -287,6 +287,7 @@ describe('installPrebuiltWatchlists', function () {
         type: 'watchlist-entity-source',
       })),
       created_at: createdAt,
+      score: 0,
     });
 
     it('reuses the watchlist found by attribute when the canonical ID is not found', async () => {
@@ -321,7 +322,7 @@ describe('installPrebuiltWatchlists', function () {
         page: 1,
         per_page: 10,
       });
-      mockScopedSoClient.delete.mockResolvedValue(undefined);
+      mockScopedSoClient.delete.mockResolvedValue({});
 
       await callInstall();
 
