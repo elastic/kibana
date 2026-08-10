@@ -1711,7 +1711,6 @@ export const getSavedObjectTypes = (
           source_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
-          is_preconfigured: { type: 'boolean', index: false },
           host: { type: 'keyword' },
           proxy_id: { type: 'keyword' },
         },
@@ -1729,9 +1728,7 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {
-                is_preconfigured: { type: 'boolean', index: false },
-              },
+              addedMappings: {},
             },
           ],
           schemas: (() => {
