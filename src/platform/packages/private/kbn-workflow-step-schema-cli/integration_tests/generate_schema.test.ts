@@ -120,7 +120,11 @@ describe('workflow step schema generation', () => {
   });
 
   it('writes the workflow step schema artifact from a live Kibana', async () => {
-    const connection: KibanaConnection = { kibanaUrl: baseUrl, username: USERNAME, password: PASSWORD };
+    const connection: KibanaConnection = {
+      kibanaUrl: baseUrl,
+      username: USERNAME,
+      password: PASSWORD,
+    };
 
     // Mirrors the CLI orchestration (`scripts/generate_workflow_step_schemas.js`)
     // so the committed bytes match what operators produce.
