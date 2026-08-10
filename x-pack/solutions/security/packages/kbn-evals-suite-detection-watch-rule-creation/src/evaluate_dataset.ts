@@ -9,9 +9,15 @@
 // {@link ../../kbn-evals-suite-security-ai-rules/src/evaluate_dataset.ts}.
 // createGapAddressedEvaluator and skipNoRule are specific to this suite.
 
-import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
+import type {
+  DefaultEvaluators,
+  EvaluationDataset,
+  EvalsExecutorClient,
+  Evaluator,
+} from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../datasets/rule_creation_golden';
-import type { RuleCreationResult } from './rule_creation_client';
+import type { RuleCreationClient, RuleCreationResult } from './rule_creation_client';
 import {
   calculateSetMetrics,
   extractMitreTechniques,
@@ -200,3 +206,48 @@ export const createGapAddressedEvaluator = (evaluators: DefaultEvaluators): Rule
     return criteriaEval.evaluate({ input, output: output.rule, expected, metadata: undefined });
   },
 });
+
+// ---------------------------------------------------------------------------
+// Dataset runner — shared wiring for all spec datasets
+// ---------------------------------------------------------------------------
+
+export const createEvaluateDataset =
+  ({
+    ruleCreationClient,
+    evaluators,
+    executorClient,
+    log,
+  }: {
+    ruleCreationClient: RuleCreationClient;
+    evaluators: DefaultEvaluators;
+    executorClient: EvalsExecutorClient;
+    log: ToolingLog;
+  }) =>
+  async ({ dataset }: { dataset: EvaluationDataset<RuleCreationExample> }): Promise<void> => {
+    const allEvaluators: RuleEvaluator[] = [
+      createQuerySyntaxValidityEvaluator(),
+      createFieldCoverageEvaluator(),
+      createRuleTypeLanguageEvaluator(),
+      createMitreAccuracyEvaluator(),
+      createSeverityValidityEvaluator(),
+      createRiskScoreValidityEvaluator(),
+      createIntervalFormatEvaluator(),
+      createLookbackGapEvaluator(),
+      createGapAddressedEvaluator(evaluators),
+    ];
+
+    log.info(
+      `Running rule creation evaluation: "${dataset.name}" (${dataset.examples.length} examples)`
+    );
+
+    await executorClient.runExperiment(
+      {
+        name: dataset.name,
+        datasets: [dataset],
+        task: async ({ input }) => ruleCreationClient.run({ input }),
+      },
+      allEvaluators
+    );
+
+    log.info(`Evaluation complete: "${dataset.name}"`);
+  };
