@@ -136,7 +136,7 @@ export const StepDeployDetect: React.FunctionComponent<{
               />
             </span>
           }
-          style={{ maxWidth: 680 }}
+          style={{ maxWidth: '50%' }}
           fullWidth
         >
           <EuiFieldText
@@ -158,7 +158,7 @@ export const StepDeployDetect: React.FunctionComponent<{
               />
             </span>
           }
-          style={{ maxWidth: 680 }}
+          style={{ maxWidth: '50%' }}
           fullWidth
         >
           <EuiSelect
@@ -242,7 +242,7 @@ export const StepDeployDetect: React.FunctionComponent<{
                       />
                     </span>
                   }
-                  style={{ maxWidth: 680 }}
+                  style={{ maxWidth: '50%' }}
                   fullWidth
                 >
                   <EuiFieldText
