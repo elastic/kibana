@@ -623,6 +623,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Whether to include tool call arguments and results in traces.',
     },
   },
+  'agentBuilder:tracing:includeUserData': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real user IDs and usernames in traces.',
+    },
+  },
   'agentBuilder:tracing:includeUserPrompts': {
     type: 'boolean',
     _meta: {
