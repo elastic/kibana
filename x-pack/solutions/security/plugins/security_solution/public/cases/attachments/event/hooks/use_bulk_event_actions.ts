@@ -8,7 +8,6 @@
 import { useCallback, useMemo } from 'react';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { ADD_TO_CASE, CASE_TYPE } from '@kbn/response-ops-alerts-table';
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { CustomBulkAction } from '../../../../../common/types';
@@ -63,37 +62,27 @@ export const useBulkAddEventsToCaseActions = ({
       userCasesPermissions?.read
       ? [
           {
-            label: ADD_TO_CASE,
-            panelTitle: CASE_TYPE,
-            key: 'add-to-case',
-            'data-test-subj': 'add-to-case',
+            label: ADD_TO_NEW_CASE,
+            key: 'attach-new-case',
+            'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE,
-            children: [
-              {
-                label: ADD_TO_NEW_CASE,
-                key: 'attach-new-case',
-                'data-test-subj': 'attach-new-case',
-                disableOnQuery: true,
-                disabledLabel: ADD_TO_NEW_CASE,
-                onClick: (events: TimelineItem[] = []) =>
-                  createCaseFlyout.open({
-                    attachments: timelineItemsToCaseEventAttachment(events),
-                  }),
-              },
-              {
-                label: ADD_TO_EXISTING_CASE,
-                key: 'attach-existing-case',
-                disableOnQuery: true,
-                disabledLabel: ADD_TO_EXISTING_CASE,
-                'data-test-subj': 'attach-existing-case',
-                onClick: (events: TimelineItem[] = []) =>
-                  selectCaseModal.open({
-                    getAttachments: (): CaseAttachmentWithoutOwner[] =>
-                      timelineItemsToCaseEventAttachment(events),
-                  }),
-              },
-            ],
+            disabledLabel: ADD_TO_NEW_CASE,
+            onClick: (events: TimelineItem[] = []) =>
+              createCaseFlyout.open({
+                attachments: timelineItemsToCaseEventAttachment(events),
+              }),
+          },
+          {
+            label: ADD_TO_EXISTING_CASE,
+            key: 'attach-existing-case',
+            disableOnQuery: true,
+            disabledLabel: ADD_TO_EXISTING_CASE,
+            'data-test-subj': 'attach-existing-case',
+            onClick: (events: TimelineItem[] = []) =>
+              selectCaseModal.open({
+                getAttachments: (): CaseAttachmentWithoutOwner[] =>
+                  timelineItemsToCaseEventAttachment(events),
+              }),
           },
         ]
       : [];

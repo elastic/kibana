@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { AddToCaseActionPanel } from '@kbn/response-ops-alerts-table';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
@@ -29,6 +28,10 @@ import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './typ
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+
+export type BulkActionMenuItem = AlertTableContextMenuItem & {
+  onActionClick?: () => void;
+};
 
 export const ALERT_STATUS_ACTION_IDS = {
   markAsAcknowledged: 'acknowledge',
@@ -200,8 +203,8 @@ export const useBulkActionItems = ({
     closePopover: closePopover ?? noop,
   });
 
-  const items = useMemo(() => {
-    const actionItems: AlertTableContextMenuItem[] = [];
+  const items = useMemo<BulkActionMenuItem[]>(() => {
+    const actionItems: BulkActionMenuItem[] = [];
     if (showAlertStatusActions && hasAlertsUpdate) {
       if (currentStatus !== FILTER_OPEN) {
         actionItems.push({
@@ -236,20 +239,20 @@ export const useBulkActionItems = ({
     }
 
     const additionalItems = customBulkActions
-      ? customBulkActions.reduce<AlertTableContextMenuItem[]>((acc, action) => {
+      ? customBulkActions.reduce<BulkActionMenuItem[]>((acc, action) => {
           const isDisabled = !!(query && action.disableOnQuery);
+          const onActionClick = () => {
+            closePopover?.();
+            action.onClick(eventIds);
+          };
           acc.push({
             key: action.key,
             disabled: isDisabled,
             'data-test-subj': action['data-test-subj'],
+            icon: action.icon,
             toolTipContent: isDisabled ? action.disabledLabel : null,
-            panel: action.children?.length ? action.key : undefined,
-            onClick: action.children?.length
-              ? undefined
-              : () => {
-                  closePopover?.();
-                  action.onClick?.(eventIds);
-                },
+            onClick: onActionClick,
+            onActionClick,
             name: action.label,
           });
           return acc;
@@ -288,39 +291,9 @@ export const useBulkActionItems = ({
             }),
           };
         }),
-        ...(customBulkActions ?? [])
-          .filter(({ children }) => children?.length)
-          .map((action) => ({
-            id: action.key,
-            title: action.panelTitle ?? action.label,
-            content: (
-              <AddToCaseActionPanel
-                actions={
-                  action.children?.map((child) => ({
-                    id: child.key,
-                    label: child.label,
-                    dataTestSubj: child['data-test-subj'],
-                    disabled: !!(query && child.disableOnQuery),
-                    onClick: () => {
-                      closePopover?.();
-                      child.onClick?.(eventIds);
-                    },
-                  })) ?? []
-                }
-              />
-            ),
-          })),
         ...(showRunWorkflowActions ? runDocumentWorkflowPanel : []),
       ] as EuiContextMenuPanelDescriptor[],
-    [
-      alertClosingReasonPanels,
-      closePopover,
-      customBulkActions,
-      eventIds,
-      query,
-      runDocumentWorkflowPanel,
-      showRunWorkflowActions,
-    ]
+    [alertClosingReasonPanels, runDocumentWorkflowPanel, showRunWorkflowActions]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);

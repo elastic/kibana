@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { TimelineItem } from '../../search_strategy';
+
 export interface CustomBulkAction {
   key: string;
   label: string;
-  panelTitle?: string;
-  children?: CustomBulkAction[];
+  icon?: IconType;
   disableOnQuery?: boolean;
   disabledLabel?: string;
-  onClick?: (items?: TimelineItem[]) => void;
+  onClick: (items?: TimelineItem[]) => void;
   ['data-test-subj']?: string;
 }
 
-export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick' | 'children'> & {
-  onClick?: (eventIds: string[]) => void;
-  children?: CustomBulkActionProp[];
+export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
+  onClick: (eventIds: string[]) => void;
 };

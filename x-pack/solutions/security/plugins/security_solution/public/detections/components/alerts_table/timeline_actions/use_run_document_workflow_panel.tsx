@@ -86,6 +86,7 @@ export const useRunDocumentWorkflowPanel = ({
       {
         'aria-label': i18n.CONTEXT_MENU_RUN_WORKFLOW,
         'data-test-subj': 'run-document-workflow-action',
+        icon: 'workflow',
         key: RUN_DOCUMENT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_DOCUMENT_WORKFLOW_PANEL_ID,

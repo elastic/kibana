@@ -23,6 +23,7 @@ export const INVESTIGATE_IN_TIMELINE_TEST_ID = 'tiIndicatorFlyoutInvestigateInTi
 export const ADD_TO_EXISTING_CASE_TEST_ID = 'tiIndicatorFlyoutAddToExistingCaseContextMenu';
 export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
 export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
+export const TAKE_ACTION_POPOVER_MIN_WIDTH = 240;
 
 export interface TakeActionProps {
   /**
@@ -104,6 +105,7 @@ export const TakeAction = memo(({ indicator }: TakeActionProps) => {
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        panelStyle={{ minWidth: TAKE_ACTION_POPOVER_MIN_WIDTH }}
         anchorPosition="downLeft"
         data-test-subj={TAKE_ACTION_BUTTON_TEST_ID}
       >

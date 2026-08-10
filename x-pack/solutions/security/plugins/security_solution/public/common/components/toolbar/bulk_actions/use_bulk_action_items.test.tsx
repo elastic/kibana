@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, renderHook } from '@testing-library/react';
-import React from 'react';
+import { renderHook } from '@testing-library/react';
 import type { BulkActionsProps } from './use_bulk_action_items';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -95,38 +94,24 @@ describe('useBulkActionItems', () => {
     ).toBeUndefined();
   });
 
-  it('should convert nested custom actions into a submenu panel', () => {
+  it('exposes custom actions for composed bulk action menus', () => {
+    const onClick = jest.fn();
     const { result } = renderUseBulkActionItems({
       customBulkActions: [
         {
-          key: 'add-to-case',
-          label: 'Add to case',
-          panelTitle: 'Case type',
-          children: [
-            {
-              key: 'add-to-new-case',
-              label: 'Add to new case',
-              'data-test-subj': 'add-to-new-case',
-              onClick: jest.fn(),
-            },
-            {
-              key: 'add-to-existing-case',
-              label: 'Add to existing case',
-              'data-test-subj': 'add-to-existing-case',
-              onClick: jest.fn(),
-            },
-          ],
+          key: 'attach-new-case',
+          label: 'Add to new case',
+          icon: 'briefcase',
+          onClick,
         },
       ],
     });
 
-    expect(result.current.items.find(({ key }) => key === 'add-to-case')?.panel).toBe(
-      'add-to-case'
-    );
-    const casePanel = result.current.panels.find(({ id }) => id === 'add-to-case');
-    const { getByTestId } = render(<>{casePanel?.content}</>);
-    expect(getByTestId('add-to-new-case')).toBeInTheDocument();
-    expect(getByTestId('add-to-existing-case')).toBeInTheDocument();
+    const customAction = result.current.items.find(({ key }) => key === 'attach-new-case');
+    customAction?.onActionClick?.();
+
+    expect(onClick).toHaveBeenCalledWith(['mockEventId']);
+    expect(customAction?.icon).toBe('briefcase');
   });
 
   describe('workflow actions', () => {

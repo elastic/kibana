@@ -48,16 +48,13 @@ describe('useBulkAddEventsToCaseActions', () => {
     jest.clearAllMocks();
   });
 
-  it('returns the case submenu when permissions and services are available', () => {
+  it('returns two actions when permissions and services are available', () => {
     const { result } = renderHook(() => useBulkAddEventsToCaseActions({ clearSelection }), {
       wrapper: TestProviders,
     });
-    expect(result.current).toHaveLength(1);
-    expect(result.current[0].label).toBe('Add to case');
-    expect(result.current[0].children?.map(({ label }) => label)).toEqual([
-      'Add to new case',
-      'Add to existing case',
-    ]);
+    expect(result.current).toHaveLength(2);
+    expect(result.current[0].label).toBeDefined();
+    expect(result.current[1].label).toBeDefined();
   });
 
   it('calls createCaseFlyout.open with correct attachments', () => {
@@ -69,7 +66,7 @@ describe('useBulkAddEventsToCaseActions', () => {
       { _id: '2', _index: 'bar' },
     ] as unknown as TimelineItem[];
     act(() => {
-      result.current[0].children?.[0].onClick?.(events);
+      result.current[0].onClick(events);
     });
     expect(mockOpenNewCase).toHaveBeenCalledWith({
       attachments: [
@@ -91,7 +88,7 @@ describe('useBulkAddEventsToCaseActions', () => {
       { _id: '2', _index: 'bar' },
     ] as unknown as TimelineItem[];
     act(() => {
-      result.current[0].children?.[1].onClick?.(events);
+      result.current[1].onClick(events);
     });
     expect(mockOpenExistingCase).toHaveBeenCalled();
     const mappedEvents = mockOpenExistingCase.mock.lastCall[0].getAttachments();
@@ -111,7 +108,7 @@ describe('useBulkAddEventsToCaseActions', () => {
     const events = [{ _id: '1', _index: 'foo' }] as unknown as TimelineItem[];
 
     act(() => {
-      result.current[0].children?.[0].onClick?.(events);
+      result.current[0].onClick(events);
     });
 
     expect(mockOpenNewCase).toHaveBeenCalledWith({
