@@ -66,19 +66,5 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.results).toBeDefined();
     });
-
-    apiTest(
-      'lists the API introspection tools while experimental features are enabled',
-      async ({ asAdmin }) => {
-        const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools`, {
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        const toolIds = response.body.results.map((tool: { id: string }) => tool.id);
-        expect(toolIds).toContain(platformCoreTools.discover);
-        expect(toolIds).toContain(platformCoreTools.describe);
-        expect(toolIds).toContain(platformCoreTools.execute);
-      }
-    );
   }
 );

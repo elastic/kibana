@@ -6,24 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getRegistries, targetSchema } from './shared';
-import type { ApiTarget } from './shared';
-
-export interface ApiDiscoverEntry {
-  api: string;
-  name: string;
-  namespace: string | null;
-  description: string;
-}
+import { listApisForTarget, targetSchema } from '../../api';
+import type { ApiSummary, ApiTarget } from '../../api';
+import { registryUnavailableErrorResult } from './errors';
 
 export interface ApiDiscoverResultData {
   target: ApiTarget;
   total: number;
-  apis: ApiDiscoverEntry[];
+  apis: ApiSummary[];
 }
 
 const discoverSchema = z.object({
@@ -38,14 +32,14 @@ const discoverSchema = z.object({
     ),
 });
 
-export const apiDiscoverTool = (): BuiltinToolDefinition<typeof discoverSchema> => {
+export const createDiscoverApisTool = (): BuiltinToolDefinition<typeof discoverSchema> => {
   return {
-    id: platformCoreTools.discover,
+    id: internalTools.discoverApis,
     type: ToolType.builtin,
     description: `Discover available HTTP API operations for a given backend target.
 
 Returns a list of API entries with their identifiers, namespace, and description.
-Use this tool first to find the \`api\` identifier needed by the \`${platformCoreTools.describe}\` and \`${platformCoreTools.execute}\` tools.
+Use this tool first to find the \`api\` identifier needed by the \`${internalTools.describeApi}\` and \`${internalTools.executeApi}\` tools.
 
 Each result includes:
 - \`api\`: the identifier to pass to the other API tools, formed from the namespace and name (e.g. \`"indices.create"\`, or \`"bulk"\` for root operations)
@@ -53,44 +47,20 @@ Each result includes:
 - \`namespace\`: the namespace group (e.g. \`"indices"\`), or null for root operations
 - \`description\`: a short description of the operation`,
     schema: discoverSchema,
-    experimental: true,
     handler: async ({ target, search }, { logger }) => {
-      let registries;
-      try {
-        registries = await getRegistries();
-      } catch (err) {
-        logger.error(`${platformCoreTools.discover}: failed to load the API registry: ${err}`);
+      const listResult = await listApisForTarget(target, search);
+      if (listResult.status !== 'listed') {
         return {
           results: [
-            createErrorResult({
-              message: `Failed to load the API registry: ${
-                err instanceof Error ? err.message : String(err)
-              }`,
+            registryUnavailableErrorResult(listResult.error, {
+              toolId: internalTools.discoverApis,
+              logger,
             }),
           ],
         };
       }
 
-      const registry = registries[target];
-      const searchTerm = search?.toLowerCase().trim();
-
-      const apis: ApiDiscoverEntry[] = registry.manifest
-        .filter((entry) => {
-          if (!searchTerm) return true;
-          return (
-            entry.name.toLowerCase().includes(searchTerm) ||
-            (entry.namespace ?? '').toLowerCase().includes(searchTerm) ||
-            entry.description.toLowerCase().includes(searchTerm) ||
-            entry.id.toLowerCase().includes(searchTerm)
-          );
-        })
-        .map((entry) => ({
-          api: entry.id,
-          name: entry.name,
-          namespace: entry.namespace ?? null,
-          description: entry.description,
-        }));
-
+      const { apis } = listResult;
       const data: ApiDiscoverResultData = { target, total: apis.length, apis };
 
       return {

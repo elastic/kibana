@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { apiDescribeTool } from './describe';
+import { agentBuilderMocks } from '../../../../../mocks';
+import { createDescribeApiTool } from './describe';
 import type { ApiDescribeResultData } from './describe';
-import { getRegistries } from './shared';
-import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from './shared';
+import { getRegistries } from '../../api/registry';
+import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
 
-jest.mock('./shared', () => ({
-  ...jest.requireActual('./shared'),
+jest.mock('../../api/registry', () => ({
+  ...jest.requireActual('../../api/registry'),
   getRegistries: jest.fn(),
 }));
 
@@ -38,7 +39,7 @@ class UnknownApiError extends Error {
   }
 }
 
-describe('apiDescribeTool', () => {
+describe('createDescribeApiTool', () => {
   let loadApi: jest.Mock;
 
   beforeEach(() => {
@@ -50,10 +51,9 @@ describe('apiDescribeTool', () => {
     });
   });
 
-  it('has the correct id and is experimental', () => {
-    const tool = apiDescribeTool();
-    expect(tool.id).toBe(platformCoreTools.describe);
-    expect(tool.experimental).toBe(true);
+  it('has the correct id', () => {
+    const tool = createDescribeApiTool();
+    expect(tool.id).toBe(internalTools.describeApi);
   });
 
   it('returns method, path, description and a YAML params schema', async () => {
@@ -74,7 +74,7 @@ describe('apiDescribeTool', () => {
       })
     );
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -108,7 +108,7 @@ describe('apiDescribeTool', () => {
       })
     );
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -134,7 +134,7 @@ describe('apiDescribeTool', () => {
       })
     );
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'bulk' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -161,7 +161,7 @@ describe('apiDescribeTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       context
@@ -186,7 +186,7 @@ describe('apiDescribeTool', () => {
       })
     );
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.delete' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -208,7 +208,7 @@ describe('apiDescribeTool', () => {
       })
     );
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'info' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -221,7 +221,7 @@ describe('apiDescribeTool', () => {
   it('returns a helpful error for an unknown API identifier', async () => {
     loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'does.not.exist' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -235,7 +235,7 @@ describe('apiDescribeTool', () => {
   it('returns an error result when loading fails for another reason', async () => {
     loadApi.mockRejectedValue(new Error('network down'));
 
-    const tool = apiDescribeTool();
+    const tool = createDescribeApiTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', api: 'indices.create' },
       agentBuilderMocks.tools.createHandlerContext()

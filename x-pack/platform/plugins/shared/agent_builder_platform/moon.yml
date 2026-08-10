@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-http-server'
-  - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'

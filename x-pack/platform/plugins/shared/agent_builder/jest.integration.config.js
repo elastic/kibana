@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/agent_builder_platform'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/agent_builder'],
 };

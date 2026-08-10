@@ -39,10 +39,6 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
-  // API tools
-  discover: platformCoreTool('discover'),
-  describe: platformCoreTool('describe'),
-  execute: platformCoreTool('execute'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -101,13 +97,17 @@ export const internalTools = {
   readFile: 'read_file',
   listFiles: 'list_files',
   bash: 'bash',
+  discoverApis: 'discover_apis',
+  describeApi: 'describe_api',
+  executeApi: 'execute_api',
 };
 
 export const isAttachmentTool = (toolName: string) =>
   Object.values(attachmentTools).includes(toolName);
 
 /**
- * Legacy filestore tool ids, used to classify these historical tool calls as `internal`.
+ * Legacy filestore tool ids, used to classify these historical tool calls as `internal` and to
+ * keep their results out of the filestore.
  */
 const LEGACY_FILESTORE_TOOL_IDS = new Set([
   'filestore.read',
@@ -122,7 +122,34 @@ const isInternalToolName = (toolName: string) => Object.values(internalTools).in
 export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
 
-export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
+/**
+ * Tools whose results are never written to the `/tool_calls` filestore.
+ *
+ * Two things put a tool here:
+ * - It already reads the virtual filesystem (`read_file`, `list_files`, `bash`, the legacy
+ *   `filestore.*` ids) or the attachments the round carries, so persisting its result would
+ *   duplicate content the agent can reach on its own.
+ * - Its result is control flow rather than data (`sleep`, `run_subagent`, `ask_user_question`,
+ *   `write_todos`, the skill tools), so there is nothing worth recovering.
+ *
+ * A tool returning data the agent may need again after truncation must stay off this list:
+ * exclusion is what turns an oversized result into an unrecoverable one.
+ */
+const filestoreExcludedToolIds = new Set<string>([
+  ...Object.values(attachmentTools),
+  ...LEGACY_FILESTORE_TOOL_IDS,
+  internalTools.readFile,
+  internalTools.listFiles,
+  internalTools.bash,
+  internalTools.sleep,
+  internalTools.runSubagent,
+  internalTools.askUserQuestion,
+  internalTools.writeTodos,
+  internalTools.loadSkill,
+  internalTools.searchRelevantSkills,
+]);
+
+export const isExcludedFromFilestore = (toolName: string) => filestoreExcludedToolIds.has(toolName);
 
 /**
  * List of tool types which can be created / edited by a user.
@@ -149,9 +176,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
-  platformCoreTools.discover,
-  platformCoreTools.describe,
-  platformCoreTools.execute,
 ];
 
 /**

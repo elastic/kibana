@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { getRegistries, getValidator, toDescribedSchema } from '../shared';
-import type { ApiTarget } from '../shared';
+import { toDescribedSchema } from '../describe_schema';
+import { getRegistries } from '../registry';
+import { getValidator } from '../validate_params';
+import type { ApiTarget } from '../types';
 
 const collectRefs = (node: unknown, found: string[]): string[] => {
   if (Array.isArray(node)) {

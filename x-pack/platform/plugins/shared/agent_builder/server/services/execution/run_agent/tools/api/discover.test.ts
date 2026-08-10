@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { apiDiscoverTool } from './discover';
+import { agentBuilderMocks } from '../../../../../mocks';
+import { createDiscoverApisTool } from './discover';
 import type { ApiDiscoverResultData } from './discover';
-import { getRegistries } from './shared';
-import type { ApiRegistry, ApiRegistryMeta } from './shared';
+import { getRegistries } from '../../api/registry';
+import type { ApiRegistry, ApiRegistryMeta } from '../../api';
 
-jest.mock('./shared', () => ({
-  ...jest.requireActual('./shared'),
+jest.mock('../../api/registry', () => ({
+  ...jest.requireActual('../../api/registry'),
   getRegistries: jest.fn(),
 }));
 
@@ -34,7 +35,7 @@ const createRegistry = (manifest: ApiRegistryMeta[]): ApiRegistry => ({
   loadApi: jest.fn(),
 });
 
-describe('apiDiscoverTool', () => {
+describe('createDiscoverApisTool', () => {
   const manifest = [
     createMeta({ id: 'indices.create', name: 'create', namespace: 'indices' }),
     createMeta({
@@ -59,14 +60,13 @@ describe('apiDiscoverTool', () => {
     });
   });
 
-  it('has the correct id and is experimental', () => {
-    const tool = apiDiscoverTool();
-    expect(tool.id).toBe(platformCoreTools.discover);
-    expect(tool.experimental).toBe(true);
+  it('has the correct id', () => {
+    const tool = createDiscoverApisTool();
+    expect(tool.id).toBe(internalTools.discoverApis);
   });
 
   it('returns all APIs when no search is provided', async () => {
-    const tool = apiDiscoverTool();
+    const tool = createDiscoverApisTool();
     const result = (await tool.handler(
       { target: 'elasticsearch' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -83,7 +83,7 @@ describe('apiDiscoverTool', () => {
   });
 
   it('filters APIs by case-insensitive substring across name/namespace/description/id', async () => {
-    const tool = apiDiscoverTool();
+    const tool = createDiscoverApisTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', search: 'CLUSTER' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -100,7 +100,7 @@ describe('apiDiscoverTool', () => {
   });
 
   it('maps root operations to a null namespace', async () => {
-    const tool = apiDiscoverTool();
+    const tool = createDiscoverApisTool();
     const result = (await tool.handler(
       { target: 'elasticsearch', search: 'bulk' },
       agentBuilderMocks.tools.createHandlerContext()
@@ -113,7 +113,7 @@ describe('apiDiscoverTool', () => {
   it('returns an error result when the schemas fail to load', async () => {
     mockGetRegistries.mockRejectedValue(new Error('boom'));
 
-    const tool = apiDiscoverTool();
+    const tool = createDiscoverApisTool();
     const result = (await tool.handler(
       { target: 'kibana' },
       agentBuilderMocks.tools.createHandlerContext()

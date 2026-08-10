@@ -7,18 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolType } from '@kbn/agent-builder-common';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  getRegistries,
-  getUnsupportedReason,
-  isUnknownApiError,
-  targetSchema,
-  toDescribedSchema,
-} from './shared';
-import type { ApiRegistryDefinition, ApiTarget } from './shared';
+import { getUnsupportedReason, loadApi, targetSchema, toDescribedSchema } from '../../api';
+import type { ApiRegistryDefinition, ApiTarget } from '../../api';
+import { apiFailureToErrorResult } from './errors';
 
 export interface ApiDescribeResultData {
   target: ApiTarget;
@@ -36,14 +31,14 @@ const describeSchema = z.object({
   api: z
     .string()
     .describe(
-      `The API identifier returned by the ${platformCoreTools.discover} tool, formed from the namespace ` +
+      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
         'and name (e.g. "indices.create", "bulk", "cluster.health").'
     ),
 });
 
-export const apiDescribeTool = (): BuiltinToolDefinition<typeof describeSchema> => {
+export const createDescribeApiTool = (): BuiltinToolDefinition<typeof describeSchema> => {
   return {
-    id: platformCoreTools.describe,
+    id: internalTools.describeApi,
     type: ToolType.builtin,
     description: `Get the full parameter specification for an HTTP API operation.
 
@@ -58,57 +53,25 @@ Returns:
   set: pass them all in a single \`params\` map and the routing into the URL path, query string, and
   request body is handled for you.
 
-Use the \`${platformCoreTools.discover}\` tool first to find the \`api\` identifier, then call
-\`${platformCoreTools.execute}\` with the same \`target\` and \`api\` plus the \`params\` from this schema.`,
+Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call
+\`${internalTools.executeApi}\` with the same \`target\` and \`api\` plus the \`params\` from this schema.`,
     schema: describeSchema,
-    experimental: true,
     handler: async ({ target, api }, { logger }) => {
-      let registries;
-      try {
-        registries = await getRegistries();
-      } catch (err) {
-        logger.error(`${platformCoreTools.describe}: failed to load the API registry: ${err}`);
+      const loadResult = await loadApi(target, api);
+      if (loadResult.status !== 'loaded') {
         return {
           results: [
-            createErrorResult({
-              message: `Failed to load the API registry: ${
-                err instanceof Error ? err.message : String(err)
-              }`,
+            apiFailureToErrorResult(loadResult, {
+              toolId: internalTools.describeApi,
+              target,
+              api,
+              logger,
             }),
           ],
         };
       }
 
-      const registry = registries[target];
-
-      let loaded;
-      try {
-        loaded = await registry.loadApi(api);
-      } catch (err) {
-        if (isUnknownApiError(err)) {
-          return {
-            results: [
-              createErrorResult({
-                message: `Unknown API identifier: "${api}". Use the ${platformCoreTools.discover} tool to find valid identifiers.`,
-              }),
-            ],
-          };
-        }
-        logger.error(
-          `${platformCoreTools.describe}: failed to load API "${api}" (target=${target}): ${err}`
-        );
-        return {
-          results: [
-            createErrorResult({
-              message: `Failed to load API definition for "${api}": ${
-                err instanceof Error ? err.message : String(err)
-              }`,
-            }),
-          ],
-        };
-      }
-
-      const { definition } = loaded;
+      const { definition } = loadResult.loaded;
 
       let paramsYaml: string;
       if (definition.input == null) {
@@ -119,14 +82,14 @@ Use the \`${platformCoreTools.discover}\` tool first to find the \`api\` identif
           paramsSchema = await toDescribedSchema(target, definition.input);
         } catch (err) {
           logger.warn(
-            `${platformCoreTools.describe}: failed to resolve schema references for "${api}" (target=${target}): ${err}`
+            `${internalTools.describeApi}: failed to resolve schema references for "${api}" (target=${target}): ${err}`
           );
         }
 
         try {
           paramsYaml = stringifyYaml(paramsSchema, { indent: 2, lineWidth: 120 });
         } catch (err) {
-          logger.warn(`${platformCoreTools.describe}: yaml stringify failed for "${api}": ${err}`);
+          logger.warn(`${internalTools.describeApi}: yaml stringify failed for "${api}": ${err}`);
           paramsYaml = JSON.stringify(paramsSchema, null, 2);
         }
       }
