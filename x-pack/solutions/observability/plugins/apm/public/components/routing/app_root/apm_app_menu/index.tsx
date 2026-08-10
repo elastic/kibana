@@ -186,7 +186,7 @@ export function ApmAppMenu({ children }: { children?: React.ReactNode }) {
     preferredEnvironment,
   ]);
 
-  const CreateSloFlyout =
+  const createSloFlyoutElement =
     sloFlyout.isOpen && sloFlyout.indicatorType
       ? slo?.getCreateSLOFormFlyout({
           initialValues: {
@@ -217,7 +217,7 @@ export function ApmAppMenu({ children }: { children?: React.ReactNode }) {
           }
         }}
       />
-      {CreateSloFlyout}
+      {createSloFlyoutElement}
       {children}
     </ApmAppMenuProvider>
   );

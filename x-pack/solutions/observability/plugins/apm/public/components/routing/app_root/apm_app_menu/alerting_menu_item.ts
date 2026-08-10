@@ -22,7 +22,7 @@ const createAnomalyAlertLabel = i18n.translate('xpack.apm.home.alertsMenu.create
 });
 
 const errorCountLabel = i18n.translate('xpack.apm.home.alertsMenu.errorCount', {
-  defaultMessage: ' Create error count rule',
+  defaultMessage: 'Create error count rule',
 });
 
 const transactionDurationLabel = i18n.translate('xpack.apm.home.alertsMenu.transactionDuration', {
