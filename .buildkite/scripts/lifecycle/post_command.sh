@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+COMMAND_EXIT_STATUS="${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-$BUILDKITE_COMMAND_EXIT_STATUS}"
+
 echo '--- Log out of gcloud'
 ./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
 ./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
@@ -49,7 +51,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
 
-  if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+  if [[ $COMMAND_EXIT_STATUS -ne 0 ]]; then
     if [[ $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG == 'elasticsearch-serverless-intake' ]]; then
       echo "--- Run Failed Test Reporter (only junit)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'\
@@ -96,7 +98,7 @@ if compgen -G 'target/kibana-check*' > /dev/null 2>&1; then
   buildkite-agent artifact upload 'target/kibana-check*'
 fi
 
-if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+if [[ $COMMAND_EXIT_STATUS -ne 0 ]]; then
   # If the slack team environment variable is set, ping the team in slack
   if [ -n "${PING_SLACK_TEAM:-}" ]; then
     buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
@@ -106,7 +108,7 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
   if [[ "${CHECK_GATE:-}" == "true" ]]; then
     # Spot/preemptible retries use Buildkite's synthetic `-1` status. Do not
     # poison the build until a non-retryable gate attempt actually fails.
-    if [[ $BUILDKITE_COMMAND_EXIT_STATUS -eq -1 ]]; then
+    if [[ $COMMAND_EXIT_STATUS -eq -1 ]]; then
       echo '--- Gate step exited with retryable status -1; skipping cancel-on-gate-failure'
     else
       echo '--- Cancel steps on gate failure'
@@ -114,3 +116,9 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     fi
   fi
 fi
+
+if [[ -n "${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-}" ]]; then
+  echo "--- Post-command processing complete; reporting self-timeout"
+fi
+
+exit "${KIBANA_SELF_TIMEOUT_EXIT_STATUS:-0}"
