@@ -154,15 +154,22 @@ const resultResponse = {
     tlsAgeDays: 3,
     umbrellaRank: 0,
   },
+  // The Result API's stats shape, which is NOT the search hit's: it carries the per-type
+  // breakdowns and derived percentages but none of the four scalar totals (requests, uniqIPs,
+  // dataLength, encodedDataLength). Confirmed absent on 22 live results. An earlier version of
+  // this fixture invented those four, which is what let the handler read fields that never
+  // arrive.
   stats: {
-    requests: 42,
-    uniqIPs: 5,
     uniqCountries: 2,
-    dataLength: 100,
-    encodedDataLength: 50,
     malicious: 2,
     secureRequests: 40,
     securePercentage: 95,
+    totalLinks: 7,
+    ipStats: [{ ip: '203.0.113.10' }, { ip: '198.51.100.7' }],
+    resourceStats: [
+      { type: 'Document', count: 1, size: 80, encodedSize: 30 },
+      { type: 'Script', count: 1, size: 20, encodedSize: 20 },
+    ],
   },
   verdicts: {
     // `malicious` deliberately omitted here to prove the boolean is normalized, not passed through.
@@ -190,6 +197,14 @@ const resultResponse = {
     servers: ['nginx'],
     linkDomains: ['login.example'],
     hashes: ['a'.repeat(64)],
+    certificates: [
+      {
+        subjectName: 'phish.example',
+        issuer: "Let's Encrypt",
+        validFrom: 1786389518,
+        validTo: 1794165517,
+      },
+    ],
   },
   data: {
     requests: [
@@ -202,6 +217,7 @@ const resultResponse = {
         },
       },
     ],
+    redirects: [{ from: 'https://lure.example/c', to: 'https://phish.example/login', status: 302 }],
   },
   meta: {
     processors: {
@@ -209,9 +225,13 @@ const resultResponse = {
         data: [{ filename: 'payload.zip', sha256: 'c'.repeat(64), mimeType: 'application/zip' }],
       },
       wappa: { data: [{ app: 'Nginx' }, { app: 'jQuery' }, {}] },
+      umbrella: { data: [{ hostname: 'phish.example', rank: 32138 }] },
     },
   },
-  submitter: { country: 'DE' },
+  // `submitter` is present but empty on live results; `scanner.country` is the field the Result
+  // API actually populates, so the projection reads that one.
+  submitter: {},
+  scanner: { country: 'se' },
 };
 
 const submissionResponse = {
@@ -581,6 +601,112 @@ describe('URLScan.io connector', () => {
       ]);
     });
 
+    // Regression: the Result API returns none of `stats.requests`, `stats.uniqIPs`,
+    // `stats.dataLength` or `stats.encodedDataLength` (confirmed absent on 22 live results;
+    // they exist only on a SEARCH hit). Reading them straight through returned four permanent
+    // nulls, so they are derived from members that do exist.
+    it('derives the scan totals the result payload does not carry directly', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: resultResponse, headers: {} });
+      const result = (await action('getResult').handler(ctx, { uuid: UUID })) as {
+        stats: Record<string, number | undefined>;
+      };
+      // One entry in data.requests, two in stats.ipStats, and resourceStats summing 80+20 / 30+20.
+      expect(result.stats.requests).toBe(1);
+      expect(result.stats.uniqueIps).toBe(2);
+      expect(result.stats.dataLength).toBe(100);
+      expect(result.stats.encodedDataLength).toBe(50);
+      // The members the API really does send are passed through unchanged.
+      expect(result.stats.uniqueCountries).toBe(2);
+      expect(result.stats.securePercentage).toBe(95);
+      expect(result.stats.totalLinks).toBe(7);
+    });
+
+    it('reports an unmeasured total as undefined rather than zero', async () => {
+      const { ctx, client } = createContext();
+      // A result with no requests list and no resourceStats: "not measured", not "zero bytes".
+      client.get.mockResolvedValue({
+        data: { ...resultResponse, data: {}, stats: { uniqCountries: 1 } },
+        headers: {},
+      });
+      const result = (await action('getResult').handler(ctx, { uuid: UUID })) as {
+        stats: Record<string, number | undefined>;
+      };
+      expect(result.stats.requests).toBeUndefined();
+      expect(result.stats.dataLength).toBeUndefined();
+      expect(result.stats.encodedDataLength).toBeUndefined();
+    });
+
+    it('surfaces the redirect chain and the certificates', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: resultResponse, headers: {} });
+      const result = (await action('getResult').handler(ctx, { uuid: UUID })) as {
+        redirects: Array<Record<string, unknown>>;
+        certificates: Array<Record<string, unknown>>;
+      };
+      expect(result.redirects).toEqual([
+        { from: 'https://lure.example/c', to: 'https://phish.example/login', status: 302 },
+      ]);
+      expect(result.certificates).toEqual([
+        {
+          subjectName: 'phish.example',
+          issuer: "Let's Encrypt",
+          validFrom: 1786389518,
+          validTo: 1794165517,
+        },
+      ]);
+    });
+
+    it('reads the scan location from scanner.country, not the empty submitter object', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: resultResponse, headers: {} });
+      const result = (await action('getResult').handler(ctx, { uuid: UUID })) as Record<
+        string,
+        unknown
+      >;
+      expect(result.scannerCountry).toBe('se');
+      expect(result.submitterCountry).toBeUndefined();
+    });
+
+    it('falls back to the umbrella processor when page.umbrellaRank is absent', async () => {
+      const { ctx, client } = createContext();
+      const pageWithoutRank = { ...resultResponse.page };
+      delete (pageWithoutRank as { umbrellaRank?: number }).umbrellaRank;
+      client.get.mockResolvedValue({
+        data: { ...resultResponse, page: pageWithoutRank },
+        headers: {},
+      });
+      const result = (await action('getResult').handler(ctx, { uuid: UUID })) as {
+        page: { umbrellaRank?: number };
+      };
+      expect(result.page.umbrellaRank).toBe(32138);
+    });
+
+    // urlscan answers 404 for both "not indexed yet" and "no such uuid", distinguished only by
+    // the body text, so the vendor's own message is passed through.
+    it('distinguishes a nonexistent scan from one still processing on a 404', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockRejectedValue(httpError(404, { message: 'No such scan submission' }));
+      const missing = (await action('getResult').handler(ctx, { uuid: UUID })) as {
+        exists: boolean;
+        reason?: string;
+        message: string;
+      };
+      expect(missing.exists).toBe(false);
+      expect(missing.reason).toBe('No such scan submission');
+      expect(missing.message).toContain('No such scan');
+
+      client.get.mockRejectedValue(httpError(404, { message: 'Scan is not finished yet' }));
+      const pending = (await action('getResult').handler(ctx, { uuid: UUID })) as {
+        exists: boolean;
+        reason?: string;
+        message: string;
+      };
+      expect(pending.exists).toBe(true);
+      expect(pending.reason).toBe('Scan is not finished yet');
+      expect(pending.message).toContain('still processing');
+    });
+
     it('does not pass the raw response through', async () => {
       const { ctx, client } = createContext();
       client.get.mockResolvedValue({ data: resultResponse, headers: {} });
@@ -645,6 +771,23 @@ describe('URLScan.io connector', () => {
       client.get.mockRejectedValue(httpError(400, { message: 'Invalid API key format' }));
       await expect(action('getResult').handler(ctx, { uuid: UUID })).rejects.toThrow(
         /Invalid API key format/
+      );
+    });
+
+    // Regression: not every 403 is about the credential. urlscan answers 403 for a plan
+    // entitlement too (verified live with a valid, accepted key), and rewriting that into
+    // "set a valid key on the connector" sends an operator to rotate a key that works.
+    it('does not blame the credential for a 403 that is really a plan limit', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockRejectedValue(
+        httpError(403, {
+          message: "Your current plan does not allow you to search field 'verdicts.score'",
+        })
+      );
+      const attempt = action('getResult').handler(ctx, { uuid: UUID });
+      await expect(attempt).rejects.toThrow(/current plan does not allow/);
+      await expect(action('getResult').handler(ctx, { uuid: UUID })).rejects.not.toThrow(
+        /connector's credential/
       );
     });
   });

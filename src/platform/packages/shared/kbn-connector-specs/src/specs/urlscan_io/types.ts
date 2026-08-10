@@ -205,10 +205,17 @@ export const SearchScansInputSchema = lazySchema(() =>
     searchAfter: z
       .string()
       .max(256)
-      .regex(/^[0-9]+,[0-9a-fA-F-]{36}$/, {
-        message:
-          'Must be the comma-joined sort value of the last result, for example "1786010595695,019fd686-b761-740e-aa64-68543ed5d3f0".',
-      })
+      // urlscan enforces its own pattern server-side and leaked it verbatim in a 400:
+      // /^\d{13},[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      // Mirrored here so a hand-built cursor is refused locally with a useful message
+      // rather than passing validation and 400ing at the vendor.
+      .regex(
+        /^\d{13},[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
+        {
+          message:
+            'Must be the comma-joined sort value of the last result, for example "1786010595695,019fd686-b761-740e-aa64-68543ed5d3f0".',
+        }
+      )
       .optional()
       .describe(
         'Pagination cursor: the "sort" value of the last (oldest) result from the previous page, comma-joined. Take it from the searchAfter field this action returns rather than building it by hand. Results are ordered newest first, so each page walks further back in time.'
@@ -276,17 +283,45 @@ export interface ScanPage {
   language?: string;
 }
 
+/**
+ * The Result API's `stats`. Note this is a DIFFERENT shape from the Search API's `stats`
+ * (see SearchHitStats): a result carries the per-type breakdowns and the derived
+ * percentages, but NOT the four scalar totals the search index exposes. Verified across 22
+ * live results: `requests`, `uniqIPs`, `dataLength` and `encodedDataLength` are absent from
+ * every one of them, so this connector derives those from the payload instead of reading
+ * fields that never arrive.
+ */
 export interface ScanStats {
-  uniqIPs?: number;
   uniqCountries?: number;
-  requests?: number;
-  dataLength?: number;
-  encodedDataLength?: number;
   malicious?: number;
   adBlocked?: number;
   secureRequests?: number;
   securePercentage?: number;
   IPv6Percentage?: number;
+  totalLinks?: number;
+  /** One entry per contacted IP; its length is the unique-IP count. */
+  ipStats?: Array<{ ip?: string; countries?: string[]; requests?: number }>;
+  /** Per-resource-type rollup. Its size/encodedSize members sum to the transfer totals. */
+  resourceStats?: Array<{
+    type?: string;
+    count?: number;
+    size?: number;
+    encodedSize?: number;
+    compression?: string;
+    percentage?: number;
+  }>;
+}
+
+/**
+ * The Search API's `stats`, which is a much smaller object than the Result API's and is the
+ * only place the four scalar totals actually appear.
+ */
+export interface SearchHitStats {
+  uniqIPs?: number;
+  uniqCountries?: number;
+  requests?: number;
+  dataLength?: number;
+  encodedDataLength?: number;
 }
 
 export interface ScanBrand {
@@ -355,20 +390,29 @@ export interface ScanResultResponse {
     linkDomains?: string[];
     servers?: string[];
     hashes?: string[];
-    certificates?: Array<{ subjectName?: string; issuer?: string; validFrom?: number }>;
+    certificates?: Array<{
+      subjectName?: string;
+      issuer?: string;
+      validFrom?: number;
+      validTo?: number;
+    }>;
   };
   data?: {
     requests?: ScanRequestEntry[];
     cookies?: Array<{ name?: string; domain?: string }>;
     links?: Array<{ href?: string; text?: string }>;
+    /** The redirect chain. A first-class phishing signal, so it is projected. */
+    redirects?: Array<{ from?: string; to?: string; status?: number }>;
   };
   meta?: {
     processors?: {
       download?: { data?: Array<{ filename?: string; sha256?: string; mimeType?: string }> };
       wappa?: { data?: Array<{ app?: string; categories?: Array<{ name?: string }> }> };
+      umbrella?: { data?: Array<{ hostname?: string; rank?: number }> };
     };
   };
-  submitter?: { country?: string };
+  /** Where urlscan ran the scan from. Distinct from `submitter`, which is often empty. */
+  scanner?: { country?: string };
   /** urlscan Pro only. */
   labels?: string[];
   usertags?: string[];
@@ -379,7 +423,7 @@ export interface SearchResultEntry {
   sort?: Array<number | string>;
   task?: ScanTask;
   page?: ScanPage;
-  stats?: ScanStats;
+  stats?: SearchHitStats;
   result?: string;
   screenshot?: string;
   brand?: ScanBrand[];
