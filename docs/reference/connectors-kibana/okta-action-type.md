@@ -1,7 +1,7 @@
 ---
 navigation_title: "Okta"
 type: reference
-description: "Use the Okta connector to contain compromised identities - suspend users, revoke sessions, reset MFA factors, manage group membership, and query System Log events."
+description: "Use the Okta connector to contain compromised identities — suspend users, revoke sessions, reset MFA factors, manage group membership, and query System Log events."
 applies_to:
   stack: preview 9.6
   serverless: preview
