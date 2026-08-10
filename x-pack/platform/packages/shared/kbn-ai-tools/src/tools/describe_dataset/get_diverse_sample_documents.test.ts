@@ -6,16 +6,21 @@
  */
 
 import objectHash from 'object-hash';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { Logger } from '@kbn/logging';
-import { getDiverseSampleDocuments } from './get_diverse_sample_documents';
+import { getDiverseSampleDocuments, selectStratifiedWindow } from './get_diverse_sample_documents';
 
 const createEsClient = () => {
-  const query = jest.fn();
+  const esql = jest.fn();
+  const schemaQuery = jest.fn().mockResolvedValue(schemaResponse());
 
   return {
-    esClient: { esql: { query } } as unknown as ElasticsearchClient,
-    query,
+    esClient: {
+      esql,
+      client: { esql: { query: schemaQuery } },
+    } as unknown as TracedElasticsearchClient,
+    esql,
+    schemaQuery,
   };
 };
 
@@ -36,7 +41,6 @@ const schemaResponse = (
   values: [],
 });
 
-// Single-pass categorize result: count, representative sample value, pattern.
 const categorizeResponse = (
   values: unknown[][] = [
     [10, 'error one', 'error'],
@@ -51,7 +55,6 @@ const categorizeResponse = (
   values,
 });
 
-// Concrete index source fetch (METADATA _id, _source survives).
 const concreteFetchResponse = (
   values: unknown[][] = [
     ['doc-1', { message: 'error one' }],
@@ -65,7 +68,6 @@ const concreteFetchResponse = (
   values,
 });
 
-// ES|QL view source fetch: _id/_source dropped, only projected columns remain.
 const viewFetchResponse = (
   values: unknown[][] = [
     ['2026-06-18T00:00:00Z', 'error one'],
@@ -79,9 +81,6 @@ const viewFetchResponse = (
   values,
 });
 
-// Concrete index where the categorized field is an ES|QL alias/runtime field
-// (here `message` aliases `body.text`): the field is a queryable column but is
-// absent from `_source` (OTel logs). The join must use the column, not _source.
 const aliasFetchResponse = (
   values: unknown[][] = [
     ['error one', 'doc-1', { 'body.text': 'error one' }],
@@ -102,33 +101,31 @@ describe('getDiverseSampleDocuments', () => {
   });
 
   it('categorizes and fetches sources without _index/_id metadata (concrete indices)', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse())
+    const { esClient, esql } = createEsClient();
+    esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
       .mockResolvedValueOnce(concreteFetchResponse());
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
       size: 2,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    const categorizeQuery = query.mock.calls[2][0].query;
+    const categorizeQuery = esql.mock.calls[1][1].query;
     expect(categorizeQuery).not.toContain('METADATA');
     expect(categorizeQuery).toContain(
-      'STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message)'
+      'STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message, {"output_format": "tokens"})'
     );
-    expect(categorizeQuery).toContain('SORT count DESC');
-    expect(categorizeQuery).toContain('LIMIT 2');
+    expect(categorizeQuery).toContain('WHERE count >');
+    expect(categorizeQuery).toContain('| SORT count ASC | LIMIT 1000');
 
-    const fetchQuery = query.mock.calls[3][0].query;
+    const fetchQuery = esql.mock.calls[2][1].query;
     expect(fetchQuery).toContain('FROM logs-a, logs-b METADATA _id, _source');
     expect(fetchQuery).toContain('WHERE message::KEYWORD IN ("error one", "warn two")');
     expect(fetchQuery).toContain('LIMIT 20');
@@ -139,27 +136,44 @@ describe('getDiverseSampleDocuments', () => {
     ]);
   });
 
+  it('runs the schema probe on the plain client so drop_null_columns cannot prune the LIMIT 0 columns', async () => {
+    const { esClient, esql, schemaQuery } = createEsClient();
+    esql
+      .mockResolvedValueOnce(countResponse(10))
+      .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(concreteFetchResponse());
+
+    await getDiverseSampleDocuments({
+      esClient,
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      size: 2,
+      iteration: 1,
+      logger,
+    });
+
+    expect(schemaQuery).toHaveBeenCalledTimes(1);
+    expect(schemaQuery.mock.calls[0][0].query).toBe('FROM logs-* | LIMIT 0');
+  });
+
   it('reconstructs sources for ES|QL views that drop _id/_source metadata', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse())
+    const { esClient, esql } = createEsClient();
+    esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
       .mockResolvedValueOnce(viewFetchResponse());
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: '$.query',
       start: 100,
       end: 200,
       size: 2,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    // Views expose no `_id`, so a stable content hash is synthesized so the doc
-    // can be deduped across the diverse/random buckets in mergeDocuments.
     const firstSource = { '@timestamp': '2026-06-18T00:00:00Z', message: 'error one' };
     const secondSource = { '@timestamp': '2026-06-18T00:01:00Z', message: 'warn two' };
     expect(result.hits).toEqual([
@@ -169,183 +183,193 @@ describe('getDiverseSampleDocuments', () => {
   });
 
   it('joins on the field column when it is an alias absent from _source (OTel logs)', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse())
+    const { esClient, esql } = createEsClient();
+    esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
       .mockResolvedValueOnce(aliasFetchResponse());
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs.otel.android',
       start: 100,
       end: 200,
       size: 2,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    // `_source` has no `message` (it lives under `body.text`); reading the join
-    // value from the `message` column still resolves both representatives.
     expect(result.hits).toEqual([
       { _index: '', _id: 'doc-1', _source: { 'body.text': 'error one' } },
       { _index: '', _id: 'doc-2', _source: { 'body.text': 'warn two' } },
     ]);
   });
 
-  it('adds SAMPLE when the population is large', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse())
+  it('adds SAMPLE to both passes when the population is large', async () => {
+    const { esClient, esql } = createEsClient();
+    esql
       .mockResolvedValueOnce(countResponse(10_000_000))
-      .mockResolvedValueOnce(categorizeResponse([[10, 'error one', 'error']]))
+      .mockResolvedValueOnce(categorizeResponse([[100_000, 'error one', 'error']]))
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]));
 
     await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
       size: 1,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    expect(query.mock.calls[2][0].query).toContain('| SAMPLE 0.01 |');
-  });
-
-  it('short-circuits when the count query returns zero', async () => {
-    const { esClient, query } = createEsClient();
-    query.mockResolvedValueOnce(schemaResponse()).mockResolvedValueOnce(countResponse(0));
-
-    const result = await getDiverseSampleDocuments({
-      esClient,
-      requestTimeout: 30_000,
-      index: 'logs-*',
-      start: 100,
-      end: 200,
-      size: 1,
-      offset: 0,
-      logger,
-    });
-
-    expect(query).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({ hits: [] });
+    expect(esql.mock.calls[1][1].query).toContain('| SAMPLE 0.01 |');
+    expect(esql.mock.calls[2][1].query).toContain(
+      'NOT MATCH(message, "error", {"operator": "AND"})'
+    );
   });
 
   it("returns no hits when no message field exists (backfilled by the caller's random arm)", async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse([{ name: 'host.name', type: 'keyword' }]))
-      .mockResolvedValueOnce(countResponse(10));
+    const { esClient, esql, schemaQuery } = createEsClient();
+    schemaQuery.mockResolvedValueOnce(schemaResponse([{ name: 'host.name', type: 'keyword' }]));
+    esql.mockResolvedValueOnce(countResponse(10));
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
       size: 1,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    expect(query).toHaveBeenCalledTimes(2);
+    expect(schemaQuery).toHaveBeenCalledTimes(1);
+    expect(esql).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ hits: [] });
   });
 
   it('uses body.text when it is the first available text field candidate', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(
-        schemaResponse([
-          { name: 'message', type: 'keyword' },
-          { name: 'body.text', type: 'text' },
-        ])
-      )
+    const { esClient, esql, schemaQuery } = createEsClient();
+    schemaQuery.mockResolvedValueOnce(
+      schemaResponse([
+        { name: 'message', type: 'keyword' },
+        { name: 'body.text', type: 'text' },
+      ])
+    );
+    esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse([[10, 'body value', 'body pattern']]))
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { body: { text: 'body value' } }]]));
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
       size: 1,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    expect(query.mock.calls[2][0].query).toContain('CATEGORIZE(body.text)');
-    expect(query.mock.calls[3][0].query).toContain('WHERE body.text::KEYWORD IN ("body value")');
+    expect(esql.mock.calls[1][1].query).toContain(
+      'CATEGORIZE(body.text, {"output_format": "tokens"})'
+    );
+    expect(esql.mock.calls[2][1].query).toContain('WHERE body.text::KEYWORD IN ("body value")');
     expect(result.hits).toEqual([
       { _index: '', _id: 'doc-1', _source: { body: { text: 'body value' } } },
     ]);
   });
 
-  it('applies the offset window before fetching sources', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse())
-      .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(
-        categorizeResponse([
-          [10, 'error one', 'error'],
-          [5, 'warn two', 'warn'],
-        ])
-      )
-      .mockResolvedValueOnce(concreteFetchResponse([['doc-2', { message: 'warn two' }]]));
+  it('rotates the diverse representative across iterations without an offset cursor', async () => {
+    const { esClient, esql } = createEsClient();
 
-    const result = await getDiverseSampleDocuments({
-      esClient,
-      requestTimeout: 30_000,
-      index: 'logs-*',
-      start: 100,
-      end: 200,
-      size: 1,
-      offset: 1,
-      logger,
-    });
+    const runIteration = async (iteration: number) => {
+      esql
+        .mockResolvedValueOnce(countResponse(10))
+        .mockResolvedValueOnce(
+          categorizeResponse([
+            [10, 'error one', 'error'],
+            [5, 'warn two', 'warn'],
+          ])
+        )
+        .mockResolvedValueOnce(
+          concreteFetchResponse([
+            ['doc-1', { message: 'error one' }],
+            ['doc-2', { message: 'warn two' }],
+          ])
+        );
 
-    expect(query.mock.calls[2][0].query).toContain('LIMIT 2');
-    expect(query.mock.calls[3][0].query).toContain('WHERE message::KEYWORD IN ("warn two")');
-    expect(result.hits).toEqual([{ _index: '', _id: 'doc-2', _source: { message: 'warn two' } }]);
+      const { hits } = await getDiverseSampleDocuments({
+        esClient,
+        index: 'logs-*',
+        start: 100,
+        end: 200,
+        size: 1,
+        iteration,
+        logger,
+      });
+      return hits;
+    };
+
+    const first = await runIteration(1);
+    const second = await runIteration(2);
+
+    expect(first).toHaveLength(1);
+    expect(second).toHaveLength(1);
+    expect(first[0]._id).not.toEqual(second[0]._id);
+    expect([first[0]._id, second[0]._id].sort()).toEqual(['doc-1', 'doc-2']);
   });
 
   it('re-queries only the still-missing values, then stops when a round resolves nothing', async () => {
-    const { esClient, query } = createEsClient();
-    query
-      .mockResolvedValueOnce(schemaResponse())
+    const { esClient, esql } = createEsClient();
+    esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
-      // Round 1 resolves only "error one"; "warn two" is crowded out / missing.
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]))
-      // Round 2 re-queries just "warn two" and finds nothing → loop stops.
       .mockResolvedValueOnce(concreteFetchResponse([]));
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
       size: 2,
-      offset: 0,
+      iteration: 1,
       logger,
     });
 
-    expect(query.mock.calls[3][0].query).toContain(
+    expect(esql.mock.calls[2][1].query).toContain(
       'WHERE message::KEYWORD IN ("error one", "warn two")'
     );
-    expect(query.mock.calls[4][0].query).toContain('WHERE message::KEYWORD IN ("warn two")');
+    expect(esql.mock.calls[3][1].query).toContain('WHERE message::KEYWORD IN ("warn two")');
     expect(result.hits).toEqual([{ _index: '', _id: 'doc-1', _source: { message: 'error one' } }]);
     expect(logger.debug).toHaveBeenCalledWith(
       'Diverse sampling: resolved 1/2 representative documents.'
     );
+  });
+});
+
+describe('selectStratifiedWindow', () => {
+  const makeRows = (counts: number[]) =>
+    counts.map((count) => ({ count, pattern: `p${count}`, sample: `s${count}` }));
+
+  it('spans the frequency distribution by taking one pattern per band', () => {
+    const rows = makeRows([60, 50, 40, 30, 20, 10]);
+    const counts = selectStratifiedWindow(rows, { iteration: 1, size: 3 }).map((r) => r.count);
+
+    expect(counts).toHaveLength(3);
+    expect([60, 50]).toContain(counts[0]);
+    expect([40, 30]).toContain(counts[1]);
+    expect([20, 10]).toContain(counts[2]);
+  });
+
+  it('rotates the picks across iterations so coverage advances without a cursor', () => {
+    const rows = makeRows([60, 50, 40, 30, 20, 10]);
+    const first = selectStratifiedWindow(rows, { iteration: 1, size: 3 }).map((r) => r.pattern);
+    const second = selectStratifiedWindow(rows, { iteration: 2, size: 3 }).map((r) => r.pattern);
+
+    expect(first).not.toEqual(second);
+    expect(new Set([...first, ...second]).size).toBe(6);
   });
 });

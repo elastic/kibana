@@ -443,7 +443,6 @@ const buildPersistenceEvents = ({
   return updateConversation$({
     conversationClient,
     conversation,
-    title$,
     roundCompletedEvents$,
     action,
   });
