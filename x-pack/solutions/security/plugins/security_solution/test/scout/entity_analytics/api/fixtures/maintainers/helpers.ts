@@ -470,12 +470,16 @@ interface SeedLogDocumentOptions {
   /**
    * Integration-specific field bag merged into the document root alongside the
    * standard ECS fields. Use this to set the inverted-actor fields (e.g.
-   * `entityanalytics_entra_id.device.registered_owners`) that the maintainer's
-   * ES|QL query reads to derive actor EUIDs.
+   * `device.registered_owners`) that the maintainer's ES|QL query reads to
+   * derive actor EUIDs.
    *
    * The caller is responsible for producing the correct shape — particularly for
    * `type: group` fields, which must be written as flattened parallel arrays to
    * match how Elasticsearch indexes them at ingest time.
+   *
+   * Keys that overlap with the standard fields (`host`, `event`) are shallowly
+   * merged; the `device` key is reserved for caller use (the helper does not
+   * pre-populate `device.*` fields).
    */
   integrationFields: Record<string, unknown>;
   /** @timestamp for the document. Defaults to 5 minutes ago (inside the 30d lookback). */
@@ -509,7 +513,6 @@ export const seedLogDocument = async (
       '@timestamp': ts,
       event: { kind: 'asset', category: ['host'] },
       host: { id: hostId, name: hostName },
-      device: { id: hostId },
       ...integrationFields,
     },
   });

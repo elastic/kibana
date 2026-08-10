@@ -19,9 +19,10 @@ const RELATIONSHIP_KEY = 'owns';
 const OKTA_ENTITY_SOURCE = 'entityanalytics_okta';
 const ENTRA_ID_ENTITY_SOURCE = 'entityanalytics_entra_id';
 const ENTRA_ID_DEVICE_DATASET = 'entityanalytics_entra_id.device';
-const OWNERS = 'entityanalytics_entra_id.device.registered_owners';
+const OWNERS = 'device.registered_owners';
 const OWNER_MAIL_FIELD = `${OWNERS}.mail`;
 const OWNER_ID_FIELD = `${OWNERS}.id`;
+const OWNER_UPN_FIELD = `${OWNERS}.user_principal_name`;
 
 // Okta: owns.host.id is an Okta device id. Device entities now key on host.id
 // (set by device.yml `set_host_id` tag), so a device's entity.id is
@@ -37,37 +38,54 @@ const OKTA_OWNS_RULES: DirectEuidRule[] = [{ field: 'host.id', euidType: 'host' 
  * Entra ID exposes device ownership only on the *device* object
  * (`registeredOwners`) — there is no user-side "devices I own" field — so this
  * query reads device documents and inverts device→user to emit a user-keyed
- * edge.
+ * relationship.
  *
- * `registered_owners` is declared `type: group`, not `nested`, so Elasticsearch
- * flattens the array at index time and per-owner correlation is lost:
+ * `registered_owners` has a plain `object` mapping (not `nested`), so
+ * Elasticsearch flattens the array at index time and per-owner correlation is
+ * lost. For a device with two owners where only one has a mail address:
  *
- *   registered_owners.id   = [idA, idB]
- *   registered_owners.mail = [mailA, mailB]
+ *   device.registered_owners.id                  = [idA, idB]        ← 2 values
+ *   device.registered_owners.mail                = [mailB]            ← 1 value (only B)
+ *   device.registered_owners.user_principal_name = [upnA, upnB]      ← 2 values
  *
- * Nothing links `id[0]` to `mail[0]`, so a per-owner ranked fallback is not
- * expressible. Instead both fields are unioned into one multi-valued column and
- * expanded, emitting one candidate actor EUID per value.
+ * A ranked CASE cannot be used here: `CASE(mail IS NOT NULL, mail, ...)` sees
+ * `mail IS NOT NULL = true` (because B's mail is present), returns the 1-element
+ * mail array, and silently drops owner A who has no mail. The arrays have
+ * different lengths and CASE short-circuits on the whole column.
  *
- * The entity store's user EUID ranking is email > id > name@domain > name, so
- * `mail` matches rank 1 and `id` rank 2. Emitting both means one lands on the
- * real entity and the other 404s. That is safe because the ambiguous EUID here
- * is the *actor*: `writeEntityIds` never validates actors (only targets), and a
- * missing actor is a counted no-op, not dangling relationship data. This is why
- * the config sets `validateTargetIds: false` — the target `host:<device.id>` was
- * never ambiguous, so validating it would buy nothing.
+ * The correct approach is `MV_APPEND` — union all three identifier arrays into
+ * one multi-valued column, then `MV_EXPAND` to get one row per value. This emits
+ * every identifier for every owner regardless of which fields are populated:
  *
- * Expect `notFound` to run roughly 2× the owner count for this integration. That
- * is the losing half of each union pair, not a regression.
+ *   ownerKey = [idA, idB, mailB, upnA, upnB]  → 5 rows → 5 actor EUID candidates
+ *
+ * The entity store's EUID ranking (email > id > name) then determines which
+ * candidate resolves to an existing entity document:
+ *
+ *   mail  → user.email → rank 1 (`user:<mail>@entra_id`)
+ *   id    → user.id   → rank 2 (`user:<id>@entra_id`)
+ *   upn   → user.name → rank 3 (`user:<upn>@entra_id`)
+ *
+ * For owner B (has mail): the mail EUID resolves; the id and upn EUIDs 404
+ * (entity is keyed by email, not id/upn). This produces notFound hits but is
+ * not incorrect — the relationship is still written for the mail EUID.
+ *
+ * For owner A (no mail): the id EUID resolves if the entity is keyed by id;
+ * the upn EUID resolves if keyed by upn.
+ *
+ * The tradeoff: 2–3× more EUID candidates than owners, with notFound hits for
+ * lower-ranked identifiers of owners whose higher-ranked one already resolved.
+ * This is the only correct approach when `type: group` destroys per-owner
+ * correlation at ingest time.
  */
 function buildEntraIdOwnsEsqlQuery(namespace: string): string {
   const logIndex = `logs-${ENTRA_ID_DEVICE_DATASET}-${namespace}`;
 
   return `FROM ${logIndex}
 | WHERE host.id IS NOT NULL
-    AND (${OWNER_MAIL_FIELD} IS NOT NULL OR ${OWNER_ID_FIELD} IS NOT NULL)
+    AND (${OWNER_MAIL_FIELD} IS NOT NULL OR ${OWNER_ID_FIELD} IS NOT NULL OR ${OWNER_UPN_FIELD} IS NOT NULL)
 | EVAL targetEntityId = CONCAT("host:", TO_STRING(host.id))
-| EVAL ownerKey = CASE(${OWNER_MAIL_FIELD} IS NULL, ${OWNER_ID_FIELD}, ${OWNER_ID_FIELD} IS NULL, ${OWNER_MAIL_FIELD}, MV_APPEND(${OWNER_MAIL_FIELD}, ${OWNER_ID_FIELD}))
+| EVAL ownerKey = MV_APPEND(MV_APPEND(${OWNER_MAIL_FIELD}, ${OWNER_ID_FIELD}), ${OWNER_UPN_FIELD})
 | MV_EXPAND ownerKey
 | EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", ownerKey, "@entra_id")
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
@@ -130,10 +148,11 @@ export function buildOwnsConfigs(lastProcessedTimestamp?: string): RelationshipI
       targetEntityType: 'host',
       relationshipKey: RELATIONSHIP_KEY,
       // Actors are owner identifiers on the device doc, not ECS user.* fields.
-      // Both are keyword-mapped, so each value of the flattened array becomes its
-      // own composite bucket — one bucket per distinct owner.
+      // All three are keyword-mapped, so each value of the flattened array
+      // becomes its own composite bucket — one bucket per distinct owner.
+      // Priority mirrors the entity store's EUID ranking: mail > id > upn.
       customActor: {
-        fields: [OWNER_MAIL_FIELD, OWNER_ID_FIELD],
+        fields: [OWNER_MAIL_FIELD, OWNER_ID_FIELD, OWNER_UPN_FIELD],
       },
       // The target is host:<device.id>, taken from the device doc's own host.id —
       // unambiguous, so there is nothing to validate. See buildEntraIdOwnsEsqlQuery
@@ -152,6 +171,7 @@ export function buildOwnsConfigs(lastProcessedTimestamp?: string): RelationshipI
             should: [
               { exists: { field: OWNER_MAIL_FIELD } },
               { exists: { field: OWNER_ID_FIELD } },
+              { exists: { field: OWNER_UPN_FIELD } },
             ],
             minimum_should_match: 1,
           },

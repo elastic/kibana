@@ -206,7 +206,7 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
 
   describe('entityanalytics_entra_id (log-based)', () => {
     const ENTRA_ID = 'entityanalytics_entra_id';
-    const OWNERS_FIELD = 'entityanalytics_entra_id.device.registered_owners';
+    const OWNERS_FIELD = 'device.registered_owners';
 
     const entraConfig = () =>
       buildOwnsConfigs().find(
@@ -237,20 +237,22 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       expect(entraConfig().validateTargetIds).toBe(false);
     });
 
-    it('discovers actors from both flattened owner identifier fields', () => {
+    it('discovers actors from all three flattened owner identifier fields (mail > id > upn)', () => {
       expect(entraConfig().customActor?.fields).toEqual([
         `${OWNERS_FIELD}.mail`,
         `${OWNERS_FIELD}.id`,
+        `${OWNERS_FIELD}.user_principal_name`,
       ]);
     });
 
-    it('Step 1 requires host.id and gates on owner presence', () => {
+    it('Step 1 requires host.id and gates on owner presence (any of mail, id, upn)', () => {
       const filters = entraConfig().compositeAggAdditionalFilters ?? [];
       expect(filters).toContainEqual({ exists: { field: 'host.id' } });
 
       const ownerGate = filters.find((f) => JSON.stringify(f).includes('registered_owners'));
       expect(JSON.stringify(ownerGate)).toContain(`${OWNERS_FIELD}.mail`);
       expect(JSON.stringify(ownerGate)).toContain(`${OWNERS_FIELD}.id`);
+      expect(JSON.stringify(ownerGate)).toContain(`${OWNERS_FIELD}.user_principal_name`);
     });
 
     it('Step 1 applies the engine @timestamp lookback (log index)', () => {
@@ -268,15 +270,18 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       expect(query).toContain('STATS owns = VALUES(targetEntityId) BY actorUserId');
     });
 
-    it('Step 2 guards MV_APPEND against nulls before expanding owners', () => {
+    it('Step 2 uses MV_APPEND to union all owner identifier arrays before MV_EXPAND', () => {
       const query = entraConfig().esqlQueryOverride('default');
-      // MV_APPEND(null, x) returns null in ES|QL, so each field is appended only
-      // when the accumulator is non-null. Without the CASE, every owner missing
-      // either field would be silently dropped.
-      expect(query).toContain('CASE(');
+      // `registered_owners` is a plain object mapping (not nested), so ES flattens
+      // it to parallel arrays of different lengths. A ranked CASE would short-circuit
+      // on the first non-null column and silently drop owners who lack that field.
+      // MV_APPEND unions all three arrays so every identifier for every owner emits
+      // a candidate row — correctness over minimising notFound hits.
       expect(query).toContain('MV_APPEND(');
+      expect(query).toContain(`${OWNERS_FIELD}.mail`);
+      expect(query).toContain(`${OWNERS_FIELD}.id`);
+      expect(query).toContain(`${OWNERS_FIELD}.user_principal_name`);
       expect(query).toContain('MV_EXPAND ownerKey');
-      // The expand must come after the union and before the actor CONCAT.
       expect(query.indexOf('MV_APPEND(')).toBeLessThan(query.indexOf('MV_EXPAND ownerKey'));
       expect(query.indexOf('MV_EXPAND ownerKey')).toBeLessThan(
         query.indexOf('CONCAT("user:", ownerKey')
@@ -294,6 +299,13 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       // An empty owner value would otherwise yield the invalid id "user:@entra_id".
       expect(query).toContain('actorUserId != "user:@entra_id"');
       expect(query).toContain('actorUserId RLIKE ".+:.+@.+"');
+    });
+
+    it('Step 2 WHERE gate accepts documents with any of mail, id, or upn', () => {
+      const query = entraConfig().esqlQueryOverride('default');
+      expect(query).toContain(`${OWNERS_FIELD}.mail IS NOT NULL`);
+      expect(query).toContain(`${OWNERS_FIELD}.id IS NOT NULL`);
+      expect(query).toContain(`${OWNERS_FIELD}.user_principal_name IS NOT NULL`);
     });
 
     it('never reads registered_users (a separate concept from registered_owners)', () => {

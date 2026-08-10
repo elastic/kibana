@@ -62,7 +62,7 @@ interface LogInvertedRelationshipMaintainerSuiteConfig {
    * the caller controls the exact field paths and structure without the suite
    * needing to know the integration's schema.
    *
-   * For `type: group` fields (like `registered_owners`), return flattened
+   * For plain-object mapped fields (like `registered_owners`), return flattened
    * parallel arrays — that is how Elasticsearch stores them at ingest time, and
    * per-object correlation is not preserved.
    *
@@ -72,7 +72,7 @@ interface LogInvertedRelationshipMaintainerSuiteConfig {
    *   relationship" test case).
    */
   buildIntegrationFields: (
-    actorIdentifiers: Array<{ id: string; mail?: string }>
+    actorIdentifiers: Array<{ id: string; mail?: string; upn?: string }>
   ) => Record<string, unknown>;
 }
 
@@ -233,12 +233,12 @@ const registerLogInvertedRelationshipMaintainerSuite = (
       );
 
       apiTest(
-        `resolves an actor with no mail via the id fallback (${relationshipKey})`,
+        `resolves an actor with no mail via the id fallback (${relationshipKey}, rank 2)`,
         async ({ apiClient, esClient }) => {
-          // Non-mailbox-enabled accounts carry no mail field, so the CASE guard
-          // in the ES|QL union must fall back to the id field alone. The
-          // entity-store user EUID ranking is email > id, so an entity minted
-          // without an email is keyed user:<id>@<actorNamespace>.
+          // Non-mailbox-enabled accounts have no mail on the device doc, so the
+          // ranked CASE falls back to id (rank 2). The entity-store EUID ranking
+          // is email > id, so an entity minted without an email is keyed
+          // user:<id>@<actorNamespace>.
           const runId = randomUUID().slice(0, 8);
           const actorId = `nomail-actor-${runId}`;
           const targetId = `nomail-target-${runId}`;
@@ -257,6 +257,46 @@ const registerLogInvertedRelationshipMaintainerSuite = (
             hostId: targetId,
             hostName: `nomail-workstation-${runId}`,
             integrationFields: buildIntegrationFields([{ id: actorId }]),
+          });
+
+          await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
+
+          await waitForRelationshipIds(
+            esClient,
+            relationshipKey,
+            actorEntityId,
+            `host:${targetId}`
+          );
+
+          const ids = await getRelationshipIds(esClient, relationshipKey, actorEntityId);
+          expect(ids).toStrictEqual([`host:${targetId}`]);
+        }
+      );
+
+      apiTest(
+        `resolves an actor with only a user_principal_name via the upn fallback (${relationshipKey}, rank 3)`,
+        async ({ apiClient, esClient }) => {
+          // Accounts where only user_principal_name is available (no mail, no id
+          // on the device doc) exercise the final CASE branch. The entity-store
+          // EUID ranking falls to user.name, so the entity is keyed
+          // user:<upn>@<actorNamespace>.
+          const runId = randomUUID().slice(0, 8);
+          const actorUpn = `upn-actor-${runId}@example.com`;
+          const targetId = `upn-target-${runId}`;
+          const actorEntityId = `user:${actorUpn}@${actorNamespace}`;
+
+          await seedUserEntity(esClient, {
+            entityId: actorEntityId,
+            namespace: actorNamespace,
+            email: `unused.${runId}@example.com`,
+            entitySource,
+          });
+
+          await seedLogDocument(esClient, {
+            index: logIndex,
+            hostId: targetId,
+            hostName: `upn-workstation-${runId}`,
+            integrationFields: buildIntegrationFields([{ id: `id-${runId}`, upn: actorUpn }]),
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });
@@ -312,14 +352,20 @@ registerLogInvertedRelationshipMaintainerSuite({
   entitySource: 'entityanalytics_entra_id',
   logIndex: 'logs-entityanalytics_entra_id.device-default',
   buildIntegrationFields: (actorIdentifiers) => {
-    // `registered_owners` is mapped `type: group`, not `nested` — Elasticsearch
-    // flattens it to disjoint parallel arrays at ingest time. Write it the same
-    // way so the test reflects production index layout exactly.
+    // `registered_owners` has a plain object mapping (not nested) — Elasticsearch
+    // flattens it to disjoint parallel arrays of potentially different lengths at
+    // ingest time. Write it the same way so the test reflects production index layout.
+    // The ES|QL uses MV_APPEND to union all three identifier arrays, so every owner
+    // identifier emits a candidate row regardless of which fields are present.
     const ids = actorIdentifiers.map((a) => a.id);
     const mails = actorIdentifiers.map((a) => a.mail).filter((m): m is string => Boolean(m));
+    const upns = actorIdentifiers.map((a) => a.upn).filter((u): u is string => Boolean(u));
     const registeredOwners: Record<string, string[]> = { id: ids };
     if (mails.length > 0) {
       registeredOwners.mail = mails;
+    }
+    if (upns.length > 0) {
+      registeredOwners.user_principal_name = upns;
     }
     return {
       data_stream: {
@@ -327,10 +373,11 @@ registerLogInvertedRelationshipMaintainerSuite({
         namespace: 'default',
         type: 'logs',
       },
-      entityanalytics_entra_id: {
-        device: {
-          registered_owners: registeredOwners,
-        },
+      // The ES|QL reads `device.registered_owners.*` (the ECS-native path).
+      // The ingest pipeline copies this to `entityanalytics_entra_id.device.registered_owners`
+      // but both paths resolve identically in Elasticsearch; we seed the ECS path directly.
+      device: {
+        registered_owners: registeredOwners,
       },
     };
   },
