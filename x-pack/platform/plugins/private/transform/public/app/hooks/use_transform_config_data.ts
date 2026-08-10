@@ -55,6 +55,11 @@ export const sourceIndexUnavailableMessage = i18n.translate(
 export const isSourceIndexUnavailableError = (error: unknown): boolean =>
   getErrorMessage(error).includes(SOURCE_INDICES_UNAVAILABLE_ERROR);
 
+export const isProjectScopedSourceIndexUnavailableError = (
+  error: unknown,
+  projectRouting?: StepDefineExposedState['projectRouting']
+): boolean => projectRouting !== undefined && isSourceIndexUnavailableError(error);
+
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
@@ -185,7 +190,7 @@ export const useTransformConfigData = (
       setNoDataMessage('');
       setStatus(INDEX_STATUS.LOADING);
     } else if (isError) {
-      if (isSourceIndexUnavailableError(previewError)) {
+      if (isProjectScopedSourceIndexUnavailableError(previewError, projectRouting)) {
         setErrorMessage('');
         setNoDataMessage(sourceIndexUnavailableMessage);
       } else {

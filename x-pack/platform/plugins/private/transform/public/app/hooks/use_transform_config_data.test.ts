@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getCombinedProperties, isSourceIndexUnavailableError } from './use_transform_config_data';
+import {
+  getCombinedProperties,
+  isProjectScopedSourceIndexUnavailableError,
+  isSourceIndexUnavailableError,
+} from './use_transform_config_data';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 describe('getCombinedProperties', () => {
@@ -78,15 +82,15 @@ describe('getCombinedProperties', () => {
 });
 
 describe('isSourceIndexUnavailableError', () => {
+  const sourceIndexUnavailableError = {
+    body: {
+      message:
+        'Bad Request: [[status_exception] Source indices have been deleted or closed.]: Source indices have been deleted or closed.',
+    },
+  };
+
   test('matches transform preview source index status errors', () => {
-    expect(
-      isSourceIndexUnavailableError({
-        body: {
-          message:
-            'Bad Request: [[status_exception] Source indices have been deleted or closed.]: Source indices have been deleted or closed.',
-        },
-      })
-    ).toBe(true);
+    expect(isSourceIndexUnavailableError(sourceIndexUnavailableError)).toBe(true);
   });
 
   test('does not match other preview errors', () => {
@@ -97,5 +101,12 @@ describe('isSourceIndexUnavailableError', () => {
         },
       })
     ).toBe(false);
+  });
+
+  test('treats source index unavailable errors as project-scoped only when routing is set', () => {
+    expect(
+      isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError, '_id:linked-id')
+    ).toBe(true);
+    expect(isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError)).toBe(false);
   });
 });
