@@ -81,8 +81,6 @@ export const accordionCss = css`
   }
 `;
 
-const PROVIDER_SELECT_BOX_ID = 'providerSelectBox';
-
 const providerConfigConfig = {
   validations: [
     {
@@ -439,7 +437,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           placeholder={LABELS.SELECT_PROVIDER}
           icon={{ type: 'chevronSingleDown', side: 'right' }}
           aria-expanded={isProviderPopoverOpen}
-          aria-describedby={isInvalid ? `${PROVIDER_SELECT_BOX_ID}-error-0` : undefined}
           role="combobox"
           onChange={() => {
             /* Intentionally left blank as onChange is required to avoid console error
@@ -598,7 +595,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           const selectInput = providerSuperSelect(isInvalid);
           const formRow = (
             <EuiFormRow
-              id={PROVIDER_SELECT_BOX_ID}
               fullWidth
               label={
                 <FormattedMessage
@@ -607,28 +603,26 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 />
               }
               isInvalid={isInvalid}
+              hasEmptyLabelSpace={true}
               error={errorMessage}
             >
-              <>
-                <EuiSpacer size="s" />
-                <EuiInputPopover
-                  id={'providerInputPopoverId'}
-                  fullWidth
-                  input={selectInput}
-                  isOpen={isProviderPopoverOpen}
-                  closePopover={closeProviderPopover}
-                  className="rightArrowIcon"
-                >
-                  <SelectableProvider
-                    currentSolution={currentSolution}
-                    providers={updatedProviders ?? []}
-                    onClosePopover={closeProviderPopover}
-                    onProviderChange={onProviderChange}
-                    onSolutionFilterChange={toggleAndApplyFilter}
-                    solutionFilter={solutionFilter}
-                  />
-                </EuiInputPopover>
-              </>
+              <EuiInputPopover
+                id={'providerInputPopoverId'}
+                fullWidth
+                input={selectInput}
+                isOpen={isProviderPopoverOpen}
+                closePopover={closeProviderPopover}
+                className="rightArrowIcon"
+              >
+                <SelectableProvider
+                  currentSolution={currentSolution}
+                  providers={updatedProviders ?? []}
+                  onClosePopover={closeProviderPopover}
+                  onProviderChange={onProviderChange}
+                  onSolutionFilterChange={toggleAndApplyFilter}
+                  solutionFilter={solutionFilter}
+                />
+              </EuiInputPopover>
             </EuiFormRow>
           );
           return formRow;
