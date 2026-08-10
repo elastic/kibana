@@ -128,6 +128,7 @@ const baseRule: RuleApiResponse = {
   enabled: true,
   metadata: {
     name: 'Test Signal Rule',
+    version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },

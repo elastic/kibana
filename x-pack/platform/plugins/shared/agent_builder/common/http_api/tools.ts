@@ -38,7 +38,9 @@ export type CreateToolPayload = Omit<
 > &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
-export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
+export type UpdateToolPayload = Partial<
+  Pick<ToolDefinition, 'description' | 'tags' | 'confirmation'>
+> & {
   configuration?: Partial<ToolDefinition['configuration']>;
 };
 
