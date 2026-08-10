@@ -54,6 +54,7 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     expect(result.panelId).toBe('panel-1');
     expect(result.config.title).toBe('Panel title');
     expect(result.config.attributes.title).toBe('My tile map');
+    expect(result.config.attributes.settings.projection).toBe('mercator');
     expect(result.config.attributes.center).toEqual({ lat: 42.0, lon: -88.9 });
     expect(result.config.attributes.zoom).toBe(5);
     expect(result.config.attributes.layers).toHaveLength(1);
@@ -96,6 +97,7 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
 
     const result = results[0] as any;
     expect(result.config.attributes.layers).toHaveLength(1);
+    expect(result.config.attributes.settings.projection).toBe('mercator');
     expect(result.config.attributes.layers[0].joins).toHaveLength(1);
     expect(result.config.attributes.layers[0].joins[0].leftField).toBe('iso2');
     expect(result.config.attributes.layers[0].joins[0].right.indexPatternId).toBe('data-view-1');
@@ -148,6 +150,7 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
 
     const result = results[0] as any;
     expect(result.panelId).toBe('panel-1');
+    expect(result.config.attributes.settings.projection).toBe('mercator');
     expect(result.config.attributes.layers[0].type).toBe('HEATMAP');
     expect(result.config.attributes.layers[0].style.type).toBe('HEATMAP');
   });

@@ -457,6 +457,7 @@ function buildMapAttributesFromTileMap(args: {
   return omitUndefined({
     title: args.title,
     isLayerTOCOpen: true,
+    settings: { projection: 'mercator' },
     layers: [layer],
     ...(center ? { center } : {}),
     ...(zoom !== undefined ? { zoom } : {}),
@@ -512,6 +513,7 @@ function buildMapAttributesFromRegionMap(args: {
   return omitUndefined({
     title: args.title,
     isLayerTOCOpen: true,
+    settings: { projection: 'mercator' },
     layers: [layer],
     ...(center ? { center } : {}),
     ...(zoom !== undefined ? { zoom } : {}),
