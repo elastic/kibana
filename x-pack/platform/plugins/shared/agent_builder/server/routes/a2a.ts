@@ -89,7 +89,7 @@ To learn more about the Agent Builder A2A server, refer to the [A2A server docum
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
-        tags: ['a2a', 'oas-tag:agent builder'],
+        tags: ['a2a', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',

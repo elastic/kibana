@@ -59,11 +59,16 @@ export async function createAgentCard({
       stateTransitionHistory: false,
     },
     securitySchemes: {
-      authorization: {
+      apiKey: {
         type: 'apiKey',
         name: 'Authorization',
         in: 'header',
-        description: 'Authentication token',
+        description: 'Elastic API key (Authorization: ApiKey <encoded>)',
+      },
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        description: `OAuth 2.0 Bearer token. To discover the authorization server, fetch ${baseUrl}/.well-known/oauth-protected-resource`,
       },
     },
     defaultInputModes: ['text/plain'],

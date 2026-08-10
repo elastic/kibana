@@ -63,7 +63,7 @@ export const labels = {
       defaultMessage: 'Bulk import MCP tools',
     }),
     manageMcpClientsButton: i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
-      defaultMessage: 'Manage MCP clients (OAuth)',
+      defaultMessage: 'Manage OAuth clients',
     }),
     aboutMcpServerDocumentationButton: i18n.translate(
       'xpack.agentBuilder.tools.aboutMcpServerDocumentationButton',
@@ -549,19 +549,19 @@ export const labels = {
     },
     mcpClients: {
       title: i18n.translate('xpack.agentBuilder.mcpClients.title', {
-        defaultMessage: 'MCP clients (OAuth)',
+        defaultMessage: 'OAuth clients',
       }),
       description: i18n.translate('xpack.agentBuilder.mcpClients.description', {
         defaultMessage:
-          'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+          'An OAuth client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
       }),
       breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
-        defaultMessage: 'MCP clients',
+        defaultMessage: 'OAuth clients',
       }),
       addMcpClientButtonLabel: i18n.translate(
         'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
         {
-          defaultMessage: 'Add MCP client',
+          defaultMessage: 'Add OAuth client',
         }
       ),
       manageApplicationConnectionsButtonLabel: i18n.translate(
@@ -579,25 +579,25 @@ export const labels = {
       listMcpClientsErrorMessage: i18n.translate(
         'xpack.agentBuilder.mcpClients.listMcpClientsErrorMessage',
         {
-          defaultMessage: 'Failed to fetch MCP clients',
+          defaultMessage: 'Failed to fetch OAuth clients',
         }
       ),
       noMcpClientsFoundMessage: i18n.translate(
         'xpack.agentBuilder.mcpClients.noMcpClientsFoundMessage',
         {
-          defaultMessage: 'No MCP clients found.',
+          defaultMessage: 'No OAuth clients found.',
         }
       ),
       noMcpClientsPromptTitle: i18n.translate(
         'xpack.agentBuilder.mcpClients.noMcpClientsPromptTitle',
         {
-          defaultMessage: 'No MCP clients (OAuth)',
+          defaultMessage: 'No OAuth clients',
         }
       ),
       noMcpClientsPromptBody: i18n.translate(
         'xpack.agentBuilder.mcpClients.noMcpClientsPromptBody',
         {
-          defaultMessage: 'Get started with MCP clients (OAuth).',
+          defaultMessage: 'Get started with OAuth clients.',
         }
       ),
       noItemsPromptLearnMoreLinkLabel: i18n.translate(
@@ -620,12 +620,12 @@ export const labels = {
         defaultMessage: 'Status',
       }),
       mcpClientsLabel: i18n.translate('xpack.agentBuilder.mcpClients.mcpClientsLabel', {
-        defaultMessage: 'MCP clients',
+        defaultMessage: 'OAuth clients',
       }),
       addMcpClientOAuthButtonLabel: i18n.translate(
         'xpack.agentBuilder.mcpClients.addMcpClientOAuthButtonLabel',
         {
-          defaultMessage: 'Add MCP client (OAuth)',
+          defaultMessage: 'Add OAuth client',
         }
       ),
       actions: {
@@ -638,14 +638,14 @@ export const labels = {
       },
       form: {
         pageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.pageTitle', {
-          defaultMessage: 'Create MCP client (OAuth)',
+          defaultMessage: 'Create OAuth client',
         }),
         pageDescription: i18n.translate('xpack.agentBuilder.mcpClients.form.pageDescription', {
           defaultMessage:
-            'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+            'An OAuth client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
         }),
         createBreadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.form.createBreadcrumb', {
-          defaultMessage: 'Create MCP client',
+          defaultMessage: 'Create OAuth client',
         }),
         createButton: i18n.translate('xpack.agentBuilder.mcpClients.form.createButton', {
           defaultMessage: 'Create client',
@@ -702,7 +702,7 @@ export const labels = {
         detailsSectionTitle: i18n.translate(
           'xpack.agentBuilder.mcpClients.form.detailsSectionTitle',
           {
-            defaultMessage: 'MCP details',
+            defaultMessage: 'Client details',
           }
         ),
         redirectSectionTitle: i18n.translate(
@@ -773,22 +773,22 @@ export const labels = {
           }
         ),
         confidentialLabel: i18n.translate('xpack.agentBuilder.mcpClients.form.confidentialLabel', {
-          defaultMessage: 'Generate confidential MCP client (optional)',
+          defaultMessage: 'Generate confidential client (optional)',
         }),
         confidentialDescription: i18n.translate(
           'xpack.agentBuilder.mcpClients.form.confidentialDescription',
           {
             defaultMessage:
-              'Make your MCP client confidential by generating a client secret. This is recommended for improved security.',
+              'Make your client confidential by generating a client secret. This is recommended for improved security.',
           }
         ),
         createSuccessToast: (name: string) =>
           i18n.translate('xpack.agentBuilder.mcpClients.form.createSuccessToast', {
-            defaultMessage: 'MCP client "{name}" created successfully',
+            defaultMessage: 'OAuth client "{name}" created successfully',
             values: { name },
           }),
         createErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.createErrorToast', {
-          defaultMessage: 'Failed to create MCP client',
+          defaultMessage: 'Failed to create OAuth client',
         }),
       },
       revoke: {
@@ -808,7 +808,7 @@ export const labels = {
         confirmPlaceholder: i18n.translate(
           'xpack.agentBuilder.mcpClients.revoke.confirmPlaceholder',
           {
-            defaultMessage: 'MCP client name',
+            defaultMessage: 'OAuth client name',
           }
         ),
         revokeButton: i18n.translate('xpack.agentBuilder.mcpClients.revoke.revokeButton', {
@@ -819,11 +819,11 @@ export const labels = {
         }),
         successToast: (name: string) =>
           i18n.translate('xpack.agentBuilder.mcpClients.revoke.successToast', {
-            defaultMessage: 'MCP client "{name}" revoked successfully',
+            defaultMessage: 'OAuth client "{name}" revoked successfully',
             values: { name },
           }),
         errorToast: i18n.translate('xpack.agentBuilder.mcpClients.revoke.errorToast', {
-          defaultMessage: 'Failed to revoke MCP client',
+          defaultMessage: 'Failed to revoke OAuth client',
         }),
       },
     },
