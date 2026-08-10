@@ -1981,6 +1981,48 @@ describe('delete()', () => {
         `Failed to delete auth tokens for connector "1": Fail`
       );
     });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        evictClientPool,
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(evictClientPool).toHaveBeenCalledWith('1');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
+    });
   });
 
   describe('auditLogger', () => {

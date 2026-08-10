@@ -27,6 +27,7 @@ import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/action
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
+import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -138,6 +139,7 @@ export interface AuthTypeDefinition {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -234,6 +236,17 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
