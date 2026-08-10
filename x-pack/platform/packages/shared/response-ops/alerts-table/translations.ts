@@ -251,6 +251,14 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const ADD_TO_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToCaseMenu', {
+  defaultMessage: 'Add to case',
+});
+
+export const CASE_TYPE = i18n.translate('xpack.responseOpsAlertsTable.actions.caseType', {
+  defaultMessage: 'Case type',
+});
+
 export const ADD_TO_CHAT = i18n.translate('xpack.responseOpsAlertsTable.actions.addChat', {
   defaultMessage: 'Add to chat',
 });
