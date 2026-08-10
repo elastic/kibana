@@ -241,9 +241,9 @@ describe('AlertsDataGrid bulk actions', () => {
       const menu = screen.getByTestId('alertsTableBulkActionMenu');
       const menuItems = within(menu).getAllByRole('menuitem');
       expect(menuItems.map((item) => item.getAttribute('data-test-subj'))).toEqual([
-        'alerts-table-add-to-case',
         'bulk-mute',
         'bulk-unmute',
+        'alerts-table-add-to-case',
       ]);
       menuItems.forEach((item) => {
         expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();

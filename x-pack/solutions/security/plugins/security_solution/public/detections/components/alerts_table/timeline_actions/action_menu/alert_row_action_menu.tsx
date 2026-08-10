@@ -80,22 +80,17 @@ export const AlertRowActionMenu = ({
   statusItems,
 }: AlertRowActionMenuProps) => {
   const items = useMemo(() => {
+    const alertManagementItems = [...alertAssigneeItems, ...addToCaseItems, ...alertTagItems];
+    const responseActionItems = [
+      ...(isAlert ? runAlertWorkflowItems : runDocumentWorkflowItems),
+      ...(hasAgent ? osqueryItems : []),
+    ];
     const actionGroups = isAlert
-      ? [
-          addToCaseItems,
-          statusItems,
-          runAlertWorkflowItems,
-          alertTagItems,
-          alertAssigneeItems,
-          exceptionItems,
-          hasAgent ? osqueryItems : [],
-          addToChatItems,
-        ]
+      ? [statusItems, alertManagementItems, exceptionItems, responseActionItems, addToChatItems]
       : [
           addToCaseItems,
-          runDocumentWorkflowItems,
           canCreateEndpointEventFilters ? eventFilterItems : [],
-          hasAgent ? osqueryItems : [],
+          responseActionItems,
         ];
     const visibleActionGroups = actionGroups.filter((group) => group.length > 0);
 

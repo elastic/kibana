@@ -11,10 +11,7 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import {
-  getActionMenuGroupSeparator,
-  withActionIcons,
-} from '../../../../common/utils/action_menu_items';
+import { withActionIcons } from '../../../../common/utils/action_menu_items';
 import { ALERT_TAG_ACTION_ID } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { ADD_TO_CASE_ACTION_IDS } from '../../alerts_table/timeline_actions/use_add_to_case_actions';
 
@@ -35,17 +32,7 @@ export const AlertSummaryActionMenu = ({
   panels,
 }: AlertSummaryActionMenuProps) => {
   const items = useMemo(
-    () =>
-      withActionIcons(
-        [
-          ...addToCaseItems,
-          ...(addToCaseItems.length > 0 && alertTagsItems.length > 0
-            ? [getActionMenuGroupSeparator('separator-before-alert-tags')]
-            : []),
-          ...alertTagsItems,
-        ],
-        ACTION_ICONS_BY_ID
-      ),
+    () => withActionIcons([...addToCaseItems, ...alertTagsItems], ACTION_ICONS_BY_ID),
     [addToCaseItems, alertTagsItems]
   );
 

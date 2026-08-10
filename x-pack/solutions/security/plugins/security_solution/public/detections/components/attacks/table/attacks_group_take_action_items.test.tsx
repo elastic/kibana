@@ -24,6 +24,7 @@ import { ATTACK_STATUS_ACTION_IDS } from '../../../hooks/attacks/bulk_actions/bu
 import { ATTACK_ASSIGNEE_ACTION_IDS } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_assignees_items';
 import { ATTACK_TAG_ACTION_ID } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_tags_items';
 import { ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
+import { ATTACK_CASE_ACTION_IDS } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_case_items';
 
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
@@ -145,7 +146,7 @@ describe('AttacksGroupTakeActionItems', () => {
     });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseAttackCaseContextMenuItems.mockReturnValue({
-      items: [],
+      items: [{ name: 'Add to case', key: ATTACK_CASE_ACTION_IDS.addToCase }],
       panels: [],
     });
     mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
@@ -168,14 +169,15 @@ describe('AttacksGroupTakeActionItems', () => {
       'Mark as acknowledged',
       'Mark as closed',
       'Mark as open',
-      'Apply alert tags',
       'Assign alert',
       'Unassign alert',
+      'Add to case',
+      'Apply alert tags',
       'Run workflow',
       'View in AI Assistant',
       'Investigate in Timeline',
     ]);
-    expect(getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(5);
+    expect(getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(4);
     getAllByRole('menuitem').forEach((item) => {
       expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
     });

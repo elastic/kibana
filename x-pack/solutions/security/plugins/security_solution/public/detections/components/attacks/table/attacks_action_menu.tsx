@@ -84,11 +84,10 @@ export const AttacksActionMenu = ({
       return navigationActionItems;
     }
 
+    const attackManagementItems = [...assigneeItems, ...caseItems, ...tagItems];
     const actionGroups = [
-      caseItems,
       withStatusDotIcons(statusItems, ATTACK_STATUS_ICON_COLORS, 'subdued'),
-      tagItems,
-      assigneeItems,
+      attackManagementItems,
       runWorkflowItems,
       showAiAssistantAction ? viewInAiAssistantItems : [],
       withActionIcon(datasetItems, 'database'),

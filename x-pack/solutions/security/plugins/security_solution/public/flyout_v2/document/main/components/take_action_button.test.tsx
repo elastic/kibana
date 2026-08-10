@@ -285,6 +285,50 @@ describe('<TakeActionButton />', () => {
       ],
       alertTagsPanels: [],
     });
+    mockUseAlertAssigneesActions.mockReturnValue({
+      alertAssigneesItems: [
+        {
+          key: 'assign-alert',
+          name: 'Assign alert',
+          'data-test-subj': 'alert-assignees-context-menu-item',
+        },
+      ],
+      alertAssigneesPanels: [],
+    });
+    mockUseAlertExceptionActions.mockReturnValue({
+      exceptionActionItems: [
+        {
+          key: 'add-endpoint-exception-menu-item',
+          name: 'Add endpoint exception',
+          'data-test-subj': 'add-endpoint-exception-menu-item',
+        },
+      ],
+    });
+    mockUseRunAlertWorkflowPanel.mockReturnValue({
+      runWorkflowMenuItem: [
+        {
+          key: 'run-workflow-action',
+          name: 'Run workflow',
+          'data-test-subj': 'run-workflow-action',
+        },
+      ],
+      runAlertWorkflowPanel: [],
+    });
+    mockUseHostIsolationAction.mockReturnValue([
+      {
+        key: 'isolate-host-action-item',
+        name: 'Isolate host',
+        'data-test-subj': 'isolate-host-action-item',
+      },
+    ]);
+    mockUseResponderActionItem.mockReturnValue([
+      {
+        key: 'endpointResponseActions-action-item',
+        name: 'Respond',
+        'data-test-subj': 'endpointResponseActions-action-item',
+      },
+    ]);
+    mockIsOsqueryAvailable.mockReturnValue(true);
     mockUseInvestigateInTimeline.mockReturnValue({
       investigateInTimelineActionItems: [
         {
@@ -304,12 +348,18 @@ describe('<TakeActionButton />', () => {
     expect(
       screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
     ).toEqual([
-      'add-to-case-action',
       'open-alert-status',
+      'alert-assignees-context-menu-item',
+      'add-to-case-action',
       'alert-tags-context-menu-item',
+      'add-endpoint-exception-menu-item',
+      'run-workflow-action',
+      'isolate-host-action-item',
+      'endpointResponseActions-action-item',
+      'osquery-action-item',
       'investigate-in-timeline-action-item',
     ]);
-    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(3);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(4);
     expect(
       screen.getByTestId('add-to-case-action').querySelector('[data-euiicon-type="briefcase"]')
     ).not.toBeNull();

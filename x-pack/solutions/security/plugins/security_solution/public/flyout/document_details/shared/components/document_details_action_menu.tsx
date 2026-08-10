@@ -102,27 +102,31 @@ export const DocumentDetailsActionMenu = ({
   statusPanels,
 }: DocumentDetailsActionMenuProps) => {
   const items = useMemo(() => {
-    const alertActionGroups = showAlertActions
-      ? [statusItems, alertTagItems, alertAssigneeItems, exceptionItems]
-      : [showEventFilter ? eventFilterItems : []];
-    const visibleAlertActionGroups = alertActionGroups.filter((group) => group.length > 0);
-    const alertItems = visibleAlertActionGroups.flatMap((group, index) => [
-      ...group,
-      ...(index < visibleAlertActionGroups.length - 1
-        ? [getActionMenuGroupSeparator(`alert-separator-${index}`)]
-        : []),
-    ]);
     if (isRemoteDocument) {
       return withActionIcons(investigateInTimelineItems, ACTION_ICONS_BY_ID);
     }
 
+    const alertManagementItems = [
+      ...(showAlertActions ? alertAssigneeItems : []),
+      ...addToCaseItems,
+      ...(showAlertActions ? alertTagItems : []),
+    ];
+    const exceptionActionItems = showAlertActions
+      ? exceptionItems
+      : showEventFilter
+      ? eventFilterItems
+      : [];
+    const responseActionItems = [
+      ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
+      ...hostIsolationItems,
+      ...endpointResponseItems,
+      ...(osqueryAvailable ? osqueryItems : []),
+    ];
     const actionGroups = [
-      addToCaseItems,
-      alertItems,
-      isAlert ? runAlertWorkflowItems : documentWorkflowItems,
-      hostIsolationItems,
-      endpointResponseItems,
-      osqueryAvailable ? osqueryItems : [],
+      showAlertActions ? statusItems : [],
+      alertManagementItems,
+      exceptionActionItems,
+      responseActionItems,
       investigateInTimelineItems,
     ].filter((group) => group.length > 0);
 

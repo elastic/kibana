@@ -36,17 +36,15 @@ interface AlertsTableBulkActionMenuProps {
 }
 
 const ACTION_GROUP_ORDER = [
-  'cases',
-  'status',
-  'workflow',
-  'tags',
-  'assignees',
-  'timeline',
-  'custom',
-  'chat',
+  ['status'],
+  ['assignees', 'cases', 'tags'],
+  ['timeline'],
+  ['custom'],
+  ['workflow'],
+  ['chat'],
 ] as const;
 
-const ACTION_GROUP_BY_ID: Readonly<Record<string, (typeof ACTION_GROUP_ORDER)[number]>> = {
+const ACTION_GROUP_BY_ID: Readonly<Record<string, string>> = {
   [BULK_ADD_TO_CASE_ACTION_IDS.addToExistingCase]: 'cases',
   [BULK_ADD_TO_CASE_ACTION_IDS.addToNewCase]: 'cases',
   [BULK_ADD_TO_CHAT_ACTION_ID]: 'chat',
@@ -81,7 +79,9 @@ const getGroupedItems = (
   addToCaseItem?: EuiContextMenuPanelItemDescriptor
 ): EuiContextMenuPanelItemDescriptor[] => {
   const groups = new Map<string, EuiContextMenuPanelItemDescriptor[]>(
-    ACTION_GROUP_ORDER.map((groupId) => [groupId, []])
+    ACTION_GROUP_ORDER.flatMap((groupIds) =>
+      groupIds.map((groupId): [string, EuiContextMenuPanelItemDescriptor[]] => [groupId, []])
+    )
   );
 
   if (addToCaseItem) {
@@ -95,11 +95,12 @@ const getGroupedItems = (
     groups.set(groupId, groupItems);
   });
 
-  const visibleGroups = Array.from(groups.entries()).filter(
-    ([, groupItems]) => groupItems.length > 0
-  );
+  const visibleGroups = ACTION_GROUP_ORDER.map((groupIds) => ({
+    groupId: groupIds.join('-'),
+    groupItems: groupIds.flatMap((groupId) => groups.get(groupId) ?? []),
+  })).filter(({ groupItems }) => groupItems.length > 0);
 
-  return visibleGroups.flatMap(([groupId, groupItems], index) => [
+  return visibleGroups.flatMap(({ groupId, groupItems }, index) => [
     ...groupItems,
     ...(index < visibleGroups.length - 1
       ? [

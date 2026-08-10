@@ -128,16 +128,24 @@ export const ActionMenu = ({
   statusPanels,
 }: ActionMenuProps) => {
   const items = useMemo(() => {
+    const alertManagementItems = [
+      ...(!isRemoteDocument && isAlert ? alertAssigneeItems : []),
+      ...(!isRemoteDocument ? addToCaseItems : []),
+      ...(!isRemoteDocument && isAlert ? alertTagItems : []),
+    ];
+    const responseActionItems = !isRemoteDocument
+      ? [
+          ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
+          ...(isAlert ? hostIsolationItems : []),
+          ...endpointResponseItems,
+          ...(osqueryAvailable ? osqueryItems : []),
+        ]
+      : [];
     const actionGroups = [
-      !isRemoteDocument ? addToCaseItems : [],
       !isRemoteDocument && isAlert ? statusItems : [],
-      !isRemoteDocument && isAlert ? alertTagItems : [],
-      !isRemoteDocument && isAlert ? alertAssigneeItems : [],
+      alertManagementItems,
       !isRemoteDocument && isAlert ? exceptionItems : [],
-      !isRemoteDocument && isAlert ? hostIsolationItems : [],
-      !isRemoteDocument ? (isAlert ? runAlertWorkflowItems : documentWorkflowItems) : [],
-      !isRemoteDocument ? endpointResponseItems : [],
-      !isRemoteDocument && osqueryAvailable ? osqueryItems : [],
+      responseActionItems,
       !isRemoteDocument && !isAlert ? withActionIcon(noteItems, 'pencil') : [],
       isInSecurityApp ? investigateInTimelineItems : [],
       !isInSecurityApp ? exploreItems : [],
