@@ -74,12 +74,16 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
         formula: `count()`,
         keepOpen: true,
       });
-      await lens.switchToQuickFunctions();
+      await lens.dimensions.switchToQuickFunctions();
       // Incomplete transition: incompatible option must not become the selected operation.
-      await lens.clickIncompatibleOperation('min');
-      await expect(lens.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText('count()');
+      await lens.dimensions.clickIncompatibleOperation('min');
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText(
+        'count()'
+      );
       await lens.closeDimensionEditor();
-      await expect(lens.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText('count()');
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText(
+        'count()'
+      );
     }
   );
 
@@ -103,11 +107,11 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
         formula: `count()`,
         keepOpen: true,
       });
-      await lens.switchToStaticValue();
+      await lens.dimensions.switchToStaticValue();
       await lens.closeDimensionEditor();
-      await expect(lens.getDimensionTriggersLocator('lnsXY_yReferenceLineLeftPanel')).toHaveText(
-        'count()'
-      );
+      await expect(
+        lens.dimensions.getDimensionTriggersLocator('lnsXY_yReferenceLineLeftPanel')
+      ).toHaveText('count()');
     }
   );
 

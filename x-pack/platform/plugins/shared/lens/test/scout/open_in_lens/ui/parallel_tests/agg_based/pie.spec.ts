@@ -69,10 +69,16 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await lens.waitForVisualization('partitionVisChart');
     expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
-    const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
+    const sliceByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sliceByDimensionPanel',
+      0
+    );
+    const sizeByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sizeByDimensionPanel',
+      0
+    );
     expect(sliceByText).toBe('machine.os.raw: Descending');
     expect(sizeByText).toBe('Sum of machine.ram');
   });
@@ -84,10 +90,16 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await convertToLensByTitle({ dashboard }, 'Pie - Basic count');
     await lens.waitForVisualization('partitionVisChart');
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
-    const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
+    const sliceByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sliceByDimensionPanel',
+      0
+    );
+    const sizeByText = await lens.dimensions.getDimensionTriggerText(
+      'lnsPie_sizeByDimensionPanel',
+      0
+    );
     expect(sliceByText).toBe('machine.os.raw: Descending');
     expect(sizeByText).toBe('Count');
 

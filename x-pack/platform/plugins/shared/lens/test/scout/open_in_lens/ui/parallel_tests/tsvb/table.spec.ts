@@ -151,7 +151,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       'Top 10 values of clientip',
     ]);
 
-    await lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger', 0, 1);
+    await lens.dimensions.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger', 0, 1);
     await expect(page.testSubj.locator('indexPattern-collapse-by')).toHaveValue('sum');
   });
 
@@ -192,7 +192,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       { stop: '', color: undefined },
     ]);
     await lens.closePalettePanelFlyout();
-    await lens.closeDimensionEditorPanel();
+    await lens.dimensions.closeDimensionEditorPanel();
   });
 
   spaceTest(

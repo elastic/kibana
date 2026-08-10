@@ -55,7 +55,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
       });
 
       await spaceTest.step('enables a trendline on the primary metric', async () => {
-        await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_background_chart_line');
         await lens.closeDimensionEditor();
         await lens.waitForVisualization('mtrVis');
@@ -77,7 +77,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
           field: 'ip',
           keepOpen: true,
         });
-        await lens.setTermsNumberOfValues(5); // Default is 9
+        await lens.dimensions.setTermsNumberOfValues(5); // Default is 9
         await lens.closeDimensionEditor();
         await lens.waitForVisualization('mtrVis');
         // Number of values (5) + the "Other" bucket. `waitForVisualization` only waits for
@@ -102,14 +102,14 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         }
 
         // Turn the trendline back off before adding the "max" dimension below.
-        await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_background_chart_none');
         await lens.closeDimensionEditor();
         await lens.waitForVisualization('mtrVis');
       });
 
       await spaceTest.step('enables a progress bar via the max dimension', async () => {
-        await lens.openDimensionEditor(`${MAX_PANEL} > lns-empty-dimension`);
+        await lens.dimensions.openDimensionEditor(`${MAX_PANEL} > lns-empty-dimension`);
 
         // Lens seeds the max dimension's static value from the active data and falls back to 0
         // when that data has not arrived yet; a zero max renders no progress bar at all. Set the
@@ -139,12 +139,12 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
             ({ showingTrendline }) => showingTrendline
           );
 
-        await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_background_chart_line');
         await expect.poll(someTileShowsTrendline).toBe(true);
         await lens.closeDimensionEditor();
 
-        await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_background_chart_none');
         await expect.poll(someTileShowsTrendline).toBe(false);
         await lens.closeDimensionEditor();
@@ -172,7 +172,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
       });
 
       await spaceTest.step('applies a static color to every tile', async () => {
-        await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
 
         await lens.setColorPickerValue('#000000');
         await lens.waitForVisualization('mtrVis');
@@ -222,7 +222,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
           keepOpen: true,
         });
 
-        await lens.enableIncludeEmptyRows();
+        await lens.dimensions.enableIncludeEmptyRows();
 
         await page.testSubj.locator('lnsMetric_max_cols').fill('1');
         await page.keyboard.press('Tab');
@@ -260,7 +260,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.removeAllDimensions(BREAKDOWN_PANEL);
         await lens.waitForVisualization('mtrVis');
 
-        await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await lens.switchToFormula();
         await lens.typeInFormula('', { replace: true });
         await lens.waitForVisualization('mtrVis');
@@ -282,7 +282,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
             field: 'bytes',
             keepOpen: true,
           });
-          await lens.editDimensionFormat('Number', { decimals: 3, prefix: ' blah' });
+          await lens.dimensions.editDimensionFormat('Number', { decimals: 3, prefix: ' blah' });
           await lens.closeDimensionEditor();
 
           await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
