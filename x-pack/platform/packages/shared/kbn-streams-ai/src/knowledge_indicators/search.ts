@@ -32,6 +32,50 @@ const isFeatureIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorFea
 const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery =>
   ki.kind === 'query';
 
+function featureMatchesRequestedTopology(
+  indicator: KnowledgeIndicatorFeature,
+  indicators: KnowledgeIndicator[],
+  featureIds: string[] | undefined
+): boolean {
+  if (!featureIds?.length) {
+    return false;
+  }
+
+  if (featureIds.includes(indicator.feature.id)) {
+    return true;
+  }
+
+  const connectedDependencies = indicators
+    .filter(
+      (candidate): candidate is KnowledgeIndicatorFeature =>
+        candidate.kind === 'feature' &&
+        candidate.feature.type === 'dependency' &&
+        [candidate.feature.properties.source, candidate.feature.properties.target].some(
+          (endpoint): endpoint is string =>
+            typeof endpoint === 'string' && featureIds.includes(endpoint)
+        )
+    )
+    .map(({ feature }) => [feature.properties.source, feature.properties.target])
+    .flat()
+    .filter((endpoint): endpoint is string => typeof endpoint === 'string');
+
+  if (indicator.feature.type === 'dependency') {
+    return [indicator.feature.properties.source, indicator.feature.properties.target].some(
+      (endpoint): endpoint is string =>
+        typeof endpoint === 'string' && featureIds.includes(endpoint)
+    );
+  }
+
+  if (indicator.feature.type === 'entity') {
+    return [indicator.feature.properties.name, indicator.feature.properties.technology].some(
+      (identity): identity is string =>
+        typeof identity === 'string' && connectedDependencies.includes(identity)
+    );
+  }
+
+  return false;
+}
+
 const compareFeatures = (
   current: KnowledgeIndicatorFeature,
   next: KnowledgeIndicatorFeature
@@ -156,7 +200,8 @@ function filterIndicators(
     if (isFeatureIndicator(indicator)) {
       return (
         (!params.feature_types?.length || params.feature_types.includes(indicator.feature.type)) &&
-        (!params.feature_ids?.length || params.feature_ids.includes(indicator.feature.id))
+        (!params.feature_ids?.length ||
+          featureMatchesRequestedTopology(indicator, indicators, params.feature_ids))
       );
     }
 

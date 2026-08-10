@@ -65,7 +65,7 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe(
-      'Return only feature KIs whose feature.id matches one of these values. Use only when `kind: ["feature"]` is specified.'
+      'Seed the feature search with these IDs. Exact feature IDs are returned; when dependency, entity, or infrastructure types are requested, connected dependency endpoints and matching entity identity fields may also be returned. Use only when `kind: ["feature"]` is specified.'
     ),
   query_types: z
     .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))

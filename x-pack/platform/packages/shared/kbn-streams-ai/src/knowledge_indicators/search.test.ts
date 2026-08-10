@@ -262,6 +262,45 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.total).toBe(1);
   });
 
+  it('matches dependency features by source or target when feature IDs are requested', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency'],
+        feature_ids: ['orders-api'],
+      },
+      getStreamNames: async () => ['logs.test'],
+      getFeatures: async () => [
+        makeFeature({
+          id: 'orders-api-storage',
+          type: 'dependency',
+          properties: {
+            source: 'orders-api',
+            target: 'storage',
+            protocol: 'tcp',
+          },
+        }),
+        makeFeature({
+          id: 'unrelated-dependency',
+          type: 'dependency',
+          properties: {
+            source: 'users-api',
+            target: 'identity',
+            protocol: 'http',
+          },
+        }),
+      ],
+      getQueries: async () => [],
+    });
+
+    expect(res.knowledge_indicators).toEqual([
+      expect.objectContaining({
+        kind: 'feature',
+        feature: expect.objectContaining({ id: 'orders-api-storage' }),
+      }),
+    ]);
+  });
+
   it('calls onFeatureFetchError when a stream feature fetch fails', async () => {
     const onFeatureFetchError = jest.fn();
 
