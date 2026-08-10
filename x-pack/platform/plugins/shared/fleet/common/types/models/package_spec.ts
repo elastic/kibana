@@ -74,6 +74,9 @@ export interface PackageSpecManifest {
   agent?: {
     privileges?: { root?: boolean };
   };
+  workflows?: {
+    default_enabled?: boolean | string[];
+  };
   asset_tags?: PackageSpecTags[];
   discovery?: {
     fields?: Array<{

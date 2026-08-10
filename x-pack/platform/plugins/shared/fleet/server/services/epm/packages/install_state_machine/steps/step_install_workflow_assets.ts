@@ -8,6 +8,7 @@
 import path from 'path';
 
 import pMap from 'p-map';
+import { parse, stringify } from 'yaml';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -47,6 +48,15 @@ export const substituteWorkflowConnectorIds = (
   vars: Record<string, unknown>,
   logger?: Logger
 ): string => {
+  const { yaml: result } = substituteWorkflowConnectorIdsWithUnresolved(yaml, vars, logger);
+  return result;
+};
+
+export const substituteWorkflowConnectorIdsWithUnresolved = (
+  yaml: string,
+  vars: Record<string, unknown>,
+  logger?: Logger
+): { yaml: string; unresolved: string[] } => {
   let result = yaml;
 
   const substitutions = Object.entries(vars)
@@ -61,15 +71,17 @@ export const substituteWorkflowConnectorIds = (
     result = result.replaceAll(placeholder, formatted);
   }
 
+  const placeholderRegex = new RegExp(`${VAR_PLACEHOLDER_PREFIX}[A-Z0-9_]+`, 'g');
+  const remaining = [...result.matchAll(placeholderRegex)].map((match) => match[0]);
+  const unresolved = [...new Set(remaining)];
+
   if (logger) {
-    const placeholderRegex = new RegExp(`${VAR_PLACEHOLDER_PREFIX}[A-Z0-9_]+`, 'g');
-    const remaining = [...result.matchAll(placeholderRegex)].map((match) => match[0]);
-    for (const placeholder of new Set(remaining)) {
+    for (const placeholder of unresolved) {
       logger.warn(`Workflow placeholder ${placeholder} has no matching package policy var`);
     }
   }
 
-  return result;
+  return { yaml: result, unresolved };
 };
 
 export const resolvePackagePolicyConnectorVars = async (
@@ -193,8 +205,35 @@ export async function stepInstallWorkflowAssets(
       workflowEntries,
       async ({ fileName, yaml }) => {
         const workflowId = getFleetPackageWorkflowId({ pkgName, spaceId, fileName });
-        let workflowYaml = substituteWorkflowConnectorIds(yaml, connectorVars, logger);
-        workflowYaml = substituteFleetAgentIds(workflowYaml, { pkgName, spaceId });
+        const { yaml: substitutedYaml, unresolved } = substituteWorkflowConnectorIdsWithUnresolved(
+          yaml,
+          connectorVars,
+          logger
+        );
+        let workflowYaml = substituteFleetAgentIds(substitutedYaml, { pkgName, spaceId });
+
+        const workflowDefinition = parse(workflowYaml) as {
+          enabled?: boolean;
+          steps?: Array<{ enabled?: boolean }>;
+        };
+        const resolvedIntent = resolveWorkflowEnabledIntent(
+          packageInfo.workflows?.default_enabled,
+          fileName
+        );
+
+        if (resolvedIntent && unresolved.length > 0) {
+          logger.warn(
+            `Workflow ${workflowId} has unresolved placeholders [${unresolved.join(
+              ', '
+            )}] — forcing disabled`
+          );
+          workflowDefinition.enabled = false;
+        } else if (resolvedIntent !== undefined) {
+          workflowDefinition.enabled = resolvedIntent;
+        }
+
+        workflowYaml = stringify(workflowDefinition);
+
         const existingWorkflow = await workflowsApi.getWorkflow(workflowId, spaceId);
 
         if (existingWorkflow) {
@@ -230,3 +269,45 @@ export async function stepInstallWorkflowAssets(
     );
   });
 }
+
+export const resolveWorkflowEnabledIntent = (
+  defaultEnabled: boolean | string[] | undefined,
+  fileName: string
+): boolean | undefined => {
+  if (defaultEnabled === undefined) {
+    return undefined;
+  }
+
+  if (typeof defaultEnabled === 'boolean') {
+    return defaultEnabled;
+  }
+
+  if (Array.isArray(defaultEnabled)) {
+    return defaultEnabled.includes(fileName);
+  }
+
+  return undefined;
+};
+
+export const applyWorkflowEnablement = (
+  yaml: string,
+  resolvedIntent: boolean | undefined,
+  unresolved: string[],
+  logger: Logger
+): { yaml: string } => {
+  const workflowDefinition = parse(yaml) as {
+    enabled?: boolean;
+    steps?: Array<{ enabled?: boolean }>;
+  };
+
+  if (resolvedIntent && unresolved.length > 0) {
+    logger.warn(
+      `Workflow has unresolved placeholders [${unresolved.join(', ')}] — forcing disabled`
+    );
+    workflowDefinition.enabled = false;
+  } else if (resolvedIntent !== undefined) {
+    workflowDefinition.enabled = resolvedIntent;
+  }
+
+  return { yaml: stringify(workflowDefinition) };
+};

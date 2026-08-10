@@ -6,9 +6,12 @@
  */
 
 import { isValidId } from '@kbn/human-readable-id';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
   getFleetPackageWorkflowId,
+  resolveWorkflowEnabledIntent,
+  applyWorkflowEnablement,
   substituteWorkflowConnectorIds,
 } from './step_install_workflow_assets';
 
@@ -319,5 +322,67 @@ config:
 
     expect(result).not.toContain('REPLACE_WITH_JIRA_CONNECTOR_ID');
     expect(result).toContain('jiraConnectorId: jira-conn-1');
+  });
+});
+
+describe('resolveWorkflowEnabledIntent', () => {
+  it('returns true when default_enabled is true', () => {
+    expect(resolveWorkflowEnabledIntent(true, 'any.yaml')).toBe(true);
+  });
+
+  it('returns false when default_enabled is false', () => {
+    expect(resolveWorkflowEnabledIntent(false, 'any.yaml')).toBe(false);
+  });
+
+  it('returns undefined when default_enabled is absent', () => {
+    expect(resolveWorkflowEnabledIntent(undefined, 'any.yaml')).toBeUndefined();
+  });
+
+  it('returns true for files listed in the array and false otherwise', () => {
+    expect(resolveWorkflowEnabledIntent(['enabled.yaml'], 'enabled.yaml')).toBe(true);
+    expect(resolveWorkflowEnabledIntent(['enabled.yaml'], 'disabled.yaml')).toBe(false);
+  });
+});
+
+describe('applyWorkflowEnablement', () => {
+  const applyMockLogger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('enables all workflows when default_enabled is true and placeholders are resolved', () => {
+    const yaml = `enabled: false\nname: wf\nsteps: []`;
+    const { yaml: result } = applyWorkflowEnablement(yaml, true, [], applyMockLogger);
+    expect(result).toContain('enabled: true');
+    expect(applyMockLogger.warn).not.toHaveBeenCalled();
+  });
+
+  it('disables all workflows when default_enabled is false', () => {
+    const yaml = `enabled: true\nname: wf\nsteps: []`;
+    const { yaml: result } = applyWorkflowEnablement(yaml, false, [], applyMockLogger);
+    expect(result).toContain('enabled: false');
+  });
+
+  it('leaves enabled unchanged when intent is undefined', () => {
+    const yaml = `enabled: true\nname: wf\nsteps: []`;
+    const { yaml: result } = applyWorkflowEnablement(yaml, undefined, [], applyMockLogger);
+    expect(result).toContain('enabled: true');
+  });
+
+  it('forces disabled and warns when placeholders are unresolved', () => {
+    const yaml = `enabled: true\nname: wf\nsteps: []`;
+    const unresolved = ['REPLACE_WITH_FOO'];
+    const { yaml: result } = applyWorkflowEnablement(yaml, true, unresolved, applyMockLogger);
+    expect(result).toContain('enabled: false');
+    expect(applyMockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('REPLACE_WITH_FOO'));
+  });
+
+  it('preserves step-level enabled keys while editing top-level enabled', () => {
+    const yaml = `enabled: true\nname: wf\nsteps:\n  - type: wait\n    enabled: true`;
+    const { yaml: result } = applyWorkflowEnablement(yaml, false, [], applyMockLogger);
+    expect(result).toContain('enabled: false');
+    const stepEnabledMatches = result.match(/enabled: true/g);
+    expect(stepEnabledMatches).toHaveLength(1);
   });
 });
