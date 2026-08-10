@@ -236,18 +236,32 @@ export async function stepInstallWorkflowAssets(
 
         const existingWorkflow = await workflowsApi.getWorkflow(workflowId, spaceId);
 
+        const managedWorkflowFields = {
+          managed: true,
+          managedBy: pkgName,
+          managedVersion: null,
+        };
+
         if (existingWorkflow) {
           await workflowsApi.updateWorkflow(
             workflowId,
-            { yaml: workflowYaml },
+            { yaml: workflowYaml, ...managedWorkflowFields },
             spaceId,
-            context.request!
+            context.request!,
+            { allowManagedWorkflowMutation: true }
           );
         } else {
           await workflowsApi.createWorkflow(
             { id: workflowId, yaml: workflowYaml },
             spaceId,
             context.request!
+          );
+          await workflowsApi.updateWorkflow(
+            workflowId,
+            { yaml: workflowYaml, ...managedWorkflowFields },
+            spaceId,
+            context.request!,
+            { allowManagedWorkflowMutation: true }
           );
         }
 

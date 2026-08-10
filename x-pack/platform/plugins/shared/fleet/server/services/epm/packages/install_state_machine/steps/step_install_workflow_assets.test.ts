@@ -6,14 +6,26 @@
  */
 
 import { isValidId } from '@kbn/human-readable-id';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
+import { appContextService } from '../../../../app_context';
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+import {
+  createAppContextStartContractMock,
+  createWorkflowsManagementSetupMock,
+} from '../../../../../mocks';
+import { saveKibanaAssetsRefs } from '../../install';
 
 import {
+  stepInstallWorkflowAssets,
   getFleetPackageWorkflowId,
   resolveWorkflowEnabledIntent,
   applyWorkflowEnablement,
   substituteWorkflowConnectorIds,
 } from './step_install_workflow_assets';
+
+jest.mock('../../install');
 
 const mockLogger = {
   warn: jest.fn(),
@@ -384,5 +396,96 @@ describe('applyWorkflowEnablement', () => {
     expect(result).toContain('enabled: false');
     const stepEnabledMatches = result.match(/enabled: true/g);
     expect(stepEnabledMatches).toHaveLength(1);
+  });
+});
+
+describe('stepInstallWorkflowAssets', () => {
+  const pkgName = 'test-package';
+  const pkgVersion = '1.2.3';
+  const spaceId = DEFAULT_SPACE_ID;
+  const workflowFileName = 'my-workflow.yaml';
+  const workflowId = 'fleet-default-test-package-my-workflow';
+  const workflowYaml = `name: my-workflow\nenabled: true\nsteps: []`;
+
+  let workflowsManagementSetupMock: ReturnType<typeof createWorkflowsManagementSetupMock>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+
+  beforeEach(() => {
+    savedObjectsClient = savedObjectsClientMock.create();
+    workflowsManagementSetupMock = createWorkflowsManagementSetupMock();
+    appContextService.start(createAppContextStartContractMock());
+    appContextService.setWorkflowsManagementSetup(workflowsManagementSetupMock);
+    jest.mocked(saveKibanaAssetsRefs).mockReset();
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
+  const createContext = (overrides: Record<string, unknown> = {}) => ({
+    logger: loggingSystemMock.createLogger(),
+    savedObjectsClient,
+    spaceId,
+    request: httpServerMock.createKibanaRequest(),
+    packageInstallContext: {
+      packageInfo: {
+        name: pkgName,
+        version: pkgVersion,
+      },
+      archiveIterator: createArchiveIteratorFromMap(
+        new Map([
+          [
+            `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+            Buffer.from(workflowYaml),
+          ],
+        ])
+      ),
+    },
+    ...overrides,
+  });
+
+  it('creates a workflow and stamps managed ownership fields', async () => {
+    await stepInstallWorkflowAssets(createContext() as any);
+
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
+      { id: workflowId, yaml: expect.any(String) },
+      spaceId,
+      expect.anything()
+    );
+
+    expect(workflowsManagementSetupMock.management.updateWorkflow).toHaveBeenCalledWith(
+      workflowId,
+      expect.objectContaining({
+        yaml: expect.any(String),
+        managed: true,
+        managedBy: pkgName,
+        managedVersion: null,
+      }),
+      spaceId,
+      expect.anything(),
+      { allowManagedWorkflowMutation: true }
+    );
+  });
+
+  it('reinstalls a managed workflow without throwing ManagedWorkflowUpdateForbiddenError', async () => {
+    workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
+      id: workflowId,
+      managed: true,
+    } as any);
+
+    await stepInstallWorkflowAssets(createContext() as any);
+
+    expect(workflowsManagementSetupMock.management.updateWorkflow).toHaveBeenCalledWith(
+      workflowId,
+      expect.objectContaining({
+        yaml: expect.any(String),
+        managed: true,
+        managedBy: pkgName,
+        managedVersion: null,
+      }),
+      spaceId,
+      expect.anything(),
+      { allowManagedWorkflowMutation: true }
+    );
   });
 });
