@@ -9,6 +9,7 @@ import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
   StartServicesAccessor,
 } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
@@ -25,6 +26,7 @@ import {
   WatchlistEntitySourceClient,
   watchlistEntitySourceTypeName,
 } from '../entity_sources/infra';
+import { watchlistConfigTypeName } from '../management/saved_object/watchlist_config_type';
 import type { StartPlugins } from '../../../../plugin';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
@@ -105,7 +107,7 @@ export const ensurePrebuiltWatchlists = async ({
   for (const watchlist of getPrebuiltWatchlists(namespace)) {
     const { id, entitySources, ...attrs } = watchlist;
 
-    const watchlistId = await getOrCreateWatchlist({ watchlistClient, logger, id, attrs });
+    const watchlistId = await getOrCreateWatchlist({ soClient, watchlistClient, logger, id, attrs });
     if (!watchlistId) {
       return;
     }
@@ -130,16 +132,19 @@ export const ensurePrebuiltWatchlists = async ({
 };
 
 const getOrCreateWatchlist = async ({
+  soClient,
   watchlistClient,
   logger,
   id,
   attrs,
 }: {
+  soClient: SavedObjectsClientContract;
   watchlistClient: WatchlistConfigClient;
   logger: Logger;
   id: string;
   attrs: Omit<PrebuiltWatchlistDefinition, 'id' | 'entitySources'>;
 }): Promise<string | undefined> => {
+  // Fast path: canonical ID exists (normal restarts).
   try {
     const existing = await watchlistClient.get(id);
     return existing.id ?? id;
@@ -149,14 +154,59 @@ const getOrCreateWatchlist = async ({
       logger.error(`Error checking prebuilt watchlist '${attrs.name}': ${errorMessage}`);
       return undefined;
     }
-
-    logger.info(`Prebuilt watchlist '${attrs.name}' not found, creating...`);
-    const created = await watchlistClient.create(attrs, { id });
-    if (!created.id) {
-      throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
-    }
-    return created.id;
   }
+
+  // Canonical ID not found — search by managed + name so the watchlist is located
+  // regardless of what ID it was stored under (e.g. after an ID format change).
+  // Filtering by both fields uniquely identifies each prebuilt watchlist even when
+  // multiple managed watchlists exist.
+  type WatchlistAttrs = { name: string; managed: boolean };
+  const { saved_objects: matches } = await soClient.find<WatchlistAttrs>({
+    type: watchlistConfigTypeName,
+    filter: `watchlist-config.attributes.managed: true AND watchlist-config.attributes.name: "${attrs.name}"`,
+    perPage: 10,
+  });
+
+  if (matches.length === 1) {
+    logger.debug(`Found prebuilt watchlist '${attrs.name}' under id '${matches[0].id}', reusing it`);
+    return matches[0].id;
+  }
+
+  if (matches.length > 1) {
+    // Multiple matches means a duplicate exists (e.g. from a past ID format change).
+    // Keep the oldest — the original is always created first, any duplicate always later.
+    // Most references is a tiebreaker if timestamps are identical.
+    const sorted: Array<SavedObjectsFindResult<WatchlistAttrs>> = [...matches].sort((a, b) => {
+      const dateDiff = String(a.created_at ?? '').localeCompare(String(b.created_at ?? ''));
+      if (dateDiff !== 0) return dateDiff;
+      return (b.references?.length ?? 0) - (a.references?.length ?? 0);
+    });
+
+    const [watchlistToKeep, ...stale] = sorted;
+
+    // Delete stale duplicates using soClient directly — watchlistClient.delete would
+    // cascade-delete entity sources that are shared with the watchlist we are keeping.
+    for (const dup of stale) {
+      try {
+        await soClient.delete(watchlistConfigTypeName, dup.id, { refresh: 'wait_for' });
+        logger.info(`Removed stale duplicate prebuilt watchlist '${dup.id}'`);
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        logger.warn(`Failed to remove stale duplicate watchlist '${dup.id}': ${errorMessage}`);
+      }
+    }
+
+    logger.debug(`Found prebuilt watchlist '${attrs.name}' under id '${watchlistToKeep.id}', reusing it`);
+    return watchlistToKeep.id;
+  }
+
+  // Genuinely not found — create with the canonical ID.
+  logger.info(`Prebuilt watchlist '${attrs.name}' not found, creating...`);
+  const created = await watchlistClient.create(attrs, { id });
+  if (!created.id) {
+    throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
+  }
+  return created.id;
 };
 
 const ensureEntitySources = async ({
