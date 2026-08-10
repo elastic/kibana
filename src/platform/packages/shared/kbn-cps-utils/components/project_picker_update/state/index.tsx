@@ -16,12 +16,13 @@ import React, {
   useEffect,
 } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import { createStoreReducers } from './reducers';
 import { type ProjectPickerState } from './reducers';
 import { projectPickerDerivatives } from './derivatives';
 import { type CPSProject } from '../../../types';
-import { getSelectedProjectIdsFromProjectRouting } from '../utils/project_routing';
+import { projectRoutingCodec } from '../utils/project_routing_codec';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
@@ -55,6 +56,40 @@ export const useProjectPickerActions = () => {
 export const useProjectPickerState = () => {
   const ctx = useProjectPickerContext();
   return ctx.state;
+};
+
+const getSelectedProjectIdsFromProjectRouting = ({
+  availableProjects,
+  originProjectId,
+  projectRouting,
+}: {
+  availableProjects: CPSProject[];
+  originProjectId?: string;
+  projectRouting?: ProjectRouting;
+}): string[] => {
+  if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ALL) {
+    return availableProjects.map((project) => project._id);
+  }
+
+  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+    return originProjectId ? [originProjectId] : [];
+  }
+
+  const { excludedProjectIds, selectedProjectIds } = projectRoutingCodec.decode(projectRouting);
+
+  if (selectedProjectIds.length > 0) {
+    return selectedProjectIds.filter((projectId) =>
+      availableProjects.some((project) => project._id === projectId)
+    );
+  }
+
+  if (excludedProjectIds.length > 0) {
+    return availableProjects
+      .map((project) => project._id)
+      .filter((projectId) => !excludedProjectIds.includes(projectId));
+  }
+
+  return availableProjects.map((project) => project._id);
 };
 
 export const ProjectPickerStateProvider = ({

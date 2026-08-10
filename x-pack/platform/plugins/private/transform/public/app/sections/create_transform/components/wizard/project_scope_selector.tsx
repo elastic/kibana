@@ -9,11 +9,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiFormRow, EuiPopover, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
-  getSelectedProjectIdsFromProjectRouting,
   type CPSProject,
   type ICPSManager,
   PROJECT_ROUTING,
   ProjectScopePicker,
+  projectRoutingCodec,
   useFetchProjects,
 } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
@@ -53,6 +53,38 @@ const getCustomProjectScopeLabel = (selectedCount: number, totalCount: number): 
     values: { selectedCount, totalCount },
   });
 
+const getSelectedProjectCount = ({
+  availableProjects,
+  originProjectId,
+  projectRouting,
+}: {
+  availableProjects: CPSProject[];
+  originProjectId?: string;
+  projectRouting: ProjectRouting;
+}): number => {
+  if (projectRouting === PROJECT_ROUTING.ALL) {
+    return availableProjects.length;
+  }
+
+  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+    return originProjectId ? 1 : 0;
+  }
+
+  const { excludedProjectIds, selectedProjectIds } = projectRoutingCodec.decode(projectRouting);
+
+  if (selectedProjectIds.length > 0) {
+    return selectedProjectIds.filter((projectId) =>
+      availableProjects.some((project) => project._id === projectId)
+    ).length;
+  }
+
+  if (excludedProjectIds.length > 0) {
+    return availableProjects.filter((project) => !excludedProjectIds.includes(project._id)).length;
+  }
+
+  return availableProjects.length;
+};
+
 const getProjectScopeButtonLabel = ({
   availableProjects,
   originProjectId,
@@ -70,13 +102,13 @@ const getProjectScopeButtonLabel = ({
     return thisProjectLabel;
   }
 
-  const selectedProjectIds = getSelectedProjectIdsFromProjectRouting({
+  const selectedProjectCount = getSelectedProjectCount({
     availableProjects,
     originProjectId,
     projectRouting,
   });
 
-  return getCustomProjectScopeLabel(selectedProjectIds.length, availableProjects.length);
+  return getCustomProjectScopeLabel(selectedProjectCount, availableProjects.length);
 };
 
 export interface ProjectScopeSelectorProps {

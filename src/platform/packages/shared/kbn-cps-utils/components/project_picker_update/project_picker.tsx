@@ -9,13 +9,14 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
 import {
   ProjectPickerStateProvider,
   type ProjectPickerStateProviderProps,
   useProjectPickerState,
 } from './state';
-import { getProjectRoutingFromSelectedProjectIds } from './utils/project_routing';
+import { projectRoutingCodec } from './utils/project_routing_codec';
 
 export interface ProjectPickerProps
   extends Omit<ProjectPickerStateProviderProps, 'children' | 'initialProjectRouting'> {
@@ -25,9 +26,8 @@ export interface ProjectPickerProps
 
 const ProjectPickerRoutingObserver = ({
   onProjectRoutingChange,
-  originProjectId,
   projectRouting,
-}: Pick<ProjectPickerProps, 'onProjectRoutingChange' | 'originProjectId' | 'projectRouting'>) => {
+}: Pick<ProjectPickerProps, 'onProjectRoutingChange' | 'projectRouting'>) => {
   const { availableProjects, selectedProjects } = useProjectPickerState();
 
   useEffect(() => {
@@ -35,22 +35,21 @@ const ProjectPickerRoutingObserver = ({
       return;
     }
 
-    const nextProjectRouting = getProjectRoutingFromSelectedProjectIds({
-      availableProjects: Array.from(availableProjects.values()),
-      originProjectId,
-      selectedProjectIds: selectedProjects,
-    });
+    const allProjectIds = Array.from(availableProjects.keys());
+    const nextProjectRouting =
+      selectedProjects.length === 0 || selectedProjects.length === allProjectIds.length
+        ? PROJECT_ROUTING.ALL
+        : projectRoutingCodec.encode({
+            excludedProjectIds: [],
+            filterExpressions: [],
+            selectedProjectIds: selectedProjects,
+            projectRoutingStrategy: 'snapshot',
+          });
 
     if (nextProjectRouting !== projectRouting) {
       onProjectRoutingChange(nextProjectRouting);
     }
-  }, [
-    availableProjects,
-    onProjectRoutingChange,
-    originProjectId,
-    projectRouting,
-    selectedProjects,
-  ]);
+  }, [availableProjects, onProjectRoutingChange, projectRouting, selectedProjects]);
 
   return null;
 };
@@ -73,7 +72,6 @@ export function ProjectPicker({
     >
       <ProjectPickerRoutingObserver
         onProjectRoutingChange={onProjectRoutingChange}
-        originProjectId={originProjectId}
         projectRouting={projectRouting}
       />
       <ProjectPickerFrame maxBodyHeight={500} scrollContainerRef={scrollContainerRef}>

@@ -55,7 +55,7 @@ jest.mock('@kbn/cps-utils', () => {
         <button
           type="button"
           data-test-subj="mockProjectScopePicker"
-          onClick={() => props.onProjectRoutingChange('_alias:linked_local_project')}
+          onClick={() => props.onProjectRoutingChange('_id:linked-id')}
         >
           Project scope picker
         </button>
@@ -273,8 +273,8 @@ describe('Transform: <Wizard />', () => {
     fireEvent.click(await screen.findByTestId('mockProjectScopePicker'));
 
     await waitFor(() => {
-      expect(mockStepDefineFormProps.overrides.projectRouting).toBe('_alias:linked_local_project');
-      expect(mockProjectScopePickerProps.projectRouting).toBe('_alias:linked_local_project');
+      expect(mockStepDefineFormProps.overrides.projectRouting).toBe('_id:linked-id');
+      expect(mockProjectScopePickerProps.projectRouting).toBe('_id:linked-id');
     });
   });
 });
