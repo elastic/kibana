@@ -92,6 +92,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         ml_model: [],
         knowledge_base: [],
         esql_view: [],
+        index_alias: [],
       },
     },
     status: 'not_installed',

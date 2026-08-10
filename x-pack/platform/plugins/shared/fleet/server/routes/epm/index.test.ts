@@ -217,6 +217,7 @@ describe('schema validation', () => {
         ml_model: [],
         knowledge_base: [],
         esql_view: [],
+        index_alias: [],
       },
     };
     packageInfo = {

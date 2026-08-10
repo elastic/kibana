@@ -134,6 +134,7 @@ export const item: GetInfoResponse['item'] = {
       ml_model: [],
       knowledge_base: [],
       esql_view: [],
+      index_alias: [],
     },
   },
   policy_templates: [

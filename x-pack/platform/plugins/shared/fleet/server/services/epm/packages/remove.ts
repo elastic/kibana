@@ -53,6 +53,7 @@ import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
+import { deleteIndexAliases } from '../elasticsearch/index_alias/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
@@ -334,6 +335,8 @@ export const deleteESAsset = async (
     return deleteMlModel(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.esqlView) {
     return deleteEsqlViews(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.indexAlias) {
+    return deleteIndexAliases(esClient, [id]);
   }
 };
 
@@ -604,6 +607,16 @@ export function cleanupEsqlViews(
     .filter((asset) => asset.type === ElasticsearchAssetType.esqlView)
     .map((asset) => asset.id);
   return deleteEsqlViews(esClient, idsToDelete);
+}
+
+export function cleanupIndexAliases(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.indexAlias)
+    .map((asset) => asset.id);
+  return deleteIndexAliases(esClient, idsToDelete);
 }
 
 /**
