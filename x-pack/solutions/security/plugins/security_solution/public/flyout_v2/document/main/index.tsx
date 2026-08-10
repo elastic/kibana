@@ -10,6 +10,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -36,11 +37,16 @@ import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_li
 import { OpenFlyoutLink } from '../../shared/components/open_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import {
+  EVENT_SOURCE_FIELD_NAME,
+  LEGACY_EVENT_SOURCE_FIELD_NAME,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
+import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_details_from_record';
+import { getAncestorsIndexById } from './utils/get_ancestors_index_by_id';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
+import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
 
 const footerStyles = css`
   @media (max-width: 767px) {
@@ -61,6 +67,8 @@ const VALID_TAB_IDS: DocumentFlyoutTabId[] = ['overview', 'table', 'json'];
 export const OVERVIEW_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutOverviewTab';
 export const TABLE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutTableTab';
 export const JSON_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutJsonTab';
+export const TABLE_TAB_SOURCE_EVENT_LINK_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutTableTabSourceEventLink';
 
 const OVERVIEW_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.document.overviewTabLabel',
@@ -95,18 +103,18 @@ export interface DocumentFlyoutProps {
  */
 export const DocumentFlyout = memo(
   ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
-    const { openNotes } = useFlyoutApi();
+    const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const isSecurityApp = useIsInSecurityApp();
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
-    // The selected tab is persisted to localStorage, sharing the key with the legacy
-    // document flyout so the user's preference carries across both implementations.
+    // The selected tab is persisted to localStorage.
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
@@ -123,25 +131,60 @@ export const DocumentFlyout = memo(
       [hit]
     );
 
+    // Maps each ancestor document id to the index it lives in, so a Source event value in the Table
+    // tab can open that specific ancestor document. Threshold rules are excluded (see helper).
+    const ancestorsIndexById = useMemo(
+      () => getAncestorsIndexById(getTimelineEventsDetailsFromRecord(hit)),
+      [hit]
+    );
+
     // Opens the relevant system flyout (host, ip, rule) when a supported value is clicked in the
     // Table tab. Mirrors the Highlighted Fields behavior in the Overview tab.
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => {
+        // Source event: the raw `kibana.alert.ancestors.id` field (or its legacy `signal.ancestors.id`
+        // equivalent) can list several ancestor documents, so each value is matched to its own index
+        // and opened in a new flyout (the same open method used by the sibling host/user/rule links).
+        // Values without a resolved index (e.g. a threshold rule's synthetic ancestor) render as
+        // plain text.
+        if (
+          props.field === EVENT_SOURCE_FIELD_NAME ||
+          props.field === LEGACY_EVENT_SOURCE_FIELD_NAME
+        ) {
+          const indexName = ancestorsIndexById[props.value];
+          if (!indexName) {
+            return <>{props.children}</>;
+          }
+          return (
+            <EuiLink
+              onClick={() =>
+                openDocumentFlyoutFromIndex({
+                  documentId: props.value,
+                  indexName,
+                  origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+                })
+              }
+              data-test-subj={TABLE_TAB_SOURCE_EVENT_LINK_TEST_ID}
+            >
+              {props.children}
+            </EuiLink>
+          );
+        }
         // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
         // UUID) while keeping the rule name as the displayed text. When no UUID is available,
-        // render plain text to avoid opening the rule flyout with an invalid id.
+        // or when in rule preview (the rule doesn't exist yet), render plain text.
         if (
           props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
           props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
         ) {
-          if (!ruleId) {
+          if (!ruleId || isRulePreview) {
             return <>{props.children}</>;
           }
           return <OpenFlyoutLink {...props} value={ruleId} displayValue={props.value} asParent />;
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId]
+      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromIndex]
     );
 
     const onShowNotesFromHeader = useCallback(() => {
@@ -207,7 +250,7 @@ export const DocumentFlyout = memo(
               renderFlyoutLink={renderFlyoutLink}
             />
           ) : isSecurityApp && selectedTabId === 'json' ? (
-            <JsonTab hit={hit} />
+            <JsonTab hit={hit} isRulePreview={isRulePreview} />
           ) : (
             <OverviewTab
               hit={hit}
@@ -216,9 +259,11 @@ export const DocumentFlyout = memo(
             />
           )}
         </EuiFlyoutBody>
-        <EuiFlyoutFooter css={footerStyles}>
-          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
-        </EuiFlyoutFooter>
+        {!isRulePreview && (
+          <EuiFlyoutFooter css={footerStyles}>
+            <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
+          </EuiFlyoutFooter>
+        )}
       </>
     );
   }

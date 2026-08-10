@@ -11,8 +11,9 @@ import { z } from '@kbn/zod';
 import {
   asCodeIdSchema,
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSearchRequestSchema,
+  getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
@@ -35,6 +36,7 @@ export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_DISCOVER_SESSION_TAGS = 1000;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
 
 const visContextSchema = z
@@ -93,7 +95,6 @@ const discoverSessionControlPanelSchema = z
 export const discoverSessionControlPanelsSchema = z
   .array(discoverSessionControlPanelSchema)
   .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
-  .default([])
   .refine(
     (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
     'control_panels must have unique ids'
@@ -188,6 +189,10 @@ export const discoverSessionApiDataSchema = z
       .max(MAX_SESSION_DESCRIPTION_LENGTH)
       .default('')
       .meta({ description: 'Discover session description.' }),
+    tags: getAsCodeTagsSchema(
+      'Tag IDs to associate with this Discover session.',
+      MAX_DISCOVER_SESSION_TAGS
+    ).optional(),
     tabs: z
       .array(discoverSessionApiTabSchema)
       .min(1)
@@ -208,13 +213,15 @@ export const discoverSessionApiDataSchema = z
     description: 'Configuration data for a Discover session.',
   });
 
-export const discoverSessionApiResponseSchema = z.object({
-  id: z.string().meta({ description: 'The Discover session ID.' }),
-  data: discoverSessionApiDataSchema,
-  meta: asCodeMetaSchema,
-});
+export const discoverSessionApiResponseSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: discoverSessionApiDataSchema,
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
-export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extend({
+export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
@@ -225,25 +232,35 @@ export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.ex
     .optional(),
 });
 
-const discoverSessionSearchItemSchema = z.object({
-  id: z.string().meta({ description: 'The Discover session ID.' }),
-  data: z.object({
-    title: z.string().meta({ description: 'Discover session title.' }),
-    description: z.string().optional().meta({ description: 'Discover session description.' }),
-  }),
-  meta: asCodeMetaSchema,
-});
+const discoverSessionSearchItemSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: z
+      .object({
+        title: z.string().meta({ description: 'Discover session title.' }),
+        description: z.string().optional().meta({ description: 'Discover session description.' }),
+        tags: getAsCodeTagsSchema(
+          'Tag IDs associated with this Discover session.',
+          MAX_DISCOVER_SESSION_TAGS
+        ).optional(),
+      })
+      .strict(),
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
-export const discoverSessionSearchResponseSchema = z.object({
-  data: z
-    .array(discoverSessionSearchItemSchema)
-    // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
-    .max(PAGINATION_MAX_SIZE)
-    .meta({
-      description: 'List of matching Discover sessions (summaries, not the full session state).',
-    }),
-  meta: asCodePaginationResponseMetaSchema,
-});
+export const discoverSessionSearchResponseSchema = z
+  .object({
+    data: z
+      .array(discoverSessionSearchItemSchema)
+      // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
+      .max(PAGINATION_MAX_SIZE)
+      .meta({
+        description: 'List of matching Discover sessions (summaries, not the full session state).',
+      }),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+  .strict();
 
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
