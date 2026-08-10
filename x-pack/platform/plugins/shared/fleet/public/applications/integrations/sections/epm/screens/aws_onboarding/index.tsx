@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiBadge,
@@ -23,7 +23,6 @@ import {
   EuiLink,
   EuiNotificationBadge,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiStepsHorizontal,
   EuiText,
@@ -39,7 +38,8 @@ import {
 } from './aws_services_data';
 import { StepServiceSettings } from './step_service_settings';
 import { StepAuthentication, type DeploymentMethod } from './step_authentication';
-import { StepDeployDetect } from './step_deploy_detect';
+import { StepDeploy } from './step_deploy';
+import { StepDetectReview } from './step_detect_review';
 
 type DataTypeFilterId = 'all' | 'logs' | 'metrics';
 
@@ -180,11 +180,39 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const [deploymentMethod, setDeploymentMethod] = useState<DeploymentMethod>('managed');
   const [triggerSources, setTriggerSources] = useState<Record<string, string>>({});
 
+  // Deploy/detect state is lifted here (rather than owned by the Deploy step)
+  // so it survives navigating to the separate Detect & Review step.
+  const [deployIdentityName, setDeployIdentityName] = useState('');
+  const [deployRegion, setDeployRegion] = useState('us-east');
+  const [isDeployed, setIsDeployed] = useState(false);
+  const [receivedCount, setReceivedCount] = useState(0);
+  const deployTimers = useRef<number[]>([]);
+  // Step 3: Next is disabled until the selected credential fields are filled.
+  const [isCredentialsValid, setIsCredentialsValid] = useState(false);
+  // Step 4: Next is disabled until the CloudFormation stack name is entered.
+  const [stackName, setStackName] = useState('');
+
+  useEffect(() => {
+    return () => deployTimers.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
   const selectedServices = useMemo(
     () =>
       AWS_SERVICE_CATEGORIES.flatMap((c) => c.services).filter((s) => selected.has(s.id)),
     [selected]
   );
+
+  // First service confirms after 5s, then each subsequent one 8s after the last.
+  const onLaunchCloudFormation = () => {
+    setIsDeployed(true);
+    setReceivedCount(0);
+    selectedServices.forEach((_, i) => {
+      const delay = 5000 + i * 8000;
+      deployTimers.current.push(window.setTimeout(() => setReceivedCount((c) => c + 1), delay));
+    });
+  };
+
+  const totalSteps = 5;
 
   const onToggle = (id: string) => {
     setSelected((prev) => {
@@ -219,30 +247,36 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     ? AWS_SERVICE_CATEGORIES.filter((c) => (visibleByCategory.get(c.id) ?? []).length > 0)
     : AWS_SERVICE_CATEGORIES.filter((c) => c.id === activeCategoryId);
 
-  const steps: EuiStepsHorizontalProps['steps'] = [
-    {
-      title: 'Choose Services',
-      status: currentStep === 1 ? 'current' : 'complete',
-      onClick: () => setCurrentStep(1),
-    },
-    {
-      title: 'Service Settings',
-      status: currentStep === 2 ? 'current' : currentStep > 2 ? 'complete' : 'incomplete',
-      onClick: () => selected.size > 0 && setCurrentStep(2),
-    },
-    {
-      title: 'Authentication',
-      status: currentStep === 3 ? 'current' : currentStep > 3 ? 'complete' : 'incomplete',
-      onClick: () => selected.size > 0 && setCurrentStep(3),
-    },
-    {
-      title: 'Deploy & Detect',
-      status: currentStep === 4 ? 'current' : 'incomplete',
-      onClick: () => selected.size > 0 && setCurrentStep(4),
-    },
+  // Both deployment methods share the same 5-step frame. Agent-based doesn't
+  // have Deploy/Detect & Review content designed yet (see placeholders below),
+  // but the step bar itself stays consistent between methods.
+  const stepTitles = [
+    'Choose Services',
+    'Service Settings',
+    'Authentication',
+    'Deploy',
+    'Detect & Review',
   ];
 
+  const steps: EuiStepsHorizontalProps['steps'] = stepTitles.map((title, i) => {
+    const stepNumber = i + 1;
+    return {
+      title,
+      status:
+        currentStep === stepNumber
+          ? 'current'
+          : currentStep > stepNumber
+          ? 'complete'
+          : 'incomplete',
+      onClick: () => selected.size > 0 && setCurrentStep(stepNumber),
+    };
+  });
+
   const onCancel = () => history.push('/detail/aws/overview');
+
+  const onDeploymentMethodChange = (method: DeploymentMethod) => {
+    setDeploymentMethod(method);
+  };
 
   return (
     // Full-bleed white page canvas per design reference, overriding
@@ -258,23 +292,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         padding: euiTheme.size.l,
       }}
     >
-      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiSelect
-            compressed
-            prepend="Deployment method"
-            options={[
-              { value: 'managed', text: 'Elastic Managed Integration' },
-              { value: 'agent', text: 'Agent-based' },
-            ]}
-            value={deploymentMethod}
-            onChange={(e) => setDeploymentMethod(e.target.value as DeploymentMethod)}
-            aria-label="Deployment method"
-            data-test-subj="awsOnboardingDeploymentMethodDropdown"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="logoAWS" size="xl" />
@@ -391,11 +408,50 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         <StepAuthentication
           servicesCount={selectedServices.length}
           deploymentMethod={deploymentMethod}
-          onDeploymentMethodChange={setDeploymentMethod}
+          onDeploymentMethodChange={onDeploymentMethodChange}
+          onCredentialsValidChange={setIsCredentialsValid}
+          deployIdentityName={deployIdentityName}
+          onDeployIdentityNameChange={setDeployIdentityName}
+          deployRegion={deployRegion}
+          onDeployRegionChange={setDeployRegion}
+          isDeployed={isDeployed}
+          onLaunchCloudFormation={onLaunchCloudFormation}
         />
       )}
 
-      {currentStep === 4 && <StepDeployDetect services={selectedServices} />}
+      {currentStep === 4 && deploymentMethod === 'managed' && (
+        <StepDeploy
+          services={selectedServices}
+          isLaunched={isDeployed}
+          receivedCount={receivedCount}
+          stackName={stackName}
+          onStackNameChange={setStackName}
+        />
+      )}
+      {currentStep === 4 && deploymentMethod === 'agent' && (
+        <>
+          <EuiTitle size="m">
+            <h2>Deploy</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>[Placeholder — not yet designed for Agent-based.]</p>
+          </EuiText>
+        </>
+      )}
+
+      {currentStep === 5 && deploymentMethod === 'managed' && <StepDetectReview />}
+      {currentStep === 5 && deploymentMethod === 'agent' && (
+        <>
+          <EuiTitle size="m">
+            <h2>Detect &amp; Review</h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>[Placeholder — not yet designed for Agent-based.]</p>
+          </EuiText>
+        </>
+      )}
 
       <EuiHorizontalRule margin="xl" />
       <EuiFlexGroup alignItems="center" responsive={false}>
@@ -420,11 +476,22 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
-        {currentStep < 4 && (
+        {currentStep < totalSteps && (
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={selected.size === 0}
+              isDisabled={
+                selected.size === 0 ||
+                // Authentication: credential fields for the selected method must be
+                // filled, and (managed only) CloudFormation must already be launched —
+                // step 4 only displays the resulting deploy/detect state, it can't
+                // trigger the launch itself.
+                (currentStep === 3 &&
+                  (!isCredentialsValid || (deploymentMethod === 'managed' && !isDeployed))) ||
+                (currentStep === 4 &&
+                  deploymentMethod === 'managed' &&
+                  stackName.trim().length === 0)
+              }
               onClick={() => setCurrentStep(currentStep + 1)}
               data-test-subj="awsOnboardingNext"
             >
