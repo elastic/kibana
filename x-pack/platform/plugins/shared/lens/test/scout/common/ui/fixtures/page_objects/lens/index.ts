@@ -6,3 +6,4 @@
  */
 
 export { LensEditorApp } from './lens_editor_app';
+export { LensLayers } from './lens_layers';
