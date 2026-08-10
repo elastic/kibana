@@ -251,8 +251,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           // Incomplete → field must commit before close, or close discards the transition.
           // Wait on Lens commit signals (op loses `incompatible`, params appear), not picker text alone.
           await this.waitForIncompatibleFieldTransition(opts.operation);
-          await header.waitUntilLoadingHasFinished();
+        } else {
+          // Same hazard on the compatible path: the column stays incomplete until the field lands,
+          // and closing the editor while incomplete makes Lens drop the whole dimension.
+          await this.waitForFieldSelectionToCommit('indexPattern-dimension-field', opts.field);
         }
+        await header.waitUntilLoadingHasFinished();
       }
 
       if (opts.formula) {
@@ -292,6 +296,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           'indexPattern-subFunction-selection-row',
           opts.operation
         );
+        await this.waitForFieldSelectionToCommit(
+          'indexPattern-subFunction-selection-row',
+          opts.operation
+        );
       }
 
       if (opts.field) {
@@ -299,7 +307,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           'indexPattern-reference-field-selection-row',
           opts.field
         );
+        await this.waitForFieldSelectionToCommit(
+          'indexPattern-reference-field-selection-row',
+          opts.field
+        );
       }
+
+      // Reference columns stay incomplete until Lens commits the selection. Callers close the
+      // dimension editor right after, which drops an incomplete column and leaves the chart empty.
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -677,6 +693,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Waits until a combo box selection is reflected back by the component that owns it.
+     * `comboBox.setElement` does not verify the click landed, so without this the caller can move
+     * on while the selection is still pending.
+     */
+    async waitForFieldSelectionToCommit(testTargetId: string, value: string) {
+      await retry.waitFor(`${testTargetId} to show "${value}"`, async () => {
+        const target = await testSubjects.find(testTargetId);
+        return await comboBox.isOptionSelected(target, value);
+      });
+    },
+
+    /**
      * Waits until an incompatible operation + field selection has been committed by Lens.
      * Closing the editor before this clears incompleteColumns and reverts the previous column.
      */
@@ -873,7 +901,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       description?: string
     ) {
       await header.waitUntilLoadingHasFinished();
+      // Lens disables this button whenever `isSaveable` is false, and clicking a disabled button is
+      // a silent no-op that only surfaces much later as a save modal timeout.
+      await testSubjects.waitForEnabled('lnsApp_saveButton');
       await testSubjects.click('lnsApp_saveButton');
+      await testSubjects.existOrFail('savedObjectTitle', { timeout: 5000 });
 
       await this.saveModal(
         title,
@@ -902,6 +934,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      // `name-input` is debounced, so closing the editor too early discards the new label and the
+      // dimension trigger keeps whatever it had before.
+      await retry.waitFor('dimension label to be applied', async () => {
+        return (await testSubjects.getAttribute('name-input', 'value')) === label;
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
@@ -2031,6 +2068,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async filterLegend(value: string) {
+      // Legend items only exist once the chart has rendered, otherwise the click below spends the
+      // full retry budget waiting for an element that was never going to appear.
+      await this.waitForVisualization();
       await testSubjects.click(`legend-${value}`);
       const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
       await filterIn.click();
