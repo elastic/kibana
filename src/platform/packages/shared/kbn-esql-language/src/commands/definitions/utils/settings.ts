@@ -61,6 +61,13 @@ function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
   };
 }
 
+export function isUnmappedFieldsStrategy(
+  value: string | undefined
+): value is UnmappedFieldsStrategy {
+  if (!value) return false;
+  return (Object.values(UnmappedFieldsStrategy) as string[]).includes(value);
+}
+
 /**
  * Checks the headers commmands looking for an unmapped_fields setting and returns its strategy value.
  * Default is DEFAULT.
@@ -74,13 +81,9 @@ export function getUnmappedFieldsStrategy(
     if (comand.name.toUpperCase() === 'SET') {
       const { settingName, settingValue } = getSettingData(comand as ESQLAstSetHeaderCommand);
       if (settingName?.toUpperCase() === EsqlSettingNames.UNMAPPED_FIELDS.toUpperCase()) {
-        switch (settingValue?.toUpperCase()) {
-          case UnmappedFieldsStrategy.NULLIFY:
-            unmappedFieldsStrategy = UnmappedFieldsStrategy.NULLIFY;
-            break;
-          case UnmappedFieldsStrategy.LOAD:
-            unmappedFieldsStrategy = UnmappedFieldsStrategy.LOAD;
-            break;
+        const normalized = settingValue?.toUpperCase();
+        if (normalized && isUnmappedFieldsStrategy(normalized)) {
+          unmappedFieldsStrategy = normalized;
         }
       }
     }
@@ -94,6 +97,7 @@ export function getUnmappedFieldsStrategy(
 export function getUnmappedFieldType(unmappedFieldsStrategy: UnmappedFieldsStrategy): string {
   switch (unmappedFieldsStrategy) {
     case UnmappedFieldsStrategy.LOAD:
+    case UnmappedFieldsStrategy.LOAD_ALL:
       return 'keyword';
     case UnmappedFieldsStrategy.NULLIFY:
       return 'null';

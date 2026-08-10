@@ -340,4 +340,5 @@ export enum UnmappedFieldsStrategy {
   DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
+  LOAD_ALL = 'LOAD_ALL',
 }

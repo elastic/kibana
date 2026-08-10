@@ -14,6 +14,7 @@ import { errors, getMessageFromId } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
 import { getExpressionType } from '../expressions';
 import type { ESQLMessage } from '../../types';
+import { isUnmappedFieldsStrategy } from '../settings';
 
 interface ColumnValidationOptions {
   skipUnsupportedOrConflictingColumnValidation?: boolean;
@@ -91,8 +92,8 @@ export class ColumnValidator {
   private get isUnmappedColumnAllowed(): boolean {
     const unmappedFieldsStrategy = this.context.unmappedFieldsStrategy;
     return (
-      unmappedFieldsStrategy === UnmappedFieldsStrategy.LOAD ||
-      unmappedFieldsStrategy === UnmappedFieldsStrategy.NULLIFY
+      isUnmappedFieldsStrategy(unmappedFieldsStrategy) &&
+      unmappedFieldsStrategy !== UnmappedFieldsStrategy.DEFAULT
     );
   }
 
