@@ -69,7 +69,7 @@ export const AnalyzerPreviewContainer = memo(
 
     const isEnabled = useIsAnalyzerEnabled(hit);
 
-    const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
+    const iconType = useMemo(() => (showIcon ? 'chevronLimitLeft' : undefined), [showIcon]);
 
     // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
     const isNavigationEnabled = useMemo(

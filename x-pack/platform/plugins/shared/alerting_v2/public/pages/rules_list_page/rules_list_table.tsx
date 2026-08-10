@@ -207,7 +207,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
-              iconType="expand"
+              iconType="maximize"
               color="text"
               onClick={() => onExpand(rule)}
               aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
