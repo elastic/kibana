@@ -289,8 +289,6 @@ export default function ({ getService }: FtrProviderContext) {
         'event_filters_read',
         'endpoint_exceptions_all',
         'endpoint_exceptions_read',
-        'custom_yara_signatures_all',
-        'custom_yara_signatures_read',
         'policy_management_all',
         'policy_management_read',
         'scripts_management_all',
