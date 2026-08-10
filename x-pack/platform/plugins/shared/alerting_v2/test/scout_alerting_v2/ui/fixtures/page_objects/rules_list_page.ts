@@ -36,7 +36,7 @@ export class RulesListPage {
   }
 
   tagsFilterOption(tag: string) {
-    return this.page.testSubj.locator(`rulesListTagsFilterOption-${tag}`);
+    return this.page.testSubj.locator('rulesListTagsFilter-list').getByText(tag, { exact: true });
   }
 
   rowCheckbox(ruleId: string) {
@@ -69,8 +69,9 @@ export class RulesListPage {
     await this.tagsFilterButton.click();
     // Initial tag aggregation can be slow on a freshly-booted Kibana before
     // the alerting indexes are warm; default 5s is too tight in CI.
-    await this.tagsFilterOption(tag).waitFor({ state: 'visible', timeout: 60_000 });
-    await this.tagsFilterOption(tag).click();
+    const option = this.tagsFilterOption(tag);
+    await option.waitFor({ state: 'visible', timeout: 60_000 });
+    await option.click();
     await this.tagsFilterButton.click();
   }
 }
