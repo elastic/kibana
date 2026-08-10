@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/267454
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Discover and ES|QL
+title: Add context-aware deep AI analysis in Discover

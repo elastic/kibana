@@ -18,6 +18,7 @@ interface SuppressionFieldsSelectorProps {
   labelAppend?: React.ReactNode;
   disabled?: boolean;
   fullWidth?: boolean;
+  isLoading?: boolean;
 }
 
 export function SuppressionFieldsSelector({
@@ -25,6 +26,7 @@ export function SuppressionFieldsSelector({
   labelAppend,
   disabled,
   fullWidth,
+  isLoading,
 }: SuppressionFieldsSelectorProps): JSX.Element {
   return (
     <EuiFormRow
@@ -42,6 +44,7 @@ export function SuppressionFieldsSelector({
             isDisabled: disabled,
             fullWidth,
             ariaLabel: i18n.ALERT_SUPPRESSION_SUPPRESS_BY_FIELD_LABEL,
+            isLoading,
           }}
         />
       </>

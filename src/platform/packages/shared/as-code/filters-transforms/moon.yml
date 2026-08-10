@@ -22,9 +22,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/es-query-constants'
   - '@kbn/logging'
-  - '@kbn/utility-types'
-  - '@kbn/config-schema'
   - '@kbn/as-code-filters-constants'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package
@@ -36,26 +35,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

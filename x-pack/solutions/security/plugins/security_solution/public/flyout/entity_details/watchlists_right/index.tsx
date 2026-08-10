@@ -34,10 +34,15 @@ export const WatchlistsFlyoutPanel = ({
   const {
     watchlist,
     normalizedWatchlistId,
+    ruleBasedSourceIds,
+    indexSourceWithMissingApiKey,
     isEditMode,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
+    setSourceValid,
   } = useWatchlistFormState({
     mode,
     watchlistId,
@@ -45,6 +50,7 @@ export const WatchlistsFlyoutPanel = ({
   const { mutation } = useWatchlistMutations({
     watchlist,
     watchlistId: normalizedWatchlistId,
+    ruleBasedSourceIds,
     spaceId,
     isEditMode,
     onSuccess: closeFlyout,
@@ -62,11 +68,17 @@ export const WatchlistsFlyoutPanel = ({
     <WatchlistsFlyoutContent
       title={title}
       watchlist={watchlist}
-      isNameInvalid={isNameInvalid}
+      watchlistId={normalizedWatchlistId}
+      indexSourceWithMissingApiKey={indexSourceWithMissingApiKey}
+      isEditMode={isEditMode}
       onFieldChange={setWatchlistField}
       onSave={() => mutation.mutate()}
       isLoading={mutation.isLoading}
       isDisabled={isDisabled}
+      isNameTooLong={isNameTooLong}
+      isDescriptionTooLong={isDescriptionTooLong}
+      isRiskModifierInvalid={isRiskModifierInvalid}
+      onSourceValidationChange={setSourceValid}
     />
   );
 };

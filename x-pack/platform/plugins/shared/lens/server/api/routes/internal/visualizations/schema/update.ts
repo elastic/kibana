@@ -5,36 +5,31 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { z } from '@kbn/zod';
+import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
-import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
-
-import { lensCMUpdateOptionsSchema, lensItemDataSchemaV2 } from '../../../../../content_management';
-import { lensItemDataSchemaV0 } from '../../../../../content_management/v0';
-import { lensItemDataSchemaV1 } from '../../../../../content_management/v1';
+import {
+  lensCMUpdateOptionsSchema,
+  lensItemDataSchemaV2,
+} from '../../../../../content_management/zod';
+import { lensItemDataSchemaV0 } from '../../../../../content_management/zod/v0';
+import { lensItemDataSchemaV1 } from '../../../../../content_management/zod/v1';
 import { lensResponseItemSchema } from './common';
 
-export const lensUpdateRequestParamsSchema = schema.object(
-  {
-    id: schema.string({
-      meta: {
-        description: 'The saved object id of a Lens visualization.',
-      },
+export const lensUpdateRequestParamsSchema = z
+  .object({
+    id: z.string().meta({
+      description: 'The saved object id of a Lens visualization.',
     }),
-  },
-  { unknowns: 'forbid' }
-);
+  })
+  .strict();
 
-export const lensUpdateRequestQuerySchema = schema.object(
-  {
-    ...omit(lensCMUpdateOptionsSchema.getPropSchemas(), ['references']),
-  },
-  { unknowns: 'forbid' }
-);
+export const lensUpdateRequestQuerySchema = lensCMUpdateOptionsSchema
+  .omit({ references: true })
+  .strict();
 
-export const lensUpdateRequestBodySchema = schema.oneOf([
-  lensApiStateSchema,
+export const lensUpdateRequestBodySchema = z.union([
+  lensApiConfigSchema,
   lensItemDataSchemaV2,
   lensItemDataSchemaV1,
   lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create

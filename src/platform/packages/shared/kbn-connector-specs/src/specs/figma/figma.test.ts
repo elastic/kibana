@@ -24,6 +24,40 @@ describe('FigmaConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('should define every action (except test) as a tool for agent exposure', () => {
+    for (const actionName of Object.keys(FigmaConnector.actions)) {
+      if (actionName !== 'test') {
+        expect(FigmaConnector.actions[actionName].isTool).toBe(true);
+      }
+    }
+  });
+
+  describe('auth', () => {
+    it('supports api_key_header auth', () => {
+      const types = (FigmaConnector.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toContain('api_key_header');
+    });
+
+    it('supports oauth_authorization_code with correct Figma defaults', () => {
+      const oauthType = (
+        FigmaConnector.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://www.figma.com/oauth',
+          tokenUrl: 'https://api.figma.com/v1/oauth/token',
+          scope: 'current_user:read file_content:read projects:read',
+        },
+      });
+    });
+  });
+
   describe('getFile action', () => {
     it('should fetch a full file when only fileKey is provided', async () => {
       const mockResponse = {
@@ -234,50 +268,33 @@ describe('FigmaConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = FigmaConnector.test;
+
     it('should return success when API is accessible', async () => {
-      if (!FigmaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
       mockClient.get.mockResolvedValue({
         data: { handle: 'designer', email: 'designer@example.com' },
       });
 
-      const result = await FigmaConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.figma.com/v1/me');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Figma as designer',
-      });
+      expect(result).toEqual({});
     });
 
     it('should fall back to email when handle is not present', async () => {
-      if (!FigmaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
       mockClient.get.mockResolvedValue({
         data: { email: 'designer@example.com' },
       });
 
-      const result = await FigmaConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Figma as designer@example.com',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
-      if (!FigmaConnector.test) {
-        throw new Error('Test handler not defined');
-      }
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid token'));
 
-      const result = await FigmaConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect to Figma API');
-      expect(result.message).toContain('Invalid token');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

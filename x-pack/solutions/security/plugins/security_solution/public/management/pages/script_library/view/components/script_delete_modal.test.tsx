@@ -127,10 +127,13 @@ describe('EndpointScriptDeleteModal', () => {
 
     await waitFor(() => {
       expect(deleteScriptMutation).toHaveBeenCalledWith({ script_id: 'script-1' });
-      expect(addErrorToast).toHaveBeenCalledWith(error, {
-        title: 'Failed to delete script',
-        toastMessage: 'failed to delete!',
-      });
+      expect(addErrorToast).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'failed to delete!' }),
+        {
+          title: 'Failed to delete script',
+          toastMessage: 'failed to delete!',
+        }
+      );
     });
   });
 });

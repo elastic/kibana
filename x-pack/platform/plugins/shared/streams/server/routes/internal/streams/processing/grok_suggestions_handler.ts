@@ -35,6 +35,7 @@ export interface ProcessingGrokSuggestionsParams {
 
 export interface ProcessingGrokSuggestionsHandlerDeps {
   params: ProcessingGrokSuggestionsParams;
+  connectorId: string;
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
@@ -59,6 +60,7 @@ type FieldReviewResults = ToolCallsOfToolOptions<
 
 export const handleProcessingGrokSuggestions = async ({
   params,
+  connectorId,
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
@@ -67,7 +69,6 @@ export const handleProcessingGrokSuggestions = async ({
   logger,
 }: ProcessingGrokSuggestionsHandlerDeps): Promise<GrokProcessor | null> => {
   const { name: streamName } = params.path;
-  const { connector_id: connectorId } = params.body;
 
   logger.debug(
     `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`

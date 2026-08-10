@@ -164,7 +164,9 @@ export class RepoSourceClassifier {
 
     if (
       pkgId === '@kbn/test' ||
+      pkgId === '@kbn/test-docker-servers' ||
       pkgId === '@kbn/test-es-server' ||
+      pkgId === '@kbn/test-kibana-server' ||
       pkgId === '@kbn/test-saml-auth' ||
       pkgId === '@kbn/test-subj-selector'
     ) {
@@ -194,6 +196,8 @@ export class RepoSourceClassifier {
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'tooling':
+          return 'tooling';
         case 'core':
         case 'plugin':
           // classification in plugins is more complicated, fall through to remaining logic

@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-significant-events",
+  "owner": "@elastic/obs-sig-events-team",
+  "group": "platform",
+  "visibility": "shared"
+}

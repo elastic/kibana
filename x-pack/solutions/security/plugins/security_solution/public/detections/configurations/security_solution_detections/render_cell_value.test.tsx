@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { Alert } from '@kbn/alerting-types';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -22,15 +23,6 @@ import { AlertTableCellContextProvider } from './cell_value_context';
 import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    browserFields: {},
-    defaultIndex: 'defaultIndex',
-    loading: false,
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -46,9 +38,17 @@ describe('RenderCellValue', () => {
   beforeEach(() => {
     data = cloneDeep(mockTimelineData[0].data);
     header = cloneDeep(defaultHeaders[0]);
+    const mockAlert: Alert = data.reduce<Record<string, unknown>>((acc, { field, value }) => {
+      if (field === '_id' || field === '_index') {
+        acc[field] = (value as string[])?.[0] ?? '';
+      } else {
+        acc[field] = value;
+      }
+      return acc;
+    }, {}) as Alert;
     defaultProps = {
       columnId,
-      legacyAlert: data,
+      alert: mockAlert,
       eventId,
       header,
       isDetails: false,
@@ -61,7 +61,6 @@ describe('RenderCellValue', () => {
       scopeId,
       rowRenderers: defaultRowRenderers,
       asPlainText: false,
-      ecsData: undefined,
       truncate: false,
       context: undefined,
       browserFields: {},

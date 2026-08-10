@@ -11,6 +11,9 @@ import { type Cookie, parse as parseCookie } from 'tough-cookie';
 
 import { adminTestUser } from '@kbn/test';
 
+export const ACCESS_CONTROL_EDITOR_USERNAME = 'access_control_editor';
+export const ACCESS_CONTROL_EDITOR_PASSWORD = 'changeme';
+
 /**
  * Result type for login operations containing the session cookie and user profile ID.
  */
@@ -32,6 +35,19 @@ export const createSimpleUser = async (es: Client, roles: string[] = ['viewer'])
     refresh: 'wait_for',
     password: 'changeme',
     roles,
+  });
+};
+
+/**
+ * Creates a non-admin user with sufficient privileges to call the access-control APIs,
+ * but without the `manage_access_control` privilege.
+ */
+export const createAccessControlEditorUser = async (es: Client) => {
+  await es.security.putUser({
+    username: ACCESS_CONTROL_EDITOR_USERNAME,
+    refresh: 'wait_for',
+    password: ACCESS_CONTROL_EDITOR_PASSWORD,
+    roles: ['kibana_savedobjects_editor'],
   });
 };
 

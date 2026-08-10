@@ -16,6 +16,7 @@ import { getId } from '../../../lib/get_id';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import type { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { useCanvasContextMenuTopBorderStyles } from '../../../lib/use_canvas_context_menu_top_border_styles';
 import { AssetManager } from '../../asset_manager';
 import type { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';
@@ -77,13 +78,13 @@ const strings = {
 
 // label and icon for the context menu item for each element type
 const elementTypeMeta: ElementTypeMeta = {
-  chart: { name: strings.getChartMenuItemLabel(), icon: 'visArea' },
+  chart: { name: strings.getChartMenuItemLabel(), icon: 'chartArea' },
   filter: { name: strings.getFilterMenuItemLabel(), icon: 'filter' },
   image: { name: strings.getImageMenuItemLabel(), icon: 'image' },
   other: { name: strings.getOtherMenuItemLabel(), icon: 'empty' },
   progress: { name: strings.getProgressMenuItemLabel(), icon: 'visGoal' },
-  shape: { name: strings.getShapeMenuItemLabel(), icon: 'node' },
-  text: { name: strings.getTextMenuItemLabel(), icon: 'visText' },
+  shape: { name: strings.getShapeMenuItemLabel(), icon: 'vectorTriangle' },
+  text: { name: strings.getTextMenuItemLabel(), icon: 'text' },
 };
 
 const getElementType = (element: ElementSpec): string =>
@@ -121,6 +122,7 @@ export interface Props {
 }
 
 export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
+  const contextMenuTopBorderStyles = useCanvasContextMenuTopBorderStyles();
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
@@ -157,7 +159,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       if (elementList.length > 1) {
         return {
           name,
-          icon: <EuiIcon type={icon} size="m" />,
+          icon: <EuiIcon type={icon} size="m" aria-hidden={true} />,
           panel: {
             id: getId('element-type'),
             title: name,
@@ -184,7 +186,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
           name: strings.getMyElementsMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
           'data-test-subj': 'saved-elements-menu-option',
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           onClick: () => {
             showSavedElementsModal();
             closePopover();
@@ -192,7 +194,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         },
         {
           name: strings.getAssetsMenuItemLabel(),
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           onClick: () => {
             showAssetModal();
             closePopover();
@@ -208,13 +210,14 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         type="primary"
         panelPaddingSize="none"
         label={strings.getElementMenuButtonLabel()}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="add-element-button"
       >
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
           <EuiContextMenu
             initialPanelId={0}
             panels={flattenPanelTree(getPanelTree(closePopover))}
+            css={contextMenuTopBorderStyles}
           />
         )}
       </ToolbarPopover>

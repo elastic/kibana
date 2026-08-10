@@ -293,7 +293,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "icon": "search",
+              "icon": "magnify",
               "inAppUrl": Object {
                 "path": "/discover/2",
                 "uiCapabilitiesPath": "discover_v2.show",

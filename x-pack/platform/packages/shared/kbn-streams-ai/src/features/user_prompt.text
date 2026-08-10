@@ -1,7 +1,17 @@
 {{#excluded_features}}
-`excluded_features` (do NOT regenerate features matching these):
+`excluded_features`:
 {{{excluded_features}}}
 {{/excluded_features}}
+
+{{#previously_identified_features}}
+`previously_identified_features`:
+{{{previously_identified_features}}}
+{{/previously_identified_features}}
+
+{{#known_feature_ids}}
+`known_feature_ids`:
+{{{known_feature_ids}}}
+{{/known_feature_ids}}
 
 `sample_documents`:
 {{{sample_documents}}}

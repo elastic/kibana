@@ -59,7 +59,6 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -72,16 +71,20 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
+import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
@@ -91,8 +94,6 @@ import {
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { RulesLocatorDefinition } from './locators/rules';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
@@ -138,9 +139,9 @@ export interface ObservabilityPublicPluginsSetup {
   uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
-  presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -154,6 +155,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
+  expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -176,7 +178,6 @@ export interface ObservabilityPublicPluginsStart {
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
-  presentationUtil?: PresentationUtilPluginStart;
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
@@ -187,6 +188,7 @@ export interface ObservabilityPublicPluginsStart {
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   cps?: CPSPluginStart;
+  ingestHub?: IngestHubStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -214,7 +216,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
     },
   ];
@@ -244,17 +246,18 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
           },
         })
       );
+      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
@@ -266,13 +269,8 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
     pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
     pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
-
-    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
-      new RuleDetailsLocatorDefinition()
-    );
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
@@ -350,8 +348,8 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        ? ['projectSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);
@@ -455,7 +453,7 @@ export class Plugin
                   //
                   // See https://github.com/elastic/kibana/issues/103325.
                   const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
-                  const alertsLink: NavigationEntry[] = otherLinks
+                  const alertsLinks: NavigationEntry[] = otherLinks
                     .filter((link) => link.id === 'alerts')
                     .map((link) => ({
                       app: observabilityAppId,
@@ -477,7 +475,7 @@ export class Plugin
                       sortKey: 100,
                       entries: [
                         ...overviewLink,
-                        ...alertsLink,
+                        ...alertsLinks,
                         ...sloLink,
                         ...casesLink,
                         ...aiAssistantLink,
@@ -529,8 +527,6 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      rulesLocator,
-      ruleDetailsLocator,
       config,
     };
   }
@@ -538,7 +534,6 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
-
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,

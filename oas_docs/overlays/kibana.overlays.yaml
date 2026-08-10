@@ -84,10 +84,10 @@ actions:
   - target: '$.tags[?(@.name=="agent builder")]'
     description: Change tag description and displayName
     update:
-      description: >
+      description: |
         Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-        
-        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
 
         **Elastic Agent Builder requires an Enterprise subscription.**
       externalDocs:
@@ -172,6 +172,26 @@ actions:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: "../examples/disable_legacy_url_request1.yaml"
+      responses:
+        204:
+          description: 'Indicates a successful call.'
+  - target: "$.paths['/api/spaces/_get_shareable_references']['post']"
+    description: "Add examples to get shareable references API"
+    update:
+      requestBody:
+        content:
+          application/json:
+            examples:
+              getShareableReferencesRequestExample1:
+                $ref: "../examples/get_shareable_references_request1.yaml"
+      responses:
+        200:
+          description: 'Indicates a successful call.'
+          content:
+            application/json:
+              examples:
+                getShareableReferencesResponseExample1:
+                  $ref: "../examples/get_shareable_references_response1.yaml"
   - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
     description: "Add example to update saved object spaces API"
     update:

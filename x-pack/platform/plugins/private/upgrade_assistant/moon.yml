@@ -46,6 +46,8 @@ dependsOn:
   - '@kbn/upgrade-assistant-pkg-server'
   - '@kbn/upgrade-assistant-pkg-common'
   - '@kbn/reindex-service-plugin'
+  - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -58,29 +60,11 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_upgrade_assistant_integration/**/*
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

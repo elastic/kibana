@@ -130,13 +130,6 @@ describe('RuleDetailsTabGuard', () => {
       );
       expect(getExpectedLandingTab(RuleDetailTabs.executionResults)).toBeInTheDocument();
     });
-
-    it('renders RuleDetailsPage for execution events tab', () => {
-      const { getExpectedLandingTab } = doRender(
-        `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`
-      );
-      expect(getExpectedLandingTab(RuleDetailTabs.executionEvents)).toBeInTheDocument();
-    });
   });
 
   describe('when user does not have access to a tab', () => {

@@ -17,9 +17,10 @@ import type {
   EuiTableActionsColumnType,
   CriteriaWithPagination,
 } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -29,10 +30,7 @@ import {
   ManagedAvatarTip,
   NoCreatorTip,
 } from '@kbn/content-management-user-profiles';
-import type {
-  OpenContentEditorParams,
-  SavedObjectsReference,
-} from '@kbn/content-management-content-editor';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { RecentlyAccessed } from '@kbn/recently-accessed';
 import {
@@ -542,9 +540,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const inspectItem = useCallback(
     (item: T) => {
-      const tags = getTagIdsFromReferences(item.references).map((_id) => {
-        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
-      });
+      const tags = getTagIdsFromReferences(item.references);
 
       const close = openContentEditor({
         item: {
@@ -1013,17 +1009,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const renderFetchError = useCallback(() => {
     return (
       <React.Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <FormattedMessage
               id="contentManagement.tableList.listing.fetchErrorTitle"
               defaultMessage="Fetching listing failed"
             />
           }
-          color="danger"
-          iconType="warning"
-        >
-          <p>
+          text={
             <FormattedMessage
               id="contentManagement.tableList.listing.fetchErrorDescription"
               defaultMessage="The {entityName} listing could not be fetched: {message}."
@@ -1032,8 +1025,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
                 message: fetchError!.body?.message || fetchError!.message,
               }}
             />
-          </p>
-        </EuiCallOut>
+          }
+        />
         <EuiSpacer size="m" />
       </React.Fragment>
     );
@@ -1148,9 +1141,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Render
   // ------------
-  if (!hasInitialFetchReturned) {
-    return null;
-  }
 
   if (!showFetchError && hasNoItems) {
     return (

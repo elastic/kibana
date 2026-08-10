@@ -19,6 +19,7 @@ import { getLogsForDataset, defaultNamespace, processors } from './data';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['datasetQuality', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const synthtrace = getService('svlLogsSynthtraceClient');
   const to = '2024-01-01T12:00:00.000Z';
 
@@ -152,9 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click(enableFailureStoreToggle);
 
-        expect(await saveModalButton.isEnabled()).to.be(true);
-
-        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.clickWhenNotDisabled(failureStoreModalSaveButton);
 
         await testSubjects.missingOrFail(editFailureStoreModal);
 
@@ -209,7 +208,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
         await testSubjects.click(enableFailureStoreToggle);
 
-        expect(await saveModalButton.isEnabled()).to.be(true);
+        await retry.try(async () => {
+          expect(await saveModalButton.isEnabled()).to.be(true);
+        });
 
         await testSubjects.click(failureStoreModalSaveButton);
 

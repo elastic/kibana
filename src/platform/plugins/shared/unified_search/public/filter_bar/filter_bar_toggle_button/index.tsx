@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { useFilterBarContext } from '../filter_bar_context';
 
@@ -40,33 +40,10 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
     useFilterBarContext();
   const themeContext = useEuiTheme();
   const styles = toggleStyles(themeContext);
-
-  // TODO Workaround for https://github.com/elastic/eui/issues/9520
-  const expandTooltipRef = useRef<EuiToolTip>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [buttonInFocusNotVisible, setButtonInFocusNotVisible] = useState(false);
-  const onTooltipMouseOut = useCallback(() => {
-    if (buttonInFocusNotVisible) {
-      expandTooltipRef.current?.hideToolTip();
-    }
-  }, [buttonInFocusNotVisible]);
-  const onButtonFocus = useCallback(() => {
-    if (document.querySelector('button:focus-visible') !== buttonRef.current) {
-      setButtonInFocusNotVisible(true);
-    }
-  }, []);
-  const onButtonBlur = useCallback(() => setButtonInFocusNotVisible(false), []);
-  // TODO End workaround, delete above block when EUI fixes this issue
 
   return (
-    <EuiToolTip
-      ref={expandTooltipRef}
-      content={isCollapsed ? expandLabel : collapseLabel}
-      disableScreenReaderOutput
-      onMouseOut={
-        /*  TODO Workaround for https://github.com/elastic/eui/issues/9520 */ onTooltipMouseOut
-      }
-    >
+    <EuiToolTip content={isCollapsed ? expandLabel : collapseLabel} disableScreenReaderOutput>
       <EuiButtonEmpty
         buttonRef={buttonRef}
         color="text"
@@ -77,8 +54,6 @@ export const FilterBarToggleButton: React.FC<{}> = () => {
         css={styles.filterButtonStyle}
         size="s"
         data-test-subj="filterBarToggleButton"
-        onFocus={/* TODO Workaround for https://github.com/elastic/eui/issues/9520 */ onButtonFocus}
-        onBlur={/* TODO Workaround for https://github.com/elastic/eui/issues/9520 */ onButtonBlur}
       >
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>

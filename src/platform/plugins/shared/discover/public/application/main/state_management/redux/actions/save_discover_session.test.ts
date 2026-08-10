@@ -35,8 +35,6 @@ const getSaveDiscoverSessionParams = (
   newTimeRestore: false,
   newDescription: 'new description',
   newTags: [],
-  isTitleDuplicateConfirmed: false,
-  onTitleDuplicate: jest.fn(),
   ...overrides,
 });
 
@@ -111,11 +109,10 @@ describe('saveDiscoverSession', () => {
       ],
     });
     const discoverSession = toolkit.internalState.getState().persistedDiscoverSession;
-    const onTitleDuplicate = jest.fn();
 
     await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
-        getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'], onTitleDuplicate })
+        getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'] })
       )
     );
 
@@ -128,9 +125,7 @@ describe('saveDiscoverSession', () => {
     };
 
     expect(saveDiscoverSessionSpy).toHaveBeenCalledWith(updatedDiscoverSession, {
-      onTitleDuplicate,
       copyOnSave: false,
-      isTitleDuplicateConfirmed: false,
     });
 
     expect(toolkit.internalState.getState().persistedDiscoverSession).toEqual({
@@ -173,6 +168,33 @@ describe('saveDiscoverSession', () => {
       dataView: dataViewMockWithTimeField,
     });
     expect(toolkit.getCurrentTab().appState.breakdownField).toBe('breakdown-test');
+  });
+
+  it('should preserve current sidebar state for initialized tabs', async () => {
+    const { toolkit, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+    const currentTabId = toolkit.getCurrentTab().id;
+
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: currentTabId,
+        appState: {
+          hideSidebar: true,
+        },
+      })
+    );
+
+    await toolkit.internalState.dispatch(
+      internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
+    );
+
+    expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+
+    const savedTab = saveDiscoverSessionSpy.mock.calls[0][0].tabs.find(
+      (tab) => tab.id === currentTabId
+    );
+
+    expect(savedTab).not.toHaveProperty('hideSidebar');
+    expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(true);
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {

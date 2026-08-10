@@ -5,17 +5,80 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import React from 'react';
+import { render, fireEvent, renderHook } from '@testing-library/react';
 import { useLeadingControlColumns } from './use_leading_control_columns';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
+
+const mockGetEuidFilterBasedOnDocument = jest.fn();
+const mockUseEntityStoreEuidApi = jest.fn();
+const mockInvestigateInTimeline = jest.fn();
+
+jest.mock('@kbn/entity-store/public', () => ({
+  useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
+  ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
+}));
+
+jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
+  useInvestigateInTimeline: jest.fn(),
+}));
+
+const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
+
+const mockRecord: DataTableRecord = {
+  id: '1',
+  raw: {
+    _index: 'test',
+    _id: '1',
+    _source: {
+      entity: {
+        id: 'test-entity-id',
+        name: 'john.doe',
+        EngineMetadata: { Type: 'user' },
+      },
+    },
+  },
+  flattened: {
+    'entity.name': 'john.doe',
+    'entity.EngineMetadata.Type': 'user',
+  },
+};
+
+const MockControl: React.FC<{
+  onClick?: () => void;
+  disabled?: boolean;
+  iconType?: string;
+  label?: string;
+  color?: string;
+  'data-test-subj'?: string;
+}> = ({ onClick, disabled }) => (
+  <button type="button" onClick={onClick} disabled={disabled} data-test-subj="control-button">
+    {'Control'}
+  </button>
+);
+
+const renderTimelineControl = (column: RowControlColumn, record: DataTableRecord = mockRecord) => {
+  const rendered = (column.render as Function)(MockControl, { record });
+  return render(rendered);
+};
 
 describe('useLeadingControlColumns', () => {
   const defaultArgs = {
     canUseTimeline: false,
-    investigateInTimeline: jest.fn(),
-    isAgentBuilderEnabled: false,
-    agentBuilder: undefined as AgentBuilderPluginStart | undefined,
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { kql: { getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument } },
+    });
+    mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimeline: mockInvestigateInTimeline,
+    });
+  });
 
   it('returns no timeline action when canUseTimeline is false', () => {
     const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
@@ -29,32 +92,63 @@ describe('useLeadingControlColumns', () => {
     expect(result.current.find((c) => c.id === 'entity-analytics-timeline-action')).toBeDefined();
   });
 
-  it('returns no AI action when isAgentBuilderEnabled is false', () => {
-    const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
-    expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
-  });
+  describe('timeline action onClick', () => {
+    it('calls investigateInTimeline with KQL query when euidApi returns a filter', () => {
+      mockGetEuidFilterBasedOnDocument.mockReturnValue('user.name: "john.doe"');
 
-  it('returns AI action when isAgentBuilderEnabled is true and agentBuilder has openChat', () => {
-    const { result } = renderHook(() =>
-      useLeadingControlColumns({
-        ...defaultArgs,
-        isAgentBuilderEnabled: true,
-        agentBuilder: {
-          openChat: jest.fn(),
-        } as unknown as AgentBuilderPluginStart,
-      })
-    );
-    expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeDefined();
-  });
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
 
-  it('returns no AI action when agentBuilder is undefined even if enabled', () => {
-    const { result } = renderHook(() =>
-      useLeadingControlColumns({
-        ...defaultArgs,
-        isAgentBuilderEnabled: true,
-        agentBuilder: undefined,
-      })
-    );
-    expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column);
+      fireEvent.click(getByTestId('control-button'));
+
+      expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith('user', mockRecord.raw);
+      expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
+        query: { query: 'user.name: "john.doe"', language: 'kuery' },
+      });
+    });
+
+    it('falls back to dataProviders when euidApi returns undefined', () => {
+      mockGetEuidFilterBasedOnDocument.mockReturnValue(undefined);
+
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column);
+      fireEvent.click(getByTestId('control-button'));
+
+      expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
+        dataProviders: expect.any(Array),
+      });
+    });
+
+    it('falls back to dataProviders when euidApi is null', () => {
+      mockUseEntityStoreEuidApi.mockReturnValue(null);
+
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column);
+      fireEvent.click(getByTestId('control-button'));
+
+      expect(mockInvestigateInTimeline).toHaveBeenCalledWith({
+        dataProviders: expect.any(Array),
+      });
+    });
+
+    it('renders disabled control when entity fields are missing', () => {
+      const emptyRecord: DataTableRecord = {
+        id: '2',
+        raw: { _index: 'test', _id: '2', _source: {} },
+        flattened: {},
+      };
+
+      const { result } = renderHook(() => useLeadingControlColumns({ canUseTimeline: true }));
+
+      const column = result.current.find((c) => c.id === 'entity-analytics-timeline-action')!;
+      const { getByTestId } = renderTimelineControl(column, emptyRecord);
+
+      expect(getByTestId('control-button')).toBeDisabled();
+    });
   });
 });

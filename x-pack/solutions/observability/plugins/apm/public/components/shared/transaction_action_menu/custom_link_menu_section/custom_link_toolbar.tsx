@@ -65,7 +65,7 @@ export function CustomLinkToolbar({
                   })}
                   data-test-subj="apmCustomLinkToolbarCreateButton"
                   isDisabled={!canSave}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   size="xs"
                   onClick={onClickCreate}
                 >

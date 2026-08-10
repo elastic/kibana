@@ -6,8 +6,9 @@
  */
 
 import type { MouseEventHandler, FC } from 'react';
-import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiToolTip, useEuiScrollBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
@@ -31,19 +32,30 @@ interface Props {
 }
 
 export const ArgAddPopover: FC<Props> = ({ options }) => {
+  const scrollBarStyles = useEuiScrollBar();
+  const panelStyles = useMemo(
+    () => css`
+      ${scrollBarStyles}
+    `,
+    [scrollBarStyles]
+  );
+
   const button = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiButtonIcon
-      iconType="plusInCircle"
-      aria-label={strings.getAddAriaLabel()}
-      onClick={handleClick}
-      className="canvasArg__addArg"
-    />
+    <EuiToolTip content={strings.getAddAriaLabel()} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="plusCircle"
+        aria-label={strings.getAddAriaLabel()}
+        onClick={handleClick}
+        className="canvasArg__addArg"
+      />
+    </EuiToolTip>
   );
 
   return (
     <Popover
       id="arg-add-popover"
       panelClassName="canvasArg__addPopover"
+      panelProps={{ css: panelStyles }}
       panelPaddingSize="none"
       button={button}
     >

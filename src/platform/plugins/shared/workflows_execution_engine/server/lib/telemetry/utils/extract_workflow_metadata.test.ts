@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { extractWorkflowMetadata } from './extract_workflow_metadata';
+
+jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
+  getInputsFromDefinition: jest.fn(),
+}));
+
+const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+  typeof getInputsFromDefinition
+>;
 
 const minimalConsoleStep = { name: 's1', type: 'console' };
 
@@ -23,6 +34,14 @@ function baseWorkflow(overrides: Partial<WorkflowYaml> = {}): Partial<WorkflowYa
 }
 
 describe('extractWorkflowMetadata (execution engine)', () => {
+  // Format-shape coverage of `inputs` is owned by `getInputsFromDefinition` unit
+  // tests. Here we mock the helper and only verify that `inputCount` reflects what
+  // it returns.
+  beforeEach(() => {
+    mockGetInputsFromDefinition.mockReset();
+    mockGetInputsFromDefinition.mockReturnValue(undefined);
+  });
+
   it('returns defaults for null and undefined', () => {
     expect(extractWorkflowMetadata(undefined)).toEqual({
       enabled: false,
@@ -103,12 +122,13 @@ describe('extractWorkflowMetadata (execution engine)', () => {
     });
   });
 
-  it('reflects root field: inputs (JSON Schema properties)', () => {
-    const jsonSchemaInputs = {
-      type: 'object' as const,
-      properties: { a: { type: 'string' as const }, b: { type: 'number' as const } },
-    } as WorkflowYaml['inputs'];
-    expect(extractWorkflowMetadata(baseWorkflow({ inputs: jsonSchemaInputs })).inputCount).toBe(2);
+  it('counts inputCount from the JSON Schema returned by getInputsFromDefinition', () => {
+    const schema: JsonModelSchemaType = {
+      properties: { a: { type: 'string' }, b: { type: 'number' } },
+    };
+    mockGetInputsFromDefinition.mockReturnValue(schema);
+
+    expect(extractWorkflowMetadata(baseWorkflow()).inputCount).toBe(2);
   });
 
   it('reflects settings key: timeout', () => {

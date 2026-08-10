@@ -8,17 +8,20 @@
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   alerting?: AlertingServerSetup;
   fleet: FleetSetupContract;
+  licensing: LicensingPluginSetup;
   share?: SharePluginSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
   alerting?: AlertingServerStart;
   fleet: FleetStartContract;
+  licensing: LicensingPluginStart;
   share?: SharePluginStart;
 }
 

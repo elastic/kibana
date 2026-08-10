@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import path from 'node:path';
 import { z } from '@kbn/zod/v4';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -14,14 +15,24 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions
 import { wrapMiddlewares } from '../middleware';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe('Entity types to uninstall. Defaults to all installed types.'),
 });
 
 export function registerUninstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: ENTITY_STORE_ROUTES.UNINSTALL,
-      access: 'internal',
+      path: ENTITY_STORE_ROUTES.public.UNINSTALL,
+      access: 'public',
+      summary: 'Uninstall the Entity Store',
+      description:
+        'Uninstall the Entity Store, removing engines and associated resources for the specified entity types.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -29,28 +40,33 @@ export function registerUninstall(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_uninstall.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res) => {
-        const {
-          logger,
-          assetManagerClient: assetManager,
-          entityMaintainersClient,
-        } = await ctx.entityStore;
+        const { logger, assetManagerClient: assetManager } = await ctx.entityStore;
         const { entityTypes } = req.body;
         logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
 
         const { engines } = await assetManager.getStatus();
         const installedTypes = new Set(engines.map((e) => e.type));
-        const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
+        const toUninstall = [...new Set(entityTypes.filter((type) => installedTypes.has(type)))];
 
-        await entityMaintainersClient.removeAll();
         await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
+
+        const isFullUninstall = toUninstall.length > 0 && toUninstall.length === engines.length;
+        if (isFullUninstall) {
+          // since engines are removed in parallel, the cleanup inside `assetManager.uninstall` might not have been called
+          // so we call it here to ensure all namespace-scoped resources are cleaned up
+          await assetManager.cleanupNamespace();
+        }
 
         return res.ok({ body: { ok: true } });
       })

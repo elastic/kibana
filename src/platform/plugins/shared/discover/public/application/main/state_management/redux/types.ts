@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -25,15 +25,19 @@ import type {
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import type { SerializedError } from '@reduxjs/toolkit';
+import type { SerializedError } from 'redux-toolkit-v1';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
+import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -65,6 +69,14 @@ export interface DiscoverAppState {
    * Hide chart
    */
   hideChart?: boolean;
+  /**
+   * Hide table
+   */
+  hideTable?: boolean;
+  /**
+   * Hide the field list sidebar (collapsed state)
+   */
+  hideSidebar?: boolean;
   /**
    * The current data source
    */
@@ -117,11 +129,18 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
+   * be reconsidered in a future version once the embedding story is clearer.
+   */
+  isApproximate?: boolean;
 }
 
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
+  columnsMeta: DataTableColumnsMeta;
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
@@ -130,31 +149,49 @@ export enum TabInitializationStatus {
   InProgress = 'InProgress',
   Complete = 'Complete',
   NoData = 'NoData',
+  Disconnected = 'Disconnected',
   Error = 'Error',
 }
 
-export const DEFAULT_PROFILE_STATE_FIELDS = [
+export const PROFILE_APP_STATE_DEFAULT_FIELDS = [
   'columns',
   'rowHeight',
   'breakdownField',
   'hideChart',
+  'hideTable',
+  'hideSidebar',
 ] as const;
 
-export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
+export type ProfileAppStateDefaultField = (typeof PROFILE_APP_STATE_DEFAULT_FIELDS)[number];
 
-type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
+type NonEmptyProfileAppStateDefaultFields = [
+  ProfileAppStateDefaultField,
+  ...ProfileAppStateDefaultField[]
+];
 
-export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+export type ProfileAppStateDefaultFields = 'all' | 'none' | NonEmptyProfileAppStateDefaultFields;
 
-export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+export type ProfileAppStateSnapshot = Partial<Pick<DiscoverAppState, ProfileAppStateDefaultField>>;
 
-export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
+export type ProfileAppStateSnapshotsByProfileId = Record<
+  string,
+  ProfileAppStateSnapshot | undefined
+>;
 
-export interface DefaultProfileState {
+export interface ProfileAppStateDefaults {
   resetId: string;
-  fieldsToReset: DefaultProfileStateFields;
-  snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
+  fieldsToReset: ProfileAppStateDefaultFields;
+  snapshotsByProfileId: ProfileAppStateSnapshotsByProfileId;
 }
+
+// This is used to identify heavy state values (e.g. long lists of nested objects)
+// that should be excluded from the Redux serializable/immutable checks to avoid
+// rendering delays when using Discover in dev builds
+export const HEAVY_STATE_KEYS = [
+  'cascadedDocumentsState',
+  'fieldListExistingFieldsInfo',
+  'renderDocumentViewMeta',
+];
 
 export interface TabState extends TabItem {
   initializationState:
@@ -184,7 +221,8 @@ export interface TabState extends TabItem {
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
-  defaultProfileState: DefaultProfileState;
+  profileAppStateDefaults: ProfileAppStateDefaults;
+  profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
@@ -194,8 +232,12 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: DataCascadeRestorableState;
+    cascadedDocumentsDataGridMap?: CascadedDocumentsDataGridUiStateMap;
   };
   expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner: string | undefined;
+  renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
 
@@ -217,7 +259,6 @@ export interface DiscoverInternalState {
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   defaultProfileEsqlQuery: DefaultEsqlQueryConfig | undefined;
-  isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;

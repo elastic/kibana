@@ -15,6 +15,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { CPS_TIER_ELIGIBLE_FEATURE } from '@kbn/cps-common';
 import { NpreClient } from './npre/npre_client';
 import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
@@ -41,6 +42,8 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
       registerRoutes(core, initContext);
     }
 
+    core.pricing.registerProductFeatures([CPS_TIER_ELIGIBLE_FEATURE]);
+
     return {
       getCpsEnabled: () => !!cpsEnabled,
     };
@@ -48,6 +51,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
 
   public start(core: CoreStart): CPSServerStart | undefined {
     const { cpsEnabled } = this.config$;
+    this.log.info(`Cross-project search (CPS) is ${cpsEnabled ? 'enabled' : 'disabled'}`);
 
     if (!cpsEnabled) {
       return undefined;

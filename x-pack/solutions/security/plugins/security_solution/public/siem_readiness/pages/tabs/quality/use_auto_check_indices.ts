@@ -45,16 +45,28 @@ interface CheckResult {
 const fetchIndexStats = async (
   http: ReturnType<typeof useKibana>['services']['http'],
   indexName: string,
-  abortController: AbortController
+  abortController: AbortController,
+  isServerless: boolean
 ): Promise<{ sizeInBytes: number; docsCount: number }> => {
   try {
     const encodedIndexName = encodeURIComponent(indexName);
+
+    // ILM and index /_stats are not available in serverless mode.
+    // Use the metering stats path instead (isILMAvailable: false) with a date range.
+    const query = isServerless
+      ? {
+          isILMAvailable: false,
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+          endDate: new Date().toISOString(),
+        }
+      : { isILMAvailable: true };
+
     const stats = await http.fetch<StatsResponse>(
       `${GET_INDEX_STATS_ENDPOINT}/${encodedIndexName}`,
       {
         method: 'GET',
         version: INTERNAL_API_VERSION,
-        query: { isILMAvailable: true },
+        query,
         signal: abortController.signal,
       }
     );
@@ -156,7 +168,8 @@ interface UseAutoCheckIndicesProps {
 }
 
 export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndicesProps) => {
-  const { http } = useKibana().services;
+  const { http, serverless } = useKibana().services;
+  const isServerless = !!serverless;
   const formatBytes = useFormatBytes();
   const queryClient = useQueryClient();
 
@@ -251,7 +264,8 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
           const { sizeInBytes, docsCount } = await fetchIndexStats(
             http,
             indexName,
-            abortController.current
+            abortController.current,
+            isServerless
           );
 
           const storageResult = formatStorageResult({
@@ -316,7 +330,7 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       setIsComplete(true);
       // Keep progress and currentIndexName visible for complete state
     }
-  }, [indexNames, formatBytes, http, refreshIndexResults]);
+  }, [indexNames, formatBytes, http, isServerless, refreshIndexResults]);
 
   // Auto-start checks when enabled (only once)
   useEffect(() => {

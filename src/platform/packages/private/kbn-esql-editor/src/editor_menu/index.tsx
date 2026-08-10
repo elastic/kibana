@@ -76,7 +76,7 @@ export function ESQLMenu({
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
+            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
             size="xs"
             aria-label={searchPlaceholder}
             onClick={onToggleVisor}
@@ -91,7 +91,7 @@ export function ESQLMenu({
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
             <StardustWrapper active={showStardust}>
               <EuiButtonIcon
-                iconType={isStarred ? 'starFilled' : 'starEmpty'}
+                iconType={isStarred ? 'starFill' : 'star'}
                 size="xs"
                 aria-label={starredQueryLabel}
                 className={!isStarred ? 'cm-favorite-button--empty' : ''}

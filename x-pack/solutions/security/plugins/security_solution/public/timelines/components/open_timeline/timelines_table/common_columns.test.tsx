@@ -135,7 +135,7 @@ describe('#getCommonColumns', () => {
         .first()
         .props() as EuiButtonIconProps;
 
-      expect(props.iconType).toEqual('arrowRight');
+      expect(props.iconType).toEqual('chevronSingleRight');
     });
 
     test('it renders the down arrow expander when the row is expanded', () => {
@@ -161,7 +161,7 @@ describe('#getCommonColumns', () => {
         .first()
         .props() as EuiButtonIconProps;
 
-      expect(props.iconType).toEqual('arrowDown');
+      expect(props.iconType).toEqual('chevronSingleDown');
     });
 
     test('it invokes onToggleShowNotes to expand the row when the row is not expanded', () => {

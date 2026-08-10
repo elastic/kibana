@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -207,6 +208,9 @@ export const AnomaliesTable: React.FunctionComponent<{
     <>
       <LoadingOverlayWrapper isLoading={isLoading}>
         <EuiBasicTable
+          tableCaption={i18n.translate('xpack.infra.logs.analysis.anomaliesTableCaption', {
+            defaultMessage: 'Log entry anomalies',
+          })}
           items={tableItems}
           itemId="id"
           itemIdToExpandedRowMap={expandedIdsRowContents}
@@ -258,7 +262,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiFlexItem grow={false} component="span">
-        <EuiIcon type={icon} />
+        <EuiIcon type={icon} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem component="span">
         {`${ratioMessage} ${message}`}
@@ -299,23 +303,27 @@ const PaginationControls = ({
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
-          <EuiButtonIcon
-            data-test-subj="infraPaginationControlsButton"
-            iconType="arrowLeft"
-            isDisabled={!fetchPreviousPage || isLoading}
-            onClick={fetchPreviousPage}
-            aria-label={previousPageLabel}
-          />
+          <EuiToolTip content={previousPageLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="infraPaginationControlsButton"
+              iconType="chevronSingleLeft"
+              isDisabled={!fetchPreviousPage || isLoading}
+              onClick={fetchPreviousPage}
+              aria-label={previousPageLabel}
+            />
+          </EuiToolTip>
           <span>
             <strong>{page}</strong>
           </span>
-          <EuiButtonIcon
-            data-test-subj="infraPaginationControlsButton"
-            iconType="arrowRight"
-            isDisabled={!fetchNextPage || isLoading}
-            onClick={fetchNextPage}
-            aria-label={nextPageLabel}
-          />
+          <EuiToolTip content={nextPageLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="infraPaginationControlsButton"
+              iconType="chevronSingleRight"
+              isDisabled={!fetchNextPage || isLoading}
+              onClick={fetchNextPage}
+              aria-label={nextPageLabel}
+            />
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

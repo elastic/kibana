@@ -17,39 +17,15 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/layout/core-chrome-layout-utils
 dependsOn:
-  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ui-chrome-layout-utils'
 tags:
   - shared-browser
   - package
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
-    - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+tasks: {}

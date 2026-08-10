@@ -9,23 +9,23 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { MarkdownCreateRequestBody, MarkdownCreateRequestParams } from './types';
-import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
+import type { MarkdownCreateRequestBody } from './types';
+import { getMarkdownCRUResponseBody } from '../get_cru_response_body';
 import type { MarkdownCreateResponseBody } from './types';
-import type { MarkdownAttributes } from '../../markdown_saved_object';
+import type { StoredMarkdownState } from '../../markdown_saved_object';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   createBody: MarkdownCreateRequestBody,
-  createParams?: MarkdownCreateRequestParams
+  id?: string
 ): Promise<MarkdownCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const savedObject = await core.savedObjects.client.create<MarkdownAttributes>(
+  const savedObject = await core.savedObjects.client.create<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
     createBody,
-    { ...(createParams?.id && { id: createParams.id }) }
+    { id }
   );
 
-  return getMarkdownCRUResponseBody(savedObject, 'create');
+  return getMarkdownCRUResponseBody(savedObject);
 }

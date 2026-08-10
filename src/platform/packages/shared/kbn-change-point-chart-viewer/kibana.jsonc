@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/change-point-chart-viewer",
+  "owner": "@elastic/ml-ui",
+  "group": "platform",
+  "visibility": "shared"
+}

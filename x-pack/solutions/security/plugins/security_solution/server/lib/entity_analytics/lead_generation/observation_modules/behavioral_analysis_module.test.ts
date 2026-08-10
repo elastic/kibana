@@ -10,15 +10,22 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createBehavioralAnalysisModule } from './behavioral_analysis_module';
 import type { LeadEntity } from '../types';
 
-const createEntity = (type: string, name: string, email?: string): LeadEntity => ({
-  record: {
-    entity: { id: `euid-${name}`, name, type },
-    ...(email ? { user: { email } } : {}),
-  } as never,
-  type,
-  name,
-  id: `euid-${name}`,
-});
+const createEntity = (
+  type: string,
+  name: string,
+  options: { email?: string; id?: string } = {}
+): LeadEntity => {
+  const id = options.id ?? `${type}:${name}`;
+  return {
+    record: {
+      entity: { id, name, type },
+      ...(options.email ? { user: { email: options.email } } : {}),
+    } as never,
+    id,
+    type,
+    name,
+  };
+};
 
 const createAlertAggResponse = (
   byUser: Array<{
@@ -47,7 +54,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
     by_host: {
@@ -59,7 +66,7 @@ const createAlertAggResponse = (
         },
         distinct_rules: { buckets: b.rules.map((r) => ({ key: r, doc_count: 1 })) },
         max_risk_score: { value: b.maxRiskScore },
-        top_5_alerts: { hits: { hits: [] } },
+        top_alerts: { hits: { hits: [] } },
       })),
     },
   },
@@ -95,7 +102,7 @@ describe('BehavioralAnalysisModule', () => {
       esClient.search.mockResolvedValue(
         createAlertAggResponse([
           {
-            key: 'alice',
+            key: 'user:alice',
             docCount: 5,
             severities: { critical: 2, high: 1 },
             rules: ['Rule A'],
@@ -117,7 +124,7 @@ describe('BehavioralAnalysisModule', () => {
       esClient.search.mockResolvedValue(
         createAlertAggResponse([
           {
-            key: 'bob',
+            key: 'user:bob',
             docCount: 3,
             severities: { high: 3 },
             rules: ['Rule B'],
@@ -139,7 +146,7 @@ describe('BehavioralAnalysisModule', () => {
       esClient.search.mockResolvedValue(
         createAlertAggResponse([
           {
-            key: 'charlie',
+            key: 'user:charlie',
             docCount: 4,
             severities: { medium: 4 },
             rules: ['Rule C', 'Rule D'],
@@ -164,7 +171,7 @@ describe('BehavioralAnalysisModule', () => {
       esClient.search.mockResolvedValue(
         createAlertAggResponse([
           {
-            key: 'alice',
+            key: 'user:alice',
             docCount: 15,
             severities: { low: 15 },
             rules: ['Rule A'],
@@ -186,7 +193,7 @@ describe('BehavioralAnalysisModule', () => {
       esClient.search.mockResolvedValue(
         createAlertAggResponse([
           {
-            key: 'alice',
+            key: 'user:alice',
             docCount: 35,
             severities: { low: 35 },
             rules: ['Rule A'],
@@ -207,7 +214,7 @@ describe('BehavioralAnalysisModule', () => {
       esClient.search.mockResolvedValue(
         createAlertAggResponse([
           {
-            key: 'alice',
+            key: 'user:alice',
             docCount: 5,
             severities: { low: 5 },
             rules: ['Rule A'],
@@ -231,7 +238,7 @@ describe('BehavioralAnalysisModule', () => {
           [],
           [
             {
-              key: 'server-01',
+              key: 'host:server-01',
               docCount: 5,
               severities: { medium: 5 },
               rules: ['Rule A', 'Rule B', 'Rule C'],
@@ -257,7 +264,7 @@ describe('BehavioralAnalysisModule', () => {
           [],
           [
             {
-              key: 'server-01',
+              key: 'host:server-01',
               docCount: 10,
               severities: { high: 10 },
               rules: ['R1', 'R2', 'R3', 'R4', 'R5', 'R6'],
@@ -281,7 +288,7 @@ describe('BehavioralAnalysisModule', () => {
           [],
           [
             {
-              key: 'server-01',
+              key: 'host:server-01',
               docCount: 3,
               severities: { medium: 3 },
               rules: ['Rule A', 'Rule B'],
@@ -298,17 +305,61 @@ describe('BehavioralAnalysisModule', () => {
     });
   });
 
-  it('includes user.email in the query when available', async () => {
-    const entity = createEntity('user', 'alice', 'alice@example.com');
+  it('filters and aggregates by a computed EUID runtime field, not by `${type}.name`', async () => {
+    const entity = createEntity('user', 'alice');
     esClient.search.mockResolvedValue(createAlertAggResponse() as never);
 
     const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
     await module.collect([entity]);
 
     const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+    const runtimeMappings = searchCall.runtime_mappings as Record<string, { type: string }>;
+    expect(runtimeMappings).toBeDefined();
+    expect(runtimeMappings.entity_id_user).toEqual(expect.objectContaining({ type: 'keyword' }));
+
     const queryStr = JSON.stringify(searchCall.query);
-    expect(queryStr).toContain('user.email');
-    expect(queryStr).toContain('alice@example.com');
+    expect(queryStr).toContain('entity_id_user');
+    expect(queryStr).toContain('user:alice');
+    expect(queryStr).not.toContain('"user.name"');
+
+    const aggsStr = JSON.stringify(searchCall.aggs);
+    expect(aggsStr).toContain('"entity_id_user"');
+    expect(aggsStr).not.toContain('"user.name"');
+  });
+
+  it('keeps observations separate for two entities sharing a name but with distinct EUIDs', async () => {
+    const aliceA = createEntity('user', 'alice', { id: 'user:alice@hosta' });
+    const aliceB = createEntity('user', 'alice', { id: 'user:alice@hostb' });
+    esClient.search.mockResolvedValue(
+      createAlertAggResponse([
+        {
+          key: 'user:alice@hosta',
+          docCount: 4,
+          severities: { critical: 4 },
+          rules: ['Rule A'],
+          maxRiskScore: 90,
+        },
+        {
+          key: 'user:alice@hostb',
+          docCount: 1,
+          severities: { low: 1 },
+          rules: ['Rule B'],
+          maxRiskScore: 20,
+        },
+      ]) as never
+    );
+
+    const module = createBehavioralAnalysisModule({ esClient, logger, alertsIndexPattern });
+    const observations = await module.collect([aliceA, aliceB]);
+
+    const obsA = observations.filter((o) => o.entityId === 'user:alice@hosta');
+    const obsB = observations.filter((o) => o.entityId === 'user:alice@hostb');
+    expect(obsA.length).toBeGreaterThan(0);
+    expect(obsB.length).toBeGreaterThan(0);
+    const severityA = obsA.find((o) => o.type === 'high_severity_alerts');
+    const severityB = obsB.find((o) => o.type === 'high_severity_alerts');
+    expect(severityA?.severity).toBe('critical');
+    expect(severityB).toBeUndefined();
   });
 
   it('returns empty observations when no alerts match', async () => {

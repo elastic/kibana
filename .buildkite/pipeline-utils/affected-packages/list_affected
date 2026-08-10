@@ -85,7 +85,6 @@ async function main() {
     const affectedPackages = await getAffectedPackages(mergeBase, {
       strategy,
       includeDownstream,
-      logging: false,
       ignorePatterns,
       ignoreUncategorizedChanges,
     });

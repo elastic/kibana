@@ -20,3 +20,6 @@ export type GapReasonType = (typeof gapReasonType)[keyof typeof gapReasonType];
 export interface GapReason {
   type: GapReasonType;
 }
+
+/** Default gap reasons to exclude from gap monitoring and auto-fill when no explicit setting is provided */
+export const DEFAULT_EXCLUDED_GAP_REASONS = [gapReasonType.RULE_DISABLED] satisfies GapReasonType[];

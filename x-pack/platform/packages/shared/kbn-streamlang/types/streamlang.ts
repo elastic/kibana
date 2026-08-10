@@ -27,12 +27,13 @@ export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z
       conditionSchema,
       z.object({
         steps: z.array(streamlangStepSchema),
+        else: z.array(streamlangStepSchema).optional(),
       })
     )
   )
   .meta({ id: 'ConditionWithSteps' });
 
-export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
+export type ConditionWithSteps = Condition & { steps: StreamlangStep[]; else?: StreamlangStep[] };
 
 /**
  * Nested condition block (recursive)
@@ -93,6 +94,15 @@ export const isActionBlock = <TBlock extends StreamlangStep | StreamlangStepWith
 export interface StreamlangDSL {
   steps: StreamlangStep[];
 }
+
+/**
+ * Streamlang as stored on stream `ingest.processing`: the DSL plus the server-managed
+ * `updated_at` cursor. Use {@link StreamlangDSL} anywhere you need the pipeline document only
+ * (YAML, simulation body, DeepStrict validation).
+ */
+export type StreamlangDSLWithUpdatedAt = StreamlangDSL & {
+  updated_at: string;
+};
 
 /**
  * Zod schema for the Streamlang DSL root

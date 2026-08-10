@@ -30,9 +30,9 @@ import {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
-  apmUseUnifiedTraceWaterfall,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
+  apmTraceLogsDefaultColumns,
   searchExcludedDataTiers,
   enableDiagnosticMode,
 } from '../common/ui_settings_keys';
@@ -205,6 +205,22 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: true,
     requiresPageReload: true,
     type: 'boolean',
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
+  },
+  [apmTraceLogsDefaultColumns]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmTraceLogsDefaultColumns', {
+      defaultMessage: 'APM trace logs default columns',
+    }),
+    description: i18n.translate('xpack.observability.apmTraceLogsDefaultColumnsDescription', {
+      defaultMessage:
+        'Default columns for the Logs tab in APM trace samples. Specify field names (e.g. message, log.level). Leave empty to use the Summary column. @timestamp is always shown.',
+    }),
+    value: [],
+    schema: schema.arrayOf(schema.string()),
+    type: 'array',
+    requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,
   },
@@ -418,19 +434,6 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     requiresPageReload: true,
     solutionViews: ['classic', 'oblt'],
   },
-  [apmUseUnifiedTraceWaterfall]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfall', {
-      defaultMessage: 'Use unified trace waterfall',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfallDescription', {
-      defaultMessage: 'Enable the new unified trace waterfall',
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solutionViews: ['classic', 'oblt'],
-  },
   [searchExcludedDataTiers]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.searchExcludedDataTiers', {
@@ -440,7 +443,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
       {
         defaultMessage: `Specify the data tiers to exclude from search, such as data_cold and/or data_frozen.
-        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure`,
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure, Synthetics`,
       }
     ),
     value: [],

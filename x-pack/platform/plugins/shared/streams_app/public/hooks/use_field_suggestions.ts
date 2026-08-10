@@ -8,12 +8,12 @@
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { useMemo } from 'react';
-import { useSimulatorSelector } from '../components/data_management/stream_detail_enrichment/state_management/stream_enrichment_state_machine/use_stream_enrichment';
-import { selectPreviewRecords } from '../components/data_management/stream_detail_enrichment/state_management/simulation_state_machine/selectors';
-import { useStreamSamplesSelector } from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine/use_stream_routing';
-import { selectPreviewDocuments } from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine/selectors';
-import { createFieldSuggestions } from '../components/data_management/stream_detail_enrichment/steps/blocks/action/utils/field_suggestions';
-import type { Suggestion } from '../components/data_management/shared/autocomplete_selector';
+import { useSimulatorSelector } from '../components/stream_management/data_management/stream_detail_enrichment/state_management/stream_enrichment_state_machine/use_stream_enrichment';
+import { selectPreviewRecords } from '../components/stream_management/data_management/stream_detail_enrichment/state_management/simulation_state_machine/selectors';
+import { useStreamSamplesSelector } from '../components/stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine/use_stream_routing';
+import { selectPreviewDocuments } from '../components/stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine/selectors';
+import { createFieldSuggestions } from '../components/stream_management/data_management/stream_detail_enrichment/steps/blocks/action/utils/field_suggestions';
+import type { Suggestion } from '../components/stream_management/data_management/shared/autocomplete_selector';
 
 /**
  * Hook for providing field suggestions from enrichment simulation data - to be used with Enrichment only

@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/es-query",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

@@ -23,7 +23,11 @@ dependsOn:
   - '@kbn/telemetry-plugin'
   - '@kbn/config-schema'
   - '@kbn/feedback-registry'
-  - '@kbn/feedback-components'
+  - '@kbn/ui-feedback'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-chrome-feature-flags'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/i18n'
   - '@kbn/core-http-router-server-mocks'
 tags:
   - plugin
@@ -37,26 +41,6 @@ fileGroups:
     - server/**/*
     - common/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

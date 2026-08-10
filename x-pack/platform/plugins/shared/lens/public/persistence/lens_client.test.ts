@@ -9,6 +9,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import type { LooseLensAttributes } from './lens_client';
 import { LensClient } from './lens_client';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 const mockResponse = {
   data: {},
@@ -21,23 +22,24 @@ const mockAttributes: LooseLensAttributes = {
   state: {
     visualization: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   description: 'bar',
 };
 
 describe('LensClient', () => {
   const httpMock = coreMock.createStart().http;
-  const client = new LensClient(httpMock);
+  let client: LensClient;
 
   beforeAll(() => {
-    httpMock.get.mockResolvedValue(mockResponse);
-    httpMock.post.mockResolvedValue(mockResponse);
-    httpMock.put.mockResolvedValue(mockResponse);
-    httpMock.delete.mockResolvedValue({ response: { ok: true } });
+    client = new LensClient(httpMock);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    httpMock.get.mockResolvedValue(mockResponse);
+    httpMock.post.mockResolvedValue(mockResponse);
+    httpMock.put.mockResolvedValue(mockResponse);
+    httpMock.delete.mockResolvedValue({ response: { ok: true } });
   });
 
   it.todo('get');

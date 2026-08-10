@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276724
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Kibana platform
+title: Fix flash-of-light on boot splash in system color mode

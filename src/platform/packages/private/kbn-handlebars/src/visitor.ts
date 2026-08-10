@@ -512,7 +512,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       : (partial.name as hbs.AST.PathExpression).original;
 
     const options: AmbiguousHelperOptions & ResolvePartialOptions = this.setupParams(partial, name);
-    options.helpers = this.container.helpers;
+    options.helpers = { ...this.container.helpers, ...this.container.hooks };
     options.partials = this.container.partials;
     options.decorators = this.container.decorators;
 

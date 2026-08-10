@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GithubConnector } from './github';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -15,7 +16,7 @@ import { GithubConnector } from './github';
 const mockCallTool = jest.fn();
 const mockListTools = jest.fn();
 
-jest.mock('../../lib/mcp', () => ({
+jest.mock('../../lib/mcp/with_mcp_client', () => ({
   withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
     return fn({ callTool: mockCallTool, listTools: mockListTools });
   }),
@@ -42,6 +43,44 @@ describe('GithubConnector', () => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
+  });
+
+  describe('auth', () => {
+    it('supports bearer auth labeled as Personal Access Token (PAT)', () => {
+      const bearerType = GithubConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerType).toEqual(
+        expect.objectContaining({
+          type: 'bearer',
+          overrides: expect.objectContaining({ label: 'Personal Access Token (PAT)' }),
+        })
+      );
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(GithubConnector.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
+    });
+
+    it('supports oauth_authorization_code with correct GitHub defaults', () => {
+      const oauthType = GithubConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://github.com/login/oauth/authorize',
+          tokenUrl: 'https://github.com/login/oauth/access_token',
+          scope: 'repo',
+        },
+      });
+    });
   });
 
   describe('getMe action', () => {
@@ -420,28 +459,20 @@ describe('GithubConnector', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok with tool count on successful connection', async () => {
-      if (!GithubConnector.test) {
-        throw new Error('test handler not defined');
-      }
-      const result = await GithubConnector.test.handler(mockContext);
+    const testSpec = GithubConnector.test;
+
+    it('returns empty object on successful connection', async () => {
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({
-        ok: true,
-        message: 'Connected to GitHub MCP server. 2 tools available.',
-      });
+      expect(result).toEqual({});
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp');
+      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!GithubConnector.test) {
-        throw new Error('test handler not defined');
-      }
-
-      await expect(GithubConnector.test.handler(mockContext)).rejects.toThrow('connection refused');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 });

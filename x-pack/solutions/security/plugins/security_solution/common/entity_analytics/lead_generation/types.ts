@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_LEADS_PER_RUN } from './constants';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -47,6 +48,13 @@ export type Observation = z.infer<typeof observationSchema>;
 export const leadEntitySchema = z.object({
   type: z.string(),
   name: z.string(),
+  /**
+   * Entity Store unique identifier (EUID, e.g. `"host:8c67cb16-..."`). Used to
+   * open the correct entity flyout by id rather than by (potentially
+   * ambiguous) display name. Optional for backwards compatibility with leads
+   * persisted before this field was introduced.
+   */
+  id: z.string().optional(),
 });
 
 export type LeadEntity = z.infer<typeof leadEntitySchema>;
@@ -80,7 +88,10 @@ export type Lead = z.infer<typeof leadSchema>;
 
 export const leadGenerationEngineConfigSchema = z.object({
   minObservations: z.number().int().min(0).default(1),
-  maxLeads: z.number().int().min(1).default(10),
+  maxLeads: z.number().int().min(1).default(MAX_LEADS_PER_RUN),
+  corroborationBonus: z.number().min(0).max(1).default(0.15),
+  diversityBonus: z.number().min(0).max(1).default(0.1),
+  normalizationCeiling: z.number().min(1).default(100),
 });
 
 export type LeadGenerationEngineConfig = z.infer<typeof leadGenerationEngineConfigSchema>;
@@ -91,14 +102,20 @@ export type LeadGenerationEngineConfig = z.infer<typeof leadGenerationEngineConf
 
 export const generateLeadsRequestSchema = z.object({
   maxLeads: z.number().int().min(1).max(50).optional(),
-  connectorId: z.string().optional(),
+  connectorId: z.string().min(1),
 });
 
 export type GenerateLeadsRequest = z.infer<typeof generateLeadsRequestSchema>;
 
+export const generateLeadsResponseSchema = z.object({
+  executionUuid: z.string().uuid(),
+});
+
+export type GenerateLeadsResponse = z.infer<typeof generateLeadsResponseSchema>;
+
 export const findLeadsRequestSchema = z.object({
-  page: z.number().int().min(1).optional().default(1),
-  perPage: z.number().int().min(1).max(100).optional().default(20),
+  page: z.coerce.number().int().min(1).optional().default(1),
+  perPage: z.coerce.number().int().min(1).max(100).optional().default(20),
   sortField: z.enum(['priority', 'timestamp']).optional().default('priority'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
   status: LeadStatusEnum.optional(),
@@ -115,11 +132,39 @@ export const findLeadsResponseSchema = z.object({
 
 export type FindLeadsResponse = z.infer<typeof findLeadsResponseSchema>;
 
+export const dismissLeadRequestSchema = z.object({
+  id: z.string().min(1),
+});
+
+export type DismissLeadRequest = z.infer<typeof dismissLeadRequestSchema>;
+
+export const bulkUpdateLeadsRequestSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(100),
+  status: LeadStatusEnum,
+});
+
+export type BulkUpdateLeadsRequest = z.infer<typeof bulkUpdateLeadsRequestSchema>;
+
+export const bulkUpdateLeadsResponseSchema = z.object({
+  updated: z.number(),
+});
+
+export type BulkUpdateLeadsResponse = z.infer<typeof bulkUpdateLeadsResponseSchema>;
+
+export const enableLeadGenerationRequestSchema = z.object({
+  connectorId: z.string().min(1),
+});
+
+export type EnableLeadGenerationRequest = z.infer<typeof enableLeadGenerationRequestSchema>;
+
 export const leadGenerationStatusSchema = z.object({
   isEnabled: z.boolean(),
   indexExists: z.boolean(),
   totalLeads: z.number(),
   lastRun: z.string().datetime().nullable(),
+  connectorId: z.string().optional(),
+  lastExecutionUuid: z.string().optional(),
+  lastError: z.string().nullable().optional(),
 });
 
 export type LeadGenerationStatus = z.infer<typeof leadGenerationStatusSchema>;

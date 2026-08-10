@@ -72,7 +72,6 @@ export const AcknowledgeAlertAction = typedMemo(
       <EuiContextMenuItem
         data-test-subj={canAcknowledge ? 'acknowledge-alert' : 'unacknowledge-alert'}
         onClick={handleClick}
-        size="s"
       >
         {canAcknowledge ? ACKNOWLEDGE : UNACKNOWLEDGE}
       </EuiContextMenuItem>

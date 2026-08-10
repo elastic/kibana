@@ -144,4 +144,66 @@ describe('Knowledge base', () => {
     indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
+
+  describe('Kibana API doc links', () => {
+    afterEach(() => {
+      kb._test.setKibanaApiDocLinks({});
+    });
+
+    it('returns an empty map by default', () => {
+      expect(kb.getKibanaApiDocLinks()).toEqual({});
+    });
+
+    it('stores and returns the provided doc links map', () => {
+      const docLinks = { '/api/spaces/space/{id}': { get: 'get-spaces-space-id' } };
+      kb._test.setKibanaApiDocLinks(docLinks);
+      expect(kb.getKibanaApiDocLinks()).toEqual(docLinks);
+    });
+
+    it('ignores non-record values', () => {
+      kb._test.setKibanaApiDocLinks({ foo: 'bar' });
+      kb._test.setKibanaApiDocLinks('not a record');
+      expect(kb.getKibanaApiDocLinks()).toEqual({ foo: 'bar' });
+    });
+  });
+
+  describe('WHEN body rules use a generated shared global', () => {
+    it('SHOULD resolve the shared rules through the existing scope-link consumer', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          globals: {
+            __generated_rule: {
+              first_property: '',
+              second_property: '',
+            },
+          },
+          endpoints: {
+            endpoint: {
+              data_autocomplete_rules: {
+                __scope_link: 'GLOBAL.__generated_rule',
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+
+      populateContext(['{'], context, null, true, kb.getEndpointBodyCompleteComponents('endpoint'));
+
+      expect(context.autoCompleteSet).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'first_property' }),
+          expect.objectContaining({ name: 'second_property' }),
+        ])
+      );
+    });
+  });
 });

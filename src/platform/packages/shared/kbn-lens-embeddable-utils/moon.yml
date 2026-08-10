@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-data-views-schema'
+  - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/event-annotation-common'
@@ -26,16 +28,17 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/esql-utils'
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/coloring'
   - '@kbn/content-management-utils'
   - '@kbn/lens-common'
   - '@kbn/chart-expressions-common'
   - '@kbn/expression-xy-plugin'
-  - '@kbn/utility-types'
   - '@kbn/transpose-utils'
   - '@kbn/palettes'
   - '@kbn/crypto-browser'
+  - '@kbn/zod-helpers'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
@@ -46,27 +49,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - config_builder/tests/integrations/download_integrations_panels.js
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -9,13 +9,13 @@
 
 import type { EuiInMemoryTableProps, EuiSelectOption } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -31,12 +31,18 @@ import {
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import {
+  TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS,
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_DETAILS,
+} from '../../ebt_constants';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
@@ -124,6 +130,10 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     esql: esqlQueryString,
     tabLabel: sectionTitle,
     dataTestSubj: 'docViewerSpanLinksOpenInDiscoverButton',
+    ebt: {
+      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+    },
   });
   const actions = useMemo(
     () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
@@ -148,53 +158,68 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
       )}
       actions={actions}
     >
-      <EuiSpacer size="s" />
       {error ? (
-        <EuiText color="subdued">
-          {i18n.translate('unifiedDocViewer.observability.traces.docViewerSpanOverview.error', {
-            defaultMessage: 'An error happened when trying to fetch data. Please try again',
-          })}
-        </EuiText>
+        <EuiCallOut
+          announceOnMount
+          data-test-subj="unifiedDocViewerSpanLinksFetchErrorCallout"
+          color="warning"
+          iconType="warning"
+          size="s"
+          title={i18n.translate(
+            'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.error',
+            {
+              defaultMessage: "Couldn't load span links for this span. Please try again later.",
+            }
+          )}
+        />
       ) : (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem
-                css={css`
-                  align-items: flex-end;
-                `}
-              >
-                <EuiSelect
-                  compressed
-                  aria-label={i18n.translate(
-                    'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.select.ariaLabel',
-                    {
-                      defaultMessage: 'Span link type selector',
-                    }
-                  )}
-                  data-test-subj="unifiedDocViewerSpanLinkTypeSelect"
-                  options={selectOptions}
-                  value={type}
-                  onChange={(e) => {
-                    setType(e.target.value as SpanLinkType);
-                  }}
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem
+                  css={css`
+                    align-items: flex-end;
+                  `}
+                >
+                  <EuiSelect
+                    compressed
+                    aria-label={i18n.translate(
+                      'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.select.ariaLabel',
+                      {
+                        defaultMessage: 'Span link type selector',
+                      }
+                    )}
+                    data-test-subj="unifiedDocViewerSpanLinkTypeSelect"
+                    {...getEbtProps({
+                      action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.FILTER_SPAN_LINKS,
+                      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.SPAN_LINKS,
+                      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+                    })}
+                    options={selectOptions}
+                    value={type}
+                    onChange={(e) => {
+                      setType(e.target.value as SpanLinkType);
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+                <EuiInMemoryTable
+                  tableCaption={sectionTitle}
+                  responsiveBreakpoint={false}
+                  items={spanLinks}
+                  columns={columns}
+                  pagination={{ showPerPageOptions: false, pageSize: 5 }}
+                  sorting={sorting}
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-              <EuiInMemoryTable
-                tableCaption={sectionTitle}
-                responsiveBreakpoint={false}
-                items={spanLinks}
-                columns={columns}
-                pagination={{ showPerPageOptions: false, pageSize: 5 }}
-                sorting={sorting}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
     </ContentFrameworkSection>
   );

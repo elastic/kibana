@@ -8,6 +8,7 @@
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
@@ -15,16 +16,17 @@ import { inspectableEsQueriesMap } from '../../routes/apm_routes/register_apm_se
 
 export async function getApmEventClient({
   context,
+  core,
   params,
   getApmIndices,
   request,
 }: Pick<
   MinimalAPMRouteHandlerResources,
-  'context' | 'params' | 'getApmIndices' | 'request'
+  'context' | 'core' | 'params' | 'getApmIndices' | 'request'
 >): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
     const coreContext = await context.core;
-    const [indices, uiSettings] = await Promise.all([
+    const [indices, uiSettings, coreStart] = await Promise.all([
       getApmIndices(),
       withApmSpan('get_ui_settings', async () => {
         const includeFrozen = await coreContext.uiSettings.client.get<boolean>(
@@ -36,10 +38,14 @@ export async function getApmEventClient({
 
         return { includeFrozen, excludedDataTiers };
       }),
+      core.start(),
     ]);
 
+    const projectRouting = getProjectRoutingFromRequest(request);
+    const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+
     return new APMEventClient({
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
+      esClient,
       debug: params.query._inspect,
       request,
       indices,
@@ -47,6 +53,7 @@ export async function getApmEventClient({
         includeFrozen: uiSettings.includeFrozen,
         excludedDataTiers: uiSettings.excludedDataTiers,
         inspectableEsQueriesMap,
+        projectRouting,
       },
     });
   });

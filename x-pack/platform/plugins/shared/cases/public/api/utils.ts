@@ -10,7 +10,7 @@ import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import type {
   AttachmentRequestV2,
   CaseResolveResponse,
-  CasesFindResponse,
+  CasesSearchResponse,
   CasesSimilarResponse,
 } from '../../common/types/api';
 import type {
@@ -24,6 +24,7 @@ import type {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
 } from '../../common/utils/attachments';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
@@ -103,6 +104,10 @@ export const convertAttachmentToCamelCase = (attachment: AttachmentRequestV2): A
     return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
   }
 
+  if (isUnifiedAttachmentRequest(attachment)) {
+    return convertAttachmentToCamelExceptProperty(attachment, 'data');
+  }
+
   return convertToCamelCase<AttachmentRequestV2, AttachmentUIV2>(attachment);
 };
 
@@ -138,7 +143,7 @@ const convertAttachmentToCamelExceptProperty = (
   } as AttachmentUI;
 };
 
-export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFindResponseUI => ({
+export const convertAllCasesToCamel = (snakeCases: CasesSearchResponse): CasesFindResponseUI => ({
   cases: convertCasesToCamelCase(snakeCases.cases),
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,
@@ -146,6 +151,7 @@ export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesFind
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
+  mttr: snakeCases.mttr,
 });
 
 export const convertSimilarCasesToCamel = (

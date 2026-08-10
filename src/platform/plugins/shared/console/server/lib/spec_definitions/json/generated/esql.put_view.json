@@ -6,6 +6,9 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "query": ""
+    },
     "methods": [
       "PUT"
     ],
@@ -15,8 +18,8 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
     "availability": {
-      "stack": false,
-      "serverless": false
+      "stack": true,
+      "serverless": true
     }
   }
 }

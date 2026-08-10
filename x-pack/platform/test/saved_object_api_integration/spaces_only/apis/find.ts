@@ -21,11 +21,8 @@ const createTestCases = (spaceId: string, crossSpaceSearch?: string[]) => {
   return Object.values(cases);
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = findTestSuiteFactory(context);
   const createTests = (spaceId: string, crossSpaceSearch?: string[]) => {
     const testCases = createTestCases(spaceId, crossSpaceSearch);
     return createTestDefinitions(testCases, false);

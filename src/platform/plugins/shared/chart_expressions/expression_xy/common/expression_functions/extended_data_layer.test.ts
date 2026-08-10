@@ -43,6 +43,8 @@ describe('extendedDataLayerConfig', () => {
       type: 'extendedDataLayer',
       layerType: LayerTypes.DATA,
       ...fullArgs,
+      xScaleType: 'time', // xAccessor `c` is a date type column
+      isHistogram: true,
       table: data,
       showLines: true,
     });

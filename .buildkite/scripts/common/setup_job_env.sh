@@ -89,9 +89,6 @@ EOF
 
 # Set up misc keys
 {
-  KIBANA_CI_REPORTER_KEY=$(vault_get kibanamachine-reporter value)
-  export KIBANA_CI_REPORTER_KEY
-
   EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
   export EC_API_KEY
 
@@ -100,24 +97,6 @@ EOF
 
   PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
   export PROJECT_API_DOMAIN
-
-  SYNTHETICS_SERVICE_USERNAME="$(vault_get kibana-ci-synthetics-credentials username)"
-  export SYNTHETICS_SERVICE_USERNAME
-
-  SYNTHETICS_SERVICE_PASSWORD="$(vault_get kibana-ci-synthetics-credentials password)"
-  export SYNTHETICS_SERVICE_PASSWORD
-
-  SYNTHETICS_SERVICE_MANIFEST="$(vault_get kibana-ci-synthetics-credentials manifest)"
-  export SYNTHETICS_SERVICE_MANIFEST
-
-  SYNTHETICS_REMOTE_KIBANA_USERNAME="$(vault_get kibana-ci-synthetics-remote-credentials username)"
-  export SYNTHETICS_REMOTE_KIBANA_USERNAME
-
-  SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(vault_get kibana-ci-synthetics-remote-credentials password)"
-  export SYNTHETICS_REMOTE_KIBANA_PASSWORD
-
-  SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(vault_get kibana-ci-synthetics-remote-credentials url)"}
-  export SYNTHETICS_REMOTE_KIBANA_URL
 
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
@@ -151,24 +130,24 @@ EOF
 # Set up Kibana Evals secrets
 {
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
-    echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
+    echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
     KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
-    # Validate config shape (safe; does not print secrets)
-    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
+    #don't fetch the validator; eval steps run on a full checkout.
+    kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
+    if [[ -f "$kbn_evals_validator" ]]; then
+      node "$kbn_evals_validator" --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    fi
 
     # Eval suites require this for the LLM-as-a-judge connector selection
-    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+    export EVAL_CONNECTOR_ID="${EVAL_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
     # Export the vault config so eval-owned scripts can extract LiteLLM / connector
     # settings without needing vault access themselves.
     # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
     export KBN_EVALS_CONFIG_B64
     KBN_EVALS_CONFIG_B64="$(printf '%s' "$KBN_EVALS_CONFIG_JSON" | base64)"
-
-    # Elasticsearch cluster for evaluation results export
-    export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    export EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
 
     # Optional: separate cluster for trace-based evaluators
     export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
@@ -178,6 +157,13 @@ EOF
     TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
     if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
       export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
+    fi
+
+    # Optional: Remote Kibana for managed dataset operations (golden cluster)
+    EVAL_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$EVAL_KBN_URL" ]]; then
+      export EVAL_KBN_URL
+      export EVAL_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
     fi
 
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
@@ -256,7 +242,6 @@ if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
   export MOON_REMOTE_CACHE_TOKEN
 fi
-export MOON_CACHE=off
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

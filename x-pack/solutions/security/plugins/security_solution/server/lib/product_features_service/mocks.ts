@@ -98,6 +98,11 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getRulesV4Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
   getAlertsFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],

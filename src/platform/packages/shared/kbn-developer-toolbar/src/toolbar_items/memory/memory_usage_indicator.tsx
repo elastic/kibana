@@ -43,7 +43,7 @@ export const MemoryUsageIndicator: React.FC = () => {
 
     return (
       <EuiToolTip content={tooltipContent}>
-        <EuiBadge color="#0B1628" css={badgeStyles}>
+        <EuiBadge color="#0B1628" css={badgeStyles} tabIndex={0}>
           {displayText}
         </EuiBadge>
       </EuiToolTip>
@@ -77,6 +77,7 @@ export const MemoryUsageIndicator: React.FC = () => {
         css={badgeStyles}
         iconType={memoryInfo.leak ? 'warningFill' : undefined}
         iconSide={'right'}
+        tabIndex={0}
       >
         {displayText}
       </EuiBadge>

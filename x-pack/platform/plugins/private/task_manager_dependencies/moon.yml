@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/event-log-plugin'
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
 tags:

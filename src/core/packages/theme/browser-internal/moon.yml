@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/core-theme-browser'
+  - '@kbn/core-theme-browser-internal-types'
   - '@kbn/core-injected-metadata-browser-mocks'
   - '@kbn/core-injected-metadata-common-internal'
   - '@kbn/ui-theme'
@@ -34,26 +35,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

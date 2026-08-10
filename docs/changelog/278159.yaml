@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278159
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix duplicate Osquery schedule runs from Fleet policy writes"
+description: "Osquery scheduled queries no longer run twice intermittently when concurrent Fleet package-policy writes created duplicate schedule configuration."

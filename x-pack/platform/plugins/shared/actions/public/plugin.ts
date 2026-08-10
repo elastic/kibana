@@ -16,6 +16,8 @@ export interface ActionsPublicPluginSetup {
   ): ValidatedEmail[];
   enabledEmailServices: string[];
   isWebhookSslWithPfxEnabled?: boolean;
+  isEarsEnabled: boolean;
+  isEarsExperimentalEnabled: boolean;
 }
 
 export interface Config {
@@ -32,18 +34,28 @@ export interface Config {
       };
     };
   };
+  auth?: {
+    ears?: {
+      enabled: boolean;
+      enableExperimental: boolean;
+    };
+  };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
   private readonly enabledEmailServices: string[];
   private readonly webhookSslWithPfxEnabled: boolean;
+  private readonly earsEnabled: boolean;
+  private readonly earsExperimentalEnabled: boolean;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
     this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
     this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
+    this.earsEnabled = config.auth?.ears?.enabled ?? false;
+    this.earsExperimentalEnabled = config.auth?.ears?.enableExperimental ?? false;
   }
 
   public setup(): ActionsPublicPluginSetup {
@@ -52,6 +64,8 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
         validateEmails(this.allowedEmailDomains, emails, options),
       enabledEmailServices: this.enabledEmailServices,
       isWebhookSslWithPfxEnabled: this.webhookSslWithPfxEnabled,
+      isEarsEnabled: this.earsEnabled,
+      isEarsExperimentalEnabled: this.earsExperimentalEnabled,
     };
   }
 

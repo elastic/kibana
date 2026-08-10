@@ -183,7 +183,6 @@ async function handleIncompleteOperator(
         values: useValueType,
         addSpaceAfterField: options.addSpaceAfterOperator ?? false,
         openSuggestions: options.openSuggestions ?? false,
-        promoteToTop: true,
       })
       .then((b) =>
         b

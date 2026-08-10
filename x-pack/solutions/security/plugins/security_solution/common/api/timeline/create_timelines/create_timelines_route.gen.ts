@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   SavedTimeline,
@@ -23,26 +23,28 @@ import {
   PersistTimelineResponse,
 } from '../model/components.gen';
 
+export const CreateTimelinesRequestBody = lazySchema(() =>
+  z.object({
+    timeline: SavedTimeline,
+    status: TimelineStatus.nullable().optional(),
+    /**
+     * A unique identifier for the Timeline template.
+     */
+    templateTimelineId: z.string().nullable().optional(),
+    /**
+     * Timeline template version number.
+     */
+    templateTimelineVersion: z.number().nullable().optional(),
+    /**
+     * A unique identifier for the Timeline.
+     */
+    timelineId: z.string().nullable().optional(),
+    timelineType: TimelineType.nullable().optional(),
+    version: z.string().nullable().optional(),
+  })
+);
 export type CreateTimelinesRequestBody = z.infer<typeof CreateTimelinesRequestBody>;
-export const CreateTimelinesRequestBody = z.object({
-  timeline: SavedTimeline,
-  status: TimelineStatus.nullable().optional(),
-  /**
-   * A unique identifier for the Timeline template.
-   */
-  templateTimelineId: z.string().nullable().optional(),
-  /**
-   * Timeline template version number.
-   */
-  templateTimelineVersion: z.number().nullable().optional(),
-  /**
-   * A unique identifier for the Timeline.
-   */
-  timelineId: z.string().nullable().optional(),
-  timelineType: TimelineType.nullable().optional(),
-  version: z.string().nullable().optional(),
-});
 export type CreateTimelinesRequestBodyInput = z.input<typeof CreateTimelinesRequestBody>;
 
+export const CreateTimelinesResponse = lazySchema(() => PersistTimelineResponse);
 export type CreateTimelinesResponse = z.infer<typeof CreateTimelinesResponse>;
-export const CreateTimelinesResponse = PersistTimelineResponse;

@@ -1775,6 +1775,7 @@ describe('getOAuthAccessToken()', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'abc',
         },
@@ -1902,6 +1903,21 @@ describe('delete()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    test('revokes tokens before deleting the saved object', async () => {
+      const callOrder: string[] = [];
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await actionsClient.delete({ id: '1' });
+
+      expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
     describe('when connector has authMode per-user', () => {
       beforeEach(() => {
         unsecuredSavedObjectsClient.get.mockReset();
@@ -1958,8 +1974,50 @@ describe('delete()', () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete auth tokens for connector "1" after delete: Fail`
+        `Failed to delete auth tokens for connector "1": Fail`
       );
+    });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        evictClientPool,
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(evictClientPool).toHaveBeenCalledWith('1');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
     });
   });
 
@@ -2021,6 +2079,9 @@ describe('delete()', () => {
   });
 
   it('throws when trying to delete a preconfigured connector', async () => {
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
+
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -2058,6 +2119,52 @@ describe('delete()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Preconfigured action testPreconfigured is not allowed to delete."`
     );
+  });
+
+  it('allows delete when both preconfigured and saved object exist (deletes saved object only)', async () => {
+    const savedObject = {
+      id: 'shared-id',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-connector-type',
+        config: {},
+      },
+      references: [],
+    };
+    unsecuredSavedObjectsClient.get
+      .mockResolvedValueOnce(savedObject)
+      .mockResolvedValueOnce(savedObject);
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'shared-id',
+          actionTypeId: 'my-connector-type',
+          isPreconfigured: true,
+          name: 'Preconfigured',
+        }),
+      ],
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    await actionsClient.delete({ id: 'shared-id' });
+
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'shared-id');
   });
 
   it('throws when trying to delete a system connector', async () => {
@@ -2220,6 +2327,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'per-user',
+          skipRevocation: true,
         });
       });
     });
@@ -2259,6 +2367,7 @@ describe('update()', () => {
         expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
           connectorId: 'my-action',
           authMode: 'shared',
+          skipRevocation: true,
         });
       });
     });
@@ -3037,6 +3146,57 @@ describe('execute()', () => {
       actionExecutionId,
     });
   });
+
+  test('preconfigured connector takes precedence over saved object connector with same ID', async () => {
+    const duplicateConnectorId = 'duplicate-connector-id';
+
+    actionsClient = new ActionsClient({
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: duplicateConnectorId,
+          actionTypeId: 'my-connector-type',
+          name: 'Preconfigured Connector',
+          isPreconfigured: true,
+          config: { url: 'https://preconfigured.example.com' },
+        }),
+      ],
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      auditLogger,
+      usageCounter: mockUsageCounter,
+      connectorTokenClient,
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId: duplicateConnectorId });
+
+    await actionsClient.execute({
+      actionId: duplicateConnectorId,
+      params: { message: 'test' },
+      source: asHttpRequestExecutionSource(request),
+    });
+
+    // Verify that savedObjectsClient.get was NOT called because preconfigured connector takes precedence
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+
+    // Verify the actionExecutor was called with the correct connector ID
+    expect(actionExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionId: duplicateConnectorId,
+      })
+    );
+  });
 });
 
 describe('bulkEnqueueExecution()', () => {
@@ -3197,6 +3357,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3243,6 +3404,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3291,6 +3453,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3337,6 +3500,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,

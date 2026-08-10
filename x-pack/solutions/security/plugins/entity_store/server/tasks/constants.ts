@@ -8,4 +8,9 @@
 import { z } from '@kbn/zod/v4';
 
 export type EntityStoreTaskType = z.infer<typeof EntityStoreTaskType>;
-export const EntityStoreTaskType = z.enum(['extractEntity', 'entityMaintainer', 'historySnapshot']);
+export const EntityStoreTaskType = z.enum([
+  'extractEntity',
+  'entityMaintainer',
+  'historySnapshot',
+  'statusReport',
+]);

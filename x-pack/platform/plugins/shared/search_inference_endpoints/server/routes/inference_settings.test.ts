@@ -17,9 +17,16 @@ import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
+const mockFeatureRegistry = {
+  getAll: jest.fn().mockReturnValue([]),
+  get: jest.fn(),
+  register: jest.fn(),
+};
+
 describe('Inference Settings API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
+  let getConnectorById: jest.Mock;
   const mockSOClient = {
     create: jest.fn(),
     get: jest.fn(),
@@ -34,6 +41,7 @@ describe('Inference Settings API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
 
     context = {
       core: Promise.resolve(mockCore),
@@ -51,6 +59,8 @@ describe('Inference Settings API', () => {
       defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
+        featureRegistry: mockFeatureRegistry as any,
+        getConnectorById,
       });
     });
 
@@ -86,6 +96,7 @@ describe('Inference Settings API', () => {
               { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           },
+          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -130,84 +141,6 @@ describe('Inference Settings API', () => {
       await expect(mockRouter.callRoute({})).rejects.toThrowError(error);
     });
 
-    it('should return empty defaults when SO returns .error with 404', async () => {
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Saved object not found',
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {
-          _meta: { id: INFERENCE_SETTINGS_ID },
-          data: { features: [] },
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    });
-
-    it('should return customError when SO returns .error with non-404', async () => {
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 403,
-          error: 'Forbidden',
-          message: 'Access denied',
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 403,
-        body: {
-          message: 'Access denied',
-          attributes: {
-            error: 'Forbidden',
-          },
-        },
-      });
-    });
-
-    it('should include metadata in .error response', async () => {
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Something went wrong',
-          metadata: { cause: 'index_not_found' },
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({});
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: {
-          message: 'Something went wrong',
-          attributes: {
-            error: 'Internal Server Error',
-            cause: 'index_not_found',
-          },
-        },
-      });
-    });
-
     it('should use hidden types client', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -235,6 +168,8 @@ describe('Inference Settings API', () => {
       defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
+        featureRegistry: mockFeatureRegistry as any,
+        getConnectorById,
       });
     });
 
@@ -414,72 +349,6 @@ describe('Inference Settings API', () => {
             errors: expect.arrayContaining([
               expect.stringContaining('Duplicate endpoints in feature "agent_builder"'),
             ]),
-          },
-        },
-      });
-    });
-
-    it('should return customError when SO create returns .error', async () => {
-      mockSOClient.create.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 409,
-          error: 'Conflict',
-          message: 'Version conflict',
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({
-        body: {
-          features: [
-            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
-          ],
-        },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 409,
-        body: {
-          message: 'Version conflict',
-          attributes: {
-            error: 'Conflict',
-          },
-        },
-      });
-    });
-
-    it('should include metadata in .error response', async () => {
-      mockSOClient.create.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        error: {
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Something went wrong',
-          metadata: { cause: 'mapper_parsing_exception' },
-        },
-        attributes: {},
-        references: [],
-      });
-
-      await mockRouter.callRoute({
-        body: {
-          features: [
-            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
-          ],
-        },
-      });
-
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: {
-          message: 'Something went wrong',
-          attributes: {
-            error: 'Internal Server Error',
-            cause: 'mapper_parsing_exception',
           },
         },
       });

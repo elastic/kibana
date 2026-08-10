@@ -70,6 +70,7 @@ describe('CPSManager', () => {
         get: jest.fn().mockReturnValue(''),
         serverBasePath: '',
       },
+      spaceId: 'default',
     } as unknown as jest.Mocked<HttpSetup>;
 
     mockApplication = {
@@ -204,14 +205,10 @@ describe('CPSManager', () => {
       it('should initialize with the current space name', async () => {
         const spaceProjectRoutingValue = '_alias:_origin';
 
-        // Mock basePath to return a space-specific path
         const customMockHttp = {
           ...mockHttp,
           get: jest.fn().mockResolvedValue(spaceProjectRoutingValue),
-          basePath: {
-            get: jest.fn().mockReturnValue('/s/test-space'),
-            serverBasePath: '',
-          },
+          spaceId: 'test-space',
         } as unknown as jest.Mocked<HttpSetup>;
 
         const manager = new CPSManager({
@@ -333,11 +330,19 @@ describe('CPSManager', () => {
       expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
     });
 
-    it('returns undefined when access is DISABLED, regardless of override', async () => {
+    it('returns override value when access is DISABLED', async () => {
       await changeAccess(ProjectRoutingAccess.DISABLED);
 
       expect(cpsManager.getProjectRouting()).toBeUndefined();
-      expect(cpsManager.getProjectRouting('_alias:_origin')).toBeUndefined();
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
+    });
+
+    it('returns override value when access is READONLY', async () => {
+      await cpsManager.whenReady();
+      await changeAccess(ProjectRoutingAccess.READONLY);
+
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
     });
 
     it('resets projectRouting$ to default when access changes to DISABLED', async () => {

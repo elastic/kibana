@@ -9,18 +9,9 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { find, get, has, isEqual } from 'lodash';
+import { find, isEqual } from 'lodash';
 import moment from 'moment-timezone';
-import {
-  Subject,
-  Subscription,
-  forkJoin,
-  map,
-  debounceTime,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
@@ -39,17 +30,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import {
-  isModelPlotEnabled,
-  isModelPlotChartableForDetector,
-  isSourceDataChartableForDetector,
-  isTimeSeriesViewJob,
-  mlFunctionToESAggregation,
-} from '../../../common/util/job_utils';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -85,7 +68,21 @@ import { TimeseriesexplorerChartDataError } from './components/timeseriesexplore
 import { AnomalyDetectionNoJobsSelected } from '../components/anomaly_detection_no_jobs_selected';
 import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
 import { indexServiceFactory } from '../util/index_service';
+import { timeBucketsServiceFactory } from '../util/time_buckets_service';
 import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
+import {
+  SingleMetricViewerChartSurface,
+  applySmvTableFilter,
+  buildCriteriaFields,
+  consumeSmvContextLoadResult,
+  fetchAnomaliesTableData$,
+  getModelPlotEnabledForDetector,
+  getSmvContextLoadErrorMessages,
+  getSmvDataReloadPlan,
+  loadSingleMetricContextData,
+  smvReloadSnapshotFromSmvHostProps,
+  subscribeSmvBrushToFocusZoom,
+} from './timeseriesexplorer_chart_controller';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -97,6 +94,9 @@ const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionV
 const containerPadding = 34;
 
 export class TimeSeriesExplorer extends React.Component {
+  /**
+   * Access ML services in react context.
+   */
   static contextType = context;
 
   static propTypes = {
@@ -136,9 +136,10 @@ export class TimeSeriesExplorer extends React.Component {
   contextChart$ = new Subject();
 
   /**
-   * Access ML services in react context.
+   * When false, skips anomalies table fetches (zoom pipeline + interval/severity reload).
+   * Reserved for future embed-style hosts; SMV page keeps default true.
    */
-  static contextType = context;
+  includeAnomaliesTable = true;
 
   dataViewsService;
   toastNotificationService;
@@ -149,6 +150,8 @@ export class TimeSeriesExplorer extends React.Component {
   mlResultsService;
   mlTimeSeriesExplorer;
   mlTimeSeriesSearchService;
+  getBoundsRoundedToInterval;
+  contextLoadAbortController;
 
   constructor(props, constructorContext) {
     super(props, constructorContext);
@@ -170,6 +173,9 @@ export class TimeSeriesExplorer extends React.Component {
       this.mlResultsService,
       this.mlApi
     );
+    this.getBoundsRoundedToInterval = timeBucketsServiceFactory(
+      constructorContext.services.uiSettings
+    ).getBoundsRoundedToInterval;
   }
 
   /**
@@ -218,33 +224,9 @@ export class TimeSeriesExplorer extends React.Component {
   previousShowModelBounds = undefined;
 
   tableFilter = (field, value, operator) => {
-    const entities = this.getControlsForDetector();
-    const entity = entities.find(({ fieldName }) => fieldName === field);
-
-    if (entity === undefined) {
-      return;
-    }
-
-    const { appStateHandler } = this.props;
-
-    let resultValue = '';
-    if (operator === '+' && entity.fieldValue !== value) {
-      resultValue = value;
-    } else if (operator === '-' && entity.fieldValue === value) {
-      resultValue = null;
-    } else {
-      return;
-    }
-
-    const resultEntities = {
-      ...entities.reduce((appStateEntities, appStateEntity) => {
-        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
-        return appStateEntities;
-      }, {}),
-      [entity.fieldName]: resultValue,
-    };
-
-    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+    applySmvTableFilter(field, value, operator, this.getControlsForDetector(), (entities) =>
+      this.props.appStateHandler(APP_STATE_ACTION.SET_ENTITIES, entities)
+    );
   };
 
   contextChartSelectedInitCallDone = false;
@@ -283,7 +265,7 @@ export class TimeSeriesExplorer extends React.Component {
     // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
     // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
     // to some extent with all detector functions if not searching complete buckets.
-    const searchBounds = getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
+    const searchBounds = this.getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
 
     return this.mlTimeSeriesExplorer.getFocusData(
       this.getCriteriaFields(selectedDetectorIndex, entityControls),
@@ -330,61 +312,22 @@ export class TimeSeriesExplorer extends React.Component {
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
-    const mlApi = this.mlApi;
-    return mlApi.results
-      .getAnomaliesTableData(
-        [selectedJob.job_id],
-        this.getCriteriaFields(selectedDetectorIndex, entityControls),
-        [],
-        tableInterval,
-        tableSeverity.val,
-        earliestMs,
-        latestMs,
-        dateFormatTz,
-        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-        undefined,
-        undefined,
-        functionDescription
-      )
-      .pipe(
-        map((resp) => {
-          const anomalies = resp.anomalies;
-          const detectorsByJob = mlJobService.detectorsByJob;
-          anomalies.forEach((anomaly) => {
-            // Add a detector property to each anomaly.
-            // Default to functionDescription if no description available.
-            // TODO - when job_service is moved server_side, move this to server endpoint.
-            const jobId = anomaly.jobId;
-            const detector = get(detectorsByJob, [jobId, anomaly.detectorIndex]);
-            anomaly.detector = get(
-              detector,
-              ['detector_description'],
-              anomaly.source.function_description
-            );
-
-            // For detectors with rules, add a property with the rule count.
-            const customRules = detector.custom_rules;
-            if (customRules !== undefined) {
-              anomaly.rulesLength = customRules.length;
-            }
-
-            // Add properties used for building the links menu.
-            // TODO - when job_service is moved server_side, move this to server endpoint.
-            if (has(mlJobService.customUrlsByJob, jobId)) {
-              anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
-            }
-          });
-
-          return {
-            tableData: {
-              anomalies,
-              interval: resp.interval,
-              examplesByJobId: resp.examplesByJobId,
-              showViewSeriesLink: false,
-            },
-          };
-        })
-      );
+    return fetchAnomaliesTableData$({
+      mlApi: this.mlApi,
+      jobId: selectedJob.job_id,
+      criteriaFields: this.getCriteriaFields(selectedDetectorIndex, entityControls),
+      tableInterval,
+      tableSeverity,
+      earliestMs,
+      latestMs,
+      dateFormatTz,
+      functionDescription,
+      enrichment: {
+        source: 'jobService',
+        detectorsByJob: mlJobService.detectorsByJob,
+        customUrlsByJob: mlJobService.customUrlsByJob,
+      },
+    });
   };
 
   setForecastId = (forecastId) => {
@@ -404,7 +347,6 @@ export class TimeSeriesExplorer extends React.Component {
       autoZoomDuration,
       bounds,
       selectedDetectorIndex,
-      selectedForecastId,
       selectedJobId,
       zoom,
       functionDescription,
@@ -425,6 +367,10 @@ export class TimeSeriesExplorer extends React.Component {
 
     const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
 
+    this.contextLoadAbortController?.abort();
+    this.contextLoadAbortController = new AbortController();
+    const contextLoadSignal = this.contextLoadAbortController.signal;
+
     this.contextChartSelectedInitCallDone = false;
 
     // Only when `fullRefresh` is true we'll reset all data
@@ -444,9 +390,11 @@ export class TimeSeriesExplorer extends React.Component {
               focusChartData: undefined,
               focusForecastData: undefined,
               showForecastCheckbox: false,
-              modelPlotEnabled:
-                isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
-                isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
+              modelPlotEnabled: getModelPlotEnabledForDetector(
+                currentSelectedJob,
+                selectedDetectorIndex,
+                entityControls
+              ),
               hasResults: false,
               dataNotChartable: false,
             }
@@ -458,220 +406,43 @@ export class TimeSeriesExplorer extends React.Component {
         const selectedJob = mlJobService.getJob(selectedJobId);
         const detectorIndex = selectedDetectorIndex;
 
-        let awaitingCount = 3;
-
-        const stateUpdate = {};
-
-        // finish() function, called after each data set has been loaded and processed.
-        // The last one to call it will trigger the page render.
-        const finish = (counterVar) => {
-          awaitingCount--;
-          if (awaitingCount === 0 && counterVar === loadCounter) {
-            stateUpdate.hasResults =
-              (Array.isArray(stateUpdate.contextChartData) &&
-                stateUpdate.contextChartData.length > 0) ||
-              (Array.isArray(stateUpdate.contextForecastData) &&
-                stateUpdate.contextForecastData.length > 0);
-            stateUpdate.loading = false;
-
-            // Set zoomFrom/zoomTo attributes in scope which will result in the metric chart automatically
-            // selecting the specified range in the context chart, and so loading that date range in the focus chart.
-            // Only touch the zoom range if data for the context chart has been loaded and all necessary
-            // partition fields have a selection.
-            if (
-              stateUpdate.contextChartData.length &&
-              this.arePartitioningFieldsProvided() === true
-            ) {
-              // Check for a zoom parameter in the appState (URL).
-              let focusRange = this.mlTimeSeriesExplorer.calculateInitialFocusRange(
-                zoom,
-                stateUpdate.contextAggregationInterval,
-                bounds
-              );
-
-              if (
-                // If the user's focus range is not defined (i.e. no 'zoom' parameter restored from the appState URL),
-                // then calculate the default focus range to use
-                zoom === undefined ||
-                focusRange === undefined
-              ) {
-                focusRange = this.mlTimeSeriesExplorer.calculateDefaultFocusRange(
-                  autoZoomDuration,
-                  stateUpdate.contextAggregationInterval,
-                  stateUpdate.contextChartData,
-                  stateUpdate.contextForecastData
-                );
-                this.previousSelectedForecastId = this.props.selectedForecastId;
-              }
-
-              if (focusRange !== undefined) {
-                this.contextChartSelected({
-                  from: focusRange[0],
-                  to: focusRange[1],
-                });
-              }
-            }
-
-            this.setState(stateUpdate);
-          }
-        };
-
-        const nonBlankEntities = entityControls.filter((entity) => {
-          return entity.fieldValue !== null;
-        });
-
-        if (
-          modelPlotEnabled === false &&
-          isSourceDataChartableForDetector(selectedJob, detectorIndex) === false &&
-          nonBlankEntities.length > 0
-        ) {
-          // For detectors where model plot has been enabled with a terms filter and the
-          // selected entity(s) are not in the terms list, indicate that data cannot be viewed.
-          stateUpdate.hasResults = false;
-          stateUpdate.loading = false;
-          stateUpdate.dataNotChartable = true;
-          this.setState(stateUpdate);
-          return;
-        }
-
-        // Calculate the aggregation interval for the context chart.
-        // Context chart swimlane will display bucket anomaly score at the same interval.
-        stateUpdate.contextAggregationInterval =
-          this.mlTimeSeriesExplorer.calculateAggregationInterval(
-            bounds,
-            CHARTS_POINT_TARGET,
-            selectedJob
-          );
-
-        // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
-        // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
-        // to some extent with all detector functions if not searching complete buckets.
-        const searchBounds = getBoundsRoundedToInterval(
+        loadSingleMetricContextData({
+          signal: contextLoadSignal,
           bounds,
-          stateUpdate.contextAggregationInterval,
-          false
-        );
-
-        // Query 1 - load metric data at low granularity across full time range.
-        // Pass a counter flag into the finish() function to make sure we only process the results
-        // for the most recent call to the load the data in cases where the job selection and time filter
-        // have been altered in quick succession (such as from the job picker with 'Apply time range').
-        const counter = loadCounter;
-        this.mlTimeSeriesSearchService
-          .getMetricData(
-            selectedJob,
-            detectorIndex,
-            nonBlankEntities,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.asMilliseconds(),
-            functionToPlotByIfMetric
-          )
-          .toPromise()
-          .then((resp) => {
-            const fullRangeChartData = this.mlTimeSeriesExplorer.processMetricPlotResults(
-              resp.results,
-              modelPlotEnabled
-            );
-            stateUpdate.contextChartData = fullRangeChartData;
-            finish(counter);
-          })
-          .catch((err) => {
-            const errorMsg = i18n.translate('xpack.ml.timeSeriesExplorer.metricDataErrorMessage', {
-              defaultMessage: 'Error getting metric data',
-            });
-            this.displayErrorToastMessages(err, errorMsg);
+          selectedJob,
+          detectorIndex,
+          entityControls,
+          modelPlotEnabled,
+          selectedForecastId: this.props.selectedForecastId,
+          functionToPlotByIfMetric,
+          functionDescription: this.props.functionDescription,
+          zoom,
+          previousSelectedForecastId: this.previousSelectedForecastId,
+          autoZoomDuration,
+          arePartitioningFieldsProvided: this.arePartitioningFieldsProvided(),
+          criteriaFields: this.getCriteriaFields(detectorIndex, entityControls),
+          displayError: (error, message) => this.displayErrorToastMessages(error, message),
+          errorMessages: getSmvContextLoadErrorMessages(this.props.selectedForecastId),
+          deps: {
+            mlTimeSeriesSearchService: this.mlTimeSeriesSearchService,
+            mlResultsService: this.mlResultsService,
+            mlForecastService: this.mlForecastService,
+            mlTimeSeriesExplorer: this.mlTimeSeriesExplorer,
+            getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
+          },
+        }).then((result) => {
+          consumeSmvContextLoadResult({
+            result,
+            isUnmounted: () => this.unmounted,
+            loadCounterWhenStarted: loadCounter,
+            readLoadCounter: () => this.state.loadCounter,
+            syncPreviousSelectedForecastIdFromProps: () => {
+              this.previousSelectedForecastId = this.props.selectedForecastId;
+            },
+            applyZoomSelection: (range) => this.contextChartSelected(range),
+            applyStatePatch: (patch) => this.setState(patch),
           });
-
-        // Query 2 - load max record score at same granularity as context chart
-        // across full time range for use in the swimlane.
-        this.mlResultsService
-          .getRecordMaxScoreByTime(
-            selectedJob.job_id,
-            this.getCriteriaFields(detectorIndex, entityControls),
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            stateUpdate.contextAggregationInterval.asMilliseconds(),
-            functionToPlotByIfMetric
-          )
-          .then((resp) => {
-            const fullRangeRecordScoreData = this.mlTimeSeriesExplorer.processRecordScoreResults(
-              resp.results
-            );
-            stateUpdate.swimlaneData = fullRangeRecordScoreData;
-            finish(counter);
-          })
-          .catch((err) => {
-            const errorMsg = i18n.translate(
-              'xpack.ml.timeSeriesExplorer.bucketAnomalyScoresErrorMessage',
-              {
-                defaultMessage: 'Error getting bucket anomaly scores',
-              }
-            );
-
-            this.displayErrorToastMessages(err, errorMsg);
-          });
-
-        // Query 3 - load details on the chart used in the chart title (charting function and entity(s)).
-        this.mlTimeSeriesSearchService
-          .getChartDetails(
-            selectedJob,
-            detectorIndex,
-            entityControls,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            this.props.functionDescription
-          )
-          .then((resp) => {
-            stateUpdate.chartDetails = resp.results;
-            finish(counter);
-          })
-          .catch((err) => {
-            this.displayErrorToastMessages(
-              err,
-              i18n.translate('xpack.ml.timeSeriesExplorer.entityCountsErrorMessage', {
-                defaultMessage: 'Error getting entity counts',
-              })
-            );
-          });
-
-        // Plus query for forecast data if there is a forecastId stored in the appState.
-        if (selectedForecastId !== undefined) {
-          awaitingCount++;
-          let aggType = undefined;
-          const detector = selectedJob.analysis_config.detectors[detectorIndex];
-          const esAgg = mlFunctionToESAggregation(detector.function);
-          if (modelPlotEnabled === false && (esAgg === 'sum' || esAgg === 'count')) {
-            aggType = { avg: 'sum', max: 'sum', min: 'sum' };
-          }
-          this.mlForecastService
-            .getForecastData(
-              selectedJob,
-              detectorIndex,
-              selectedForecastId,
-              nonBlankEntities,
-              searchBounds.min.valueOf(),
-              searchBounds.max.valueOf(),
-              stateUpdate.contextAggregationInterval.asMilliseconds(),
-              aggType
-            )
-            .toPromise()
-            .then((resp) => {
-              stateUpdate.contextForecastData = this.mlTimeSeriesExplorer.processForecastResults(
-                resp.results
-              );
-              finish(counter);
-            })
-            .catch((err) => {
-              this.displayErrorToastMessages(
-                err,
-                i18n.translate('xpack.ml.timeSeriesExplorer.forecastDataErrorMessage', {
-                  defaultMessage: 'Error loading forecast data for forecast ID {forecastId}',
-                  values: { forecastId: selectedForecastId },
-                })
-              );
-            });
-        }
+        });
       }
     );
   };
@@ -692,15 +463,7 @@ export class TimeSeriesExplorer extends React.Component {
    * @param entities
    */
   getCriteriaFields(detectorIndex, entities) {
-    // Only filter on the entity if the field has a value.
-    const nonBlankEntities = entities.filter((entity) => entity.fieldValue !== null);
-    return [
-      {
-        fieldName: 'detector_index',
-        fieldValue: detectorIndex,
-      },
-      ...nonBlankEntities,
-    ];
+    return buildCriteriaFields(detectorIndex, entities);
   }
 
   loadForJobId(jobId) {
@@ -745,7 +508,6 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
-    const mlJobService = this.mlJobService;
     // if timeRange used in the url is incorrect
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;
@@ -771,92 +533,40 @@ export class TimeSeriesExplorer extends React.Component {
 
     // Listen for context chart updates.
     this.subscriptions.add(
-      this.contextChart$
-        .pipe(
-          tap((selection) => {
-            this.setState({
-              zoomFrom: selection.from,
-              zoomTo: selection.to,
-            });
-          }),
-          debounceTime(500),
-          tap((selection) => {
-            const {
-              contextChartData,
-              contextForecastData,
-              focusChartData,
-              zoomFromFocusLoaded,
-              zoomToFocusLoaded,
-            } = this.state;
-
-            if (
-              (contextChartData === undefined || contextChartData.length === 0) &&
-              (contextForecastData === undefined || contextForecastData.length === 0)
-            ) {
-              return;
-            }
-
-            if (
-              (this.contextChartSelectedInitCallDone === false && focusChartData === undefined) ||
-              zoomFromFocusLoaded.getTime() !== selection.from.getTime() ||
-              zoomToFocusLoaded.getTime() !== selection.to.getTime()
-            ) {
-              this.contextChartSelectedInitCallDone = true;
-
-              this.setState({
-                loading: true,
-                fullRefresh: false,
-              });
-            }
-          }),
-          switchMap((selection) => {
-            const { selectedJobId } = this.props;
-            const selectedJob = mlJobService.getJob(selectedJobId);
-
-            // Calculate the aggregation interval for the focus chart.
-            const bounds = { min: moment(selection.from), max: moment(selection.to) };
-            const focusAggregationInterval = this.mlTimeSeriesExplorer.calculateAggregationInterval(
-              bounds,
-              CHARTS_POINT_TARGET,
-              selectedJob
-            );
-
-            // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
-            // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
-            // to some extent with all detector functions if not searching complete buckets.
-            const searchBounds = getBoundsRoundedToInterval(
-              bounds,
-              focusAggregationInterval,
-              false
-            );
-            return forkJoin([
-              this.getFocusData(selection),
-              // Load the data for the anomalies table.
-              this.loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf()),
-            ]);
-          }),
-          withLatestFrom(this.contextChart$)
-        )
-        .subscribe(([[refreshFocusData, tableData], selection]) => {
-          const { modelPlotEnabled } = this.state;
-
-          // All the data is ready now for a state update.
+      subscribeSmvBrushToFocusZoom(this.contextChart$, {
+        includeAnomaliesTable: this.includeAnomaliesTable,
+        isBrushFocusInitPending: () => this.contextChartSelectedInitCallDone === false,
+        markBrushFocusInitHandled: () => {
+          this.contextChartSelectedInitCallDone = true;
+        },
+        onBrushPreview: (selection) => {
           this.setState({
-            focusAggregationInterval: this.getFocusAggregationInterval({
-              from: selection.from,
-              to: selection.to,
-            }),
-            loading: false,
-            showModelBoundsCheckbox: modelPlotEnabled && refreshFocusData.focusChartData.length > 0,
-            zoomFromFocusLoaded: selection.from,
-            zoomToFocusLoaded: selection.to,
-            showForecastCheckbox: Boolean(
-              this.props.selectedForecastId && refreshFocusData.showForecastCheckbox
-            ),
-            ...refreshFocusData,
-            ...tableData,
+            zoomFrom: selection.from,
+            zoomTo: selection.to,
           });
-        })
+        },
+        readChartZoomState: () => ({
+          contextChartData: this.state.contextChartData,
+          contextForecastData: this.state.contextForecastData,
+          focusChartData: this.state.focusChartData,
+          zoomFromFocusLoaded: this.state.zoomFromFocusLoaded,
+          zoomToFocusLoaded: this.state.zoomToFocusLoaded,
+        }),
+        onFocusPipelineStarting: () => {
+          this.setState({
+            loading: true,
+            fullRefresh: false,
+          });
+        },
+        getFocusAggregationInterval: (selection) => this.getFocusAggregationInterval(selection),
+        getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
+        getFocusData$: (selection) => this.getFocusData(selection),
+        getAnomaliesTableForRange$: (earliestMs, latestMs) =>
+          this.loadAnomaliesTableData(earliestMs, latestMs),
+        readModelPlotEnabled: () => this.state.modelPlotEnabled,
+        readSelectedForecastId: () => this.props.selectedForecastId,
+        applyFocusPipelinePatch: (patch) => this.setState(patch),
+      })
     );
 
     this.componentDidUpdate();
@@ -865,20 +575,24 @@ export class TimeSeriesExplorer extends React.Component {
   componentDidUpdate(previousProps) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
       const selectedJob = this.mlJobService.getJob(this.props.selectedJobId);
+      const jobIdForGeoFetch = this.props.selectedJobId;
       this.contextChartSelectedInitCallDone = false;
       getDataViewsAndIndicesWithGeoFields([selectedJob], this.dataViewsService, this.mlIndexUtils)
-        .then(({ getSourceIndicesWithGeoFieldsResp }) =>
+        .then(({ sourceIndicesWithGeoFieldsMap }) => {
+          if (this.unmounted || jobIdForGeoFetch !== this.props.selectedJobId) {
+            return;
+          }
           this.setState(
             {
               fullRefresh: false,
               loading: true,
-              sourceIndicesWithGeoFields: getSourceIndicesWithGeoFieldsResp,
+              sourceIndicesWithGeoFields: sourceIndicesWithGeoFieldsMap,
             },
             () => {
               this.loadForJobId(this.props.selectedJobId);
             }
-          )
-        )
+          );
+        })
         .catch(console.error); // eslint-disable-line no-console
     }
 
@@ -897,25 +611,11 @@ export class TimeSeriesExplorer extends React.Component {
       }
     }
 
-    if (
-      previousProps === undefined ||
-      !isEqual(previousProps.bounds, this.props.bounds) ||
-      (!isEqual(previousProps.lastRefresh, this.props.lastRefresh) &&
-        previousProps.lastRefresh !== 0) ||
-      !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
-      !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-      previousProps.selectedForecastId !== this.props.selectedForecastId ||
-      previousProps.selectedJobId !== this.props.selectedJobId ||
-      previousProps.functionDescription !== this.props.functionDescription
-    ) {
-      const fullRefresh =
-        previousProps === undefined ||
-        !isEqual(previousProps.bounds, this.props.bounds) ||
-        !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
-        !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-        previousProps.selectedForecastId !== this.props.selectedForecastId ||
-        previousProps.selectedJobId !== this.props.selectedJobId ||
-        previousProps.functionDescription !== this.props.functionDescription;
+    const { shouldReload, fullRefresh } = getSmvDataReloadPlan(
+      previousProps === undefined ? undefined : smvReloadSnapshotFromSmvHostProps(previousProps),
+      smvReloadSnapshotFromSmvHostProps(this.props)
+    );
+    if (shouldReload) {
       this.loadSingleMetricData(fullRefresh);
     }
 
@@ -925,6 +625,9 @@ export class TimeSeriesExplorer extends React.Component {
 
     // Reload the anomalies table if the Interval or Threshold controls are changed.
     const tableControlsListener = () => {
+      if (this.includeAnomaliesTable === false) {
+        return;
+      }
       const { zoomFrom, zoomTo } = this.state;
       if (zoomFrom !== undefined && zoomTo !== undefined) {
         this.loadAnomaliesTableData(zoomFrom.getTime(), zoomTo.getTime()).subscribe((res) =>
@@ -942,6 +645,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentWillUnmount() {
+    this.contextLoadAbortController?.abort();
     this.subscriptions.unsubscribe();
     this.resizeChecker.destroy();
     this.unmounted = true;
@@ -1052,288 +756,271 @@ export class TimeSeriesExplorer extends React.Component {
         handleJobSelectionChange={this.props.handleJobSelectionChange}
         selectedJobId={[selectedJobId]}
       >
-        {fieldNamesWithEmptyValues.length > 0 && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              title={
-                <FormattedMessage
-                  id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
-                  defaultMessage="To view a single metric, select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}."
-                  values={{
-                    missingValuesCount: fieldNamesWithEmptyValues.length,
-                    fieldName1: fieldNamesWithEmptyValues[0],
-                    fieldName2: fieldNamesWithEmptyValues[1],
-                  }}
+        <SingleMetricViewerChartSurface fieldNamesWithEmptyValues={fieldNamesWithEmptyValues}>
+          <SeriesControls
+            selectedJobId={selectedJobId}
+            appStateHandler={this.props.appStateHandler}
+            selectedDetectorIndex={selectedDetectorIndex}
+            selectedEntities={this.props.selectedEntities}
+            bounds={bounds}
+            functionDescription={this.props.functionDescription}
+            setFunctionDescription={this.setFunctionDescription}
+          >
+            {arePartitioningFieldsProvided && (
+              <EuiFlexItem>
+                <TimeSeriesExplorerControls
+                  forecastId={this.props.selectedForecastId}
+                  selectedDetectorIndex={selectedDetectorIndex}
+                  selectedEntities={selectedEntities}
+                  selectedJob={selectedJob}
+                  showAnnotationsCheckbox={showAnnotationsCheckbox}
+                  showAnnotations={showAnnotations}
+                  showForecastCheckbox={showForecastCheckbox}
+                  showForecast={showForecast}
+                  showModelBoundsCheckbox={showModelBoundsCheckbox}
+                  showModelBounds={showModelBounds}
+                  onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
+                  onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
+                  onShowForecastChange={this.toggleShowForecastHandler}
+                  fullRefresh={fullRefresh}
+                  loading={loading}
+                  hasResults={hasResults}
+                  setForecastId={this.setForecastId}
+                  entities={entityControls}
+                  jobs={jobs}
+                  selectedJobId={selectedJobId}
+                  // It seems like props below can be easily extracted from the selectedJob
+                  // However, it seems like we are losing sync at some point and they need to be passed directly
+                  jobState={selectedJob.state}
+                  earliestRecordTimestamp={selectedJob.data_counts.earliest_record_timestamp}
+                  latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
                 />
-              }
-              iconType="question"
-              size="s"
+              </EuiFlexItem>
+            )}
+          </SeriesControls>
+          <EuiSpacer size="m" />
+
+          {fullRefresh && loading === true && (
+            <LoadingIndicator
+              label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
+                defaultMessage: 'Loading',
+              })}
             />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <SeriesControls
-          selectedJobId={selectedJobId}
-          appStateHandler={this.props.appStateHandler}
-          selectedDetectorIndex={selectedDetectorIndex}
-          selectedEntities={this.props.selectedEntities}
-          bounds={bounds}
-          functionDescription={this.props.functionDescription}
-          setFunctionDescription={this.setFunctionDescription}
-        >
-          {arePartitioningFieldsProvided && (
-            <EuiFlexItem>
-              <TimeSeriesExplorerControls
-                forecastId={this.props.selectedForecastId}
-                selectedDetectorIndex={selectedDetectorIndex}
-                selectedEntities={selectedEntities}
-                selectedJob={selectedJob}
-                showAnnotationsCheckbox={showAnnotationsCheckbox}
-                showAnnotations={showAnnotations}
-                showForecastCheckbox={showForecastCheckbox}
-                showForecast={showForecast}
-                showModelBoundsCheckbox={showModelBoundsCheckbox}
-                showModelBounds={showModelBounds}
-                onShowModelBoundsChange={this.toggleShowModelBoundsHandler}
-                onShowAnnotationsChange={this.toggleShowAnnotationsHandler}
-                onShowForecastChange={this.toggleShowForecastHandler}
-                fullRefresh={fullRefresh}
-                loading={loading}
-                hasResults={hasResults}
-                setForecastId={this.setForecastId}
+          )}
+
+          {loading === false && chartDataError !== undefined && (
+            <TimeseriesexplorerChartDataError errorMsg={chartDataError} />
+          )}
+
+          {arePartitioningFieldsProvided &&
+            jobs.length > 0 &&
+            (fullRefresh === false || loading === false) &&
+            hasResults === false &&
+            chartDataError === undefined && (
+              <TimeseriesexplorerNoChartData
+                dataNotChartable={dataNotChartable}
                 entities={entityControls}
-                jobs={jobs}
-                selectedJobId={selectedJobId}
-                // It seems like props below can be easily extracted from the selectedJob
-                // However, it seems like we are losing sync at some point and they need to be passed directly
-                jobState={selectedJob.state}
-                earliestRecordTimestamp={selectedJob.data_counts.earliest_record_timestamp}
-                latestRecordTimestamp={selectedJob.data_counts.latest_record_timestamp}
               />
-            </EuiFlexItem>
-          )}
-        </SeriesControls>
-        <EuiSpacer size="m" />
-
-        {fullRefresh && loading === true && (
-          <LoadingIndicator
-            label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
-              defaultMessage: 'Loading',
-            })}
-          />
-        )}
-
-        {loading === false && chartDataError !== undefined && (
-          <TimeseriesexplorerChartDataError errorMsg={chartDataError} />
-        )}
-
-        {arePartitioningFieldsProvided &&
-          jobs.length > 0 &&
-          (fullRefresh === false || loading === false) &&
-          hasResults === false &&
-          chartDataError === undefined && (
-            <TimeseriesexplorerNoChartData
-              dataNotChartable={dataNotChartable}
-              entities={entityControls}
-            />
-          )}
-        {arePartitioningFieldsProvided &&
-          jobs.length > 0 &&
-          (fullRefresh === false || loading === false) &&
-          hasResults === true && (
-            <div>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size={'xs'}>
-                    <h2>
-                      <span>
-                        {i18n.translate(
-                          'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
-                          {
-                            defaultMessage: 'Single time series analysis of {functionLabel}',
-                            values: { functionLabel: chartDetails.functionLabel },
-                          }
-                        )}
-                      </span>
-                      &nbsp;
-                      {chartDetails.entityData.count === 1 &&
-                        chartDetails.entityData.entities.length > 0 && (
+            )}
+          {arePartitioningFieldsProvided &&
+            jobs.length > 0 &&
+            (fullRefresh === false || loading === false) &&
+            hasResults === true && (
+              <div>
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size={'xs'}>
+                      <h2>
+                        <span>
+                          {i18n.translate(
+                            'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
+                            {
+                              defaultMessage: 'Single time series analysis of {functionLabel}',
+                              values: { functionLabel: chartDetails.functionLabel },
+                            }
+                          )}
+                        </span>
+                        &nbsp;
+                        {chartDetails.entityData.count === 1 &&
+                          chartDetails.entityData.entities.length > 0 && (
+                            <EuiTextColor color="accentSecondary" size="s" component="span">
+                              (
+                              {chartDetails.entityData.entities
+                                .map((entity) => {
+                                  return `${entity.fieldName}: ${entity.fieldValue}`;
+                                })
+                                .join(', ')}
+                              )
+                            </EuiTextColor>
+                          )}
+                        {chartDetails.entityData.count > 1 && (
                           <EuiTextColor color="accentSecondary" size="s" component="span">
-                            (
-                            {chartDetails.entityData.entities
-                              .map((entity) => {
-                                return `${entity.fieldName}: ${entity.fieldValue}`;
-                              })
-                              .join(', ')}
-                            )
+                            {chartDetails.entityData.entities.map((countData, i) => {
+                              return (
+                                <Fragment key={countData.fieldName}>
+                                  {i18n.translate(
+                                    'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                                    {
+                                      defaultMessage:
+                                        '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                      values: {
+                                        openBrace: i === 0 ? '(' : '',
+                                        closeBrace:
+                                          i === chartDetails.entityData.entities.length - 1
+                                            ? ')'
+                                            : '',
+                                        cardinalityValue:
+                                          countData.cardinality === 0
+                                            ? allValuesLabel
+                                            : countData.cardinality,
+                                        cardinality: countData.cardinality,
+                                        fieldName: countData.fieldName,
+                                      },
+                                    }
+                                  )}
+                                  {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                                </Fragment>
+                              );
+                            })}
                           </EuiTextColor>
                         )}
-                      {chartDetails.entityData.count > 1 && (
-                        <EuiTextColor color="accentSecondary" size="s" component="span">
-                          {chartDetails.entityData.entities.map((countData, i) => {
-                            return (
-                              <Fragment key={countData.fieldName}>
-                                {i18n.translate(
-                                  'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                                  {
-                                    defaultMessage:
-                                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                                    values: {
-                                      openBrace: i === 0 ? '(' : '',
-                                      closeBrace:
-                                        i === chartDetails.entityData.entities.length - 1
-                                          ? ')'
-                                          : '',
-                                      cardinalityValue:
-                                        countData.cardinality === 0
-                                          ? allValuesLabel
-                                          : countData.cardinality,
-                                      cardinality: countData.cardinality,
-                                      fieldName: countData.fieldName,
-                                    },
-                                  }
-                                )}
-                                {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                              </Fragment>
-                            );
-                          })}
-                        </EuiTextColor>
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <TimeSeriesExplorerHelpPopover />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <TimeSeriesExplorerHelpPopover />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-              <TimeSeriesChartWithTooltips
-                chartProps={chartProps}
-                contextAggregationInterval={contextAggregationInterval}
-                bounds={bounds}
-                detectorIndex={selectedDetectorIndex}
-                renderFocusChartOnly={renderFocusChartOnly}
-                selectedJob={selectedJob}
-                selectedEntities={this.props.selectedEntities}
-                showAnnotations={showAnnotations}
-                showForecast={showForecast}
-                showModelBounds={showModelBounds}
-                lastRefresh={lastRefresh}
-                tableData={tableData}
-                sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
-              />
-              {focusAnnotationError !== undefined && (
-                <>
-                  <EuiTitle data-test-subj="mlAnomalyExplorerAnnotations error" size={'xs'}>
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
-                        defaultMessage="Annotations"
-                      />
-                    </h2>
-                  </EuiTitle>
-                  <EuiPanel>
-                    <EuiCallOut
-                      announceOnMount
-                      title={i18n.translate(
-                        'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
-                        {
-                          defaultMessage: 'An error occurred loading annotations:',
-                        }
-                      )}
-                      color="danger"
-                      iconType="warning"
+                <TimeSeriesChartWithTooltips
+                  chartProps={chartProps}
+                  contextAggregationInterval={contextAggregationInterval}
+                  bounds={bounds}
+                  detectorIndex={selectedDetectorIndex}
+                  renderFocusChartOnly={renderFocusChartOnly}
+                  selectedJob={selectedJob}
+                  selectedEntities={this.props.selectedEntities}
+                  showAnnotations={showAnnotations}
+                  showForecast={showForecast}
+                  showModelBounds={showModelBounds}
+                  lastRefresh={lastRefresh}
+                  tableData={tableData}
+                  sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+                  telemetrySource={'single_metric_viewer_chart'}
+                />
+                {focusAnnotationError !== undefined && (
+                  <>
+                    <EuiTitle data-test-subj="mlAnomalyExplorerAnnotations error" size={'xs'}>
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
+                          defaultMessage="Annotations"
+                        />
+                      </h2>
+                    </EuiTitle>
+                    <EuiPanel>
+                      <EuiCallOut
+                        announceOnMount
+                        title={i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+                          {
+                            defaultMessage: 'An error occurred loading annotations:',
+                          }
+                        )}
+                        color="danger"
+                        iconType="warning"
+                      >
+                        <p>{focusAnnotationError}</p>
+                      </EuiCallOut>
+                    </EuiPanel>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {focusAnnotationData && focusAnnotationData.length > 0 && (
+                  <>
+                    <EuiAccordion
+                      id={'mlAnnotationsAccordion'}
+                      buttonContent={
+                        <EuiTitle size={'xs'}>
+                          <h2>
+                            <FormattedMessage
+                              id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                              defaultMessage="Annotations {badge}"
+                              values={{
+                                badge: (
+                                  <EuiBadge color={'hollow'}>
+                                    <FormattedMessage
+                                      id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                      defaultMessage="Total: {count}"
+                                      values={{ count: focusAnnotationData.length }}
+                                    />
+                                  </EuiBadge>
+                                ),
+                              }}
+                            />
+                          </h2>
+                        </EuiTitle>
+                      }
+                      data-test-subj="mlAnomalyExplorerAnnotations loaded"
                     >
-                      <p>{focusAnnotationError}</p>
-                    </EuiCallOut>
-                  </EuiPanel>
-                  <EuiSpacer size="m" />
-                </>
-              )}
-              {focusAnnotationData && focusAnnotationData.length > 0 && (
-                <>
-                  <EuiAccordion
-                    id={'mlAnnotationsAccordion'}
-                    buttonContent={
-                      <EuiTitle size={'xs'}>
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-                            defaultMessage="Annotations {badge}"
-                            values={{
-                              badge: (
-                                <EuiBadge color={'hollow'}>
-                                  <FormattedMessage
-                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                    defaultMessage="Total: {count}"
-                                    values={{ count: focusAnnotationData.length }}
-                                  />
-                                </EuiBadge>
-                              ),
-                            }}
-                          />
-                        </h2>
-                      </EuiTitle>
-                    }
-                    data-test-subj="mlAnomalyExplorerAnnotations loaded"
-                  >
-                    <AnnotationsTable
-                      chartDetails={chartDetails}
-                      detectorIndex={selectedDetectorIndex}
-                      detectors={detectors}
-                      jobIds={[this.props.selectedJobId]}
-                      annotations={focusAnnotationData}
-                      isSingleMetricViewerLinkVisible={false}
-                      isNumberBadgeVisible={true}
+                      <AnnotationsTable
+                        chartDetails={chartDetails}
+                        detectorIndex={selectedDetectorIndex}
+                        detectors={detectors}
+                        jobIds={[this.props.selectedJobId]}
+                        annotations={focusAnnotationData}
+                        isSingleMetricViewerLinkVisible={false}
+                        isNumberBadgeVisible={true}
+                      />
+                    </EuiAccordion>
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                <AnnotationFlyout
+                  chartDetails={chartDetails}
+                  detectorIndex={selectedDetectorIndex}
+                  detectors={detectors}
+                />
+                <EuiTitle size={'xs'}>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                      defaultMessage="Anomalies"
                     />
-                  </EuiAccordion>
-                  <EuiSpacer size="m" />
-                </>
-              )}
-              <AnnotationFlyout
-                chartDetails={chartDetails}
-                detectorIndex={selectedDetectorIndex}
-                detectors={detectors}
+                  </h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                  <EuiFlexItem grow={false}>
+                    <SelectSeverity />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <SelectInterval />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+              </div>
+            )}
+          {arePartitioningFieldsProvided &&
+            jobs.length > 0 &&
+            hasResults === true &&
+            tableData?.anomalies && (
+              <AnomaliesTable
+                bounds={bounds}
+                tableData={tableData}
+                filter={this.tableFilter}
+                sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
+                selectedJobs={[
+                  {
+                    id: selectedJob.job_id,
+                    modelPlotEnabled,
+                  },
+                ]}
+                telemetrySource="single_metric_viewer_anomalies_table"
               />
-              <EuiTitle size={'xs'}>
-                <h2>
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
-                    defaultMessage="Anomalies"
-                  />
-                </h2>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
-                <EuiFlexItem grow={false}>
-                  <SelectSeverity />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SelectInterval />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </div>
-          )}
-        {arePartitioningFieldsProvided &&
-          jobs.length > 0 &&
-          hasResults === true &&
-          tableData?.anomalies && (
-            <AnomaliesTable
-              bounds={bounds}
-              tableData={tableData}
-              filter={this.tableFilter}
-              sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
-              selectedJobs={[
-                {
-                  id: selectedJob.job_id,
-                  modelPlotEnabled,
-                },
-              ]}
-            />
-          )}
+            )}
+        </SingleMetricViewerChartSurface>
       </TimeSeriesExplorerPage>
     );
   }

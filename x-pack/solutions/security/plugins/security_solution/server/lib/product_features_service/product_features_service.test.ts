@@ -45,6 +45,7 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
   getRulesFeature: () => mockGetFeature(),
   getRulesV2Feature: () => mockGetFeature(),
   getRulesV3Feature: () => mockGetFeature(),
+  getRulesV4Feature: () => mockGetFeature(),
   getAlertsFeature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
   getCasesV2Feature: () => mockGetFeature(),

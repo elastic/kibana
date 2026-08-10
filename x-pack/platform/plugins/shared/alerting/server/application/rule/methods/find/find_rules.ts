@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { pick } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildConsumersFilter,
   buildRuleTypeIdsFilter,
@@ -20,7 +21,6 @@ import type { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../..
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
-  validateOperationOnAttributes,
   buildKueryNodeFilter,
   includeFieldsRequiredForAuthentication,
 } from '../../../../rules_client/common';
@@ -43,14 +43,16 @@ export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
+  searchAfter?: SortResults;
   data: Array<SanitizedRule<Params>>;
+  aggregations?: Record<string, unknown>;
 }
 
 export async function findRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params?: FindRulesParams
 ): Promise<FindResult<Params>> {
-  const { options, excludeFromPublicApi = false, includeSnoozeData = false } = params || {};
+  const { options } = params || {};
 
   const { fields, ruleTypeIds, consumers, ...restOptions } = options || {};
 
@@ -81,19 +83,6 @@ export async function findRules<Params extends RuleParams = never>(
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(restOptions.filter as string | KueryNode);
   let sortField = mapSortField(restOptions.sortField);
-
-  if (excludeFromPublicApi) {
-    try {
-      validateOperationOnAttributes(
-        filterKueryNode,
-        sortField,
-        restOptions.searchFields,
-        context.fieldsToExcludeFromPublicApi
-      );
-    } catch (error) {
-      throw Boom.badRequest(`Error find rules: ${error.message}`);
-    }
-  }
 
   sortField = mapSortField(getModifiedField(restOptions.sortField));
 
@@ -134,6 +123,7 @@ export async function findRules<Params extends RuleParams = never>(
     per_page: perPage,
     total,
     saved_objects: data,
+    aggregations,
   } = await findRulesSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
@@ -143,6 +133,8 @@ export async function findRules<Params extends RuleParams = never>(
       fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
     },
   });
+
+  const searchAfter = data.length > 0 ? data[data.length - 1]?.sort : undefined;
 
   const siemRules: Rule[] = [];
 
@@ -165,10 +157,7 @@ export async function findRules<Params extends RuleParams = never>(
     }
 
     const rule = getAlertFromRaw<Params>({
-      excludeFromPublicApi,
       id,
-      includeLegacyId: false,
-      includeSnoozeData,
       isSystemAction: context.isSystemAction,
       logger: context.logger,
       rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,
@@ -210,6 +199,8 @@ export async function findRules<Params extends RuleParams = never>(
       page,
       perPage,
       total,
+      ...(searchAfter !== undefined ? { searchAfter } : {}),
+      ...(aggregations !== undefined ? { aggregations } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -219,6 +210,8 @@ export async function findRules<Params extends RuleParams = never>(
     page,
     perPage,
     total,
+    ...(searchAfter !== undefined ? { searchAfter } : {}),
+    ...(aggregations !== undefined ? { aggregations } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

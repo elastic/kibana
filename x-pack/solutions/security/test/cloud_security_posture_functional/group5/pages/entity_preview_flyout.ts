@@ -8,12 +8,11 @@
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
-  cleanupEntityStore,
   waitForEntityDataIndexed,
-  waitForEnrichPolicyCreated,
-  executeEnrichPolicy,
   dataViewRouteHelpersFactory,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from '../../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
@@ -31,17 +30,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     'header',
     'networkEvents',
     'expandedFlyoutGraph',
-    'genericEntityFlyout',
+    'entityFlyout',
   ]);
   const networkEventsPage = pageObjects.networkEvents;
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
-  const genericEntityFlyout = pageObjects.genericEntityFlyout;
+  const entityFlyout = pageObjects.entityFlyout;
 
-  describe('Security Network Page - Generic Entity Preview flyout', function () {
+  describe('Security Network Page - Entity Preview flyout', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
-      await cleanupEntityStore({ supertest, logger });
+      await uninstallEntityStoreV2({ supertest, logger });
 
       try {
         await es.indices.delete({
@@ -52,20 +51,20 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         // Ignore if index doesn't exist
       }
 
-      // Enable asset inventory setting
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.create('security-solution');
 
-      // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
-      await initEntityEnginesWithRetry({
-        supertest,
-        retry,
-        logger,
-        entityTypes: ['generic'],
-      });
+      // Install Entity Store V2 (covers the generic engine the asset inventory tests need).
+      // v2 install always installs all entity types; per-type selection is no longer available.
+      await installEntityStoreV2({ supertest, logger });
+      await waitForEntityStoreV2Running({ supertest, retry, logger });
 
       // Load security alerts with modified mappings (includes actor and target)
       await esArchiver.load(
@@ -82,10 +81,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
     after(async () => {
       // Clean up entity store resources
-      await cleanupEntityStore({ supertest, logger });
+      await uninstallEntityStoreV2({ supertest, logger });
 
-      // Disable asset inventory setting
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
+      // Disable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': false,
+        'securitySolution:entityStoreEnableV2': false,
+      });
 
       // Delete alerts
       await es.deleteByQuery({
@@ -100,64 +102,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
     });
 
-    // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
-    const runEnrichmentTests = () => {
-      it('expanded flyout - show generic entity details', async () => {
-        // Setting the timerange to fit the data and open the flyout for a specific event
-        await networkEventsPage.navigateToNetworkEventsPage(
-          `${networkEventsPage.getAbsoluteTimerangeFilter(
-            '2024-09-01T00:00:00.000Z',
-            '2024-09-02T00:00:00.000Z'
-          )}&${networkEventsPage.getFlyoutFilter('MultiTargetEventDoc789')}`
-        );
-        await networkEventsPage.waitForListToHaveEvents();
-
-        await networkEventsPage.flyout.expandVisualizations();
-        await networkEventsPage.flyout.assertGraphPreviewVisible();
-        await networkEventsPage.flyout.assertGraphNodesNumber(3);
-
-        await expandedFlyoutGraph.expandGraph();
-        await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(3);
-
-        // Click on the entity node to show entity details
-        await expandedFlyoutGraph.showEntityDetails(
-          'api-service@your-project-id.iam.gserviceaccount.com'
-        );
-
-        // Verify the generic entity preview panel is open
-        await genericEntityFlyout.assertGenericEntityPanelIsOpen();
-        await genericEntityFlyout.assertGenericEntityPanelHeader('ApiServiceAccount');
-      });
-    };
-
-    describe('via ENRICH policy (v1)', () => {
-      before(async () => {
-        // Load v1 entity data
-        await esArchiver.load(
-          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
-        );
-
-        // Wait for entity data to be fully indexed
-        await waitForEntityDataIndexed({
-          es,
-          logger,
-          retry,
-          entitiesIndex: '.entities.v1.latest.security_*',
-          expectedCount: 15,
-        });
-
-        // Execute enrich policy to pick up entity data
-        await waitForEnrichPolicyCreated({ es, retry, logger });
-        await executeEnrichPolicy({ es, retry, logger });
-      });
-
-      runEnrichmentTests();
-    });
-
     describe('via LOOKUP JOIN (v2)', () => {
       before(async () => {
-        // Delete v2 manually since its not being deleted by the cleanupEntityStore function
+        // Delete v2 manually since it's not being deleted by the v2 install/uninstall cycle
         try {
           await es.indices.delete({
             index: getEntitiesLatestIndexName(),
@@ -178,7 +125,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           logger,
           retry,
           entitiesIndex: getEntitiesLatestIndexName(),
-          expectedCount: 36,
+          expectedCount: 46,
         });
       });
 
@@ -188,7 +135,114 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
       });
 
-      runEnrichmentTests();
+      it('expanded flyout - show generic entity details', async () => {
+        // Setting the timerange to fit the data and open the flyout for a specific event
+        await networkEventsPage.navigateToNetworkEventsPage(
+          `${networkEventsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${networkEventsPage.getFlyoutFilter('MvExpandBugTest123')}`
+        );
+        await networkEventsPage.waitForListToHaveEvents();
+
+        await networkEventsPage.flyout.expandVisualizations();
+        await networkEventsPage.flyout.assertGraphPreviewVisible();
+        await networkEventsPage.flyout.assertGraphNodesNumber(4);
+
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(4);
+
+        // Click on the entity node to show entity details
+        await expandedFlyoutGraph.showEntityDetails('mv-expand-target-storage');
+
+        // Verify entity preview panel is open
+        await entityFlyout.assertEntityPanelIsOpen('generic');
+        await entityFlyout.assertEntityPanelHeader('generic', 'MvExpandTargetStorage');
+      });
+
+      it('expanded flyout - show user entity details', async () => {
+        // Setting the timerange to fit the data and open the flyout for a specific event
+        await networkEventsPage.navigateToNetworkEventsPage(
+          `${networkEventsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${networkEventsPage.getFlyoutFilter('MvExpandBugTest123')}`
+        );
+        await networkEventsPage.waitForListToHaveEvents();
+
+        await networkEventsPage.flyout.expandVisualizations();
+        await networkEventsPage.flyout.assertGraphPreviewVisible();
+        await networkEventsPage.flyout.assertGraphNodesNumber(4);
+
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(4);
+
+        // Click on the entity node to show entity details
+        await expandedFlyoutGraph.showEntityDetails('user:mv-expand-test-actor@example.com@gcp');
+
+        // Verify entity preview panel is open
+        await entityFlyout.assertEntityPanelIsOpen('user');
+        await entityFlyout.assertEntityPanelHeader('user', 'MvExpandTestActor');
+      });
+
+      it('expanded flyout - show service entity details', async () => {
+        // Setting the timerange to fit the data and open the flyout for a specific event
+        await networkEventsPage.navigateToNetworkEventsPage(
+          `${networkEventsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${networkEventsPage.getFlyoutFilter('MultiTargetEventDoc789')}`
+        );
+        await networkEventsPage.waitForListToHaveEvents();
+
+        await networkEventsPage.flyout.expandVisualizations();
+        await networkEventsPage.flyout.assertGraphPreviewVisible();
+        await networkEventsPage.flyout.assertGraphNodesNumber(3);
+
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+        // Click on the entity node to show entity details
+        await expandedFlyoutGraph.showEntityDetails('service:ApiServiceAccount');
+
+        // Verify entity preview panel is open
+        await entityFlyout.assertEntityPanelIsOpen('service');
+        await entityFlyout.assertEntityPanelHeader('service', 'ApiServiceAccount');
+      });
+
+      it('expanded flyout - grouped entities - show host entity details', async () => {
+        // Setting the timerange to fit the data and open the flyout for a specific event
+        await networkEventsPage.navigateToNetworkEventsPage(
+          `${networkEventsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${networkEventsPage.getFlyoutFilter('MultiTargetEventDoc789')}`
+        );
+        await networkEventsPage.waitForListToHaveEvents();
+
+        await networkEventsPage.flyout.expandVisualizations();
+        await networkEventsPage.flyout.assertGraphPreviewVisible();
+        await networkEventsPage.flyout.assertGraphNodesNumber(3);
+
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+        // Click on the entity node to show grouped entities
+        await expandedFlyoutGraph.showEntityDetails(
+          '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339'
+        );
+
+        // Verify grouped entities preview panel is open
+        await entityFlyout.clickOnEntity('host:host-instance-1');
+
+        // Verify entity preview panel is open
+        await entityFlyout.assertEntityPanelIsOpen('host');
+        await entityFlyout.assertEntityPanelHeader('host', 'HostInstance1');
+      });
     });
   });
 }

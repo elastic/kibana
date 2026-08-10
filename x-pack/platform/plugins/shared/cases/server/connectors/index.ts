@@ -7,7 +7,12 @@
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { ServerlessProjectType } from '../../common/constants/types';
@@ -26,6 +31,7 @@ export function registerConnectorTypes({
   getSpaceId,
   serverlessProjectType,
   isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
 }: {
   actions: ActionsPluginSetupContract;
   alerting: AlertingServerSetup;
@@ -35,6 +41,7 @@ export function registerConnectorTypes({
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: ServerlessProjectType;
   isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,
@@ -59,13 +66,22 @@ export function registerConnectorTypes({
     return unsecuredSavedObjectsClient;
   };
 
+  const getUiSettingsClient = async (request: KibanaRequest): Promise<IUiSettingsClient> => {
+    const [coreStart] = await core.getStartServices();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
+    return coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+  };
+
   actions.registerSubActionConnectorType(
     getCasesConnectorType({
       getCasesClient,
       getSpaceId,
       getUnsecuredSavedObjectsClient,
+      getUiSettingsClient,
       serverlessProjectType,
       isCasesAttachmentsEnabled,
+      isTemplatesEnabled,
     })
   );
 

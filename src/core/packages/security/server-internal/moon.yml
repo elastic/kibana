@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/logging-mocks'
   - '@kbn/core-base-server-mocks'
+  - '@kbn/core-http-server-mocks'
   - '@kbn/config'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/config-mocks'
@@ -37,26 +38,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

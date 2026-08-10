@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import path from 'path';
-import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findPackageForPath } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -25,51 +23,20 @@ const getModuleIdForConfigPath = (configPath: string): string | undefined => {
 };
 
 /**
- * Read the affected modules JSON file produced by the `list_affected` CLI.
- * Returns null on any error (missing file, invalid JSON) to allow graceful fallback.
- */
-export const readAffectedModules = (filePath: string, log: ToolingLog): Set<string> | null => {
-  try {
-    const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(REPO_ROOT, filePath);
-    const content = fs.readFileSync(absolutePath, 'utf-8');
-    const parsed = JSON.parse(content);
-
-    if (!Array.isArray(parsed)) {
-      log.warning(`Affected modules file does not contain a JSON array: ${filePath}`);
-      return null;
-    }
-
-    return new Set<string>(parsed);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.warning(`Failed to read affected modules file '${filePath}': ${message}`);
-    return null;
-  }
-};
-
-/**
- * Mark modules with isAffected based on the affected modules set.
- * All modules are returned; none are filtered out.
+ * Mark each module with `isAffected` against an in-memory set of @kbn/ IDs.
+ * All modules are returned; downstream callers can drop non-affected ones to
+ * implement selective testing.
  *
  * Behavior:
  * - Module maps to an affected @kbn/ ID -> isAffected: true
  * - Module does not map to any @kbn/ ID -> isAffected: false (warn)
  * - Module maps to a @kbn/ ID NOT in affected set -> isAffected: false
- * - If the file cannot be read or is invalid -> throw (fail fast)
  */
-export const markModulesAffectedStatus = (
+export const markModulesAffectedStatusFromSet = (
   modules: ModuleDiscoveryInfo[],
-  affectedModulesPath: string,
+  affectedModules: ReadonlySet<string>,
   log: ToolingLog
 ): ModuleDiscoveryInfo[] => {
-  const affectedModules = readAffectedModules(affectedModulesPath, log);
-
-  if (affectedModules === null) {
-    throw createFailError(
-      'Selective testing: could not load affected modules file. Check that list_affected produced a valid JSON array.'
-    );
-  }
-
   let affectedCount = 0;
   let unmappedCount = 0;
 
@@ -91,10 +58,27 @@ export const markModulesAffectedStatus = (
   });
 
   log.info(
-    `Selective testing: ${affectedCount} affected module(s), ${
+    `Affected modules: ${affectedCount} affected, ${
       marked.length - affectedCount
-    } rest, ${unmappedCount} unmapped`
+    } unaffected, ${unmappedCount} unmapped`
   );
 
   return marked;
 };
+
+/**
+ * Drop configs whose path is not in the `affectedConfigs` allowlist; drop modules
+ * left without configs. Surviving configs are by definition affected, so the
+ * module's isAffected flag is set to `true`.
+ */
+export const filterModulesByAffectedConfigs = (
+  modules: ModuleDiscoveryInfo[],
+  affectedConfigs: ReadonlySet<string>
+): ModuleDiscoveryInfo[] =>
+  modules
+    .map((module) => ({
+      ...module,
+      isAffected: true,
+      configs: module.configs.filter((config) => affectedConfigs.has(config.path)),
+    }))
+    .filter((module) => module.configs.length > 0);

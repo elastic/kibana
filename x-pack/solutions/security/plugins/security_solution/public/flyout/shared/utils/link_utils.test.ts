@@ -44,8 +44,13 @@ describe('isFlyoutLink', () => {
     expect(isFlyoutLink({ field: 'host.ip', scopeId: 'scopeId' })).toBe(true);
   });
 
-  it('should return false if field is not host.name, user.name, rule name or ip type', () => {
+  it('should return false if field is not host.name, user name, rule name or ip type', () => {
     expect(isFlyoutLink({ field: 'field', scopeId: 'scopeId' })).toBe(false); // non-ecs field
-    expect(isFlyoutLink({ field: 'event.category', scopeId: 'scopeId' })).toBe(false); // ecs field but not ip type
+    expect(isFlyoutLink({ field: 'event.category', scopeId: 'scopeId' })).toBe(false); // ecs field but not flyout link type
+    expect(isFlyoutLink({ field: 'user.entity.id', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'user.id', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'user.email', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'host.id', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'host.hostname', scopeId: 'scopeId' })).toBe(false);
   });
 });

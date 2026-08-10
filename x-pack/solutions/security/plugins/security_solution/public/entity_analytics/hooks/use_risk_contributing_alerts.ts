@@ -29,13 +29,14 @@ interface AlertData {
 interface AlertHit {
   _id: string;
   _index: string;
-  _source: AlertData;
+  _source: Record<string, unknown>;
 }
 
 export interface InputAlert {
   alert: AlertData;
   input: RiskScoreInput;
   _id: string;
+  rawSource: Record<string, unknown>;
 }
 
 export interface UseRiskContributingAlertsResult {
@@ -73,11 +74,16 @@ export const useRiskContributingAlerts = <T extends EntityType>({
 
   const error = !loading && data === undefined;
 
-  const alerts = inputs.map((input) => ({
-    _id: input.id,
-    input,
-    alert: (data?.hits.hits.find((alert) => alert._id === input.id)?._source || {}) as AlertData,
-  }));
+  const alerts = inputs.map((input) => {
+    const source = data?.hits.hits.find((alert) => alert._id === input.id)?._source;
+
+    return {
+      _id: input.id,
+      input,
+      alert: (source || {}) as unknown as AlertData,
+      rawSource: source || {},
+    };
+  });
 
   return {
     loading,

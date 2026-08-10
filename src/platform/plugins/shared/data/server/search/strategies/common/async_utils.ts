@@ -11,8 +11,18 @@ import type {
   AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/search-types';
 import type { SearchConfigSchema } from '../../../config';
+
+/**
+ * Returns the `asStream` transport option with 401 retry handling enabled
+ * when streaming is requested, or `undefined` otherwise.
+ */
+export const getAsStreamWithRetryOption = (
+  stream: boolean | undefined
+): TransportRequestOptions['asStream'] =>
+  (stream ? { retryOn401: true } : undefined) as unknown as TransportRequestOptions['asStream'];
 
 /**
  @internal
@@ -67,7 +77,9 @@ export function getCommonDefaultAsyncGetParams(
 
   return {
     // Wait up to the timeout for the response to return
-    wait_for_completion_timeout: `${config.asyncSearch.waitForCompletion.asMilliseconds()}ms`,
+    ...(config.asyncSearch.pollLength
+      ? { wait_for_completion_timeout: `${config.asyncSearch.pollLength.asMilliseconds()}ms` }
+      : {}),
     ...(useSearchSessions && options.isStored
       ? // Use session's keep_alive if search belongs to a stored session
         options.isSearchStored || options.isRestore // if search was already stored and extended, then no need to extend keepAlive

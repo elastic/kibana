@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { parseHistoryUrlParams, serializeHistoryUrlParams } from './use_history_url_params';
+import { renderHook, act } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import {
+  parseHistoryUrlParams,
+  serializeHistoryUrlParams,
+  useHistoryUrlParams,
+} from './use_history_url_params';
 import type { HistoryUrlFilters } from './use_history_url_params';
+import { getHistoryFilters } from './history_filter_storage';
 
 describe('parseHistoryUrlParams', () => {
   it('returns defaults for empty search string', () => {
@@ -226,5 +235,59 @@ describe('serializeHistoryUrlParams', () => {
       pageSize: '25',
       sortDirection: 'asc',
     });
+  });
+});
+
+describe('useHistoryUrlParams', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  const renderWithRouter = (initialPath: string) => {
+    const history = createMemoryHistory({ initialEntries: [initialPath] });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Router, { history }, children);
+
+    return { ...renderHook(() => useHistoryUrlParams(), { wrapper }), history };
+  };
+
+  it('persists filters to sessionStorage when setFilter is called', () => {
+    const { result } = renderWithRouter('/history');
+
+    act(() => {
+      result.current.setFilter('q', 'uptime');
+    });
+
+    expect(getHistoryFilters()).toContain('q=uptime');
+  });
+
+  it('persists filters to sessionStorage when setFilters is called', () => {
+    const { result } = renderWithRouter('/history');
+
+    act(() => {
+      result.current.setFilters({ q: 'dns', sources: ['live'] });
+    });
+
+    const stored = getHistoryFilters();
+    expect(stored).toContain('q=dns');
+    expect(stored).toContain('sources=live');
+  });
+
+  it('URL wins over stale sessionStorage on mount', () => {
+    sessionStorage.setItem('osquery:historyFilters', '?q=stale');
+    const { result } = renderWithRouter('/history?q=fromUrl');
+
+    expect(result.current.filters.q).toBe('fromUrl');
+    expect(getHistoryFilters()).toContain('q=fromUrl');
+  });
+
+  it('stores empty string when all filters are at defaults', () => {
+    const { result } = renderWithRouter('/history?q=test');
+
+    act(() => {
+      result.current.setFilter('q', '');
+    });
+
+    expect(getHistoryFilters()).toBe('');
   });
 });

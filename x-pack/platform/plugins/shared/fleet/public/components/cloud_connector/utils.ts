@@ -72,12 +72,12 @@ export const isCloudConnectorNameValid = (name: string | undefined): boolean => 
 export const getCloudConnectorNameError = (name: string | undefined): string | undefined => {
   if (!name || name.trim().length === 0) {
     return i18n.translate('xpack.fleet.cloudConnector.nameValidation.requiredError', {
-      defaultMessage: 'Cloud Connector Name is required',
+      defaultMessage: 'Federated Identity Name is required',
     });
   }
   if (name.length > CLOUD_CONNECTOR_NAME_MAX_LENGTH) {
     return i18n.translate('xpack.fleet.cloudConnector.nameValidation.tooLongError', {
-      defaultMessage: 'Cloud Connector Name must be {maxLength} characters or less',
+      defaultMessage: 'Federated Identity Name must be {maxLength} characters or less',
       values: { maxLength: CLOUD_CONNECTOR_NAME_MAX_LENGTH },
     });
   }

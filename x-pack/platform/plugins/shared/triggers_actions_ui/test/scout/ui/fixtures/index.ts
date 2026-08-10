@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { RuleDetailsPage } from './page_objects';
+// The globalSearch page object is owned by the global_search plugin; reuse its fixture wiring.
+import type { GlobalSearchPageObjects } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
+import { extendPageObjects as extendPageObjectsWithGlobalSearch } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
+import { RuleDetailsPage, StackAlertsPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
+  pageObjects: GlobalSearchPageObjects & {
     ruleDetailsPage: RuleDetailsPage;
+    stackAlertsPage: StackAlertsPage;
   };
 }
 
@@ -27,8 +31,9 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
-      ...pageObjects,
+      ...extendPageObjectsWithGlobalSearch(pageObjects, page),
       ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
+      stackAlertsPage: createLazyPageObject(StackAlertsPage, page),
     };
 
     await use(extendedPageObjects);
@@ -36,3 +41,33 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
 });
 
 export * as testData from './constants';
+export {
+  CONNECTORS_APP_PATH,
+  CONNECTORS_LIST_SELECTORS,
+  CONNECTORS_ROLE,
+  MAINTENANCE_WINDOWS_APP_PATH,
+  STACK_ALERTS_INDEX,
+  STACK_ALERTS_INDEX_PATTERN,
+  STACK_ALERTS_PAGE_PATH,
+  STACK_ALERTS_PAGE_TEST_SUBJECTS,
+} from './constants';
+export {
+  makeEsQueryRule,
+  makeIndexThresholdRule,
+  fillIndexThresholdForm,
+  defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
+  findRuleIdByName,
+  deleteRuleById,
+  deleteRulesByPrefix,
+} from './helpers';
+export {
+  setMonacoValue,
+  getMonacoValue,
+  navigateToConnectors,
+  searchConnectors,
+  openConnectorFlyout,
+  searchAndOpenConnector,
+  closeFlyoutIfOpen,
+  cancelRuleCreation,
+} from './connector_helpers';

@@ -22,7 +22,7 @@ export const RenderMessageWithIcon: React.FC<RenderMessageWithIconProps> = ({
 }) => (
   <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
     <EuiFlexItem grow={false}>
-      <EuiIcon size="s" type={icon} color={color} />
+      <EuiIcon size="s" type={icon} color={color} aria-hidden={true} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiText size={'xs'} textAlign={'left'} color={labelColor ?? 'default'}>

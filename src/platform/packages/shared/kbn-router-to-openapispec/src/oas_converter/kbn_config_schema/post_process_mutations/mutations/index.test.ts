@@ -8,9 +8,38 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { processMap, processRecord } from '.';
+import { processAnyType, processMap, processRecord } from '.';
 import { joi2JsonInternal } from '../../parse';
 import { createCtx } from '../context';
+
+describe('processAnyType', () => {
+  test('strips all keys from a plain any schema', () => {
+    const obj: Record<string, unknown> = { type: 'any', 'x-oas-any-type': true };
+    processAnyType(obj as any);
+    expect(obj).toEqual({});
+  });
+
+  test('preserves description when present', () => {
+    const obj: Record<string, unknown> = {
+      type: 'any',
+      'x-oas-any-type': true,
+      description: 'accepts any value',
+    };
+    processAnyType(obj as any);
+    expect(obj).toEqual({ description: 'accepts any value' });
+  });
+
+  test('preserves nullable when present', () => {
+    const obj: Record<string, unknown> = {
+      type: 'any',
+      'x-oas-any-type': true,
+      nullable: true,
+      description: 'nullable any',
+    };
+    processAnyType(obj as any);
+    expect(obj).toEqual({ description: 'nullable any', nullable: true });
+  });
+});
 
 test.each([
   [

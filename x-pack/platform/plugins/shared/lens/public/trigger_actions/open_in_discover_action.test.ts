@@ -133,16 +133,24 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      isApproximate: false,
+    });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
-  it('navigates to discover for an ES|QL chart but without the filters', async () => {
+  it('navigates to discover for an ES|QL chart and appends translatable filters as a WHERE clause', async () => {
     const viewUnderlyingDataArgs = {
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: {},
-      filters: [{ meta: { type: 'range' } }],
-      query: undefined,
+      filters: [
+        {
+          meta: { type: 'phrase', key: 'host.name', params: { query: 'web-1' } },
+          query: { match_phrase: { 'host.name': 'web-1' } },
+        },
+      ],
+      query: { esql: 'FROM logs' },
       esqlControls: undefined,
       columns: [],
     };
@@ -174,11 +182,150 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    const viewUnderlyingDataArgsWithoutFilters = {
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
       filters: [],
-    };
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgsWithoutFilters);
+      query: { esql: 'FROM logs\n| WHERE `host.name` : "web-1"' },
+      isApproximate: false,
+    });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+  });
+
+  it('navigates to discover for an ES|QL chart and translates the dashboard KQL into a KQL(...) clause', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [],
+      query: { esql: 'FROM logs' },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+      parentApi: {
+        query$: { getValue: () => ({ language: 'kuery', query: 'host.name : "web-1"' }) },
+        filters$: { getValue: () => [] },
+        timeRange$: { getValue: () => undefined },
+      },
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      filters: [],
+      query: { esql: 'FROM logs\n| WHERE KQL("""host.name : "web-1"""")' },
+      isApproximate: false,
+    });
+  });
+
+  it('navigates to discover for an ES|QL chart and drops untranslatable filters', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [{ meta: { type: 'custom', key: 'host.name' }, query: { custom: {} } }],
+      query: { esql: 'FROM logs' },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => true,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      filters: [],
+      isApproximate: false,
+    });
+    expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+  });
+
+  it('passes isApproximate to the locator when parentApi publishes approximation', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [],
+      query: { esql: 'FROM logs' },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+      parentApi: {
+        isApproximate$: { value: true },
+      },
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => false,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({ isApproximate: true })
+    );
   });
 });

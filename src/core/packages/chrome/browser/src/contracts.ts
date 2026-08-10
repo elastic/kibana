@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { ChromeNext } from './chrome_next';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -50,11 +51,11 @@ export interface ChromeSetup {
  * ```
  *
  * @example
- * How to set the help dropdown extension (React-first, preferred):
+ * How to set the help dropdown extension:
  * ```tsx
  * core.chrome.setHelpExtension({
  *   appName: 'My App',
- *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+ *   links: [{ linkType: 'documentation', href: docLinks.links.myApp.guide }],
  * });
  * ```
  *
@@ -69,6 +70,12 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /**
+   * Chrome Next rollout namespace.
+   *
+   * {@inheritdoc ChromeNext}
+   */
+  next: ChromeNext;
 
   /**
    * Get an observable of the current visibility state of the chrome.
@@ -84,15 +91,13 @@ export interface ChromeStart {
 
   /**
    * Get an observable of the current badge
-   * @deprecated Badges now render inline with breadcrumbs. Prefer {@link ChromeStart.setBreadcrumbsBadges}.
+   * @deprecated Pass `badges` to `AppHeader` from `@kbn/app-header`.
    */
   getBadge$(): Observable<ChromeBadge | undefined>;
 
   /**
    * Override the current badge.
-   * Internally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge
-   * renders inline with breadcrumbs in both classic and project layouts.
-   * @deprecated Use {@link ChromeStart.setBreadcrumbsBadges} directly for full control.
+   * @deprecated Pass `badges` to `AppHeader` from `@kbn/app-header`.
    */
   setBadge(badge?: ChromeBadge): void;
 
@@ -113,54 +118,29 @@ export interface ChromeStart {
 
   /**
    * Get an observable of the current app menu configuration
+   * @deprecated Pass `menu` to `AppHeader` from `@kbn/app-header`.
    */
   getAppMenu$(): Observable<AppMenuConfig | undefined>;
 
   /**
    * Set the app menu configuration for the current application.
    *
-   * @example
-   *```tsx
-   * import React, { useEffect } from 'react';
-   * import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-   * import type { CoreStart } from '@kbn/core/public';
-   *
-   * interface Props {
-   *  config: AppMenuConfig;
-   *  core: CoreStart;
-   *}
-   *
-   * const Example = ({ config, core }: Props) => {
-   *  const { chrome } = core;
-   *
-   *  useEffect(() => {
-   *    chrome.setAppMenu(config);
-   *  }, [chrome.setAppMenu, config]);
-   *
-   *  return <div>Hello world!</div>;
-   * };
+   * @deprecated Pass `menu` to `AppHeader` from `@kbn/app-header`.
    */
   setAppMenu(config?: AppMenuConfig): void;
 
   /**
    * Get an observable of the current extensions appended to breadcrumbs
+   * @deprecated Use the typed `favorite`, `badges`, or `metadata` props on `AppHeader` from
+   * `@kbn/app-header`.
    */
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
    * Render an element next to the last breadcrumb.
    *
-   * @example
-   * ```tsx
-   * import { dynamic } from '@kbn/shared-ux-utility';
-   *
-   * const LazyBadge = dynamic(() => import('./my_badge'));
-   *
-   * const unregister = chrome.setBreadcrumbsAppendExtension({
-   *   content: <LazyBadge />,
-   *   order: 10,
-   * });
-   * ```
+   * @deprecated Use the typed `favorite`, `badges`, or `metadata` props on `AppHeader` from
+   * `@kbn/app-header`.
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
@@ -172,23 +152,9 @@ export interface ChromeStart {
    * By default, when navigating within the same application, badges are not cleared automatically, you need to handle
    * their removal manually.
    *
+   * @deprecated Pass `badges` to `AppHeader` from `@kbn/app-header`.
+   *
    * @param badges - Array of {@link ChromeBreadcrumbsBadge} to display in the breadcrumbs area.
-   *
-   * @example
-   * ```tsx
-   * useEffect(() => {
-   *  const badges: ChromeBreadcrumbsBadge[] = [
-   *   { badgeText: 'Example', color: '#F6E58D' },
-   *  ];
-   *
-   *  core.chrome.setBreadcrumbsBadges(badges);
-   *
-   *  return () => {
-   *    // Clear badges when component unmounts
-   *    core.chrome.setBreadcrumbsBadges([]);
-   *  };
-   * }, [core.chrome]);
-   * ```
    */
   setBreadcrumbsBadges(badges: ChromeBreadcrumbsBadge[]): void;
 
@@ -231,7 +197,6 @@ export interface ChromeStart {
 
   /**
    * Override the current set of custom help content.
-   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -14,12 +14,11 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useBulkAddEventsToCaseActions } from '../../../cases/attachments/event/hooks/use_bulk_event_actions';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
-import { eventsDefaultModel } from '../events_viewer/default_model';
+import { getEventsDefaultModelForTable } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import * as i18n from './translations';
@@ -81,8 +80,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -118,17 +115,22 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [defaultNumberFormat, showExternalAlerts]
   );
 
+  const eventsDefaultModelForTable = useMemo(
+    () => getEventsDefaultModelForTable(tableId),
+    [tableId]
+  );
+
   useEffect(() => {
     dispatch(
       dataTableActions.initializeDataTableSettings({
         id: tableId,
-        defaultColumns: eventsDefaultModel.columns,
+        defaultColumns: eventsDefaultModelForTable.columns,
         title: i18n.EVENTS_GRAPH_TITLE,
         showCheckboxes: true,
         selectAll: true,
       })
     );
-  }, [dispatch, showExternalAlerts, tableId]);
+  }, [dispatch, eventsDefaultModelForTable, tableId]);
 
   useEffect(() => {
     return () => {
@@ -155,10 +157,10 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   const defaultModel = useMemo(
     () => ({
-      ...eventsDefaultModel,
+      ...eventsDefaultModelForTable,
       excludedRowRendererIds: showExternalAlerts ? RowRendererValues : [],
     }),
-    [showExternalAlerts]
+    [eventsDefaultModelForTable, showExternalAlerts]
   );
 
   const composedPageFilters = useMemo(
@@ -193,9 +195,10 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
+          applyPageAndTabsFilters={false}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
-          sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+          pageScope={PageScope.explore}
         />
       )}
       <StatefulEventsViewer
@@ -206,7 +209,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+        pageScope={PageScope.explore}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

@@ -6,7 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
+import {
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
+  suggestProcessingPipeline,
+  type SuggestProcessingPipelineResult,
+} from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError, createSSERequestError, isSSEError } from '@kbn/sse-utils';
@@ -16,6 +25,7 @@ import {
   type FlattenRecord,
   flattenRecord,
   getStreamTypeFromDefinition,
+  isOtelStream,
 } from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
 import { type InferenceClient, isInferenceError } from '@kbn/inference-common';
@@ -43,6 +53,7 @@ import { reviewGrokFields } from '../processing/grok_suggestions_handler';
 import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -69,6 +80,7 @@ type SuggestProcessingPipelineResponse = Observable<
 
 const MAX_REVIEW_MESSAGES = 10;
 const NUM_REVIEW_EXAMPLES = 10;
+const SYSTEM_PARSING_PRE_SIM_ID = 'system-suggested-parsing-pre-step';
 
 export const suggestProcessingPipelineRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_suggest_processing_pipeline',
@@ -91,9 +103,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
     const log = logger.get('suggestProcessingPipeline');
-    log.debug(
-      `Request received (stream=${params.path.name} connectorId=${params.body.connector_id})`
-    );
+    const { connector_id: connectorId } = params.body;
 
     // Wrap entire logic in Observable so errors can be sent as SSE events
     return from(
@@ -108,6 +118,8 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
           await getScopedClients({ request });
 
+        log.debug(`Request received (stream=${params.path.name} connectorId=${connectorId})`);
+
         const stream = await streamsClient.getStream(params.path.name);
         if (!Streams.ingest.all.Definition.is(stream)) {
           throw new StatusError(
@@ -116,7 +128,20 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           );
         }
 
-        const abortController = new AbortController();
+        // Get the request abort signal to respect client disconnections
+        const requestAbortSignal = getRequestAbortSignal(request);
+
+        // Create a timeout-based AbortSignal for grok/dissect and pipeline suggestions
+        // 2 minute timeout for the entire operation
+        const OPERATION_TIMEOUT_MS = 2 * 60 * 1000;
+        const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
+
+        // Combine request abort and timeout signals
+        const timeoutAbortController = new AbortController();
+        const cleanup = () => timeoutAbortController.abort();
+        requestAbortSignal.addEventListener('abort', cleanup);
+        timeoutSignal.addEventListener('abort', cleanup);
+
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
         const fieldName = getDefaultTextField(params.body.documents, PRIORITIZED_CONTENT_FIELDS);
@@ -134,7 +159,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           > = [];
 
           log.debug(
-            `Scheduling parallel grok + dissect extraction (stream=${stream.name} messages=${messages.length} fieldName=${fieldName} connectorId=${params.body.connector_id})`
+            `Scheduling parallel grok + dissect extraction (stream=${stream.name} messages=${messages.length} fieldName=${fieldName} connectorId=${connectorId})`
           );
 
           candidatePromises.push(
@@ -142,14 +167,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               messages,
               fieldName,
               streamName: stream.name,
-              connectorId: params.body.connector_id,
+              connectorId,
               documents: params.body.documents,
               patternExtractionService,
               inferenceClient,
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -159,14 +184,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               messages,
               fieldName,
               streamName: stream.name,
-              connectorId: params.body.connector_id,
+              connectorId,
               documents: params.body.documents,
               patternExtractionService,
               inferenceClient,
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -185,13 +210,13 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               const { reason } = result;
               if (isNoLLMSuggestionsError(reason)) {
                 log.debug(
-                  `No LLM suggestions available (stream=${stream.name} connectorId=${params.body.connector_id})`
+                  `No LLM suggestions available (stream=${stream.name} connectorId=${connectorId})`
                 );
               } else {
                 const meta = formatInferenceErrorMeta(reason);
                 log.error(
                   `Candidate failed (stream=${stream.name}` +
-                    ` connectorId=${params.body.connector_id}${meta}): ${getErrorMessage(reason)}`
+                    ` connectorId=${connectorId}${meta}): ${getErrorMessage(reason)}`
                 );
               }
             }
@@ -214,20 +239,79 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         const maxSteps = 6; // Limit reasoning steps for latency and token cost
         const startTime = Date.now();
 
-        const result = await suggestProcessingPipeline({
+        let documentsForAgent = params.body.documents;
+        let effectiveParsingProcessor: GrokProcessor | DissectProcessor | undefined =
+          parsingProcessor;
+
+        const isOtel = isOtelStream(stream);
+        const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
+          scopedClusterClient.asCurrentUser,
+          stream.name
+        );
+
+        if (parsingProcessor) {
+          const { parsedDocuments, definitionError } = await extractParsedSampleDocuments({
+            streamName: stream.name,
+            documents: params.body.documents,
+            parsingProcessor,
+            scopedClusterClient,
+            streamsClient,
+            fieldsMetadataClient,
+            logger: log,
+          });
+
+          if (definitionError) {
+            effectiveParsingProcessor = undefined;
+            documentsForAgent = params.body.documents;
+          } else if (parsedDocuments.length > 0) {
+            documentsForAgent = parsedDocuments;
+            log.debug(
+              `Agent will use ${parsedDocuments.length}/${params.body.documents.length}` +
+                ` fully parsed samples (stream=${stream.name})`
+            );
+          } else {
+            log.warn(
+              `No fully parsed documents after system parsing step (stream=${stream.name}); ` +
+                `falling back to raw samples without system-managed parser mode`
+            );
+            effectiveParsingProcessor = undefined;
+            documentsForAgent = params.body.documents;
+          }
+        }
+
+        const initialDatasetAnalysisJson = JSON.stringify(
+          await buildDocumentStructureOverviewForPipelinePrompt(
+            documentsForAgent,
+            fieldsMetadataClient,
+            isOtel,
+            mappedFields
+          )
+        );
+
+        const agentPipelineSchema = effectiveParsingProcessor
+          ? postParsePipelineDefinitionSchema
+          : pipelineDefinitionSchema;
+
+        const suggestion = await suggestProcessingPipeline({
           definition: stream,
-          inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
-          parsingProcessor,
+          inferenceClient: inferenceClient.bindTo({ connectorId }),
+          agentPipelineSchema,
           maxSteps,
-          signal: abortController.signal,
-          documents: params.body.documents,
+          maxDurationMs: 180_000, // 3 minutes - surface errors faster than infrastructure timeout
+          signal: timeoutAbortController.signal,
+          documents: documentsForAgent,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
+          initialDatasetAnalysisJson,
+          mappedFields,
+          upstreamSeedParsingContextMarkdown: effectiveParsingProcessor
+            ? formatUpstreamSeedParsingContextForPromptMarkdown(effectiveParsingProcessor)
+            : undefined,
           simulatePipeline: (pipeline: StreamlangDSL) =>
             simulateProcessing({
               params: {
                 path: { name: stream.name },
-                body: { processing: pipeline, documents: params.body.documents },
+                body: { processing: pipeline, documents: documentsForAgent },
               },
               esClient: scopedClusterClient.asCurrentUser,
               streamsClient,
@@ -235,13 +319,26 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             }),
         });
 
+        const pipeline =
+          suggestion.pipeline && effectiveParsingProcessor
+            ? mergeSeedParsingProcessorIntoSuggestedPipeline(
+                effectiveParsingProcessor,
+                suggestion.pipeline
+              )
+            : suggestion.pipeline;
+
+        const result: SuggestProcessingPipelineResult = {
+          ...suggestion,
+          pipeline,
+        };
+
         const durationMs = Date.now() - startTime;
         log.debug(
-          `Processing pipeline generated (stream=${stream.name} connectorId=${
-            params.body.connector_id
-          } durationMs=${durationMs} steps=${result.metadata.stepsUsed} hasPipeline=${
-            result.pipeline !== null
-          })`
+          `Processing pipeline generated (stream=${
+            stream.name
+          } connectorId=${connectorId} durationMs=${durationMs} steps=${
+            result.metadata.stepsUsed
+          } hasPipeline=${result.pipeline !== null})`
         );
 
         telemetry.trackProcessingPipelineSuggested({
@@ -262,7 +359,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
       catchError((error) => {
         if (isNoLLMSuggestionsError(error)) {
           log.debug(
-            `No LLM suggestions available for pipeline generation (stream=${params.path.name} connectorId=${params.body.connector_id})`
+            `No LLM suggestions available for pipeline generation (stream=${params.path.name} connectorId=${connectorId})`
           );
           // Return null pipeline instead of error - frontend will handle this gracefully
           return [
@@ -275,9 +372,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         const errorMessage = getErrorMessage(error) || 'Failed to generate pipeline suggestion';
         log.error(
           `Failed to generate pipeline suggestion (stream=${params.path.name}` +
-            ` connectorId=${params.body.connector_id}${formatInferenceErrorMeta(
-              error
-            )}): ${errorMessage}`
+            ` connectorId=${connectorId}${formatInferenceErrorMeta(error)}): ${errorMessage}`
         );
         if (isSSEError(error) && error.status) {
           throw createSSERequestError(errorMessage, error.status);
@@ -287,6 +382,56 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     );
   },
 });
+
+/**
+ * Runs the seed grok/dissect processor alone so fully parsed sample shapes can be passed to the agent.
+ */
+async function extractParsedSampleDocuments({
+  streamName,
+  documents,
+  parsingProcessor,
+  scopedClusterClient,
+  streamsClient,
+  fieldsMetadataClient,
+  logger,
+}: {
+  streamName: string;
+  documents: FlattenRecord[];
+  parsingProcessor: GrokProcessor | DissectProcessor;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  logger: Logger;
+}): Promise<{ parsedDocuments: FlattenRecord[]; definitionError: boolean }> {
+  const simulationResult = await simulateProcessing({
+    params: {
+      path: { name: streamName },
+      body: {
+        documents,
+        processing: {
+          steps: [{ ...parsingProcessor, customIdentifier: SYSTEM_PARSING_PRE_SIM_ID }],
+        },
+      },
+    },
+    esClient: scopedClusterClient.asCurrentUser,
+    streamsClient,
+    fieldsMetadataClient,
+  });
+
+  if (simulationResult.definition_error) {
+    logger.warn(
+      `Parsing pre-simulation failed (stream=${streamName}): ${simulationResult.definition_error.message}`
+    );
+    return { parsedDocuments: [], definitionError: true };
+  }
+
+  return {
+    parsedDocuments: simulationResult.documents
+      .filter((doc) => doc.status === 'parsed')
+      .map((doc) => doc.value),
+    definitionError: false,
+  };
+}
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);

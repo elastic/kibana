@@ -47,7 +47,15 @@ const IMPORTING_TO_OTHER_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.importingToOtherSpaceNotAllowedMessage',
   {
     defaultMessage:
-      'Importing artifacts to a different space requires global artifact management privilege',
+      "This artifact can't be imported because you don't have permission to manage artifacts in other spaces. Contact your administrator for access.",
+  }
+);
+
+const GLOBAL_ARTIFACT_IMPORT_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.baseValidator.noGlobalArtifactImportMessage',
+  {
+    defaultMessage:
+      "This artifact can't be imported because you don't have permission to manage global artifacts. Contact your administrator for access.",
   }
 );
 
@@ -62,19 +70,18 @@ export const GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
 const IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.importingArtifactNotVisibleInCurrentSpace',
   {
-    defaultMessage: 'Importing artifacts that are not visible in the current space is not allowed',
+    defaultMessage:
+      "This artifact can't be imported because it isn't visible in the current space. Try importing it from a matching space or a space with access to the related policy.",
   }
 );
 
-const IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID = (spaceIds: string[]): string =>
-  i18n.translate('xpack.securitySolution.baseValidator.invalidOwnerSpaceId', {
+const IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID = i18n.translate(
+  'xpack.securitySolution.baseValidator.invalidOwnerSpaceId',
+  {
     defaultMessage:
-      'Importing artifacts with invalid owner space IDs is not allowed. The following space {numberOfSpaces, plural, one {ID is} other {IDs are} } invalid or unaccessible by current user: {invalidSpaceIds}',
-    values: {
-      invalidSpaceIds: spaceIds.join(', '),
-      numberOfSpaces: spaceIds.length,
-    },
-  });
+      "This artifact can't be imported because it belongs to a space you don't have access to. Update the artifact in its original space and try again.",
+  }
+);
 
 const ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE = (spaceIds: string[]): string =>
   i18n.translate('xpack.securitySolution.baseValidator.cannotManageItemInCurrentSpace', {
@@ -342,7 +349,7 @@ export class BaseValidator {
 
     if (invalidSpaceIds.length > 0) {
       throw new EndpointArtifactExceptionValidationError(
-        IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID(invalidSpaceIds),
+        IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID,
         403
       );
     }
@@ -417,6 +424,15 @@ export class BaseValidator {
     if (!this.isItemByPolicy(item) && !(await this.endpointAuthzPromise).canManageGlobalArtifacts) {
       throw new EndpointArtifactExceptionValidationError(
         `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+        403
+      );
+    }
+  }
+
+  protected async validateCanImportGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
+    if (!this.isItemByPolicy(item) && !(await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+      throw new EndpointArtifactExceptionValidationError(
+        `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_IMPORT_NOT_ALLOWED_MESSAGE}`,
         403
       );
     }

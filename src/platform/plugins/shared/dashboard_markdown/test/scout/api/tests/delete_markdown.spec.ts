@@ -51,7 +51,7 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
   });
 
-  apiTest('should return 404 for a non-existent markdown panel', async ({ apiClient }) => {
+  apiTest('should return 404 for a non-existent markdown library item', async ({ apiClient }) => {
     const response = await apiClient.delete(`${MARKDOWN_API_PATH}/non-existent-markdown`, {
       headers: {
         ...COMMON_HEADERS,
@@ -61,12 +61,9 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(404);
-    expect(response.body.message).toBe(
-      'A markdown panel with ID non-existent-markdown was not found.'
-    );
   });
 
-  apiTest('should return 204 if the markdown panel is deleted', async ({ apiClient }) => {
+  apiTest('should return 204 when a markdown library item is deleted', async ({ apiClient }) => {
     const response = await apiClient.delete(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -78,26 +75,23 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(204);
   });
 
-  apiTest(
-    'should return 204 if the markdown panel is deleted in a specific space',
-    async ({ apiClient }) => {
-      const response = await apiClient.delete(
-        `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
-        {
-          headers: {
-            ...COMMON_HEADERS,
-            ...editorCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-        }
-      );
+  apiTest('should return 204 when deleted in a specific space', async ({ apiClient }) => {
+    const response = await apiClient.delete(
+      `s/${spaceId}/${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID_IN_SPACE}`,
+      {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      }
+    );
 
-      expect(response).toHaveStatusCode(204);
-    }
-  );
+    expect(response).toHaveStatusCode(204);
+  });
 
   apiTest(
-    'authorization - returns error when user does not have permission to delete markdown panels',
+    'authorization - returns error when user does not have permission to delete library item',
     async ({ apiClient }) => {
       const response = await apiClient.delete(`${MARKDOWN_API_PATH}/${TEST_MARKDOWN_ID}`, {
         headers: {
@@ -108,7 +102,6 @@ apiTest.describe('markdown - delete', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(403);
-      expect(response.body.message).toBe('Unable to delete markdown');
     }
   );
 });

@@ -13,18 +13,15 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import type { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
-const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
-  defaultMessage: 'Sample web logs',
-});
-const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
-  defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
-});
-
 export const logsSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'logs',
-    name: logsName,
-    description: logsDescription,
+    name: i18n.translate('home.sampleData.logsSpecTitle', {
+      defaultMessage: 'Sample web logs',
+    }),
+    description: i18n.translate('home.sampleData.logsSpecDescription', {
+      defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
+    }),
     previewImagePath: staticAssets.getPluginAssetHref(
       '/sample_data_resources/logs/search_analytics.svg'
     ),

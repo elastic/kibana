@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extname } from 'path';
+import path from 'node:path';
 import type { Readable } from 'stream';
 import { chain } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
+  MAX_SAVED_OBJECTS_PER_QUERY,
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -43,6 +49,7 @@ export const registerResolveImportErrorsRoute = (
         access: 'public',
         description:
           'To resolve errors from the import objects API, you can retry certain saved objects, overwrite specific saved objects, and change references to different saved objects',
+        oasOperationObject: () => path.resolve(__dirname, './resolve_import_errors.examples.yaml'),
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
@@ -58,8 +65,20 @@ export const registerResolveImportErrorsRoute = (
       validate: {
         query: schema.object(
           {
-            createNewCopies: schema.boolean({ defaultValue: false }),
-            compatibilityMode: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Creates copies of saved objects, regenerates each object ID, and resets the origin.',
+              },
+            }),
+            compatibilityMode: schema.boolean({
+              defaultValue: false,
+              meta: {
+                description:
+                  'Applies adjustments to maintain compatibility between different Kibana versions.',
+              },
+            }),
           },
           {
             validate: (object) => {
@@ -73,22 +92,22 @@ export const registerResolveImportErrorsRoute = (
           file: schema.stream(),
           retries: schema.arrayOf(
             schema.object({
-              type: schema.string(),
-              id: schema.string(),
+              type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+              id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
               overwrite: schema.boolean({ defaultValue: false }),
-              destinationId: schema.maybe(schema.string()),
+              destinationId: schema.maybe(schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH })),
               replaceReferences: schema.arrayOf(
                 schema.object({
-                  type: schema.string(),
-                  from: schema.string(),
-                  to: schema.string(),
+                  type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                  from: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
+                  to: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
                 }),
-                { defaultValue: [], maxSize: 100 }
+                { defaultValue: [], maxSize: MAX_SAVED_OBJECTS_PER_QUERY }
               ),
               createNewCopy: schema.maybe(schema.boolean()),
               ignoreMissingReferences: schema.maybe(schema.boolean()),
             }),
-            { maxSize: 10_000 }
+            { maxSize: MAX_SAVED_OBJECTS_PER_BULK_REQUEST }
           ),
         }),
       },
@@ -106,7 +125,7 @@ export const registerResolveImportErrorsRoute = (
         .catch(() => {});
 
       const file = req.body.file as FileStream;
-      const fileExtension = extname(file.hapi.filename).toLowerCase();
+      const fileExtension = path.extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }

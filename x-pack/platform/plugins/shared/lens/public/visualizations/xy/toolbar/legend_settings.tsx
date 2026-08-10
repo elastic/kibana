@@ -124,13 +124,6 @@ export const XyLegendSettings = ({
           legend: { ...state.legend, maxLines: val },
         });
       }}
-      maxPixels={state?.legend.maxPixels}
-      onMaxPixelsChange={(val) => {
-        setState({
-          ...state,
-          legend: { ...state.legend, maxPixels: val },
-        });
-      }}
       shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
       onTruncateLegendChange={() => {
         const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;

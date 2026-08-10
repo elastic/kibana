@@ -31,8 +31,10 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/search-types'
   - '@kbn/task-manager-plugin'
+  - '@kbn/esql-types'
   - '@kbn/esql-utils'
   - '@kbn/safer-lodash-set'
+  - '@kbn/datemath'
 tags:
   - shared-server
   - package
@@ -46,26 +48,6 @@ fileGroups:
     - '**/*.tsx'
     - '**/*.d.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

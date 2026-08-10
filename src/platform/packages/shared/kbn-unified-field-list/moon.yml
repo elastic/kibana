@@ -49,6 +49,8 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/css-utils'
   - '@kbn/field-formats-common'
+  - '@kbn/ebt-click'
+  - '@kbn/scout'
 tags:
   - shared-browser
   - package
@@ -60,28 +62,9 @@ fileGroups:
   src:
     - '*.ts'
     - src/**/*
+    - test/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

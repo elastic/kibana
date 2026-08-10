@@ -12,7 +12,7 @@ import { DataQualityCard } from './data_quality_card';
 import {
   createMockWiredStreamDefinition,
   createMockQueryStreamDefinition,
-} from '../data_management/shared/mocks';
+} from '../stream_management/data_management/shared/mocks';
 
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsAppFetch = jest.fn();
@@ -37,8 +37,13 @@ jest.mock('../../hooks/use_time_range', () => ({
   useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
 }));
 
+jest.mock('./top_failure_reasons', () => ({
+  TopFailureReasons: () => null,
+}));
+
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: { application: { navigateToUrl: jest.fn() }, uiSettings: {} },
     dependencies: {
       start: {
         data: { search: { search: jest.fn() } },

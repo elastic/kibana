@@ -50,7 +50,6 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       async (context, _request, response) => {
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         let installation;
 
@@ -145,9 +144,9 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                   queries: enrichedQueries,
                   enabled: false,
                   created_at: now,
-                  created_by: currentUser,
+                  created_by: 'elastic',
                   updated_at: now,
-                  updated_by: currentUser,
+                  updated_by: 'elastic',
                   version: packAssetSavedObject.attributes.version ?? 1,
                 },
                 {
@@ -199,8 +198,9 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     omit(packSavedObjectsResponse.saved_objects[0].attributes, 'queries'),
                     omit(packAssetSavedObject.attributes, 'queries'),
                     {
+                      created_by: 'elastic',
                       updated_at: now,
-                      updated_by: currentUser,
+                      updated_by: 'elastic',
                       queries: convertPackQueriesToSO(enrichedQueries),
                     },
                     {

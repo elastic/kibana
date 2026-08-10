@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
@@ -137,6 +138,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
       misconfigurationsFlyout = findings.misconfigurationsFlyout;
+      // Disable the new flyout so the CSP findings flyout uses its legacy selectors
+      await kibanaServer.uiSettings.update({ 'securitySolution:enableNewFlyout': false });
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
       // Prepare mocked findings
@@ -147,6 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await findings.index.remove();
       await findings.detectionRuleApi.remove();
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     beforeEach(async () => {
@@ -166,11 +170,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const toastMessageElement = await toasts.getElementByIndex();
         expect(toastMessageElement).to.be.ok();
-        const toastMessageTitle = await toastMessageElement.findByTestSubject(
-          'csp:toast-success-title'
-        );
 
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        await retry.try(async () => {
+          const toastMessageTitle = await toastMessageElement.findByTestSubject(
+            'csp:toast-success-title'
+          );
+          expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        });
 
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
@@ -200,8 +206,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const toastMessage = await toasts.getElementByIndex();
         expect(toastMessage).to.be.ok();
 
-        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        await retry.try(async () => {
+          const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+          expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        });
 
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')

@@ -80,7 +80,7 @@ export function AddDataView() {
   const secretToken = data?.collector?.secretToken;
   const collectionAgentHost = data?.collector?.host;
   const symbolUrl = data?.symbolizer?.host;
-  const stackVersion = data?.stackVersion!;
+  const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
   const tabs: Tab[] = useMemo(
@@ -511,13 +511,12 @@ EOF`}
 
   return (
     <ProfilingAppPageTemplate
-      tabs={[]}
       restrictWidth
       hideSearchBar
       pageTitle={
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="m" />
+            <EuiIcon type="logoObservability" size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.profiling.noDataPage.pageTitle', {

@@ -15,10 +15,18 @@ export const INFERENCE_CONNECTORS_INTERNAL_API_PATH =
   '/internal/search_inference_endpoints/connectors' as const;
 
 /**
+ * Connector entry returned by {@link INFERENCE_CONNECTORS_INTERNAL_API_PATH}.
+ * `isRecommended` is set server-side for endpoints that a feature recommends when no
+ * saved-object override is configured.
+ */
+export interface ApiInferenceConnector extends InferenceConnector {
+  isRecommended?: boolean;
+}
+
+/**
  * Response body shape for {@link INFERENCE_CONNECTORS_INTERNAL_API_PATH}.
  */
 export interface InferenceConnectorsApiResponseBody {
-  connectors: InferenceConnector[];
-  allConnectors: InferenceConnector[];
+  connectors: ApiInferenceConnector[];
   soEntryFound: boolean;
 }

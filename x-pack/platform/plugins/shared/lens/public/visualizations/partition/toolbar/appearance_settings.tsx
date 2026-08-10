@@ -48,7 +48,7 @@ export function PartitionAppearanceSettings(
     emptySizeRatioOptions.map(({ id, label, icon }) => ({
       value: id,
       label,
-      prepend: icon ? <EuiIcon type={icon} /> : undefined,
+      prepend: icon ? <EuiIcon type={icon} aria-hidden={true} /> : undefined,
     }));
 
   const selectedOption = emptySizeRatioOptions

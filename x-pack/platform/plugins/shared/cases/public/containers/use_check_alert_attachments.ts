@@ -19,6 +19,7 @@ interface DocumentReference {
   alertId?: string[] | string;
   eventId?: string | string[];
   externalReferenceId?: string | string[];
+  attachmentId?: string | string[];
 }
 
 export const hasDocReferences = <T>(arg: T): arg is T & DocumentReference => {
@@ -27,7 +28,7 @@ export const hasDocReferences = <T>(arg: T): arg is T & DocumentReference => {
   }
 
   const candidate = arg as DocumentReference;
-  const idFields = ['alertId', 'eventId', 'externalReferenceId'] as const;
+  const idFields = ['alertId', 'eventId', 'externalReferenceId', 'attachmentId'] as const;
 
   for (const fieldName of idFields) {
     if (
@@ -47,8 +48,8 @@ export const useCheckDocumentAttachments = ({
 }: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
   const selectedDocumentIds = (getAttachments?.({ theCase: undefined }) ?? [])
     .filter(hasDocReferences)
-    .flatMap(({ alertId, eventId, externalReferenceId }) =>
-      [alertId, eventId, externalReferenceId].flat()
+    .flatMap(({ alertId, eventId, externalReferenceId, attachmentId }) =>
+      [alertId, eventId, externalReferenceId, attachmentId].flat()
     )
     .filter(
       (reference): reference is string => typeof reference === 'string' && reference.length > 0

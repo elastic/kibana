@@ -40,13 +40,6 @@ describe('usesOAuthAuthorizationCode', () => {
     expect(usesOAuthAuthorizationCode(connector)).toBe(true);
   });
 
-  it('returns true when config.auth.type is oauth_authorization_code', () => {
-    const connector = createConnector({
-      config: { auth: { type: 'oauth_authorization_code' } },
-    });
-    expect(usesOAuthAuthorizationCode(connector)).toBe(true);
-  });
-
   it('returns true when authMode is per-user (API-created spec connector)', () => {
     const connector = createConnector({ authMode: 'per-user', config: {} });
     expect(usesOAuthAuthorizationCode(connector)).toBe(true);

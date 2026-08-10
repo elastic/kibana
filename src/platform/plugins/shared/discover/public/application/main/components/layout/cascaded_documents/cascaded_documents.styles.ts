@@ -28,6 +28,17 @@ export const cascadedDocumentsStyles = ({ euiTheme }: { euiTheme: EuiThemeShape 
       transform: 'none !important',
     },
 
+    // Remove the contain property from the data cascade scroll container when full screen mode is active
+    '&:has(.euiDataGrid--fullScreen) [data-test-subj="dataCascadeScrollContainer"]': {
+      contain: 'none',
+    },
+
+    // Remove the contain property from the data cascade rows when full screen mode is active
+    // to ensure the full screen grid can take up the entire screen.
+    '&:has(.euiDataGrid--fullScreen) [role="row"][data-row-type]': {
+      contain: 'none',
+    },
+
     // This is also required because we clip the rendered content
     // in the cascade grid cells to have rounded corners
     // but in full screen mode we want to disable that clipping,

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphEdge } from '@dagrejs/dagre';
 import { graphlib } from '@dagrejs/dagre';
+import type { EdgeLabel } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
-import type { GraphNodeUnion } from '../types';
+import type { GraphNodeUnion, WorkflowGraphType } from '../types';
+import { isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -29,11 +30,12 @@ import type { GraphNodeUnion } from '../types';
  * ```
  */
 export class WorkflowGraph {
-  private graph: graphlib.Graph<GraphNodeUnion>;
+  private graph: WorkflowGraphType;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
+  private innerStepIdsCache = new Map<string, Set<string>>();
 
-  constructor(graph: graphlib.Graph<GraphNodeUnion>) {
+  constructor(graph: WorkflowGraphType) {
     this.graph = graph;
   }
 
@@ -84,9 +86,16 @@ export class WorkflowGraph {
   }
 
   public getNodeStack(nodeId: string): string[] {
+    const currentNode = this.getNode(nodeId);
+
+    if (!currentNode) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
+
     const predecessors = this.getAllPredecessors(nodeId).toReversed();
 
     const stack: string[] = [];
+
     for (const node of predecessors) {
       if (node.type.startsWith('enter-')) {
         stack.push(node.id);
@@ -96,6 +105,11 @@ export class WorkflowGraph {
         stack.pop();
       }
     }
+
+    if (currentNode.type.startsWith('exit-')) {
+      stack.pop();
+    }
+
     return stack;
   }
 
@@ -107,7 +121,7 @@ export class WorkflowGraph {
     return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
   }
 
-  public getEdge(edgeMetadata: { v: string; w: string }): GraphEdge {
+  public getEdge(edgeMetadata: { v: string; w: string }): EdgeLabel | undefined {
     return this.graph.edge(edgeMetadata);
   }
 
@@ -174,6 +188,16 @@ export class WorkflowGraph {
     return successors.map((id) => this.graph.node(id));
   }
 
+  /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */
+  public getWorkflowLevelTimeout(): string | undefined {
+    for (const node of this.getAllNodes()) {
+      if (isEnterWorkflowTimeoutZone(node)) {
+        return node.timeout;
+      }
+    }
+    return undefined;
+  }
+
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const visited = new Set<string>();
     const collectPredecessors = (predNodeId: string) => {
@@ -190,5 +214,19 @@ export class WorkflowGraph {
     const directPredecessors = this.graph.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
     return Array.from(visited).map((id) => this.graph.node(id));
+  }
+
+  /** Inner stepIds for a compound step (excluding that step). Cached. */
+  public getInnerStepIds(compoundStepId: string): Set<string> {
+    const cached = this.innerStepIdsCache.get(compoundStepId);
+    if (cached) {
+      return cached;
+    }
+
+    const subGraph = this.getStepGraph(compoundStepId);
+    const stepIds = new Set(subGraph.getAllNodes().map((n) => n.stepId));
+    stepIds.delete(compoundStepId);
+    this.innerStepIdsCache.set(compoundStepId, stepIds);
+    return stepIds;
   }
 }

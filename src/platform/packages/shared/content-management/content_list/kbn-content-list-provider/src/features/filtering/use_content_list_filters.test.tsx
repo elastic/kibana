@@ -9,10 +9,21 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { ContentListProvider } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import { useContentListFilters } from './use_content_list_filters';
 import { useContentListSearch } from '../search/use_content_list_search';
+
+const mockFavoritesClient: FavoritesClientPublic = {
+  getFavorites: jest.fn().mockResolvedValue({ favoriteIds: [] }),
+  addFavorite: jest.fn(),
+  removeFavorite: jest.fn(),
+  isAvailable: jest.fn().mockResolvedValue(true),
+  getFavoriteType: jest.fn().mockReturnValue('dashboard'),
+  reportAddFavoriteClick: jest.fn(),
+  reportRemoveFavoriteClick: jest.fn(),
+};
 
 describe('useContentListFilters', () => {
   const mockFindItems = jest.fn(
@@ -23,13 +34,14 @@ describe('useContentListFilters', () => {
   );
 
   const createWrapper =
-    () =>
+    (services?: { favorites?: FavoritesClientPublic }) =>
     ({ children }: { children: React.ReactNode }) =>
       (
         <ContentListProvider
           id="test-list"
           labels={{ entity: 'item', entityPlural: 'items' }}
           dataSource={{ findItems: mockFindItems }}
+          services={services}
         >
           {children}
         </ContentListProvider>
@@ -45,33 +57,53 @@ describe('useContentListFilters', () => {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.filters).toEqual({
-        search: undefined,
-      });
+      // `toFindItemsFilters(EMPTY_MODEL)` produces `{}` (empty object).
+      expect(result.current.filters).toEqual({});
     });
   });
 
   describe('clearFilters', () => {
-    it('resets filters to defaults', () => {
+    it('strips filter clauses from queryText', () => {
       const { result } = renderHook(
         () => ({ filters: useContentListFilters(), search: useContentListSearch() }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper({ favorites: mockFavoritesClient }) }
       );
 
       act(() => {
-        result.current.search.setSearch('query', {
-          search: 'query',
-          tag: { include: ['tag-1'] },
-        });
+        result.current.search.setQueryFromText('is:starred');
+      });
+
+      expect(result.current.filters.filters).toEqual({ starred: { state: 'include' } });
+
+      act(() => {
+        result.current.filters.clearFilters();
+      });
+
+      expect(result.current.filters.filters).toEqual({});
+      expect(result.current.search.queryText).toBe('');
+    });
+
+    it('preserves free-text search when clearing filters', () => {
+      const { result } = renderHook(
+        () => ({ filters: useContentListFilters(), search: useContentListSearch() }),
+        { wrapper: createWrapper({ favorites: mockFavoritesClient }) }
+      );
+
+      act(() => {
+        result.current.search.setQueryFromText('is:starred my search');
+      });
+
+      expect(result.current.filters.filters).toEqual({
+        search: 'my search',
+        starred: { state: 'include' },
       });
 
       act(() => {
         result.current.filters.clearFilters();
       });
 
-      expect(result.current.filters.filters).toEqual({
-        search: undefined,
-      });
+      expect(result.current.search.queryText).toBe('my search');
+      expect(result.current.filters.filters).toEqual({ search: 'my search' });
     });
   });
 

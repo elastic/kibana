@@ -7,6 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinition } from '../../types/processors';
+import {
+  URI_PARTS_DEFAULT_TARGET,
+  URI_PARTS_NUMBER_SUBFIELDS,
+  URI_PARTS_STRING_SUBFIELDS,
+} from '../../types/processors/uri_parts';
 import { isAlwaysCondition } from '../../types/conditions';
 import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 import {
@@ -69,6 +74,25 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
         });
       }
       break;
+
+    case 'uri_parts': {
+      const prefix = processor.to || URI_PARTS_DEFAULT_TARGET;
+      for (const sub of URI_PARTS_STRING_SUBFIELDS) {
+        fields.push(`${prefix}.${sub}`);
+      }
+      for (const sub of URI_PARTS_NUMBER_SUBFIELDS) {
+        fields.push(`${prefix}.${sub}`);
+      }
+      // keep_original defaults to true; only skip when explicitly disabled
+      if (processor.keep_original !== false) {
+        fields.push(`${prefix}.original`);
+      }
+      // remove_if_successful nulls the source field on a successful parse.
+      if (processor.remove_if_successful === true && processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+    }
 
     case 'convert':
       if (processor.to) {
@@ -154,6 +178,20 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       });
       break;
 
+    case 'enrich':
+      fields.push(processor.to);
+      break;
+
+    case 'user_agent':
+      fields.push(processor.to ?? 'user_agent');
+      break;
+    case 'registered_domain':
+      fields.push(`${processor.prefix}.domain`);
+      fields.push(`${processor.prefix}.registered_domain`);
+      fields.push(`${processor.prefix}.top_level_domain`);
+      fields.push(`${processor.prefix}.subdomain`);
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -201,6 +239,24 @@ function convertTypeToFieldType(convertType: string): FieldType {
 }
 
 /**
+ * Returns the sub-field name when `fieldName === \`${prefix}.<subfield>\``
+ * and the sub-field is non-empty. Returns `null` otherwise.
+ *
+ * Used by `getProcessorOutputType` to safely classify `uri_parts` output
+ * sub-fields (e.g. `port` → number). Without the `startsWith` guard a raw
+ * `fieldName.slice(prefix.length + 1)` can silently produce a substring
+ * that accidentally matches a valid sub-field name — e.g. `prefix = "x"`,
+ * `fieldName = "abcport"` → `slice(2) === "port"` → misclassified as number.
+ */
+function subfieldAfterPrefix(fieldName: string, prefix: string): string | null {
+  const expectedStart = `${prefix}.`;
+  if (!fieldName.startsWith(expectedStart) || fieldName.length === expectedStart.length) {
+    return null;
+  }
+  return fieldName.slice(expectedStart.length);
+}
+
+/**
  * Get the expected output type for each processor action.
  */
 export function getProcessorOutputType(
@@ -243,7 +299,23 @@ export function getProcessorOutputType(
     case 'lowercase':
     case 'trim':
     case 'concat':
+    case 'registered_domain':
       return 'string';
+
+    case 'uri_parts': {
+      const prefix = processor.to || URI_PARTS_DEFAULT_TARGET;
+      if (processor.remove_if_successful === true && fieldName === processor.from) {
+        return 'unknown';
+      }
+      const subfield = subfieldAfterPrefix(fieldName, prefix);
+      if (
+        subfield !== null &&
+        (URI_PARTS_NUMBER_SUBFIELDS as readonly string[]).includes(subfield)
+      ) {
+        return 'number';
+      }
+      return 'string';
+    }
 
     case 'date':
       return 'date';
@@ -299,11 +371,14 @@ export function getProcessorOutputType(
       }
     }
 
+    case 'enrich':
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
     case 'manual_ingest_pipeline':
+    case 'user_agent':
       return 'unknown';
+
     default: {
       const _exhaustiveCheck: never = processor;
       return _exhaustiveCheck;
@@ -352,6 +427,12 @@ export function getExpectedInputType(
       }
       return null;
 
+    case 'uri_parts':
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'math':
       if (extractFieldsFromMathExpression(processor.expression).includes(fieldName)) {
         return ['number'];
@@ -385,6 +466,12 @@ export function getExpectedInputType(
       }
       return null;
 
+    case 'registered_domain':
+      if (processor.expression === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'sort':
     case 'rename':
     case 'set':
@@ -393,6 +480,7 @@ export function getExpectedInputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'network_direction':
+    case 'enrich':
     case 'manual_ingest_pipeline':
       return null;
     case 'json_extract':
@@ -400,6 +488,13 @@ export function getExpectedInputType(
         return ['string'];
       }
       return null;
+
+    case 'user_agent':
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     default: {
       const _exhaustiveCheck: never = processor;
       return _exhaustiveCheck;
@@ -437,6 +532,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
       case 'remove':
       case 'grok':
       case 'dissect':
+      case 'uri_parts':
       case 'uppercase':
       case 'lowercase':
       case 'trim':
@@ -471,6 +567,17 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         break;
       case 'json_extract':
         fieldsUsed.push(step.field);
+        break;
+      case 'enrich':
+        fieldsUsed.push(step.to);
+        break;
+      case 'user_agent':
+        if (step.from) {
+          fieldsUsed.push(step.from);
+        }
+        break;
+      case 'registered_domain':
+        fieldsUsed.push(step.expression);
         break;
       case 'append':
       case 'drop_document':

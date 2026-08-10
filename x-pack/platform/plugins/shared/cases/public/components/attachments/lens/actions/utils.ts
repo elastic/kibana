@@ -5,12 +5,11 @@
  * 2.0.
  */
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { LENS_ATTACHMENT_TYPE } from '../../../../../common/constants/visualizations';
-import type { PersistableStateAttachmentPayload } from '../../../../../common/types/domain';
-import { AttachmentType } from '../../../../../common/types/domain';
+import { LENS_ATTACHMENT_TYPE } from '../../../../../common/constants/attachments';
+import type { UnifiedValueAttachmentPayload } from '../../../../../common/types/domain';
 import type { LensProps } from '../types';
 
-type PersistableStateAttachmentWithoutOwner = Omit<PersistableStateAttachmentPayload, 'owner'>;
+type UnifiedValueAttachmentWithoutOwner = Omit<UnifiedValueAttachmentPayload, 'owner'>;
 
 export const getLensCaseAttachment = ({
   timeRange,
@@ -20,9 +19,10 @@ export const getLensCaseAttachment = ({
   timeRange: LensProps['timeRange'];
   attributes: LensSavedObjectAttributes;
   metadata?: LensProps['metadata'];
-}): PersistableStateAttachmentWithoutOwner =>
+}): UnifiedValueAttachmentWithoutOwner =>
   ({
-    persistableStateAttachmentState: { attributes, timeRange, metadata },
-    persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-    type: AttachmentType.persistableState,
-  } as unknown as PersistableStateAttachmentWithoutOwner);
+    type: LENS_ATTACHMENT_TYPE,
+    data: {
+      state: { attributes, timeRange, metadata },
+    },
+  } as unknown as UnifiedValueAttachmentWithoutOwner);

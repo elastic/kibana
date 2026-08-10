@@ -65,10 +65,16 @@ export { useConnectorContext } from './application/context/use_connector_context
 export {
   ActionForm,
   CreateConnectorFlyout,
+  CreateConnectorForm,
   EditConnectorFlyout,
 } from './application/sections/action_connector_form';
 
-export type { ConnectorFormSchema } from './application/sections/action_connector_form';
+export type {
+  ConnectorFormSchema,
+  CreateConnectorFormProps,
+  CreateConnectorFormHandle,
+  CreateConnectorFormStatus,
+} from './application/sections/action_connector_form';
 
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 
@@ -106,6 +112,7 @@ export {
   builtInComparators,
   builtInGroupByTypes,
   builtInAggregationTypes,
+  convertFieldSpecToFieldOption,
   getFields,
   getIndexOptions,
   firstFieldOption,
@@ -135,5 +142,8 @@ export { transformRule } from './application/lib/rule_api/common_transformations
 export { validateActionFilterQuery } from './application/lib/value_validators';
 
 export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';
+
+export { RuleQueryInspector } from './application/components/rule_query_inspector';
+export type { RuleQueryInspectorProps } from './application/components/rule_query_inspector';
 
 export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';

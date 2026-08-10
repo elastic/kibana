@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { MaintenanceWindowStatus } from '../../common';
@@ -258,14 +259,16 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
 
     const button = useMemo(
       () => (
-        <EuiButtonIcon
-          isDisabled={isLoading}
-          data-test-subj="table-actions-icon-button"
-          iconType="boxesVertical"
-          size="s"
-          aria-label="Upcoming events"
-          onClick={onButtonClick}
-        />
+        <EuiToolTip content="Upcoming events" disableScreenReaderOutput>
+          <EuiButtonIcon
+            isDisabled={isLoading}
+            data-test-subj="table-actions-icon-button"
+            iconType="boxesVertical"
+            size="s"
+            aria-label="Upcoming events"
+            onClick={onButtonClick}
+          />
+        </EuiToolTip>
       ),
       [isLoading, onButtonClick]
     );
@@ -275,6 +278,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiPopover
+              aria-label={i18n.TABLE_ACTIONS_POPOVER_ARIA_LABEL}
               button={button}
               isOpen={isPopoverOpen}
               closePopover={closePopover}

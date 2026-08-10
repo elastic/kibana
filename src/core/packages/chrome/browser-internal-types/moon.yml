@@ -17,7 +17,10 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/browser-internal-types
 dependsOn:
+  - '@kbn/core-capabilities-common'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-mount-utils-browser'
 tags:
   - shared-common
   - package
@@ -30,26 +33,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

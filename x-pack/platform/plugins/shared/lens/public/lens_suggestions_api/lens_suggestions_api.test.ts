@@ -81,6 +81,38 @@ describe('suggestionsApi', () => {
     expect(suggestions?.length).toEqual(0);
   });
 
+  test('filters out approximation columns from textBasedColumns before passing to datasource', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      testVis: { ...mockVis },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const approxColumn: DatatableColumn = {
+      id: '_approx_col',
+      name: '_approx_col',
+      meta: {
+        type: 'number',
+        esMeta: { approximation: { type: 'count_distinct', column: '@timestamp' } },
+      },
+    };
+    const context = {
+      dataViewSpec: { id: 'index1', title: 'index1', name: 'DataView' },
+      fieldName: '',
+      textBasedColumns: [...textBasedQueryColumns, approxColumn],
+      query: { esql: 'FROM "index1" | STATS COUNT(DISTINCT @timestamp)' },
+    };
+    suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
+    const calledContext = (
+      datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mock.calls[0][0] as {
+        initialContext: typeof context;
+      }
+    ).initialContext;
+    expect(calledContext.textBasedColumns).toEqual(textBasedQueryColumns);
+    expect(calledContext.textBasedColumns).not.toContainEqual(approxColumn);
+  });
+
   test('returns the visualizations suggestions', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
     const visualizationMap = {
@@ -280,6 +312,75 @@ describe('suggestionsApi', () => {
     });
     expect(suggestions?.length).toEqual(1);
     expect(suggestions?.[0].title).toEqual('Tag cloud');
+  });
+
+  test('preserves a table preference when an ES|QL aggregation suggests XY', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      lnsDatatable: {
+        ...mockVis,
+        id: 'lnsDatatable',
+        getSuggestions: () => [
+          {
+            score: 0.4,
+            title: 'Datatable',
+            state: { columns: [] },
+            previewIcon: 'empty',
+            visualizationId: 'lnsDatatable',
+            hide: true,
+          },
+        ],
+      },
+      lnsXY: {
+        ...mockVis,
+        id: 'lnsXY',
+        suggestionPriority: 1,
+        getSuggestions: () => [
+          {
+            score: 0.9,
+            title: 'Bar',
+            state: { preferredSeriesType: 'bar_stacked' },
+            previewIcon: 'empty',
+            visualizationId: 'lnsXY',
+          },
+        ],
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
+
+    const context = {
+      dataViewSpec: { id: 'index1', title: 'index1', name: 'DataView' },
+      fieldName: '',
+      textBasedColumns: [
+        { id: 'count', name: 'COUNT(*)', meta: { type: 'number' } },
+        { id: 'geo.dest', name: 'geo.dest', meta: { type: 'string' } },
+      ] as DatatableColumn[],
+      query: { esql: 'FROM "index1" | STATS COUNT(*) BY geo.dest' },
+    };
+
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredChartType: ChartType.Table,
+      preferredVisAttributes: {
+        visualizationType: 'lnsDatatable',
+        state: {
+          visualization: { columns: [] },
+          datasourceStates: { textBased: { layers: {} } },
+          query: { esql: 'FROM "index1" | keep field1, field2' },
+        },
+      } as unknown as TypedLensByValueInput['attributes'],
+    });
+
+    expect(suggestions).toHaveLength(1);
+    expect(suggestions?.[0].visualizationId).toEqual('lnsDatatable');
   });
 
   test('returns the suggestion as line if user asks for it ', async () => {
@@ -629,6 +730,83 @@ describe('suggestionsApi', () => {
       legend: { isVisible: false, position: 'left' },
       yLeftExtent: { mode: 'custom', lowerBound: 0, upperBound: 100 },
     });
+  });
+
+  test('keeps the preferred visualization as the primary suggestion seed', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const preservedVisualizationState = {
+      preferredSeriesType: 'bar_stacked',
+      legend: { isVisible: false, position: 'left' as const },
+    };
+    const xyGetSuggestions = jest.fn(({ state }: { state?: unknown }) => [
+      {
+        score: 0.5,
+        title: 'XY chart',
+        state: state ?? { preferredSeriesType: 'bar_stacked' },
+        previewIcon: 'empty',
+      },
+    ]);
+    const metricGetSuggestions = jest.fn(() => [
+      {
+        score: 0.6,
+        title: 'Metric',
+        state: {},
+        previewIcon: 'empty',
+      },
+    ]);
+    const visualizationMap = {
+      lnsMetric: {
+        ...mockVis,
+        id: 'lnsMetric',
+        getSuggestions: metricGetSuggestions,
+      },
+      lnsXY: {
+        ...mockVis,
+        id: 'lnsXY',
+        getSuggestions: xyGetSuggestions,
+      },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const context = {
+      dataViewSpec: { id: 'index1', title: 'index1', name: 'DataView' },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: { esql: 'FROM "index1" | keep field1, field2' },
+    };
+
+    const suggestions = suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredVisAttributes: {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: preservedVisualizationState,
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  columns: [{ fieldName: 'stale_field' }],
+                },
+              },
+            },
+          },
+          query: { esql: 'FROM "index1" | keep stale_field' },
+        },
+      } as unknown as TypedLensByValueInput['attributes'],
+    });
+
+    expect(metricGetSuggestions).toHaveBeenCalled();
+    expect(xyGetSuggestions).toHaveBeenCalledTimes(2);
+    expect(xyGetSuggestions.mock.calls[1]?.[0].state).toEqual(preservedVisualizationState);
+    expect(suggestions?.[0].visualizationId).toEqual('lnsXY');
+    expect(suggestions?.[0].visualizationState).toEqual(preservedVisualizationState);
   });
 
   test('preserves preferred attributes when switching visualization family (XY to Pie)', async () => {

@@ -11,16 +11,18 @@ import { Children, Fragment, isValidElement, useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import type { ParsedPart } from '@kbn/content-list-assembly';
-import { useContentListSort, useFilterDisplay } from '@kbn/content-list-provider';
+import { useContentListSort, useContentListConfig } from '@kbn/content-list-provider';
 import { filter } from '../filters/part';
 import { Filters, type FiltersProps } from '../filters/filters';
 import type { FilterContext } from '../filters/part';
 
-// Default order: starred toggle → tag facet → sort. Each resolves to undefined when its
-// corresponding service/feature is absent, so unused entries are silently dropped.
+// Default order: starred toggle → tag facet → created by → sort.
+// Each resolves to undefined when its corresponding service/feature is absent,
+// so unused entries are silently dropped.
 const DEFAULT_PARTS: ParsedPart[] = [
   { type: 'part', part: 'filter', preset: 'starred', instanceId: 'starred', attributes: {} },
   { type: 'part', part: 'filter', preset: 'tags', instanceId: 'tags', attributes: {} },
+  { type: 'part', part: 'filter', preset: 'createdBy', instanceId: 'createdBy', attributes: {} },
   { type: 'part', part: 'filter', preset: 'sort', instanceId: 'sort', attributes: {} },
 ];
 
@@ -74,26 +76,31 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  * 1. Extract `<Filters>` children from the toolbar's children.
  * 2. Parse declarative `Filter` presets via `filter.parseChildren`.
  * 3. Resolve `SearchFilterConfig` objects via `filter.resolve`.
- * 4. Fall back to default filters (tags + sort) if none are found.
+ * 4. Fall back to default filters (starred + tags + created by + sort) if none are found.
+ *
+ * Custom (consumer-registered) filters are *not* rendered automatically; a
+ * registered filter dimension powers KQL search and facet counts on its own,
+ * and its toolbar control is placed explicitly via `filter.createComponent`
+ * (see `createFilterControl` in `@kbn/content-list-provider-client`).
  *
  * @param children - React children from the toolbar component.
  * @returns Array of EUI search filter configs ready for `EuiSearchBar`.
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
-  const { hasTags, hasStarred } = useFilterDisplay();
+  const { supports } = useContentListConfig();
+  const { tags: hasTags, starred: hasStarred, userProfiles: hasCreatedBy } = supports;
 
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
   // recompute more than expected. The parsing logic is cheap, so this is
-  // acceptable today. If the filter set grows or resolution becomes expensive,
-  // consider keying on a more stable signal.
+  // acceptable today.
   return useMemo(() => {
     const parts = parseFilterParts(children);
-    const context: FilterContext = { hasSorting, hasTags, hasStarred };
+    const context: FilterContext = { hasSorting, hasTags, hasStarred, hasCreatedBy };
 
     return parts
       .map((part) => filter.resolve(part, context))
-      .filter((f): f is SearchFilterConfig => f !== undefined);
-  }, [children, hasSorting, hasTags, hasStarred]);
+      .filter((filterConfig): filterConfig is SearchFilterConfig => filterConfig !== undefined);
+  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy]);
 };

@@ -25,7 +25,8 @@ export {
   getBodyCompletionItems,
   shouldTriggerSuggestions,
 } from './autocomplete_utils';
-export { getLineTokens, containsUrlParams } from './tokens_utils';
+export { getLineTokens, containsUrlParams, isRequestLineStart } from './tokens_utils';
+export { getKibanaApiDocLink } from './kibana_api_doc_links';
 export { getStatusCodeDecorations } from './status_code_decoration_utils';
 export {
   isMapboxVectorTile,

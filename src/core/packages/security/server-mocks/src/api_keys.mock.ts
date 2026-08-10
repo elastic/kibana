@@ -18,6 +18,7 @@ export const apiKeysMock = {
       create: jest.fn(),
       update: jest.fn(),
       grantAsInternalUser: jest.fn(),
+      cloneAsInternalUser: jest.fn(),
       validate: jest.fn(),
       invalidate: jest.fn(),
       invalidateAsInternalUser: jest.fn(),
@@ -25,6 +26,7 @@ export const apiKeysMock = {
         grant: jest.fn(),
         invalidate: jest.fn(),
         convert: jest.fn(),
+        getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({}),
       },
     }),
 };

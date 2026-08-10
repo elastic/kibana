@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-
 // This import needs to come first as it contains the jest.mocks
+import { createPreviewError, mockDocuments } from './helpers/mocks';
 import { setupEnvironment } from './helpers';
-import type { Props } from '../../public/components/field_editor_flyout_content';
+import { screen, waitFor } from '@testing-library/react';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 import { setup } from './field_editor_flyout_content.helpers';
-import { mockDocuments, createPreviewError } from './helpers/mocks';
 
 describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
@@ -32,13 +30,13 @@ describe('<FieldEditorFlyoutContent />', () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
-  test('should have the correct title', async () => {
-    const { exists, find } = await setup();
-    expect(exists('flyoutTitle')).toBe(true);
-    expect(find('flyoutTitle').text()).toBe('Create field');
+  it('should have the correct title', async () => {
+    await setup();
+
+    expect(screen.getByText('Create field')).toBeVisible();
   });
 
-  test('should allow an existing field to be provided', async () => {
+  it('should allow an existing field to be provided', async () => {
     const field = {
       name: 'foo',
       type: 'ip' as const,
@@ -47,15 +45,17 @@ describe('<FieldEditorFlyoutContent />', () => {
       },
     };
 
-    const { find } = await setup({ fieldToEdit: field });
+    const {
+      actions: { getByTestSubjectPath },
+    } = await setup({ fieldToEdit: field });
 
-    expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
-    expect(find('nameField.input').props().value).toBe(field.name);
-    expect(find('typeField').props().value).toBe(field.type);
-    expect(find('scriptField').props().value).toBe(field.script.source);
+    expect(screen.getByText(`Edit field 'foo'`)).toBeVisible();
+    expect(getByTestSubjectPath('nameField.input')).toHaveValue(field.name);
+    expect(getByTestSubjectPath('typeField')).toHaveValue(field.type);
+    expect(getByTestSubjectPath('scriptField')).toHaveValue(field.script.source);
   });
 
-  test('should allow a new field to be created with initial configuration', async () => {
+  it('should allow a new field to be created with initial configuration', async () => {
     const fieldToCreate = {
       name: 'demotestfield',
       type: 'boolean' as const,
@@ -65,74 +65,72 @@ describe('<FieldEditorFlyoutContent />', () => {
       popularity: 1,
     };
 
-    const { find } = await setup({ fieldToCreate });
+    const {
+      actions: { getByTestSubjectPath },
+    } = await setup({ fieldToCreate });
 
-    expect(find('flyoutTitle').text()).toBe(`Create field`);
-    expect(find('nameField.input').props().value).toBe(fieldToCreate.name);
-    expect(find('typeField').props().value).toBe(fieldToCreate.type);
-    expect(find('scriptField').props().value).toBe(fieldToCreate.script.source);
-    expect(find('editorFieldCount').props().value).toBe(fieldToCreate.popularity.toString());
+    expect(screen.getByText(`Create field`)).toBeVisible();
+    expect(getByTestSubjectPath('nameField.input')).toHaveValue(fieldToCreate.name);
+    expect(getByTestSubjectPath('typeField')).toHaveValue(fieldToCreate.type);
+    expect(getByTestSubjectPath('scriptField')).toHaveValue(fieldToCreate.script.source);
+    expect(getByTestSubjectPath('editorFieldCount')).toHaveValue(fieldToCreate.popularity);
   });
 
-  test('should accept an "onSave" prop', async () => {
+  it('should accept an "onSave" prop', async () => {
     const field = {
       name: 'foo',
       type: 'date' as const,
       script: { source: 'test=123' },
     };
-    const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    const onSave = jest.fn();
 
-    const { find, actions } = await setup({ onSave, fieldToEdit: field });
+    const {
+      actions: { saveField },
+    } = await setup({ onSave, fieldToEdit: field });
 
-    await act(async () => {
-      find('fieldSaveButton').simulate('click');
-    });
+    await saveField();
 
-    await actions.waitForUpdates(); // Run the validations
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
 
     expect(onSave).toHaveBeenCalled();
     const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
     expect(fieldReturned).toEqual({ ...field, format: null });
   });
 
-  test('should accept an onCancel prop', async () => {
+  it('should accept an onCancel prop', async () => {
     const onCancel = jest.fn();
-    const { find } = await setup({ onCancel });
+    const {
+      actions: { closeFlyout },
+    } = await setup({ onCancel });
 
-    find('closeFlyoutButton').simulate('click');
+    await closeFlyout();
 
     expect(onCancel).toHaveBeenCalled();
   });
 
   describe('validation', () => {
-    test('should validate the fields and prevent saving invalid form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    it('should validate the fields and prevent saving invalid form', async () => {
+      const onSave = jest.fn();
 
       const {
-        find,
-        form,
-        actions: { waitForUpdates },
+        actions: { saveField },
       } = await setup({ onSave });
 
-      expect(find('fieldSaveButton').props().disabled).toBe(false);
+      expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-      });
+      await saveField();
 
-      await waitForUpdates();
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled());
 
       expect(onSave).toHaveBeenCalledTimes(0);
-      expect(find('fieldSaveButton').props().disabled).toBe(true);
-      expect(form.getErrorsMessages()).toEqual(['A name is required.']);
+      expect(screen.getAllByText('A name is required.')).toHaveLength(2);
     });
 
-    test('should forward values from the form', async () => {
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+    it('should forward default values from the form', async () => {
+      const onSave = jest.fn();
 
       const {
-        find,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { fields, saveField, toggleFormRow, waitForUpdates },
       } = await setup({ onSave });
 
       await fields.updateName('someName');
@@ -140,63 +138,64 @@ describe('<FieldEditorFlyoutContent />', () => {
       await fields.updateScript('echo("hello")');
 
       await waitForUpdates();
+      await saveField();
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      expect(onSave).toHaveBeenCalledTimes(1);
+
+      const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        script: { source: 'echo("hello")' },
+        type: 'keyword', // default to keyword
+        format: null,
       });
+    });
 
-      expect(onSave).toHaveBeenCalled();
+    it('should forward updated type and popularity from the form', async () => {
+      const onSave = jest.fn();
+      const fieldToCreate = {
+        name: 'someName',
+        type: 'keyword' as const,
+        script: { source: 'echo("hello")' },
+      };
+
+      const {
+        actions: { fields, saveField, toggleFormRow },
+      } = await setup({ fieldToCreate, onSave });
+
+      await fields.updateType('date');
+
+      await saveField();
+
+      expect(onSave).toHaveBeenCalledTimes(1);
 
       let fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(fieldReturned).toEqual({
-        name: 'someName',
-        type: 'keyword', // default to keyword
-        script: { source: 'echo("hello")' },
-        format: null,
-      });
-
-      // Change the type and make sure it is forwarded
-      await fields.updateType('date');
-      await waitForUpdates();
-
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
-
-      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
-
-      expect(fieldReturned).toEqual({
-        name: 'someName',
+        ...fieldToCreate,
         type: 'date',
-        script: { source: 'echo("hello")' },
         format: null,
       });
 
       await toggleFormRow('popularity');
       await fields.updatePopularity('5');
 
-      await waitForUpdates();
+      await saveField();
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
+      expect(onSave).toHaveBeenCalledTimes(2);
 
       fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(fieldReturned).toEqual({
-        name: 'someName',
+        ...fieldToCreate,
         type: 'date',
-        script: { source: 'echo("hello")' },
         format: null,
         popularity: 5,
       });
     });
 
-    test('should not block validation if no documents could be fetched from server', async () => {
+    it('should not block validation if no documents could be fetched from server', async () => {
       // If no documents can be fetched from the cluster (either because there are none or because
       // the request failed), we still need to be able to resolve the painless script validation.
       // In this test we will make sure that the validation for the script does not block saving the
@@ -206,11 +205,10 @@ describe('<FieldEditorFlyoutContent />', () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: [], error, status: 400 });
       setSearchResponse([]);
 
-      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+      const onSave = jest.fn();
 
       const {
-        find,
-        actions: { toggleFormRow, fields, waitForUpdates },
+        actions: { fields, saveField, toggleFormRow, waitForUpdates },
       } = await setup({ onSave });
 
       await fields.updateName('someName');
@@ -219,12 +217,9 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       await waitForUpdates(); // Wait for validation... it should not block and wait for preview response
 
-      await act(async () => {
-        find('fieldSaveButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
+      await saveField();
 
-      expect(onSave).toBeCalled();
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
       const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(fieldReturned).toEqual({

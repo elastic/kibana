@@ -9,10 +9,7 @@ import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useState } from 'react';
 import type { ErrorBudgetEmbeddableState } from '../../../embeddable/slo/error_budget/types';
@@ -22,8 +19,6 @@ import type { ChartData } from '../../../typings/slo';
 import type { TimeBounds } from '../types';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export interface Props {
   data: ChartData[];
@@ -40,8 +35,6 @@ export function ErrorBudgetChartPanel({
   onBrushed,
   hideHeaderDurationLabel = false,
 }: Props) {
-  const [isMouseOver, setIsMouseOver] = useState(false);
-
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const { embeddable } = useKibana().services;
 
@@ -77,22 +70,11 @@ export function ErrorBudgetChartPanel({
         color="transparent"
         hasBorder
         data-test-subj="errorBudgetChartPanel"
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <ErrorBudgetHeader
             slo={slo}
             hideHeaderDurationLabel={hideHeaderDurationLabel}
-            isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
 

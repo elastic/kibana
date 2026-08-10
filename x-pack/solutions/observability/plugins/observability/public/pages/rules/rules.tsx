@@ -125,7 +125,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       data-test-subj="createRuleButton"
       disabled={!authorizedToCreateAnyRules}
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       key="create-alert"
       onClick={() => setRuleTypeModalVisibility(true)}
     >

@@ -256,7 +256,7 @@ export const OptionsListPopoverActionBar = ({
                 >
                   <EuiButtonIcon
                     size="xs"
-                    iconType="list"
+                    iconType="listBullet"
                     aria-pressed={showOnlySelected}
                     color={showOnlySelected ? 'primary' : 'text'}
                     display={showOnlySelected ? 'base' : 'empty'}

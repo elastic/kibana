@@ -17,7 +17,6 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/shared/kibana_react
 dependsOn:
-  - '@kbn/storybook'
   - '@kbn/core'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
@@ -39,30 +38,9 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - .storybook/**/*
     - common/**/*
     - public/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

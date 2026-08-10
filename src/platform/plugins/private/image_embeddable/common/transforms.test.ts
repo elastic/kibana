@@ -10,10 +10,6 @@
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getTransforms } from './transforms';
 
-jest.mock('@kbn/presentation-publishing', () => ({
-  transformTitlesOut: <T>(state: T) => state,
-}));
-
 const identityDrilldownTransforms: DrilldownTransforms = {
   transformIn: (state) => ({ state, references: [] }),
   transformOut: (state) => state,
@@ -81,8 +77,15 @@ describe('Image embeddable transformOut', () => {
     });
   });
 
-  it('passes through state with top-level object_fit unchanged', () => {
+  it('passes through snake_case state without changes', () => {
     const current = {
+      drilldowns: [
+        {
+          label: 'some drilldown',
+          type: 'test',
+          trigger: 'some_trigger',
+        },
+      ],
       image_config: {
         src: {
           type: 'file',

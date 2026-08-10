@@ -7,10 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useMonitorAttachmentConfig } from './use_monitor_attachment_config';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 
 const mockSetChatConfig = jest.fn();
 const mockClearChatConfig = jest.fn();
@@ -103,7 +100,6 @@ describe('useMonitorAttachmentConfig', () => {
     renderHook(() => useMonitorAttachmentConfig());
 
     expect(mockSetChatConfig).toHaveBeenCalledWith({
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,

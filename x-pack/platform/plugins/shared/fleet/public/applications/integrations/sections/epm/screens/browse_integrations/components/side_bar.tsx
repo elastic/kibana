@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiNotificationBadge,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -75,7 +76,7 @@ export const UPDATE_FAILED_CATEGORY = {
 export interface Props {
   isLoading?: boolean;
   categories: CategoryFacet[];
-  selectedCategory: string;
+  selectedCategories: string[];
   onCategoryChange: (category: CategoryFacet) => void;
 }
 
@@ -83,42 +84,51 @@ const StickySidebar = styled(EuiFlexItem)`
   @media screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.m}px) {
     position: sticky;
     top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
-    max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
+    max-height: calc(
+      100vh - var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'))
+    );
     overflow: scroll;
   }
   padding-top: ${(props) => props.theme.euiTheme.size.m};
-  padding-right: ${(props) => props.theme.euiTheme.size.l};
+  padding-right: ${(props) => props.theme.euiTheme.size.m};
 `;
 
 export interface SidebarProps extends Props {
   CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
+  createdIntegrationsCount?: number;
+  isLoadingCreatedIntegrations?: boolean;
+  manageIntegrationsHref?: string;
   onManageIntegrationsClick?: (ev: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isLoading,
   categories,
-  selectedCategory,
+  selectedCategories,
   onCategoryChange,
   CreateIntegrationCardButton,
   hasCreatedIntegrations,
+  createdIntegrationsCount,
+  isLoadingCreatedIntegrations,
+  manageIntegrationsHref,
   onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <StickySidebar>
-      {CreateIntegrationCardButton && (
+      {CreateIntegrationCardButton && !isLoadingCreatedIntegrations && (
         <>
-          <EuiSpacer size="s" />
           {hasCreatedIntegrations ? (
             <EuiLink
               color="text"
+              href={manageIntegrationsHref}
               onClick={onManageIntegrationsClick}
               data-test-subj="manageCreatedIntegrationsLink"
               css={{
-                display: 'inline-flex',
+                display: 'flex',
+                width: '100%',
                 alignItems: 'center',
                 gap: euiTheme.size.s,
                 textDecoration: 'none',
@@ -130,12 +140,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   color: euiTheme.colors.text,
                   fontSize: euiTheme.size.m,
                   fontWeight: euiTheme.font.weight.bold,
+                  flexGrow: 1,
                 }}
               >
                 {i18n.translate('xpack.fleet.epmList.manageCreatedIntegrationsLinkLabel', {
                   defaultMessage: 'Manage my integrations',
                 })}
               </span>
+              {createdIntegrationsCount ? (
+                <EuiNotificationBadge
+                  size="m"
+                  color="accent"
+                  className="euiFacetButton__quantity"
+                  data-test-subj="manageCreatedIntegrationsCount"
+                >
+                  {createdIntegrationsCount}
+                </EuiNotificationBadge>
+              ) : null}
             </EuiLink>
           ) : (
             <CreateIntegrationCardButton />
@@ -146,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <CategoryFacets
         isLoading={isLoading}
         categories={categories}
-        selectedCategory={selectedCategory}
+        selectedCategories={selectedCategories}
         onCategoryChange={onCategoryChange}
       />
     </StickySidebar>
@@ -156,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 export function CategoryFacets({
   isLoading,
   categories,
-  selectedCategory,
+  selectedCategories,
   onCategoryChange,
 }: Props) {
   const controls = (
@@ -172,7 +193,11 @@ export function CategoryFacets({
           return (
             <EuiFacetButton
               data-test-subj={`epmList.categories.${category.id}`}
-              isSelected={category.id === selectedCategory}
+              isSelected={
+                selectedCategories.length === 0
+                  ? category.id === ''
+                  : selectedCategories.includes(category.id)
+              }
               key={category.id}
               id={category.id}
               style={{

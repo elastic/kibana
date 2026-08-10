@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { Subject } from 'rxjs';
+import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
 
-jest.mock('../performance/query_performance_tracking', () => {
+jest.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
-    startQueryPerformanceTracking: jest.fn(),
+    startTrackingDashboardLoadTelemetry: jest.fn(),
   };
 });
-
-import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
-import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -30,7 +30,7 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
 
 jest.mock('../../dashboard_client', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const defaultState = require('../default_dashboard_state');
+  const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
       get: jest.fn().mockResolvedValue({
@@ -40,16 +40,17 @@ jest.mock('../../dashboard_client', () => {
   };
 });
 
-const lastSavedQuery = { query: 'memory:>220000', language: 'kuery' };
+const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
+  const userActivity$ = new Subject();
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
-      api: {},
+      api: { userActivity$ },
       cleanUp: jest.fn(),
       internalApi: {},
     });
@@ -102,7 +103,7 @@ describe('loadDashboardApi', () => {
 
     // dashboard app passes URL state as override state
     test('should overwrite saved object state and unsaved state with override state', async () => {
-      const queryFromUrl = { query: 'memory:>5000', language: 'kuery' };
+      const queryFromUrl = { expression: 'memory:>5000', language: 'kql' as const };
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: true,
@@ -134,10 +135,34 @@ describe('loadDashboardApi', () => {
         DASHBOARD_DURATION_START_MARK,
         'mark'
       );
-      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+      expect(startTrackingDashboardLoadTelemetry).toHaveBeenCalledWith(expect.any(Object), {
         firstLoad: true,
         creationStartTime: 12345,
       });
+    });
+  });
+
+  describe('user activity', () => {
+    test('should not track view on load of brand new dashboard', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+      });
+      expect(nextSpy).toBeCalledTimes(0);
+    });
+
+    test('should track view on load of saved object', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+      expect(nextSpy).toBeCalledTimes(1);
+      expect(nextSpy).toBeCalledWith(expect.objectContaining({ type: 'view' }));
     });
   });
 });

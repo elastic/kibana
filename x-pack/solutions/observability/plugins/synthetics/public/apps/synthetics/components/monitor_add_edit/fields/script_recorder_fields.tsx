@@ -59,7 +59,7 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
               <EuiButton
                 data-test-subj="syntheticsScriptRecorderFieldsShowScriptButton"
                 onClick={() => setShowScript(true)}
-                iconType="editorCodeBlock"
+                iconType="code"
                 iconSide="right"
               >
                 <FormattedMessage

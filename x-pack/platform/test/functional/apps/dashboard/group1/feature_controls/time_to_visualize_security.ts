@@ -39,9 +39,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const securityService = getService('security');
-  const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Verify lens and vis by-value work when user does not have library permissions
+   *
+   * Migration: Migrate to scout
+   */
   describe('dashboard time to visualize security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
@@ -147,13 +151,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.switchToVisualization('lnsLegacyMetric');
 
         await lens.waitForVisualization('legacyMtrVis');
-        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
         await header.waitUntilLoadingHasFinished();
         await testSubjects.click('lnsApp_saveButton');
 
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
+        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
 
         await timeToVisualize.saveFromModal('New Lens from Modal', {
           addToDashboard: 'new',
@@ -163,7 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
 
-        await lens.assertLegacyMetric('Average of bytes', '5,727.322');
+        await lens.assertLegacyMetric('Average of bytes', '5,727.314');
 
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
@@ -184,7 +187,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
         await dashboard.waitForRenderComplete();
 
-        await dashboardAddPanel.clickAddCustomVisualization();
+        await dashboardAddPanel.clickAddVega();
 
         await visualize.saveVisualizationAndReturn();
         const newPanelCount = await dashboard.getPanelCount();
@@ -229,15 +232,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('visualizeSaveButton');
 
         await visualize.ensureSavePanelOpen();
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
-        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
 
+        expect(await testSubjects.exists('add-to-library-checkbox')).to.equal(false);
         await timeToVisualize.saveFromModal('My New Vis 1', {
           addToDashboard: 'new',
         });
 
         await dashboard.waitForRenderComplete();
-        await dashboardExpect.metricValuesExist(['14,005']);
+        await dashboardExpect.metricValuesExist(['14,004']);
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
       });

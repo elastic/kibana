@@ -48,6 +48,7 @@ import {
   getCloudCredentialVarsConfig,
   updatePolicyWithInputs,
   getAwsCredentialsType,
+  findVariableDef,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -89,7 +90,8 @@ const updatePolicyCloudConnectorSupport = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
   input: NewPackagePolicyInput,
-  awsPolicyType: string
+  awsPolicyType: string,
+  pkgInfo: PackageInfo
 ) => {
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
@@ -99,10 +101,12 @@ const updatePolicyCloudConnectorSupport = (
             value: awsCredentialsType,
             type: 'text',
           },
-          'aws.supports_cloud_connectors': {
-            value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-            type: 'bool',
-          },
+          ...(findVariableDef(pkgInfo, 'aws.supports_cloud_connectors') && {
+            'aws.supports_cloud_connectors': {
+              value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+              type: 'bool',
+            },
+          }),
         }),
       },
     });
@@ -165,7 +169,8 @@ export const AwsCredentialsFormAgentless = ({
       newPolicy,
       updatePolicy,
       input,
-      awsPolicyType
+      awsPolicyType,
+      packageInfo
     );
   }, [
     awsCredentialsType,
@@ -174,6 +179,7 @@ export const AwsCredentialsFormAgentless = ({
     awsPolicyType,
     newPolicy,
     updatePolicy,
+    packageInfo,
   ]);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
@@ -220,7 +226,7 @@ export const AwsCredentialsFormAgentless = ({
           isAwsCloudConnectorEnabled ? (
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContentAgentlessCloudConnector"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys or Federated Identity to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 shortName,
                 gettingStartedLink: (
@@ -277,6 +283,7 @@ export const AwsCredentialsFormAgentless = ({
                 optionId,
                 showCloudConnectors: isAwsCloudConnectorEnabled,
                 provider: AWS_PROVIDER,
+                packageInfo,
               })
             ),
           });

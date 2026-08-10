@@ -32,3 +32,15 @@ export interface EntitiesAggregation {
     buckets: EntityBucket[];
   };
 }
+
+export interface IndexSourceBucket {
+  key: { identifier: string };
+  doc_count: number;
+}
+
+export interface IndexSourceAggregation {
+  identifiers?: {
+    after_key?: AfterKey;
+    buckets: IndexSourceBucket[];
+  };
+}

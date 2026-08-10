@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { fireEvent, waitFor } from '@testing-library/react';
+
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
@@ -15,18 +17,39 @@ jest.mock('../../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../../hooks'),
     useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
+    useBulkGetAgentPoliciesQuery: jest
+      .fn()
+      .mockReturnValue({ data: { items: [] }, isLoading: false }),
     useGetPackageInstallStatus: jest.fn(),
+    useGetSettingsQuery: jest.fn().mockReturnValue({
+      data: { item: { integration_knowledge_enabled: true } },
+    }),
     useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
     useStartServices: jest.fn().mockReturnValue({
       notifications: {
         toasts: {
           addError: jest.fn(),
           addSuccess: jest.fn(),
+          addWarning: jest.fn(),
+        },
+      },
+      docLinks: {
+        links: {
+          fleet: {
+            datastreams: 'https://www.elastic.co/docs/reference/fleet/data-streams',
+          },
         },
       },
     }),
     useUpgradePackagePolicyDryRunQuery: jest.fn().mockReturnValue({ data: null }),
-    useUpdatePackageMutation: jest.fn().mockReturnValue({ mutate: jest.fn() }),
+    useUpgradeAgentlessPoliciesDryRunQuery: jest.fn().mockReturnValue({ data: null }),
+    useUpdatePackageMutation: jest
+      .fn()
+      .mockReturnValue({ mutate: jest.fn(), isLoading: false, isPending: false }),
+    useNamespacePreflightCheckMutation: jest.fn().mockReturnValue({
+      mutateAsync: jest.fn().mockResolvedValue({ warnings: [] }),
+      isLoading: false,
+    }),
     useAuthz: jest.fn(),
     useConfirmForceInstall: jest.fn().mockReturnValue(jest.fn()),
     useInstallPackage: jest.fn().mockReturnValue(jest.fn()),
@@ -49,6 +72,7 @@ jest.mock('../../../../../services', () => ({
   ExperimentalFeaturesService: {
     get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
   },
+  isAgentlessPoliciesUIEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => ({
@@ -59,8 +83,61 @@ jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions
   }),
 }));
 
+// Simplified stand-in that exposes onSave via test buttons without requiring EUI combo box
+// interactions. The rendered text/IDs preserve the assertions in existing tests.
+jest.mock('../components', () => {
+  const MockReact = jest.requireActual('react');
+  return {
+    KeepPoliciesUpToDateSwitch: () => null,
+    NamespaceCustomizationSection: ({
+      savedNamespaces,
+      onSave,
+    }: {
+      savedNamespaces: string[];
+      onSave: (next: string[]) => void;
+    }) =>
+      MockReact.createElement(
+        'div',
+        null,
+        MockReact.createElement('h2', null, 'Namespace index templates'),
+        MockReact.createElement(
+          'div',
+          { 'data-test-subj': 'epmSettings.namespaceCustomizationInput' },
+          savedNamespaces.join(', ')
+        ),
+        MockReact.createElement(
+          'button',
+          {
+            'data-test-subj': 'mock-ns-save-with-new',
+            onClick: () => onSave([...savedNamespaces, 'staging']),
+          },
+          'Add namespace'
+        ),
+        MockReact.createElement(
+          'button',
+          {
+            'data-test-subj': 'mock-ns-save-same',
+            onClick: () => onSave([...savedNamespaces]),
+          },
+          'Save unchanged'
+        )
+      ),
+  };
+});
+
 // Import after mocks are defined
-import { useGetPackageInstallStatus, useAuthz } from '../../../../../hooks';
+import {
+  useGetPackageInstallStatus,
+  useAuthz,
+  useGetPackagePoliciesQuery,
+  useBulkGetAgentPoliciesQuery,
+  useUpgradePackagePolicyDryRunQuery,
+  useUpgradeAgentlessPoliciesDryRunQuery,
+  useUpdatePackageMutation,
+  useNamespacePreflightCheckMutation,
+  useStartServices,
+} from '../../../../../hooks';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
 import { SettingsPage } from './settings';
 
@@ -116,6 +193,7 @@ describe('SettingsPage', () => {
 
     it('should display the install section with install description when user has install permission', () => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: true,
           writePackageSettings: true,
@@ -138,6 +216,7 @@ describe('SettingsPage', () => {
 
     it('should display permission callout when user does not have install permission', () => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: false,
           writePackageSettings: false,
@@ -175,6 +254,7 @@ describe('SettingsPage', () => {
 
     it('should not display the install section or permission callout', () => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: false,
           writePackageSettings: false,
@@ -191,6 +271,114 @@ describe('SettingsPage', () => {
       // Should show version info instead of install section
       expect(result.getByText('Installed version')).toBeInTheDocument();
       expect(result.queryByTestId('installPermissionCallout')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('agentless upgrade partition', () => {
+    const policies = [
+      { id: 'agent-based-policy', supports_agentless: false, policy_ids: [] },
+      { id: 'agentless-policy', supports_agentless: true, policy_ids: [] },
+    ];
+
+    beforeEach(() => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+      mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
+        integrations: { installPackages: true, writePackageSettings: true },
+      });
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: { items: policies },
+      } as any);
+    });
+
+    afterEach(() => {
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
+      jest
+        .mocked(useBulkGetAgentPoliciesQuery)
+        .mockReturnValue({ data: { items: [] }, isLoading: false } as any);
+      jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(true);
+    });
+
+    const installedPackageInfo = {
+      ...basePackageInfo,
+      status: 'installed',
+    } as PackageInfo;
+
+    it('routes agentless policies to the agentless dry-run when the agentless policies UI is enabled', () => {
+      renderComponent(installedPackageInfo);
+
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+        'agent-based-policy',
+      ]);
+      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
+        'agentless-policy',
+      ]);
+    });
+
+    it('routes all policies to the legacy dry-run when the agentless policies UI is disabled', () => {
+      jest.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(false);
+
+      renderComponent(installedPackageInfo);
+
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+        'agent-based-policy',
+        'agentless-policy',
+      ]);
+      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([]);
+    });
+
+    it('routes a parent-only agentless policy (no own supports_agentless flag) to the agentless dry-run', () => {
+      // Older agentless policies carry the flag only on their parent agent policy; the server's
+      // block matches them via the parent, so the client must too or they poison the legacy batch.
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-based-policy', supports_agentless: false, policy_ids: ['regular-agent'] },
+            { id: 'legacy-agentless', supports_agentless: false, policy_ids: ['agentless-agent'] },
+          ],
+        },
+      } as any);
+      jest.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'regular-agent', supports_agentless: false },
+            { id: 'agentless-agent', supports_agentless: true },
+          ],
+        },
+        isLoading: false,
+      } as any);
+
+      renderComponent(installedPackageInfo);
+
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][0]).toEqual([
+        'agent-based-policy',
+      ]);
+      expect(jest.mocked(useUpgradeAgentlessPoliciesDryRunQuery).mock.calls[0][0]).toEqual([
+        'legacy-agentless',
+      ]);
+    });
+
+    it('holds the legacy dry-run (enabled: false) until the parent agent-policy lookup resolves', () => {
+      jest.mocked(useGetPackagePoliciesQuery).mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-based-policy', supports_agentless: false, policy_ids: ['regular-agent'] },
+          ],
+        },
+      } as any);
+      jest.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+        data: undefined,
+        isLoading: true,
+      } as any);
+
+      renderComponent(installedPackageInfo);
+
+      // While the parent lookup is loading, the legacy dry-run must not fire (a still-hidden
+      // parent-only agentless policy could otherwise 400 the whole batch).
+      expect(jest.mocked(useUpgradePackagePolicyDryRunQuery).mock.calls[0][2]?.enabled).toBe(false);
     });
   });
 
@@ -214,6 +402,7 @@ describe('SettingsPage', () => {
 
     beforeEach(() => {
       mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
         integrations: {
           installPackages: true,
           writePackageSettings: true,
@@ -282,6 +471,174 @@ describe('SettingsPage', () => {
 
       const rollbackButton = result.getByTestId('rollbackButton');
       expect(rollbackButton).toBeDisabled();
+    });
+  });
+
+  describe('namespace customization section', () => {
+    const installedPackageInfo: PackageInfo = {
+      ...basePackageInfo,
+      status: 'installed',
+      installationInfo: {
+        version: '1.3.0',
+        previous_version: '1.2.0',
+        install_source: 'registry',
+        install_status: 'installed',
+        verification_status: 'verified',
+        verification_key_id: null,
+        installed_kibana: [],
+        installed_es: [],
+        type: 'epm-package',
+        name: 'nginx',
+        namespace_customization_enabled_for: ['production'],
+      },
+    } as PackageInfo;
+
+    beforeEach(() => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+      mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
+        integrations: {
+          installPackages: true,
+          writePackageSettings: true,
+        },
+      });
+    });
+
+    it('renders the section title and existing opted-in namespaces', () => {
+      const result = renderComponent(installedPackageInfo);
+
+      expect(result.getByText('Namespace index templates')).toBeInTheDocument();
+      const input = result.getByTestId('epmSettings.namespaceCustomizationInput');
+      expect(input).toBeInTheDocument();
+      expect(result.getByText('production')).toBeInTheDocument();
+    });
+
+    it('does not render the section when the package is not installed', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.notInstalled,
+        version: null,
+      }));
+
+      const result = renderComponent(basePackageInfo);
+      expect(result.queryByText('Namespace index templates')).not.toBeInTheDocument();
+    });
+
+    describe('preflight → modal → confirm flow', () => {
+      const mockMutateAsync = jest.fn();
+      const mockMutate = jest.fn();
+      const mockAddWarning = jest.fn();
+      const conflictWarning = {
+        dataStreamName: 'logs-nginx.access-staging',
+        namespace: 'staging',
+        baseTemplateName: 'logs-nginx.access',
+        conflictingTemplates: [
+          {
+            name: 'logs-nginx.access-clone',
+            priority: 300,
+            conflictType: 'overrides_fleet' as const,
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        mockMutateAsync.mockReset();
+        mockMutate.mockReset();
+        mockAddWarning.mockReset();
+        (useNamespacePreflightCheckMutation as jest.Mock).mockReturnValue({
+          mutateAsync: mockMutateAsync,
+          isLoading: false,
+        });
+        (useUpdatePackageMutation as jest.Mock).mockReturnValue({
+          mutate: mockMutate,
+          isLoading: false,
+          isPending: false,
+        });
+        (useStartServices as jest.Mock).mockReturnValue({
+          notifications: {
+            toasts: { addError: jest.fn(), addSuccess: jest.fn(), addWarning: mockAddWarning },
+          },
+          docLinks: { links: { fleet: { datastreams: '' } } },
+        });
+      });
+
+      it('shows the conflict modal when preflight returns warnings', async () => {
+        mockMutateAsync.mockResolvedValue({ warnings: [conflictWarning] });
+        const result = renderComponent(installedPackageInfo);
+
+        fireEvent.click(result.getByTestId('mock-ns-save-with-new'));
+
+        await waitFor(() => {
+          expect(result.getByTestId('epmSettings.namespaceConflictModal')).toBeInTheDocument();
+        });
+        expect(mockMutate).not.toHaveBeenCalled();
+      });
+
+      it('does not save when the user cancels the conflict modal', async () => {
+        mockMutateAsync.mockResolvedValue({ warnings: [conflictWarning] });
+        const result = renderComponent(installedPackageInfo);
+
+        fireEvent.click(result.getByTestId('mock-ns-save-with-new'));
+        await waitFor(() => result.getByTestId('epmSettings.namespaceConflictModal'));
+        fireEvent.click(result.getByText('Cancel'));
+
+        await waitFor(() => {
+          expect(
+            result.queryByTestId('epmSettings.namespaceConflictModal')
+          ).not.toBeInTheDocument();
+        });
+        expect(mockMutate).not.toHaveBeenCalled();
+      });
+
+      it('saves with the pending namespaces when the user confirms the conflict modal', async () => {
+        mockMutateAsync.mockResolvedValue({ warnings: [conflictWarning] });
+        const result = renderComponent(installedPackageInfo);
+
+        fireEvent.click(result.getByTestId('mock-ns-save-with-new'));
+        await waitFor(() => result.getByTestId('epmSettings.namespaceConflictModal'));
+        fireEvent.click(result.getByText('Enable anyway'));
+
+        await waitFor(() => {
+          expect(mockMutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: { namespace_customization_enabled_for: ['production', 'staging'] },
+            }),
+            expect.anything()
+          );
+        });
+        expect(result.queryByTestId('epmSettings.namespaceConflictModal')).not.toBeInTheDocument();
+      });
+
+      it('proceeds with save when the preflight check throws', async () => {
+        mockMutateAsync.mockRejectedValue(new Error('Network error'));
+        const result = renderComponent(installedPackageInfo);
+
+        fireEvent.click(result.getByTestId('mock-ns-save-with-new'));
+
+        await waitFor(() => {
+          expect(mockMutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: { namespace_customization_enabled_for: ['production', 'staging'] },
+            }),
+            expect.anything()
+          );
+        });
+        expect(mockAddWarning).toHaveBeenCalled();
+        expect(result.queryByTestId('epmSettings.namespaceConflictModal')).not.toBeInTheDocument();
+      });
+
+      it('skips the preflight check when no new namespaces are added', async () => {
+        const result = renderComponent(installedPackageInfo);
+
+        fireEvent.click(result.getByTestId('mock-ns-save-same'));
+
+        await waitFor(() => {
+          expect(mockMutate).toHaveBeenCalled();
+        });
+        expect(mockMutateAsync).not.toHaveBeenCalled();
+      });
     });
   });
 });

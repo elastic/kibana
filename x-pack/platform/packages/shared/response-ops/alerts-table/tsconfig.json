@@ -2,19 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "@kbn/ambient-ui-types",
-    ]
+    "types": ["jest", "node", "@kbn/ambient-ui-types"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/rule-data-utils",
     "@kbn/i18n",
@@ -47,5 +38,12 @@
     "@kbn/field-types",
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/es-query",
+    "@kbn/response-ops-alert-snooze",
+    "@kbn/rison",
+    "@kbn/reporting-common",
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-rendering-browser"
   ]
 }

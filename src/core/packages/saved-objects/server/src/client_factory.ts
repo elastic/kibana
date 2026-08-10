@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -110,9 +110,11 @@ export interface SavedObjectsRepositoryFactory {
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
+   * @param serverTiming - Optional server timing API for observability purposes only (not used for authentication).
    */
   createInternalRepository: (
     includedHiddenTypes?: string[],
-    extensions?: SavedObjectsExtensions
+    extensions?: SavedObjectsExtensions,
+    serverTiming?: RequestTiming
   ) => ISavedObjectsRepository;
 }

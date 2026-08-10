@@ -27,11 +27,17 @@ import { SeverityBar } from '../../../../../entity_analytics/components/severity
 import { useAttacksListData } from './use_attacks_list_data';
 import type { AttacksListItem } from './types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { AttacksEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 const PAGE_SIZE = 10;
 const TABLE_WIDTH = 385;
 const TABLE_HEIGHT = 200;
+export const ATTACKS_LIST_PANEL_TEST_ID = 'attacksListPanel';
+export const ATTACKS_LIST_TABLE_TEST_ID = 'attacksListTable';
+export const ATTACKS_LIST_ATTACK_NAME_COLUMN_TEST_ID = 'attacksListAttackNameColumn';
+export const ATTACKS_LIST_ALERTS_COUNT_COLUMN_TEST_ID = 'attacksListAlertsCountColumn';
 
 const TableContainer = styled.div`
   flex: 1;
@@ -63,11 +69,11 @@ export interface AttacksListPanelProps {
 export const AttacksListPanel = React.memo<AttacksListPanelProps>(
   ({ filters, query, dataView }) => {
     const { openFlyout } = useExpandableFlyoutApi();
-    const {
-      services: { telemetry },
-    } = useKibana();
+    const { telemetry } = useKibana().services;
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
 
-    const { items, isLoading, pageIndex, setPageIndex, pageSize, setPageSize, total } =
+    const { items, isLoading, pageIndex, setPageIndex, pageSize, setPageSize, total, refetch } =
       useAttacksListData({
         filters,
         query,
@@ -78,6 +84,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
       () => [
         {
           field: 'name',
+          'data-test-subj': ATTACKS_LIST_ATTACK_NAME_COLUMN_TEST_ID,
           name: i18n.translate(
             'xpack.securitySolution.attacksPage.attacksListPanel.attackNameColumn',
             {
@@ -88,15 +95,25 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
             <EuiLink
               className="eui-textTruncate"
               onClick={() => {
-                openFlyout({
-                  right: {
-                    id: AttackDetailsRightPanelKey,
-                    params: {
-                      attackId: item.id,
-                      indexName: dataView.getIndexPattern(),
+                if (enableNewFlyout) {
+                  openAttackFlyout({
+                    attackId: item.id,
+                    indexName: dataView.getIndexPattern(),
+                    onAttackUpdated: refetch,
+                    origin: FLYOUT_ORIGIN.ATTACKS_KPI,
+                    attackTitle: item.name,
+                  });
+                } else {
+                  openFlyout({
+                    right: {
+                      id: AttackDetailsRightPanelKey,
+                      params: {
+                        attackId: item.id,
+                        indexName: dataView.getIndexPattern(),
+                      },
                     },
-                  },
-                });
+                  });
+                }
                 telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
                   id: item.id,
                   source: 'attacks_page_summary_kpi',
@@ -110,6 +127,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
         },
         {
           field: 'alertsCount',
+          'data-test-subj': ATTACKS_LIST_ALERTS_COUNT_COLUMN_TEST_ID,
           name: i18n.translate(
             'xpack.securitySolution.attacksPage.attacksListPanel.alertCountColumn',
             {
@@ -130,7 +148,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
           ),
         },
       ],
-      [dataView, openFlyout, telemetry]
+      [dataView, enableNewFlyout, openAttackFlyout, openFlyout, refetch, telemetry]
     );
 
     const pagination = {
@@ -149,6 +167,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
     return (
       <EuiPanel
         hasBorder
+        data-test-subj={ATTACKS_LIST_PANEL_TEST_ID}
         style={{
           width: TABLE_WIDTH,
           height: TABLE_HEIGHT,
@@ -170,6 +189,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
             <EuiLoadingChart size="xl" />
           ) : (
             <EuiBasicTable<AttacksListItem>
+              data-test-subj={ATTACKS_LIST_TABLE_TEST_ID}
               items={items}
               columns={columns}
               pagination={pagination}

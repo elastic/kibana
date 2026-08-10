@@ -14,28 +14,30 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const InstallPrebuiltRulesAndTimelinesResponse = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The number of rules installed
+       */
+      rules_installed: z.number().int().min(0),
+      /**
+       * The number of rules updated
+       */
+      rules_updated: z.number().int().min(0),
+      /**
+       * The number of timelines installed
+       */
+      timelines_installed: z.number().int().min(0),
+      /**
+       * The number of timelines updated
+       */
+      timelines_updated: z.number().int().min(0),
+    })
+    .strict()
+);
 export type InstallPrebuiltRulesAndTimelinesResponse = z.infer<
   typeof InstallPrebuiltRulesAndTimelinesResponse
 >;
-export const InstallPrebuiltRulesAndTimelinesResponse = z
-  .object({
-    /**
-     * The number of rules installed
-     */
-    rules_installed: z.number().int().min(0),
-    /**
-     * The number of rules updated
-     */
-    rules_updated: z.number().int().min(0),
-    /**
-     * The number of timelines installed
-     */
-    timelines_installed: z.number().int().min(0),
-    /**
-     * The number of timelines updated
-     */
-    timelines_updated: z.number().int().min(0),
-  })
-  .strict();

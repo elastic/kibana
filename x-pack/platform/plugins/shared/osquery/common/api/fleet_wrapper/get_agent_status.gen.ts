@@ -14,15 +14,17 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { KueryOrUndefined } from '../model/schema/common_attributes.gen';
 
+export const GetAgentStatusRequestParams = lazySchema(() => z.object({}));
 export type GetAgentStatusRequestParams = z.infer<typeof GetAgentStatusRequestParams>;
-export const GetAgentStatusRequestParams = z.object({});
 
+export const GetAgentStatusRequestQueryParams = lazySchema(() =>
+  z.object({
+    kuery: KueryOrUndefined.optional(),
+    policyId: z.string().optional(),
+  })
+);
 export type GetAgentStatusRequestQueryParams = z.infer<typeof GetAgentStatusRequestQueryParams>;
-export const GetAgentStatusRequestQueryParams = z.object({
-  kuery: KueryOrUndefined.optional(),
-  policyId: z.string().optional(),
-});

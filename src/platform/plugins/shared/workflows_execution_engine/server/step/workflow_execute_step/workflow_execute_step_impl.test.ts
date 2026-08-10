@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 import type { WorkflowExecuteStepImplInit } from './workflow_execute_step_impl';
+import type { WorkflowsExecutionEngineConfig } from '../../config';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -62,7 +63,8 @@ const createMockInit = (
     node,
     getCurrentStepState: jest.fn(),
     setCurrentStepState: jest.fn(),
-    tryEnterDelay: jest.fn().mockReturnValue(true),
+    tryEnterWaitUntil: jest.fn().mockReturnValue(true),
+    updateWorkflowExecution: jest.fn(),
   } as unknown as jest.Mocked<StepExecutionRuntime>;
 
   const workflowExecutionRuntime = {
@@ -91,6 +93,7 @@ const createMockInit = (
     logInfo: jest.fn(),
     logDebug: jest.fn(),
     logError: jest.fn(),
+    logWarn: jest.fn(),
   } as unknown as jest.Mocked<IWorkflowEventLogger>;
 
   return {
@@ -104,7 +107,9 @@ const createMockInit = (
     workflowExecutionRepository,
     stepExecutionRepository,
     workflowLogger,
-    maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    config: {
+      maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    } as WorkflowsExecutionEngineConfig,
     ...overrides,
   };
 };
@@ -140,6 +145,41 @@ describe('WorkflowExecuteStepImpl', () => {
         'workflow-id': 'child-workflow-id',
         inputs: { param1: 'value1' },
       });
+      expect(repo.getWorkflow).toHaveBeenCalledWith('child-workflow-id', 'default', {
+        includeGlobal: false,
+        managedFilter: 'unmanaged',
+      });
+    });
+
+    it('should include global workflows for managed parent runs', async () => {
+      const init = createMockInit();
+      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+      repo.getWorkflow.mockResolvedValue(createMockWorkflow());
+      (init.stepExecutionRuntime as any).workflowExecution.managed = true;
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.run();
+
+      expect(repo.getWorkflow).toHaveBeenCalledWith('child-workflow-id', 'default', {
+        includeGlobal: true,
+        managedFilter: 'all',
+      });
+    });
+
+    it('should not treat originManagedWorkflowId alone as a managed parent run', async () => {
+      const init = createMockInit();
+      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+      repo.getWorkflow.mockResolvedValue(createMockWorkflow());
+      (init.stepExecutionRuntime as any).workflowExecution.originManagedWorkflowId =
+        'system-parent-workflow';
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.run();
+
+      expect(repo.getWorkflow).toHaveBeenCalledWith('child-workflow-id', 'default', {
+        includeGlobal: false,
+        managedFilter: 'unmanaged',
+      });
     });
 
     it('should render inputs via context manager', async () => {
@@ -161,6 +201,42 @@ describe('WorkflowExecuteStepImpl', () => {
         inputs: { rendered: true },
       });
     });
+
+    it.each([
+      { name: 'empty string', renderedWorkflowId: '' },
+      { name: 'undefined', renderedWorkflowId: undefined },
+    ])(
+      'should fail before lookup when rendered workflow-id is $name',
+      async ({ renderedWorkflowId }) => {
+        const init = createMockInit();
+        const ctx = (init.stepExecutionRuntime as any).contextManager;
+        ctx.renderValueAccordingToContext.mockReturnValue({
+          'workflow-id': renderedWorkflowId,
+          inputs: { rendered: true },
+        });
+
+        const step = new WorkflowExecuteStepImpl(init);
+        await step.run();
+
+        const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+        const stepRuntime = init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>;
+        expect(stepRuntime.setInput).toHaveBeenCalledWith({
+          'workflow-id': '',
+          inputs: { rendered: true },
+        });
+        expect(repo.getWorkflow).not.toHaveBeenCalled();
+        expect(stepRuntime.failStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'workflow.execute step "execute-step-1" in workflow "parent-workflow-id" rendered an empty workflow-id.',
+          })
+        );
+        expect(
+          (init.workflowExecutionRuntime as jest.Mocked<WorkflowExecutionRuntimeManager>)
+            .navigateToNextNode
+        ).toHaveBeenCalled();
+      }
+    );
 
     it('should fail when depth limit is exceeded', async () => {
       const init = createMockInit();
@@ -314,7 +390,7 @@ describe('WorkflowExecuteStepImpl', () => {
       );
     });
 
-    it('should finish step on completed result', async () => {
+    it('should finish step on completed result from ES', async () => {
       const init = createMockInit();
       const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
       repo.getWorkflow.mockResolvedValue(createMockWorkflow());
@@ -323,11 +399,10 @@ describe('WorkflowExecuteStepImpl', () => {
         workflowId: 'child-workflow-id',
         executionId: 'child-exec-1',
         startedAt: '2024-01-01T00:00:00Z',
-        pollCount: 0,
       });
-
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
+      (
+        init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>
+      ).getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
         context: { output: { result: 'success' } },
@@ -344,7 +419,7 @@ describe('WorkflowExecuteStepImpl', () => {
       ).toHaveBeenCalled();
     });
 
-    it('should call failStep and navigateToNextNode when executor returns failed', async () => {
+    it('should call failStep and navigateToNextNode when child workflow failed', async () => {
       const init = createMockInit();
       const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
       repo.getWorkflow.mockResolvedValue(createMockWorkflow());
@@ -353,11 +428,10 @@ describe('WorkflowExecuteStepImpl', () => {
         workflowId: 'child-workflow-id',
         executionId: 'child-exec-1',
         startedAt: '2024-01-01T00:00:00Z',
-        pollCount: 0,
       });
-
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
+      (
+        init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>
+      ).getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
         status: ExecutionStatus.FAILED,
         error: { type: 'Error', message: 'child workflow failed' },
@@ -376,11 +450,14 @@ describe('WorkflowExecuteStepImpl', () => {
       ).toHaveBeenCalled();
     });
 
-    it('should not navigate when sync executor returns waiting', async () => {
+    it('should not navigate when sync executor returns waiting (enters WAITING_FOR_CHILD)', async () => {
       const init = createMockInit();
       const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
       repo.getWorkflow.mockResolvedValue(createMockWorkflow());
       (init.stepExecutionRuntime as any).getCurrentStepState.mockReturnValue(undefined);
+      (init.stepExecutionRuntime as any).stepExecution = {
+        startedAt: '2025-01-01T00:00:00.000Z',
+      };
 
       const step = new WorkflowExecuteStepImpl(init);
       await step.run();
@@ -389,7 +466,10 @@ describe('WorkflowExecuteStepImpl', () => {
         (init.workflowExecutionRuntime as jest.Mocked<WorkflowExecutionRuntimeManager>)
           .navigateToNextNode
       ).not.toHaveBeenCalled();
-      expect((init.stepExecutionRuntime as any).tryEnterDelay).toHaveBeenCalledWith('1s');
+      expect((init.stepExecutionRuntime as any).tryEnterWaitUntil).toHaveBeenCalledWith(
+        undefined,
+        ExecutionStatus.WAITING_FOR_CHILD
+      );
     });
 
     it('should catch and fail on unexpected errors', async () => {
@@ -404,18 +484,6 @@ describe('WorkflowExecuteStepImpl', () => {
       expect(stepRuntime.failStep).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'Unexpected ES error' })
       );
-    });
-
-    it('should always flush event logs even on failure', async () => {
-      const init = createMockInit();
-      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
-      repo.getWorkflow.mockRejectedValue(new Error('boom'));
-
-      const step = new WorkflowExecuteStepImpl(init);
-      await step.run();
-
-      const stepRuntime = init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>;
-      expect(stepRuntime.flushEventLogs).toHaveBeenCalled();
     });
 
     it('should handle missing inputs gracefully', async () => {
@@ -446,7 +514,7 @@ describe('WorkflowExecuteStepImpl', () => {
       });
     });
 
-    it('should skip getInput setInput getWorkflow and validation on poll resume', async () => {
+    it('should skip getInput setInput getWorkflow and validation on resume', async () => {
       const init = createMockInit();
       (
         init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>
@@ -454,10 +522,10 @@ describe('WorkflowExecuteStepImpl', () => {
         workflowId: 'child-workflow-id',
         executionId: 'child-exec-1',
         startedAt: '2024-01-01T00:00:00Z',
-        pollCount: 0,
       });
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
+      (
+        init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>
+      ).getWorkflowExecutionById.mockResolvedValue({
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
         context: { output: { result: 'success' } },
@@ -493,7 +561,6 @@ describe('WorkflowExecuteStepImpl', () => {
         workflowId: 'child-workflow-id',
         executionId: 'child-exec-1',
         startedAt: '2024-01-01T00:00:00Z',
-        pollCount: 1,
       });
 
       const step = new WorkflowExecuteStepImpl(init);
@@ -501,7 +568,11 @@ describe('WorkflowExecuteStepImpl', () => {
 
       const engine =
         init.workflowsExecutionEngine as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-      expect(engine.cancelWorkflowExecution).toHaveBeenCalledWith('child-exec-1', 'default');
+      expect(engine.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'child-exec-1',
+        'default',
+        init.request
+      );
     });
 
     it('should do nothing when step state is undefined', async () => {

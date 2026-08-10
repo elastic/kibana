@@ -13,7 +13,7 @@ import {
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
-} from 'react-redux';
+} from 'react-redux-v7';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext, useContext } from 'react';
 import defaultComparator from 'fast-deep-equal';
@@ -50,6 +50,11 @@ export const useInternalStateDispatch = createDispatchHook(
 export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
   const { store } = useContext(internalStateContext);
   return store.getState as () => DiscoverInternalState;
+};
+
+export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
+  const { store } = useContext(internalStateContext);
+  return store.subscribe;
 };
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =

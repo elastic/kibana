@@ -391,17 +391,21 @@ export const setAnnotationsDimension: Visualization<XYVisualizationState>['setDi
   };
 };
 
-export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>
-  layer.annotations.map((annotation) => getAnnotationAccessor(annotation));
+export const getAnnotationsAccessorColorConfig = (
+  layer: XYAnnotationLayerConfig,
+  isDarkMode = false
+) => layer.annotations.map((annotation) => getAnnotationAccessor(annotation, isDarkMode));
 
 export const getAnnotationsConfiguration = ({
   state,
   frame,
   layer,
+  isDarkMode = false,
 }: {
   state: XYVisualizationState;
   frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
+  isDarkMode?: boolean;
 }) => {
   const groupLabel = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
 
@@ -417,7 +421,7 @@ export const getAnnotationsConfiguration = ({
             values: { groupLabel },
           }
         ),
-        accessors: getAnnotationsAccessorColorConfig(layer),
+        accessors: getAnnotationsAccessorColorConfig(layer, isDarkMode),
         dataTestSubj: 'lnsXY_xAnnotationsPanel',
         requiredMinDimensionCount: 0,
         supportsMoreColumns: true,

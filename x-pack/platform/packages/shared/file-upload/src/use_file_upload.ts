@@ -34,7 +34,7 @@ export function useFileUpload(
 ) {
   const isMounted = useMountedState();
   const { dataViews } = data;
-  const { navigateToApp } = application;
+  const { navigateToApp, capabilities } = application;
 
   const [importResults, setImportResults] = useState<FileUploadResults | null>(null);
   const [indexCreateMode, setIndexCreateMode] = useState<UPLOAD_TYPE>(UPLOAD_TYPE.NEW);
@@ -42,7 +42,9 @@ export function useFileUpload(
 
   const [indexName, setIndexName] = useState<string>('');
   const [dataViewName, setDataViewName] = useState<string | null>(
-    fileUploadManager.getAutoCreateDataView() ? '' : null
+    capabilities.indexPatterns.save === true && fileUploadManager.getAutoCreateDataView()
+      ? ''
+      : null
   );
 
   const [existingDataViewNames, setExistingDataViewNames] = useState<string[]>([]);
@@ -50,6 +52,10 @@ export function useFileUpload(
   const [dataViewNameError, setDataViewNameError] = useState<string>('');
 
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
+
+  const canCreateDataView = useMemo(() => {
+    return capabilities.indexPatterns.save === true;
+  }, [capabilities.indexPatterns.save]);
 
   const deleteFile = useCallback(
     (i: number) => fileUploadManager.removeFile(i),
@@ -278,6 +284,7 @@ export function useFileUpload(
     abortImport,
     getFieldsStatsGrid,
     reset,
+    canCreateDataView,
   };
 }
 

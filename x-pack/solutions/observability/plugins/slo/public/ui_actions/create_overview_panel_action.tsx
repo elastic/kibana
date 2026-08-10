@@ -18,6 +18,7 @@ import { ADD_SLO_OVERVIEW_ACTION_ID } from '../embeddable/slo/overview/constants
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../common/embeddables/overview/constants';
 import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/overview/slo_overview_open_configuration';
+import { isValidLicense } from './is_valid_license';
 
 export function createOverviewPanelAction(
   coreStart: CoreStart,
@@ -28,9 +29,9 @@ export function createOverviewPanelAction(
     id: ADD_SLO_OVERVIEW_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 20,
-    getIconType: () => 'visGauge',
+    getIconType: () => 'chartGauge',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return (await isValidLicense(pluginsStart)) && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();

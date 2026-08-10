@@ -133,7 +133,7 @@ export class FeaturesTooltip extends Component<Props, State> {
           (euiTheme) => euiContextMenuPanelStyles(euiTheme).euiContextMenuPanel__title,
         ]}
         onClick={this._showPropertiesView}
-        icon="arrowLeft"
+        icon="chevronSingleLeft"
       >
         {label}
       </EuiContextMenuItem>

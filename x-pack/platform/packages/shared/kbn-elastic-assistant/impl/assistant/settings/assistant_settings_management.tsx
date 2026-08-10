@@ -155,7 +155,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
                   <EuiButtonEmpty
                     iconType="gear"
                     size="m"
-                    onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+                    onClick={() =>
+                      navigateToApp('management', { path: 'modelManagement/model_settings' })
+                    }
                     data-test-subj="genAiSettingsButton"
                   >
                     {i18n.GEN_AI_SETTINGS_BUTTON}

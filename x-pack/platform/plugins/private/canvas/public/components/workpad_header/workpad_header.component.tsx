@@ -24,7 +24,6 @@ import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
-import { LabsControl } from './labs_control';
 import { EditorMenu } from './editor_menu';
 
 const strings = {
@@ -142,12 +141,12 @@ export const WorkpadHeader: FC<Props> = ({
 
   const quickButtons = [
     {
-      iconType: 'visText',
+      iconType: 'text',
       label: elementStrings.markdown.displayName,
       onClick: createElement('markdown'),
     },
     {
-      iconType: 'node',
+      iconType: 'vectorTriangle',
       label: elementStrings.shape.displayName,
       onClick: createElement('shape'),
     },
@@ -196,9 +195,6 @@ export const WorkpadHeader: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <ShareMenu />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <LabsControl />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem />
@@ -216,7 +212,7 @@ export const WorkpadHeader: FC<Props> = ({
               )}
               <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
                 <EuiButtonIcon
-                  iconType={isWriteable ? 'eyeClosed' : 'eye'}
+                  iconType={isWriteable ? 'eyeSlash' : 'eye'}
                   onClick={toggleWriteable}
                   size="s"
                   aria-label={getEditToggleToolTipText()}

@@ -88,7 +88,7 @@ class DataTableFormatClass extends Component<
                 }
               >
                 <EuiButtonIcon
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   color="text"
                   aria-label={i18n.translate('data.inspector.table.filterForValueButtonAriaLabel', {
                     defaultMessage: 'Filter for value',
@@ -118,7 +118,7 @@ class DataTableFormatClass extends Component<
                   }
                 >
                   <EuiButtonIcon
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     color="text"
                     aria-label={i18n.translate(
                       'data.inspector.table.filterOutValueButtonAriaLabel',
@@ -167,7 +167,7 @@ class DataTableFormatClass extends Component<
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
-          const formattedValue = fieldFormatter.convert(value);
+          const formattedValue = fieldFormatter.convertToText(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
           return DataTableFormatClass.renderCell({
@@ -195,6 +195,9 @@ class DataTableFormatClass extends Component<
 
     return (
       <EuiInMemoryTable
+        tableCaption={i18n.translate('data.inspector.table.tableCaption', {
+          defaultMessage: 'Inspector data',
+        })}
         tableLayout="auto"
         className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"

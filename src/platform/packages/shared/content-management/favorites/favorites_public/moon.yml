@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core-http-browser'
   - '@kbn/content-management-favorites-server'
+  - '@kbn/favorite-button'
   - '@kbn/i18n-react'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-user-profile-browser'
@@ -36,26 +37,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

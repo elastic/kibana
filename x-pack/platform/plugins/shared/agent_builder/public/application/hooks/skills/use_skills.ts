@@ -18,8 +18,9 @@ export const useSkillsService = () => {
   const { skillsService } = useAgentBuilderServices();
 
   const { data, isLoading, error, isError } = useQuery({
-    queryKey: queryKeys.skills.all,
+    queryKey: queryKeys.skills.list,
     queryFn: () => skillsService.list(),
+    keepPreviousData: true,
   });
 
   return { skills: data ?? [], isLoading, error, isError };

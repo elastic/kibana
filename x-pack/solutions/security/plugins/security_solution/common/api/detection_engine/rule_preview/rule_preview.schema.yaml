@@ -9,6 +9,10 @@ paths:
       operationId: RulePreview
       x-codegen-enabled: true
       summary: Preview rule alerts generated on specified time range
+      description: |
+        Simulates a detection rule using the same rule type and query logic as a persisted rule, over a short
+        time window, without persisting a rule or writing alerts. Use the response to validate queries, see sample
+        matching documents, and inspect execution logs. Pair `invocationCount` and `timeframeEnd` to cap run time.
       tags:
         - Rule preview API
       parameters:
@@ -19,7 +23,10 @@ paths:
           schema:
             type: boolean
       requestBody:
-        description: An object containing tags to add or remove and alert ids the changes will be applied
+        description: |
+          Rule create payload (same shape as `POST /api/detection_engine/rules` for a given `type`) plus
+          `invocationCount` and `timeframeEnd` to control how the preview is executed. Optional
+          `enable_logged_requests` surfaces Elasticsearch request logging for debugging.
         required: true
         content:
           application/json:
@@ -51,6 +58,22 @@ paths:
                 - allOf:
                     - $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/EsqlRuleCreateProps'
                     - $ref: '#/components/schemas/RulePreviewParams'
+            examples:
+              queryRule:
+                value:
+                  type: query
+                  name: Rule preview
+                  description: Find matching events
+                  index: ['logs-*']
+                  query: "process.name : *"
+                  language: kuery
+                  risk_score: 25
+                  severity: low
+                  from: 'now-24h'
+                  to: now
+                  max_signals: 20
+                  invocationCount: 1
+                  timeframeEnd: '2025-01-20T12:00:00.000Z'
       responses:
         200:
           description: Successful response
@@ -68,6 +91,17 @@ paths:
                   isAborted:
                     type: boolean
                 required: [logs]
+              examples:
+                success:
+                  value:
+                    isAborted: false
+                    previewId: 7f1c9d1e-4c8a-4a3e-9a5d-0d4f6e1b2a90
+                    logs:
+                      - errors: []
+                        warnings: []
+                        duration: 45
+                        startedAt: 2025-01-20T10:00:00.000Z
+                        requests: []
         400:
           description: Invalid input data response
           content:
@@ -76,18 +110,35 @@ paths:
                 oneOf:
                   - $ref: '../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body].timeframeEnd: expected string, received null'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

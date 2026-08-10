@@ -85,17 +85,20 @@ const mockHistory = ({
   nextPage,
   isLoading = false,
   isFetching = false,
+  isPlaceholderData = false,
 }: {
   data?: UnifiedHistoryResponse['data'];
   hasMore?: boolean;
   nextPage?: string;
   isLoading?: boolean;
   isFetching?: boolean;
+  isPlaceholderData?: boolean;
 }) => {
   useUnifiedHistoryMock.mockReturnValue({
     data: { data, hasMore, nextPage },
     isLoading,
     isFetching,
+    isPlaceholderData,
     refetch: jest.fn(),
   } as never);
 };
@@ -135,7 +138,7 @@ describe('UnifiedHistoryTable', () => {
 
     const columnHeaders = screen.getAllByRole('columnheader');
     const headerTexts = columnHeaders.map((h) => h.textContent);
-    expect(headerTexts).toContain('Query');
+    expect(headerTexts).toContain('Query or Pack');
     expect(headerTexts).toContain('Source');
     expect(headerTexts).toContain('Results');
     expect(headerTexts).toContain('Agents');
@@ -244,6 +247,15 @@ describe('UnifiedHistoryTable', () => {
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Rule')).toBeInTheDocument();
+  });
+
+  it('run by column shows Elastic for rule row', () => {
+    const row = createMockRuleRow();
+    mockHistory({ data: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Elastic')).toBeInTheDocument();
   });
 
   it('details button has correct href for navigation', () => {
@@ -362,6 +374,36 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('Monitoring Pack')).toBeInTheDocument();
     });
 
+    it('query column falls back to scheduleId and packId when names are absent (cross-project row)', () => {
+      const row = createMockScheduledRow({
+        queryName: undefined,
+        packName: undefined,
+        scheduleId: 'sched-xp-1',
+        packId: 'pack-xp-1',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('sched-xp-1')).toBeInTheDocument();
+      expect(screen.getByText('pack-xp-1')).toBeInTheDocument();
+    });
+
+    it('query column falls back to ids when names are empty strings (cross-project row)', () => {
+      const row = createMockScheduledRow({
+        queryName: '',
+        packName: '',
+        scheduleId: 'sched-xp-2',
+        packId: 'pack-xp-2',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('sched-xp-2')).toBeInTheDocument();
+      expect(screen.getByText('pack-xp-2')).toBeInTheDocument();
+    });
+
     it('results column shows totalRows for scheduled row', () => {
       const row = createMockScheduledRow({ totalRows: 20 });
       mockHistory({ data: [row] });
@@ -371,14 +413,13 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('20')).toBeInTheDocument();
     });
 
-    it('run by column shows em dash for scheduled row', () => {
+    it('run by column shows Elastic for scheduled row', () => {
       const row = createMockScheduledRow();
       mockHistory({ data: [row] });
 
       renderWithProviders(<UnifiedHistoryTable />);
 
-      const dashes = screen.getAllByText('\u2014');
-      expect(dashes.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Elastic')).toBeInTheDocument();
     });
 
     it('play button is not available for scheduled rows', () => {
@@ -404,6 +445,15 @@ describe('UnifiedHistoryTable', () => {
         'href',
         '/history/scheduled/sched-1/3'
       );
+    });
+
+    it('live row query column is unaffected by the scheduled-row fallback logic', () => {
+      const row = createMockLiveRow({ queryText: 'SELECT * FROM uptime' });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
     });
 
     it('renders mixed live and scheduled rows together', () => {
@@ -438,7 +488,7 @@ describe('UnifiedHistoryTable', () => {
       renderWithProviders(<UnifiedHistoryTable />);
 
       const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
-      expect(headers).toContain('Query');
+      expect(headers).toContain('Query or Pack');
       expect(headers).toContain('Tags');
       expect(headers).toContain('Results');
       expect(headers).toContain('Source');
@@ -456,7 +506,7 @@ describe('UnifiedHistoryTable', () => {
 
       const headers = screen.getAllByRole('columnheader').map((h) => h.textContent);
       expect(headers).toContain('Actions');
-      expect(headers).toContain('Query');
+      expect(headers).toContain('Query or Pack');
       expect(headers).toContain('Created at');
       expect(headers).not.toContain('Tags');
       expect(headers).not.toContain('Source');
@@ -480,6 +530,26 @@ describe('UnifiedHistoryTable', () => {
       expect(useUnifiedHistoryMock).toHaveBeenCalledWith(
         expect.objectContaining({ sortDirection: 'desc' })
       );
+    });
+  });
+
+  describe('pagination', () => {
+    it('does not advertise extra pages while showing placeholder (stale) data', () => {
+      const rows = Array.from({ length: 20 }, () => createMockLiveRow());
+      mockHistory({
+        data: rows,
+        hasMore: true,
+        nextPage: 'cursor-abc',
+        isPlaceholderData: true,
+      });
+
+      const { container } = renderWithProviders(<UnifiedHistoryTable />);
+
+      // When data is stale (placeholder), the forward arrow should be disabled
+      // even though the stale response has hasMore: true.
+      const nextButton = container.querySelector('[data-test-subj="pagination-button-next"]');
+      expect(nextButton).toBeTruthy();
+      expect(nextButton).toBeDisabled();
     });
   });
 });

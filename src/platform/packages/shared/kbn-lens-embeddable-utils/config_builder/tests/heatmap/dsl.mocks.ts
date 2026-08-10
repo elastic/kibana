@@ -9,6 +9,7 @@
 
 import type { HeatmapVisualizationState } from '@kbn/lens-common/visualizations/heatmap/types';
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 
 export const simple: LensAttributes = {
@@ -90,7 +91,7 @@ export const simple: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -206,7 +207,7 @@ export const withXAndYAxes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -398,7 +399,7 @@ export const withDynamicColors = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -487,7 +488,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -610,13 +611,196 @@ export const selectorColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [
     {
       type: 'index-pattern',
       id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
       name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};
+
+export const formulaColumns: LensAttributes = {
+  state: {
+    visualization: {
+      shape: 'heatmap',
+      layerId: '76ecf220-01ab-4916-b92d-3507abef5ff0',
+      layerType: 'data',
+      legend: {
+        isVisible: true,
+        position: 'right',
+        type: 'heatmap_legend',
+      },
+      gridConfig: {
+        type: 'heatmap_grid',
+        isCellLabelVisible: false,
+        isYAxisLabelVisible: true,
+        isXAxisLabelVisible: true,
+        isYAxisTitleVisible: true,
+        isXAxisTitleVisible: true,
+      },
+      valueAccessor: '7a266ca9-ff64-4ef2-a303-e5a1f34db73a',
+      xAccessor: '58ee0496-7acc-4774-9db1-25d227f8392c',
+      yAccessor: '1c024881-94fe-4572-89fa-9ed9d289f127',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '76ecf220-01ab-4916-b92d-3507abef5ff0': {
+            columns: {
+              '58ee0496-7acc-4774-9db1-25d227f8392c': {
+                label: 'Top 9 values of geo.srcdest',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.srcdest',
+                isBucketed: true,
+                params: {
+                  // @ts-expect-error
+                  size: 9,
+                  orderBy: {
+                    type: 'alphabetical',
+                    fallback: true,
+                  },
+                  orderDirection: 'asc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              },
+              '1c024881-94fe-4572-89fa-9ed9d289f127': {
+                label: 'Top 9 values of extension.keyword',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'extension.keyword',
+                isBucketed: true,
+                params: {
+                  // @ts-expect-error
+                  size: 9,
+                  orderBy: {
+                    type: 'alphabetical',
+                    fallback: true,
+                  },
+                  orderDirection: 'asc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              },
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX0': {
+                label: 'Part of max(bytes) + sum(bytes)',
+                dataType: 'number',
+                operationType: 'max',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              },
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX1': {
+                label: 'Part of max(bytes) + sum(bytes)',
+                dataType: 'number',
+                operationType: 'sum',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              },
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX2': {
+                label: 'Part of max(bytes) + sum(bytes)',
+                dataType: 'number',
+                operationType: 'math',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error
+                  tinymathAst: {
+                    type: 'function',
+                    name: 'add',
+                    args: [
+                      '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX0',
+                      '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX1',
+                    ],
+                    location: {
+                      min: 0,
+                      max: 23,
+                    },
+                    text: 'max(bytes) + sum(bytes)',
+                  },
+                },
+                references: [
+                  '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX0',
+                  '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX1',
+                ],
+                customLabel: true,
+              },
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73a': {
+                label: 'max(bytes) + sum(bytes)',
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                params: {
+                  // @ts-expect-error
+                  formula: 'max(bytes) + sum(bytes)',
+                  isFormulaBroken: false,
+                },
+                references: ['7a266ca9-ff64-4ef2-a303-e5a1f34db73aX2'],
+              },
+            },
+            columnOrder: [
+              '1c024881-94fe-4572-89fa-9ed9d289f127',
+              '58ee0496-7acc-4774-9db1-25d227f8392c',
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73a',
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX0',
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX1',
+              '7a266ca9-ff64-4ef2-a303-e5a1f34db73aX2',
+            ],
+            incompleteColumns: {},
+            sampling: 1,
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'Heatmap with formula',
+  description: '',
+  version: 2,
+  visualizationType: 'lnsHeatmap',
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-76ecf220-01ab-4916-b92d-3507abef5ff0',
     },
   ],
 };

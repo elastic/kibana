@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+export function startTrialLicenseIfEligible(): void {
+  cy.request({
+    method: 'POST',
+    url: '/api/license/start_trial?acknowledge=true',
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+    },
+    failOnStatusCode: false,
+  }).then(({ body, status }) => {
+    cy.log(`startTrialLicenseIfEligible: status=${status} body=${JSON.stringify(body)}`);
+  });
+}
+
 export function downgradeLicenseToBasic(): Cypress.Chainable<Cypress.Response<unknown>> {
   return cy
     .request({

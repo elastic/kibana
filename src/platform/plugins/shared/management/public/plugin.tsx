@@ -22,6 +22,8 @@ import type {
   AppDeepLink,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type {
   ConfigSchema,
   ManagementSetup,
@@ -56,6 +58,7 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  cps?: CPSPluginStart;
 }
 
 export class ManagementPlugin
@@ -70,21 +73,22 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
-      (section: ManagementSection) => ({
+    const deepLinks: AppDeepLink[] = this.managementSections
+      .getAllSections()
+      .map((section: ManagementSection) => ({
         id: section.id,
         title: section.title,
         deepLinks: section
           .getAppsEnabled()
-          .filter((mgmtApp) => !mgmtApp.hideFromGlobalSearch)
+          .filter((mgmtApp) => mgmtApp.visibleIn || !mgmtApp.hideFromGlobalSearch)
           .map((mgmtApp) => ({
             id: mgmtApp.id,
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
+            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'projectSideNav'],
           })),
-      })
-    );
+      }));
 
     return { deepLinks };
   });
@@ -169,9 +173,19 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
-                project: { value: newBreadcrumbs, absolute: true },
-              });
+              const chromeStyle = coreStart.chrome.getChromeStyle();
+              if (chromeStyle === 'project') {
+                // Project chrome (solution spaces): the navigation tree provides "Stack Management > App".
+                // Management apps provide breadcrumbs as [Stack Management, App, ...details].
+                // We drop the first two and append the rest to the nav tree path.
+                const [, , ...trailingBreadcrumbs] = newBreadcrumbs;
+                coreStart.chrome.setBreadcrumbs([], {
+                  project: { value: trailingBreadcrumbs },
+                });
+              } else {
+                // Classic chrome: use full breadcrumb trail as-is
+                coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+              }
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
@@ -209,6 +223,12 @@ export class ManagementPlugin
         };
       });
     }
+
+    plugins.cps?.cpsManager?.registerAppAccess('management', (location: string) =>
+      location.includes('management/ml')
+        ? ProjectRoutingAccess.READONLY
+        : ProjectRoutingAccess.DISABLED
+    );
 
     return {
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>

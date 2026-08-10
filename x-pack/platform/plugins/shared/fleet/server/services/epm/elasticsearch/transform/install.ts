@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 import pMap from 'p-map';
@@ -57,6 +57,7 @@ import {
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
+import { removeRemoteClusterSourceIndicesOnServerless } from './ccs_transform_source';
 import { appContextService } from '../../../app_context';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
@@ -210,7 +211,7 @@ const processTransformAssetsPerModule = async (
     }
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
-    const content = load(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
+    const content = parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
@@ -752,6 +753,7 @@ export const isTransform = (path: string) => {
 interface TransformEsAssetReference extends EsAssetReference {
   version?: string;
 }
+
 /**
  * Create transform and optionally start transform
  * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
@@ -772,6 +774,8 @@ async function handleTransformInstall({
   startTransform?: boolean;
   secondaryAuth?: SecondaryAuthorizationHeader;
 }): Promise<TransformEsAssetReference> {
+  removeRemoteClusterSourceIndicesOnServerless(transform, logger);
+
   let isUnauthorizedAPIKey = false;
   try {
     await retryTransientEsErrors(

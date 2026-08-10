@@ -92,16 +92,20 @@ describe('Rules Endpoint response actions validators', () => {
       await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
     });
 
-    it('should only validate .endpoint response actions', async () => {
+    it('should validate both .endpoint and .osquery response actions independently', async () => {
       endpointAuthz.canIsolateHost = false;
+      const mockOsqueryAuthz = jest.fn().mockResolvedValue(undefined);
       rulePayload.response_actions = [
-        { action_type_id: '.osquery', params: {} },
+        { action_type_id: '.osquery', params: { query: 'SELECT 1' } },
         createRulePayloadResponseActionMock(),
       ];
+      options.checkOsqueryResponseActionAuthz = mockOsqueryAuthz;
 
       await expect(validateRuleResponseActions(options)).rejects.toThrow(
         'User is not authorized to create/update isolate response action'
       );
+      // Osquery authz was still called for the osquery action
+      expect(mockOsqueryAuthz).toHaveBeenCalledTimes(1);
     });
 
     interface AuthzTestCase {
@@ -211,6 +215,75 @@ describe('Rules Endpoint response actions validators', () => {
         await expect(validateRuleResponseActions(options)).rejects.toThrow(
           "Invalid [kill-process] response action configuration: 'field' is required when 'overwrite' is 'false'"
         );
+      });
+    });
+
+    describe('and response action has `kill_descendants`', () => {
+      // Builds a kill/suspend process action while allowing an arbitrary (possibly invalid)
+      // `kill_descendants` value so that the validator's runtime type check can be exercised.
+      const createProcessActionWithKillDescendants = (
+        command: 'kill-process' | 'suspend-process',
+        killDescendants: unknown
+      ): ResponseAction =>
+        createRulePayloadResponseActionMock({
+          params: {
+            command,
+            config: { overwrite: true, kill_descendants: killDescendants as boolean },
+          },
+        } as ResponseAction);
+
+      beforeEach(() => {
+        // @ts-expect-error assignment to readonly is ok here
+        endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = true;
+      });
+
+      it.each([true, false])(
+        'should succeed when `kill_descendants` is `%s`',
+        async (killDescendants) => {
+          rulePayload.response_actions = [
+            createProcessActionWithKillDescendants('kill-process', killDescendants),
+          ];
+
+          await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+        }
+      );
+
+      it('should succeed when `kill_descendants` is not defined', async () => {
+        rulePayload.response_actions = [
+          createRulePayloadResponseActionMock({
+            params: { command: 'kill-process', config: { overwrite: true } },
+          }),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should error when `kill_descendants` is not a boolean', async () => {
+        rulePayload.response_actions = [
+          createProcessActionWithKillDescendants('kill-process', 'not-a-boolean'),
+        ];
+
+        await expect(validateRuleResponseActions(options)).rejects.toThrow(
+          "Invalid [kill-process] response action configuration: 'kill_descendants' must be a boolean"
+        );
+      });
+
+      it('should NOT validate `kill_descendants` when the feature flag is disabled', async () => {
+        // @ts-expect-error assignment to readonly is ok here
+        endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants = false;
+        rulePayload.response_actions = [
+          createProcessActionWithKillDescendants('kill-process', 'not-a-boolean'),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+      });
+
+      it('should NOT validate `kill_descendants` for the suspend-process command', async () => {
+        rulePayload.response_actions = [
+          createProcessActionWithKillDescendants('suspend-process', 'not-a-boolean'),
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
       });
     });
 
@@ -494,6 +567,142 @@ describe('Rules Endpoint response actions validators', () => {
           ],
         }
       `);
+    });
+  });
+
+  describe('osquery response actions validation', () => {
+    let options: ValidateRuleResponseActionsOptions;
+    let mockOsqueryAuthz: jest.Mock;
+
+    beforeEach(() => {
+      mockOsqueryAuthz = jest.fn().mockResolvedValue(undefined);
+      options = {
+        rulePayload: {
+          response_actions: [
+            {
+              action_type_id: '.osquery' as const,
+              params: { query: 'SELECT * FROM processes' },
+            },
+          ],
+        },
+        endpointService,
+        endpointAuthz,
+        spaceId: 'foo',
+        checkOsqueryResponseActionAuthz: mockOsqueryAuthz,
+      };
+    });
+
+    it('should call osquery authz checker for .osquery actions', async () => {
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: undefined,
+        pack_id: undefined,
+      });
+    });
+
+    it('should pass saved_query_id to osquery authz checker', async () => {
+      options.rulePayload = {
+        response_actions: [
+          {
+            action_type_id: '.osquery' as const,
+            params: { saved_query_id: 'test-saved-query' },
+          },
+        ],
+      };
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: 'test-saved-query',
+        pack_id: undefined,
+      });
+    });
+
+    it('should pass pack_id to osquery authz checker', async () => {
+      options.rulePayload = {
+        response_actions: [
+          {
+            action_type_id: '.osquery' as const,
+            params: { pack_id: 'test-pack' },
+          },
+        ],
+      };
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: undefined,
+        pack_id: 'test-pack',
+      });
+    });
+
+    it('should throw when osquery authz checker rejects', async () => {
+      const authzError: Error & { statusCode?: number } = new Error(
+        'User is not authorized to create/update osquery response action'
+      );
+      authzError.statusCode = 403;
+      mockOsqueryAuthz.mockRejectedValue(authzError);
+
+      await expect(validateRuleResponseActions(options)).rejects.toThrow(
+        'User is not authorized to create/update osquery response action'
+      );
+    });
+
+    it('should skip osquery validation when no authz checker is provided', async () => {
+      delete options.checkOsqueryResponseActionAuthz;
+
+      // Should not throw even though there are osquery actions
+      await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+    });
+
+    it('should handle camelCase params from existing rule (savedQueryId)', async () => {
+      // Existing rule stores params in camelCase (RuleResponseOsqueryAction).
+      // When the action is modified, the old camelCase version appears in the xor diff.
+      options.rulePayload = { response_actions: [] };
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { savedQueryId: 'existing-saved-query' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: 'existing-saved-query',
+        pack_id: undefined,
+      });
+    });
+
+    it('should handle camelCase params from existing rule (packId)', async () => {
+      options.rulePayload = { response_actions: [] };
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { packId: 'existing-pack' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      expect(mockOsqueryAuthz).toHaveBeenCalledWith({
+        saved_query_id: undefined,
+        pack_id: 'existing-pack',
+      });
+    });
+
+    it('should not validate unchanged osquery actions on update', async () => {
+      const osqueryAction = {
+        action_type_id: '.osquery' as const,
+        params: { query: 'SELECT * FROM processes' },
+      };
+      options.rulePayload = { response_actions: [osqueryAction] };
+      existingRule.params.responseActions = [
+        { actionTypeId: '.osquery', params: { query: 'SELECT * FROM processes' } },
+      ] as RuleResponseAction[];
+      options.existingRule = existingRule;
+
+      await validateRuleResponseActions(options);
+
+      // Osquery authz should not be called since the action is unchanged
+      expect(mockOsqueryAuthz).not.toHaveBeenCalled();
     });
   });
 });

@@ -14,29 +14,39 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+
+export const UpsertDatasetExamplePayload = lazySchema(() =>
+  z.object({
+    input: z.object({}).catchall(z.unknown()).optional(),
+    output: z.object({}).catchall(z.unknown()).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
 export type UpsertDatasetExamplePayload = z.infer<typeof UpsertDatasetExamplePayload>;
-export const UpsertDatasetExamplePayload = z.object({
-  input: z.object({}).catchall(z.unknown()).optional(),
-  output: z.object({}).catchall(z.unknown()).optional(),
-  metadata: z.object({}).catchall(z.unknown()).optional(),
-});
 
+export const UpsertEvaluationDatasetRequestBody = lazySchema(() =>
+  z.object({
+    name: z.string().min(1).max(256),
+    description: z.string().max(2048),
+    tags: DatasetTags.optional(),
+    maturity: DatasetMaturity.optional(),
+    examples: z.array(UpsertDatasetExamplePayload),
+  })
+);
 export type UpsertEvaluationDatasetRequestBody = z.infer<typeof UpsertEvaluationDatasetRequestBody>;
-export const UpsertEvaluationDatasetRequestBody = z.object({
-  name: z.string(),
-  description: z.string(),
-  examples: z.array(UpsertDatasetExamplePayload),
-});
 export type UpsertEvaluationDatasetRequestBodyInput = z.input<
   typeof UpsertEvaluationDatasetRequestBody
 >;
 
+export const UpsertEvaluationDatasetResponse = lazySchema(() =>
+  z.object({
+    dataset_id: z.string(),
+    added: z.number().int(),
+    removed: z.number().int(),
+    unchanged: z.number().int(),
+  })
+);
 export type UpsertEvaluationDatasetResponse = z.infer<typeof UpsertEvaluationDatasetResponse>;
-export const UpsertEvaluationDatasetResponse = z.object({
-  dataset_id: z.string(),
-  added: z.number().int(),
-  removed: z.number().int(),
-  unchanged: z.number().int(),
-});

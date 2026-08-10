@@ -14,9 +14,11 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const CreateListIndexResponse = lazySchema(() =>
+  z.object({
+    acknowledged: z.boolean(),
+  })
+);
 export type CreateListIndexResponse = z.infer<typeof CreateListIndexResponse>;
-export const CreateListIndexResponse = z.object({
-  acknowledged: z.boolean(),
-});

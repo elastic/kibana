@@ -255,6 +255,10 @@ export const requiredFieldsForActions = [
   'kibana.alert.suppression.docs_count',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
+  // User entity fields (for flyout links and entity resolution)
+  'user.id',
+  'user.email',
+  'user.domain',
   // Endpoint exception fields
   'file.path',
   'file.Ext.code_signature.subject_name',

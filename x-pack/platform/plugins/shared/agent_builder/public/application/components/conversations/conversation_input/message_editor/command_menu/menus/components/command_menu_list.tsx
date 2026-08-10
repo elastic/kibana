@@ -41,16 +41,25 @@ const noMatchesLabel = i18n.translate(
 
 export interface CommandMenuListOption {
   readonly key: string;
+  /**
+   * Plain string for accessibility and default label; use `renderLabel` for rich rows.
+   */
   readonly label: string;
+  readonly renderLabel?: React.ReactNode;
 }
+
+/** After EuiSelectableList merges `option.data` into the option, `renderOption` receives this shape. */
+type CommandMenuListSelectableRow = EuiSelectableOption &
+  Partial<Pick<CommandMenuListOption, 'renderLabel'>>;
 
 interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
   readonly isLoading: boolean;
   readonly onSelect: (option: CommandMenuListOption) => void;
-  readonly renderExtraContent?: (key: string) => React.ReactNode;
   readonly width?: number;
   readonly 'data-test-subj'?: string;
+  /** When true, Space also selects the highlighted option, like Enter. */
+  readonly spaceSelection?: boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -59,9 +68,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       options,
       isLoading,
       onSelect,
-      renderExtraContent,
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
+      spaceSelection,
     },
     ref
   ) => {
@@ -72,9 +81,13 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const optionKeysSignature = useMemo(
+      () => options.map((option) => option.key).join('|'),
+      [options]
+    );
     useEffect(() => {
       setActiveIndex(0);
-    }, [options.length]);
+    }, [optionKeysSignature]);
 
     const scrollIndexIntoView = (index: number) => {
       const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
@@ -99,6 +112,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         options.map((option) => ({
           label: option.label,
           key: option.key,
+          data: option.renderLabel != null ? { renderLabel: option.renderLabel } : undefined,
         })),
       [options]
     );
@@ -113,6 +127,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           keys.ENTER,
           keys.TAB,
         ];
+        // Always claim Space, even with zero options: results can lag a
+        // keystroke behind, and a leaked space would type as plain text.
+        if (event.key === keys.SPACE && spaceSelection) {
+          return true;
+        }
         return handledKeys.includes(event.key);
       },
       handleKeyDown: (event: React.KeyboardEvent): void => {
@@ -122,28 +141,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           handleSetActive((prev) => Math.max(prev - 1, 0));
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
           handleSelectOption();
+        } else if (event.key === keys.SPACE && spaceSelection) {
+          handleSelectOption();
         }
       },
     }));
-
-    const optionRowStyles = css`
-      display: flex;
-      align-items: baseline;
-      gap: ${euiTheme.size.s};
-      min-width: 0;
-    `;
-
-    const renderOption = renderExtraContent
-      ? (option: EuiSelectableOption) => {
-          const extraContent = renderExtraContent(option.key ?? '');
-          return (
-            <span css={optionRowStyles}>
-              <span>{option.label}</span>
-              {extraContent}
-            </span>
-          );
-        }
-      : undefined;
 
     const containerStyles = css`
       width: ${menuWidth}px;
@@ -151,7 +153,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const activeHighlightStyles = css`
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
+        background-color: ${euiTheme.focus.backgroundColor};
       }
     `;
 
@@ -186,7 +188,9 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
-          renderOption={renderOption}
+          renderOption={(option: CommandMenuListSelectableRow) =>
+            option.renderLabel ?? option.label
+          }
           listProps={{
             showIcons: false,
             bordered: false,

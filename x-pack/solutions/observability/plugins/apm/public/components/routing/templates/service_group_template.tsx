@@ -105,9 +105,9 @@ export function ServiceGroupTemplate({
               }),
               href: serviceGroupsLink,
             },
+            // No href on the current entity — Chrome Next Back would self-link.
             {
               title: serviceGroupName,
-              href: router.link('/services', { query: linkQuery }),
             },
             ...(selectedTab
               ? [
@@ -146,7 +146,7 @@ export function ServiceGroupTemplate({
                       <EuiIcon
                         aria-label={returnToServiceGroupsBreadcrumbLabel}
                         size="s"
-                        type="arrowLeft"
+                        type="chevronSingleLeft"
                       />{' '}
                       {returnToServiceGroupsBreadcrumbLabel}
                     </>

@@ -6,16 +6,18 @@
  */
 
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { EvaluationIndices, type DatasetMaturity } from '@kbn/evals-common';
 import { types } from '@kbn/storage-adapter';
 
-export const datasetsIndexName = 'kibana-evaluation-datasets' as const;
-
 export const datasetsStorageSettings = {
-  name: datasetsIndexName,
+  name: EvaluationIndices.DATASETS,
   schema: {
     properties: {
       name: types.keyword({}),
       description: types.text({}),
+      tags: types.keyword({}),
+      maturity: types.keyword({}),
+      examples_count: types.long({}),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -25,6 +27,9 @@ export const datasetsStorageSettings = {
 export interface DatasetStorageProperties {
   name: string;
   description: string;
+  tags?: string[];
+  maturity?: DatasetMaturity;
+  examples_count?: number;
   created_at: string;
   updated_at: string;
 }

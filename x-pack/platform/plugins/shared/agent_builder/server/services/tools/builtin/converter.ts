@@ -38,6 +38,7 @@ export const convertTool = ({
       tags: tool.tags,
       configuration: {},
       readonly: true,
+      experimental: tool.experimental ?? false,
       confirmation: tool.confirmation ?? { askUser: 'never' },
       isAvailable: async (ctx) => {
         if (tool.availability) {
@@ -49,6 +50,7 @@ export const convertTool = ({
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
       summarizeToolReturn: tool.summarizeToolReturn,
+      maxResultTokens: tool.maxResultTokens,
     };
   }
   if (!isBuiltinDefinition(definition)) {
@@ -65,6 +67,7 @@ export const convertTool = ({
       description: tool.description,
       tags: tool.tags,
       readonly: true,
+      experimental: tool.experimental ?? false,
       confirmation: tool.confirmation ?? { askUser: 'never' },
       isAvailable: (ctx) => {
         if (tool.availability) {
@@ -86,6 +89,7 @@ export const convertTool = ({
         return props.getLlmDescription ? props.getLlmDescription(args) : tool.description;
       },
       summarizeToolReturn: tool.summarizeToolReturn,
+      maxResultTokens: tool.maxResultTokens,
     };
   }
 

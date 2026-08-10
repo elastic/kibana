@@ -162,6 +162,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               </EuiFilterButton>
             ))}
             <EuiPopover
+              aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                defaultMessage: 'More platforms',
+              })}
               button={
                 <EuiFilterButton
                   iconType="chevronSingleDown"
@@ -170,6 +173,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
                   numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                    defaultMessage: 'More platforms',
+                  })}
                   css={css`
                     .euiFilterButton__text {
                       min-inline-size: 0;
@@ -181,7 +187,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               }
               isOpen={showExtendedPlatforms}
               closePopover={() => setShowExtendedPlatforms(false)}
-              panelPaddingSize="none"
+              panelPaddingSize="s"
               repositionOnScroll={true}
             >
               <EuiSelectable
@@ -203,7 +209,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   setShowExtendedPlatforms(false);
                 }}
                 css={{ width: 150 }}
-                listProps={{ paddingSize: 'none', onFocusBadge: false }}
+                listProps={{ onFocusBadge: false }}
               >
                 {(list) => list}
               </EuiSelectable>

@@ -13,6 +13,7 @@ import type { ClosePopoverFn } from '../../popover';
 import { Popover } from '../../popover';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { useCanvasContextMenuTopBorderStyles } from '../../../lib/use_canvas_context_menu_top_border_styles';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
 import type { PositionedElement } from '../../../../types';
@@ -237,6 +238,7 @@ export const EditMenu: FunctionComponent<Props> = ({
   redoHistory,
   hasPasteData,
 }) => {
+  const contextMenuTopBorderStyles = useCanvasContextMenuTopBorderStyles();
   const [isModalVisible, setModalVisible] = useState(false);
   const showModal = () => setModalVisible(true);
   const hideModal = () => setModalVisible(false);
@@ -262,7 +264,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       ? {
           name: strings.getUngroupMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           onClick: () => {
             ungroupNodes();
             closePopover();
@@ -271,7 +273,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       : {
           name: strings.getGroupMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           disabled: selectedNodes.length < 2,
           onClick: () => {
             groupNodes();
@@ -282,7 +284,7 @@ export const EditMenu: FunctionComponent<Props> = ({
     const orderMenuItem = {
       name: strings.getOrderMenuItemLabel(),
       disabled: selectedNodes.length !== 1, // TODO: change to === 0 when we support relayering multiple elements
-      icon: <EuiIcon type="empty" size="m" />,
+      icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
       panel: {
         id: 1,
         title: strings.getOrderMenuItemLabel(),
@@ -294,12 +296,12 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: shortcutHelp.BRING_FORWARD, // TODO: same as above
-            icon: 'arrowUp',
+            icon: 'chevronSingleUp',
             onClick: bringForward,
           },
           {
             name: shortcutHelp.SEND_BACKWARD, // TODO: check against current element position and disable if already bottom layer
-            icon: 'arrowDown',
+            icon: 'chevronSingleDown',
             onClick: sendBackward,
           },
           {
@@ -315,14 +317,14 @@ export const EditMenu: FunctionComponent<Props> = ({
       name: strings.getAlignmentMenuItemLabel(),
       className: 'canvasContextMenu',
       disabled: groupIsSelected || selectedNodes.length < 2,
-      icon: <EuiIcon type="empty" size="m" />,
+      icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
       panel: {
         id: 2,
         title: strings.getAlignmentMenuItemLabel(),
         items: [
           {
             name: strings.getLeftAlignMenuItemLabel(),
-            icon: 'editorItemAlignLeft',
+            icon: 'alignLeft',
             onClick: () => {
               alignLeft();
               closePopover();
@@ -330,7 +332,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getCenterAlignMenuItemLabel(),
-            icon: 'editorItemAlignCenter',
+            icon: 'alignCenterHorizontal',
             onClick: () => {
               alignCenter();
               closePopover();
@@ -338,7 +340,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getRightAlignMenuItemLabel(),
-            icon: 'editorItemAlignRight',
+            icon: 'alignRight',
             onClick: () => {
               alignRight();
               closePopover();
@@ -346,7 +348,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getTopAlignMenuItemLabel(),
-            icon: 'editorItemAlignTop',
+            icon: 'alignTop',
             onClick: () => {
               alignTop();
               closePopover();
@@ -354,7 +356,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getMiddleAlignMenuItemLabel(),
-            icon: 'editorItemAlignMiddle',
+            icon: 'alignCenterVertical',
             onClick: () => {
               alignMiddle();
               closePopover();
@@ -362,7 +364,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getBottomAlignMenuItemLabel(),
-            icon: 'editorItemAlignBottom',
+            icon: 'alignBottom',
             onClick: () => {
               alignBottom();
               closePopover();
@@ -376,14 +378,14 @@ export const EditMenu: FunctionComponent<Props> = ({
       name: strings.getDistributionMenuItemLabel(),
       className: 'canvasContextMenu',
       disabled: groupIsSelected || selectedNodes.length < 3,
-      icon: <EuiIcon type="empty" size="m" />,
+      icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
       panel: {
         id: 3,
         title: strings.getAlignmentMenuItemLabel(),
         items: [
           {
             name: strings.getHorizontalDistributionMenuItemLabel(),
-            icon: 'editorDistributeHorizontal',
+            icon: 'distributeHorizontal',
             onClick: () => {
               distributeHorizontally();
               closePopover();
@@ -391,7 +393,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getVerticalDistributionMenuItemLabel(),
-            icon: 'editorDistributeVertical',
+            icon: 'distributeVertical',
             onClick: () => {
               distributeVertically();
               closePopover();
@@ -403,7 +405,7 @@ export const EditMenu: FunctionComponent<Props> = ({
 
     const savedElementMenuItem = {
       name: strings.getSaveElementMenuItemLabel(),
-      icon: <EuiIcon type="indexOpen" size="m" />,
+      icon: <EuiIcon type="indexOpen" size="m" aria-hidden={true} />,
       disabled: selectedNodes.length < 1,
       className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
       'data-test-subj': 'canvasWorkpadEditMenu__saveElementButton',
@@ -417,7 +419,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         // TODO: check history and disable when there are no more changes to revert
         name: strings.getUndoMenuItemLabel(),
-        icon: <EuiIcon type="editorUndo" size="m" />,
+        icon: <EuiIcon type="undo" size="m" aria-hidden={true} />,
         onClick: () => {
           undoHistory();
         },
@@ -425,14 +427,14 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         // TODO: check history and disable when there are no more changes to reapply
         name: strings.getRedoMenuItemLabel(),
-        icon: <EuiIcon type="editorRedo" size="m" />,
+        icon: <EuiIcon type="redo" size="m" aria-hidden={true} />,
         onClick: () => {
           redoHistory();
         },
       },
       {
         name: shortcutHelp.CUT,
-        icon: <EuiIcon type="cut" size="m" />,
+        icon: <EuiIcon type="scissors" size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         disabled: selectedNodes.length < 1,
         onClick: () => {
@@ -443,14 +445,14 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         name: shortcutHelp.COPY,
         disabled: selectedNodes.length < 1,
-        icon: <EuiIcon type="copy" size="m" />,
+        icon: <EuiIcon type="copy" size="m" aria-hidden={true} />,
         onClick: () => {
           copyNodes();
         },
       },
       {
         name: shortcutHelp.PASTE, // TODO: can this be disabled if clipboard is empty?
-        icon: <EuiIcon type="copyClipboard" size="m" />,
+        icon: <EuiIcon type="copy" size="m" aria-hidden={true} />,
         disabled: !hasPasteData,
         onClick: () => {
           pasteNodes();
@@ -459,7 +461,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       },
       {
         name: shortcutHelp.DELETE,
-        icon: <EuiIcon type="trash" size="m" />,
+        icon: <EuiIcon type="trash" size="m" aria-hidden={true} />,
         disabled: selectedNodes.length < 1,
         onClick: () => {
           deleteNodes();
@@ -469,7 +471,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       },
       {
         name: shortcutHelp.CLONE,
-        icon: <EuiIcon type="empty" size="m" />,
+        icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
         disabled: selectedNodes.length < 1,
         onClick: () => {
           cloneNodes();
@@ -497,6 +499,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           <EuiContextMenu
             initialPanelId={0}
             panels={flattenPanelTree(getPanelTree(closePopover))}
+            css={contextMenuTopBorderStyles}
           />
         )}
       </Popover>

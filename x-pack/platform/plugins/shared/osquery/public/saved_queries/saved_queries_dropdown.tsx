@@ -13,6 +13,7 @@ import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './c
 import { OsquerySchemaLink } from '../components/osquery_schema_link';
 import { useOsquerySchema } from '../common/hooks/use_osquery_schema';
 import { useSavedQueries } from './use_saved_queries';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 const euiCodeBlockCss = {
@@ -44,6 +45,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   onChange,
 }) => {
   const { osqueryVersion } = useOsquerySchema();
+  const isHistoryReworkEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const savedQueryId = useWatch({ name: 'savedQueryId' });
   const context = useFormContext();
   const { errors } = context.formState;
@@ -94,12 +96,14 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
         <div className="eui-textTruncate">
           <EuiTextColor color="subdued">{value.description}</EuiTextColor>
         </div>
-        <EuiCodeBlock css={euiCodeBlockCss} language="sql" fontSize="m" paddingSize="s">
-          {value.query.split('\n').join(' ')}
-        </EuiCodeBlock>
+        {!isHistoryReworkEnabled && (
+          <EuiCodeBlock css={euiCodeBlockCss} language="sql" fontSize="m" paddingSize="s">
+            {value.query.split('\n').join(' ')}
+          </EuiCodeBlock>
+        )}
       </>
     ),
-    []
+    [isHistoryReworkEnabled]
   );
 
   useEffect(() => {
@@ -138,7 +142,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
         selectedOptions={selectedOptions}
         onChange={handleSavedQueryChange}
         renderOption={renderOption}
-        rowHeight={110}
+        rowHeight={isHistoryReworkEnabled ? 55 : 110}
       />
     </EuiFormRow>
   );

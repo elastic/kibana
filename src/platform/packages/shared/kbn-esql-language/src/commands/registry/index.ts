@@ -9,6 +9,7 @@
 
 import { CommandRegistry } from './registry';
 import { limitCommand } from './limit';
+import { dedupCommand } from './dedup';
 import { dropCommand } from './drop';
 import { keepCommand } from './keep';
 import { forkCommand } from './fork';
@@ -17,7 +18,9 @@ import { changePointCommand } from './change_point';
 import { completionCommand } from './completion';
 import { dissectCommand } from './dissect';
 import { uriPartsCommand } from './uri_parts';
+import { userAgentCommand } from './user_agent';
 import { registeredDomainCommand } from './registered_domain';
+import { ipLocationCommand } from './ip_location';
 import { enrichCommand } from './enrich';
 import { evalCommand } from './eval';
 import { fromCommand } from './from';
@@ -45,6 +48,7 @@ const esqlCommandRegistry = new CommandRegistry();
 
 const baseCommands = [
   limitCommand,
+  dedupCommand,
   dropCommand,
   forkCommand,
   renameCommand,
@@ -52,7 +56,9 @@ const baseCommands = [
   completionCommand,
   dissectCommand,
   uriPartsCommand,
+  userAgentCommand,
   registeredDomainCommand,
+  ipLocationCommand,
   enrichCommand,
   evalCommand,
   fromCommand,

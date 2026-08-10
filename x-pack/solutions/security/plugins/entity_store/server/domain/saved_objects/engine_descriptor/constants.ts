@@ -13,9 +13,10 @@ export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updatin
 
 export type EngineLogExtractionState = z.infer<typeof EngineLogExtractionState>;
 export const EngineLogExtractionState = z.object({
-  paginationTimestamp: z.string().optional(),
-  paginationId: z.string().optional(),
-  lastExecutionTimestamp: z.string().optional(),
+  /** Inclusive lower bound for the next log-slice probe and the fromDateISO for entity recovery. */
+  checkpointTimestamp: z.string().nullable().default(null),
+  paginationId: z.string().nullable().default(null),
+  lastExecutionTimestamp: z.string().nullable().default(null),
 });
 
 export type EngineError = z.infer<typeof EngineError>;
@@ -36,6 +37,6 @@ export const EngineDescriptor = z.object({
   type: EntityType,
   status: EngineStatus,
   logExtractionState: EngineLogExtractionState,
-  error: EngineError.optional(),
+  error: EngineError.nullable().default(null),
   versionState: VersionState,
 });

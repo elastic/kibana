@@ -14,10 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ReadListIndexResponse = lazySchema(() =>
+  z.object({
+    list_index: z.boolean(),
+    list_item_index: z.boolean(),
+  })
+);
 export type ReadListIndexResponse = z.infer<typeof ReadListIndexResponse>;
-export const ReadListIndexResponse = z.object({
-  list_index: z.boolean(),
-  list_item_index: z.boolean(),
-});

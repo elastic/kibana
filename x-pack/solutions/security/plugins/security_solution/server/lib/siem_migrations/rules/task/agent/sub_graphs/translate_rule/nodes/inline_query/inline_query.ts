@@ -23,7 +23,8 @@ export const getInlineQueryNode = (params: InlineQueryNodeParams): GraphNode => 
   const inlineSplQuery = getInlineSplQuery(inlineParams);
   return async (state) => {
     if (state.original_rule.vendor !== OriginalRuleVendorEnum.splunk) {
-      // We only support inlining SPL queries, if the original rule is not a Splunk rule, we return the original query without inlining and add a comment about it.
+      // For non-Splunk vendors (QRadar, Sentinel), inline query substitution is not applicable.
+      // The nl_query from the sourceRuleToNaturalLanguage node is used instead.
       return {
         inline_query: undefined,
       };

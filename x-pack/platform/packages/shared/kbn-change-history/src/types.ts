@@ -12,6 +12,56 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 /**
+ * Mapped keyword fields that support terms aggregations in change history.
+ * Only string-valued keyword paths are supported.
+ */
+export type ChangeHistoryAggregateField = 'user.name' | 'user.id' | 'event.action' | 'event.type';
+
+/** Supported {@link ChangeHistoryAggregateField} values for facet queries and tests. */
+export const CHANGE_HISTORY_AGGREGATE_FIELDS = [
+  'user.name',
+  'user.id',
+  'event.action',
+  'event.type',
+] as const satisfies readonly ChangeHistoryAggregateField[];
+
+export interface ChangeHistoryFieldBucket {
+  /** Distinct field value for this bucket. */
+  key: string;
+  /** Number of matching change history documents. */
+  docCount: number;
+}
+
+export interface GetChangeHistoryByFieldsOptions {
+  /** Additional filters merged with the standard object scope filters. */
+  additionalFilters?: QueryDslQueryContainer[];
+  /** Maximum number of distinct values to return per field. Defaults to `DEFAULT_FIELD_AGGREGATION_SIZE` (100). */
+  size?: number;
+}
+
+/**
+ * One field's terms aggregation within a {@link GetChangeHistoryByFieldsResult}.
+ */
+export interface GetChangeHistoryByFieldResult {
+  field: ChangeHistoryAggregateField;
+  buckets: ChangeHistoryFieldBucket[];
+  /**
+   * Elasticsearch {@link https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-terms-aggregation sum_other_doc_count}:
+   * total **document** count in terms buckets omitted because {@link GetChangeHistoryByFieldsOptions.size}
+   * was exceeded.
+   */
+  sumOtherDocCount: number;
+}
+
+/**
+ * Result from field terms aggregations scoped to an object's change history.
+ * `results` follows the order of the requested fields (duplicates removed).
+ */
+export interface GetChangeHistoryByFieldsResult {
+  results: GetChangeHistoryByFieldResult[];
+}
+
+/**
  * Represents a single document in the change history.
  */
 export interface ChangeHistoryDocument {
@@ -47,8 +97,8 @@ export interface ChangeHistoryDocument {
     created?: string;
   };
 
-  transaction?: {
-    /** ID shared between events in the same transaction. */
+  span?: {
+    /** ID shared between events in the same bulk operation. */
     id: string;
   };
 
@@ -57,24 +107,24 @@ export interface ChangeHistoryDocument {
     id: string;
     /** Type of the target entity in kibana. Allows tracking multiple entity types in same stream. */
     type: string;
-    /** ES backing index where this entity was stored. */
-    index?: string;
     /** SHA256 hash of the entity.raw to identify changes in the payload. */
     hash: string;
-    /** Version identifier used for ordering. Increases with each version. */
+    /**
+     * Monotonically increasing integer determining object changes order.
+     *
+     * `@timestamp` is used for ordering when omitted.
+     *
+     * Use `object.sequence` when you can't tolerate clock skew. The best source for
+     * such a sequence number is some monotonically increasing number tracked in the
+     * source object which gets incremented upon every object change. It has to survive
+     * reindexing, upgrades, failovers, migrations and cluster rebuilds.
+     */
     sequence?: number;
-    /** The diff (if available) */
-    diff?: {
-      /** Calculation used to produce this diff (ie `default`, `rfc6092`) */
-      type: ChangeHistoryDiff['type'];
-      /** List of field names that changed. With full paths. */
-      fields: string[];
-      /** Previous state for changed fields. */
-      before: Record<string, unknown>;
-    };
     fields: {
-      /** Full paths of fields stored as hashes (sensitive fields or blob binaries). */
+      /** Full paths of fields stored as hashes (high-entropy secrets). */
       hashed: string[];
+      /** Full paths of fields replaced with a `[redacted]` placeholder (low-entropy sensitive data, large blobs). */
+      redacted: string[];
     };
     /** Full snapshot after the change. */
     snapshot: Record<string, unknown>;
@@ -83,13 +133,8 @@ export interface ChangeHistoryDocument {
   /** Optional list of tags for the event. */
   tags?: string[];
 
-  /** Optional metadata about the event. Information that does not form part of the diff or ECS schema. */
+  /** Optional metadata about the event. Information that does not form part of the ECS schema. */
   metadata?: Record<string, unknown>;
-
-  kibana?: {
-    // /** Kibana space ID that the change event belongs to. (ie `default` etc) */
-    space_ids: string;
-  };
 
   service: {
     type: 'kibana';
@@ -105,14 +150,30 @@ export interface ObjectChange {
   objectType: string;
   /** The `object.id`. Uniquely identifies this object in Kibana within its `type` */
   objectId: string;
-  /** ES backing `_index` where this object was stored. */
-  index?: string;
-  /** A sequentially increasing version for ordering changes. Please avoid ES _seq_no or _version as these are not reliable */
+  /**
+   * Monotonically increasing integer determining object changes order.
+   *
+   * `@timestamp` is used for ordering when omitted.
+   *
+   * Use `object.sequence` when you can't tolerate clock skew. The best source for
+   * such a sequence number is some monotonically increasing number tracked in the
+   * source object which gets incremented upon every object change. It has to survive
+   * reindexing, upgrades, failovers, migrations and cluster rebuilds.
+   */
   sequence?: number;
-  /** Raw version of the object. Before changes. If available. */
-  before?: Record<string, any>;
-  /** Raw copy of the object after changes (ie the `object.snapshot`). */
-  after: Record<string, any>;
+  /**
+   * Full snapshot of the object **after** the change (post-write state). Persisted as
+   * `object.snapshot`.
+   */
+  snapshot: Record<string, any>;
+}
+
+/** Optional overrides merged into a logged change document. */
+export interface LogChangeHistoryDataOverrides {
+  tags?: ChangeHistoryDocument['tags'];
+  metadata?: ChangeHistoryDocument['metadata'];
+  /** Only `type` and `reason` are applied; `event.id` is always generated by the client. */
+  event?: Partial<Pick<ChangeHistoryDocument['event'], 'type' | 'reason'>>;
 }
 
 export interface LogChangeHistoryOptions {
@@ -124,19 +185,21 @@ export interface LogChangeHistoryOptions {
   userProfileId?: string;
   /** Kibana space that the event belongs to. (ie `default` etc). */
   spaceId: string;
-  /** ID shared between events that take place together (ie in the same transaction). */
+  /** ID shared between events that take place together (ie in the same bulk operation). */
   correlationId?: string;
-  /**
-   * Direct overrides for the change document (`tags`, `metadata`, and selected `event` fields).
-   * `event.id` is always generated by the client and cannot be supplied here.
-   */
-  data?: Partial<Pick<ChangeHistoryDocument, 'event' | 'tags' | 'metadata'>>;
-  /** List of fields to ignore in change calculation */
-  fieldsToIgnore?: ChangeHistoryFieldsToIgnore;
-  /** List of fields to hash in the saved change history (secret keys, PII, base64 etc) */
-  fieldsToHash?: ChangeHistoryFieldsToHash;
+  /** @see {@link LogChangeHistoryDataOverrides} */
+  data?: LogChangeHistoryDataOverrides;
+  /** Snapshot fields to replace with a salted SHA-256 digest. High-entropy secrets only (API keys, tokens); low-entropy values stay brute-forceable, use `fieldsToRedact` for those. */
+  fieldsToHash?: ChangeHistoryFieldsToMask;
+  /** Snapshot fields to replace with a `[redacted]` placeholder. Use for low-entropy sensitive data (emails, names, IPs). */
+  fieldsToRedact?: ChangeHistoryFieldsToMask;
   /** Optional indicator to force an ES refresh after changes (affects performance) */
   refresh?: Refresh;
+  /**
+   * Caller-supplied labels attached to every span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
 }
 
 export interface GetChangeHistoryOptions {
@@ -144,6 +207,11 @@ export interface GetChangeHistoryOptions {
   sort?: SortCombinations[];
   from?: number;
   size?: number;
+  /**
+   * Caller-supplied labels attached to every span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
 }
 
 /**
@@ -155,46 +223,8 @@ export interface GetHistoryResult {
 }
 
 /**
- * Fields excluded from diff calculation
+ * Nested map of snapshot field paths to mask (set `true` to select a path). Used by `fieldsToHash` and `fieldsToRedact`.
  */
-export interface ChangeHistoryFieldsToIgnore {
-  [Key: string]: boolean | ChangeHistoryFieldsToIgnore;
-}
-
-/**
- * Fields hashed due to sensitive nature (PII, Secret keys, etc) or being very large (base64 blob)
- */
-export interface ChangeHistoryFieldsToHash {
-  [Key: string]: boolean | ChangeHistoryFieldsToHash;
-}
-
-/**
- * Input for the diff calculation
- */
-export interface ChangeHistoryDiffOptions {
-  a?: Record<string, any>;
-  b?: Record<string, any>;
-  fieldsToIgnore?: ChangeHistoryFieldsToIgnore;
-}
-
-/**
- * Output of the diff calculation
- */
-export interface ChangeHistoryDiff {
-  stats: {
-    total: number;
-    additions: number;
-    deletions: number;
-    updates: number;
-  };
-  /** The type of diff calculation (ie `default`, `rfc6902` etc) */
-  type: 'default';
-  /** The list of fields that changed, using full paths */
-  fields: Array<string>;
-  /** The list of fields that were ignored, using full paths */
-  ignored: Array<string>;
-  /** A partial copy of the original object, including only fields that changed */
-  before: Record<string, any>;
-  /** A partial copy of the modified object, including only fields that changed */
-  after: Record<string, any>;
+export interface ChangeHistoryFieldsToMask {
+  [Key: string]: boolean | ChangeHistoryFieldsToMask;
 }

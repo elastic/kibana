@@ -122,7 +122,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
-            iconType="beaker"
+            iconType="flask"
             color="hollow"
           >
             {i18n.translate(
@@ -146,7 +146,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         label: conn.name,
         value: {
           _icon,
-          _badges: <EuiIcon size="l" type={conn.iconPath} />,
+          _badges: <EuiIcon size="l" type={conn.iconPath} aria-hidden />,
           serviceType: conn.serviceType,
         },
         'aria-label': conn.name + _ariaLabelAppend,

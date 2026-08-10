@@ -10,8 +10,8 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { AttackDetailsProps } from './types';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
-import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
+import { FlyoutError } from '../../flyout_v2/shared/components/flyout_error';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useAttackDetails } from './hooks/use_attack_details';
 import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';

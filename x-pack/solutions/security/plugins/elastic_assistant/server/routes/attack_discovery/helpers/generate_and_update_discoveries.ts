@@ -20,6 +20,7 @@ import type {
   CreateAttackDiscoveryAlertsParams,
   Replacements,
 } from '@kbn/elastic-assistant-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Document } from '@langchain/core/documents';
@@ -39,6 +40,7 @@ export interface GenerateAndUpdateAttackDiscoveriesParams {
   enableFieldRendering: boolean;
   esClient: ElasticsearchClient;
   executionUuid: string;
+  inferenceClient?: InferenceClient;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
@@ -53,6 +55,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
   enableFieldRendering,
   esClient,
   executionUuid,
+  inferenceClient,
   logger,
   savedObjectsClient,
   telemetry,
@@ -80,6 +83,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
       actionsClient,
       config,
       esClient,
+      inferenceClient,
       logger,
       savedObjectsClient,
     });

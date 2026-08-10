@@ -219,6 +219,37 @@ export const StackAlertsOnly: User = {
   },
 };
 
+/**
+ * Alerts-only user: the `stackAlertsOnly` feature grants alert read/write but
+ * no rule read/create. Used to verify that alert views still receive a rule type
+ * list (via the alert authorization entity), unlike `StackAlertsOnly` above which
+ * uses the `stackAlerts` (rule management) feature.
+ */
+export const StackAlertsOnlyFeatureReadUser: User = {
+  username: 'stack_alerts_only_feature_read',
+  fullName: 'stack_alerts_only_feature_read',
+  password: 'stack_alerts_only_feature_read-password',
+  role: {
+    name: 'stack_alerts_only_feature_read_role',
+    kibana: [
+      {
+        feature: {
+          stackAlertsOnly: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const ManualRunOnlyUser: User = {
   username: 'manual_run_only',
   fullName: 'manual_run_only',
@@ -358,6 +389,7 @@ export const Users: User[] = [
   Space1AllAlertingNoneActions,
   CasesAll,
   StackAlertsOnly,
+  StackAlertsOnlyFeatureReadUser,
   ManualRunOnlyUser,
   EnableDisableOnlyUser,
   ManageRuleSettingsOnlyUser,
@@ -444,7 +476,7 @@ const Space1AllWithRestrictedFixtureAtSpace1: Space1AllWithRestrictedFixtureAtSp
 interface Space1AllAlertingNoneActionsAtSpace1 extends Scenario {
   id: 'space_1_all_alerts_none_actions at space1';
 }
-const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
+export const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
   id: 'space_1_all_alerts_none_actions at space1',
   user: Space1AllAlertingNoneActions,
   space: Space1,

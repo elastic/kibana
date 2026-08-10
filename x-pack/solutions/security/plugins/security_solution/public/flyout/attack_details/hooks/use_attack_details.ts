@@ -74,7 +74,7 @@ export const useAttackDetails = ({
   // https://github.com/elastic/kibana/issues/244205
   const pageScope = PageScope.attacks;
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
@@ -97,6 +97,7 @@ export const useAttackDetails = ({
         attackDiscoveryAlertDocument: source as AttackDiscoveryAlertDocument,
         enableFieldRendering: true,
         id: searchHit._id ?? attackId,
+        index: searchHit._index,
         withReplacements: true,
       });
       return transformAttackDiscoveryAlertFromApi(apiAlert);

@@ -43,7 +43,6 @@ export async function autocomplete(
           detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineStats.statsKeyword', {
             defaultMessage: 'STATS keyword',
           }),
-          sortText: 'A',
         }),
       ];
     }
@@ -64,7 +63,6 @@ export async function autocomplete(
             defaultMessage: 'INLINE STATS command',
           }
         ),
-        sortText: 'A',
       }),
     ];
   }

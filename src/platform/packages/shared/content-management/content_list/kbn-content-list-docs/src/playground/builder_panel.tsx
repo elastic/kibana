@@ -245,21 +245,14 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'getHref', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="getEditUrl">
-            <InlineCheckbox
-              id={`${idPrefix}-getEditUrl`}
-              checked={item.getEditUrl}
-              onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'getEditUrl', value: v })}
-            />
-          </JsxPropDisplay>
-          <JsxPropDisplay name="onEdit">
+          <JsxPropDisplay name="actions.edit">
             <InlineCheckbox
               id={`${idPrefix}-onEdit`}
               checked={item.onEdit}
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onEdit', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="onDelete">
+          <JsxPropDisplay name="actions.delete">
             <InlineCheckbox
               id={`${idPrefix}-onDelete`}
               checked={item.onDelete}
@@ -298,15 +291,43 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'starred', value: v })}
             />
           </JsxPropDisplay>
+          <JsxPropDisplay name="tags">
+            <InlineCheckbox
+              id={`${idPrefix}-tags`}
+              checked={features.tags}
+              onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'tags', value: v })}
+            />
+          </JsxPropDisplay>
+          <JsxPropDisplay name="userProfiles">
+            <InlineCheckbox
+              id={`${idPrefix}-userProfiles`}
+              checked={features.userProfiles}
+              onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'userProfiles', value: v })}
+            />
+          </JsxPropDisplay>
+          <JsxPropDisplay name="contentEditor.open">
+            <InlineCheckbox
+              id={`${idPrefix}-contentEditor`}
+              checked={features.contentEditor}
+              onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'contentEditor', value: v })}
+            />
+          </JsxPropDisplay>
         </JsxPropBlock>
       </JsxTag>
 
-      {/* ── Toolbar (child of Provider) ──────────────────────────── */}
+      {/* ── ContentList shell (child of Provider) ────────────────── */}
+      <JsxTag name="ContentList" indent={1}>
+        <JsxPropBlock name="emptyState">
+          <JsxTag name="ContentListEmptyState" selfClosing />
+        </JsxPropBlock>
+      </JsxTag>
+
+      {/* ── Toolbar (child of ContentList) ───────────────────────── */}
       {toolbar.filters.length === 0 ? (
-        <JsxTag name="ContentListToolbar" selfClosing indent={1} />
+        <JsxTag name="ContentListToolbar" selfClosing indent={2} />
       ) : (
         <>
-          <JsxTag name="ContentListToolbar" indent={1} />
+          <JsxTag name="ContentListToolbar" indent={2} />
 
           <div css={nestedContentCss}>
             <JsxTag name="Filters" indent={0} />
@@ -340,18 +361,18 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
             <JsxTag name="Filters" closing indent={0} />
           </div>
 
-          <JsxTag name="ContentListToolbar" closing indent={1} />
+          <JsxTag name="ContentListToolbar" closing indent={2} />
         </>
       )}
 
-      {/* ── Table (child of Provider) ────────────────────────────── */}
+      {/* ── Table (child of ContentList) ─────────────────────────── */}
       {table.columns.length === 0 ? (
         <EuiToolTip content="No explicit columns — default columns are displayed.">
-          <JsxTag name="ContentListTable" selfClosing indent={1} />
+          <JsxTag name="ContentListTable" selfClosing indent={2} />
         </EuiToolTip>
       ) : (
         <>
-          <JsxTag name="ContentListTable" indent={1} />
+          <JsxTag name="ContentListTable" indent={2} />
 
           <div css={nestedContentCss}>
             <EuiDroppable droppableId="columns" type="COLUMN" spacing="s">
@@ -379,8 +400,11 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
                         col.type === 'actions' &&
                         !item.onEdit &&
                         !item.onDelete &&
-                        !col.actions.some((a) => a.type !== 'edit' && a.type !== 'delete')
-                          ? 'This column is hidden because no item actions (onEdit, onDelete) are configured on the provider and no custom actions are present.'
+                        !features.contentEditor &&
+                        !col.actions.some(
+                          (a) => !['edit', 'delete', 'contentEditor'].includes(a.type)
+                        )
+                          ? 'This column is hidden because no row entry points are wired (actions.edit, actions.delete, features.contentEditor.open) and no custom actions are present.'
                           : undefined
                       }
                     />
@@ -390,12 +414,14 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
             </EuiDroppable>
           </div>
 
-          <JsxTag name="ContentListTable" closing indent={1} />
+          <JsxTag name="ContentListTable" closing indent={2} />
         </>
       )}
 
-      {/* ── Footer (child of Provider) ───────────────────────────── */}
-      <JsxTag name="ContentListFooter" selfClosing indent={1} />
+      {/* ── Footer (child of ContentList) ────────────────────────── */}
+      <JsxTag name="ContentListFooter" selfClosing indent={2} />
+
+      <JsxTag name="ContentList" closing indent={1} />
       <JsxTag name="ContentListProvider" closing indent={0} />
     </div>
   );

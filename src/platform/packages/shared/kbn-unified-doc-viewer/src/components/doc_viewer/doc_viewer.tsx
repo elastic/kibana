@@ -12,6 +12,7 @@ import React, { forwardRef, useCallback, useImperativeHandle, useState, useEffec
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
@@ -31,18 +32,23 @@ export interface InternalDocViewerProps
   docViews: DocView[];
   initialTabId?: DocView['id'];
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
+  originDocType?: string;
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
 const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewer_tab_', '');
 
 const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProps>(
-  ({ docViews, initialTabId, onUpdateSelectedTabId, reportEvent, ...renderProps }, ref) => {
+  (
+    { docViews, initialTabId, onUpdateSelectedTabId, reportEvent, originDocType, ...renderProps },
+    ref
+  ) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map((docView: DocView) => ({
         id: getFullTabId(docView.id), // `id` value is used to persist the selected tab in localStorage
         name: docView.title,
+        prepend: docView.prepend,
         content: (
           <DocViewerTab
             key={`${renderProps.hit.id}_${docView.id}`}
@@ -51,6 +57,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
           />
         ),
         ['data-test-subj']: `docViewerTab-${docView.id}`,
+        ...(docView.ebt ? getEbtProps(docView.ebt) : {}),
       }));
 
     const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
@@ -83,6 +90,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
     useDocViewerTabViewedEvent({
       reportEvent,
       tabId: selectedTab ? getOriginalTabId(selectedTab.id) : undefined,
+      originDocType,
       hit: renderProps.hit,
       initialEventKey: initialDocViewerViewedEventKey,
       onEventKeyChange: setInitialDocViewerViewedEventKey,

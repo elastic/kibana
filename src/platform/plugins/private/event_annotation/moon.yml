@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/saved-objects-tagging-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/visualization-ui-components'
   - '@kbn/i18n-react'
@@ -55,26 +54,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

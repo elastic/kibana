@@ -15,13 +15,26 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { FieldType } from '../../../common/types/domain/template/fields';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import React from 'react';
 
 jest.mock('../../common/use_cases_features');
 jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../common/lib/kibana'),
+  useCasesConfig: jest.fn(),
+}));
+jest.mock('./hooks/use_global_inline_fields', () => ({
+  ...jest.requireActual('./hooks/use_global_inline_fields'),
+  useGlobalInlineFields: jest.fn(),
+}));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useCasesConfigMock = useCasesConfig as jest.Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
 
 describe('useCasesColumnsConfiguration ', () => {
   const license = licensingMock.createLicense({
@@ -35,6 +48,12 @@ describe('useCasesColumnsConfiguration ', () => {
       isAlertsEnabled: true,
     });
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
+    useGlobalInlineFieldsMock.mockReturnValue({ globalInlineFields: [], isLoading: false });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('returns all columns correctly', async () => {
@@ -196,6 +215,35 @@ describe('useCasesColumnsConfiguration ', () => {
     expect(result.current[toggleKey]).toEqual({
       field: toggleKey,
       name: toggleLabel,
+      canDisplay: true,
+      isCheckedDefault: false,
+    });
+  });
+
+  it('sources columns from global extended fields when templates v2 is enabled', async () => {
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    // Legacy customFields must be ignored in favor of global field definitions.
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [{ key: 'legacy_key', label: 'Legacy', type: CustomFieldTypes.TEXT }],
+      },
+    }));
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [
+        { name: 'priority', type: 'keyword', control: FieldType.INPUT_TEXT, label: 'Priority' },
+      ],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    expect(result.current.legacy_key).toBeUndefined();
+    expect(result.current.priority_as_keyword).toEqual({
+      field: 'priority_as_keyword',
+      name: 'Priority',
       canDisplay: true,
       isCheckedDefault: false,
     });

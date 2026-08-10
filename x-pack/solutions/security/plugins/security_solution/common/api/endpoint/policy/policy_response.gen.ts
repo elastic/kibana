@@ -14,17 +14,20 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AgentId, SuccessResponse } from '../model/schema/common.gen';
 
+export const GetPolicyResponseRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The agent ID to retrieve the policy response for.
+     */
+    agentId: AgentId,
+  })
+);
 export type GetPolicyResponseRequestQuery = z.infer<typeof GetPolicyResponseRequestQuery>;
-export const GetPolicyResponseRequestQuery = z.object({
-  query: z.object({
-    agentId: AgentId.optional(),
-  }),
-});
 export type GetPolicyResponseRequestQueryInput = z.input<typeof GetPolicyResponseRequestQuery>;
 
+export const GetPolicyResponseResponse = lazySchema(() => SuccessResponse);
 export type GetPolicyResponseResponse = z.infer<typeof GetPolicyResponseResponse>;
-export const GetPolicyResponseResponse = SuccessResponse;

@@ -12,12 +12,15 @@ import { css } from '@emotion/react';
 
 import { RISK_SEVERITY_COLOUR } from '../../../common/utils';
 import { HoverPopover } from '../../../../common/components/hover_popover';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import {
+  RiskSeverity,
+  type RiskSeverity as RiskSeverityType,
+} from '../../../../../common/search_strategy';
 
 const RiskBadge = styled('div', {
   shouldForwardProp: (prop) => !['severity', 'hideBackgroundColor'].includes(prop),
 })<{
-  severity: RiskSeverity;
+  severity: RiskSeverityType;
   hideBackgroundColor: boolean;
 }>`
   ${({ theme: { euiTheme }, color, severity, hideBackgroundColor }) => css`
@@ -39,7 +42,7 @@ const TooltipContainer = styled.div`
 `;
 
 export const RiskScoreLevel: React.FC<{
-  severity: RiskSeverity;
+  severity: RiskSeverityType;
   hideBackgroundColor?: boolean;
   toolTipContent?: JSX.Element;
   ['data-test-subj']?: string;
@@ -69,11 +72,14 @@ export const RiskScoreLevel: React.FC<{
 RiskScoreLevel.displayName = 'RiskScoreLevel';
 
 const RiskScoreBadge: React.FC<{
-  severity: RiskSeverity;
+  severity: RiskSeverityType;
   hideBackgroundColor?: boolean;
   ['data-test-subj']?: string;
 }> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => {
   const { euiTheme } = useEuiTheme();
+  const healthColor =
+    RISK_SEVERITY_COLOUR[severity as keyof typeof RISK_SEVERITY_COLOUR] ??
+    RISK_SEVERITY_COLOUR[RiskSeverity.Unknown];
   return (
     <RiskBadge
       color={euiTheme.colors.backgroundBaseDanger}
@@ -84,7 +90,7 @@ const RiskScoreBadge: React.FC<{
       <EuiTextColor color="default">
         <EuiHealth
           className="eui-alignMiddle eui-textNoWrap"
-          color={RISK_SEVERITY_COLOUR[severity]}
+          color={healthColor}
           textSize="inherit"
         >
           {severity}

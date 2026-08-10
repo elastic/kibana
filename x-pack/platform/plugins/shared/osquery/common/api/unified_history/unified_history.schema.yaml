@@ -11,13 +11,13 @@ paths:
         osquery executions. The response uses cursor-based pagination.
       operationId: OsqueryGetUnifiedHistory
       x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
       parameters:
         - name: pageSize
           in: query
           required: false
+          description: 'The number of results to return per page.'
           schema:
             description: 'The number of results to return per page.'
             type: integer
@@ -27,18 +27,21 @@ paths:
         - name: nextPage
           in: query
           required: false
+          description: 'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
           schema:
             description: 'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
             type: string
         - name: kuery
           in: query
           required: false
+          description: 'A search string to filter history entries by pack name, query text, or query ID.'
           schema:
             description: 'A search string to filter history entries by pack name, query text, or query ID.'
             type: string
         - name: userIds
           in: query
           required: false
+          description: 'Comma-separated list of user IDs to filter live query history.'
           schema:
             description: 'Comma-separated list of user IDs to filter live query history.'
             example: 'elastic,admin'
@@ -46,6 +49,7 @@ paths:
         - name: sourceFilters
           in: query
           required: false
+          description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
           schema:
             description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
             example: 'live,scheduled'
@@ -53,6 +57,7 @@ paths:
         - name: startDate
           in: query
           required: false
+          description: 'The start of the time range filter (ISO 8601).'
           schema:
             description: 'The start of the time range filter (ISO 8601).'
             example: '2024-01-01T00:00:00Z'
@@ -60,14 +65,49 @@ paths:
         - name: endDate
           in: query
           required: false
+          description: 'The end of the time range filter (ISO 8601).'
           schema:
             description: 'The end of the time range filter (ISO 8601).'
             example: '2024-12-31T23:59:59Z'
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: './get_unified_history.schema.yaml#/components/schemas/GetUnifiedHistoryResponse'
+              examples:
+                unifiedHistoryExample:
+                  summary: Example unified history response
+                  value:
+                    data:
+                      - id: '3c42c847-eb30-4452-80e0-728584042334'
+                        sourceType: 'live'
+                        source: 'Live'
+                        timestamp: '2024-07-26T09:59:32.220Z'
+                        queryText: 'select * from uptime;'
+                        queryName: 'uptime_query'
+                        agentCount: 5
+                        successCount: 5
+                        errorCount: 0
+                        totalRows: 42
+                        actionId: '609c4c66-ba3d-43fa-afdd-53e244577aa0'
+                        userId: 'elastic'
+                      - id: 'pack_my_pack_uptime_3'
+                        sourceType: 'scheduled'
+                        source: 'Scheduled'
+                        timestamp: '2024-07-26T09:00:00.000Z'
+                        plannedTime: '2024-07-26T09:00:00.000Z'
+                        queryText: 'select * from uptime;'
+                        queryName: 'uptime'
+                        packName: 'My Pack'
+                        packId: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+                        agentCount: 10
+                        successCount: 9
+                        errorCount: 1
+                        totalRows: 100
+                        scheduleId: 'pack_my_pack_uptime'
+                        executionCount: 3
+                    nextPage: 'eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...'
+                    hasMore: true

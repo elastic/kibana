@@ -88,6 +88,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
 
           const actions = assistantContext.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
+          const inference = assistantContext.inference;
+          const inferenceClient = inference.getClient({ request });
           const dataClient = await assistantContext.getDefendInsightsDataClient();
           const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           const authenticatedUser = await assistantContext.getCurrentUser();
@@ -153,6 +155,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             connectorTimeout: CONNECTOR_TIMEOUT,
             esClient,
+            inferenceClient,
             langSmithProject,
             langSmithApiKey,
             latestReplacements,

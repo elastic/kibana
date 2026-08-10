@@ -36,6 +36,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
       ],
     },
+    uiSettings: {
+      globalDefaults: {
+        hideAnnouncements: true,
+      },
+    },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,
   };
 }

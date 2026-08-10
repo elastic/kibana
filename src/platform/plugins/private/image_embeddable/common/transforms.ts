@@ -8,23 +8,13 @@
  */
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
-import { flow, snakeCase, isObject } from 'lodash';
+import { convertCamelCasedKeysToSnakeCase, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { ImageEmbeddableState } from '../server';
-
-// Pre 9.4.0 image config was camelCased, recursively transform it to snake_case when transforming out
-const transformToSnakeCase = (obj: object): object =>
-  Object.entries(obj).reduce(
-    (result, [key, value]) => ({
-      ...result,
-      [snakeCase(key)]: isObject(value) ? transformToSnakeCase(value) : value,
-    }),
-    {}
-  );
 
 export function getTransformOut(
   transformDrilldownsOut: DrilldownTransforms['transformOut']
-): (storedState: object, panelReferences?: Reference[]) => object {
+): (storedState: object, panelReferences?: Reference[]) => ImageEmbeddableState {
   return (storedState: object, panelReferences?: Reference[]) => {
     const transformsFlow = flow(
       // Strip fileImageMeta from src and hoist objectFit out of sizing — both removed in 9.4.0
@@ -47,9 +37,11 @@ export function getTransformOut(
 
         return { ...state, imageConfig: updated };
       },
-      transformToSnakeCase,
       transformTitlesOut<ImageEmbeddableState>,
-      (state: ImageEmbeddableState) => transformDrilldownsOut(state, panelReferences)
+      (state: ImageEmbeddableState) => transformDrilldownsOut(state, panelReferences),
+      // snake case last as snake casing may effect other transforms
+      // BWC transforms may be looking for original camel cased keys
+      convertCamelCasedKeysToSnakeCase
     );
     return transformsFlow(storedState as ImageEmbeddableState);
   };

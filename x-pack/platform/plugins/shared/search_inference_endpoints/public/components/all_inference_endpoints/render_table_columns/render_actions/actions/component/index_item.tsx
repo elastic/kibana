@@ -17,34 +17,29 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
-
-import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import type { InferenceUsageInfo } from '../../../../types';
-import { SERVERLESS_INDEX_MANAGEMENT_URL } from '../../../../constants';
 
 interface UsageProps {
   usageItem: InferenceUsageInfo;
 }
 export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
   const {
-    services: { application, serverless },
+    services: { share },
   } = useKibana();
-  const navigateToIndex = useCallback(() => {
-    if (serverless) {
-      application?.navigateToApp(SEARCH_INDICES, {
-        path: `${SERVERLESS_INDEX_MANAGEMENT_URL}/${usageItem.id}/data`,
-        openInNewTab: true,
+  const navigateToIndex = useCallback(async () => {
+    if (!usageItem?.id) return;
+
+    const indexManagementLocator = share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+    if (indexManagementLocator) {
+      const url = await indexManagementLocator.getUrl({
+        page: 'index_details',
+        indexName: usageItem.id,
       });
-    } else {
-      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-        path: `search_indices/${usageItem.id}`,
-        openInNewTab: true,
-      });
+      if (url) window.open(url, '_blank');
     }
-  }, [application, serverless, usageItem.id]);
+  }, [share, usageItem.id]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="usageItem">
@@ -64,7 +59,7 @@ export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj="navigateToIndexPage" onClick={navigateToIndex}>
-              <EuiIcon size="s" type="popout" />
+              <EuiIcon size="s" type="external" aria-hidden={true} />
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>

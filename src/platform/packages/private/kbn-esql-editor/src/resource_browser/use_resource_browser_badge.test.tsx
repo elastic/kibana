@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useSourcesBadge } from './use_resource_browser_badge';
 import { IndicesBrowserOpenMode } from './types';
 

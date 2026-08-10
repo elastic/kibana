@@ -12,12 +12,10 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { Reference } from '@kbn/content-management-utils';
 import { extractReferences } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { SortOrder } from '@kbn/discover-utils';
-import type { DataGridDensity } from '@kbn/unified-data-table';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
-import type { DiscoverSession, SavedSearchAttributes } from '../../common';
+import type { DiscoverSession } from '../../common';
+import type { DiscoverSessionAttributes } from '../../server';
 
 export type SaveDiscoverSessionParams = Pick<
   DiscoverSession,
@@ -26,14 +24,12 @@ export type SaveDiscoverSessionParams = Pick<
   Partial<Pick<DiscoverSession, 'id'>>;
 
 export interface SaveDiscoverSessionOptions {
-  onTitleDuplicate?: () => void;
-  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
 const saveDiscoverSessionSavedObject = async (
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  attributes: DiscoverSessionAttributes,
   references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
 ) => {
@@ -71,23 +67,9 @@ export const saveDiscoverSession = async (
 ): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
 
-  if (isNew) {
-    try {
-      await checkForDuplicateTitle({
-        title: discoverSession.title,
-        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
-        onTitleDuplicate: options.onTitleDuplicate,
-        contentManagement,
-      });
-    } catch {
-      return;
-    }
-  }
-
   const tabReferences: SavedObjectReference[] = [];
 
-  // TODO: SavedSearchAttributes['tabs'] shouldn't be nullable soon
-  const tabs: NonNullable<SavedSearchAttributes['tabs']> = discoverSession.tabs.map((tab) => {
+  const tabs: DiscoverSessionAttributes['tabs'] = discoverSession.tabs.map((tab) => {
     const [serializedSearchSource, searchSourceReferences] = extractReferences(
       tab.serializedSearchSource,
       { refNamePrefix: `tab_${tab.id}` }
@@ -103,6 +85,7 @@ export const saveDiscoverSession = async (
         columns: tab.columns,
         grid: tab.grid,
         hideChart: tab.hideChart,
+        hideTable: tab.hideTable,
         isTextBasedQuery: tab.isTextBasedQuery,
         usesAdHocDataView: tab.usesAdHocDataView,
         kibanaSavedObjectMeta: {
@@ -126,16 +109,10 @@ export const saveDiscoverSession = async (
     };
   });
 
-  const { chartInterval, ...firstTabAttributes } = tabs[0].attributes;
-
-  const attributes: SavedSearchAttributes = {
+  const attributes: DiscoverSessionAttributes = {
     title: discoverSession.title,
     description: discoverSession.description,
     tabs,
-    // TODO: Spreading the first tab attributes like this shouldn't be necessary soon
-    ...firstTabAttributes,
-    sort: firstTabAttributes.sort as SortOrder[],
-    density: firstTabAttributes.density as DataGridDensity,
   };
 
   const references = savedObjectsTagging

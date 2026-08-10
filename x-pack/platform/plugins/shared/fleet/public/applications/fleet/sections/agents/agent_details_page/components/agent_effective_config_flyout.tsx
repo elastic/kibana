@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { dump } from 'js-yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -26,9 +25,11 @@ import {
 import type { Agent } from '../../../../types';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useGetAgentEffectiveConfigQuery } from '../../../../hooks';
+import { useYaml } from '../../../../../../services';
 
 export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {
+    const yaml = useYaml();
     const { data: agentData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
     const agentName =
       typeof agent.local_metadata?.host?.hostname === 'string'
@@ -38,12 +39,12 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
     const flyoutTitleId = useGeneratedHtmlId();
 
     const effectiveConfigYaml = useMemo(() => {
-      if (agentData?.effective_config) {
-        return dump(agentData.effective_config, { noRefs: true });
+      if (agentData?.effective_config && yaml) {
+        return yaml.stringify(agentData.effective_config);
       }
 
       return '';
-    }, [agentData?.effective_config]);
+    }, [agentData?.effective_config, yaml]);
 
     const downloadFile = () => {
       const link = document.createElement('a');
@@ -68,7 +69,7 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {isLoading ? (
+          {isLoading || !yaml ? (
             <EuiLoadingSpinner />
           ) : (
             <EuiCodeBlock language="yaml" isCopyable>
@@ -87,7 +88,7 @@ export const AgentEffectiveConfigFlyout = memo<{ agent: Agent; onClose: () => vo
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="download" onClick={downloadFile} isLoading={isLoading}>
+              <EuiButton iconType="download" onClick={downloadFile} isLoading={isLoading || !yaml}>
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.effectiveConfigFlyoutDownloadButtonLabel"
                   defaultMessage="Download Configuration"

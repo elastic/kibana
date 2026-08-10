@@ -11,9 +11,12 @@ import type {
   NewPackagePolicyInputStream,
   PackageInfo,
   InputsOverride,
+  RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
+  RegistryStreamWithDataStream,
 } from '../../common/types';
 import type { NewPackagePolicy } from '../types';
-import { varsReducer } from '../../common/services';
+import { varsReducer, getInputEffectiveName } from '../../common/services';
 
 /**
  * Finds an input in `inputs` matching `type`, preferring a match on `policyTemplate`. Falls back
@@ -22,16 +25,21 @@ import { varsReducer } from '../../common/services';
  */
 export function findInputForMigration(
   inputs: NewPackagePolicyInput[],
-  type: string,
+  idOrType: string,
   policyTemplate: string | undefined
 ): NewPackagePolicyInput | undefined {
+  // Match by effective id (name when set, otherwise type). An input that has an
+  // explicit name must be referenced by that name -- matching by type alone is
+  // ambiguous when multiple inputs share the same type (e.g., two otelcol inputs).
+  const matches = (i: NewPackagePolicyInput) => getInputEffectiveName(i) === idOrType;
+
   if (policyTemplate) {
     return (
-      inputs.find((i) => i.type === type && i.policy_template === policyTemplate) ??
-      inputs.find((i) => i.type === type && !i.policy_template)
+      inputs.find((i) => matches(i) && i.policy_template === policyTemplate) ??
+      inputs.find((i) => matches(i) && !i.policy_template)
     );
   }
-  return inputs.find((i) => i.type === type);
+  return inputs.find(matches);
 }
 
 /**
@@ -47,7 +55,8 @@ export function findInputForMigration(
 export function applyInputLevelMigration(
   update: InputsOverride,
   allBaseInputs: NewPackagePolicyInput[],
-  inputs: NewPackagePolicyInput[]
+  inputs: NewPackagePolicyInput[],
+  varDefs?: RegistryVarsEntry[]
 ): NewPackagePolicyInput | undefined {
   if (update.migrate_from === undefined || update.deprecated) {
     return undefined;
@@ -68,20 +77,60 @@ export function applyInputLevelMigration(
   const staleIdx = foundStale ? inputs.indexOf(foundStale) : -1;
   if (staleIdx !== -1) inputs.splice(staleIdx, 1);
 
+  // Copy old vars so we can alias renamed entries without mutating the stored input.
+  const oldVars = { ...(originalInputToMigrate.vars ?? {}) };
+
+  // When the new input declares var-level migrate_from (e.g. azure_tenant_id.migrate_from =
+  // 'tenant_id'), alias the old value under the new name so deepMergeVars can find it.
+  // Only alias when the new name is not already present — direct mapping wins over a rename.
+  if (varDefs && varDefs.length > 0) {
+    const renameMap = buildVarRenameMap(varDefs);
+    for (const [newName, oldName] of Object.entries(renameMap)) {
+      if (oldVars[oldName] != null && !(newName in oldVars)) {
+        oldVars[newName] = oldVars[oldName];
+      }
+    }
+  }
+
   // Merge old input vars into the new input: seed with old values, keep new schema as the
   // authoritative list of vars, then strip any keys not present in the new schema.
   // deepMergeVars iterates over `update` (new schema) and restores non-null old values, so
   // null old values fall through to the new package defaults (see keepOriginalValue logic).
-  const mergedInput = deepMergeVars(
-    { ...update, vars: originalInputToMigrate.vars },
-    update,
-    true
-  ) as InputsOverride;
+  const mergedInput = deepMergeVars({ ...update, vars: oldVars }, update, true) as InputsOverride;
   update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
   // Preserve the enabled state of the old input rather than unconditionally enabling.
   update.enabled = originalInputToMigrate.enabled;
 
   return originalInputToMigrate;
+}
+
+/**
+ * Normalizes the var-level `migrate_from` field to the object form. Accepts either the current
+ * object shape (`{ name?, scope?, stream? }`) or the legacy string shorthand that named only the
+ * previous variable. Returns undefined when the field is absent.
+ */
+function normalizeVarMigrateFrom(
+  migrateFrom: RegistryVarsEntry['migrate_from']
+): RegistryVarsMigrateFrom | undefined {
+  if (!migrateFrom) return undefined;
+  if (typeof migrateFrom === 'string') return { name: migrateFrom };
+  return migrateFrom;
+}
+
+/**
+ * Builds a rename map `{ newVarName: oldVarName }` from `RegistryVarsEntry` definitions that
+ * declare `migrate_from.name` (or the legacy string shorthand). Used by `migrateStreamVars` to
+ * alias old var values under new names before the name-based `deepMergeVars` lookup runs.
+ */
+export function buildVarRenameMap(varDefs: RegistryVarsEntry[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const varDef of varDefs) {
+    const oldName = normalizeVarMigrateFrom(varDef.migrate_from)?.name;
+    if (oldName) {
+      map[varDef.name] = oldName;
+    }
+  }
+  return map;
 }
 
 /**
@@ -93,13 +142,18 @@ export function applyInputLevelMigration(
  * Stream-level vars take priority over input-level vars on collision.
  * `removeStaleVars` then discards any key not defined in the new stream schema.
  *
+ * When `varDefs` is provided, vars that declare `migrate_from` on the new stream definition are
+ * aliased in `combinedOldVars` under the new name before the name-based merge runs, so renamed
+ * vars carry over their old values correctly.
+ *
  * `oldStream` may be `undefined` when only input-level vars are available (e.g. the new input
  * has more streams than the old one). In that case `enabled` is left at the new stream's default.
  */
 export function migrateStreamVars(
   newStream: InputsOverride,
   oldStream: NewPackagePolicyInputStream | undefined,
-  oldInputVars: PackagePolicyConfigRecord | undefined
+  oldInputVars: PackagePolicyConfigRecord | undefined,
+  varDefs?: RegistryVarsEntry[]
 ): NewPackagePolicyInputStream {
   // Combine old input-level vars with old stream-level vars. Stream-level vars take
   // priority over input-level vars for the same key (more specific value wins).
@@ -108,6 +162,18 @@ export function migrateStreamVars(
     ...(oldInputVars ?? {}),
     ...(oldStream?.vars ?? {}),
   };
+
+  // When the new stream declares var-level migrate_from (e.g. url.migrate_from = 'request_url'),
+  // alias the old value under the new name so deepMergeVars (which matches by name) can find it.
+  // Only alias when the new name is not already present — direct mapping wins over a rename.
+  if (varDefs && varDefs.length > 0) {
+    const renameMap = buildVarRenameMap(varDefs);
+    for (const [newName, oldName] of Object.entries(renameMap)) {
+      if (combinedOldVars[oldName] != null && !(newName in combinedOldVars)) {
+        combinedOldVars[newName] = combinedOldVars[oldName];
+      }
+    }
+  }
 
   const merged = deepMergeVars(
     { ...newStream, vars: combinedOldVars },
@@ -139,7 +205,8 @@ export function migrateStreamVars(
 export function applyStreamLevelMigration(
   update: InputsOverride,
   originalInputToMigrate: NewPackagePolicyInput | undefined,
-  allBaseInputs: NewPackagePolicyInput[]
+  allBaseInputs: NewPackagePolicyInput[],
+  registryStreams?: RegistryStreamWithDataStream[]
 ): void {
   if (!update.streams || update.deprecated) {
     return;
@@ -187,13 +254,112 @@ export function applyStreamLevelMigration(
 
     if (!oldStream && !oldInputVars) return newStream;
 
-    return migrateStreamVars(newStream as InputsOverride, oldStream, oldInputVars);
+    const registryStream = registryStreams?.find(
+      (rs) =>
+        rs.data_stream.dataset === (newStream as NewPackagePolicyInputStream).data_stream?.dataset
+    );
+    return migrateStreamVars(
+      newStream as InputsOverride,
+      oldStream,
+      oldInputVars,
+      registryStream?.vars
+    );
   });
 
   // If stream-level migration succeeded without an input-level migrate_from, carry the
   // old input's enabled state over instead of unconditionally enabling the new input.
   if (streamMigrationOccurred && update.migrate_from === undefined) {
     update.enabled = oldInputForStreamMigration?.enabled ?? update.enabled;
+
+    // Also carry input-level vars from the old input to the new input.
+    // This handles packages like SentinelOne where vars like url/api_token remain at
+    // input level in both old and new inputs, but only streams declare migrate_from.
+    if (oldInputForStreamMigration) {
+      const mergedInput = deepMergeVars(
+        { ...update, vars: oldInputForStreamMigration.vars },
+        update,
+        true
+      ) as InputsOverride;
+      update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
+    }
+  }
+}
+
+/**
+ * Carries var values across scopes (input ↔ stream) for same-input-type upgrades when the new
+ * schema declares `migrate_from.scope`. Seeds the value into `originalInput` in place so the
+ * subsequent `deepMergeVars` + `removeStaleVars` cycle propagates and cleans up automatically.
+ *
+ * Cross-input-type migrations are handled by `applyInputLevelMigration` / `applyStreamLevelMigration`.
+ *
+ * - `scope: 'stream'` on an input var: pulls from the matching old stream. `migrate_from.stream`
+ *   picks the dataset (bare name or fully-qualified); omit only when the input has exactly one stream.
+ * - `scope: 'input'` on a stream var: pulls from old input-level vars.
+ * - `migrate_from.name`: look up the old value under that key instead of the var's current name.
+ * - No-ops when the destination already has a value, or the source var/stream is missing.
+ */
+export function applyVarScopeMigration(
+  originalInput: NewPackagePolicyInput,
+  registryInputVarDefs: RegistryVarsEntry[] | undefined,
+  registryStreams: RegistryStreamWithDataStream[] | undefined
+): void {
+  // Stream → input: an input-level var in the new schema was previously at stream scope.
+  if (registryInputVarDefs && originalInput.streams.length > 0) {
+    for (const varDef of registryInputVarDefs) {
+      const mf = normalizeVarMigrateFrom(varDef.migrate_from);
+      if (mf?.scope !== 'stream') continue;
+
+      let sourceStream: NewPackagePolicyInputStream | undefined;
+      if (mf.stream) {
+        // Accept either the fully-qualified dataset (`<package>.<folder>`) or the bare folder
+        // name as written in the data_stream directory. Authors naturally reach for the bare
+        // name, and silently skipping when they pick the "wrong" form is a footgun.
+        sourceStream = originalInput.streams.find((s) => {
+          const dataset = s.data_stream?.dataset;
+          if (!dataset) return false;
+          return dataset === mf.stream || dataset.endsWith(`.${mf.stream}`);
+        });
+      } else if (originalInput.streams.length === 1) {
+        sourceStream = originalInput.streams[0];
+      }
+      if (!sourceStream?.vars) continue;
+
+      const sourceKey = mf.name ?? varDef.name;
+      const oldEntry = sourceStream.vars[sourceKey];
+      if (oldEntry?.value == null) continue;
+
+      if (!originalInput.vars) originalInput.vars = {};
+      const existing = originalInput.vars[varDef.name];
+      if (existing?.value != null) continue;
+
+      originalInput.vars[varDef.name] = { ...oldEntry };
+    }
+  }
+
+  // Input → stream: a stream-level var in the new schema was previously at input scope.
+  if (registryStreams && originalInput.vars) {
+    for (const registryStream of registryStreams) {
+      const dataset = registryStream.data_stream?.dataset;
+      if (!dataset || !registryStream.vars) continue;
+
+      const originalStream = originalInput.streams.find((s) => s.data_stream?.dataset === dataset);
+      if (!originalStream) continue;
+
+      for (const varDef of registryStream.vars) {
+        const mf = normalizeVarMigrateFrom(varDef.migrate_from);
+        if (mf?.scope !== 'input') continue;
+
+        const sourceKey = mf.name ?? varDef.name;
+        const oldEntry = originalInput.vars[sourceKey];
+        if (oldEntry?.value == null) continue;
+
+        if (!originalStream.vars) originalStream.vars = {};
+        const existing = originalStream.vars[varDef.name];
+        if (existing?.value != null) continue;
+
+        originalStream.vars[varDef.name] = { ...oldEntry };
+      }
+    }
   }
 }
 

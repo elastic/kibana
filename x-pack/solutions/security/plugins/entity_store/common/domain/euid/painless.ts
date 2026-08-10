@@ -11,6 +11,7 @@ import type {
   EntityType,
   EuidAttribute,
   FieldEvaluation,
+  FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
@@ -117,18 +118,11 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     throw new Error('No euid ranking branches found, invalid euid logic definition');
   }
 
-  const filterChecks: string[] = [];
-  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
-    (c): c is Condition => Boolean(c)
-  )) {
-    filterChecks.push(`if (!(${streamlangConditionToPainlessDoc(filterCond)})) { return null; }`);
-  }
-  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
-
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
-  if (identityField.fieldEvaluations?.length) {
-    const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
+  const fieldEvaluations = identityField.fieldEvaluations ?? [];
+  if (fieldEvaluations.length > 0) {
+    const result = buildFieldEvaluationsPreamble(fieldEvaluations);
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
@@ -140,6 +134,18 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     entityDefinition.whenConditionTrueSetFieldsAfterStats,
     evaluatedVars
   );
+
+  /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
+  const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
+  const filterChecks: string[] = [];
+  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
+    (c): c is Condition => Boolean(c)
+  )) {
+    filterChecks.push(
+      `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
+    );
+  }
+  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
 
   const fieldCondition = (field: string): string => {
     const varName = evaluatedVars.get(field);
@@ -168,8 +174,8 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const hasConditionalBranch = euidRanking.branches.some((b) => b.when != null);
   if (!hasConditionalBranch && euidRanking.branches.length === 1) {
     return (
-      filterPreamble +
       preamble +
+      filterPreamble +
       buildBranchClauses(euidRanking.branches[0].ranking) +
       ' return null;'
     );
@@ -193,7 +199,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const lastBranchPart = branchParts[branchParts.length - 1] ?? '';
   const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
   const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
-  return filterPreamble + preamble + branchLogic + trailingReturn;
+  return preamble + filterPreamble + branchLogic + trailingReturn;
 }
 
 function painlessFieldNonEmpty(field: string): string {
@@ -299,8 +305,41 @@ function escapePainlessString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function toPainlessNullableStringLiteral(value: string | null): string {
+  return value === null ? 'null' : `"${escapePainlessString(value)}"`;
+}
+
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
+}
+
+/**
+ * Generates a Painless block that implements a `{ field, mapping }` when-clause arm.
+ *
+ * The block is guarded by `varName == null` (first-match-wins: once a prior arm set the
+ * destination variable, all subsequent arms are skipped) and by the caller-supplied `cond`
+ * (the stringified condition that must be true for this arm to fire).
+ *
+ * Inside the block, `then.field` is read from `doc` with a null-safe accessor.
+ * If the value is present and found in `then.mapping`, `varName` is assigned the mapped value;
+ * otherwise `varName` remains `null` and the next when-clause arm is tried.
+ */
+function buildFieldMappingPainless(
+  varName: string,
+  cond: string,
+  then: FieldEvaluationWhenClauseFieldMappingThen
+): string {
+  const fieldEsc = escapePainlessField(then.field);
+  const fieldRead = `(doc.containsKey('${fieldEsc}') && doc['${fieldEsc}'].size() > 0 ? doc['${fieldEsc}'].value : null)`;
+  const branches = Object.entries(then.mapping)
+    .map(
+      ([from, to], i) =>
+        `${i === 0 ? 'if' : 'else if'} (_mappedField == "${escapePainlessString(
+          from
+        )}") { ${varName} = "${escapePainlessString(to)}"; }`
+    )
+    .join(' ');
+  return `if (${varName} == null && (${cond})) { String _mappedField = ${fieldRead}; if (_mappedField != null) { ${branches} } }`;
 }
 
 function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
@@ -327,18 +366,37 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
         );
       }
     }
-    stmts.push(`if (_src != null) {`);
-    let first = true;
+
     for (const clause of ev.whenClauses) {
-      const conds = clause.sourceMatchesAny
-        .map((v) => `_src == "${escapePainlessString(v)}"`)
-        .join(' || ');
-      const prefix = first ? '  if ' : '  else if ';
-      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
-      first = false;
+      if ('sourceMatchesAny' in clause) {
+        const conds = clause.sourceMatchesAny
+          .map((v) => `_src == "${escapePainlessString(v)}"`)
+          .join(' || ');
+        stmts.push(
+          `if (${varName} == null && _src != null && (${conds})) { ${varName} = "${escapePainlessString(
+            clause.then
+          )}"; }`
+        );
+      } else {
+        const cond = streamlangConditionToPainlessDoc(clause.condition);
+        if (typeof clause.then === 'string') {
+          stmts.push(
+            `if (${varName} == null && (${cond})) { ${varName} = "${escapePainlessString(
+              clause.then
+            )}"; }`
+          );
+        } else {
+          stmts.push(buildFieldMappingPainless(varName, cond, clause.then));
+        }
+      }
     }
-    stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push(`} else { ${varName} = "${escapePainlessString(ev.fallbackValue)}"; }`);
+
+    stmts.push(
+      `if (${varName} == null && _src != null) { ${varName} = _src; } else if (${varName} == null) { ${varName} = ${toPainlessNullableStringLiteral(
+        ev.fallbackValue
+      )}; }`
+    );
+
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');

@@ -45,6 +45,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const {
     services: {
       application: { navigateToApp },
+      chrome,
     },
   } = useKibanaContextForPlugin();
 
@@ -60,6 +61,11 @@ export const useTemplateHeaderBreadcrumbs = () => {
     e.preventDefault();
   };
 
+  // The compatibility Back only renders when Chrome Next is active in the project layout.
+  if (chrome.next.isEnabled && chrome.getChromeStyle() === 'project') {
+    return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
+  }
+
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
     // With that, we can show the return button. Otherwise, it will be hidden (ex: the user opened a shared URL or opened the page from their bookmarks)
@@ -69,7 +75,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
             text: (
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="s" type="arrowLeft" aria-hidden={true} />
+                  <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FormattedMessage

@@ -35,6 +35,7 @@ describe('EndpointScriptDetailsFlyout', () => {
         id: 'script-1',
         name: 'Script snippet',
         platform: ['linux', 'macos'],
+        fileType: 'script',
         tags: [...SORTED_SCRIPT_TAGS_KEYS],
         updatedBy: 'elastic',
         updatedAt: '2026-02-04T12:23:37Z',
@@ -102,8 +103,15 @@ describe('EndpointScriptDetailsFlyout', () => {
       expect(body).toBeInTheDocument();
     });
 
-    it('should render all script details items in body', () => {
-      render();
+    it('should render all script details items in body for `archive` file type', () => {
+      render({
+        ...defaultProps,
+        scriptItem: {
+          ...defaultProps.scriptItem,
+          fileType: 'archive',
+          pathToExecutable: '/usr/bin/bash',
+        },
+      });
       const { getByTestId } = renderResult;
       const body = getByTestId('test-body');
 
@@ -117,7 +125,26 @@ describe('EndpointScriptDetailsFlyout', () => {
         .join(', ');
 
       expect(detailLabels).toBe(
-        'Requires user input, Types, Description, Instructions, Examples, File name, Path to executable file (only for archive files), File size, SHA256, Updated by'
+        'Requires user input, Categories, Description, Instructions, Examples, File name, Path to executable file (only for archive files), File size, SHA256, Updated by'
+      );
+    });
+
+    it('should render all script details items in body for `script` file type', () => {
+      render();
+      const { getByTestId } = renderResult;
+      const body = getByTestId('test-body');
+
+      const detailItems = body.querySelectorAll('[data-test-subj^="test-body-detail-"]');
+      expect(detailItems).toHaveLength(9);
+
+      const detailLabels = Array.from(detailItems)
+        .map((item) => {
+          return item.querySelector('h5')?.textContent;
+        })
+        .join(', ');
+
+      expect(detailLabels).toBe(
+        'Requires user input, Categories, Description, Instructions, Examples, File name, File size, SHA256, Updated by'
       );
     });
 
@@ -158,7 +185,14 @@ describe('EndpointScriptDetailsFlyout', () => {
     });
 
     it('should have tooltip icon for path to executable detail item', () => {
-      render();
+      render({
+        ...defaultProps,
+        scriptItem: {
+          ...defaultProps.scriptItem,
+          fileType: 'archive',
+          pathToExecutable: '/usr/bin/bash',
+        },
+      });
       const { getByTestId } = renderResult;
       const pathToExecutableDetailItem = getByTestId('test-body-detail-pathToExecutable');
       const tooltipIcon = pathToExecutableDetailItem.querySelector('.euiToolTipAnchor');

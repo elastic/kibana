@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -23,9 +24,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         shouldUseHashForSubUrl: false,
       });
 
-      // Prevent GettingStartedRedirectGate from redirecting away from the home page
-      await browser.setLocalStorageItem('gettingStartedVisited', 'true');
-
       // Create a space with the search solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'es' }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
@@ -36,16 +34,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('sidenav & breadcrumbs', () => {
+    describe('sidenav', () => {
       it('renders the correct nav and navigate to links', async () => {
         await solutionNavigation.expectExists();
-        await solutionNavigation.breadcrumbs.expectExists();
-        // Navigate explicitly to the home page as a reliable starting point
-        await common.navigateToApp('elasticsearch/home', { basePath: `/s/${spaceCreated.id}` });
-        // check side nav links
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'searchHomepage',
-        });
 
         await solutionNavigation.sidenav.clickLink({
           deepLinkId: 'discover',
@@ -53,8 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'discover',
         });
-
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
+        expect(await browser.getCurrentUrl()).to.contain('/app/discover');
 
         // navigate to a different section
         await solutionNavigation.sidenav.clickLink({
@@ -69,6 +59,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
 
+        // navigate to getting started page
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'searchGettingStarted',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'searchGettingStarted',
+        });
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({

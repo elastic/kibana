@@ -475,7 +475,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Too small: expected number to be >=1, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, and 12 more"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -489,7 +489,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"max_signals: Too small: expected number to be >=1, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, and 12 more"`
+      `"max_signals: Too small: expected number to be >=1"`
     );
   });
 
@@ -551,7 +551,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"name: Too small: expected string to have >=1 characters, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", name: Too small: expected string to have >=1 characters, name: Too small: expected string to have >=1 characters, and 12 more"`
+      `"name: Too small: expected string to have >=1 characters"`
     );
   });
 
@@ -564,7 +564,7 @@ describe('Patch rule request schema', () => {
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"description: Too small: expected string to have >=1 characters, type: Invalid input: expected \\"eql\\", language: Invalid input: expected \\"eql\\", description: Too small: expected string to have >=1 characters, description: Too small: expected string to have >=1 characters, and 12 more"`
+      `"description: Too small: expected string to have >=1 characters"`
     );
   });
 
@@ -876,7 +876,7 @@ describe('Patch rule request schema', () => {
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of \\"detection\\"|\\"rule_default\\"|\\"endpoint\\"|\\"endpoint_trusted_apps\\"|\\"endpoint_trusted_devices\\"|\\"endpoint_events\\"|\\"endpoint_host_isolation_exceptions\\"|\\"endpoint_blocklists\\", exceptions_list.0.namespace_type: Invalid option: expected one of \\"agnostic\\"|\\"single\\", type: Invalid input: expected \\"eql\\", exceptions_list.0.list_id: Invalid input: expected string, received undefined, and 26 more"`
+        `"exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of \\"detection\\"|\\"rule_default\\"|\\"endpoint\\"|\\"endpoint_trusted_apps\\"|\\"endpoint_trusted_devices\\"|\\"endpoint_events\\"|\\"endpoint_host_isolation_exceptions\\"|\\"endpoint_blocklists\\"|\\"endpoint_custom_yara_signatures\\", exceptions_list.0.namespace_type: Invalid option: expected one of \\"agnostic\\"|\\"single\\", type: Invalid input: expected \\"eql\\", exceptions_list.0.list_id: Invalid input: expected string, received undefined, and 26 more"`
       );
     });
 

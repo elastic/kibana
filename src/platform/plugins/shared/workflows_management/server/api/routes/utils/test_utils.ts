@@ -25,8 +25,11 @@ export const mockLogger = loggingSystemMock.create().get();
 /** Default engine mock for route tests; event-driven execution enabled, log trigger events enabled. */
 export const getWorkflowExecutionEngineMock = (enabled = true, logEventsEnabled = true) =>
   jest.fn().mockResolvedValue({
-    isEventDrivenExecutionEnabled: () => enabled,
-    isLogTriggerEventsEnabled: () => logEventsEnabled,
+    triggerEvents: {
+      isEnabled: enabled,
+      isLogEventsEnabled: logEventsEnabled,
+      maxEventChainDepth: 10,
+    },
   });
 
 export const createMockRouterInstance = () => createMockRouter.create();

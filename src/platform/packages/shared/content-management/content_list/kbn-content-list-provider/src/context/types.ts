@@ -76,5 +76,5 @@ export type ContentListConfig = ContentListCoreConfig & {
   dataSource: DataSourceConfig;
 };
 
-// Re-export `ContentListServices` from the services module.
+// Re-export service types.
 export type { ContentListServices } from '../services';

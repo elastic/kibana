@@ -154,7 +154,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         const menuItem = (
           <EuiContextMenuItem
             icon={icon}
-            size="s"
             onClick={onClick}
             data-test-subj={dataTestSubj}
             aria-current={ariaCurrent}
@@ -347,7 +346,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               aria-label={menuButtonLabel}
               color="text"
               data-test-subj={testSubj.tabsBarMenuButton}
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               onClick={() => {
                 const isOpen = !isPopoverOpen;
                 setIsPopoverOpen(isOpen);
@@ -367,7 +366,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           </EuiPopoverTitle>
           <div css={styles.sectionListCss}>
             <EuiContextMenu
-              size="s"
               initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
               panels={openedTabsPanels}
               data-test-subj={testSubj.openedTabsContextMenu}
@@ -408,7 +406,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               <div css={styles.sectionListCss}>
                 <EuiContextMenu
                   css={styles.recentlyClosedContextMenuCss}
-                  size="s"
                   initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
                   panels={recentlyClosedPanels}
                   data-test-subj={testSubj.recentlyClosedContextMenu}

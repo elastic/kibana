@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/core-pricing-server-mocks'
   - '@kbn/core-di-mocks'
   - '@kbn/core-data-streams-server-mocks'
+  - '@kbn/core-user-storage-server-mocks'
   - '@kbn/lazy-object'
   - '@kbn/core-user-activity-server-mocks'
 tags:
@@ -60,26 +61,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

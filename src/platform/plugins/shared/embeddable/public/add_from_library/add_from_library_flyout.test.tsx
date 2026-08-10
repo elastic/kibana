@@ -17,35 +17,11 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import { registerAddFromLibraryType } from './registry';
 import type { PresentationContainer, HasType } from '@kbn/presentation-publishing';
 
-// Mock saved objects finder component so we can call the onChoose method.
+import * as SavedObjectsFinderPlugin from '@kbn/saved-objects-finder-plugin/public';
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   return {
-    SavedObjectFinder: jest
-      .fn()
-      .mockImplementation(
-        ({
-          onChoose,
-        }: {
-          onChoose: (id: string, type: string, name: string, so: unknown) => Promise<void>;
-        }) => (
-          <>
-            <button
-              id="soFinderAddButton"
-              data-test-subj="soFinderAddButton"
-              onClick={() =>
-                onChoose?.(
-                  'awesomeId',
-                  'AWESOME_EMBEDDABLE',
-                  'Awesome sauce',
-                  {} as unknown as SavedObjectCommon
-                )
-              }
-            >
-              Add embeddable!
-            </button>
-          </>
-        )
-      ),
+    __esModule: true, // allows us to overwrite saved object finder via spyOn
+    ...jest.requireActual('@kbn/saved-objects-finder-plugin/public'),
   };
 });
 
@@ -54,6 +30,26 @@ describe('add from library flyout', () => {
   const onAdd = jest.fn();
 
   beforeAll(() => {
+    // Mock saved objects finder component so we can call the onChoose method.
+    jest.spyOn(SavedObjectsFinderPlugin, 'SavedObjectFinder').mockImplementation(({ onChoose }) => (
+      <>
+        <button
+          id="soFinderAddButton"
+          data-test-subj="soFinderAddButton"
+          onClick={() =>
+            onChoose?.(
+              'awesomeId',
+              'AWESOME_EMBEDDABLE',
+              'Awesome sauce',
+              {} as unknown as SavedObjectCommon
+            )
+          }
+        >
+          Add embeddable!
+        </button>
+      </>
+    ));
+
     registerAddFromLibraryType({
       onAdd,
       savedObjectType: 'AWESOME_EMBEDDABLE',

@@ -5,83 +5,52 @@
  * 2.0.
  */
 
-export const FieldType = {
-  INPUT_TEXT: 'INPUT_TEXT',
-  INPUT_NUMBER: 'INPUT_NUMBER',
-  SELECT_BASIC: 'SELECT_BASIC',
-  TEXTAREA: 'TEXTAREA',
-} as const;
+import { FieldType } from '../../../../common/types/domain/template/fields';
+import type { FieldType as FieldTypeType } from '../../../../common/types/domain/template/fields';
 
-export type FieldType = (typeof FieldType)[keyof typeof FieldType];
-
-export const fieldTypesArray = Object.keys(FieldType) as FieldType[];
+export const fieldTypesArray = Object.keys(FieldType) as FieldTypeType[];
 
 export const exampleTemplateDefinition = `
-# name is required
-name: Example template
-# description is optional
-description: A short description of the template
-# severity is optional (low, medium, high, critical)
+# Case defaults applied when this template creates a case.
+name: Example case title
+description: A short default case description
 severity: low
-# category is optional
 category: General
-# tags are optional
 tags:
   - example
+assignees: []
+# Custom fields rendered on the case when this template is applied.
 fields:
   - name: summary
     control: INPUT_TEXT
     label: Summary
     type: keyword
+  - name: requires_escalation
+    control: TOGGLE
+    label: Requires escalation
+    type: boolean
     metadata:
-      default: Default summary text
-  - name: effort
-    control: INPUT_NUMBER
-    label: Effort estimate
-    type: integer
-    metadata:
-      default: 1
-  - name: details
+      default: false
+  # Shown and required only when escalation is toggled on.
+  - name: escalation_reason
     control: TEXTAREA
-    label: Details
-    type: keyword
-    metadata:
-      default: Enter details here...
-  - name: priority
-    control: SELECT_BASIC
-    label: Priority
-    type: keyword
-    metadata:
-      default: medium
-      options:
-        - low
-        - medium
-        - high
-        - urgent
-  # display.show_when hides this field unless priority is urgent
-  - name: urgency_reason
-    control: TEXTAREA
-    label: Reason for urgency
+    label: Escalation reason
     type: keyword
     display:
       show_when:
-        field: priority
+        field: requires_escalation
         operator: eq
-        value: urgent
+        value: true
     validation:
       required_when:
-        field: priority
+        field: requires_escalation
         operator: eq
-        value: urgent
-      pattern:
-        regex: "^[A-Z]"
-        message: "Must start with a capital letter"
-  - name: score
-    control: INPUT_NUMBER
-    label: Score
-    type: integer
+        value: true
+  # Required before a case can move to the closed state.
+  - name: resolution_notes
+    control: TEXTAREA
+    label: Resolution notes
+    type: keyword
     validation:
-      required: true
-      min: 0
-      max: 100
+      required_on_close: true
 `.trimStart();

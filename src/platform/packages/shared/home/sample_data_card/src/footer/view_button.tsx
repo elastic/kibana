@@ -111,6 +111,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
       panelPaddingSize="none"
       anchorPosition="downCenter"
       data-test-subj={`launchSampleDataSet${id}`}
+      aria-label={viewDataButtonAriaLabel}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

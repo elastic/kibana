@@ -28,7 +28,7 @@ export const getMaxListHeight = ({
   return height;
 };
 
-const SELECTOR_POPOVER_WIDTH = 275;
+const SELECTOR_POPOVER_WIDTH = 400;
 export const selectorPopoverPanelStyles = css`
   inline-size: ${SELECTOR_POPOVER_WIDTH}px;
 `;

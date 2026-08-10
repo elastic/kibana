@@ -16,11 +16,6 @@ import type {
 } from './types';
 
 import { setKibanaServices } from './services/kibana_services';
-import { getPresentationLabsService } from './services/presentation_labs_service';
-import {
-  registerPanelPlacementSettings,
-  getPanelPlacementSettings,
-} from './registries/panel_placement';
 
 export class PresentationUtilPlugin
   implements
@@ -44,11 +39,7 @@ export class PresentationUtilPlugin
   ): PresentationUtilPluginStart {
     setKibanaServices(coreStart, startPlugins);
 
-    return {
-      labsService: getPresentationLabsService(),
-      registerPanelPlacementSettings,
-      getPanelPlacementSettings,
-    };
+    return {};
   }
 
   public stop() {}

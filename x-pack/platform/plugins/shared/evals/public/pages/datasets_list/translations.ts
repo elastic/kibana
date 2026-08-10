@@ -60,6 +60,10 @@ export const CREATE_DATASET_SUBMIT_BUTTON = i18n.translate(
   }
 );
 
+export const TABLE_CAPTION = i18n.translate('xpack.evals.datasetsList.tableCaption', {
+  defaultMessage: 'Datasets',
+});
+
 export const COLUMN_NAME = i18n.translate('xpack.evals.datasetsList.columns.name', {
   defaultMessage: 'Name',
 });
@@ -68,10 +72,86 @@ export const COLUMN_DESCRIPTION = i18n.translate('xpack.evals.datasetsList.colum
   defaultMessage: 'Description',
 });
 
+export const COLUMN_TAGS = i18n.translate('xpack.evals.datasetsList.columns.tags', {
+  defaultMessage: 'Tags',
+});
+
+export const COLUMN_MATURITY = i18n.translate('xpack.evals.datasetsList.columns.maturity', {
+  defaultMessage: 'Maturity',
+});
+
 export const COLUMN_EXAMPLES = i18n.translate('xpack.evals.datasetsList.columns.examples', {
   defaultMessage: 'Examples',
 });
 
 export const COLUMN_LAST_UPDATED = i18n.translate('xpack.evals.datasetsList.columns.lastUpdated', {
   defaultMessage: 'Last Updated',
+});
+
+export const COLUMN_ACTIONS = i18n.translate('xpack.evals.datasetsList.columns.actions', {
+  defaultMessage: 'Actions',
+});
+
+export const DELETE_DATASET_ACTION = i18n.translate(
+  'xpack.evals.datasetsList.deleteDatasetAction',
+  {
+    defaultMessage: 'Delete dataset',
+  }
+);
+
+export const getDeleteDatasetAriaLabel = (datasetName: string) =>
+  i18n.translate('xpack.evals.datasetsList.deleteDatasetAriaLabel', {
+    defaultMessage: 'Delete dataset {datasetName}',
+    values: { datasetName },
+  });
+
+export const SEARCH_PLACEHOLDER = i18n.translate('xpack.evals.datasetsList.searchPlaceholder', {
+  defaultMessage: 'Search datasets by name or description',
+});
+
+export const NO_DATASETS_TITLE = i18n.translate('xpack.evals.datasetsList.noDatasetsTitle', {
+  defaultMessage: 'No datasets yet',
+});
+
+export const NO_DATASETS_BODY = i18n.translate('xpack.evals.datasetsList.noDatasetsBody', {
+  defaultMessage: 'Create a dataset to start collecting examples for evaluations.',
+});
+
+export const NO_MATCHES_TITLE = i18n.translate('xpack.evals.datasetsList.noMatchesTitle', {
+  defaultMessage: 'No matching datasets',
+});
+
+export const getNoMatchesBody = (searchTerm: string) =>
+  i18n.translate('xpack.evals.datasetsList.noMatchesBody', {
+    defaultMessage: 'No datasets match "{searchTerm}". Try a different search.',
+    values: { searchTerm },
+  });
+
+export const NO_FILTER_MATCHES_BODY = i18n.translate(
+  'xpack.evals.datasetsList.noFilterMatchesBody',
+  {
+    defaultMessage: 'No datasets match the selected filters.',
+  }
+);
+
+export const CLEAR_SEARCH_BUTTON = i18n.translate('xpack.evals.datasetsList.clearSearchButton', {
+  defaultMessage: 'Clear search',
+});
+
+export const CLEAR_FILTERS_BUTTON = i18n.translate('xpack.evals.datasetsList.clearFiltersButton', {
+  defaultMessage: 'Clear filters',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.datasetsList.loadErrorTitle', {
+  defaultMessage: 'Unable to load datasets',
+});
+
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.datasetsList.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading datasets: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.datasetsList.retryButton', {
+  defaultMessage: 'Retry',
 });

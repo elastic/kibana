@@ -8,10 +8,10 @@
 import React from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 
 import { getModelId } from '../../../../utils/get_model_id';
-import * as i18n from './translations';
 
 interface ModelProps {
   endpointInfo: InferenceInferenceEndpointInfo;
@@ -33,13 +33,15 @@ export const Model: React.FC<ModelProps> = ({ endpointInfo }) => {
       {isEligibleForMITBadge && (
         <EuiBadge
           color="hollow"
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           href={modelDefinition.licenseUrl ?? ''}
           target="_blank"
           data-test-subj="mit-license-badge"
         >
-          {i18n.MIT_LICENSE}
+          {i18n.translate('xpack.searchInferenceEndpoints.model.mitLicense', {
+            defaultMessage: 'License: MIT',
+          })}
         </EuiBadge>
       )}
     </div>

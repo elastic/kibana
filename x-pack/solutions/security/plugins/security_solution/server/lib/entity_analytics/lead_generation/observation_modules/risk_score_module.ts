@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
-import { makeObservation, getEntityField, groupEntitiesByType } from './utils';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
+import {
+  errorMessage,
+  makeObservation,
+  getEntityField,
+  groupEntitiesByType,
+  entityTypeLabel,
+  extractIsPrivileged,
+} from './utils';
+import { OBSERVATION_MODULE_WEIGHTS } from './weights';
 
 const MODULE_ID = 'risk_analysis';
 const MODULE_NAME = 'Risk Analysis';
 const MODULE_PRIORITY = 10;
-const MODULE_WEIGHT = 0.35;
+const MODULE_WEIGHT = OBSERVATION_MODULE_WEIGHTS.risk_analysis;
 
 const HIGH_RISK_THRESHOLD = 70;
 const ESCALATION_DELTA_24H = 10;
@@ -24,14 +29,11 @@ const ESCALATION_DELTA_7D_90D = 20;
 /** At or above this delta, the escalation severity bumps up one tier */
 const ESCALATION_CRITICAL_DELTA = 40;
 
-// ---------------------------------------------------------------------------
-// Risk level → observation severity mapping
-//
-// Uses the risk engine's authoritative calculated_level directly instead of
-// re-deriving tiers from score thresholds. "Low" is intentionally omitted —
-// a low-risk entity on its own is not an actionable lead signal.
-// ---------------------------------------------------------------------------
-
+/**
+ * Uses the risk engine's authoritative calculated_level directly instead of
+ * re-deriving tiers from score thresholds. "Low" is intentionally omitted —
+ * a low-risk entity on its own is not an actionable lead signal.
+ */
 const RISK_LEVEL_TO_SEVERITY: Readonly<Record<string, ObservationSeverity>> = {
   Critical: 'critical',
   High: 'high',
@@ -54,9 +56,7 @@ interface EscalationWindow {
   readonly daysBack: number;
   readonly threshold: number;
   readonly type: string;
-  /** Severity when delta < ESCALATION_CRITICAL_DELTA */
   readonly baseSeverity: ObservationSeverity;
-  /** Severity when delta >= ESCALATION_CRITICAL_DELTA */
   readonly criticalSeverity: ObservationSeverity;
   readonly label: string;
 }
@@ -88,51 +88,46 @@ const ESCALATION_WINDOWS: readonly EscalationWindow[] = [
   },
 ] as const;
 
-// ---------------------------------------------------------------------------
-// Risk Score Analysis Module
-//
-// Current risk scores are read directly from the Entity Store V2 record
-// (entity.risk.calculated_score_norm). The time-series risk-score index is
-// queried only for escalation detection (24h / 7d / 90d windows).
-// ---------------------------------------------------------------------------
-
 interface RiskScoreModuleDeps {
-  readonly esClient: ElasticsearchClient;
+  readonly riskScoreDataClient: RiskScoreDataClient;
   readonly logger: Logger;
-  readonly spaceId: string;
 }
 
 export const createRiskScoreModule = ({
-  esClient,
+  riskScoreDataClient,
   logger,
-  spaceId,
 }: RiskScoreModuleDeps): ObservationModule => ({
-  config: { id: MODULE_ID, name: MODULE_NAME, priority: MODULE_PRIORITY, weight: MODULE_WEIGHT },
+  config: {
+    id: MODULE_ID,
+    name: MODULE_NAME,
+    priority: MODULE_PRIORITY,
+    weight: MODULE_WEIGHT,
+  },
 
   isEnabled: () => true,
 
   async collect(entities: LeadEntity[]): Promise<Observation[]> {
-    const timeSeriesScores = await fetchTimeSeriesRiskScores(esClient, spaceId, entities, logger);
+    const timeSeriesScores = await fetchTimeSeriesRiskScores(riskScoreDataClient, entities, logger);
     const observations: Observation[] = [];
 
     for (const entity of entities) {
       const internals = extractEntityInternals(entity);
       if (internals) {
         const { scoreNorm, level, isPrivileged } = internals;
-        const historicalScores = timeSeriesScores.get(`${entity.type}:${entity.name}`) ?? [];
+        const historicalScores = timeSeriesScores.get(entity.id) ?? [];
 
-        // Observation 1: Current risk level — mapped from risk engine's calculated_level
         const severity = RISK_LEVEL_TO_SEVERITY[level];
-        if (severity) {
+        const observationType = RISK_LEVEL_TO_TYPE[level];
+        if (severity && observationType) {
           observations.push(
             makeObservation(entity, MODULE_ID, {
-              type: RISK_LEVEL_TO_TYPE[level],
+              type: observationType,
               score: scoreNorm,
               severity,
               confidence: RISK_LEVEL_CONFIDENCE[level] ?? 0.8,
-              description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(
-                1
-              )}`,
+              description: `${entityTypeLabel(entity)} ${
+                entity.name
+              } has a ${level} risk score of ${scoreNorm.toFixed(1)}`,
               metadata: {
                 calculated_score_norm: scoreNorm,
                 calculated_level: level,
@@ -142,7 +137,6 @@ export const createRiskScoreModule = ({
           );
         }
 
-        // Observation 2: Risk escalation — one check per time window
         for (const w of ESCALATION_WINDOWS) {
           const esc = detectEscalation(scoreNorm, historicalScores, w.daysBack, w.threshold);
           if (esc) {
@@ -154,7 +148,9 @@ export const createRiskScoreModule = ({
                 score: Math.min(100, esc.delta * 2),
                 severity: escalationSeverity,
                 confidence: 0.85,
-                description: `Entity ${entity.name} risk score escalated by ${esc.delta.toFixed(
+                description: `${entityTypeLabel(entity)} ${
+                  entity.name
+                } risk score escalated by ${esc.delta.toFixed(
                   1
                 )} points (from ${esc.previousScore.toFixed(1)} to ${scoreNorm.toFixed(
                   1
@@ -171,7 +167,6 @@ export const createRiskScoreModule = ({
           }
         }
 
-        // Observation 3: Privileged entity with elevated risk
         if (isPrivileged && scoreNorm >= HIGH_RISK_THRESHOLD) {
           observations.push(
             makeObservation(entity, MODULE_ID, {
@@ -179,7 +174,7 @@ export const createRiskScoreModule = ({
               score: Math.min(100, scoreNorm * 1.2),
               severity: 'critical',
               confidence: 0.95,
-              description: `Privileged entity ${
+              description: `Privileged ${entityTypeLabel(entity).toLowerCase()} ${
                 entity.name
               } has a ${level} risk score of ${scoreNorm.toFixed(
                 1
@@ -203,10 +198,6 @@ export const createRiskScoreModule = ({
   },
 });
 
-// ---------------------------------------------------------------------------
-// Entity record accessors
-// ---------------------------------------------------------------------------
-
 interface EntityInternals {
   readonly scoreNorm: number;
   readonly level: string;
@@ -225,106 +216,72 @@ const extractEntityInternals = (entity: LeadEntity): EntityInternals | undefined
   const scoreNorm = Number(risk.calculated_score_norm);
   if (Number.isNaN(scoreNorm)) return undefined;
 
-  const attributes = entityField.attributes as { privileged?: boolean } | undefined;
   return {
     scoreNorm,
     level: risk.calculated_level ?? 'Unknown',
-    isPrivileged: attributes?.privileged === true,
+    isPrivileged: extractIsPrivileged(entity),
   };
 };
 
-// ---------------------------------------------------------------------------
-// Time-series risk score fetching (for escalation detection)
-//
-// Fetches 90-day daily averages per entity, oldest → newest.
-// All escalation windows (24h, 7d, 90d) are derived from this single query.
-// ---------------------------------------------------------------------------
-
+/**
+ * Fetches daily average risk score history from the time-series index.
+ *
+ * Identity is resolved via `<entityType>.risk.id_field`/`<entityType>.risk.id_value`
+ * inside the data client, which authoritatively selects V2-shaped documents regardless of
+ * which writer last ran. Correct under both `entityAnalyticsEntityStoreV2 = true`
+ * (entity-store risk-score maintainer) and `= false` (legacy scoring task);
+ * legacy-shaped documents are excluded from the lookback window. The returned
+ * map is keyed directly by EUID.
+ */
 const fetchTimeSeriesRiskScores = async (
-  esClient: ElasticsearchClient,
-  spaceId: string,
+  riskScoreDataClient: RiskScoreDataClient,
   entities: LeadEntity[],
   logger: Logger
 ): Promise<Map<string, number[]>> => {
   const result = new Map<string, number[]>();
 
-  await Promise.all(
-    [...groupEntitiesByType(entities).entries()].map(async ([entityType, group]) => {
-      const names = group.map((e) => e.name);
+  for (const [entityType, group] of groupEntitiesByType(entities).entries()) {
+    const entityIds = group.map((e) => e.id);
+    if (entityIds.length > 0) {
       try {
-        const response = await esClient.search({
-          index: `risk-score.risk-score-${spaceId}`,
-          size: 0,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          query: {
-            bool: {
-              filter: [
-                { terms: { [`${entityType}.name`]: names } },
-                { range: { '@timestamp': { gte: 'now-90d', lte: 'now' } } },
-              ],
-            },
-          },
-          aggs: {
-            by_entity: {
-              terms: { field: `${entityType}.name`, size: names.length },
-              aggs: {
-                scores_over_time: {
-                  date_histogram: { field: '@timestamp', calendar_interval: 'day' },
-                  aggs: {
-                    avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
-                  },
-                },
-              },
-            },
-          },
+        const batch = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+          entityType,
+          entityIds,
         });
-
-        const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-          []) as Array<{
-          key: string;
-          scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
-        }>;
-
-        for (const bucket of buckets) {
-          const scores = bucket.scores_over_time.buckets
-            .map((b) => b.avg_score.value)
-            .filter((v): v is number => v != null);
-          result.set(`${entityType}:${bucket.key}`, scores);
+        for (const [key, scores] of batch.entries()) {
+          result.set(key, scores);
         }
       } catch (error) {
         logger.warn(
-          `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${error}`
+          `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${errorMessage(
+            error
+          )}`
         );
       }
-    })
-  );
+    }
+  }
 
   return result;
 };
-
-// ---------------------------------------------------------------------------
-// Escalation detection
-//
-// dailyScores is oldest → newest. daysBack selects the comparison bucket:
-//   daysBack=1  → yesterday's score (last bucket)
-//   daysBack=7  → 7 buckets from the end
-//   daysBack=90 → oldest bucket in the 90-day window
-// ---------------------------------------------------------------------------
 
 interface EscalationInfo {
   readonly delta: number;
   readonly previousScore: number;
 }
 
+/**
+ * `dailyScores` is ordered oldest → newest (one value per calendar day bucket).
+ * Compare current score to the bucket `daysBack` positions before the latest bucket
+ * so we do not compare "today" to "today" (which would hide 24h escalations).
+ */
 const detectEscalation = (
   currentScore: number,
   dailyScores: number[],
   daysBack: number,
   deltaThreshold: number
 ): EscalationInfo | undefined => {
-  if (dailyScores.length < daysBack) return undefined;
-  const previousScore = dailyScores[dailyScores.length - daysBack];
+  if (dailyScores.length < daysBack + 1) return undefined;
+  const previousScore = dailyScores[dailyScores.length - 1 - daysBack];
   if (previousScore == null || Number.isNaN(previousScore)) return undefined;
   const delta = currentScore - previousScore;
   return delta >= deltaThreshold ? { delta, previousScore } : undefined;

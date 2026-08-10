@@ -21,6 +21,7 @@ export {
   PRIVILEGED_AGENT_KUERY,
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE as PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   FLEET_SERVER_PACKAGE,
+  FLEET_CONNECTORS_PACKAGE,
   // Fleet Server index
   AGENTS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
@@ -38,6 +39,7 @@ export {
 } from '../../common/constants';
 
 export * from './page_paths';
+export * from './page_sizes';
 
 export const INDEX_NAME = INGEST_SAVED_OBJECT_INDEX;
 

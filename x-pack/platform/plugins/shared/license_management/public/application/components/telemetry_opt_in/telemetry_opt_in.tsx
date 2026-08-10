@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LazyOptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
 import type { TelemetryPluginStart } from '../../lib/telemetry';
@@ -55,7 +56,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
     this.setState({ showExample: true });
     this.closeReadMorePopover();
   };
-  onChangeOptIn = (event: any) => {
+  onChangeOptIn = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isOptingInToTelemetry = event.target.checked;
     const { onOptInChange } = this.props;
     onOptInChange(isOptingInToTelemetry);
@@ -110,6 +111,9 @@ export class TelemetryOptIn extends React.Component<Props, State> {
       <EuiPopover
         ownFocus
         id="readMorePopover"
+        aria-label={i18n.translate('xpack.licenseMgmt.telemetryOptIn.readMorePopoverAriaLabel', {
+          defaultMessage: 'Telemetry information',
+        })}
         button={readMoreButton}
         isOpen={showMoreTelemetryInfo}
         closePopover={this.closeReadMorePopover}

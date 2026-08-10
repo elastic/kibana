@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/alerting-types'
   - '@kbn/management-settings-ids'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
@@ -53,26 +54,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

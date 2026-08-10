@@ -48,13 +48,13 @@ description: Create security detection rule
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: wf_multiple_alerts
-    type: string
-    required: true
-  - name: wf_single_alert
-    type: string
-    required: true
+    inputs:
+      - name: wf_multiple_alerts
+        type: string
+        required: true
+      - name: wf_single_alert
+        type: string
+        required: true
 consts:
   alerts_index_name: ${TEST_ALERTS_INDEX}
 steps:
@@ -125,13 +125,13 @@ description: Create ES|QL alert rule
 enabled: true
 triggers:
   - type: manual
-inputs:
-  - name: wf_multiple_alerts
-    type: string
-    required: true
-  - name: wf_single_alert
-    type: string
-    required: true
+    inputs:
+      - name: wf_multiple_alerts
+        type: string
+        required: true
+      - name: wf_single_alert
+        type: string
+        required: true
 consts:
   alerts_index_name: ${TEST_ALERTS_INDEX}
 steps:
@@ -202,18 +202,19 @@ description: Add timestamp ingest pipeline, ingest docs, which will trigger the 
 enabled: true
 triggers:
   - type: manual
+    inputs:
+      type: object
+      properties:
+        alerts:
+          type: array
+          items:
+            type: object
+      required:
+        - "alerts"
 consts:
   pipeline_name: add_timestamp_if_missing
   alerts_index_name: ${TEST_ALERTS_INDEX}
-inputs:
-  type: object
-  properties:
-    alerts:
-      type: array
-      items:
-        type: object
-  required:
-    - "alerts"
+
 steps:
   - name: create_ingest_pipeline
     type: elasticsearch.request

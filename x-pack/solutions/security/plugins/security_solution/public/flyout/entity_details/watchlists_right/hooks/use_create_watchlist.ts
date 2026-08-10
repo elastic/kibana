@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import { getApiErrorMessage } from '../utils';
 
 export interface UseCreateWatchlistOptions {
   watchlist: CreateWatchlistRequestBodyInput;
@@ -31,11 +32,20 @@ export const useCreateWatchlist = ({
   return useMutation({
     mutationFn: () => createWatchlist(watchlist),
     onSuccess: async () => {
-      toasts.addSuccess(
-        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccess', {
-          defaultMessage: 'Watchlist created successfully',
-        })
-      );
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccessTitle',
+          {
+            defaultMessage: 'Watchlist created successfully',
+          }
+        ),
+        text: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccessText',
+          {
+            defaultMessage: 'Entities in the Watchlist may take a few minutes to synchronize.',
+          }
+        ),
+      });
       if (spaceId) {
         await queryClient.invalidateQueries({
           queryKey: ['watchlists-management-table', spaceId],
@@ -53,6 +63,7 @@ export const useCreateWatchlist = ({
             defaultMessage: 'Failed to create watchlist',
           }
         ),
+        toastMessage: getApiErrorMessage(error),
       });
     },
   });

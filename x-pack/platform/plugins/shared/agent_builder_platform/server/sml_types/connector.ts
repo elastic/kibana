@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { parse } from 'yaml';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType, CONNECTOR_TAG_PREFIX } from '@kbn/agent-builder-common/attachments';
-import { getConnectorSpec, getWorkflowTemplatesForConnector } from '@kbn/connector-specs';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { getConnectorSpec } from '@kbn/connector-specs';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 const CONNECTOR_SML_TYPE = 'connector';
 
 interface ConnectorSmlTypeDeps {
-  getToolRegistry: (request: KibanaRequest) => Promise<ToolRegistry>;
   /**
    * Returns a saved objects client scoped to the given request that can read
    * hidden `action` saved objects. Uses `includedHiddenTypes: ['action']` so
@@ -30,54 +29,43 @@ interface ConnectorSmlTypeDeps {
 }
 
 /**
- * Parses a workflow YAML template and extracts metadata relevant to SML.
- * Returns the tag check and description in a single parse pass.
- */
-const parseWorkflowTemplate = (
-  yamlTemplate: string
-): { hasAgentBuilderToolTag: boolean; description?: string } => {
-  try {
-    const parsed = parse(yamlTemplate);
-    return {
-      hasAgentBuilderToolTag: parsed?.tags?.includes('agent-builder-tool') ?? false,
-      description: typeof parsed?.description === 'string' ? parsed.description : undefined,
-    };
-  } catch {
-    return { hasAgentBuilderToolTag: false };
-  }
-};
-
-/**
  * Creates the SML type definition for connectors.
  *
- * Connectors are indexed into the SML exclusively via event-driven calls
- * in the connector lifecycle handler (onPostCreate / onPostDelete).
- * No crawling is needed — `list` yields nothing and `fetchFrequency` is omitted.
- *
- * A factory function is used because `toAttachment()` needs access to the tool
- * registry, which requires a scoped request not available in the `SmlToAttachmentContext`.
+ * Connectors are indexed into the SML via event-driven calls and during periodic crawls.
  */
 export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefinition => {
-  const { getToolRegistry, getActionSavedObjectsClient, logger } = deps;
+  const { getActionSavedObjectsClient, logger } = deps;
 
   return {
     id: CONNECTOR_SML_TYPE,
 
-    // Connectors are indexed exclusively via event-driven lifecycle hooks.
-    // The list method yields nothing — no crawling is performed.
-    list: (_context) => ({
-      [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
-    }),
-
-    getSmlData: async (originId, context) => {
-      if (!context.request) {
-        throw new Error(
-          `SML connector: no request available for '${originId}' — cannot create scoped client`
-        );
-      }
+    async *list(context) {
+      const finder = context.savedObjectsClient.createPointInTimeFinder({
+        type: 'action',
+        perPage: 1000,
+        namespaces: ['*'],
+      });
       try {
-        const soClient = await getActionSavedObjectsClient(context.request);
-        const so = await soClient.get('action', originId);
+        for await (const response of finder.find()) {
+          yield response.saved_objects
+            .filter((so) => {
+              const { actionTypeId } = so.attributes as { actionTypeId?: string };
+              return isChatCallableConnectorType(actionTypeId ?? '');
+            })
+            .map((so) => ({
+              id: so.id,
+              updatedAt: so.updated_at ?? new Date().toISOString(),
+              spaces: so.namespaces ?? [],
+            }));
+        }
+      } finally {
+        await finder.close();
+      }
+    },
+
+    getSmlEntry: async (originId, context) => {
+      try {
+        const so = await context.savedObjectsClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';
@@ -86,25 +74,22 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         const displayName = spec?.metadata.displayName ?? actionTypeId;
         const description = spec?.metadata.description ?? '';
 
-        const templates = getWorkflowTemplatesForConnector(actionTypeId);
-        const toolDescriptions = templates
-          .map(parseWorkflowTemplate)
-          .filter((t) => t.hasAgentBuilderToolTag && t.description)
-          .map((t) => t.description!);
+        // Include sub-action descriptions from the ConnectorSpec
+        const subActionDescriptions = spec?.actions
+          ? Object.entries(spec.actions)
+              .filter(([, action]) => action.isTool && action.description)
+              .map(([actionName, action]) => `${actionName}: ${action.description}`)
+          : [];
 
         const contentParts = [
-          ...new Set([name, displayName, description, ...toolDescriptions].filter(Boolean)),
+          ...new Set([name, displayName, description, ...subActionDescriptions].filter(Boolean)),
         ];
 
         return {
-          chunks: [
-            {
-              type: CONNECTOR_SML_TYPE,
-              title: name,
-              content: contentParts.join('\n'),
-              permissions: ['action:execute'],
-            },
-          ],
+          type: CONNECTOR_SML_TYPE,
+          title: name,
+          content: contentParts.join('\n'),
+          discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_SML_TYPE}/${name}` }],
         };
       } catch (error) {
         context.logger.warn(
@@ -114,32 +99,23 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       }
     },
 
+    requiredHiddenTypes: ['action'],
+
+    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
+
     toAttachment: async (item, context) => {
       try {
         const soClient = await getActionSavedObjectsClient(context.request);
-        const so = await soClient.get('action', item.origin_id);
+        const originId = item.origin_id ?? '';
+        const so = await soClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
-        const connectorName = attrs.name ?? item.origin_id;
+        const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
 
-        const toolRegistry = await getToolRegistry(context.request);
-        const connectorTag = `${CONNECTOR_TAG_PREFIX}${item.origin_id}`;
-        const connectorTools = await toolRegistry.list({ tags: [connectorTag] });
-
-        const tools: ConnectorAttachmentData['tools'] = connectorTools.map((tool) => ({
-          tool_id: tool.id,
-          description: tool.description,
-          configuration: {
-            workflow_id:
-              ((tool.configuration as Record<string, unknown>)?.workflow_id as string) ?? '',
-          },
-        }));
-
         const data: ConnectorAttachmentData = {
-          connector_id: item.origin_id,
+          connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
-          tools,
         };
 
         return {

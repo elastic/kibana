@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
+import classNames from 'classnames';
 import { TagList } from '../tag_list';
 
 export interface Props {
@@ -34,6 +38,32 @@ export interface Props {
 
 const tagType = 'badge';
 
+export const ElementCardWrapper: FC<PropsWithChildren<EuiFlexItemProps>> = ({
+  children,
+  className,
+  ...rest
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      & .canvasElementCard__controls {
+        background: ${transparentize(euiTheme.colors.plainLight, 0.5)};
+      }
+    `,
+    [euiTheme]
+  );
+
+  return (
+    <EuiFlexItem
+      className={classNames('canvasElementCard__wrapper', className)}
+      css={styles}
+      {...rest}
+    >
+      {children}
+    </EuiFlexItem>
+  );
+};
+
 export const ElementCard = ({ title, description, image, tags = [], onClick, ...rest }: Props) => (
   <EuiCard
     className={image ? 'canvasElementCard' : 'canvasElementCard canvasElementCard--hasIcon'}
@@ -42,7 +72,7 @@ export const ElementCard = ({ title, description, image, tags = [], onClick, ...
     description={description}
     footer={<TagList tags={tags} tagType={tagType} />}
     image={image}
-    icon={image ? undefined : <EuiIcon type="canvasApp" size="xxl" />}
+    icon={image ? undefined : <EuiIcon type="canvasApp" size="xxl" aria-hidden={true} />}
     onClick={onClick}
     {...rest}
   />

@@ -39,6 +39,7 @@ import {
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
   return {
@@ -171,6 +172,14 @@ describe('Actions Plugin', () => {
       expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
       );
+    });
+
+    it('should expose the same client lease pool before start', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+
+      const clientLeasePool = setupContract.getClientLeasePool();
+      expect(clientLeasePool).toBeInstanceOf(LeasePool);
+      expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -775,13 +784,83 @@ describe('Actions Plugin', () => {
         });
       });
 
+      describe('detectPreconfiguredConflicts', () => {
+        it('should not modify inMemoryConnectors when there are no conflicts', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockResolvedValue({
+            hits: { hits: [] },
+          });
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(pluginStart.inMemoryConnectors).toHaveLength(1);
+          expect(pluginStart.inMemoryConnectors[0].id).toBe('preconfiguredServerLog');
+        });
+
+        it('should remove conflicting preconfigured connector from inMemoryConnectors and log error', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockResolvedValue({
+            hits: { hits: [{ _id: 'action:preconfiguredServerLog', _source: { type: 'action' } }] },
+          });
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(context.logger.get().error).toHaveBeenCalledWith(
+            expect.stringContaining('preconfiguredServerLog')
+          );
+          const startResult = await pluginStart;
+          expect(
+            startResult.inMemoryConnectors.find((c) => c.id === 'preconfiguredServerLog')
+          ).toBeUndefined();
+        });
+
+        it('should log debug when savedObjects search throws', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockRejectedValue(new Error('SO error'));
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(context.logger.get().debug).toHaveBeenCalledWith(
+            'Failed to check for preconfigured connector conflicts: SO error'
+          );
+        });
+      });
+
       describe('Dynamic connectors', () => {
         let pluginStart: PluginStartContract;
+        let pluginSetup: PluginSetupContract;
         beforeEach(async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
 
-          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType(serverLogConnectorType);
 
           pluginStart = await plugin.start(coreStart, pluginsStart);
@@ -849,6 +928,95 @@ describe('Actions Plugin', () => {
           expect(pluginStart.inMemoryConnectors.length).toEqual(1);
           expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
         });
+
+        it('should allow removing a previously registered dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+
+          expect(pluginStart.unregisterDynamicConnector(newDynamicConnector.id)).toEqual(true);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(
+            pluginStart.inMemoryConnectors.find((c) => c.id === newDynamicConnector.id)
+          ).toBeUndefined();
+        });
+
+        it('should evict pooled clients when removing a dynamic connector', async () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+
+          // A dynamic connector's ID can be re-registered with different config, and in-memory
+          // connectors share one revision sentinel, so the lease key alone cannot invalidate a
+          // stale client. Unregistering has to evict.
+          const pool = pluginSetup.getClientLeasePool();
+          const terminate = jest.fn().mockResolvedValue(undefined);
+          await pool.lease(
+            `${newDynamicConnector.id}:fake:shared:in-memory`,
+            async () => ({}),
+            terminate
+          );
+
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+          await new Promise(process.nextTick);
+
+          expect(terminate).toHaveBeenCalledTimes(1);
+        });
+
+        it('should mutate the inMemoryConnectors array in place when removing a dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+          const liveReference = pluginStart.inMemoryConnectors;
+
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+
+          expect(pluginStart.inMemoryConnectors).toBe(liveReference);
+          expect(liveReference.length).toEqual(1);
+        });
+
+        it('should return false when removing a dynamic connector that does not exist', () => {
+          expect(pluginStart.unregisterDynamicConnector('non-existent-id')).toEqual(false);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+        });
+
+        it('should not allow removing a non-dynamic preconfigured connector', () => {
+          const existingConnector = pluginStart.inMemoryConnectors[0];
+          expect(existingConnector.isDynamic).not.toEqual(true);
+
+          expect(pluginStart.unregisterDynamicConnector(existingConnector.id)).toEqual(false);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
+        });
       });
     });
 
@@ -908,6 +1076,7 @@ describe('Actions Plugin', () => {
             validate: { params: expect.any(Object) },
             isDeprecated: false,
             source: 'stack',
+            isTestable: false,
           },
         ]);
 

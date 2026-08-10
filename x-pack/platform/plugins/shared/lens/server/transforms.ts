@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
-
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { lensApiConfigSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { referencesSchema } from '@kbn/content-management-utils';
+import { referencesSchema } from '@kbn/content-management-utils/zod';
 import {
   ON_CLICK_VALUE,
   ON_SELECT_RANGE,
@@ -23,11 +22,12 @@ import {
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
-import { isByRefLensConfig } from '../common/transforms/utils';
-import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
+import { isByRefLensConfig, unflattenAPIConfig } from '../common/transforms/utils';
+import type { FlattenedLensByValuePanelSchema } from './types';
 
 /**
  * Triggers that Lens visualizations support, derived from visualization definitions:
@@ -49,7 +49,8 @@ export function registerLensEmbeddableTransforms(
   embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
 ) {
-  embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
+  embeddableSetup.registerEmbeddableServerDefinition(LENS_EMBEDDABLE_TYPE, {
+    title: 'Visualization',
     getTransforms: (drilldownTransforms) =>
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
@@ -58,10 +59,13 @@ export function registerLensEmbeddableTransforms(
     getSchema: (getDrilldownsSchema) => {
       return getLensPanelSchema(getDrilldownsSchema);
     },
-    throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
+    throwOnUnmappedPanel: (
+      config: FlattenedLensByValuePanelSchema | LensByRefSerializedAPIConfig
+    ) => {
       if (isByRefLensConfig(config)) return;
 
-      const chartType = builder.getType(config.attributes);
+      const { attributes } = unflattenAPIConfig(config);
+      const chartType = builder.getType(attributes);
 
       if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
@@ -70,41 +74,44 @@ export function registerLensEmbeddableTransforms(
   });
 }
 
-const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ({
-  references: schema.maybe(referencesSchema),
-  ...serializedTimeRangeSchema.getPropSchemas(),
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).getPropSchemas(),
-});
+const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+      ...serializedTimeRangeSchema.shape,
+      ...serializedTitlesSchema.shape,
+      ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
+    })
+    .strip();
 
-const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object(
-    {
-      attributes: lensApiStateSchema,
-      ...getSharedPanelSchema(getDrilldownsSchema),
-    },
-    {
-      meta: BY_VALUE_SCHEMA_META,
-    }
-  );
+export const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+  return lensApiConfigSchema
+    .and(getSharedPanelSchema(getDrilldownsSchema))
+    .meta(BY_VALUE_SCHEMA_META);
+};
 
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object(
-    {
-      ref_id: schema.string(),
-      ...getSharedPanelSchema(getDrilldownsSchema),
-    },
-    {
-      meta: BY_REF_SCHEMA_META,
-    }
-  );
+  z
+    .object({
+      ref_id: z.string(),
+    })
+    .extend(getSharedPanelSchema(getDrilldownsSchema).shape)
+    .strip()
+    .meta(BY_REF_SCHEMA_META);
 
-export const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.oneOf(
-    [getLensByValuePanelSchema(getDrilldownsSchema), getLensByRefPanelSchema(getDrilldownsSchema)],
-    {
-      meta: {
-        description: 'Lens embeddable schema',
-      },
-    }
-  );
+export const getLensPanelSchema = (
+  getDrilldownsSchema: GetDrilldownsSchemaFnType
+): z.ZodUnion<
+  readonly [
+    ReturnType<typeof getLensByValuePanelSchema>,
+    ReturnType<typeof getLensByRefPanelSchema>
+  ]
+> =>
+  z
+    .union([
+      getLensByValuePanelSchema(getDrilldownsSchema),
+      getLensByRefPanelSchema(getDrilldownsSchema),
+    ])
+    .meta({
+      description: 'Lens embeddable schema',
+    });

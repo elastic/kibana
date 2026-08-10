@@ -10,8 +10,7 @@ import { getMockCallbacks, mockContext } from '../../../__tests__/commands/conte
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getRecommendedQueriesTemplatesFromExtensions } from '../options/recommended_queries';
 
@@ -59,11 +58,8 @@ describe('TS Autocomplete', () => {
   });
   describe('... <sources> ...', () => {
     const suggest = async (query: string) => {
-      const correctedQuery = correctQuerySyntax(query);
-      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
       const cursorPosition = query.length;
-      const { command } = findAstPosition(root, cursorPosition);
+      const { command } = findAutocompleteAstPosition(query, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }
@@ -126,7 +122,7 @@ describe('TS Autocomplete', () => {
       const extensionsSuggestions = getRecommendedQueriesTemplatesFromExtensions(
         editorExtensions.recommendedQueries
       ).map((s) => s.text);
-      const expected = ['METADATA ', ',', '| ', ...extensionsSuggestions].sort();
+      const expected = ['\n', 'METADATA ', ',', '| ', ...extensionsSuggestions].sort();
 
       await tsExpectSuggestions('ts time_series_index ', expected);
     });
@@ -141,9 +137,14 @@ describe('TS Autocomplete', () => {
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
-      await tsExpectSuggestions('ts time_series_index metadata _index ', [',', '| ']);
-      await tsExpectSuggestions('ts time_series_index metadata _index, _source ', [',', '| ']);
+      await tsExpectSuggestions('ts time_series_index metadata _index ', ['\n', ',', '| ']);
+      await tsExpectSuggestions('ts time_series_index metadata _index, _source ', [
+        '\n',
+        ',',
+        '| ',
+      ]);
       await tsExpectSuggestions(`ts time_series_index metadata ${METADATA_FIELDS.join(', ')} `, [
+        '\n',
         '| ',
       ]);
     });
@@ -180,7 +181,13 @@ describe('TS Autocomplete', () => {
     );
 
     test('standalone suggestion appears after space alongside other suggestions', async () => {
-      const expected = ['METADATA ', ',', '| ', ...extensionSuggestions.map((s) => s.text)].sort();
+      const expected = [
+        '\n',
+        'METADATA ',
+        ',',
+        '| ',
+        ...extensionSuggestions.map((s) => s.text),
+      ].sort();
 
       await expectSuggestions(
         'ts timeseries_index ',

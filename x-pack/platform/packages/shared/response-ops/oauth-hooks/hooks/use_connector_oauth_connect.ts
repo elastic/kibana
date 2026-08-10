@@ -15,7 +15,7 @@ import {
   INTERNAL_BASE_ACTION_API_PATH,
 } from '@kbn/actions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
+import { isHttpFetchError, type HttpStart } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OAUTH_BROADCAST_CHANNEL_NAME, type OAuthFlowCompletedMessage } from '../oauth';
 
@@ -89,6 +89,7 @@ export const useConnectorOAuthConnect = ({
   onErrorRef.current = onError;
 
   const [isAwaitingCallback, setIsAwaitingCallback] = useState(false);
+  const pendingStateRef = useRef<string | undefined>();
 
   const handleAuthRedirect = useCallback(
     (authorizationUrl: string) => {
@@ -110,22 +111,34 @@ export const useConnectorOAuthConnect = ({
     StartOAuthFlowRequestBody
   >({
     mutationFn: (request) =>
-      http.post<{ authorizationUrl: string }>(
+      http.post<StartOAuthFlowResponse>(
         `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
           connectorId
         )}/_start_oauth_flow`,
         { body: JSON.stringify({ returnUrl: request.returnUrl }) }
       ),
-    onSuccess: ({ authorizationUrl }) => {
+    onSuccess: ({ authorizationUrl, state }) => {
+      pendingStateRef.current = state;
       setIsAwaitingCallback(true);
       handleAuthRedirect(authorizationUrl);
     },
     onError: (error) => {
-      onErrorRef.current?.(isError(error) ? error : new Error(String(error)));
+      const body = isHttpFetchError(error) ? error.body : undefined;
+      const bodyMessage =
+        typeof body === 'object' &&
+        body !== null &&
+        'message' in body &&
+        typeof body.message === 'string'
+          ? body.message
+          : undefined;
+      onErrorRef.current?.(
+        new Error(bodyMessage ?? (isError(error) ? error.message : String(error)))
+      );
     },
   });
 
   const connect = useCallback(() => {
+    pendingStateRef.current = undefined;
     setIsAwaitingCallback(false);
     let resolvedReturnUrl: string | undefined;
     if (returnUrl) {
@@ -139,8 +152,21 @@ export const useConnectorOAuthConnect = ({
   }, [startOAuthFlow, redirectMode, returnUrl]);
 
   const cancelConnect = useCallback(() => {
+    const state = pendingStateRef.current;
+    pendingStateRef.current = undefined;
     setIsAwaitingCallback(false);
-  }, []);
+    if (state) {
+      // Fire-and-forget: best-effort server cancel; UI state is already reset above.
+      http
+        .post(
+          `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
+            connectorId
+          )}/_oauth_cancel`,
+          { body: JSON.stringify({ state }) }
+        )
+        .catch(() => {});
+    }
+  }, [http, connectorId]);
 
   // Handle OAuth callback timeout
   useEffect(() => {
@@ -149,6 +175,7 @@ export const useConnectorOAuthConnect = ({
     }
 
     const callbackTimeout = setTimeout(() => {
+      pendingStateRef.current = undefined;
       setIsAwaitingCallback(false);
       onErrorRef.current?.(
         new Error(
@@ -173,6 +200,7 @@ export const useConnectorOAuthConnect = ({
       if (event.data.connectorId !== connectorId) {
         return;
       }
+      pendingStateRef.current = undefined;
       if (event.data.status === OAuthAuthorizationStatus.Success) {
         onSuccessRef.current?.();
       } else {

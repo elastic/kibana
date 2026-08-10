@@ -52,6 +52,7 @@ export type DynamicPage =
   | 'agent_details_logs'
   | 'agent_details_settings'
   | 'agent_details_diagnostics'
+  | 'agent_details_collector_config'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
@@ -75,6 +76,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
   agent_details_settings: '/agents/:agentId/settings',
+  agent_details_collector_config: '/agents/:agentId/collector-config',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -95,9 +97,6 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_proxy: '/settings/fleet-proxies/:itemId',
   settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
-
-  // TODO: Move this to the integrations app
-  add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
@@ -123,6 +122,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_edit: '/edit-integration/:packagePolicyId',
   integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
+  add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
 };
 
 export const pagePathGetters: {
@@ -258,22 +258,15 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({
-    pkgkey,
-    integration,
-    agentPolicyId,
-    useMultiPageLayout,
-    prerelease,
-  }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
       ...(prerelease ? { prerelease } : {}),
     });
     return [
-      FLEET_BASE_PATH,
+      INTEGRATIONS_BASE_PATH,
       // prettier-ignore
-      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+      `/detail/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
     ];
   },
   edit_integration: ({ policyId, packagePolicyId }) => [
@@ -307,6 +300,10 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
+  agent_details_collector_config: ({ agentId }) => [
+    FLEET_BASE_PATH,
+    `/agents/${agentId}/collector-config`,
+  ],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],

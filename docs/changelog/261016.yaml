@@ -1,0 +1,9 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/261016
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Kibana platform
+title: Trim whitespace from space names on create/update

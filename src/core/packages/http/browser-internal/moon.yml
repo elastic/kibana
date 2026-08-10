@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-http-browser'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-http-common'
   - '@kbn/core-execution-context-browser-internal'
   - '@kbn/core-execution-context-browser'
@@ -41,26 +42,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

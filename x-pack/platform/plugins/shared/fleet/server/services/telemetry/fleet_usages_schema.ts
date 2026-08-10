@@ -557,6 +557,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
       _meta: { description: 'list of managed ILMs modified by users' },
     },
   },
+  agent_upgrade_rollbacks: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of agent upgrade rollback actions (type:UPGRADE, data.rollback:true) in the last 1 hour',
+    },
+  },
 };
 
 export const fleetIntegrationsSchema: RootSchema<any> = {

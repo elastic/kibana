@@ -11,7 +11,15 @@ import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
 import { serializeEditorContent } from './serialize';
-import { createCommandRange, insertSpaceAfter, placeCursorAfter, placeCursorAtEnd } from './utils';
+import {
+  createCommandRange,
+  createTextFragment,
+  ensureCaretTargetBeforeFirstBadge,
+  insertSpaceAfter,
+  placeCursorAfter,
+  placeCursorAtEnd,
+  stripZeroWidthSpaces,
+} from './utils';
 
 export interface MessageEditorInstance {
   ref: React.RefObject<HTMLDivElement>;
@@ -22,6 +30,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
+  /** Reports whether the active command's mounted menu has anything to show, for a given query */
+  reportMenuContent: (hasVisibleContent: boolean, forQuery: string) => void;
 }
 
 export interface MessageEditorController {
@@ -52,16 +62,24 @@ const useMessageEditorInstance = ({
     match: commandMatch,
     dismiss: dismissCommandMenu,
     checkInputForCommand,
+    reportContent,
   } = useCommandMenu();
   const prefetchCommandMenus = useCommandMenuPrefetch();
 
   const messageEditor = useMemo(
     () => ({
       ref,
-      // Sync empty state and re-evaluate command menu on every input change
+      // Sync empty state, maintain caret targets, and re-evaluate command menu on every input change
       onChange: () => {
         syncIsEmpty();
         if (ref.current) {
+          if (ensureCaretTargetBeforeFirstBadge(ref.current)) {
+            const sel = window.getSelection();
+            const zwsNode = ref.current.firstChild;
+            if (sel && zwsNode instanceof Text) {
+              placeCursorAfter(zwsNode, sel);
+            }
+          }
           checkInputForCommand(ref.current);
         }
       },
@@ -78,6 +96,7 @@ const useMessageEditorInstance = ({
       },
       commandMatch,
       dismissActionMenu: dismissCommandMenu,
+      reportMenuContent: reportContent,
       // Replace the command text (e.g. "/summ") with a badge element:
       handleCommandSelect: (selection: CommandBadgeData) => {
         if (!ref.current || !commandMatch.activeCommand) {
@@ -94,6 +113,7 @@ const useMessageEditorInstance = ({
 
         const badge = createCommandBadgeElement(selection);
         commandRange.insertNode(badge);
+        ensureCaretTargetBeforeFirstBadge(ref.current);
 
         const space = insertSpaceAfter(badge, ref.current);
         placeCursorAfter(space, sel);
@@ -109,6 +129,7 @@ const useMessageEditorInstance = ({
       prefetchCommandMenus,
       commandMatch,
       dismissCommandMenu,
+      reportContent,
       onEditorFocus,
     ]
   );
@@ -154,12 +175,13 @@ const useMessageEditorController = ({
 
         for (const segment of segments) {
           if (segment.type === 'text') {
-            ref.current.appendChild(document.createTextNode(segment.value));
+            ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
           }
         }
 
+        ensureCaretTargetBeforeFirstBadge(ref.current);
         syncIsEmpty();
         placeCursorAtEnd(ref.current);
       },
@@ -206,7 +228,8 @@ export const useMessageEditor = (
     if (!ref?.current) {
       return;
     }
-    const nextIsEmpty = !ref.current.textContent || ref.current.textContent.trim() === '';
+    const textContent = stripZeroWidthSpaces(ref.current.textContent ?? '');
+    const nextIsEmpty = !textContent || textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
       // This is required so the :empty pseudo-class gets reset and the placeholder is shown

@@ -231,6 +231,12 @@ describe('getEuidPainlessEvaluation', () => {
       });
     });
   });
+
+  it('does not include shared field evaluations in host EUID generation', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.host);
+
+    expect(script).not.toContain('entity_source');
+  });
 });
 
 describe('getEuidPainlessRuntimeMapping', () => {

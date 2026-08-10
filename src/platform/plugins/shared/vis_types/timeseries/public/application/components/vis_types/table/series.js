@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
@@ -46,8 +47,13 @@ function TableSeriesUI(props) {
 
   const handleChange = createTextHandler(onChange);
 
-  let caretIcon = 'arrowDown';
-  if (!visible) caretIcon = 'arrowRight';
+  const toggleEditorLabel = intl.formatMessage({
+    id: 'visTypeTimeseries.table.toggleSeriesEditorAriaLabel',
+    defaultMessage: 'Toggle series editor',
+  });
+
+  let caretIcon = 'chevronSingleDown';
+  if (!visible) caretIcon = 'chevronSingleRight';
 
   let body = null;
   if (visible) {
@@ -107,16 +113,15 @@ function TableSeriesUI(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={caretIcon}
-            color="text"
-            onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({
-              id: 'visTypeTimeseries.table.toggleSeriesEditorAriaLabel',
-              defaultMessage: 'Toggle series editor',
-            })}
-            aria-expanded={props.visible}
-          />
+          <EuiToolTip content={toggleEditorLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={caretIcon}
+              color="text"
+              onClick={props.toggleVisible}
+              aria-label={toggleEditorLabel}
+              aria-expanded={props.visible}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem>

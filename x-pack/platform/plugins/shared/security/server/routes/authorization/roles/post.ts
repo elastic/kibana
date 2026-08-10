@@ -9,6 +9,7 @@ import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { roleGrantsSubFeaturePrivileges } from './lib';
 import {
+  bulkCreateOrUpdateRolesResponseSchema,
   getBulkCreateOrUpdatePayloadSchema,
   transformPutPayloadToElasticsearchRole,
 } from './model';
@@ -47,6 +48,7 @@ export function defineBulkCreateOrUpdateRolesRoutes({
       path: '/api/security/roles',
       access: 'public',
       summary: 'Create or update roles',
+      description: 'Create or update multiple Kibana roles in a single request.',
       options: {
         tags: ['oas-tag:roles'],
       },
@@ -57,6 +59,48 @@ export function defineBulkCreateOrUpdateRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkCreateOrUpdateRoles: {
+                      value: {
+                        roles: {
+                          my_kibana_role: {
+                            elasticsearch: {
+                              cluster: ['monitor'],
+                              indices: [{ names: ['logs-*'], privileges: ['read'] }],
+                            },
+                            kibana: [{ spaces: ['default'], base: ['read'], feature: {} }],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      bulkCreateOrUpdateRolesResponse: {
+                        value: {
+                          created: ['my_kibana_role'],
+                          updated: [],
+                          noop: [],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: {
             body: getBulkCreateOrUpdatePayloadSchema(() => {
@@ -69,6 +113,7 @@ export function defineBulkCreateOrUpdateRolesRoutes({
           },
           response: {
             200: {
+              body: () => bulkCreateOrUpdateRolesResponseSchema,
               description: 'Indicates a successful call.',
             },
           },

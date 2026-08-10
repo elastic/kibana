@@ -14,20 +14,17 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { FILTER_CLOSED, FILTER_OPEN } from '../../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
 import { useApplyAttackWorkflowStatus } from './use_apply_attack_workflow_status';
-import { useSetUnifiedAlertsWorkflowStatus } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_workflow_status';
+import { useSetAttacksStatus } from '../../../../../common/containers/attacks/hooks/use_set_attacks_status';
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock(
-  '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_workflow_status'
-);
+jest.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_status');
 jest.mock('../confirmation_modal/use_update_attacks_modal');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSetUnifiedAlertsWorkflowStatus =
-  useSetUnifiedAlertsWorkflowStatus as jest.MockedFunction<
-    typeof useSetUnifiedAlertsWorkflowStatus
-  >;
+const mockUseSetAttacksStatus = useSetAttacksStatus as jest.MockedFunction<
+  typeof useSetAttacksStatus
+>;
 const mockUseUpdateAttacksModal = useUpdateAttacksModal as jest.MockedFunction<
   typeof useUpdateAttacksModal
 >;
@@ -39,7 +36,7 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useApplyAttackWorkflowStatus', () => {
-  const mockMutateAsync = jest.fn();
+  const mockAttacksMutateAsync = jest.fn();
   const mockShowModal = jest.fn();
   const mockReportEvent = jest.fn();
 
@@ -55,16 +52,16 @@ describe('useApplyAttackWorkflowStatus', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    mockUseSetUnifiedAlertsWorkflowStatus.mockReturnValue({
-      mutateAsync: mockMutateAsync,
-    } as unknown as ReturnType<typeof useSetUnifiedAlertsWorkflowStatus>);
+    mockUseSetAttacksStatus.mockReturnValue({
+      mutateAsync: mockAttacksMutateAsync,
+    } as unknown as ReturnType<typeof useSetAttacksStatus>);
 
     mockUseUpdateAttacksModal.mockReturnValue(mockShowModal);
   });
 
   it('should report telemetry with attack_only scope when user chooses attacks only', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
 
@@ -86,7 +83,7 @@ describe('useApplyAttackWorkflowStatus', () => {
 
   it('should report telemetry with attack_and_related_alerts scope when user chooses both', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: true });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
 
@@ -108,7 +105,7 @@ describe('useApplyAttackWorkflowStatus', () => {
 
   it('should show modal and update only attacks when user chooses attacks only', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
     const setIsLoading = jest.fn();
@@ -128,9 +125,10 @@ describe('useApplyAttackWorkflowStatus', () => {
       alertsCount: 2,
       attackDiscoveriesCount: 2,
     });
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      signal_ids: ['attack-1', 'attack-2'],
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+      ids: ['attack-1', 'attack-2'],
       status: FILTER_OPEN,
+      update_related_alerts: false,
     });
     expect(setIsLoading).toHaveBeenCalledWith(true);
     expect(setIsLoading).toHaveBeenCalledWith(false);
@@ -139,7 +137,7 @@ describe('useApplyAttackWorkflowStatus', () => {
 
   it('should show modal and update both when user chooses attacks and alerts', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: true });
-    mockMutateAsync.mockResolvedValue({ updated: 4 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
     const setIsLoading = jest.fn();
@@ -159,16 +157,17 @@ describe('useApplyAttackWorkflowStatus', () => {
       alertsCount: 3,
       attackDiscoveriesCount: 1,
     });
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      signal_ids: ['attack-1', 'alert-1', 'alert-2', 'alert-3'],
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+      ids: ['attack-1'],
       status: FILTER_OPEN,
+      update_related_alerts: true,
     });
     expect(onSuccess).toHaveBeenCalled();
   });
 
   it('should include reason when status is FILTER_CLOSED', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 1 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 1 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
     const reason = 'false_positive' as const;
@@ -182,16 +181,17 @@ describe('useApplyAttackWorkflowStatus', () => {
       });
     });
 
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      signal_ids: ['attack-1'],
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+      ids: ['attack-1'],
       status: FILTER_CLOSED,
+      update_related_alerts: false,
       reason,
     });
   });
 
   it('should not include reason when status is not FILTER_CLOSED', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 1 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 1 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
     const reason = 'false_positive' as const;
@@ -205,11 +205,12 @@ describe('useApplyAttackWorkflowStatus', () => {
       });
     });
 
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      signal_ids: ['attack-1'],
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+      ids: ['attack-1'],
       status: FILTER_OPEN,
+      update_related_alerts: false,
     });
-    expect(mockMutateAsync).not.toHaveBeenCalledWith(expect.objectContaining({ reason }));
+    expect(mockAttacksMutateAsync).not.toHaveBeenCalledWith(expect.objectContaining({ reason }));
   });
 
   it('should not proceed when user cancels modal', async () => {
@@ -230,14 +231,14 @@ describe('useApplyAttackWorkflowStatus', () => {
     });
 
     expect(mockShowModal).toHaveBeenCalled();
-    expect(mockMutateAsync).not.toHaveBeenCalled();
+    expect(mockAttacksMutateAsync).not.toHaveBeenCalled();
     expect(setIsLoading).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
   it('should handle missing optional callbacks', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 1 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 1 });
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
 
@@ -249,12 +250,12 @@ describe('useApplyAttackWorkflowStatus', () => {
       });
     });
 
-    expect(mockMutateAsync).toHaveBeenCalled();
+    expect(mockAttacksMutateAsync).toHaveBeenCalled();
   });
 
   it('should set loading to false even if mutation fails', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockRejectedValue(new Error('Mutation failed'));
+    mockAttacksMutateAsync.mockRejectedValue(new Error('Mutation failed'));
 
     const { result } = renderHook(() => useApplyAttackWorkflowStatus(), { wrapper });
     const setIsLoading = jest.fn();

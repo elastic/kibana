@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import type { DateRangePickerProps } from '../date_range_picker';
 import { DateRangePickerProvider } from '../date_range_picker_context';
@@ -37,7 +37,7 @@ const renderWithProvider = (
     ...(onRefresh ? { onRefresh } : {}),
   };
 
-  return renderWithEuiTheme(
+  return renderWithKibanaRenderContext(
     <DateRangePickerProvider {...providerProps}>
       <DateRangePickerPanelNavigationProvider
         defaultPanelId={SettingsPanel.PANEL_ID}
@@ -62,7 +62,12 @@ describe('Auto-refresh settings row', () => {
     renderWithProvider(
       {
         roundRelativeTime: true,
-        autoRefresh: { isEnabled: true, isPaused: false, interval: 10_000 },
+        autoRefresh: {
+          isEnabled: true,
+          isPaused: false,
+          intervalMs: 10_000,
+          intervalDisplayUnit: 's',
+        },
       },
       () => {}
     );
@@ -77,7 +82,12 @@ describe('Auto-refresh settings row', () => {
     renderWithProvider(
       {
         roundRelativeTime: true,
-        autoRefresh: { isEnabled: false, isPaused: true, interval: 10_000 },
+        autoRefresh: {
+          isEnabled: false,
+          isPaused: true,
+          intervalMs: 10_000,
+          intervalDisplayUnit: 's',
+        },
       },
       onSettingsChange,
       onRefresh
@@ -90,7 +100,7 @@ describe('Auto-refresh settings row', () => {
     const next = onSettingsChange.mock.calls[0][0];
 
     expect(next.autoRefresh).toEqual(
-      expect.objectContaining({ isEnabled: true, isPaused: true, interval: 10_000 })
+      expect.objectContaining({ isEnabled: true, isPaused: true, intervalMs: 10_000 })
     );
   });
 
@@ -104,8 +114,8 @@ describe('Auto-refresh settings row', () => {
         autoRefresh: {
           isEnabled: true,
           isPaused: false,
-          interval: 60_000,
-          intervalUnit: 'm',
+          intervalMs: 60_000,
+          intervalDisplayUnit: 'm',
         },
       },
       onSettingsChange,
@@ -122,10 +132,10 @@ describe('Auto-refresh settings row', () => {
 
     const last = onSettingsChange.mock.calls.at(-1)[0];
 
-    expect(last.autoRefresh?.interval).toBe(5 * 60_000);
+    expect(last.autoRefresh?.intervalMs).toBe(5 * 60_000);
   });
 
-  it('updates `interval` and `intervalUnit` when the unit select changes', () => {
+  it('updates `intervalMs` and `intervalDisplayUnit` when the unit select changes', () => {
     const onSettingsChange = jest.fn();
     const onRefresh = jest.fn();
 
@@ -135,8 +145,8 @@ describe('Auto-refresh settings row', () => {
         autoRefresh: {
           isEnabled: true,
           isPaused: false,
-          interval: 60_000,
-          intervalUnit: 'm',
+          intervalMs: 60_000,
+          intervalDisplayUnit: 'm',
         },
       },
       onSettingsChange,
@@ -153,21 +163,21 @@ describe('Auto-refresh settings row', () => {
 
     expect(last.autoRefresh).toEqual(
       expect.objectContaining({
-        intervalUnit: 'h',
-        interval: 60 * 60_000,
+        intervalDisplayUnit: 'h',
+        intervalMs: 60 * 60_000,
       })
     );
   });
 
-  it('re-syncs the count field when interval stays the same but intervalUnit is updated externally', () => {
+  it('re-syncs the count field when intervalMs stays the same but intervalDisplayUnit is updated externally', () => {
     const Harness = () => {
       const [settings, setSettings] = useState<DateRangePickerSettings>({
         roundRelativeTime: true,
         autoRefresh: {
           isEnabled: true,
           isPaused: true,
-          interval: 60_000,
-          intervalUnit: 'm',
+          intervalMs: 60_000,
+          intervalDisplayUnit: 'm',
         },
       });
       const harnessProviderProps: DateRangePickerProps = {
@@ -187,7 +197,7 @@ describe('Auto-refresh settings row', () => {
                 if (!s.autoRefresh) return s;
                 return {
                   ...s,
-                  autoRefresh: { ...s.autoRefresh, interval: 60_000, intervalUnit: 's' },
+                  autoRefresh: { ...s.autoRefresh, intervalMs: 60_000, intervalDisplayUnit: 's' },
                 };
               })
             }
@@ -206,7 +216,7 @@ describe('Auto-refresh settings row', () => {
       );
     };
 
-    renderWithEuiTheme(<Harness />);
+    renderWithKibanaRenderContext(<Harness />);
 
     expect(screen.getByTestId('dateRangePickerAutoRefreshIntervalCount')).toHaveValue(1);
 

@@ -47,7 +47,7 @@ const getPolicyPopupReference = (): Array<{
   },
   {
     keyPath: 'popup.ransomware.message',
-    osList: [PolicyOperatingSystem.windows],
+    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
   },
   {
     keyPath: 'popup.device_control.message',
@@ -64,7 +64,7 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
   },
   {
     keyPath: 'ransomware.mode',
-    osList: [PolicyOperatingSystem.windows],
+    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
     disableValue: ProtectionModes.off,
     enableValue: ProtectionModes.prevent,
   },
@@ -120,6 +120,7 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
     },
     mac: {
       ...result.mac,
+      ...getDisabledMacSpecificProtections(result),
       device_control: {
         ...result.mac.device_control,
         enabled: false,
@@ -127,6 +128,7 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
       },
       popup: {
         ...result.mac.popup,
+        ...getDisabledMacSpecificPopups(result),
         device_control: {
           ...result.mac.popup.device_control,
           enabled: false,
@@ -219,6 +221,20 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
     ...policy.windows.popup.device_control,
     enabled: false,
     message: policy.windows.popup.device_control?.message || '',
+  },
+});
+
+const getDisabledMacSpecificProtections = (policy: PolicyConfig) => ({
+  ransomware: {
+    ...policy.mac.ransomware,
+    mode: ProtectionModes.off,
+  },
+});
+
+const getDisabledMacSpecificPopups = (policy: PolicyConfig) => ({
+  ransomware: {
+    ...policy.mac.popup.ransomware,
+    enabled: false,
   },
 });
 

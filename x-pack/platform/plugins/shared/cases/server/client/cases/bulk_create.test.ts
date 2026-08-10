@@ -14,6 +14,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
@@ -63,6 +64,92 @@ describe('bulkCreate', () => {
     jest.clearAllMocks();
   });
 
+  describe('workflow events', () => {
+    it('emits caseCreated events on successful bulk create', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO, { ...caseSO, id: 'mock-id-2' }],
+      });
+
+      await bulkCreate({ cases: [getCases()[0], getCases()[0]] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledTimes(2);
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
+        1,
+        clientArgs.request,
+        { caseId: 'mock-id-1', owner: caseSO.attributes.owner }
+      );
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenNthCalledWith(
+        2,
+        clientArgs.request,
+        { caseId: 'mock-id-2', owner: caseSO.attributes.owner }
+      );
+    });
+  });
+
+  describe('assignee identity population', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+    });
+
+    it('resolves every uid across all cases in a single bulkGet and populates identity', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+        {
+          uid: '2',
+          enabled: true,
+          data: {},
+          user: { username: 'u2', full_name: 'User Two', email: 'u2@e.com' },
+        },
+      ] as never);
+
+      await bulkCreate(
+        {
+          cases: [
+            getCases({ assignees: [{ uid: '1' }] })[0],
+            getCases({ assignees: [{ uid: '2' }] })[0],
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).toHaveBeenCalledTimes(1);
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+      expect(cases[1].assignees).toEqual([
+        { uid: '2', username: 'u2', full_name: 'User Two', email: 'u2@e.com' },
+      ]);
+    });
+
+    it('does not resolve profiles when the flag is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: false } };
+
+      await bulkCreate(
+        { cases: getCases({ assignees: [{ uid: '1' }] }) },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).not.toHaveBeenCalled();
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases[0].assignees).toEqual([{ uid: '1' }]);
+    });
+  });
+
   describe('execution', () => {
     const createdAtDate = new Date('2023-11-05');
 
@@ -76,6 +163,9 @@ describe('bulkCreate', () => {
     });
 
     const clientArgs = createCasesClientMockArgs();
+    // This suite asserts the exact bulkCreateCases payload; the extended_fields
+    // mirroring (templates flag ON) is covered by dedicated tests below.
+    clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
 
     clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
       saved_objects: [caseSO],
@@ -620,6 +710,26 @@ describe('bulkCreate', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
       );
+    });
+
+    it('rejects an extended field value that exceeds the maximum byte size before writing', async () => {
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              extended_fields: {
+                large_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1),
+              },
+            }),
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        `Failed to bulk create cases: Error: Invalid extended_fields: Extended field "large_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
     });
   });
 
@@ -1405,6 +1515,141 @@ describe('bulkCreate', () => {
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update template usage stats')
       );
+    });
+
+    it('rejects a template reference without a pinned version (no server-side expansion on bulkCreate)', async () => {
+      await expect(
+        bulkCreate({ cases: getCases({ template: { id: 'tmpl-1' } }) }, clientArgs, casesClient)
+      ).rejects.toThrow('template.version is required');
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('accepts a version-pinned template reference', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ template: { id: 'tmpl-1', version: 2 } }) },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('customFields → extended_fields adapter (write-time mirror)', () => {
+    const adapterCustomFieldsCfg = [
+      { key: 'priority', type: CustomFieldTypes.TEXT, label: 'Priority', required: false },
+      { key: 'count', type: CustomFieldTypes.NUMBER, label: 'Count', required: false },
+    ];
+
+    const adapterCustomFields: CaseCustomFields = [
+      { key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' },
+      { key: 'count', type: CustomFieldTypes.NUMBER, value: 3 },
+    ];
+
+    const adapterCasesClient = createCasesClientMock();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      adapterCasesClient.configure.get = jest
+        .fn()
+        .mockResolvedValue([
+          { owner: SECURITY_SOLUTION_OWNER, customFields: adapterCustomFieldsCfg },
+        ]);
+    });
+
+    it('mirrors customFields into extended_fields when templates flag is enabled', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        { cases: getCases({ customFields: adapterCustomFields }) },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
+    });
+
+    it('does not mirror customFields into extended_fields when templates flag is disabled', async () => {
+      // FAILURE SCENARIO: adapter runs unconditionally — extended_fields written when flag is off.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        { cases: getCases({ customFields: adapterCustomFields }) },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields).toBeUndefined();
+    });
+
+    it('overrides explicit extended_fields values when customField is also set (customFields-win)', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        {
+          cases: getCases({
+            customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
+            // Pre-set v2 value — customFields wins and overrides it.
+            extended_fields: { priority_as_keyword: 'critical' },
+          }),
+        },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      expect(createdCase.extended_fields?.priority_as_keyword).toBe('low');
+    });
+
+    it('preserves a mirror key for a customField absent from the request (synthetic-null regression)', async () => {
+      // FAILURE SCENARIO (before fix): fillMissingCustomFields pads { key: 'priority', value: null }
+      // for the absent 'priority' field; the merge then deletes priority_as_keyword — even though
+      // the request never submitted priority. Fix: mirror only request-provided customFields.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await bulkCreate(
+        {
+          cases: getCases({
+            // Only count is provided — priority is absent from the request.
+            customFields: [{ key: 'count', type: CustomFieldTypes.NUMBER, value: 3 }],
+            // priority_as_keyword pre-set by a template default in extended_fields.
+            extended_fields: { priority_as_keyword: 'crit' },
+          }),
+        },
+        clientArgs,
+        adapterCasesClient
+      );
+
+      const createdCase = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
+      // priority was not submitted — its mirror key must be preserved.
+      expect(createdCase.extended_fields?.priority_as_keyword).toBe('crit');
+      // count was submitted — it must still be mirrored.
+      expect(createdCase.extended_fields?.count_as_integer).toBe('3');
     });
   });
 });

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DownloadableContent } from '@kbn/share-plugin/public';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowApi } from '@kbn/workflows-ui';
 import { extractReferencedWorkflowIds } from './export/extract_workflow_references';
-import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
+import { generateWorkflowsZip } from './export/generate_zip_archive';
 
 const FALLBACK_FILENAME = 'workflow_export';
 
@@ -25,39 +24,32 @@ type WithDefinition = WorkflowListItemDto & {
   definition: NonNullable<WorkflowListItemDto['definition']>;
 };
 
-export interface WorkflowExportPayload {
-  filename: string;
-  content: DownloadableContent;
-}
-
-/**
- * Generates the export payload for a single workflow without triggering a
- * download. Returns null when the workflow has no definition.
- */
-export const prepareSingleWorkflowExport = (
-  workflow: WorkflowListItemDto
-): WorkflowExportPayload | null => {
-  if (!workflow.definition) {
-    return null;
-  }
-  const yaml = stringifyWorkflowDefinition(workflow.definition);
-  const filename = `${sanitizeFilename(workflow.name)}.yml`;
-  return { filename, content: { content: yaml, type: 'text/yaml' } };
-};
-
 /**
  * Exports a single workflow as a `.yml` file download.
+ * Fetches the stored YAML from the server so that comments and the current
+ * `enabled` state are preserved (avoids re-serialising from `definition`).
+ * Skips silently when the workflow has no definition (same guard as before).
  */
-export const exportSingleWorkflow = (workflow: WorkflowListItemDto): void => {
-  const payload = prepareSingleWorkflowExport(workflow);
-  if (payload) {
-    downloadFileAs(payload.filename, payload.content);
+export const exportSingleWorkflow = async (
+  workflow: WorkflowListItemDto,
+  api: WorkflowApi
+): Promise<void> => {
+  if (!workflow.definition) {
+    return;
   }
+  const { entries } = await api.exportWorkflows({ ids: [workflow.id] });
+  if (!entries.length) {
+    return;
+  }
+  const yaml = entries[0].yaml;
+  const filename = `${sanitizeFilename(workflow.name)}.yml`;
+  downloadFileAs(filename, { content: yaml, type: 'text/yaml' });
 };
 
 /**
- * Exports multiple workflows as a ZIP archive via the server-side export API.
- * For a single exportable workflow, falls back to a direct YAML download.
+ * Exports workflows. For a single workflow, downloads as a `.yml` file.
+ * For multiple workflows, fetches entries from the server and builds
+ * a ZIP archive client-side before triggering the download.
  * Returns the number of exported workflows.
  */
 export const exportWorkflows = async (
@@ -70,12 +62,13 @@ export const exportWorkflows = async (
   }
 
   if (exportable.length === 1) {
-    exportSingleWorkflow(exportable[0]);
+    await exportSingleWorkflow(exportable[0], api);
     return 1;
   }
 
   const ids = exportable.map((w) => w.id);
-  const blob = await api.exportWorkflows({ ids });
+  const { entries, manifest } = await api.exportWorkflows({ ids });
+  const blob = await generateWorkflowsZip(entries, manifest);
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `workflows_export_${timestamp}.zip`;

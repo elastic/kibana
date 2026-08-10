@@ -15,12 +15,13 @@ import type {
   RenderCellValue,
   UseEuiTheme,
 } from '@elastic/eui';
-import { EuiCallOut, EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
+import { EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldRow } from './field_row';
@@ -77,6 +78,7 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
+  headerVisibility?: boolean;
   hideFilteringOnComputedColumns?: boolean;
 }
 
@@ -107,6 +109,7 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
+  headerVisibility,
   hideFilteringOnComputedColumns,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
@@ -255,7 +258,7 @@ export function TableGrid({
           {Boolean(warningMessage) && (
             <div>
               <EuiSpacer size="xs" />
-              <EuiCallOut announceOnMount={false} title={warningMessage} color="warning" size="s" />
+              <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
             </div>
           )}
         </>
@@ -299,6 +302,7 @@ export function TableGrid({
       className="kbnDocViewer__fieldsGrid"
       css={styles.fieldsGrid}
       columns={gridColumns}
+      headerVisibility={headerVisibility}
       toolbarVisibility={false}
       rowCount={rows.length}
       renderCellValue={customRenderCellValue ? customRenderCellValue : renderCellValue}
@@ -319,6 +323,22 @@ const componentStyles = {
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
+      },
+
+      '&.euiDataGrid--noHeader': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__content': {
+        overflow: 'visible',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGrid__virtualized': {
+        overflow: 'visible !important',
+      },
+
+      '&.euiDataGrid--noHeader .euiDataGridRow:first-of-type .euiDataGridRowCell': {
+        borderBlockStart: 'none',
       },
 
       '&.euiDataGrid--headerUnderline .euiDataGridHeader': {

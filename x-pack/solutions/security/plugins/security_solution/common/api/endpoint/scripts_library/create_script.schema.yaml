@@ -9,9 +9,7 @@ paths:
       operationId: EndpointScriptLibraryCreateScript
       description: Create a new script entry by uploading a script file
       x-codegen-enabled: false
-      x-labels: []
-#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-#      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
@@ -51,6 +49,18 @@ paths:
             application/json:
               schema:
                 $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+              examples:
+                CreateScriptEntrySuccess:
+                  summary: Create a script entry
+                  value:
+                    data:
+                      id: 1234567890
+                      name: Collect host data
+                      platform: [ linux, macos ]
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      description: Collects host data for investigation
+                      instructions: No arguments required
 
 components:
   x-codegen-enabled: false
@@ -64,8 +74,7 @@ components:
         - fileType
       properties:
         name:
-          type: string
-          description: Name of the script
+          $ref: './common.yaml#/components/schemas/ScriptNameSchema'
         platform:
           type: array
           description: Platforms supported by the the script
@@ -86,12 +95,15 @@ components:
             $ref: './common.yaml#/components/schemas/EndpointScriptTags'
         description:
           type: string
+          maxLength: 10000
           description: Description of the script and its purpose/functionality
         instructions:
           type: string
+          maxLength: 10000
           description: Instructions for using the script, including details around its supported input arguments
         example:
           type: string
+          maxLength: 10000
           description: Example usage of the script
         requiresInput:
           type: boolean

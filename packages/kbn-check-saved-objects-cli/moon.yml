@@ -17,21 +17,12 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: packages/kbn-check-saved-objects-cli
 dependsOn:
-  - '@kbn/some-dev-log'
-  - '@kbn/dev-cli-errors'
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
-  - '@kbn/core-saved-objects-migration-server-internal'
   - '@kbn/dev-cli-runner'
-  - '@kbn/test'
-  - '@kbn/core-elasticsearch-client-server-mocks'
-  - '@kbn/safer-lodash-set'
   - '@kbn/tooling-log'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/utils'
-  - '@kbn/dev-utils'
-  - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-root-server-internal'
   - '@kbn/core-test-helpers-so-type-serializer'
   - '@kbn/core-saved-objects-api-server'
@@ -39,6 +30,8 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/repo-info'
   - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/object-utils'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
@@ -50,26 +43,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

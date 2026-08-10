@@ -29,10 +29,10 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/presentation-publishing'
-  - '@kbn/config-schema'
   - '@kbn/handlebars'
   - '@kbn/rison'
   - '@kbn/datemath'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -45,26 +45,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

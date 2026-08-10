@@ -6,10 +6,28 @@
  */
 
 import userEvent from '@testing-library/user-event';
+import { waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppMockRenderer } from '../test_utils';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../test_utils';
 import ServiceNowConnectorFieldsNoApp from './servicenow_connectors_no_app';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+
+const mockUseKibanaReturnValue = createStartServicesMock();
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('ServiceNowActionConnectorFields renders', () => {
   const basicAuthConnector = {
@@ -131,7 +149,9 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
     it.each(oauthTests)('validates correctly %p', async (field, value) => {
@@ -154,7 +174,9 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

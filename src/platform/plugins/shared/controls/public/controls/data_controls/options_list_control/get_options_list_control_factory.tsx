@@ -21,22 +21,24 @@ import {
   skip,
 } from 'rxjs';
 
-import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type {
-  OptionsListSelection,
-  OptionsListControlState,
-  OptionsListDSLControlState,
-} from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  ControlValuesSource,
+  OPTIONS_LIST_CONTROL,
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+} from '@kbn/controls-constants';
+import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
-  initializeUnsavedChanges,
+  panelIsRelatedByGlobalFilters,
+  initializeRelatedPanels,
+  initializeStateApi,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
-import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
+import { isValidSearch } from '../../../../common/options_list';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -63,19 +65,39 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getOptionsListControlFactory = (): EmbeddableFactory<
-  OptionsListControlState,
+// TODO Remove when we're able to get accurate document counts for ES|QL-source controls and can reenable doc-count sorting on them
+const normalizeEsqlSort = (
+  controlState: OptionsListDSLControlState
+): OptionsListDSLControlState => {
+  if (
+    controlState.values_source !== ControlValuesSource.ESQL ||
+    (controlState.sort?.by ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.by) !== '_count'
+  ) {
+    return controlState;
+  }
+
+  return {
+    ...controlState,
+    sort: {
+      by: '_key',
+      direction: controlState.sort?.direction ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.direction,
+    },
+  };
+};
+
+export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
+  OptionsListDSLControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const state = initialState;
+      const state = normalizeEsqlSort(initialState);
 
-      if (isOptionsListESQLControlState(state)) {
-        throw new Error('ES|QL control state handling not yet implemented');
-      }
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
@@ -131,8 +153,14 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const fieldChangedSubscription = combineLatest([
         dataControlManager.api.fieldName$,
         dataControlManager.api.dataViewId$,
+        dataControlManager.api.valuesSource$,
       ])
         .pipe(
+          filter(([, , valuesSource]) => valuesSource === ControlValuesSource.FIELD),
+          distinctUntilChanged(
+            ([fieldNameA, dataViewIdA], [fieldNameB, dataViewIdB]) =>
+              fieldNameA === fieldNameB && dataViewIdA === dataViewIdB
+          ),
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {
@@ -147,7 +175,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
-      const fetchSubscription = fetchAndValidate$({
+      const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
           ...dataControlManager.api,
           loadMoreSubject,
@@ -161,7 +189,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$: selectionsManager.api.sort$,
-      }).subscribe((result) => {
+      });
+      const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           suggestionLoadError$.next((result as { error: Error }).error);
@@ -239,21 +268,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
-        return {
+      const stateApi = initializeStateApi<OptionsListDSLControlState>({
+        uuid,
+        parentApi,
+        serializeState: (): OptionsListDSLControlState => ({
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),
-
           // serialize state that cannot be changed to keep it consistent
           display_settings: state.display_settings,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -274,14 +298,18 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           exclude: false,
           exists_selected: false,
         },
-        onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved)) {
-            throw new Error('ES|QL control state handling not yet implemented');
-          }
-          dataControlManager.reinitializeState(lastSaved);
-          selectionsManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          const normalizedState = normalizeEsqlSort(nextState);
+          dataControlManager.reinitializeState(normalizedState);
+          selectionsManager.reinitializeState(normalizedState);
+          editorStateManager.reinitializeState(normalizedState);
         },
+      });
+
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -297,20 +325,21 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        cancelRequests,
+        ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-        serializeState,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
+        supportsJsonExport: true,
       });
 
       const componentApi: DSLOptionsListComponentApi = {
         ...api,
-        ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,

@@ -89,20 +89,24 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
-                    <button
-                      aria-label="Open"
-                      class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
-                      data-test-subj="query-toggle-header"
-                      title="Open"
-                      type="button"
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id_euiToolTipAnchor"
                     >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
-                    </button>
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                        data-test-subj="query-toggle-header"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="chevronSingleDown"
+                        />
+                      </button>
+                    </span>
                   </div>
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -123,21 +127,25 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <button
-                  aria-label="Inspect"
-                  class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-                  data-test-subj="inspect-icon-button"
-                  disabled=""
-                  title="Inspect"
-                  type="button"
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id_euiToolTipAnchor"
                 >
-                  <span
-                    aria-hidden="true"
-                    class="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="inspect"
-                  />
-                </button>
+                  <button
+                    aria-label="Inspect"
+                    class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                    data-test-subj="inspect-icon-button"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="inspect"
+                    />
+                  </button>
+                </span>
               </div>
             </div>
           </div>
@@ -426,7 +434,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                         <a
                           class="euiLink emotion-euiLink-primary"
                           data-test-subj="host-details-button"
-                          href="/name/hello-world"
+                          href="/name/hello-world/events?identityFields=(host.name:hello-world)"
                           rel="noreferrer"
                         >
                           hello-world
@@ -527,7 +535,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                         <a
                           class="euiLink emotion-euiLink-primary"
                           data-test-subj="host-details-button"
-                          href="/name/hello-world"
+                          href="/name/hello-world/events?identityFields=(host.name:hello-world)"
                           rel="noreferrer"
                         >
                           hello-world
@@ -547,7 +555,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                         <a
                           class="euiLink emotion-euiLink-primary"
                           data-test-subj="host-details-button"
-                          href="/name/hello-world-2"
+                          href="/name/hello-world-2/events?identityFields=(host.name:hello-world-2)"
                           rel="noreferrer"
                         >
                           hello-world-2
@@ -733,7 +741,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                         <a
                           class="euiLink emotion-euiLink-primary"
                           data-test-subj="host-details-button"
-                          href="/name/hello-world"
+                          href="/name/hello-world/events?identityFields=(host.name:hello-world)"
                           rel="noreferrer"
                         >
                           hello-world
@@ -753,7 +761,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                         <a
                           class="euiLink emotion-euiLink-primary"
                           data-test-subj="host-details-button"
-                          href="/name/hello-world-2"
+                          href="/name/hello-world-2/events?identityFields=(host.name:hello-world-2)"
                           rel="noreferrer"
                         >
                           hello-world-2
@@ -831,7 +839,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
             </span>
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>
@@ -973,20 +981,24 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
             </button>
           </li>
         </ul>
-        <button
-          aria-label="Next page"
-          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-text-euiPaginationButton"
-          data-test-subj="pagination-button-next"
-          title="Next page"
-          type="button"
+        <span
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id_euiToolTipAnchor"
         >
-          <span
-            aria-hidden="true"
-            class="euiButtonIcon__icon"
-            color="inherit"
-            data-euiicon-type="chevronSingleRight"
-          />
-        </button>
+          <button
+            aria-label="Next page"
+            class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-text-euiPaginationButton"
+            data-test-subj="pagination-button-next"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="chevronSingleRight"
+            />
+          </button>
+        </span>
       </nav>
     </div>
   </div>

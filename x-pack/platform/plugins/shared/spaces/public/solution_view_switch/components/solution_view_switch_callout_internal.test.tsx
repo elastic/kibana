@@ -49,6 +49,7 @@ describe('SolutionViewSwitchCalloutInternal', () => {
         manageSpacesUrl="app/management/kibana/spaces"
         updateSpace={updateSpace}
         showError={showError}
+        onDismiss={jest.fn()}
       />
     );
 

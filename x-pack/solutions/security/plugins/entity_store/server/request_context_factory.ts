@@ -16,11 +16,15 @@ import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
-import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
+import { LogsExtractionClient } from './domain/logs_extraction';
+import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
+import { EntityMetadataClient } from './domain/entity_metadata';
 import { ResolutionClient } from './domain/resolution';
+import { ResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
+import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: EntityStoreCoreSetup;
@@ -40,9 +44,15 @@ export async function createRequestHandlerContext({
   analytics,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const [, startPlugins] = await coreSetup.getStartServices();
+  const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
+
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+  const emitEvent = createWorkflowTriggerEmitter({
+    getWorkflowsClient: () => startPlugins.workflowsExtensions.getClient(request),
+    logger,
+    context: `namespace "${namespace}"`,
+  });
 
   const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
     core.savedObjects.client,
@@ -63,12 +73,31 @@ export async function createRequestHandlerContext({
   );
 
   const esClient = core.elasticsearch.client.asCurrentUser;
+  const cpsClient = coreStart.elasticsearch.client.asScoped(request, {
+    projectRouting: 'space',
+  }).asCurrentUser;
+
   const crudClient = new CRUDClient({
     logger,
     esClient,
     namespace,
+    emitWorkflowTriggerEvent: emitEvent,
   });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
+  const entityMetadataClient = new EntityMetadataClient({
+    logger,
+    esClient: core.elasticsearch.client.asInternalUser,
+    namespace,
+  });
+  const { client: remoteLogsExtractionClient, stateClient: remoteLogExtractionStateClient } =
+    createRemoteLogsExtractionClient({
+      logger,
+      namespace,
+      soClient: core.savedObjects.client,
+      esClient,
+      cpsClient,
+      isServerless,
+    });
+
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
@@ -76,7 +105,7 @@ export async function createRequestHandlerContext({
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
-    ccsLogsExtractionClient,
+    remoteLogsExtractionClient,
   });
 
   const historySnapshotClient = new HistorySnapshotClient({
@@ -92,9 +121,11 @@ export async function createRequestHandlerContext({
     assetManagerClient: new AssetManagerClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
+      internalEsClient: core.elasticsearch.client.asInternalUser,
       taskManager: taskManagerStart,
       engineDescriptorClient,
       globalStateClient,
+      remoteLogExtractionStateClient,
       namespace,
       isServerless,
       logsExtractionClient,
@@ -107,18 +138,27 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       namespace,
       analytics,
+      coreStart,
+      licensing: startPlugins.licensing,
     }),
     crudClient,
+    entityMetadataClient,
     resolutionClient: new ResolutionClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
     }),
-    ccsLogsExtractionClient,
+    entityResolutionRuleClient: new ResolutionRulesClient(
+      core.savedObjects.client,
+      namespace,
+      logger
+    ),
+    remoteLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     historySnapshotClient,
     security: startPlugins.security,
     namespace,
+    analytics,
   };
 }

@@ -31,16 +31,18 @@ export const Basic: Story = {
     description: 'This is a description for the section.',
     actions: [
       {
-        icon: 'expand',
+        icon: 'maximize',
         onClick: () => alert('First action clicked!'),
         ariaLabel: 'First action ariaLabel',
         dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',
+        ebt: { action: 'expand', element: 'storybookSection' },
       },
       {
         icon: 'discoverApp',
         onClick: () => alert('Second action clicked!'),
         ariaLabel: 'Second action ariaLabel',
         dataTestSubj: 'unifiedDocViewerSectionActionButton-discoverApp',
+        ebt: { action: 'openInDiscover', element: 'storybookSection' },
       },
       {
         icon: 'fullScreen',
@@ -48,6 +50,7 @@ export const Basic: Story = {
         ariaLabel: 'Third action ariaLabel',
         label: 'Third action label',
         dataTestSubj: 'unifiedDocViewerSectionActionButton-fullScreen',
+        ebt: { action: 'fullScreen', element: 'storybookSection' },
       },
     ],
     children: <div>Additional content goes here.</div>,

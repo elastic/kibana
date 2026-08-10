@@ -50,27 +50,54 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('when maxTraceItems is 5000 (default)', () => {
-        let response: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'>;
+        describe('ecsOnly: true', () => {
+          let response: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'>;
 
-        before(async () => {
-          response = await getUnifiedTrace({ es, apmApiClient });
+          before(async () => {
+            response = await getUnifiedTrace({ es, apmApiClient, ecsOnly: true });
+          });
+
+          it('returns traceDocsTotal greater than the limit', () => {
+            expect(response.traceDocsTotal).to.be.greaterThan(15000);
+            expect(response.traceDocsTotal).to.be.lessThan(16000);
+          });
+
+          it('returns only maxTraceItems trace items', () => {
+            expect(response.traceItems.length).to.be(5000);
+          });
+
+          it('returns maxTraceItems correctly', () => {
+            expect(response.maxTraceItems).to.be(5000);
+          });
+
+          it('does not include exceedMax in the response', () => {
+            expect(response).not.to.have.property('exceedMax');
+          });
         });
 
-        it('returns traceDocsTotal greater than the limit', () => {
-          expect(response.traceDocsTotal).to.be.greaterThan(15000);
-          expect(response.traceDocsTotal).to.be.lessThan(16000);
-        });
+        describe('ecsOnly: false (unified query)', () => {
+          let response: APIReturnType<'GET /internal/apm/unified_traces/{traceId}'>;
 
-        it('returns only maxTraceItems trace items', () => {
-          expect(response.traceItems.length).to.be(5000);
-        });
+          before(async () => {
+            response = await getUnifiedTrace({ es, apmApiClient, ecsOnly: false });
+          });
 
-        it('returns maxTraceItems correctly', () => {
-          expect(response.maxTraceItems).to.be(5000);
-        });
+          it('returns traceDocsTotal greater than the limit', () => {
+            expect(response.traceDocsTotal).to.be.greaterThan(15000);
+            expect(response.traceDocsTotal).to.be.lessThan(16000);
+          });
 
-        it('does not include exceedMax in the response', () => {
-          expect(response).not.to.have.property('exceedMax');
+          it('returns only maxTraceItems trace items', () => {
+            expect(response.traceItems.length).to.be(5000);
+          });
+
+          it('returns maxTraceItems correctly', () => {
+            expect(response.maxTraceItems).to.be(5000);
+          });
+
+          it('does not include exceedMax in the response', () => {
+            expect(response).not.to.have.property('exceedMax');
+          });
         });
       });
     });
@@ -98,7 +125,15 @@ async function getRootTransaction(es: Client) {
   };
 }
 
-async function getUnifiedTrace({ es, apmApiClient }: { es: Client; apmApiClient: ApmApiClient }) {
+async function getUnifiedTrace({
+  es,
+  apmApiClient,
+  ecsOnly,
+}: {
+  es: Client;
+  apmApiClient: ApmApiClient;
+  ecsOnly: boolean;
+}) {
   const { traceId, transactionId } = await getRootTransaction(es);
 
   const res = await apmApiClient.readUser({
@@ -109,6 +144,7 @@ async function getUnifiedTrace({ es, apmApiClient }: { es: Client; apmApiClient:
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         entryTransactionId: transactionId,
+        ecsOnly,
       },
     },
   });

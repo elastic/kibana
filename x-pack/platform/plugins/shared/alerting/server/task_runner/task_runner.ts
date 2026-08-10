@@ -7,11 +7,12 @@
 
 import apm from 'elastic-apm-node';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { DEFAULT_SPACE_ID, type SpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -32,11 +33,17 @@ import type {
   RuleExecutionStatus,
   RuleTypeRegistry,
 } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRuleWithEs,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
+import { AlertAuditAction, alertAuditSystemEvent } from '../lib/alert_audit_events';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -69,6 +76,8 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
+  evaluatePerAlertSnoozeExpiry,
+  evaluatePerAlertSnoozeConditions,
 } from './lib';
 import {
   ErrorWithType,
@@ -102,6 +111,7 @@ interface TaskRunnerConstructorParams<
     AlertData
   >;
   taskInstance: ConcreteTaskInstance;
+  executionUuid: string;
 }
 
 export class TaskRunner<
@@ -159,6 +169,7 @@ export class TaskRunner<
     internalSavedObjectsRepository,
     ruleType,
     taskInstance,
+    executionUuid,
   }: TaskRunnerConstructorParams<
     Params,
     ExtractedParams,
@@ -179,7 +190,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid;
     this.inMemoryMetrics = inMemoryMetrics;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.timer = new TaskRunnerTimer({ logger: this.logger });
@@ -208,6 +219,9 @@ export class TaskRunner<
     this.ruleResult = new RuleResultService();
   }
 
+  /**
+   * Persists the post-run rule attributes to Elasticsearch.
+   */
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
     attributes: {
@@ -215,8 +229,10 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstancesToRemove?: Array<{ instanceId: string; snoozedAt: string }>;
     }
-  ) {
+  ): Promise<boolean> {
+    const { snoozedInstancesToRemove, ...docAttributes } = attributes;
     const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
@@ -231,14 +247,23 @@ export class TaskRunner<
       await partiallyUpdateRuleWithEs(
         client,
         ruleId,
-        { ...attributes, running: false },
+        { ...docAttributes, running: false },
         {
           ignore404: true,
           refresh: false,
         }
       );
+      if (snoozedInstancesToRemove?.length) {
+        // Per-alert snooze expiry is applied via an atomic Painless script.
+        await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstancesToRemove, {
+          ignore404: true,
+          refresh: false,
+        });
+      }
+      return true;
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
+      return false;
     }
   }
 
@@ -269,28 +294,70 @@ export class TaskRunner<
     }
   }
 
+  /**
+   * Emits one `alert_auto_unsnooze` audit event per per-alert snooze entry that
+   * the task runner has just decided to drop, attributed to `System` with the
+   * supplied reason. Wrapped defensively so a misconfigured audit sink can never
+   * break rule execution; failures are logged at warn level only.
+   */
+  private logAutoUnsnoozeAuditEvents(
+    instances: RawRuleSnoozedInstance[],
+    reason: 'ttl_expired' | 'condition_met',
+    rule: { id: string; name: string }
+  ): void {
+    if (instances.length === 0 || !this.context.auditService) {
+      return;
+    }
+    try {
+      for (const instance of instances) {
+        this.context.auditService.withoutRequest.log(
+          alertAuditSystemEvent({
+            action: AlertAuditAction.AUTO_UNSNOOZE,
+            id: instance.instanceId,
+            outcome: 'success',
+            reason,
+            ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.name },
+          })
+        );
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Failed to emit alert_auto_unsnooze audit event(s) for rule [id=${rule.id}]: ${e.message}`
+      );
+    }
+  }
+
   private async runRule({
     fakeRequest,
     rule,
-    apiKey,
-    uiamApiKey,
+    effectiveApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
+      rule.snoozedInstances,
+      this.runDate
+    );
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-      apm.currentTransaction.addLabels({
-        alerting_rule_consumer: rule.consumer,
-        alerting_rule_name: rule.name,
-        alerting_rule_tags: rule.tags.join(', '),
-        alerting_rule_type_id: rule.alertTypeId,
-        alerting_rule_params: JSON.stringify(rule.params),
-      });
     }
 
+    addSpanLabels({
+      alerting_rule_consumer: rule.consumer,
+      alerting_rule_name: rule.name,
+      alerting_rule_tags: rule.tags.join(', '),
+      alerting_rule_type_id: rule.alertTypeId,
+      alerting_rule_params: JSON.stringify(rule.params),
+    });
+
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId: maybeSpaceId },
       state: { previousStartedAt },
     } = this.taskInstance;
+    // spaceId is optional in the persisted task params (legacy), but is always
+    // populated for tasks scheduled by the rules client. Default to the built-in
+    // space at this trusted boundary so the branded SpaceId flows downstream.
+    const spaceId: SpaceId = brandSpaceId(maybeSpaceId ?? DEFAULT_SPACE_ID);
 
     const { queryDelaySettings, flappingSettings: spaceFlappingSettings } =
       await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
@@ -345,6 +412,7 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: activeInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
@@ -365,7 +433,6 @@ export class TaskRunner<
         spaceId,
       },
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
-      uiamApiKey,
     });
 
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
@@ -399,6 +466,36 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
+    for (const instance of activeInstances) {
+      if (!instance.conditions?.length) {
+        continue;
+      }
+      const data = alertsClient.getBuiltActiveAlertDataByInstanceId(instance.instanceId);
+      if (data) {
+        alertAsDataByInstanceId.set(instance.instanceId, data);
+      }
+    }
+
+    const { conditionExpiredInstances } = evaluatePerAlertSnoozeConditions(
+      activeInstances,
+      alertAsDataByInstanceId
+    );
+
+    const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
+    const updatedActiveInstances =
+      conditionExpiredInstances.length > 0
+        ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
+        : activeInstances;
+
+    // Condition evaluation happens after persistAlerts(), so alerts for condition-expired
+    // instances were already written with kibana.alert.snoozed: true. Correct that now.
+    if (conditionExpiredInstances.length > 0) {
+      await alertsClient.clearSnoozedStatusForAlerts(
+        conditionExpiredInstances.map((i) => i.instanceId)
+      );
+    }
+
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
@@ -406,7 +503,7 @@ export class TaskRunner<
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey,
+      apiKey: effectiveApiKey,
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
@@ -414,6 +511,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
+      activeSnoozedIds: new Set(updatedActiveInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -473,6 +571,28 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      expiredSnoozedInstances:
+        expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+          ? [
+              ...expiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+              ...conditionExpiredInstances.map((i) => ({
+                instanceId: i.instanceId,
+                snoozedAt: i.snoozedAt,
+              })),
+            ]
+          : undefined,
+      ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+        ? {
+            autoUnsnoozeAudit: {
+              expired: expiredInstances,
+              conditionExpired: conditionExpiredInstances,
+              ruleName: rule.name,
+            },
+          }
+        : {}),
     };
   }
 
@@ -526,12 +646,13 @@ export class TaskRunner<
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: ruleId,
-          plugins: 'alerting',
-        });
       }
+
+      addSpanLabels({
+        alerting_rule_space_id: spaceId,
+        alerting_rule_id: ruleId,
+        plugins: 'alerting',
+      });
 
       this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
 
@@ -575,6 +696,7 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        tags: runRuleParams.rule.tags,
         uuid:
           this.ruleType.solution === 'security' &&
           typeof runRuleParams.rule.params.ruleId === 'string'
@@ -682,6 +804,13 @@ export class TaskRunner<
         });
       }
 
+      const expiredSnoozedInstances = isOk(runRuleResult)
+        ? runRuleResult.value.expiredSnoozedInstances
+        : undefined;
+      const autoUnsnoozeAudit = isOk(runRuleResult)
+        ? runRuleResult.value.autoUnsnoozeAudit
+        : undefined;
+
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
         if (outcome === 'failure') {
@@ -695,12 +824,26 @@ export class TaskRunner<
           );
         }
 
-        await this.updateRuleSavedObjectPostRun(ruleId, {
+        const updatePersisted = await this.updateRuleSavedObjectPostRun(ruleId, {
           executionStatus: ruleExecutionStatusToRaw(executionStatus),
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          ...(expiredSnoozedInstances !== undefined
+            ? { snoozedInstancesToRemove: expiredSnoozedInstances }
+            : {}),
         });
+
+        // Only emit `alert_auto_unsnooze` events after the SO update.
+        if (updatePersisted && autoUnsnoozeAudit !== undefined) {
+          const ruleRef = { id: ruleId, name: autoUnsnoozeAudit.ruleName };
+          this.logAutoUnsnoozeAuditEvents(autoUnsnoozeAudit.expired, 'ttl_expired', ruleRef);
+          this.logAutoUnsnoozeAuditEvents(
+            autoUnsnoozeAudit.conditionExpired,
+            'condition_met',
+            ruleRef
+          );
+        }
       }
 
       if (startedAt) {

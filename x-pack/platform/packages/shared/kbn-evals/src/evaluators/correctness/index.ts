@@ -154,7 +154,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata: metadata ?? undefined,
+        metadata: { ...(metadata ?? {}), correctnessAnalysis },
       };
     },
     kind: 'LLM',

@@ -18,6 +18,49 @@ import {
 import type { SkillRegistryListOptions } from '@kbn/agent-builder-server/runner';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 
+const isUiSettingRequirementMet = (
+  uiSettingRequired: string | { key: string; value: unknown },
+  uiSettingValues: ReadonlyMap<string, unknown>
+): boolean => {
+  if (typeof uiSettingRequired === 'string') {
+    return uiSettingValues.get(uiSettingRequired) === true;
+  }
+
+  if (typeof uiSettingRequired === 'object') {
+    return uiSettingValues.get(uiSettingRequired.key) === uiSettingRequired.value;
+  }
+
+  return false;
+};
+
+/**
+ * Validates that all provided tool IDs exist in the tool registry
+ * and that the count does not exceed the per-skill limit.
+ */
+export const validateToolIds = async (
+  toolIds: string[] | undefined,
+  toolRegistry: ToolRegistry
+): Promise<void> => {
+  if (!toolIds || toolIds.length === 0) {
+    return;
+  }
+  if (toolIds.length > maxToolsPerSkill) {
+    throw createBadRequestError(
+      `A skill can reference at most ${maxToolsPerSkill} tools, but ${toolIds.length} were provided.`
+    );
+  }
+  const invalidIds: string[] = [];
+  for (const toolId of toolIds) {
+    const exists = await toolRegistry.has(toolId);
+    if (!exists) {
+      invalidIds.push(toolId);
+    }
+  }
+  if (invalidIds.length > 0) {
+    throw createBadRequestError(`Invalid tool IDs: ${invalidIds.join(', ')}`);
+  }
+};
+
 export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
   get(skillId: string): Promise<InternalSkillDefinition | undefined>;
@@ -33,33 +76,25 @@ export const createSkillRegistry = ({
   persistedProvider,
   toolRegistry,
   experimentalFeaturesEnabled,
+  uiSettingValues = new Map(),
 }: {
   builtinProvider: ReadonlySkillProvider;
   persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
   experimentalFeaturesEnabled: boolean;
+  uiSettingValues?: ReadonlyMap<string, unknown>;
 }): SkillRegistry => {
-  const isVisible = (skill: InternalSkillDefinition): boolean =>
-    !skill.experimental || experimentalFeaturesEnabled;
-  const validateToolIds = async (toolIds: string[] | undefined) => {
-    if (!toolIds || toolIds.length === 0) {
-      return;
+  const isVisible = (skill: InternalSkillDefinition): boolean => {
+    if (skill.experimental && !experimentalFeaturesEnabled) {
+      return false;
     }
-    if (toolIds.length > maxToolsPerSkill) {
-      throw createBadRequestError(
-        `A skill can reference at most ${maxToolsPerSkill} tools, but ${toolIds.length} were provided.`
-      );
+    if (
+      skill.uiSettingRequired &&
+      !isUiSettingRequirementMet(skill.uiSettingRequired, uiSettingValues)
+    ) {
+      return false;
     }
-    const invalidIds: string[] = [];
-    for (const toolId of toolIds) {
-      const exists = await toolRegistry.has(toolId);
-      if (!exists) {
-        invalidIds.push(toolId);
-      }
-    }
-    if (invalidIds.length > 0) {
-      throw createBadRequestError(`Invalid tool IDs: ${invalidIds.join(', ')}`);
-    }
+    return true;
   };
 
   return {
@@ -145,7 +180,7 @@ export const createSkillRegistry = ({
           { statusCode: 409 }
         );
       }
-      await validateToolIds(params.tool_ids);
+      await validateToolIds(params.tool_ids, toolRegistry);
       return persistedProvider.create(params);
     },
 
@@ -154,7 +189,7 @@ export const createSkillRegistry = ({
       if (existsInBuiltin) {
         throw createBadRequestError(`Skill '${skillId}' is read-only`);
       }
-      await validateToolIds(updateRequest.tool_ids);
+      await validateToolIds(updateRequest.tool_ids, toolRegistry);
       return persistedProvider.update(skillId, updateRequest);
     },
 

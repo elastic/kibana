@@ -8,11 +8,13 @@
  */
 
 export type { LoggingServiceSetup, LoggerContextConfigInput } from './src/contracts';
-export type { LoggerConfigType } from './src/logger';
+export type { LoggerConfigType, MetaFilterConfig } from './src/logger';
 export type { LayoutConfigType, JsonLayoutConfigType, PatternLayoutConfigType } from './src/layout';
 export type {
   FileAppenderConfig,
   ConsoleAppenderConfig,
+  OtelAppenderConfig,
+  OtelAppenderTlsConfig,
   RollingFileAppenderConfig,
   RewriteAppenderConfig,
   AppenderConfigType,

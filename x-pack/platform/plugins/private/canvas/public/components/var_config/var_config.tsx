@@ -126,7 +126,7 @@ export const VarConfig: FC<Props> = ({
       type: 'icon',
       name: strings.getCopyActionButtonLabel(),
       description: strings.getCopyActionTooltipLabel(),
-      icon: 'copyClipboard',
+      icon: 'copy',
       onClick: onCopyVar,
       isPrimary: true,
     },
@@ -204,7 +204,7 @@ export const VarConfig: FC<Props> = ({
             >
               <EuiButtonIcon
                 color="primary"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 aria-label={strings.getAddTooltipLabel()}
                 onClick={() => {
                   setSelectedVar(null);
@@ -235,7 +235,7 @@ export const VarConfig: FC<Props> = ({
               <EuiSpacer size="m" />
               <EuiButton
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => setPanelMode(PanelMode.Edit)}
               >
                 {strings.getAddButtonLabel()}

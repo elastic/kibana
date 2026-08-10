@@ -10,8 +10,50 @@
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { synth, BasicPrettyPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { FunctionNames } from '@kbn/esql-language';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import { isLegacyHistogram } from '../legacy_histogram';
+import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
+import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
+
+/**
+ * Gets the appropriate casting function name for a field type.
+ * @param fieldType - The target field type
+ * @returns The TO_* function name (e.g., 'TO_DOUBLE', 'TO_LONG'), or undefined if no cast is needed
+ */
+function getCastFunctionForType(fieldType: ES_FIELD_TYPES | undefined): string | undefined {
+  switch (fieldType) {
+    case ES_FIELD_TYPES.DOUBLE:
+      return FunctionNames.TO_DOUBLE;
+    case ES_FIELD_TYPES.LONG:
+      return FunctionNames.TO_LONG;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * When multiple field types are present, resolves them to a single cast
+ * expression if compatible. For incompatible types, the field is returned
+ * uncast so Lens can surface its own error.
+ */
+function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): ESQLAstExpression {
+  if (types.length <= 1) return field;
+
+  const resolvedType = resolveConflictingFieldTypes(types);
+  if (resolvedType) {
+    const castFn = getCastFunctionForType(resolvedType);
+    if (castFn) {
+      return synth.exp`${synth.kwd(castFn)}(${field})`;
+    }
+  }
+  return field;
+}
+
+function resolvePercentileValue(settings: MetricsGridSettings): number {
+  return HISTOGRAM_PERCENTILE_VALUES[settings.histogramPercentile];
+}
 
 /**
  * Builds an ES|QL aggregation expression AST node using `synth.exp` template
@@ -20,24 +62,41 @@ import { isLegacyHistogram } from '../legacy_histogram';
  * aggregation function based on the field type and instrument.
  */
 function buildAggregationNode(
-  type: ES_FIELD_TYPES,
+  types: ES_FIELD_TYPES[],
   instrument: MappingTimeSeriesMetricType,
   field: ESQLAstExpression,
-  customFunction?: string
-) {
+  customFunction?: string,
+  gridSettings?: MetricsGridSettings
+): ESQLAstExpression | undefined {
+  const resolvedField = applyCastIfNeeded(types, field);
+  const settings = gridSettings ?? METRICS_GRID_SETTINGS_DEFAULTS;
+  const primaryType = types[0];
+
   if (customFunction) {
-    return synth.exp`${synth.kwd(customFunction)}(${field})`;
+    return synth.exp`${synth.kwd(customFunction)}(${resolvedField})`;
   }
-  if (isLegacyHistogram(type, instrument)) {
-    return synth.exp`PERCENTILE(TO_TDIGEST(${field}), ${95})`;
+
+  if (isLegacyHistogram(primaryType, instrument)) {
+    const percentile = resolvePercentileValue(settings);
+    return synth.exp`${synth.kwd(
+      FunctionNames.PERCENTILE.toUpperCase()
+    )}(TO_TDIGEST(${resolvedField}), ${percentile})`;
   }
-  if (type === 'exponential_histogram' || type === 'tdigest') {
-    return synth.exp`PERCENTILE(${field}, ${95})`;
+
+  if (primaryType === 'exponential_histogram' || primaryType === 'tdigest') {
+    const percentile = resolvePercentileValue(settings);
+    return synth.exp`${synth.kwd(
+      FunctionNames.PERCENTILE.toUpperCase()
+    )}(${resolvedField}, ${percentile})`;
   }
+
   if (instrument === 'counter') {
-    return synth.exp`SUM(RATE(${field}))`;
+    const fn = settings.counterAggregation.toUpperCase();
+    return synth.exp`${synth.kwd(fn)}(RATE(${resolvedField}))`;
   }
-  return synth.exp`AVG(${field})`;
+
+  const fn = settings.gaugeAggregation.toUpperCase();
+  return synth.exp`${synth.kwd(fn)}(${resolvedField})`;
 }
 
 /**
@@ -48,47 +107,50 @@ function buildAggregationNode(
  * - `SUM(RATE(...))` for counter instruments
  * - `AVG(...)` for other metric types
  *
+ * When multiple field types are present (from different backing indices with conflicting mappings),
+ * the aggregation will wrap the field in an appropriate casting function (e.g., TO_DOUBLE) to resolve the ambiguity.
+ *
  * When `metricName` is provided the column is resolved and properly escaped.
  * Otherwise a `??placeholderName` parameter placeholder is emitted.
  *
- * @param type - The ES field type (e.g., 'histogram', 'exponential_histogram', 'tdigest').
+ * @param types - The ES field types array (for conflicting mappings across backing indices).
  * @param instrument - The metric instrument type (e.g., 'counter', 'histogram', 'gauge').
  * @param metricName - The actual name of the metric field to aggregate.
  * @param placeholderName - The name of the placeholder to use in the template.
  * @param customFunction - Optional custom aggregation function to use for default case.
+ * @param gridSettings - Optional per-`metric_type` aggregation overrides (counter/gauge/histogram).
  * @returns The ES|QL aggregation string.
  */
 export function createMetricAggregation({
-  type,
+  types,
   instrument,
   metricName,
   placeholderName = 'metricName',
   customFunction,
+  gridSettings,
 }: {
-  type: ES_FIELD_TYPES;
+  types: ES_FIELD_TYPES[];
   instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
+  gridSettings?: MetricsGridSettings;
 }): string {
   const field = metricName ? synth.col(metricName.split('.')) : synth.dpar(placeholderName);
-  const node = buildAggregationNode(type, instrument, field, customFunction);
+  const node = buildAggregationNode(types, instrument, field, customFunction, gridSettings);
+  if (!node) {
+    return '';
+  }
   return BasicPrettyPrinter.print(node).trim();
 }
 
 /**
- * Creates the time bucketing part of an ES|QL query.
+ * Creates the time bucketing part of an ES|QL query using `TBUCKET`,
+ * which automatically resolves the timestamp field via the Kibana timestamp filter.
  *
  * @param targetBuckets - The desired number of buckets for the time series.
- * @param timestampField - The name of the timestamp field.
- * @returns The ES|QL BUCKET function string.
+ * @returns The ES|QL TBUCKET function string.
  */
-export function createTimeBucketAggregation({
-  targetBuckets = 100,
-  timestampField = '@timestamp',
-}: {
-  targetBuckets?: number;
-  timestampField?: string;
-}) {
-  return `BUCKET(${timestampField}, ${targetBuckets}, ?_tstart, ?_tend)`;
+export function createTimeBucketAggregation({ targetBuckets = 100 }: { targetBuckets?: number }) {
+  return `TBUCKET(${targetBuckets})`;
 }

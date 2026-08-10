@@ -23,11 +23,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { defer } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useEsqlEditorParams } from '../../hooks/use_esql_editor_params';
 import { useEsqlParamsValidation } from '../../hooks/use_esql_params_validation';
@@ -82,19 +84,22 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          aria-label={i18nMessages.inferParamsButtonLabel}
+        <AiButton
           iconType="sparkles"
-          color="primary"
           size="s"
+          variant="empty"
           onClick={() => {
             inferParamsFromEsql();
             trigger('esql');
             triggerEsqlParamFieldsValidation(['name']);
           }}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.INFER_PARAMS,
+          })}
         >
           {i18nMessages.inferParamsButtonLabel}
-        </EuiButtonEmpty>
+        </AiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
@@ -106,6 +111,10 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
             triggerEsqlParamFieldsValidation(['name', 'description', 'type']);
             onAppend();
           }}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_PARAM,
+          })}
         >
           {i18nMessages.addParamButtonLabel}
         </EuiButtonEmpty>
@@ -230,6 +239,11 @@ export const EsqlParams = () => {
                               target="_blank"
                               data-test-subj="mvContainsLink"
                               aria-label="MV_CONTAINS"
+                              {...getEbtProps({
+                                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                                action:
+                                  AGENT_BUILDER_UI_EBT.action.globalManagement.MV_CONTAINS_DOCS,
+                              })}
                             >
                               MV_CONTAINS
                             </EuiLink>

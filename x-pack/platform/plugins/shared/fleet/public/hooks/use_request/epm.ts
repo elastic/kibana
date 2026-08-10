@@ -29,6 +29,7 @@ import type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
+import type { NamespaceConflictWarning } from '../../../common/types/rest_spec/epm';
 import type {
   BulkUpgradePackagesRequest,
   BulkOperationPackagesResponse,
@@ -36,12 +37,14 @@ import type {
   GetEpmDataStreamsResponse,
   GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  GetDependenciesResponse,
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
   BulkRollbackPackagesRequest,
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
+  GetIlmPoliciesResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -219,6 +222,23 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
+export const useGetPackageDependencies = (
+  pkgName: string,
+  pkgVersion: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
+  return useQuery<GetDependenciesResponse, RequestError>(
+    ['package-dependencies', pkgName, pkgVersion],
+    () =>
+      sendRequestForRq<GetDependenciesResponse>({
+        path: epmRouteService.getDependenciesPath(pkgName, pkgVersion),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+    { enabled, refetchOnWindowFocus: false }
+  );
+};
+
 export const useGetPackageVerificationKeyId = () => {
   const { data, ...rest } = useQuery<GetVerificationKeyIdResponse, RequestError>(
     ['verification_key_id'],
@@ -299,6 +319,20 @@ export const useGetEpmDatastreams = () => {
       version: API_VERSIONS.public.v1,
     })
   );
+};
+
+export const useGetIlmPoliciesQuery = (options?: { enabled?: boolean }) => {
+  return useQuery<GetIlmPoliciesResponse, RequestError>({
+    queryKey: ['get-ilm-policies'],
+    queryFn: () =>
+      sendRequestForRq<GetIlmPoliciesResponse>({
+        path: epmRouteService.getIlmPoliciesPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+    refetchOnWindowFocus: false,
+  });
 };
 
 export const sendGetFileByPath = (filePath: string) => {
@@ -485,6 +519,27 @@ export const useUpdatePackageMutation = () => {
       queryClient.invalidateQueries([pkgName]);
       queryClient.invalidateQueries(['get-packages']);
     },
+  });
+};
+
+interface NamespacePreflightCheckArgs {
+  pkgName: string;
+  namespaces: string[];
+}
+
+interface NamespacePreflightCheckResponse {
+  warnings: NamespaceConflictWarning[];
+}
+
+export const useNamespacePreflightCheckMutation = () => {
+  return useMutation<NamespacePreflightCheckResponse, RequestError, NamespacePreflightCheckArgs>({
+    mutationFn: ({ pkgName, namespaces }: NamespacePreflightCheckArgs) =>
+      sendRequestForRq<NamespacePreflightCheckResponse>({
+        path: epmRouteService.getNamespacePreflightCheckPath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.internal.v1,
+        body: { namespaces },
+      }),
   });
 };
 

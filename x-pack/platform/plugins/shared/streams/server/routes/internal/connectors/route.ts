@@ -9,25 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 
-export const getConnectorsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/connectors',
-  options: {
-    access: 'internal',
-    summary: 'Get GenAI connectors',
-    description: 'Fetches all available GenAI connectors for AI features',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({ request, server }) => {
-    const connectors = await server.inference.getConnectorList(request);
-
-    return { connectors };
-  },
-});
-
 export const getConnectorByIdRoute = createServerRoute({
   endpoint: 'GET /internal/streams/connectors/{connectorId}',
   options: {
@@ -49,6 +30,5 @@ export const getConnectorByIdRoute = createServerRoute({
 });
 
 export const connectorRoutes = {
-  ...getConnectorsRoute,
   ...getConnectorByIdRoute,
 };

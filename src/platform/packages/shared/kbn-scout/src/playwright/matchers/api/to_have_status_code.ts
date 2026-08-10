@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect as baseExpect } from '@playwright/test';
-import { createMatcherError } from './utils';
+import type { ExpectMatcherState, MatcherReturnType } from '@playwright/test';
 
 export interface ToHaveStatusCodeOptions {
   /** Match if the status code is one of these values */
@@ -17,7 +16,7 @@ export interface ToHaveStatusCodeOptions {
 }
 
 /**
- * Asserts that the response has the expected HTTP status code.
+ * Custom matcher for expect.extend(): asserts the response has the expected HTTP status code.
  *
  * @example
  * expect(response).toHaveStatusCode(200);
@@ -25,40 +24,41 @@ export interface ToHaveStatusCodeOptions {
  * expect(response).not.toHaveStatusCode(404);
  */
 export function toHaveStatusCode(
-  obj: unknown,
-  expected: number | ToHaveStatusCodeOptions,
-  isNegated = false,
-  message?: string
-): void {
-  if (typeof obj !== 'object' || obj === null || (!('status' in obj) && !('statusCode' in obj))) {
+  this: ExpectMatcherState,
+  received: unknown,
+  expected: number | ToHaveStatusCodeOptions
+): MatcherReturnType {
+  if (
+    typeof received !== 'object' ||
+    received === null ||
+    (!('status' in received) && !('statusCode' in received))
+  ) {
     const expectedValue = typeof expected === 'number' ? expected : expected.oneOf;
-    throw createMatcherError({
-      expected: `${JSON.stringify({ status: expectedValue })} or ${JSON.stringify({
-        statusCode: expectedValue,
-      })}`,
-      matcherName: 'toHaveStatusCode',
-      received: obj,
-      isNegated,
-      message,
-    });
+    return {
+      pass: this.isNot,
+      message: () =>
+        this.utils.matcherHint('toHaveStatusCode', undefined, undefined, { isNot: this.isNot }) +
+        '\n\n' +
+        `Expected object with ${this.utils.printExpected({
+          status: expectedValue,
+        })} or ${this.utils.printExpected({ statusCode: expectedValue })}\n` +
+        `Received: ${this.utils.printReceived(received)}`,
+    };
   }
 
-  const actual = 'status' in obj ? obj.status : obj.statusCode;
+  const actual = 'status' in received ? received.status : received.statusCode;
   const codes = typeof expected === 'number' ? [expected] : expected.oneOf;
+  const pass = codes.includes(actual as number);
 
-  try {
-    if (isNegated) {
-      baseExpect(codes).not.toContain(actual);
-    } else {
-      baseExpect(codes).toContain(actual);
-    }
-  } catch {
-    throw createMatcherError({
-      expected,
-      matcherName: 'toHaveStatusCode',
-      received: actual,
-      isNegated,
-      message,
-    });
-  }
+  return {
+    pass,
+    message: () =>
+      this.utils.matcherHint('toHaveStatusCode', undefined, undefined, { isNot: this.isNot }) +
+      '\n\n' +
+      `Expected: ${this.utils.printExpected(expected)}\n` +
+      `Received: ${this.utils.printReceived(actual)}`,
+    name: 'toHaveStatusCode',
+    expected,
+    actual,
+  };
 }

@@ -14,15 +14,17 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ListId } from '../model/list_common.gen';
 
+export const ExportListItemsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Value list's `id` to export.
+     */
+    list_id: ListId,
+  })
+);
 export type ExportListItemsRequestQuery = z.infer<typeof ExportListItemsRequestQuery>;
-export const ExportListItemsRequestQuery = z.object({
-  /**
-   * Value list's `id` to export.
-   */
-  list_id: ListId,
-});
 export type ExportListItemsRequestQueryInput = z.input<typeof ExportListItemsRequestQuery>;
