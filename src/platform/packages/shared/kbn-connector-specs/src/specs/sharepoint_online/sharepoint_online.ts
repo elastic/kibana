@@ -648,6 +648,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     callGraphAPI: {
       isTool: true,
+      annotations: { destructiveHint: true },
       description: 'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
       input: lazySchema(() =>
         z.object({

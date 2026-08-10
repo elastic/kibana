@@ -75,6 +75,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     reportIp: {
       isTool: true,
+      annotations: { destructiveHint: true },
       input: lazySchema(() =>
         z.object({
           ip: z.ipv4().describe('IP address to report'),

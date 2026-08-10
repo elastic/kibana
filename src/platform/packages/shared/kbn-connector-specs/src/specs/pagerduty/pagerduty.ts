@@ -235,6 +235,7 @@ export const PagerdutyConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      annotations: { destructiveHint: true },
       description:
         'Call any tool on the PagerDuty MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,
