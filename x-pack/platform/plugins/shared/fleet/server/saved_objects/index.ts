@@ -1734,8 +1734,8 @@ export const getSavedObjectTypes = (
               },
             },
           ],
-          schemas: {
-            forwardCompatibility: schema.object(
+          schemas: (() => {
+            const downloadSourceSchemaV2 = schema.object(
               {
                 source_id: schema.maybe(schema.string()),
                 name: schema.maybe(schema.string()),
@@ -1748,8 +1748,12 @@ export const getSavedObjectTypes = (
                 secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
               },
               { unknowns: 'ignore' }
-            ),
-          },
+            );
+            return {
+              forwardCompatibility: downloadSourceSchemaV2,
+              create: downloadSourceSchemaV2,
+            };
+          })(),
         },
       },
     },
