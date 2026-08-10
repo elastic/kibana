@@ -27,7 +27,7 @@ import {
 } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
-import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
+import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
@@ -253,7 +253,7 @@ export const ActionPoliciesTableContent = ({
             const policy = toPolicy(item);
             if (!policy.enabled || !canWrite) return null;
             return (
-              <ActionPolicySnoozePopover
+              <ActionPolicySnoozeButton
                 policy={policy}
                 onSnooze={onSnooze}
                 onCancelSnooze={onCancelSnooze}
@@ -280,8 +280,6 @@ export const ActionPoliciesTableContent = ({
                 onEdit={onEdit}
                 onClone={onClone}
                 onDelete={onDelete}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
                 onUpdateApiKey={onUpdateApiKey}
                 isDisabled={isBulkActionInProgress}
               />

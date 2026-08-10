@@ -131,8 +131,8 @@ jest.mock('../../../components/action_policy/delete_confirmation_modal', () => (
   DeleteActionPolicyConfirmModal: () => null,
 }));
 
-jest.mock('../../../components/action_policy/action_policy_snooze_popover', () => ({
-  ActionPolicySnoozePopover: () => <span>Snooze popover</span>,
+jest.mock('../../../components/action_policy/action_policy_snooze_button', () => ({
+  ActionPolicySnoozeButton: () => <span>Snooze button</span>,
 }));
 
 jest.mock('../../../components/action_policy/action_policy_state_badge', () => ({

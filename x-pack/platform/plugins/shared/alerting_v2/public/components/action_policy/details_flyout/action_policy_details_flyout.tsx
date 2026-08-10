@@ -33,6 +33,7 @@ import React, { useMemo } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
+import { ActionPolicySnoozeButton } from '../action_policy_snooze_button';
 import { ActionPolicyStateBadge } from '../action_policy_state_badge';
 import { isSnoozed } from '../is_snoozed';
 import { ActionPolicyDefinitionList } from './action_policy_definition_list';
@@ -53,6 +54,7 @@ interface Props {
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isStateLoading?: boolean;
+  isSnoozeLoading?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
   hasAnimation?: EuiFlyoutProps['hasAnimation'];
@@ -71,6 +73,7 @@ export const ActionPolicyDetailsFlyout = ({
   onCancelSnooze,
   onUpdateApiKey,
   isStateLoading = false,
+  isSnoozeLoading = false,
   session,
   ownFocus = true,
   hasAnimation = true,
@@ -158,6 +161,16 @@ export const ActionPolicyDetailsFlyout = ({
           responsive={false}
           alignItems="center"
         >
+          {canWrite && policy.enabled && (
+            <EuiFlexItem grow={false}>
+              <ActionPolicySnoozeButton
+                policy={policy}
+                onSnooze={onSnooze}
+                onCancelSnooze={onCancelSnooze}
+                isLoading={isSnoozeLoading}
+              />
+            </EuiFlexItem>
+          )}
           {canWrite && (
             <EuiFlexItem grow={false}>
               <ActionPolicyActionsMenu
@@ -166,8 +179,6 @@ export const ActionPolicyDetailsFlyout = ({
                 onDelete={handleDelete}
                 onEnable={onEnable}
                 onDisable={onDisable}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
                 onUpdateApiKey={handleUpdateApiKey}
                 isStateLoading={isStateLoading}
                 data-test-subj="detailsFlyoutActionsMenuButton"
