@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
 const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
-/** Dependencies from `LensApp` / `LensEditorApp` that dimensions helpers need. */
-interface LensDimensionsDeps {
-  closeDimensionEditorButton: Locator;
-  closeDimensionEditor: () => Promise<void>;
-}
 
 /**
  * Lens editor dimension triggers, format params, and quick-functions / static-value tabs.
@@ -22,9 +17,14 @@ interface LensDimensionsDeps {
 export class LensDimensions {
   /** Locator for all dimension-trigger buttons in the Lens config panel. */
   readonly dimensionTriggerLocator;
+  /** Close control on the open dimension-editor flyout. */
+  private readonly closeDimensionEditorButton;
 
-  constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
+  constructor(private readonly page: ScoutPage) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
+    this.closeDimensionEditorButton = this.page.testSubj.locator(
+      'lns-indexPattern-dimensionContainerClose'
+    );
   }
 
   /**
@@ -126,12 +126,14 @@ export class LensDimensions {
       );
     }
     await editor.click();
-    await this.deps.closeDimensionEditorButton.waitFor({ state: 'visible' });
+    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
   }
 
-  /** Closes the open dimension editor flyout (same as `closeDimensionEditor`, kept for FTR parity naming). */
+  /** Closes the open dimension editor flyout (same as `LensApp.closeDimensionEditor`, kept for FTR parity naming). */
   async closeDimensionEditorPanel() {
-    await this.deps.closeDimensionEditor();
+    // Suggested-value panels can remount and exceed the 10s actionTimeout.
+    await this.closeDimensionEditorButton.click({ timeout: 15_000 });
+    await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   /** Clears the dimension field combo box (removes the currently selected field). */
