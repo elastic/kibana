@@ -13,7 +13,7 @@ The Google Cloud IAM connector lets a workflow or agent respond to a cloud ident
 
 ## Overview
 
-This is a **custom connector** that calls the Google Cloud IAM API (`iam.googleapis.com`) and the Cloud Resource Manager API (`cloudresourcemanager.googleapis.com`). You upload a service account JSON key when creating the connector; every action then runs as that service account, using a short-lived access token the connector mints for each request.
+This connector calls the Google Cloud IAM API (`iam.googleapis.com`) and the Cloud Resource Manager API (`cloudresourcemanager.googleapis.com`). You upload a service account JSON key when creating the connector, and every action then runs as that service account, using a short-lived access token the connector mints for each request.
 
 Containment actions are deliberately available as workflow steps only, not as autonomous agent tools, because disabling an identity or revoking a role can take a production workload offline. Read actions are available to both.
 
