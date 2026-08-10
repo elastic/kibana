@@ -84,40 +84,46 @@ export const createClient = ({
   logger,
   esClient,
   user,
+  isAdmin,
   agentRegistry,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   user: UserIdAndName;
+  isAdmin: boolean;
   agentRegistry: AgentRegistry;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
-  return new ConversationClientImpl({ storage, user, space, agentRegistry, logger });
+  return new ConversationClientImpl({ storage, user, isAdmin, space, agentRegistry, logger });
 };
 
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly user: UserIdAndName;
+  private readonly isAdmin: boolean;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
   constructor({
     storage,
     user,
+    isAdmin,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
     user: UserIdAndName;
+    isAdmin: boolean;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
   }) {
     this.storage = storage;
     this.user = user;
+    this.isAdmin = isAdmin;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
@@ -333,6 +339,7 @@ class ConversationClientImpl implements ConversationClient {
       permissions: getConversationPermissions({
         conversation: document._source!,
         user: this.user,
+        isAdmin: this.isAdmin,
       }),
     };
   }
@@ -345,6 +352,7 @@ class ConversationClientImpl implements ConversationClient {
       permissions: getConversationPermissions({
         conversation: document._source!,
         user: this.user,
+        isAdmin: this.isAdmin,
       }),
     };
   }
@@ -424,11 +432,19 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'rename':
-        allowed = hasConversationRenameAccess({ conversation, user: this.user });
+        allowed = hasConversationRenameAccess({
+          conversation,
+          user: this.user,
+          isAdmin: this.isAdmin,
+        });
         break;
 
       case 'delete':
-        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
+        allowed = hasConversationDeleteAccess({
+          conversation,
+          user: this.user,
+          isAdmin: this.isAdmin,
+        });
         break;
     }
 

@@ -107,6 +107,7 @@ describe('ConversationClient', () => {
       logger: loggerMock.create(),
       esClient: {} as never,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
+      isAdmin: false,
       user: {
         id: 'user-1',
         username: 'test-user',
@@ -1029,7 +1030,7 @@ describe('ConversationClient', () => {
   });
 
   describe('delete', () => {
-    it('remains owner-only for public conversations', async () => {
+    it('remains owner-only for public conversations when the caller is not an admin', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -1153,6 +1154,105 @@ describe('ConversationClient', () => {
       expect(permissions.rename).toBe(false);
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  describe('admin client', () => {
+    let adminClient: ConversationClient;
+
+    const conversationOwnedByAnotherUser = (accessMode: ConversationAccessControlMode) =>
+      createConversationDocument({
+        userId: 'other-user-id',
+        username: 'other-user',
+        accessMode,
+      });
+
+    beforeEach(() => {
+      adminClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        isAdmin: true,
+        user: {
+          id: 'admin-user-id',
+          username: 'admin-user',
+        },
+      });
+    });
+
+    it('deletes a public conversation owned by another user', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
+      });
+      mockEsClient.delete.mockResolvedValue({ result: 'deleted' });
+
+      await expect(adminClient.delete('conversation-1')).resolves.toBe(true);
+
+      expect(mockEsClient.delete).toHaveBeenCalledWith({ id: 'conversation-1' });
+    });
+
+    it('renames a public conversation owned by another user', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
+      });
+      mockEsClient.index.mockResolvedValue({ result: 'updated' });
+
+      const updated = await adminClient.update(
+        { id: 'conversation-1', title: 'renamed by admin' },
+        { access: 'rename' }
+      );
+
+      expect(updated.title).toBe('renamed by admin');
+    });
+
+    it('reports rename and delete permissions on a public conversation owned by another user', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
+      });
+
+      const { permissions } = await adminClient.get('conversation-1');
+
+      expect(permissions).toEqual({ rename: true, delete: true });
+    });
+
+    it('cannot rename or delete a private conversation owned by another user', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Private)] },
+      });
+
+      await expect(adminClient.delete('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+      await expect(
+        adminClient.update(
+          { id: 'conversation-1', title: 'renamed by admin' },
+          { access: 'rename' }
+        )
+      ).rejects.toThrow('Conversation conversation-1 not found');
+
+      expect(mockEsClient.delete).not.toHaveBeenCalled();
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('cannot read a private conversation owned by another user', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Private)] },
+      });
+
+      await expect(adminClient.get('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+
+    it('does not gain owner access to a public conversation owned by another user', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
+      });
+
+      await expect(
+        adminClient.update({ id: 'conversation-1', title: 'renamed by admin' })
       ).rejects.toThrow('Conversation conversation-1 not found');
     });
   });

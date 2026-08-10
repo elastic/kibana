@@ -19,6 +19,7 @@ import type { ChatResponse } from '../../../../common/http_api/chat';
 import type {
   GetConversationResponse,
   ListConversationsResponse,
+  RenameConversationResponse,
 } from '../../../../common/http_api/conversations';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { internalApiPath, publicApiPath } from '../../../../common/constants';
@@ -833,6 +834,119 @@ apiTest.describe(
           { headers: headersFor(bob), responseType: 'json' }
         );
         expect(bobView).toHaveStatusCode(404);
+      }
+    );
+
+    // ── cluster admin management ────────────────────────────────────────────
+
+    apiTest(
+      'cluster admin can rename and delete a public conversation they do not own',
+      async ({ apiClient, asAdmin }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-admin-public-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const toRename = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Admin rename target',
+          title: 'Admin Rename Target',
+          accessMode: ConversationAccessControlMode.Public,
+        });
+        const toDelete = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Admin delete target',
+          title: 'Admin Delete Target',
+          accessMode: ConversationAccessControlMode.Public,
+        });
+
+        await apiTest.step('admin renames the conversation', async () => {
+          const renamed = await asAdmin.post(
+            `${accessControlInternalBase}/conversations/${encodeURIComponent(
+              toRename.conversation_id
+            )}/_rename`,
+            {
+              headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+              body: { title: 'Renamed by admin' },
+              responseType: 'json',
+            }
+          );
+          expect(renamed).toHaveStatusCode(200);
+          expect((renamed.body as RenameConversationResponse).title).toBe('Renamed by admin');
+        });
+
+        await apiTest.step('admin deletes the conversation', async () => {
+          const deleted = await asAdmin.delete(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(toDelete.conversation_id)}`,
+            {
+              headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+              responseType: 'json',
+            }
+          );
+          expect(deleted).toHaveStatusCode(200);
+
+          const ownerView = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(toDelete.conversation_id)}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(ownerView).toHaveStatusCode(404);
+        });
+      }
+    );
+
+    apiTest(
+      'cluster admin cannot rename or delete a private conversation they do not own',
+      async ({ apiClient, asAdmin }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-admin-private-agent-${testRunId.slice(
+          0,
+          8
+        )}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const privateConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Admin private target',
+          title: 'Admin Private Target',
+        });
+        const conversationId = privateConversation.conversation_id;
+
+        await apiTest.step('rename is masked as not found', async () => {
+          const renamed = await asAdmin.post(
+            `${accessControlInternalBase}/conversations/${encodeURIComponent(
+              conversationId
+            )}/_rename`,
+            {
+              headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+              body: { title: 'Renamed by admin' },
+              responseType: 'json',
+            }
+          );
+          expect(renamed).toHaveStatusCode(404);
+        });
+
+        await apiTest.step('delete is masked as not found', async () => {
+          const deleted = await asAdmin.delete(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+            {
+              headers: { 'elastic-api-version': ELASTIC_API_VERSION },
+              responseType: 'json',
+            }
+          );
+          expect(deleted).toHaveStatusCode(404);
+        });
+
+        await apiTest.step('the conversation is untouched for its owner', async () => {
+          const ownerView = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(ownerView).toHaveStatusCode(200);
+          expect((ownerView.body as Conversation).title).not.toBe('Renamed by admin');
+        });
       }
     );
 

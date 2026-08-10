@@ -14,7 +14,7 @@ import type {
 import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { getUserFromRequest } from '../utils';
+import { getUserFromRequest, isAdminFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
 import type { ConversationClient } from './client';
@@ -53,11 +53,16 @@ export class ConversationServiceImpl implements ConversationService {
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
     const user = await this.getCurrentUser({ request });
+    // Probed against the caller's own client so the result reflects their privileges, unlike the
+    // internal client the storage layer reads with.
+    const isAdmin = await isAdminFromRequest({
+      esClient: this.getScopedEsClient(request).asCurrentUser,
+    });
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
 
-    return createClient({ user, esClient, logger: this.logger, space, agentRegistry });
+    return createClient({ user, isAdmin, esClient, logger: this.logger, space, agentRegistry });
   }
 
   /**

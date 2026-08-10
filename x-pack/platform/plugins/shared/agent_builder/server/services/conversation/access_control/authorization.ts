@@ -76,21 +76,37 @@ export const hasConversationOwnerAccess = ({
   user: UserIdAndName;
 }): boolean => isConversationOwner({ conversation, user });
 
+/**
+ * Checks whether the caller can rename the conversation.
+ *
+ * Admins are granted management of conversations they do not own only in `public` access mode.
+ * The check is deliberately "public mode only" rather than "not private": a conversation that is
+ * private but shared through access-control entries stays owner-only, so sharing a sensitive chat
+ * with a few colleagues never hands it to every admin.
+ */
 export const hasConversationRenameAccess = ({
   conversation,
   user,
+  isAdmin,
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
-}): boolean => hasConversationOwnerAccess({ conversation, user });
+  isAdmin: boolean;
+}): boolean =>
+  hasConversationOwnerAccess({ conversation, user }) ||
+  (isAdmin && isPublicConversation({ conversation }));
 
 export const hasConversationDeleteAccess = ({
   conversation,
   user,
+  isAdmin,
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
-}): boolean => hasConversationOwnerAccess({ conversation, user });
+  isAdmin: boolean;
+}): boolean =>
+  hasConversationOwnerAccess({ conversation, user }) ||
+  (isAdmin && isPublicConversation({ conversation }));
 
 export const hasConversationUpdateAccessControlAccess = ({
   conversation,
@@ -103,11 +119,13 @@ export const hasConversationUpdateAccessControlAccess = ({
 export const getConversationPermissions = ({
   conversation,
   user,
+  isAdmin,
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
+  isAdmin: boolean;
 }): ConversationPermissions => ({
-  rename: hasConversationRenameAccess({ conversation, user }),
-  delete: hasConversationDeleteAccess({ conversation, user }),
+  rename: hasConversationRenameAccess({ conversation, user, isAdmin }),
+  delete: hasConversationDeleteAccess({ conversation, user, isAdmin }),
   update_access_control: hasConversationUpdateAccessControlAccess({ conversation, user }),
 });
