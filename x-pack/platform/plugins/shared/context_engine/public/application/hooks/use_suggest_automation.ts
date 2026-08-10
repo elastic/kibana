@@ -26,7 +26,7 @@ const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',
   {
     defaultMessage:
-      "Load [/{skillId}](skill://{skillId}) and follow its **When an ai_index attachment is present** section for the attached AI index. Skip discovery — use only the attachment's destination, sources, and automations.",
+      "Load [/{skillId}](skill://{skillId}) and follow its **When an ai_index attachment is present** section for the attached AI index. Skip discovery and only use the attachment's destination, sources, and automations.",
     values: { skillId: KI_AUTOMATION_GENERATION_SKILL_ID },
   }
 );
