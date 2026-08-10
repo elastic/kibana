@@ -24,6 +24,7 @@ import {
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
+  type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
@@ -61,6 +62,8 @@ interface GetExperimentFilters {
 export interface UpsertDatasetInput {
   name: string;
   description: string;
+  tags?: string[];
+  maturity?: DatasetMaturity;
   examples: Array<{
     input?: Record<string, unknown>;
     output?: Record<string, unknown>;
@@ -72,6 +75,8 @@ export interface DatasetWithId {
   id: string;
   name: string;
   description: string;
+  tags?: string[];
+  maturity?: DatasetMaturity;
   examples: Array<{
     id: string;
     input?: Record<string, unknown>;
@@ -253,6 +258,10 @@ export class EvalsClient {
       body: {
         name: dataset.name,
         description: dataset.description,
+        // Omitted rather than sent as `undefined` so a suite that doesn't
+        // declare tags leaves the stored ones alone.
+        ...(dataset.tags ? { tags: dataset.tags } : {}),
+        ...(dataset.maturity ? { maturity: dataset.maturity } : {}),
         examples: dataset.examples,
       },
       headers: VERSIONED_HEADERS,
@@ -276,6 +285,8 @@ export class EvalsClient {
         id: parsed.id,
         name: parsed.name,
         description: parsed.description,
+        tags: parsed.tags,
+        maturity: parsed.maturity,
         examples: parsed.examples.map(({ id, input, output, metadata }) => ({
           id,
           input,
