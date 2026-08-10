@@ -118,7 +118,7 @@ export interface OtelAppenderConfig {
    * cloud/k8s/process/host fields excluded.
    *
    * An explicit allowlist fully governs the resource: a listed key is kept even if
-   * {@link OtelAppenderProgrammaticConfig.dropResourceAttributes} also names it.
+   * {@link OtelAppenderPluginConfig.dropResourceAttributes} also names it.
    * `dropResourceAttributes` only shapes the resource in the default `['*']` case.
    */
   includeResources?: string[];
@@ -146,12 +146,12 @@ export interface OtelAppenderConfig {
 export type OtelAttributesTransform = (attributes: Attributes) => Attributes;
 
 /**
- * Programmatic-only extension of {@link OtelAppenderConfig}: options that cannot be expressed
+ * Plugin-only extension of {@link OtelAppenderConfig}: options that cannot be expressed
  * in YAML, accepted exclusively through {@link LoggingServiceSetup.configure}.
  *
  * @public
  */
-export interface OtelAppenderProgrammaticConfig extends OtelAppenderConfig {
+export interface OtelAppenderPluginConfig extends OtelAppenderConfig {
   /**
    * Applied to the flattened attributes just before emit. Use for output-shaping too specific
    * to belong in serializable config (e.g. audit log field mappings).

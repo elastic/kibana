@@ -116,7 +116,7 @@ describe('OtelAppender', () => {
       expect(result.promoteResourceAttributes).toBeUndefined();
     });
 
-    it('rejects YAML-representable values for the programmatic-only options', () => {
+    it('rejects YAML-representable values for the plugin-only options', () => {
       // kibana.yml can only express serializable values, and the strict schema rejects unknown
       // keys, so neither option can ever arrive from config files.
       expect(() =>
@@ -201,7 +201,7 @@ describe('OtelAppender', () => {
     });
   });
 
-  describe('runtimeConfigSchema (programmatic path)', () => {
+  describe('runtimeConfigSchema (plugin path)', () => {
     it('accepts a transformAttributes callback and passes it through', () => {
       const transformAttributes = (attrs: Record<string, unknown>) => attrs;
       const result = OtelAppender.runtimeConfigSchema.validate({

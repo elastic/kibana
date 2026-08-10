@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
 import type { DisposableAppender } from '@kbn/logging';
-import type { ProgrammaticAppenderConfigType } from '@kbn/core-logging-server';
+import type { PluginAppenderConfigType } from '@kbn/core-logging-server';
 
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender } from './console/console_appender';
@@ -34,7 +34,7 @@ export const appendersSchema = schema.oneOf([
 ]);
 
 /** @internal {@link appendersSchema}, but OTel appenders use {@link OtelAppender.runtimeConfigSchema}. */
-export const programmaticAppendersSchema = schema.oneOf([
+export const pluginAppendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,
   OtelAppender.runtimeConfigSchema,
@@ -51,7 +51,7 @@ export class Appenders {
    * @param config Configuration specific to a particular `Appender` implementation.
    * @returns Fully constructed `Appender` instance.
    */
-  public static create(config: ProgrammaticAppenderConfigType): DisposableAppender {
+  public static create(config: PluginAppenderConfigType): DisposableAppender {
     switch (config.type) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));

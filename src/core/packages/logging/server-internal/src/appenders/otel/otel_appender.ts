@@ -32,7 +32,7 @@ import { resources } from '@elastic/opentelemetry-node/sdk';
 import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
 import type {
   OtelAppenderConfig,
-  OtelAppenderProgrammaticConfig,
+  OtelAppenderPluginConfig,
   OtelAttributesTransform,
   LayoutConfigType,
 } from '@kbn/core-logging-server';
@@ -276,8 +276,8 @@ export class OtelAppender implements DisposableAppender {
   });
 
   /**
-   * {@link OtelAppender.configSchema} plus the programmatic-only options of
-   * {@link OtelAppenderProgrammaticConfig}; used only by the {@link LoggingServiceSetup.configure}
+   * {@link OtelAppender.configSchema} plus the plugin-only options of
+   * {@link OtelAppenderPluginConfig}; used only by the {@link LoggingServiceSetup.configure}
    * validation path, never wired into YAML config validation.
    */
   public static runtimeConfigSchema = OtelAppender.configSchema.extends({
@@ -301,7 +301,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly transformAttributes?: OtelAttributesTransform;
   private readonly promotedAttributes: Attributes;
 
-  constructor(config: OtelAppenderProgrammaticConfig) {
+  constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
     const exporter = createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
@@ -402,7 +402,7 @@ export class OtelAppender implements DisposableAppender {
           ? omitDeepNilValues(JsonLayout.ecsRecord(record))
           : this.layout.format(record),
       context: toTraceContext(record),
-      // The programmatic transform hook runs last, on the fully flattened attributes.
+      // The plugin transform hook runs last, on the fully flattened attributes.
       attributes: this.transformAttributes ? this.transformAttributes(attributes) : attributes,
     });
   }

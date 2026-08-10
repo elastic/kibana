@@ -19,7 +19,7 @@ export const AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES: string[] = ['project.id'];
 
 /**
  * Maps the flattened per-record OTel attributes of an audit record to the Serverless audit log
- * field requirements, via the OTel appender's programmatic `transformAttributes` hook.
+ * field requirements, via the OTel appender's plugin `transformAttributes` hook.
  * Deliberately imperative: a closed, audit-owned translation that changes only when Serverless
  * field requirements do. Does not mutate the input.
  */

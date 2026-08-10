@@ -268,8 +268,8 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
-  ProgrammaticAppenderConfigType,
-  OtelAppenderProgrammaticConfig,
+  PluginAppenderConfigType,
+  OtelAppenderPluginConfig,
   OtelAttributesTransform,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';

@@ -18,10 +18,10 @@ import {
 import type {
   AppenderConfigType,
   LoggerConfigType,
-  ProgrammaticAppenderConfigType,
+  PluginAppenderConfigType,
 } from '@kbn/core-logging-server';
 import type { MetaFilterConfig } from '@kbn/logging';
-import { Appenders, programmaticAppendersSchema } from './appenders/appenders';
+import { Appenders, pluginAppendersSchema } from './appenders/appenders';
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
@@ -130,7 +130,7 @@ export const config = {
 
 /** @internal */
 export type LoggingConfigType = Pick<TypeOf<typeof config.schema>, 'loggers' | 'root'> & {
-  appenders: Map<string, ProgrammaticAppenderConfigType>;
+  appenders: Map<string, PluginAppenderConfigType>;
 };
 
 type LoggingConfigLoggerType = LoggingConfigType['loggers'][number];
@@ -163,24 +163,24 @@ export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
 
 /**
  * Validates {@link LoggingServiceSetup.configure} inputs. Same as {@link loggerContextConfigSchema}
- * but accepts the programmatic-only appender options (see {@link programmaticAppendersSchema}).
+ * but accepts the plugin-only appender options (see {@link pluginAppendersSchema}).
  *
  * @internal
  */
-export const loggerContextProgrammaticConfigSchema = schema.object({
-  appenders: schema.mapOf(schema.string(), programmaticAppendersSchema, {
-    defaultValue: new Map<string, ProgrammaticAppenderConfigType>(),
+export const loggerContextPluginConfigSchema = schema.object({
+  appenders: schema.mapOf(schema.string(), pluginAppendersSchema, {
+    defaultValue: new Map<string, PluginAppenderConfigType>(),
   }),
 
   loggers: schema.arrayOf(loggerSchema, { defaultValue: [], maxSize: 100 }),
 });
 
 /** @internal */
-export type LoggerContextProgrammaticConfigType = Pick<
-  TypeOf<typeof loggerContextProgrammaticConfigSchema>,
+export type LoggerContextPluginConfigType = Pick<
+  TypeOf<typeof loggerContextPluginConfigSchema>,
   'loggers'
 > & {
-  appenders: Map<string, ProgrammaticAppenderConfigType>;
+  appenders: Map<string, PluginAppenderConfigType>;
 };
 
 /**
@@ -210,7 +210,7 @@ export class LoggingConfig {
   /**
    * Map of the appender unique arbitrary key and its corresponding config.
    */
-  public readonly appenders: Map<string, ProgrammaticAppenderConfigType> = new Map([
+  public readonly appenders: Map<string, PluginAppenderConfigType> = new Map([
     [
       'default',
       {
@@ -245,7 +245,7 @@ export class LoggingConfig {
    *
    * @param contextConfig
    */
-  public extend(contextConfig: LoggerContextProgrammaticConfigType) {
+  public extend(contextConfig: LoggerContextPluginConfigType) {
     // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
     const mergedLoggers = new Map<string, LoggerConfigType>([
       ...this.configType.loggers.map((l) => [l.name, l] as [string, LoggerConfigType]),

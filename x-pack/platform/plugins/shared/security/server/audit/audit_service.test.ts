@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { AppenderConfigType, OtelAppenderProgrammaticConfig } from '@kbn/core-logging-server';
+import type { AppenderConfigType, OtelAppenderPluginConfig } from '@kbn/core-logging-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
@@ -607,7 +607,7 @@ describe('#createLoggingConfig', () => {
     );
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
-    const otelAppender = appenders.auditTrailAppender as OtelAppenderProgrammaticConfig;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     expect(otelAppender.transformAttributes).toBe(applyAuditOtelFieldMap);
   });
 
@@ -632,7 +632,7 @@ describe('#createLoggingConfig', () => {
     );
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
-    const otelAppender = appenders.auditTrailAppender as OtelAppenderProgrammaticConfig;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     const transform = otelAppender.transformAttributes;
     if (!transform) {
       throw new Error('expected transformAttributes to be injected for a serverless OTel appender');
@@ -700,7 +700,7 @@ describe('#createLoggingConfig', () => {
     );
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
-    const otelAppender = appenders.auditTrailAppender as OtelAppenderProgrammaticConfig;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     // includeResources keeps the audit resource attribute keys plus the promoted keys (so project.id
     // stays in the resource for log delivery); attributes supply the service.name/service.type values.
     expect(otelAppender.includeResources).toEqual([
@@ -734,7 +734,7 @@ describe('#createLoggingConfig', () => {
     );
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
-    const otelAppender = appenders.auditTrailAppender as OtelAppenderProgrammaticConfig;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     expect(otelAppender.attributes).toEqual({
       'custom.attr': 'value',
       ...AUDIT_OTEL_RESOURCE_ATTRIBUTES,
@@ -793,7 +793,7 @@ describe('#createLoggingConfig', () => {
     // The transform is Serverless-only: on other build flavors the OTel appender passes through
     // unchanged (full resource, raw ECS field names).
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
-    const otelAppender = appenders.auditTrailAppender as OtelAppenderProgrammaticConfig;
+    const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
     expect(otelAppender).not.toHaveProperty('transformAttributes');
     expect(otelAppender).not.toHaveProperty('includeResources');
     expect(otelAppender).not.toHaveProperty('promoteResourceAttributes');

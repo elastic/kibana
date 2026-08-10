@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { LoggerConfigType } from './logger';
-import type { ProgrammaticAppenderConfigType } from './appenders';
+import type { PluginAppenderConfigType } from './appenders';
 
 /**
  * Provides APIs to plugins for customizing the plugin's logger.
@@ -41,13 +41,11 @@ export interface LoggingServiceSetup {
 
 /**
  * Input used to configure logging dynamically using {@link LoggingServiceSetup.configure}.
- * Unlike YAML config, also accepts {@link ProgrammaticAppenderConfigType}.
+ * Unlike YAML config, also accepts {@link PluginAppenderConfigType}.
  * @public
  */
 export interface LoggerContextConfigInput {
   // config-schema knows how to handle either Maps or Records
-  appenders?:
-    | Record<string, ProgrammaticAppenderConfigType>
-    | Map<string, ProgrammaticAppenderConfigType>;
+  appenders?: Record<string, PluginAppenderConfigType> | Map<string, PluginAppenderConfigType>;
   loggers?: LoggerConfigType[];
 }
