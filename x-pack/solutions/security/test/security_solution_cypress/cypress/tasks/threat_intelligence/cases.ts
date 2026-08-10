@@ -6,6 +6,8 @@
  */
 
 import {
+  ADD_TO_CASE_ITEM,
+  ADD_TO_CASE_SUBMIT_BUTTON,
   FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
   FLYOUT_ADD_TO_NEW_CASE_ITEM,
   INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
@@ -23,28 +25,36 @@ import {
  * Open the add to new case flyout from the indicators table more actions menu
  */
 export const openAddToNewCaseFlyoutFromTable = () => {
+  cy.get(ADD_TO_CASE_ITEM).first().click();
   cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).first().click();
+  cy.get(ADD_TO_CASE_SUBMIT_BUTTON).click();
 };
 
 /**
  * Open the add to existing case flyout from the indicators table more actions menu
  */
 export const openAddToExistingCaseFlyoutFromTable = () => {
+  cy.get(ADD_TO_CASE_ITEM).first().click();
   cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).first().click();
+  cy.get(ADD_TO_CASE_SUBMIT_BUTTON).click();
 };
 
 /**
  * Open the new case flyout from the indicators flyout take action menu
  */
 export const openAddToNewCaseFromFlyout = () => {
+  cy.get(ADD_TO_CASE_ITEM).first().click();
   cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).first().click();
+  cy.get(ADD_TO_CASE_SUBMIT_BUTTON).click();
 };
 
 /**
  * Open the new existing flyout from the indicators flyout take action menu
  */
 export const openAddToExistingCaseFromFlyout = () => {
+  cy.get(ADD_TO_CASE_ITEM).first().click();
   cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).first().click();
+  cy.get(ADD_TO_CASE_SUBMIT_BUTTON).click();
 };
 
 /**
