@@ -207,6 +207,27 @@ describe('Transform: <Wizard />', () => {
     expect(screen.getByTestId('transformDataViewPicker')).toHaveTextContent('Select data view');
   });
 
+  test('shows a visible project scope error when project fetch fails', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    appDeps.cps = {
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
+        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Project scope unavailable')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('transformProjectScopePicker')).toBeDisabled();
+  });
+
   test('shows confirmation before changing an existing data view', async () => {
     const setSavedObjectId = jest.fn();
 

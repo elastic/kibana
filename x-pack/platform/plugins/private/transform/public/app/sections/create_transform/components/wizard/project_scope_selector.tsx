@@ -151,7 +151,11 @@ export const ProjectScopeSelector = ({
       });
 
   return (
-    <EuiFormRow label={projectScopeLabel}>
+    <EuiFormRow
+      error={error ? unavailableLabel : undefined}
+      isInvalid={Boolean(error)}
+      label={projectScopeLabel}
+    >
       <EuiPopover
         aria-label={projectScopeLabel}
         button={
