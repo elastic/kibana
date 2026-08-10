@@ -84,7 +84,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer existing components in this order: the owning platform or solution area, `@kbn/ui-*` under `src/platform/kbn-ui`, then `@elastic/eui`. Use supported props and composition before creating a component.
 - Keep new UI in its owning area by default. Use `@kbn/ui-*` only for low-dependency UI shared across areas.
 - For new complex UI shared across areas, prefer a static package with tests and Storybook when available instead of expanding a plugin.
-- If existing local, `@kbn/ui-*`, and EUI components cannot meet a requirement through supported props or composition, flag the gap and recommend discussing it with product and design before implementing a workaround.
+- If existing `@kbn/ui-*` and EUI components cannot meet a requirement through supported props or composition, flag the gap and recommend discussing it with product and design before implementing a workaround.
 - Style with Emotion (`@emotion/react`) and EUI design tokens. Use CSS overrides only as a last resort, and inline styles only for dynamic runtime values such as animation or positioning.
 
 ### Schema validation
