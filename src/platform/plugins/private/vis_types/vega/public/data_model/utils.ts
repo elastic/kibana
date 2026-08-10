@@ -102,7 +102,7 @@ export function getVegaThemeColors<T extends 'grid' | 'title' | 'label' | 'defau
 export function getDefaultAreaGradientFill(defaultColor: string | string[]): Gradient {
   const color = Array.isArray(defaultColor) ? defaultColor[0] : defaultColor;
   const startOpacity = 0.15;
-  const stopCount = 10;
+  const stopCount = 12;
 
   return {
     gradient: 'linear',
@@ -112,7 +112,7 @@ export function getDefaultAreaGradientFill(defaultColor: string | string[]): Gra
     y2: 0,
     stops: Array.from({ length: stopCount }, (_, i) => {
       const offset = i / (stopCount - 1);
-      const opacity = startOpacity + (1 - startOpacity) * easing.inOutCubic(offset);
+      const opacity = startOpacity + (1 - startOpacity) * easing.inOutSine(offset);
       return { offset, color: transparentize(color, opacity) };
     }),
   };

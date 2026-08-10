@@ -17,8 +17,7 @@ const fillLabel = i18n.translate('xpack.lens.xyChart.fillLabel', {
 });
 
 export interface AreaFillOptionProps {
-  isStacked: boolean;
-  selectedAreaFillOption?: AreaFillOptionValue;
+  value?: AreaFillOptionValue;
   onChange: (value: AreaFillOptionValue) => void;
 }
 
@@ -40,11 +39,11 @@ const areaFillOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export const AreaFillOption: React.FC<AreaFillOptionProps> = ({
-  selectedAreaFillOption = AreaFillOptions.SOLID,
+  value = AreaFillOptions.SOLID,
   onChange,
 }) => {
   const selectedOption =
-    areaFillOptions.find(({ value }) => value === selectedAreaFillOption) ?? areaFillOptions[0];
+    areaFillOptions.find((option) => option.value === value) ?? areaFillOptions[0];
 
   return (
     <EuiFormRow display="columnCompressed" label={fillLabel} fullWidth>

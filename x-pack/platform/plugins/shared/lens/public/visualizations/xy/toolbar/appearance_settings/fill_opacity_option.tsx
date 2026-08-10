@@ -25,7 +25,7 @@ export interface FillOpacityOptionProps {
    */
   isFillOpacityEnabled?: boolean;
   /**
-   * Flag for rendering or not the gradient fill option
+   * Currently selected fill option
    */
   fill?: AreaFillOption;
 }
