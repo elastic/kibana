@@ -81,12 +81,12 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
       await expect
-        .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
+        .poll(() => pageObjects.lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
         .toBe('Median of bytes_gauge');
     });
 
     await test.step('does not show warnings', async () => {
-      await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+      await pageObjects.lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel');
       await expect(page.testSubj.locator('median-partial-warning')).toHaveCount(0);
       await expect(page.testSubj.locator('lens-editor-warning')).toHaveCount(0);
       await pageObjects.lens.closeDimensionEditor();
@@ -110,10 +110,10 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
-      .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
+      .poll(() => pageObjects.lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
       .toBe('Average of bytes_gauge');
 
-    await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+    await pageObjects.lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel');
     await expect(page.testSubj.locator('median-partial-warning')).toBeVisible();
     await page.testSubj.locator('lns-indexPatternDimension-median').click();
     await pageObjects.lens.waitForVisualization('xyVisChart');
@@ -197,7 +197,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       // Unsupported operations are always present for counter; empty for gauge
       await test.step(`unsupported ${fieldType} operations`, async () => {
         // Reuse the existing dimensions from the supported step — just reopen the y-axis
-        await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+        await pageObjects.lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel');
         await pageObjects.lens.selectOperation('min');
 
         for (const operation of unsupportedOperations) {
@@ -259,7 +259,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       operation: 'date_histogram',
       keepOpen: true,
     });
-    await pageObjects.lens.clearDimensionField();
+    await pageObjects.lens.dimensions.clearDimensionField();
     const fieldComboBox = page.components.comboBox('indexPattern-dimension-field');
     expect(await fieldComboBox.getAllVisibleOptions()).not.toHaveLength(0);
     const optionsList = page.getByRole('listbox');
