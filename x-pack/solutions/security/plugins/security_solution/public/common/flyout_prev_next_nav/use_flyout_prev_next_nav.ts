@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { FlyoutPrevNextNavigation } from './types';
 
 export interface UseFlyoutPrevNextNavArgs<T extends { id: string }> {
   /** Ordered items of the currently loaded page, including non-navigable ones. */
@@ -18,19 +19,12 @@ export interface UseFlyoutPrevNextNavArgs<T extends { id: string }> {
   onNavigate: (item: T) => void;
 }
 
-export interface UseFlyoutPrevNextNavResult {
-  hasNext: boolean;
-  hasPrevious: boolean;
-  goToNext: () => void;
-  goToPrevious: () => void;
-}
-
 export const useFlyoutPrevNextNav = <T extends { id: string }>({
   items,
   openedItemId,
   isNavigable,
   onNavigate,
-}: UseFlyoutPrevNextNavArgs<T>): UseFlyoutPrevNextNavResult => {
+}: UseFlyoutPrevNextNavArgs<T>): FlyoutPrevNextNavigation => {
   const navigableItems = useMemo(() => items.filter(isNavigable), [items, isNavigable]);
 
   // -1 when nothing is open or the opened item is not navigable / not in the loaded page.

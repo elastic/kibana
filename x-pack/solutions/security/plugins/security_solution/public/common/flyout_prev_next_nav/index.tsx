@@ -8,15 +8,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { PREVIOUS_BUTTON_LABEL, NEXT_BUTTON_LABEL } from './translation';
+import type { FlyoutPrevNextNavigation } from './types';
 
+export * from './types';
 export * from './use_flyout_prev_next_nav';
-
-export interface FlyoutPrevNextNavigation {
-  hasPrevious: boolean;
-  hasNext: boolean;
-  goToPrevious: () => void;
-  goToNext: () => void;
-}
 
 export interface FlyoutPrevNextNavProps {
   navigation: FlyoutPrevNextNavigation;
