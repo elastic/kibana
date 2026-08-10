@@ -63,7 +63,7 @@ test.describe('API key update', { tag: tags.stateful.classic }, () => {
       await apiKeys.submitFlyout();
 
       await expect(apiKeys.updateSuccessToast).toContainText(`Updated API key '${API_KEY_NAME}'`);
-      await expect(page).toHaveURL(/app\/management\/security\/api_keys\/?$/);
+      await expect(page).toHaveURL(testData.API_KEYS_URL);
     });
   });
 });

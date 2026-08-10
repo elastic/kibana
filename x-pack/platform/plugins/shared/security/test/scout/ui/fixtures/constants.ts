@@ -7,6 +7,9 @@
 
 import type { KibanaRole } from '@kbn/scout';
 
+export const API_KEYS_URL = /app\/management\/security\/api_keys\/?$/;
+export const API_KEYS_CREATE_URL = /app\/management\/security\/api_keys\/create/;
+
 const KIBANA_ACCESS: KibanaRole['kibana'] = [
   { base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] },
 ];

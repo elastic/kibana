@@ -10,8 +10,6 @@ import { expect } from '@kbn/scout/ui';
 
 import { getCurrentUsername, invalidateApiKeysOwnedBy, test, testData } from '../fixtures';
 
-const API_KEYS_URL = /app\/management\/security\/api_keys\/?$/;
-
 test.describe('API keys creation', { tag: tags.stateful.classic }, () => {
   let currentUsername: string | undefined;
   test.beforeEach(async ({ browserAuth, page, kbnUrl, esClient, pageObjects }) => {
@@ -38,13 +36,13 @@ test.describe('API keys creation', { tag: tags.stateful.classic }, () => {
     await expect(apiKeys.emptyPromptTitle).toHaveText('Create your first API key');
 
     await apiKeys.clickCreateFromPrompt();
-    await expect(page).toHaveURL(/app\/management\/security\/api_keys\/create/);
+    await expect(page).toHaveURL(testData.API_KEYS_CREATE_URL);
     await expect(apiKeys.flyoutTitle).toHaveText('Create API key');
 
     await apiKeys.setName(apiKeyName);
     await apiKeys.submitFlyout();
 
-    await expect(page).toHaveURL(API_KEYS_URL);
+    await expect(page).toHaveURL(testData.API_KEYS_URL);
     await expect(apiKeys.createdCallOut).toContainText(`Created API key '${apiKeyName}'`);
     await expect(apiKeys.rowByName(apiKeyName)).toBeVisible();
   });
@@ -54,13 +52,13 @@ test.describe('API keys creation', { tag: tags.stateful.classic }, () => {
     const apiKeys = pageObjects.apiKeys;
 
     await apiKeys.clickCreateFromPrompt();
-    await expect(page).toHaveURL(/app\/management\/security\/api_keys\/create/);
+    await expect(page).toHaveURL(testData.API_KEYS_CREATE_URL);
 
     await apiKeys.setName(apiKeyName);
     await apiKeys.setCustomExpiration('12');
     await apiKeys.submitFlyout();
 
-    await expect(page).toHaveURL(API_KEYS_URL);
+    await expect(page).toHaveURL(testData.API_KEYS_URL);
     await expect(apiKeys.createdCallOut).toContainText(`Created API key '${apiKeyName}'`);
     await expect(apiKeys.rowByName(apiKeyName)).toBeVisible();
 
