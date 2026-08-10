@@ -34,7 +34,7 @@ const createServiceMock = (
 ): jest.Mocked<DateRangePickerPresetsService> => ({
   getUiSettingsPresets: jest.fn(() => uiSettingsPresets),
   getPresets$: jest.fn(() => of(lockedPresets)),
-  getCanWrite$: jest.fn(() => of(true)),
+  canPersist: jest.fn(() => true),
   savePreset: jest.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
   deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
   ...overrides,
@@ -83,7 +83,7 @@ describe('useDateRangePickerPresets', () => {
     });
 
     it('omits save/delete handlers when the user cannot write', () => {
-      const service = createServiceMock({ getCanWrite$: jest.fn(() => of(false)) });
+      const service = createServiceMock({ canPersist: jest.fn(() => false) });
       const { hook } = renderPresetsHook({ service });
 
       expect(hook.result.current.onPresetSave).toBeUndefined();
@@ -161,13 +161,13 @@ describe('useDateRangePickerPresets', () => {
       expect(service.getPresets$).not.toHaveBeenCalled();
     });
 
-    it('omits save/delete handlers and skips the canWrite check', () => {
+    it('omits save/delete handlers and skips the canPersist check', () => {
       const service = createServiceMock();
       const { hook } = renderPresetsHook({ service, persistenceEnabled: false });
 
       expect(hook.result.current.onPresetSave).toBeUndefined();
       expect(hook.result.current.onPresetDelete).toBeUndefined();
-      expect(service.getCanWrite$).not.toHaveBeenCalled();
+      expect(service.canPersist).not.toHaveBeenCalled();
     });
   });
 });

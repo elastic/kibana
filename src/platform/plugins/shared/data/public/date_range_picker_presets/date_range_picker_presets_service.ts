@@ -28,7 +28,6 @@ import { mapQuickRanges, TIMEPICKER_QUICK_RANGES_SETTING, type QuickRange } from
 export interface DateRangePickerPresetsServiceDeps {
   userStorage: CoreStart['userStorage'];
   uiSettings: CoreStart['uiSettings'];
-  userProfile: CoreStart['userProfile'];
 }
 
 const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
@@ -52,12 +51,10 @@ const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
 export class DateRangePickerPresetsService implements IDateRangePickerPresetsService {
   private readonly userStorage: CoreStart['userStorage'];
   private readonly uiSettings: CoreStart['uiSettings'];
-  private readonly userProfile: CoreStart['userProfile'];
 
-  constructor({ userStorage, uiSettings, userProfile }: DateRangePickerPresetsServiceDeps) {
+  constructor({ userStorage, uiSettings }: DateRangePickerPresetsServiceDeps) {
     this.userStorage = userStorage;
     this.uiSettings = uiSettings;
-    this.userProfile = userProfile;
   }
 
   public getUiSettingsPresets(): PresetItem[] {
@@ -79,24 +76,19 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
       );
   }
 
-  public getCanWrite$(): Observable<boolean> {
-    return this.userProfile.getUserProfile$().pipe(map((profile) => Boolean(profile)));
+  public canPersist(): boolean {
+    return this.userStorage.isAvailable();
   }
 
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {
-    const base = this.getMutationBase();
     const presetKey = getPresetKey(preset);
+    const base = await this.getStoredPresets();
     const matchesExistingPreset = [...base, ...this.getUiSettingsPresets()].some(
       (item) => getPresetKey(item) === presetKey
     );
 
-    if (matchesExistingPreset) {
-      return 'duplicate';
-    }
-
-    if (base.length >= MAX_PRESETS) {
-      return 'limit-reached';
-    }
+    if (matchesExistingPreset) return 'duplicate';
+    if (base.length >= MAX_PRESETS) return 'limit-reached';
 
     // Stored newest first, so a saved preset lands at the top of the displayed list.
     await this.persist([preset, ...base]);
@@ -105,33 +97,27 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
 
   public async deletePreset(preset: PresetItem): Promise<void> {
     const presetKey = getPresetKey(preset);
-    const base = this.getMutationBase();
+    const base = await this.getStoredPresets();
     const next = base.filter((item) => getPresetKey(item) !== presetKey);
 
     // A quick range is never stored, so there is nothing to remove and no reason to write.
-    if (next.length === base.length) {
-      return;
-    }
+    if (next.length === base.length) return;
 
     await this.persist(next);
   }
 
   /**
-   * The user's own presets, used as the base for a mutation and read
-   * synchronously from the local cache via `peek`.
-   *
-   * NOTE: with the `preload: false` key, `peek` returns the empty default until
-   * the lazy fetch triggered by `getPresets$` hydrates the cache — so a save
-   * issued before hydration can overwrite previously stored user presets. A
-   * robust fix needs a core "value ready" signal (tracked with the
-   * `userStorage.isAvailable` follow-up); centralising writes here makes that a
-   * one-spot change.
+   * The user's own presets, used as the base for a mutation. This key is
+   * `preload: false`, so `get()` (never `peek()`) is required — an unhydrated
+   * read would persist an empty list over whatever the user already had stored.
    */
-  private getMutationBase(): PresetItem[] {
-    return migrateStoredPresets(
-      this.userStorage.peek<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS),
-      this.getUiSettingsPresets()
-    ).presets;
+  private async getStoredPresets(): Promise<PresetItem[]> {
+    const stored = await this.userStorage.get<StoredPresets>(
+      DATE_RANGE_PICKER_PRESETS_KEY,
+      DEFAULT_STORED_PRESETS
+    );
+
+    return migrateStoredPresets(stored, this.getUiSettingsPresets()).presets;
   }
 
   private async persist(presets: PresetItem[]): Promise<void> {
