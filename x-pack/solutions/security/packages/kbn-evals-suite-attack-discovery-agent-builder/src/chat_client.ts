@@ -39,6 +39,28 @@ const parseInsightsFromMessage = (message: string): AttackDiscovery[] | null => 
   }
 };
 
+// On long runs the agent's report and insights JSON land in a `reasoning` step
+// rather than `response.message`, so reading only the message loses them. Scan
+// `reasoning` steps ONLY, never tool results: `security.attack-discovery.run`
+// returns its own `attack_discoveries`, and reading that would score the tool's
+// return value instead of what the agent actually rendered.
+export const parseInsightsFromSteps = (
+  steps: AgentBuilderConverseResponse['steps']
+): AttackDiscovery[] | null => {
+  const reasoning = steps
+    .filter((step) => step.type === 'reasoning' && typeof step.reasoning === 'string')
+    .map((step) => step.reasoning as string);
+
+  for (let i = reasoning.length - 1; i >= 0; i--) {
+    const insights = parseInsightsFromMessage(reasoning[i]);
+    if (insights) {
+      return insights;
+    }
+  }
+
+  return null;
+};
+
 export class AttackDiscoveryAgentBuilderChatClient {
   constructor(
     private readonly fetch: HttpHandler,
@@ -90,7 +112,9 @@ export class AttackDiscoveryAgentBuilderChatClient {
       steps: response.steps ?? [],
       errors: [],
       traceId: response.trace_id,
-      insights: parseInsightsFromMessage(response.response.message),
+      insights:
+        parseInsightsFromMessage(response.response.message) ??
+        parseInsightsFromSteps(response.steps ?? []),
     };
   }
 }
