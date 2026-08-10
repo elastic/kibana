@@ -67,7 +67,7 @@ export const WatchesPage: React.FC = () => {
             <EuiButton
               key="new-watch"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onNewWatch}
               data-test-subj="pndNewWatchButton"
             >
