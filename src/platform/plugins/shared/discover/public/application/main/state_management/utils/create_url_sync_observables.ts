@@ -22,7 +22,7 @@ import {
   type InternalStateDependencies,
   type InternalStateDispatch,
 } from '../redux';
-import { internalStateSliceActions } from '../redux/internal_state';
+import { internalStateSlice } from '../redux/internal_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../common/context_awareness';
 
@@ -155,7 +155,7 @@ export const createUrlSyncObservables = ({
         });
 
         dispatch(
-          internalStateSliceActions.setProfileState({
+          internalStateSlice.actions.setProfileState({
             tabId,
             key: stateKey,
             profileState: { ...nonUrlProfileState, ...nextProfileUrlState },
@@ -183,7 +183,7 @@ export const createUrlSyncObservables = ({
 
         if (!isEqual(currentProfileState, nonUrlProfileState)) {
           dispatch(
-            internalStateSliceActions.setProfileState({
+            internalStateSlice.actions.setProfileState({
               tabId,
               key: profileUrlStateDefinition.key,
               profileState: nonUrlProfileState,
