@@ -117,6 +117,41 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Every suite must have [deployment tags](../testing/deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 - Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
+
+## Don't assume your fixtures are the only data [dont-assume-your-fixtures-are-the-only-data]
+
+Tests share a deployment with other suites, with data left behind by earlier runs, and — on Cloud — with preinstalled managed content (Fleet integration dashboards, prebuilt rules, sample connectors). Anything that reads a *collection* has to tolerate unrelated entries.
+
+- **Narrow the query; don't count on ordering.** Search or filter by a term unique to your fixtures before asserting.
+- **Watch for result caps and pagination.** Both silently drop your rows once the deployment holds more data than your local stack. Filter a table down before clicking one of its rows.
+- **Prefer identity over position.** Address objects by ID or name, never by index.
+- **Assert containment, not totality.** `toContainText(myFixture)` survives a busy deployment; `toHaveCount(4)` does not.
+
+:::::{dropdown} Examples
+❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where managed dashboards push the fixtures past the search provider's result cap:
+
+```ts
+await pageObjects.globalSearch.searchFor('type:dashboard');
+await expect(page.testSubj.locator('globalSearchResults')).toHaveCount(4);
+```
+
+✔️ **Do:** include a term that only your fixtures match, and assert on those:
+
+```ts
+await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
+await expect(page.testSubj.locator('globalSearchResults')).toContainText('my-fixture-1');
+```
+
+✔️ **Do:** filter a paginated table down to the target before interacting with its row:
+
+```ts
+await searchBox.fill(connectorName);
+await searchBox.press('Enter');
+await page.testSubj.locator('connectorsTable-loaded').waitFor({ state: 'visible' });
+```
+
+:::::
+
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
 
 A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:
