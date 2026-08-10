@@ -98,7 +98,7 @@ describe('KnowledgeIndicatorsPanel', () => {
     renderWithProviders(<KnowledgeIndicatorsPanel isLoading={false} aiIndex={aiIndex} />);
 
     expect(screen.getByTestId('contextAiIndexKiHeaderSummary')).toHaveTextContent(
-      "25 KIs stored in ai-index-idx-sample-ki"
+      '25 KIs stored in ai-index-idx-sample-ki'
     );
     await waitFor(() => {
       expect(screen.getByTestId('contextAiIndexKiIndexLink')).toHaveAttribute(
