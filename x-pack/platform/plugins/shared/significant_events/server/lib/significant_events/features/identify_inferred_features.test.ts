@@ -30,16 +30,12 @@ const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'i
 });
 
 describe('isSampleHealthy', () => {
-  it('is healthy when no entity filters were applied', () => {
-    expect(isSampleHealthy({ totalFilters: 0, hasFilteredDocuments: false })).toBe(true);
+  it('is healthy when the entity-filtered arm ran without erroring', () => {
+    expect(isSampleHealthy({ totalFilters: 3, entityFilteredErrored: false })).toBe(true);
   });
 
-  it('is healthy when entity filters returned documents', () => {
-    expect(isSampleHealthy({ totalFilters: 3, hasFilteredDocuments: true })).toBe(true);
-  });
-
-  it('is degraded when entity filters were applied but returned nothing', () => {
-    expect(isSampleHealthy({ totalFilters: 3, hasFilteredDocuments: false })).toBe(false);
+  it('is degraded only when the entity-filtered arm errored', () => {
+    expect(isSampleHealthy({ totalFilters: 3, entityFilteredErrored: true })).toBe(false);
   });
 });
 

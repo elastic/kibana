@@ -148,10 +148,7 @@ steps:
             with:
               hasSuccess: true
 
-      # 2e: Convergence early-stop. Only healthy successful iterations count:
-      #     a new feature resets patience, a barren one increments it, and a
-      #     degraded/failed sample is neutral (left unchanged). Break once
-      #     convergencePatience consecutive barren iterations are reached.
+      # 2e: Convergence early-stop. sampleHealthy gates: an errored entity-filtered arm can produce a false barren result.
       - name: track_convergence
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' and steps.identify_inferred.output.sampleHealthy == true }}"

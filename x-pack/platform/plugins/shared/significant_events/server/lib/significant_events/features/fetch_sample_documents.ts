@@ -153,6 +153,7 @@ export async function fetchSampleDocuments({
       totalFilters: 0,
       filtersCapped: false,
       hasFilteredDocuments: false,
+      entityFilteredErrored: false,
     };
   }
 
@@ -162,16 +163,68 @@ export async function fetchSampleDocuments({
     .map((filter) => conditionToESQLAst({ not: filter }))
     .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
 
-  const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
-    await Promise.all([
+  const [
+    { hits: entityFilteredHits, errored: entityFilteredErrored },
+    { hits: diverseHits },
+    { hits: randomHits },
+  ] = await Promise.all([
+    withSpan(
+      {
+        name: 'sample_documents_entity_filtered',
+        labels: {
+          stream: index,
+          strategy: 'entity-filtered',
+          sampleSize: String(entityFilteredSize),
+        },
+      },
+      () =>
+        getSampleDocumentsEsql({
+          esClient,
+          index,
+          start,
+          end,
+          sampleSize: entityFilteredSize,
+          whereCondition,
+          unmappedFields: 'LOAD',
+          requestTimeout: samplingTimeoutMs,
+        })
+    )
+      // resolve(no-hits) is genuine exhaustion; reject is degraded — don't collapse both to EMPTY_SAMPLE
+      .then(({ hits }) => ({ hits, errored: false }))
+      .catch((err) => {
+        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+        return { hits: EMPTY_SAMPLE.hits, errored: true };
+      }),
+    diverseSize > 0
+      ? withSpan(
+          {
+            name: 'sample_documents_diverse',
+            labels: {
+              stream: index,
+              strategy: 'diverse',
+              sampleSize: String(diverseSize + entityFilteredSize),
+            },
+          },
+          () =>
+            getDiverseSampleDocuments({
+              esClient: tracedEsClient,
+              index,
+              start,
+              end,
+              size: diverseSize + entityFilteredSize,
+              iteration,
+              logger,
+            })
+        ).catch((err) => {
+          logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+          return EMPTY_SAMPLE;
+        })
+      : Promise.resolve(EMPTY_SAMPLE),
+    withRandomSamplingErrorContext(
       withSpan(
         {
-          name: 'sample_documents_entity_filtered',
-          labels: {
-            stream: index,
-            strategy: 'entity-filtered',
-            sampleSize: String(entityFilteredSize),
-          },
+          name: 'sample_documents_random',
+          labels: { stream: index, strategy: 'random', sampleSize: String(size) },
         },
         () =>
           getSampleDocumentsEsql({
@@ -179,59 +232,13 @@ export async function fetchSampleDocuments({
             index,
             start,
             end,
-            sampleSize: entityFilteredSize,
-            whereCondition,
-            unmappedFields: 'LOAD',
+            sampleSize: size,
             requestTimeout: samplingTimeoutMs,
           })
-      ).catch((err) => {
-        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
-        return EMPTY_SAMPLE;
-      }),
-      diverseSize > 0
-        ? withSpan(
-            {
-              name: 'sample_documents_diverse',
-              labels: {
-                stream: index,
-                strategy: 'diverse',
-                sampleSize: String(diverseSize + entityFilteredSize),
-              },
-            },
-            () =>
-              getDiverseSampleDocuments({
-                esClient: tracedEsClient,
-                index,
-                start,
-                end,
-                size: diverseSize + entityFilteredSize,
-                iteration,
-                logger,
-              })
-          ).catch((err) => {
-            logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
-            return EMPTY_SAMPLE;
-          })
-        : Promise.resolve(EMPTY_SAMPLE),
-      withRandomSamplingErrorContext(
-        withSpan(
-          {
-            name: 'sample_documents_random',
-            labels: { stream: index, strategy: 'random', sampleSize: String(size) },
-          },
-          () =>
-            getSampleDocumentsEsql({
-              esClient,
-              index,
-              start,
-              end,
-              sampleSize: size,
-              requestTimeout: samplingTimeoutMs,
-            })
-        ),
-        samplingTimeoutMs
       ),
-    ]);
+      samplingTimeoutMs
+    ),
+  ]);
 
   const { documents, bucketCounts } = mergeDocuments(
     [
@@ -256,6 +263,7 @@ export async function fetchSampleDocuments({
     totalFilters: features.length,
     filtersCapped: features.length > maxEntityFilters,
     hasFilteredDocuments: entityFilteredHits.length > 0,
+    entityFilteredErrored,
   };
 }
 

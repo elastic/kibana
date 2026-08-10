@@ -474,6 +474,7 @@ type InferredIterationResult =
       totalFilters: number;
       filtersCapped: boolean;
       hasFilteredDocuments: boolean;
+      entityFilteredErrored: boolean;
       outcome:
         | { state: 'failure' }
         | {
@@ -489,15 +490,13 @@ type InferredIterationResult =
           };
     };
 
-// Zero new features only signals convergence if the entity-filtered arm actually ran:
-// filters present but no filtered docs = sampling artifact (flaky SAMPLE), not progress.
 export const isSampleHealthy = ({
   totalFilters,
-  hasFilteredDocuments,
+  entityFilteredErrored,
 }: {
   totalFilters: number;
-  hasFilteredDocuments: boolean;
-}): boolean => !(totalFilters > 0 && !hasFilteredDocuments);
+  entityFilteredErrored: boolean;
+}): boolean => !(totalFilters > 0 && entityFilteredErrored);
 
 async function runInferredIteration({
   samplingEsClient,
@@ -552,7 +551,7 @@ async function runInferredIteration({
     return { hasDocuments: false };
   }
 
-  const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
+  const { totalFilters, filtersCapped, hasFilteredDocuments, entityFilteredErrored } = batchResult;
   const docsCount = batchResult.documents.length;
   const docIds = batchResult.documents
     .map((doc) => doc._id)
@@ -617,6 +616,7 @@ async function runInferredIteration({
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
+      entityFilteredErrored,
       outcome: { state: 'failure' },
     };
   }
@@ -645,6 +645,7 @@ async function runInferredIteration({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
+    entityFilteredErrored,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -809,8 +810,15 @@ export async function identifyInferredFeatures({
     };
   }
 
-  const { docsCount, docIds, totalFilters, filtersCapped, hasFilteredDocuments, outcome } =
-    iterationResult;
+  const {
+    docsCount,
+    docIds,
+    totalFilters,
+    filtersCapped,
+    hasFilteredDocuments,
+    entityFilteredErrored,
+    outcome,
+  } = iterationResult;
 
   const durationMs = Date.now() - startedAt;
 
@@ -905,7 +913,7 @@ export async function identifyInferredFeatures({
 
   return {
     hasDocuments: true,
-    sampleHealthy: isSampleHealthy({ totalFilters, hasFilteredDocuments }),
+    sampleHealthy: isSampleHealthy({ totalFilters, entityFilteredErrored }),
     docsCount,
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),
