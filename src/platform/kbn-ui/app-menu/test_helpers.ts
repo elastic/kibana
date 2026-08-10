@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/app-menu/core-chrome-app-menu-components'],
-};
+// RTL interaction helpers (depend on @testing-library), so they live in this test-only entry.
+export { openAppMenuOverflow } from './src/test_helpers';

@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openAppMenuOverflow } from '@kbn/ui-app-menu/test_helpers';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/platform/kbn-ui/app-menu'],
+  setupFilesAfterEnv: ['<rootDir>/src/platform/kbn-ui/app-menu/setup_tests.ts'],
+};

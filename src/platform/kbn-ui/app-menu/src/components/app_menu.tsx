@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, type EuiBreakpointSize, useCurrentEuiBreakpoint } from '@elastic/eui';
-import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
+import { useCurrentChromeApplicationBreakpoint } from '@kbn/ui-chrome-layout-utils';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
