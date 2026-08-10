@@ -40,7 +40,7 @@ import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/publ
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
-import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -96,12 +96,12 @@ export function InternalDashboardTopNav({
 
   const chromeStyle = useChromeStyle();
   // Header rendering mode:
-  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
-  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
+  //  - `inline`: project chrome, standalone -> we render `AppHeader`.
+  //  - `registered`: project chrome, embedded in a host that owns the layout (e.g. Security) -> register
   //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome or next chrome disabled -> push through the imperative chrome APIs.
+  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
+  const isAppHeaderActive = chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);

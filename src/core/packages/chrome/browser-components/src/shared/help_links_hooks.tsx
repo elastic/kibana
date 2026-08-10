@@ -20,7 +20,7 @@ import { useIsServerless } from '@kbn/react-env';
 import { css } from '@emotion/react';
 import type { HelpLinks, HelpMenuLinkItem } from './help_menu_links';
 import { buildHelpLinks, toContextMenuItem } from './help_menu_links';
-import { useNavigateToUrl, useIsNextChrome } from './chrome_hooks';
+import { useNavigateToUrl } from './chrome_hooks';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -31,10 +31,9 @@ export function useHelpLinks$(): Observable<HelpLinks> {
   const chrome = useChromeService();
   const chromeStyle = useChromeStyle();
   const docLinks = useChromeComponentsDeps().docLinks;
-  const isNextChrome = useIsNextChrome();
   const isServerless = useIsServerless();
-  const isProjectAndNextChrome = chromeStyle === 'project' && isNextChrome;
-  const showNewsfeed = isProjectAndNextChrome && !isServerless;
+  const isProject = chromeStyle === 'project';
+  const showNewsfeed = isProject && !isServerless;
 
   return useMemo(
     () =>
@@ -72,7 +71,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
                 supportUrl,
                 globalExtensionMenuLinks,
                 docLinks,
-                feedbackHandler: isProjectAndNextChrome ? feedbackHandler : undefined,
+                feedbackHandler: isProject ? feedbackHandler : undefined,
                 newsfeedHandler: showNewsfeed ? newsfeedInfo?.open : undefined,
                 newsfeedHasNew: showNewsfeed ? newsfeedInfo?.hasNew : undefined,
               },
@@ -80,7 +79,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
         ),
         distinctUntilChanged(equal)
       ),
-    [chrome, chromeStyle, docLinks, isProjectAndNextChrome, showNewsfeed]
+    [chrome, chromeStyle, docLinks, isProject, showNewsfeed]
   );
 }
 

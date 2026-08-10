@@ -17,7 +17,7 @@ export default function ({ getPageObject }: FtrProviderContext) {
     });
 
     it('has project header', async () => {
-      await svlCommonPage.assertProjectHeaderExists();
+      await svlCommonPage.assertChromeNextGlobalHeaderExists();
     });
 
     // We don't have a logger service to check the logs at this stage.

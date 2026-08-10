@@ -39,7 +39,7 @@ describe('GlobalSearchBarPlugin', () => {
       expect(navControlsRegisterSpy).toHaveBeenCalled();
     });
 
-    it('registers Chrome Next globalSearch when next is enabled', () => {
+    it('registers Chrome Next globalSearch', () => {
       const coreSetup = coreMock.createSetup();
 
       const service = createPlugin();
@@ -47,7 +47,6 @@ describe('GlobalSearchBarPlugin', () => {
       service.setup(coreSetup);
 
       const coreStart = coreMock.createStart();
-      jest.spyOn(coreStart.chrome.next, 'isEnabled', 'get').mockReturnValue(true);
 
       const setSpy = jest.spyOn(coreStart.chrome.next.globalSearch, 'set');
 

@@ -12,7 +12,7 @@ import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
-import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
+import { ChromeAppHeader } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -39,7 +39,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChrome = services.chrome.getChromeStyle() === 'project';
 
   const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems } = useAppMenuData({
     currentDataView,
@@ -73,19 +73,19 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
-    if (isChromeNextProjectHeader) {
+    if (isProjectChrome) {
       return (tabsBar) => (
         <ChromeAppHeader menu={topNavMenuItems} hasTabs={Boolean(tabsBar)} tabsBar={tabsBar} />
       );
     }
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+  }, [isProjectChrome, topNavMenuItems]);
 
   const appendRight = useMemo(() => {
-    if (!isChromeNextProjectHeader) {
+    if (!isProjectChrome) {
       return <AppMenuComponent config={topNavMenuItems} />;
     }
     return undefined;
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+  }, [isProjectChrome, topNavMenuItems]);
 
   const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
     (droppedCount: number) => {

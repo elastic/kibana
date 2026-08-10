@@ -13,7 +13,6 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
@@ -21,7 +20,6 @@ export interface LayoutServiceStartDeps {
   http: InternalHttpStart;
   docLinks: DocLinksStart;
   customBranding: CustomBrandingStart;
-  featureFlags: FeatureFlagsStart;
 }
 
 /**

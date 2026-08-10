@@ -27,7 +27,7 @@ test.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.spaces.navigateToHome();
 
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+      const isHeaderVisible = await pageObjects.spaces.isChromeNextGlobalHeaderVisible();
       expect(isHeaderVisible).toBe(true);
 
       await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
@@ -40,7 +40,7 @@ test.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.spaces.navigateToHome();
 
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+      const isHeaderVisible = await pageObjects.spaces.isChromeNextGlobalHeaderVisible();
       expect(isHeaderVisible).toBe(true);
 
       await pageObjects.spaces.openSpacesSelector();
@@ -56,7 +56,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.spaces.navigateToHome();
 
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+      const isHeaderVisible = await pageObjects.spaces.isChromeNextGlobalHeaderVisible();
       expect(isHeaderVisible).toBe(true);
 
       await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
@@ -69,7 +69,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.spaces.navigateToHome();
 
-      const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
+      const isHeaderVisible = await pageObjects.spaces.isChromeNextGlobalHeaderVisible();
       expect(isHeaderVisible).toBe(true);
 
       await pageObjects.spaces.openSpacesSelector();

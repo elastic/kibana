@@ -57,16 +57,14 @@ export interface NavigationItems {
  * @param navLinks
  * @param activeNodes
  * @param panelStateManager - Manager for panel opener state
- * @param isNextChrome - Whether the navigation is in the next chrome
  */
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
   activeNodes: ChromeProjectNavigationNode[][],
   overflowItemIds: string[] = [],
-  panelStateManager: PanelStateManager,
-  isNextChrome: boolean = false
+  panelStateManager: PanelStateManager
 ): NavigationItems => {
-  let primaryNodes: ChromeProjectNavigationNode[] = navigationTree.body;
+  const primaryNodes: ChromeProjectNavigationNode[] = navigationTree.body;
   const footerNodes: ChromeProjectNavigationNode[] = navigationTree.footer ?? [];
 
   let deepestActiveItemId: string | undefined;
@@ -106,28 +104,16 @@ export const toNavigationItems = (
     );
   };
 
-  let logoItem: SideNavLogo | undefined;
+  // Home stays in `primaryNodes` as a regular, customizable sidebar item.
+  // Its title/icon are normalized upstream in `applyCustomization`.
+  // `logoItem` is unused in the project shell (Chrome Next); kept undefined for API shape.
+  // TODO: remove the `renderAs: 'home'` special-casing entirely in favor of
+  // solution-owned nav tree config: https://github.com/elastic/kibana/issues/272291
+  const logoItem: SideNavLogo | undefined = undefined;
 
   const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
   if (homeNodeIndex !== -1) {
-    const homeNode = primaryNodes[homeNodeIndex];
-    maybeMarkActive(homeNode, 0);
-
-    if (!isNextChrome) {
-      primaryNodes = primaryNodes.filter((_, i) => i !== homeNodeIndex);
-      logoItem = {
-        href: warnIfMissing(homeNode, 'href', '/missing-href-😭'),
-        iconType: getNavigationNodeIcon(homeNode),
-        id: warnIfMissing(homeNode, 'id', 'kibana'),
-        label: warnIfMissing(homeNode, 'title', 'Kibana'),
-        'data-test-subj': getTestSubj(homeNode, ['nav-item-home']),
-      };
-    }
-    // In Chrome Next the home node stays in `primaryNodes` as a regular,
-    // customizable sidebar item. Its title/icon are normalized upstream in
-    // `applyCustomization`, so no override is needed here.
-    // TODO: remove the `renderAs: 'home'` special-casing entirely in favor of
-    // solution-owned nav tree config: https://github.com/elastic/kibana/issues/272291
+    maybeMarkActive(primaryNodes[homeNodeIndex], 0);
   } else {
     warnOnce(
       `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`

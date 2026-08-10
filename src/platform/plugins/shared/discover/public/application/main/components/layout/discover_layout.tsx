@@ -71,8 +71,6 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { useIsChromeNextProjectHeader } from '../chrome_app_header';
-
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 
@@ -85,6 +83,7 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
 
 export function DiscoverLayout() {
   const {
+    chrome,
     core,
     docLinks,
     trackUiMetric,
@@ -107,7 +106,7 @@ export function DiscoverLayout() {
   const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChrome = chrome.getChromeStyle() === 'project';
 
   const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -363,12 +362,12 @@ export function DiscoverLayout() {
 
   const fullBodyHeightOffset = useMemo(() => {
     const isStandalone = customizationContext.displayMode === 'standalone';
-    if (isChromeNextProjectHeader && isStandalone) {
+    if (isProjectChrome && isStandalone) {
       return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
     }
 
     return `${TABS_BAR_HEIGHT + 1}px`;
-  }, [customizationContext.displayMode, euiTheme.size.xxl, isChromeNextProjectHeader]);
+  }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChrome]);
 
   return (
     <EuiPage

@@ -24,8 +24,6 @@ describe('Feedback Plugin', () => {
 
   const enableFeedback = () => coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
 
-  const enableChromeNext = () => coreStartMock.featureFlags.getBooleanValue.mockReturnValue(true);
-
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
     cloudStartMock = cloudMock.createStart();
@@ -58,45 +56,30 @@ describe('Feedback Plugin', () => {
     expect(coreStartMock.chrome.navControls.registerRight).not.toHaveBeenCalled();
   });
 
-  describe('Chrome Next', () => {
-    beforeEach(() => {
-      enableFeedback();
-      enableChromeNext();
-    });
-
-    it('registers the feedback handler only once opt-in resolves to true', () => {
-      startPlugin();
-
-      expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
-
-      isOptedIn$.next(true);
-
-      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-    });
-
-    it('unregisters the feedback handler when opt-in becomes false', () => {
-      const unregister = jest.fn();
-      coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
-
-      startPlugin();
-
-      isOptedIn$.next(true);
-      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
-
-      isOptedIn$.next(false);
-      expect(unregister).toHaveBeenCalled();
-    });
-  });
-
-  it('does not register the feedback handler when Chrome Next is disabled', () => {
+  it('registers the feedback handler only once opt-in resolves to true', () => {
     enableFeedback();
-    coreStartMock.featureFlags.getBooleanValue.mockReturnValue(false);
-
     startPlugin();
-    isOptedIn$.next(true);
 
     expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+
+    isOptedIn$.next(true);
+
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
+      expect.any(Function)
+    );
+  });
+
+  it('unregisters the feedback handler when opt-in becomes false', () => {
+    enableFeedback();
+    const unregister = jest.fn();
+    coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
+
+    startPlugin();
+
+    isOptedIn$.next(true);
+    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
+
+    isOptedIn$.next(false);
+    expect(unregister).toHaveBeenCalled();
   });
 });

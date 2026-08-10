@@ -35,9 +35,6 @@ export const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
 
       // backward compatible way to position sticky sub-headers
       --kbn-application--sticky-headers-offset: ${layoutVar('application.topBar.height', '0px')};
-
-      // height of the project header app action menu which is part of the application area
-      --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
     }
 
     // disable document-level scroll, since the application area handles it, but only when not printing

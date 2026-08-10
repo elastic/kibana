@@ -22,8 +22,8 @@ export class SpacesPage {
 
   // ---- generic header / selector ----
 
-  async isProjectHeaderVisible() {
-    return await this.page.testSubj.isVisible('kibanaProjectHeader');
+  async isChromeNextGlobalHeaderVisible() {
+    return await this.page.testSubj.isVisible('chromeNextGlobalHeader');
   }
 
   async navigateToHome() {

@@ -5,8 +5,8 @@ Top-level layout wiring for Kibana's Chrome application shell. Bridges core serv
 ## Responsibilities
 
 - **Assembles `ChromeComponentsDeps`** from whole service contracts (`application`, `http`, `docLinks`, `customBranding`) and wraps the tree with `ChromeComponentsProvider`.
-- **Selects the chrome layout** based on `useChromeStyle()` — renders `ClassicHeader` or `ProjectHeader` + `GridLayoutProjectSideNav` accordingly.
-- **Composes the shell** — header, navigation, sidebar, banner, app menu bar, footer, and the application content area — into a CSS Grid layout via `ChromeLayout` from `@kbn/ui-chrome-layout`.
+- **Selects the chrome layout** based on `useChromeStyle()` — renders `ClassicHeader` or `ChromeNextGlobalHeader` + `GridLayoutProjectSideNav` accordingly.
+- **Composes the shell** — header, navigation, sidebar, banner, chrome-owned app header, footer, and the application content area — into a CSS Grid layout via `ChromeLayout` from `@kbn/ui-chrome-layout`.
 - **Provides layout config** (`ChromeLayoutConfigProvider`) with dimensions (header height, banner height, sidebar width, etc.) consumed by layout components via CSS custom properties.
 
 ## Available Layouts

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
+import { ChromeAppHeader } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '.';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
@@ -21,11 +21,11 @@ export interface SingleTabViewWithAppMenuProps extends SingleTabViewProps {
 export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
   const { chrome } = useDiscoverServices();
   const topNavMenuItems = useTopNavMenuItems();
-  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+  const isProjectChrome = chrome.getChromeStyle() === 'project';
 
   return (
     <>
-      {isChromeNextProjectHeader ? (
+      {isProjectChrome ? (
         <ChromeAppHeader menu={topNavMenuItems} />
       ) : (
         topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />

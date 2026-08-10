@@ -19,7 +19,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('has project header', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
-      await svlCommonPage.assertProjectHeaderExists();
+      await svlCommonPage.assertChromeNextGlobalHeaderExists();
     });
   });
 }

@@ -110,7 +110,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   return {
     // check that chrome ui is in project/solution mode
     async expectExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await testSubjects.existOrFail('chromeNextGlobalHeader');
     },
     async clickLogo() {
       await testSubjects.click('nav-header-logo');
