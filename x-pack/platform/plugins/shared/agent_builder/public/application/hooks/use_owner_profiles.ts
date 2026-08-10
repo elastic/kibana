@@ -11,6 +11,8 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { useKibana } from './use_kibana';
 import { queryKeys } from '../query_keys';
 
+const EMPTY_PROFILES = new Map<string, string>();
+
 export const useOwnerProfiles = (agents: AgentDefinition[]): Map<string, string> => {
   const { services } = useKibana();
 
@@ -26,11 +28,12 @@ export const useOwnerProfiles = (agents: AgentDefinition[]): Map<string, string>
   const { data } = useQuery({
     queryKey: queryKeys.security.ownerProfiles(sortedUids),
     enabled: uids.size > 0 && Boolean(services.userProfile),
+    retry: false,
     queryFn: async () => {
       const profiles = await services.userProfile.bulkGet({ uids });
       return new Map(profiles.map((p) => [p.uid, p.user.full_name || p.user.username]));
     },
   });
 
-  return data ?? new Map<string, string>();
+  return data ?? EMPTY_PROFILES;
 };

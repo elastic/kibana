@@ -32,6 +32,7 @@ import { resolveOwnerLabel } from '../../../utils/owner';
 import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
@@ -47,7 +48,8 @@ import { accessSummaryManageButton } from '../access/access_i18n';
 const renderOwnerCell = (
   owner: { id?: string; username?: string } | undefined,
   date?: string,
-  profileMap?: Map<string, string>
+  profileMap?: Map<string, string>,
+  dateFormat?: string
 ) => {
   const label = resolveOwnerLabel(owner, profileMap);
   const relativeDate = date ? moment(date).fromNow() : undefined;
@@ -76,7 +78,7 @@ const renderOwnerCell = (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={moment(date).format('LL LT')}>
+        <EuiToolTip content={moment(date).format(dateFormat ?? 'LL LT')}>
           <EuiText size="xs" color="subdued" tabIndex={0}>
             {relativeDate}
           </EuiText>
@@ -125,6 +127,10 @@ export const AgentsList: React.FC = () => {
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
+  const {
+    services: { settings },
+  } = useKibana();
+  const dateFormat = settings?.client.get<string>('dateFormat');
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
   const [aclAgent, setAclAgent] = React.useState<AgentDefinitionWithPermissions | null>(null);
@@ -215,7 +221,7 @@ export const AgentsList: React.FC = () => {
       render: (
         createdBy: AgentDefinitionWithPermissions['created_by'],
         agent: AgentDefinitionWithPermissions
-      ) => renderOwnerCell(createdBy, agent.created_at, profileMap),
+      ) => renderOwnerCell(createdBy, agent.created_at, profileMap, dateFormat),
       'data-test-subj': 'agentBuilderAgentsListCreatedBy',
     };
 
@@ -226,7 +232,7 @@ export const AgentsList: React.FC = () => {
       render: (
         updatedBy: AgentDefinitionWithPermissions['updated_by'],
         agent: AgentDefinitionWithPermissions
-      ) => renderOwnerCell(updatedBy, agent.updated_at, profileMap),
+      ) => renderOwnerCell(updatedBy, agent.updated_at, profileMap, dateFormat),
       'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
     };
 
@@ -316,7 +322,7 @@ export const AgentsList: React.FC = () => {
       agentLastUpdatedBy,
       agentActions,
     ];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess, profileMap]);
+  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess, profileMap, dateFormat]);
 
   const errorMessage = useMemo(
     () =>
