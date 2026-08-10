@@ -10,10 +10,8 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../resources/datastreams/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import type {
   ActionPolicySavedObjectAttributes,
   RuleSavedObjectAttributes,
@@ -42,14 +40,20 @@ import {
   FetchSuppressionsStep,
   ApplySuppressionStep,
   FetchRulesStep,
+  ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
   EvaluateMatchersStep,
   BuildGroupsStep,
   ApplyThrottlingStep,
   DispatchStep,
   StoreActionsStep,
+  StoreExecutionHistoryStep,
 } from './steps';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
+import type { MaintenanceWindowServiceContract } from '../services/maintenance_window_service/maintenance_window_service';
+import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
+import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
+import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -67,26 +71,33 @@ function mockRulesFindByIds(
 
 function mockNpFindAllDecrypted(
   spy: jest.SpyInstance,
-  policyIds: string[],
+  policies: Array<string | { id: string; spaceId: string }>,
   overrides: Partial<ActionPolicySavedObjectAttributes> = {}
 ) {
   spy.mockResolvedValue(
-    policyIds.map((id) => ({
-      id,
-      attributes: {
-        name: `Policy ${id}`,
-        description: `Description for ${id}`,
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
-        auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
-        createdBy: null,
-        updatedBy: null,
-        createdAt: '2026-01-01T00:00:00.000Z',
-        updatedAt: '2026-01-01T00:00:00.000Z',
-        ...overrides,
-      },
-      namespaces: ['default'],
-    }))
+    policies.map((policy) => {
+      const { id, spaceId } =
+        typeof policy === 'string' ? { id: policy, spaceId: 'default' } : policy;
+
+      return {
+        id,
+        attributes: {
+          name: `Policy ${id}`,
+          description: `Description for ${id}`,
+          enabled: true,
+          destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
+          apiKey: 'test-api-key',
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+          ...overrides,
+        },
+        namespaces: [spaceId],
+      };
+    })
   );
 }
 
@@ -102,6 +113,8 @@ function buildDispatcherService(deps: {
   rulesSoService: RulesSavedObjectServiceContract;
   npSoService: ActionPolicySavedObjectServiceContract;
   workflowsManagement: WorkflowsServerPluginSetup['management'];
+  maintenanceWindowService: MaintenanceWindowServiceContract;
+  eventLogService: EventLogServiceContract;
 }): DispatcherService {
   const { loggerService } = createLoggerService();
 
@@ -110,12 +123,14 @@ function buildDispatcherService(deps: {
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
+    new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),
     new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
     new DispatchStep(loggerService, deps.workflowsManagement),
     new StoreActionsStep(deps.storageService),
+    new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
   return new DispatcherService(pipeline);
 }
@@ -131,6 +146,8 @@ describe('DispatcherService', () => {
   let mockFindByIds: jest.SpyInstance;
   let mockFindAllDecrypted: jest.SpyInstance;
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
+  let mockEventLogService: EventLogServiceContract;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -147,6 +164,8 @@ describe('DispatcherService', () => {
     mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
 
     mockWfm = createMockWorkflowsManagement();
+    mockMwService = createMaintenanceWindowServiceMock();
+    ({ eventLogService: mockEventLogService } = createEventLogService());
 
     dispatcherService = buildDispatcherService({
       queryService,
@@ -154,6 +173,8 @@ describe('DispatcherService', () => {
       rulesSoService,
       npSoService,
       workflowsManagement: mockWfm,
+      maintenanceWindowService: mockMwService,
+      eventLogService: mockEventLogService,
     });
   });
 
@@ -167,6 +188,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           episode_status: 'active',
@@ -174,6 +197,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:15:00.000Z',
           rule_id: 'rule-2',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           episode_status: 'inactive',
@@ -183,12 +208,16 @@ describe('DispatcherService', () => {
       const suppressions: AlertEpisodeSuppression[] = [
         {
           rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           should_suppress: false,
         },
         {
           rule_id: 'rule-2',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           should_suppress: false,
@@ -279,6 +308,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:10:00.000Z',
           rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           episode_status: 'active',
@@ -286,6 +317,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-22T07:15:00.000Z',
           rule_id: 'rule-2',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           episode_status: 'active',
@@ -295,12 +328,16 @@ describe('DispatcherService', () => {
       const suppressions: AlertEpisodeSuppression[] = [
         {
           rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-1',
           episode_id: 'episode-1',
           should_suppress: true,
         },
         {
           rule_id: 'rule-2',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'hash-2',
           episode_id: 'episode-2',
           should_suppress: false,
@@ -386,6 +423,8 @@ describe('DispatcherService', () => {
       });
 
       mockWfm = createMockWorkflowsManagement();
+      mockMwService = createMaintenanceWindowServiceMock();
+      ({ eventLogService: mockEventLogService } = createEventLogService());
 
       dispatcherService = buildDispatcherService({
         queryService,
@@ -393,6 +432,8 @@ describe('DispatcherService', () => {
         rulesSoService,
         npSoService,
         workflowsManagement: mockWfm,
+        maintenanceWindowService: mockMwService,
+        eventLogService: mockEventLogService,
       });
 
       // Dataset: 5 rules, 9 episodes total
@@ -405,6 +446,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-001',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           episode_status: 'active',
@@ -412,6 +455,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-002',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           episode_status: 'active',
@@ -419,6 +464,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-1',
           episode_id: 'rule-003-series-1-episode-1',
           episode_status: 'active',
@@ -426,6 +473,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:00:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-2',
           episode_id: 'rule-003-series-2-episode-1',
           episode_status: 'active',
@@ -433,6 +482,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:05:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-2',
           episode_id: 'rule-003-series-2-episode-1',
           episode_status: 'inactive',
@@ -440,6 +491,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-003',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-003-series-2',
           episode_id: 'rule-003-series-2-episode-2',
           episode_status: 'active',
@@ -447,6 +500,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-1',
           episode_id: 'rule-004-series-1-episode-1',
           episode_status: 'active',
@@ -454,6 +509,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-2',
           episode_id: 'rule-004-series-2-episode-1',
           episode_status: 'active',
@@ -461,6 +518,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-005',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           episode_status: 'active',
@@ -468,6 +527,8 @@ describe('DispatcherService', () => {
         {
           last_event_timestamp: '2026-01-27T16:15:00.000Z',
           rule_id: 'rule-005',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-005-series-2',
           episode_id: 'rule-005-series-2-episode-1',
           episode_status: 'active',
@@ -484,30 +545,40 @@ describe('DispatcherService', () => {
       const suppressions: AlertEpisodeSuppression[] = [
         {
           rule_id: 'rule-001',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           should_suppress: false,
         },
         {
           rule_id: 'rule-002',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           should_suppress: true,
         },
         {
           rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-1',
           episode_id: null,
           should_suppress: true,
         },
         {
           rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-004-series-2',
           episode_id: null,
           should_suppress: true,
         },
         {
           rule_id: 'rule-005',
+          source: 'internal',
+          space_id: 'default',
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           should_suppress: true,
@@ -635,6 +706,75 @@ describe('DispatcherService', () => {
           }),
         ])
       );
+    });
+
+    it('keeps external episodes isolated per space when a vendor group_hash collides', async () => {
+      // The same PagerDuty incident is ingested into two spaces: identical source,
+      // group_hash and episode_id. Only space-a has acked it.
+      const externalEpisode = (spaceId: string): AlertEpisode => ({
+        last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        rule_id: null,
+        source: 'pagerduty',
+        space_id: spaceId,
+        group_hash: 'pd-incident-P1234567',
+        episode_id: 'pd-ep-1',
+        episode_status: 'active',
+      });
+
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: null,
+          source: 'pagerduty',
+          space_id: 'space-a',
+          group_hash: 'pd-incident-P1234567',
+          episode_id: 'pd-ep-1',
+          should_suppress: true,
+          last_ack_action: 'ack',
+        },
+      ];
+
+      mockNpFindAllDecrypted(mockFindAllDecrypted, [
+        { id: 'policy_space_a', spaceId: 'space-a' },
+        { id: 'policy_space_b', spaceId: 'space-b' },
+      ]);
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(
+          createDispatchableAlertEventsResponse([
+            externalEpisode('space-a'),
+            externalEpisode('space-b'),
+          ])
+        )
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+
+      expect(docs.filter((doc) => doc.action_type === 'fire')).toEqual([
+        expect.objectContaining({
+          action_type: 'fire',
+          rule_id: null,
+          source: 'pagerduty',
+          space_id: 'space-b',
+          group_hash: 'pd-incident-P1234567',
+        }),
+      ]);
+      expect(docs.filter((doc) => doc.action_type === 'suppress')).toEqual([
+        expect.objectContaining({
+          action_type: 'suppress',
+          source: 'pagerduty',
+          space_id: 'space-a',
+          reason: 'ack',
+        }),
+      ]);
     });
   });
 

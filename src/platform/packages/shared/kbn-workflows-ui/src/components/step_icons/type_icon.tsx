@@ -53,6 +53,18 @@ export interface TypeIconProps extends Omit<EuiIconProps, 'type'> {
  * {@link useWorkflowsUiServices}, so consumers must be wrapped in a
  * `WorkflowsUiServicesProvider`. The tooltip shows the raw `type`.
  */
+/*
+ * EuiToolTip's default anchor is an inline-block with a normal line box, which
+ * verticals the masked-span glyphs and `<svg>` icons differently (baseline vs
+ * middle) and makes mixed icon rows look misaligned. Anchor to a zero-line-box
+ * flex span instead — same idiom as the plugin's `withTooltip`.
+ */
+const tooltipAnchorStyle = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  lineHeight: 0,
+});
+
 export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest }) => {
   const { euiTheme } = useEuiTheme();
   const { workflowsExtensions, triggersActionsUi } = useWorkflowsUiServices();
@@ -94,6 +106,12 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
       </Suspense>
     );
 
-  return <EuiToolTip content={label}>{icon}</EuiToolTip>;
+  return (
+    <EuiToolTip content={label} anchorProps={{ css: css({ display: 'inline-flex' }) }}>
+      <span css={tooltipAnchorStyle} tabIndex={0}>
+        {icon}
+      </span>
+    </EuiToolTip>
+  );
 });
 TypeIcon.displayName = 'TypeIcon';

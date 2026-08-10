@@ -9,6 +9,7 @@ import type {
   QueryWithOccurrences,
   QueryOccurrencesResponse,
 } from '@kbn/significant-events-schema';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import type { TracedElasticsearchClient, UnparsedEsqlResponse } from '@kbn/traced-es-client';
@@ -21,6 +22,7 @@ import { parseError } from '../streams/parse_error';
 import { SecurityError } from '../errors/security_error';
 import { getColumnIndex } from '../streams/esql';
 import { type ISignificantEventsAlertsReader, ALERTS_READER_V2 } from './alerting/alerts_reader';
+import { METRIC_SERIES_MAX_WRITE_DELAY } from './rules/metric_series_contract';
 import { ESQL_UNITS, MAX_FILL_BUCKETS, parseBucketSize } from './helpers/fill_bucket_gaps';
 
 export interface SparseBucket {
@@ -36,6 +38,7 @@ interface TimeBucket {
 
 export interface SignificantEventsParams {
   streamNames?: string[];
+  ruleUuids?: string[];
   from: Date;
   to: Date;
   bucketSize: string;
@@ -94,6 +97,22 @@ function buildTimeline({
     current += intervalMs;
   }
   return timeline;
+}
+
+/**
+ * Rules emit one point per closed UTC minute, so a sub-minute chart interval
+ * can never fill more than one bucket per minute — the zero-fill paints the
+ * rest as gaps and steady activity renders as a spike/zero comb. Callers may
+ * still ask for seconds (`calculateAuto.near` does for short ranges); the floor
+ * is applied here, upstream of `intervalMs` / `timeline` / `limit`, so the
+ * whole grid stays consistent for every caller of the route.
+ */
+function clampToSourceResolution({ value, unit }: { value: number; unit: string }): {
+  value: number;
+  unit: string;
+} {
+  const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
+  return intervalMs < MS_PER_UNIT.m ? { value: 1, unit: 'm' } : { value, unit };
 }
 
 /** Projects a rule's firing buckets onto a shared {@link TimeBucket} grid, zero-filling gaps. */
@@ -155,16 +174,30 @@ export async function computeOccurrences(
     return emptyResult;
   }
 
-  const { value, unit } = parseBucketSize(bucketSize);
+  const { value, unit } = clampToSourceResolution(parseBucketSize(bucketSize));
   const esqlUnit = ESQL_UNITS[unit] ?? unit;
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
   const ruleIdColumn = alertsReader.ruleIdColumn;
+
+  // A closed source minute is written up to MAX_WRITE_DELAY later, so the newest
+  // minutes of a `now`-anchored range have no rows yet. `fillTimeline` cannot
+  // tell that apart from "the rule matched nothing" and zero-fills it, painting
+  // a trailing cliff on every live chart. Ending the grid at the write horizon
+  // leaves those buckets absent instead of falsely flat. Ranges that already end
+  // in the past are untouched.
+  const writeHorizon = new Date(Date.now() - parseDuration(METRIC_SERIES_MAX_WRITE_DELAY));
+  const effectiveTo = to < writeHorizon ? to : writeHorizon;
+
+  // Whole range sits inside the write horizon: nothing is readable yet.
+  if (effectiveTo < from) {
+    return emptyResult;
+  }
 
   // Build the grid once; reused by lazy per-rule fill and the aggregate.
   // `buckets` is capped at MAX_FILL_BUCKETS, so for ranges wider than the cap
   // the LIMIT below intentionally matches the truncated grid: SORT bucket ASC
   // keeps the earliest buckets, the only ones the timeline can render.
-  const timeline = buildTimeline({ from, to, intervalMs });
+  const timeline = buildTimeline({ from, to: effectiveTo, intervalMs });
   const buckets = Math.max(timeline.length, 1);
 
   // One row per (rule × bucket): batch rules under the row cap, run in parallel
@@ -173,9 +206,28 @@ export async function computeOccurrences(
   const batches = chunk(ruleIds, rulesPerBatch);
   const limiter = pLimit(BATCH_CONCURRENCY);
 
-  const timeRangeFilter = {
+  // Precise window is on source `bucket` inside the ES|QL request. Convert once
+  // here so the reader never calls Date#toISOString on a missing range.
+  const rangeFromIso = from.toISOString();
+  const rangeToIso = effectiveTo.toISOString();
+
+  // Widen the write-time `@timestamp` prune by MAX_WRITE_DELAY so late rule
+  // runs (cadence + jitter) for in-window minutes are still candidates; ES|QL
+  // then drops out-of-window source buckets.
+  const writeTimePrune = {
     bool: {
-      filter: [{ range: { '@timestamp': { gte: from.toISOString(), lte: to.toISOString() } } }],
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: rangeFromIso,
+              lte: new Date(
+                effectiveTo.getTime() + parseDuration(METRIC_SERIES_MAX_WRITE_DELAY)
+              ).toISOString(),
+            },
+          },
+        },
+      ],
     },
   };
 
@@ -188,8 +240,10 @@ export async function computeOccurrences(
           esqlUnit,
           limit: batchRuleIds.length * buckets,
           spaceId,
+          rangeFromIso,
+          rangeToIso,
         }),
-        filter: timeRangeFilter,
+        filter: writeTimePrune,
       });
     } catch (err) {
       const { type, message } = parseError(err);
@@ -253,6 +307,42 @@ export async function computeOccurrences(
   return { sparseByRule, aggregatedOccurrences, timeline };
 }
 
+/** Stub query link so rule_uuid filters can return series without a KI query. */
+function createRuleScopedQueryLink(ruleUuid: string): QueryLink {
+  return {
+    query: {
+      id: `rule:${ruleUuid}`,
+      title: ruleUuid,
+      description: '',
+      type: 'match',
+      esql: { query: '' },
+    },
+    stream_name: '',
+    rule_backed: true,
+    rule_id: ruleUuid,
+  };
+}
+
+function resolveQueryLinksForOccurrences(
+  fetchedQueryLinks: QueryLink[],
+  ruleUuids: string[] | undefined
+): QueryLink[] {
+  if (!ruleUuids?.length) {
+    return fetchedQueryLinks;
+  }
+
+  const requestedRuleUuids = new Set(ruleUuids);
+  const matchedLinks = fetchedQueryLinks.filter(({ rule_id: ruleId }) =>
+    requestedRuleUuids.has(ruleId)
+  );
+  const matchedRuleIds = new Set(matchedLinks.map(({ rule_id: ruleId }) => ruleId));
+  const stubs = ruleUuids
+    .filter((ruleUuid) => !matchedRuleIds.has(ruleUuid))
+    .map((ruleUuid) => createRuleScopedQueryLink(ruleUuid));
+
+  return [...matchedLinks, ...stubs];
+}
+
 export async function getQueryOccurrences(
   params: SignificantEventsParams,
   dependencies: SignificantEventsDependencies
@@ -260,7 +350,8 @@ export async function getQueryOccurrences(
   const { kiClient, esClient } = dependencies;
   const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V2 } = params;
 
-  const queryLinks = await fetchQueryLinks(params, kiClient);
+  const fetchedQueryLinks = await fetchQueryLinks(params, kiClient);
+  const queryLinks = resolveQueryLinksForOccurrences(fetchedQueryLinks, params.ruleUuids);
   if (isEmpty(queryLinks)) {
     return {
       queryLinks: [],
@@ -300,6 +391,7 @@ export function toQueryWithOccurrences({
 }): QueryWithOccurrences {
   return {
     ...queryLink.query,
+    rule_uuid: queryLink.rule_id,
     stream_name: queryLink.stream_name,
     occurrences: buildQueryOccurrences({ queryLink, queryOccurrences }),
     change_points: EMPTY_CHANGE_POINTS,

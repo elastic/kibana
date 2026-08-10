@@ -15,12 +15,9 @@ import {
   type BulkResponse,
   type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../resources/datastreams/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
+import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -93,7 +90,7 @@ const preconditionErrorToItem = (
     error.data != null && typeof error.data === 'object' ? (error.data as AlertActionBoomData) : {};
 
   return toBulkAlertActionError(action, {
-    code: data.code ?? ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+    code: data.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
     message: error.message,
     details: data.details,
   });
@@ -282,7 +279,7 @@ export class AlertActionsClient {
       if (!alertEvent) {
         errors.push(
           toBulkAlertActionError(action, {
-            code: ALERTING_V2_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
+            code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
             message: `No alert event found for group [${action.group_hash}]`,
           })
         );
@@ -296,7 +293,7 @@ export class AlertActionsClient {
       if ('episode_id' in action && alertEvent.episode_id !== action.episode_id) {
         errors.push(
           toBulkAlertActionError(action, {
-            code: ALERTING_V2_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
+            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
             message: `Episode [${action.episode_id}] is not the latest episode for group [${action.group_hash}]`,
           })
         );
@@ -323,6 +320,7 @@ export class AlertActionsClient {
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],
       rule_id: alertEvent.rule_id,
+      source: alertEvent.source,
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
       space_id: alertEvent.space_id,

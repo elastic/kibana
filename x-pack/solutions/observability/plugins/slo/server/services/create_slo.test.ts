@@ -89,6 +89,7 @@ describe('CreateSLO', () => {
             syncDelay: oneMinute(),
             frequency: oneMinute(),
             preventInitialBackfill: false,
+            preventCrossProjectSearch: false,
           },
           revision: 1,
           tags: [],
@@ -129,6 +130,7 @@ describe('CreateSLO', () => {
             syncDelay: fiveMinute(),
             frequency: oneMinute(),
             preventInitialBackfill: false,
+            preventCrossProjectSearch: false,
           },
           revision: 1,
           tags: ['one', 'two'],
@@ -161,12 +163,28 @@ describe('CreateSLO', () => {
             syncDelay: fiveMinute(),
             frequency: fiveMinute(),
             preventInitialBackfill: true,
+            preventCrossProjectSearch: false,
           },
           revision: 1,
           tags: ['one', 'two'],
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
+        })
+      );
+    });
+
+    it('defaults preventCrossProjectSearch to false when not provided', async () => {
+      const sloParams = createSLOParams({
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
+      await createSLO.execute(sloParams);
+
+      expect(mockRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          settings: expect.objectContaining({ preventCrossProjectSearch: false }),
         })
       );
     });

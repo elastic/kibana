@@ -24,7 +24,11 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getDefaultSort,
 } from '@kbn/discover-utils';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  DISCOVER_QUERY_MODE_KEY,
+} from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
@@ -33,8 +37,6 @@ import {
   type InternalStateThunkActionCreator,
   type InternalStateThunkAction,
   type TabActionPayload,
-  transitionedFromEsqlToDataView,
-  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import {
   ProfileStateType,
@@ -62,9 +64,10 @@ export interface RawAppStatePayload {
   appState: DiscoverAppState;
   /**
    * Marks app state changes that come from URL syncing or other internal updates
-   * instead of direct user actions. These updates skip profile state snapshot
-   * syncing so they do not overwrite restorable profile state. This should
-   * rarely be needed outside of URL syncing and specific edge cases.
+   * instead of direct user actions. These updates skip profile app state
+   * snapshot syncing so they do not overwrite restorable profile app state
+   * defaults. This should rarely be needed outside of URL syncing and specific
+   * edge cases.
    */
   isSystemTriggered?: boolean;
 }
@@ -86,12 +89,12 @@ export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
-export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+export const syncProfileAppStateSnapshot: InternalStateThunkActionCreator<
   [TabActionPayload<{ appState?: DiscoverAppState }>]
 > = (payload) =>
-  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+  function syncProfileAppStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
-    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+    dispatch(internalStateSlice.actions.syncProfileAppStateSnapshot({ ...payload, profileId }));
   };
 
 /**
@@ -124,7 +127,7 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
 
     if (!payload.isSystemTriggered) {
       dispatch(
-        syncProfileStateSnapshot({
+        syncProfileAppStateSnapshot({
           tabId: payload.tabId,
           appState: mergedAppState,
         })
@@ -395,9 +398,9 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
-    // Mark all profile state fields to reset when transitioning to data view mode
+    // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -428,7 +431,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       })
     );
 
-    dispatch(transitionedFromEsqlToDataView({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'classic',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**
@@ -438,10 +444,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
-    // Mark all profile state fields to reset when transitioning to ES|QL mode
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
+    // Mark all profile app state default fields to reset when transitioning to ES|QL mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -474,7 +480,10 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
 
-    dispatch(transitionedFromDataViewToEsql({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'esql',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**

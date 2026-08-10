@@ -78,6 +78,7 @@ async function queryAllResults(
   slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date,
+  projectRouting?: string,
   buckets: EvaluationBucket[] = [],
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
@@ -87,6 +88,7 @@ async function queryAllResults(
     () =>
       esClient.search<undefined, EvalutionAggResults>({
         index: SLI_DESTINATION_INDEX_PATTERN,
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
         ...queryAndAggs,
       })
   );
@@ -103,6 +105,7 @@ async function queryAllResults(
     slo,
     params,
     startedAt,
+    projectRouting,
     [...buckets, ...results.aggregations.instances.buckets],
     results.aggregations.instances.after_key
   );
@@ -112,9 +115,10 @@ export async function evaluate(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
   params: BurnRateRuleParams,
-  startedAt: Date
+  startedAt: Date,
+  projectRouting?: string
 ) {
-  const buckets = await queryAllResults(esClient, slo, params, startedAt);
+  const buckets = await queryAllResults(esClient, slo, params, startedAt, projectRouting);
   return transformBucketToResults(buckets, params);
 }
 

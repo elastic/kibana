@@ -16,7 +16,7 @@ export interface AiIndexDest {
   value: string;
 }
 
-export type AiIndexSourceType = 'esql';
+export type AiIndexSourceType = 'esql' | 'connector';
 
 export interface AiIndexSource {
   type: AiIndexSourceType;
@@ -64,4 +64,15 @@ export interface PutAiIndexResponse {
 
 export interface DeleteAiIndexResponse {
   acknowledged: boolean;
+}
+
+export interface KiTypeCount {
+  type: string;
+  count: number;
+}
+
+export interface GetAiIndexKiSummaryResponse {
+  count: number;
+  dest: AiIndexDest;
+  counts_by_type: KiTypeCount[];
 }
