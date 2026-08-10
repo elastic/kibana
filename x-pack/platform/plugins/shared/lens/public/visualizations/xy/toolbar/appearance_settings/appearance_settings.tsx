@@ -113,6 +113,7 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
           <FillOpacityOption
             isFillOpacityEnabled={true}
             value={state?.fillOpacity ?? 0.3}
+            fill={state?.areaFill ?? AreaFillOptions.SOLID}
             onChange={(newValue) => {
               setState({
                 ...state,
