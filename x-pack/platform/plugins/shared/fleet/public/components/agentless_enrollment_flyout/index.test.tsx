@@ -7,7 +7,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { sendGetAgents, useGetPackageInfoByKeyQuery } from '../../hooks';
+import { useGetAgentsQuery, useGetPackageInfoByKeyQuery } from '../../hooks';
 import { usePollingIncomingData } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
 import { createIntegrationsTestRendererMock } from '../../mock';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
@@ -18,15 +18,15 @@ import { AgentlessEnrollmentFlyout } from '.';
 
 jest.mock('../../hooks', () => ({
   ...jest.requireActual('../../hooks'),
+  useGetAgentsQuery: jest.fn(),
   useGetPackageInfoByKeyQuery: jest.fn(),
-  sendGetAgents: jest.fn(),
 }));
 
 jest.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => ({
   usePollingIncomingData: jest.fn(),
 }));
 
-const mockSendGetAgents = sendGetAgents as jest.Mock;
+const mockUseGetAgentsQuery = useGetAgentsQuery as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
 
@@ -41,7 +41,7 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
   };
 
   beforeEach(() => {
-    mockSendGetAgents.mockResolvedValue({ data: { items: [] } });
+    mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [] } } });
     mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: { item: { title: 'Test Package' } } });
   });
 
@@ -51,7 +51,6 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
 
   describe('Step 1 — Confirm managed integration enrollment', () => {
     beforeEach(() => {
-      mockUseFleetStatus.mockReturnValue({ spaceId: 'default' });
       mockUseGetPackageInfoByKeyQuery.mockReturnValue({
         data: { item: { title: 'Test Package' } },
       });
@@ -159,9 +158,8 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
   });
 
   it('updates step statuses when agent deployment fails', async () => {
+    mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [{ status: 'error' }] } } });
     const renderer = createIntegrationsTestRendererMock();
-    const agentData = { status: 'error' };
-    mockSendGetAgents.mockResolvedValueOnce({ data: { items: [agentData] } });
 
     const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
 
@@ -175,17 +173,23 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
   });
 
   it('fetches agents data on mount and sets step statuses when agent deployment succeeds', async () => {
-    const renderer = createIntegrationsTestRendererMock();
-    const agentData = { status: 'online' };
-    mockSendGetAgents.mockResolvedValueOnce({ data: { items: [agentData] } });
+    mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [{ status: 'online' }] } } });
     mockUsePollingIncomingData.mockReturnValue({ incomingData: [], hasReachedTimeout: false });
+    const renderer = createIntegrationsTestRendererMock();
 
     const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
 
     await waitFor(() => {
-      expect(mockSendGetAgents).toHaveBeenCalledWith({
-        kuery: `${AGENTS_PREFIX}.policy_id: "test-policy-id"`,
-      });
+      expect(mockUseGetAgentsQuery).toHaveBeenCalledWith(
+        {
+          kuery: buildPolicyBaseIdWithFallbackKuery(
+            'test-policy-id',
+            `${AGENTS_PREFIX}.policy_base_id`,
+            `${AGENTS_PREFIX}.policy_id`
+          ),
+        },
+        expect.objectContaining({ refetchInterval: expect.any(Number) })
+      );
       expect(getByText('Confirm managed integration enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
       expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
@@ -195,9 +199,9 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
   });
 
   it('shows confirm data step as failed when timeout has been reached', async () => {
-    const renderer = createIntegrationsTestRendererMock();
-    mockSendGetAgents.mockResolvedValueOnce({ data: { items: [{ status: 'online' }] } });
+    mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [{ status: 'online' }] } } });
     mockUsePollingIncomingData.mockReturnValue({ incomingData: [], hasReachedTimeout: true });
+    const renderer = createIntegrationsTestRendererMock();
 
     const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
 
@@ -210,11 +214,11 @@ describe.skip('AgentlessEnrollmentFlyout', () => {
   });
 
   it('shows confirm data step as successful when incoming data is received', async () => {
-    const renderer = createIntegrationsTestRendererMock();
-    mockSendGetAgents.mockResolvedValueOnce({ data: { items: [{ status: 'online' }] } });
+    mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [{ status: 'online' }] } } });
     mockUsePollingIncomingData.mockReturnValue({ incomingData: [{ data: 'test-data' }] });
+    const renderer = createIntegrationsTestRendererMock();
 
-    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...flyoutProps} />);
+    const { getByText } = renderer.render(<AgentlessEnrollmentFlyout {...baseProps} />);
 
     await waitFor(() => {
       expect(getByText('Step 1 is complete')).toBeInTheDocument();
