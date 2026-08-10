@@ -67,13 +67,13 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
       await convertToLensByTitle({ dashboard }, 'XY - Differing Layers');
       await lens.waitForVisualization('xyVisChart');
-      expect(await lens.getLayerCount()).toBe(2);
+      expect(await lens.layers.getLayerCount()).toBe(2);
 
-      await lens.activateLayerTab(0);
+      await lens.layers.activateLayerTab(0);
       expect(await lens.getChartSwitchType()).toBe('Area');
       expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
 
-      await lens.activateLayerTab(1);
+      await lens.layers.activateLayerTab(1);
       expect(await lens.getChartSwitchType()).toBe('Bar');
       expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Max memory');
     }
@@ -86,7 +86,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
       await convertToLensByTitle({ dashboard }, 'XY - Similar Layers');
       await lens.waitForVisualization('xyVisChart');
-      expect(await lens.getLayerCount()).toBe(1);
+      expect(await lens.layers.getLayerCount()).toBe(1);
 
       expect(await lens.getChartSwitchType()).toBe('Bar');
       expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
@@ -99,7 +99,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Parent pipeline agg');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
       'Cumulative Sum of Count'
@@ -112,7 +112,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Sibling pipeline agg');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(
       'Overall Max of Count'
@@ -128,12 +128,12 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Reference line');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(2);
+    expect(await lens.layers.getLayerCount()).toBe(2);
 
-    await lens.activateLayerTab(0);
+    await lens.layers.activateLayerTab(0);
     expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
 
-    await lens.activateLayerTab(1);
+    await lens.layers.activateLayerTab(1);
     expect(await lens.getDimensionTriggerText('lnsXY_yReferenceLineLeftPanel', 0)).toBe(
       'Static value: 10'
     );
@@ -144,7 +144,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Stacked lines');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Area');
   });
@@ -154,7 +154,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Percentage chart');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Area');
   });
@@ -164,7 +164,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Horizontal Bar');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Bar');
     expect(await lens.getSelectedBarOrientationSetting()).toBe('Horizontal');
@@ -175,7 +175,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Axis positions');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe('Count');
     expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1)).toBe('Max memory');
@@ -239,7 +239,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
 
     await convertToLensByTitle({ dashboard }, 'XY - Percentiles with decimals');
     await lens.waitForVisualization('xyVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Line');
     expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0)).toBe(

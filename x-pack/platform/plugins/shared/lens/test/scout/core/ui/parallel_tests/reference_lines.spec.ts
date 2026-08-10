@@ -45,10 +45,10 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           field: 'bytes',
         });
 
-        await lens.createLayer('referenceLine');
-        expect(await lens.getLayerCount()).toBe(2);
+        await lens.layers.createLayer('referenceLine');
+        expect(await lens.layers.getLayerCount()).toBe(2);
 
-        await lens.activateLayerTab(1);
+        await lens.layers.activateLayerTab(1);
         // The default static value is backend-computed; assert the structure, not the number.
         expect(await lens.getDimensionTriggerText(REFERENCE_LINE_LEFT)).toMatch(/^Static value: /);
       });
@@ -69,7 +69,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
       );
 
       await spaceTest.step('adds a right-axis group when a right axis is enabled', async () => {
-        await lens.activateLayerTab(0);
+        await lens.layers.activateLayerTab(0);
         await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'average',
@@ -79,7 +79,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
         await lens.changeAxisSide('right');
         await lens.closeDimensionEditor();
 
-        await lens.activateLayerTab(1);
+        await lens.layers.activateLayerTab(1);
         await expect(
           page.testSubj.locator(`${REFERENCE_LINE_RIGHT} > lns-empty-dimension`)
         ).toBeVisible();

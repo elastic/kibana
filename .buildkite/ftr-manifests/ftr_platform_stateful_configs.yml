@@ -226,7 +226,6 @@ enabled:
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
-  - x-pack/platform/test/functional/apps/index_management/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
@@ -266,7 +265,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
-  - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
