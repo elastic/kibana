@@ -74,23 +74,25 @@ src/platform/kbn-ui/
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
 
-## Who should import what
+## Who should import what [kbn-ui-who-should-import]
 
-Use `visibility` in each package's `kibana.jsonc` to mark the intended audience:
+`@kbn/ui-*` packages come in two kinds. The kind decides whether app code may import the package.
 
-| `visibility` | Who imports `@kbn/ui-*` directly | Examples |
-|---|---|---|
-| **`shared`** | Any Kibana package or plugin | `@kbn/ui-callout` |
-| **`private`** | Owning Kibana package/plugin only. App authors use the owning API instead. | `@kbn/ui-chrome-layout*`, `@kbn/ui-side-navigation`, `@kbn/ui-feedback` |
+**Shared** — reusable UI for plugins. Import directly (for example `@kbn/ui-callout`).
 
-`visibility: private` under `src/platform/kbn-ui/` is enforced in two places:
+**Platform implementation** — chrome layout, side navigation, feedback UI, Storybook config. These back core or plugin contracts; app code must not import them. Use the chrome layout APIs, the feedback plugin API, `@kbn/core-chrome-layout-constants` / `-utils`, etc. The lint error names the alternative for each package.
 
-- across groups by `@kbn/imports/no_group_crossing_imports`
-- within platform by `@kbn/kbn-ui/no_restricted_package_imports`, which bans importing those packages outside allowlisted paths
+| You are… | Do |
+| --- | --- |
+| App author | Import shared packages. For platform implementation packages, use the core/plugin contract — never the `@kbn/ui-*` package. |
+| kbn-ui / owner | Packages under `src/platform/kbn-ui/` may import each other. Core chrome and owning plugins import via per-package overrides in the boundaries file. |
 
-Allowlists and suggested alternatives live in [`src/platform/kbn-ui/_tooling/eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js): `alwaysAllowed` (`src/core/`, `src/platform/kbn-ui/`) plus optional per-package `overrides` / `alternative`. New private packages under `src/platform/kbn-ui/` are restricted automatically from their `kibana.jsonc` (`manifest.visibility`).
+Enforcement is `@kbn/kbn-ui/no_restricted_package_imports` plus [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js):
 
-Do not import private `@kbn/ui-*` packages from application plugins. Use chrome APIs, `@kbn/core-chrome-layout-constants` / `-utils`, or the feedback plugin instead.
+- Unlisted packages stay freely importable.
+- Listed packages are restricted to `alwaysAllowed` (today: `src/platform/kbn-ui/`) plus that package's `overrides` (for example `src/core/packages/chrome/` for layout/nav, or the feedback plugin for `@kbn/ui-feedback`).
+
+To restrict a package, add it under `packages` with a non-empty `alternative`. Path prefixes must end with `/` and exist on disk; each override needs a `reason`.
 
 ## Development [kbn-ui-development]
 
@@ -123,12 +125,11 @@ docs-builder serve --path docs-dev
 ## Contributing
 
 1. Create a new package directory under `src/platform/kbn-ui/`.
-2. Add a `kibana.jsonc` with `"group": "platform"`, the `@kbn/ui-<name>` id, and the right `visibility`:
-   - `"shared"` if Kibana app authors should import it directly
-   - `"private"` if only an owning package/plugin should import it
-3. Export a single public API from `index.ts` — no subpath imports.
-4. Include unit tests alongside source files.
-5. Respect the dependency and portability rules above.
+2. Add a `kibana.jsonc` with `"group": "platform"` and the `@kbn/ui-<name>` id.
+3. If it is a platform implementation package, restrict it: add it under `packages` in [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js) with an `alternative` naming the contract apps should use, plus `overrides` for owners that must import it. See [Who should import what](#kbn-ui-who-should-import).
+4. Export a single public API from `index.ts` — no subpath imports.
+5. Include unit tests alongside source files.
+6. Respect the dependency and portability rules above.
 
 ### Guidelines
 

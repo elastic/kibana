@@ -8,6 +8,6 @@ invoked from each package's `packaging/scripts/build.sh`.
 ## Contents
 
 - `affected_packages.ts`: lists changed `@kbn/ui-*` package directories for the publish pipeline using `@kbn/moon` to query Moon affected-project data, with kbn-ui-specific force-all handling for shared tooling and publish pipeline changes.
-- `eslint_boundaries.js`: allowlist/alternative policy for private kbn-ui imports (`alwaysAllowed` + optional per-package `alternative` / `overrides`). Overrides require `path` + `reason`. The restricted package set itself comes from `visibility: "private"` in manifests under `src/platform/kbn-ui/`. Consumed by `@kbn/kbn-ui/no_restricted_package_imports` (not used at runtime or packaging time).
+- `eslint_boundaries.js`: restricted-import policy for `@kbn/kbn-ui/no_restricted_package_imports`. Listed `packages` are banned outside `alwaysAllowed` + per-package `overrides`; unlisted packages stay open. Requires `alternative` per package and `path`/`reason` on overrides. Load-time validation checks package ids, non-empty `alternative`, trailing `/` on prefixes, and that those paths exist on disk. Not used at runtime or packaging time.
 - `metadata.js`: writes `metadata.json` (name, version, git SHA, build timestamp, peer dependencies) into a package's `target/` directory.
 - `stamp_version.js`: rewrites a package's `target/package.json` version to a content-hash pre-release (`0.0.0-<hash12>`), so identical builds produce identical versions and the publish pipeline can refuse duplicates.

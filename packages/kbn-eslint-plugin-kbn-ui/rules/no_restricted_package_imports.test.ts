@@ -11,11 +11,9 @@ import path from 'path';
 import { createRequire } from 'module';
 import { RuleTester } from 'eslint';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getPackages } from '@kbn/repo-packages';
 import {
   assertBoundariesConfig,
   BOUNDARIES_PATH,
-  getPrivateKbnUiPackageIds,
   NoRestrictedPackageImports,
 } from './no_restricted_package_imports';
 
@@ -29,12 +27,7 @@ const tester = new RuleTester({
 
 const opts = [
   {
-    alwaysAllowed: ['src/platform/kbn-ui/', 'src/core/'],
-    privatePackages: [
-      '@kbn/ui-feedback',
-      '@kbn/ui-chrome-layout',
-      '@kbn/ui-chrome-layout-constants',
-    ],
+    alwaysAllowed: ['src/platform/kbn-ui/'],
     packages: {
       '@kbn/ui-feedback': {
         alternative: 'Use the feedback plugin API instead.',
@@ -49,6 +42,10 @@ const opts = [
         alternative: 'Use chrome layout APIs instead.',
         overrides: [
           {
+            path: 'src/core/packages/chrome/',
+            reason: 'Core chrome mounts layout.',
+          },
+          {
             path: 'src/platform/plugins/shared/developer_toolbar/',
             reason: 'Needs useLayoutUpdate; no core re-export yet.',
           },
@@ -56,6 +53,12 @@ const opts = [
       },
       '@kbn/ui-chrome-layout-constants': {
         alternative: 'Import from @kbn/core-chrome-layout-constants instead.',
+        overrides: [
+          {
+            path: 'src/core/packages/chrome/',
+            reason: 'Core chrome re-exports constants.',
+          },
+        ],
       },
     },
   },
@@ -64,7 +67,7 @@ const opts = [
 tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
   valid: [
     {
-      name: 'shared package is unrestricted even when not listed in privatePackages',
+      name: 'unlisted package is unrestricted',
       filename: 'src/plugins/discover/public/app.tsx',
       code: `import { KbnInfoCallout } from '@kbn/ui-callout';`,
       options: opts,
@@ -76,19 +79,13 @@ tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
       options: opts,
     },
     {
-      name: 'any kbn-ui package may import private packages',
+      name: 'any kbn-ui package may import restricted packages',
       filename: 'src/platform/kbn-ui/side-navigation/src/stories.tsx',
       code: `import { ChromeLayout } from '@kbn/ui-chrome-layout';`,
       options: opts,
     },
     {
-      name: 'any core package may import private packages',
-      filename: 'src/core/packages/apps/browser/src/foo.ts',
-      code: `import { Feedback } from '@kbn/ui-feedback';`,
-      options: opts,
-    },
-    {
-      name: 'longest private package id wins over shorter prefix',
+      name: 'core chrome may import chrome layout packages',
       filename: 'src/core/packages/chrome/browser/src/index.ts',
       code: `import { x } from '@kbn/ui-chrome-layout-constants';`,
       options: opts,
@@ -96,7 +93,7 @@ tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
   ],
   invalid: [
     {
-      name: 'app may not import private feedback package',
+      name: 'app may not import restricted feedback package',
       filename: 'src/plugins/discover/public/app.tsx',
       code: `import { Feedback } from '@kbn/ui-feedback';`,
       options: opts,
@@ -112,26 +109,25 @@ tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
       ],
     },
     {
-      name: 'private package without policy still uses default alternative',
-      filename: 'src/plugins/discover/public/app.tsx',
-      code: `import { x } from '@kbn/ui-chrome-layout-constants';`,
-      options: [
-        {
-          alwaysAllowed: ['src/platform/kbn-ui/', 'src/core/'],
-          privatePackages: ['@kbn/ui-chrome-layout-constants'],
-          packages: {},
-        },
-      ],
-      errors: [
-        {
-          messageId: 'restrictedImport',
-          data: {
-            package: '@kbn/ui-chrome-layout-constants',
-            alternative: 'This package is private; use the owning plugin or core facade instead.',
-            boundariesPath: BOUNDARIES_PATH,
-          },
-        },
-      ],
+      name: 'non-chrome core may not import feedback',
+      filename: 'src/core/packages/apps/browser/src/foo.ts',
+      code: `import { Feedback } from '@kbn/ui-feedback';`,
+      options: opts,
+      errors: [{ messageId: 'restrictedImport' }],
+    },
+    {
+      name: 'non-chrome core may not import chrome-layout',
+      filename: 'src/core/packages/apps/browser/src/foo.ts',
+      code: `import { ChromeLayout } from '@kbn/ui-chrome-layout';`,
+      options: opts,
+      errors: [{ messageId: 'restrictedImport' }],
+    },
+    {
+      name: 'core chrome may not import feedback',
+      filename: 'src/core/packages/chrome/browser/src/index.ts',
+      code: `import { Feedback } from '@kbn/ui-feedback';`,
+      options: opts,
+      errors: [{ messageId: 'restrictedImport' }],
     },
     {
       name: 'feedback owner may not import chrome-layout',
@@ -171,48 +167,80 @@ tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
   ],
 });
 
-describe('getPrivateKbnUiPackageIds', () => {
-  it('uses manifest visibility and kbn-ui directory scope', () => {
-    const ids = getPrivateKbnUiPackageIds([
-      {
-        id: '@kbn/ui-callout',
-        normalizedRepoRelativeDir: 'src/platform/kbn-ui/callout',
-        manifest: { visibility: 'shared' },
-      },
-      {
-        id: '@kbn/ui-feedback',
-        normalizedRepoRelativeDir: 'src/platform/kbn-ui/feedback',
-        manifest: { visibility: 'private' },
-      },
-      {
-        id: '@kbn/ui-shared-deps-npm',
-        normalizedRepoRelativeDir: 'src/platform/packages/private/kbn-ui-shared-deps-npm',
-        manifest: { visibility: 'private' },
-      },
-    ]);
-
-    expect([...ids].sort()).toEqual(['@kbn/ui-feedback']);
-  });
-
-  it('discovers real private kbn-ui packages from manifests', () => {
-    const ids = getPrivateKbnUiPackageIds(getPackages(REPO_ROOT));
-
-    expect(ids.has('@kbn/ui-feedback')).toBe(true);
-    expect(ids.has('@kbn/ui-chrome-layout')).toBe(true);
-    expect(ids.has('@kbn/ui-storybook-config')).toBe(true);
-
-    expect(ids.has('@kbn/ui-callout')).toBe(false);
-    expect(ids.has('@kbn/ui-shared-deps-npm')).toBe(false);
-    expect(ids.has('@kbn/ui-shared-deps-src')).toBe(false);
-    expect(ids.has('@kbn/ui-settings-plugin')).toBe(false);
-  });
-});
-
 describe('assertBoundariesConfig', () => {
-  it('accepts the real boundaries file', () => {
+  it('accepts the real boundaries file with full checks', () => {
     const requireFromRepo = createRequire(__filename);
     const config = requireFromRepo(path.join(REPO_ROOT, BOUNDARIES_PATH));
-    expect(() => assertBoundariesConfig(config)).not.toThrow();
+    expect(() =>
+      assertBoundariesConfig(config, {
+        checkKnownPackageIds: true,
+        checkPathsOnDisk: true,
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects unknown package ids when checkKnownPackageIds is enabled', () => {
+    expect(() =>
+      assertBoundariesConfig(
+        {
+          packages: {
+            '@kbn/ui-does-not-exist': {
+              alternative: 'Use something else.',
+            },
+          },
+        },
+        {
+          checkKnownPackageIds: true,
+          knownPackageIds: new Set(['@kbn/ui-feedback']),
+        }
+      )
+    ).toThrow(/unknown package "@kbn\/ui-does-not-exist"/);
+  });
+
+  it('rejects missing alternative', () => {
+    expect(() =>
+      assertBoundariesConfig({
+        packages: {
+          '@kbn/ui-feedback': {
+            alternative: '',
+          },
+        },
+      })
+    ).toThrow(/missing alternative/);
+  });
+
+  it('rejects path prefixes without a trailing slash', () => {
+    expect(() =>
+      assertBoundariesConfig({
+        alwaysAllowed: ['src/platform/kbn-ui'],
+        packages: {
+          '@kbn/ui-feedback': {
+            alternative: 'Use the feedback plugin API instead.',
+          },
+        },
+      })
+    ).toThrow(/must end with \//);
+  });
+
+  it('rejects override paths that do not exist on disk', () => {
+    expect(() =>
+      assertBoundariesConfig(
+        {
+          packages: {
+            '@kbn/ui-feedback': {
+              alternative: 'Use the feedback plugin API instead.',
+              overrides: [
+                {
+                  path: 'src/platform/plugins/shared/does-not-exist/',
+                  reason: 'typo',
+                },
+              ],
+            },
+          },
+        },
+        { checkPathsOnDisk: true }
+      )
+    ).toThrow(/not an existing directory/);
   });
 
   it('rejects overrides without a reason', () => {
@@ -220,6 +248,7 @@ describe('assertBoundariesConfig', () => {
       assertBoundariesConfig({
         packages: {
           '@kbn/ui-chrome-layout': {
+            alternative: 'Use chrome layout APIs instead.',
             overrides: [
               {
                 path: 'src/platform/plugins/shared/developer_toolbar/',

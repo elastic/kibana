@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
 import type { Rule } from 'eslint';
@@ -20,7 +21,7 @@ export interface PackageOverride {
 }
 
 export interface PackagePolicy {
-  alternative?: string;
+  alternative: string;
   overrides?: PackageOverride[];
 }
 
@@ -29,48 +30,84 @@ export interface BoundariesConfig {
   packages?: Record<string, PackagePolicy>;
 }
 
-interface RuleOptions extends BoundariesConfig {
-  /** Test-only: private package ids. Production discovers these from manifests. */
-  privatePackages?: string[];
-}
-
-interface DiscoverablePackage {
-  id: string;
-  normalizedRepoRelativeDir: string;
-  manifest: { visibility?: string };
+export interface AssertBoundariesOptions {
+  boundariesPath?: string;
+  /** When true, each packages key must exist in knownPackageIds. */
+  checkKnownPackageIds?: boolean;
+  knownPackageIds?: Set<string>;
+  /** When true, alwaysAllowed and override paths must exist as dirs under repoRoot. */
+  checkPathsOnDisk?: boolean;
+  repoRoot?: string;
 }
 
 export const BOUNDARIES_PATH = 'src/platform/kbn-ui/_tooling/eslint_boundaries.js';
-export const KBN_UI_DIR_PREFIX = 'src/platform/kbn-ui/';
-const DEFAULT_ALTERNATIVE =
-  'This package is private; use the owning plugin or core facade instead.';
 const requireFromRepo = createRequire(__filename);
 
-let cachedPrivateUiPackageIds: Set<string> | undefined;
+let cachedBoundariesConfig: BoundariesConfig | undefined;
 
-/**
- * Private `@kbn/ui-*` packages under `src/platform/kbn-ui/`, using manifest
- * visibility (not path-derived Package.visibility).
- */
-export const getPrivateKbnUiPackageIds = (
-  packages: DiscoverablePackage[] = getPackages(REPO_ROOT)
-): Set<string> => {
-  return new Set(
-    packages
-      .filter(
-        (pkg) =>
-          pkg.normalizedRepoRelativeDir.startsWith(KBN_UI_DIR_PREFIX) &&
-          pkg.manifest.visibility === 'private'
-      )
-      .map((pkg) => pkg.id)
-  );
+const getKnownPackageIds = (): Set<string> =>
+  new Set(getPackages(REPO_ROOT).map((pkg) => pkg.id));
+
+const assertPathPrefix = (
+  prefix: string,
+  label: string,
+  {
+    boundariesPath,
+    checkPathsOnDisk,
+    repoRoot,
+  }: {
+    boundariesPath: string;
+    checkPathsOnDisk: boolean;
+    repoRoot: string;
+  }
+): void => {
+  if (!prefix?.trim()) {
+    throw new Error(`${boundariesPath}: ${label} is empty`);
+  }
+  if (!prefix.endsWith('/')) {
+    throw new Error(`${boundariesPath}: ${label} "${prefix}" must end with /`);
+  }
+  if (checkPathsOnDisk) {
+    const absolute = path.join(repoRoot, prefix);
+    if (!fs.existsSync(absolute) || !fs.statSync(absolute).isDirectory()) {
+      throw new Error(
+        `${boundariesPath}: ${label} "${prefix}" is not an existing directory under the repo root`
+      );
+    }
+  }
 };
 
+/**
+ * Validates eslint_boundaries policy shape. Optionally checks that package ids
+ * exist in the repo and that allowlist path prefixes exist on disk.
+ */
 export const assertBoundariesConfig = (
   config: BoundariesConfig,
-  boundariesPath: string = BOUNDARIES_PATH
+  options: AssertBoundariesOptions = {}
 ): void => {
+  const boundariesPath = options.boundariesPath ?? BOUNDARIES_PATH;
+  const checkKnownPackageIds = options.checkKnownPackageIds ?? false;
+  const checkPathsOnDisk = options.checkPathsOnDisk ?? false;
+  const repoRoot = options.repoRoot ?? REPO_ROOT;
+  const knownPackageIds = options.knownPackageIds ?? (checkKnownPackageIds ? getKnownPackageIds() : undefined);
+
+  for (const prefix of config.alwaysAllowed ?? []) {
+    assertPathPrefix(prefix, 'alwaysAllowed path', {
+      boundariesPath,
+      checkPathsOnDisk,
+      repoRoot,
+    });
+  }
+
   for (const [pkgId, policy] of Object.entries(config.packages ?? {})) {
+    if (checkKnownPackageIds && knownPackageIds && !knownPackageIds.has(pkgId)) {
+      throw new Error(`${boundariesPath}: unknown package "${pkgId}"`);
+    }
+
+    if (!policy.alternative?.trim()) {
+      throw new Error(`${boundariesPath}: ${pkgId} is missing alternative`);
+    }
+
     for (const override of policy.overrides ?? []) {
       if (!override.path?.trim()) {
         throw new Error(`${boundariesPath}: ${pkgId} override is missing path`);
@@ -80,21 +117,25 @@ export const assertBoundariesConfig = (
           `${boundariesPath}: ${pkgId} override "${override.path}" is missing reason`
         );
       }
+      assertPathPrefix(override.path, `${pkgId} override path`, {
+        boundariesPath,
+        checkPathsOnDisk,
+        repoRoot,
+      });
     }
   }
 };
 
 const loadBoundariesConfig = (): BoundariesConfig => {
-  const config = requireFromRepo(path.join(REPO_ROOT, BOUNDARIES_PATH)) as BoundariesConfig;
-  assertBoundariesConfig(config);
-  return config;
-};
-
-const discoverPrivateUiPackageIds = (): Set<string> => {
-  if (!cachedPrivateUiPackageIds) {
-    cachedPrivateUiPackageIds = getPrivateKbnUiPackageIds();
+  if (!cachedBoundariesConfig) {
+    const config = requireFromRepo(path.join(REPO_ROOT, BOUNDARIES_PATH)) as BoundariesConfig;
+    assertBoundariesConfig(config, {
+      checkKnownPackageIds: true,
+      checkPathsOnDisk: true,
+    });
+    cachedBoundariesConfig = config;
   }
-  return cachedPrivateUiPackageIds;
+  return cachedBoundariesConfig;
 };
 
 const getStringLiteral = (node: unknown): string | undefined => {
@@ -111,12 +152,12 @@ const getStringLiteral = (node: unknown): string | undefined => {
   return undefined;
 };
 
-const matchPrivatePackage = (
+const matchRestrictedPackage = (
   request: string,
-  privatePackageIds: Set<string>
+  restrictedPackageIds: Set<string>
 ): string | undefined => {
   let match: string | undefined;
-  for (const pkgId of privatePackageIds) {
+  for (const pkgId of restrictedPackageIds) {
     if (request === pkgId || request.startsWith(`${pkgId}/`)) {
       if (!match || pkgId.length > match.length) {
         match = pkgId;
@@ -143,23 +184,20 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Disallow importing private @kbn/ui-* packages outside their owning packages',
+      description:
+        'Disallow importing listed @kbn/ui-* packages outside allowlisted paths',
       category: 'Best Practices',
       recommended: true,
     },
     messages: {
       restrictedImport:
-        "Do not import '{{package}}' outside its owning packages. {{alternative}} See {{boundariesPath}}.",
+        "Do not import '{{package}}' outside allowlisted paths. {{alternative}} See {{boundariesPath}}.",
     },
     schema: [
       {
         type: 'object',
         properties: {
           alwaysAllowed: {
-            type: 'array',
-            items: { type: 'string' },
-          },
-          privatePackages: {
             type: 'array',
             items: { type: 'string' },
           },
@@ -182,6 +220,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
                   },
                 },
               },
+              required: ['alternative'],
               additionalProperties: false,
             },
           },
@@ -191,18 +230,20 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
     ],
   },
   create(context) {
-    const options = (context.options[0] ?? {}) as RuleOptions;
-    // Tests inject `privatePackages`; production loads policy from disk and
-    // discovers private kbn-ui package ids from manifests.
-    const config: BoundariesConfig = options.privatePackages ? options : loadBoundariesConfig();
+    const options = context.options[0] as BoundariesConfig | undefined;
+    // Only treat options as the full policy when they list packages. An empty
+    // `{}` / partial options object must not disable the on-disk boundaries.
+    const useInjected =
+      !!options?.packages && Object.keys(options.packages).length > 0;
+    const config = useInjected ? options : loadBoundariesConfig();
 
-    assertBoundariesConfig(config);
+    if (useInjected) {
+      assertBoundariesConfig(config);
+    }
 
     const alwaysAllowed = config.alwaysAllowed ?? [];
     const packagePolicies = config.packages ?? {};
-    const privatePackageIds = options.privatePackages
-      ? new Set(options.privatePackages)
-      : discoverPrivateUiPackageIds();
+    const restrictedPackageIds = new Set(Object.keys(packagePolicies));
 
     const filename = context.getPhysicalFilename
       ? context.getPhysicalFilename()
@@ -214,7 +255,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
         return;
       }
 
-      const pkg = matchPrivatePackage(request, privatePackageIds);
+      const pkg = matchRestrictedPackage(request, restrictedPackageIds);
       if (!pkg) {
         return;
       }
@@ -231,7 +272,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
         messageId: 'restrictedImport',
         data: {
           package: pkg,
-          alternative: policy?.alternative ?? DEFAULT_ALTERNATIVE,
+          alternative: policy.alternative,
           boundariesPath: BOUNDARIES_PATH,
         },
       });

@@ -10,11 +10,17 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'kbn-ui']
 
 ## `@kbn/kbn-ui/no_restricted_package_imports`
 
-Bans importing packages under `src/platform/kbn-ui/` with `manifest.visibility: "private"` (and their subpaths) outside allowlisted paths. Discovery uses the kibana.jsonc visibility field (not path-derived package visibility) and is scoped to that directory, so shared packages such as `@kbn/ui-callout` and unrelated `@kbn/ui-*` ids outside kbn-ui stay unrestricted.
+Stops app code from importing kbn-ui platform implementation packages (chrome layout, side navigation, feedback, and so on) and points each caller at the contract to use instead. Enabled as an error in the shared ESLint config.
 
-`src/platform/kbn-ui/_tooling/eslint_boundaries.js` supplies `alwaysAllowed`, optional per-package `alternative` text (shown in the lint error), and path `overrides` (`path` + `reason`). The rule validates overrides when loading the policy.
+The list lives in `src/platform/kbn-ui/_tooling/eslint_boundaries.js`. Packages under `packages` (and their subpaths) are banned outside allowlisted paths; unlisted packages stay unrestricted.
 
-Enabled as an error in the shared ESLint config. To allow a non-core importer, add an override in the boundaries file — do not add path exceptions to the root ESLint config.
+- `alwaysAllowed`: prefixes that may import any restricted package (today: `src/platform/kbn-ui/`).
+- per-package `overrides` (`path` + `reason`): extra importers for one package (owning plugin, core chrome, …).
+- `alternative`: text shown in the lint error.
+
+On load the rule checks that listed package ids exist, each `alternative` is non-empty, and every path prefix ends with `/` and exists on disk.
+
+To restrict a package, add it under `packages`. To allow a non-allowlisted importer, add an override in that file — not in the root ESLint config.
 
 ### Examples
 

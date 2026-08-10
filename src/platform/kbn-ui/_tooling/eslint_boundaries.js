@@ -8,22 +8,31 @@
  */
 
 /**
- * Import policy for private packages under `src/platform/kbn-ui/`.
- * Enforced by `@kbn/kbn-ui/no_restricted_package_imports`.
+ * Import policy for restricted packages. Enforced by
+ * `@kbn/kbn-ui/no_restricted_package_imports`.
  *
- * Restriction itself comes from `visibility: "private"` in each package's
- * `kibana.jsonc` (scoped to `src/platform/kbn-ui/`). This file only adds:
+ * By default any package may be imported anywhere. Listing a package id under
+ * `packages` restricts it.
  *
- * - `alwaysAllowed`: path prefixes that may import any private kbn-ui package
+ * Load-time checks (ESLint fails hard on typos):
+ * - each `packages` key must be a real package id
+ * - each listed package must have a non-empty `alternative`
+ * - `alwaysAllowed` and override `path` values must end with `/` and exist as
+ *   directories under the repo root
+ * - each override must include a non-empty `reason`
+ *
+ * Fields:
+ * - `alwaysAllowed`: path prefixes that may import any listed package
  * - `packages[id].alternative`: what app authors should use instead (lint error)
  * - `packages[id].overrides[]`: extra allowlisted importers beyond `alwaysAllowed`
- *   - `path`: repo-relative prefix
+ *   - `path`: repo-relative prefix (trailing `/` required)
  *   - `reason`: why this override exists (required)
- *
- * Shared packages (`visibility: "shared"`) are unrestricted.
  */
 module.exports = {
-  alwaysAllowed: ['src/platform/kbn-ui/', 'src/core/'],
+  // Cross-imports within kbn-ui only. Core chrome and owning plugins are
+  // per-package overrides — do not grant all of src/core/ access to every
+  // restricted package (e.g. feedback).
+  alwaysAllowed: ['src/platform/kbn-ui/'],
 
   packages: {
     '@kbn/ui-feedback': {
@@ -44,6 +53,10 @@ module.exports = {
       alternative: 'Use chrome layout APIs instead.',
       overrides: [
         {
+          path: 'src/core/packages/chrome/',
+          reason: 'Core chrome mounts layout and owns the public chrome facades.',
+        },
+        {
           path: 'src/platform/plugins/shared/developer_toolbar/',
           reason:
             'Needs useLayoutUpdate to set chrome footerHeight; no public core re-export yet. Prefer re-exporting from @kbn/core-chrome-layout (or a chrome API).',
@@ -53,14 +66,32 @@ module.exports = {
 
     '@kbn/ui-chrome-layout-constants': {
       alternative: 'Import from @kbn/core-chrome-layout-constants instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/',
+          reason: 'Core chrome re-exports and consumes layout constants.',
+        },
+      ],
     },
 
     '@kbn/ui-chrome-layout-utils': {
       alternative: 'Import from @kbn/core-chrome-layout-utils instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/',
+          reason: 'Core chrome re-exports and consumes layout utils.',
+        },
+      ],
     },
 
     '@kbn/ui-side-navigation': {
       alternative: 'Use chrome navigation APIs instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/',
+          reason: 'Core chrome mounts side navigation and owns navigation APIs.',
+        },
+      ],
     },
 
     '@kbn/ui-storybook-config': {
