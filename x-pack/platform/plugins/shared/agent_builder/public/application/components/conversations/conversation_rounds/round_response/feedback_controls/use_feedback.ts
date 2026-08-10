@@ -221,9 +221,11 @@ export const useFeedback = (
 
   const submit = useCallback(() => {
     const currentVote = voteRef.current;
-    if (!currentVote || !conversationId) return;
+    if (!currentVote || !conversationId || isSubmittingRef.current) return;
 
     setModalOpen(false);
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
 
     conversationsService
       .submitRoundFeedback({
@@ -253,6 +255,10 @@ export const useFeedback = (
       .catch(() => {
         addErrorToast({ title: labels.submitError });
         resetTo();
+      })
+      .finally(() => {
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       });
   }, [
     conversationId,
