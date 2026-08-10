@@ -55,7 +55,7 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
             `${ANNOTATIONS_PANEL} > lns-dimensionTrigger`,
             1
           );
-          await lens.setAnnotationTextVisibility('name');
+          await lens.style.setAnnotationTextVisibility('name');
           await lens.closeDimensionEditor();
 
           await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
@@ -102,7 +102,7 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
 
         await lens.dimensions.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
         await page.testSubj.click('lnsXY_annotation_query');
-        await lens.configureQueryAnnotation({
+        await lens.style.configureQueryAnnotation({
           queryString: '*',
           timeField: 'utc_time',
           textDecoration: { type: 'name' },

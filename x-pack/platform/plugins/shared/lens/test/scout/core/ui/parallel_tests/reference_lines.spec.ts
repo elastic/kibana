@@ -94,11 +94,13 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
             `${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`,
             1
           );
-          await lens.setReferenceLineFillBelow();
+          await lens.style.setReferenceLineFillBelow();
           // Snapshot before close: closing the editor (and applying the fill) must produce a
           // newer chart render. Settling on the pre-edit count lets the drag land on stale
           // state and drop the dimension without adding it to the target group.
-          const renderCountBeforeClose = await lens.getVisualizationRenderCount('xyVisChart');
+          const renderCountBeforeClose = await lens.workspace.getVisualizationRenderCount(
+            'xyVisChart'
+          );
           await lens.closeDimensionEditor();
           await lens.waitForVisualization('xyVisChart', {
             afterCount: renderCountBeforeClose ?? undefined,
@@ -123,7 +125,10 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
             `${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`,
             1
           );
-          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
+          await expect(lens.style.referenceLineFillBelowButton).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
           await lens.closeDimensionEditor();
         }
       );
@@ -145,7 +150,10 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
             1,
             1
           );
-          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
+          await expect(lens.style.referenceLineFillBelowButton).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
           await lens.closeDimensionEditor();
         }
       );
