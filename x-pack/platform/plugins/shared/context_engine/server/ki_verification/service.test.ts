@@ -8,16 +8,12 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { KiVerifierRegistry } from './registry';
 import { KiVerificationService } from './service';
-import type { KiVerificationContext, KiVerifier, KiVerifierResult } from './types';
+import type { KiVerificationContext, KiVerifier, KiVerifierOutcome } from './types';
 
-const makeVerifier = (
-  id: string,
-  result: Omit<KiVerifierResult, 'verifier'>,
-  applies = true
-): KiVerifier => ({
+const makeVerifier = (id: string, outcome: KiVerifierOutcome, applies = true): KiVerifier => ({
   id,
   applies: () => applies,
-  verify: jest.fn(async () => ({ verifier: id, ...result })),
+  verify: jest.fn(async () => outcome),
 });
 
 describe('KiVerificationService', () => {
@@ -108,6 +104,40 @@ describe('KiVerificationService', () => {
       { verifier: 'after', passed: true },
     ]);
     expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'thrower' threw: boom");
+  });
+
+  it('records a verifier whose applies() throws as a failure and continues the run', async () => {
+    const thrower: KiVerifier = {
+      id: 'applies-thrower',
+      applies: () => {
+        throw new Error('applies boom');
+      },
+      verify: jest.fn(async () => ({ passed: true as const })),
+    };
+    const after = makeVerifier('after', { passed: true });
+    registry.register(thrower);
+    registry.register(after);
+
+    const summary = await service.verifyKi({}, context);
+
+    expect(thrower.verify).not.toHaveBeenCalled();
+    expect(after.verify).toHaveBeenCalledTimes(1);
+    expect(summary.passed).toBe(false);
+    expect(summary.results).toEqual([
+      { verifier: 'applies-thrower', passed: false, reason: 'applies boom' },
+      { verifier: 'after', passed: true },
+    ]);
+    expect(context.logger.warn).toHaveBeenCalledWith(
+      "KI verifier 'applies-thrower' threw: applies boom"
+    );
+  });
+
+  it('stamps the result with the verifier id from the registry', async () => {
+    registry.register(makeVerifier('real-id', { passed: true }));
+
+    const summary = await service.verifyKi({}, context);
+
+    expect(summary.results).toEqual([{ verifier: 'real-id', passed: true }]);
   });
 
   it('passes with no results when no verifier applies', async () => {

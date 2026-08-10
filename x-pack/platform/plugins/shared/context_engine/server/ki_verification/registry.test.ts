@@ -6,11 +6,11 @@
  */
 
 import { KiVerifierRegistry } from './registry';
-import type { KiVerifier, KnowledgeIndicator } from './types';
+import type { KiVerifier } from './types';
 
 const makeVerifier = (overrides: Partial<KiVerifier> & { id: string }): KiVerifier => ({
   applies: () => true,
-  verify: jest.fn(async () => ({ verifier: overrides.id, passed: true })),
+  verify: jest.fn(async () => ({ passed: true as const })),
   ...overrides,
 });
 
@@ -38,22 +38,7 @@ describe('KiVerifierRegistry', () => {
     );
   });
 
-  it('getApplicable returns only verifiers that apply, in registration order', () => {
-    const ki: KnowledgeIndicator = { type: 'esql' };
-    const applies = makeVerifier({ id: 'applies', applies: () => true });
-    const skips = makeVerifier({ id: 'skips', applies: () => false });
-    const alsoApplies = makeVerifier({
-      id: 'also',
-      applies: (candidate) => candidate.type === 'esql',
-    });
-    registry.register(applies);
-    registry.register(skips);
-    registry.register(alsoApplies);
-
-    expect(registry.getApplicable(ki)).toEqual([applies, alsoApplies]);
-  });
-
-  it('getApplicable is empty when nothing is registered', () => {
-    expect(registry.getApplicable({})).toEqual([]);
+  it('getAll is empty when nothing is registered', () => {
+    expect(registry.getAll()).toEqual([]);
   });
 });

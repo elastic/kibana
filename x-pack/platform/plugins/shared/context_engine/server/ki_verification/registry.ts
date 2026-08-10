@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KiVerifier, KnowledgeIndicator } from './types';
+import type { KiVerifier } from './types';
 
 export class KiVerifierRegistry {
   private readonly verifiers = new Map<string, KiVerifier>();
@@ -19,10 +19,5 @@ export class KiVerifierRegistry {
 
   getAll(): KiVerifier[] {
     return [...this.verifiers.values()];
-  }
-
-  /** Verifiers that apply to the given KI, preserving registration order. */
-  getApplicable(ki: KnowledgeIndicator): KiVerifier[] {
-    return this.getAll().filter((verifier) => verifier.applies(ki));
   }
 }

@@ -9,6 +9,7 @@ export type {
   KnowledgeIndicator,
   KiVerifierContext,
   KiVerificationContext,
+  KiVerifierOutcome,
   KiVerifierResult,
   KiVerifier,
   KiVerificationSummary,

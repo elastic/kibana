@@ -35,20 +35,17 @@ export interface KiVerificationContext extends KiVerifierContext {
   isEnabled: boolean;
 }
 
-/** Outcome of a single verifier for one KI. */
-export interface KiVerifierResult {
-  /** Id of the verifier that produced this result. */
-  verifier: string;
-  passed: boolean;
-  /** Explanation, set when a check fails. */
-  reason?: string;
-}
+/** Outcome a verifier reports for one KI. A failure must carry a reason. */
+export type KiVerifierOutcome = { passed: true } | { passed: false; reason: string };
+
+/** A {@link KiVerifierOutcome} attributed to a verifier by the framework. */
+export type KiVerifierResult = KiVerifierOutcome & { verifier: string };
 
 export interface KiVerifier {
   readonly id: string;
   /** Whether this verifier has anything to check for the given KI. */
   applies(ki: KnowledgeIndicator): boolean;
-  verify(ki: KnowledgeIndicator, context: KiVerifierContext): Promise<KiVerifierResult>;
+  verify(ki: KnowledgeIndicator, context: KiVerifierContext): Promise<KiVerifierOutcome>;
 }
 
 /**
