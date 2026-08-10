@@ -30,7 +30,10 @@ export class LensEditorApp extends LensApp {
   constructor(page: ScoutPage) {
     super(page);
     this.layers = createLazyPageObject(LensLayers, page);
-    this.dimensions = createLazyPageObject(LensDimensions, page);
+    this.dimensions = createLazyPageObject(LensDimensions, page, {
+      closeDimensionEditorButton: this.closeDimensionEditorButton,
+      closeDimensionEditor: () => this.closeDimensionEditor(),
+    });
   }
 
   // ---------------------------------------------------------------------------
