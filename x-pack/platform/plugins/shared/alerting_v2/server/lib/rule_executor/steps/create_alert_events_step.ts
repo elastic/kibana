@@ -20,6 +20,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import { forwardThenFinalize, guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
 
 @injectable()
@@ -82,6 +83,12 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         if (droppedGroupCount > 0) {
           step.logger.warn({
             message: `[${step.name}] Rule ${lastState.input.ruleId} (space ${lastState.input.spaceId}) exceeded maxGroupsPerExecution=${step.maxGroupsPerExecution}; dropped ${droppedGroupCount} new group(s) this run`,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_MAX_GROUPS_EXCEEDED,
+            labels: {
+              rule_id: lastState.input.ruleId,
+              space_id: lastState.input.spaceId,
+              step: step.name,
+            },
           });
         }
         return undefined;

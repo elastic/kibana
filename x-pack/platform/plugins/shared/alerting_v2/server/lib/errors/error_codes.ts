@@ -365,6 +365,8 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
+  RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**

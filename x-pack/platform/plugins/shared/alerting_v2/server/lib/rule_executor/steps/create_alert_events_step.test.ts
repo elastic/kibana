@@ -17,6 +17,7 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
 
 describe('CreateAlertEventsStep', () => {
@@ -185,11 +186,18 @@ describe('CreateAlertEventsStep', () => {
       });
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('exceeded maxGroupsPerExecution=2')
+        expect.stringContaining('exceeded maxGroupsPerExecution=2'),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_MAX_GROUPS_EXCEEDED,
+            rule_id: expect.any(String),
+            space_id: expect.any(String),
+          }),
+        })
       );
-      // The single summary carries the full tally, not just "it happened".
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('dropped 2 new group(s) this run')
+        expect.stringContaining('dropped 2 new group(s) this run'),
+        expect.anything()
       );
     });
 
@@ -248,7 +256,12 @@ describe('CreateAlertEventsStep', () => {
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       // The tally accumulates across batches, not just the last one.
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('dropped 2 new group(s) this run')
+        expect.stringContaining('dropped 2 new group(s) this run'),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_MAX_GROUPS_EXCEEDED,
+          }),
+        })
       );
     });
   });
