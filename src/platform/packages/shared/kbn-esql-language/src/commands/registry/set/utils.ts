@@ -73,7 +73,7 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
         defaultMessage:
-          'Attempts to load the fields from the source that are explicity mentioned in the query',
+          'Attempts to load the fields from the source that are explicitly mentioned in the query',
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
