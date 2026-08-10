@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP } from '../translations';
 import type { TableRow } from './types';
+import { AnomalyActionMenu } from './anomaly_action_menu';
 import { useAnomalyTableRowActions } from '../../../api/hooks/use_anomaly_table_row_actions';
-import {
-  ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID,
-  ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX,
-} from '../test_ids';
+import { ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID } from '../test_ids';
 
 interface AnomalyRowActionsMenuProps {
   row: TableRow;
@@ -27,21 +24,6 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
   const togglePopover = useCallback(() => setIsOpen((value) => !value), []);
 
   const { actions } = useAnomalyTableRowActions({ row, timeRange, closePopover });
-
-  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
-    () => [
-      {
-        id: 0,
-        items: actions.map((action) => ({
-          name: action.label,
-          icon: action.icon,
-          onClick: action.onClick,
-          'data-test-subj': `${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${action.key}`,
-        })),
-      },
-    ],
-    [actions]
-  );
 
   const button = (
     <EuiToolTip content={ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP} disableScreenReaderOutput>
@@ -64,7 +46,7 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({ ro
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <AnomalyActionMenu actions={actions} />
     </EuiPopover>
   );
 };

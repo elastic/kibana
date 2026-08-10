@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { render, renderHook } from '@testing-library/react';
+import { fireEvent, render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { alertInputDataMock } from '../mocks';
@@ -101,11 +101,32 @@ describe('useRiskInputActionsPanels', () => {
     expect(getByTestId('contextMenuPanelTitle')).toHaveTextContent('2 selected');
   });
 
-  it('displays cases actions when user has cases permissions', () => {
-    const { container } = customRender();
+  it('displays cases actions when user has cases permissions', async () => {
+    const { findByTestId, getByTestId } = customRender();
 
-    expect(container).toHaveTextContent('Add to existing case');
-    expect(container).toHaveTextContent('Add to new case');
+    fireEvent.click(getByTestId('add-to-case'));
+
+    expect(await findByTestId('add-to-new-case')).toBeInTheDocument();
+    expect(await findByTestId('add-to-existing-case')).toBeInTheDocument();
+  });
+
+  it('keeps action order, icons, and the explicit group separator visible', () => {
+    mockUseUserPrivileges.mockReturnValue({
+      timelinePrivileges: { read: true },
+    });
+    const { getAllByRole, getByTestId } = customRender();
+
+    expect(getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Add to new timeline',
+      'Add to case',
+    ]);
+    expect(getByTestId('securityActionMenuGroupSeparator')).toBeInTheDocument();
+    expect(
+      getByTestId('add-to-new-timeline').querySelector('[data-euiicon-type="timeline"]')
+    ).not.toBeNull();
+    expect(
+      getByTestId('add-to-case').querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeNull();
   });
 
   it('does NOT display cases actions when user has NO cases permissions', () => {
@@ -158,11 +179,12 @@ describe('useRiskInputActionsPanels', () => {
     );
 
     const timelineAction = result.current[0].items?.find(
-      (item: Partial<{ name: React.JSX.Element }>) =>
-        item.name?.props?.defaultMessage === 'Add to new timeline'
+      ({ key }) => key === 'add-to-new-timeline'
     );
 
-    timelineAction?.onClick?.();
+    if (timelineAction && 'onClick' in timelineAction) {
+      timelineAction.onClick?.();
+    }
 
     expect(mockSendBulkEvents).toHaveBeenCalledWith([
       {
