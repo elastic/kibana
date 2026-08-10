@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-/** User index holding every Context Engine signal, of every type. */
-export const SIGNAL_INDEX = 'context-engine-signals';
+/**
+ * Prefix for the per-space Context Engine signals user indices — one index per
+ * Kibana space, mirroring the per-space Agent Builder traces convention
+ * (`traces-agent_builder.otel-<space>`). The `kibana_system` reserved-role grant
+ * covers `context-engine-signals-*`.
+ */
+export const SIGNAL_INDEX_PREFIX = 'context-engine-signals-';
+
+/** The signals user index for a given Kibana space. */
+export const buildSignalsIndexName = (spaceId: string): string =>
+  `${SIGNAL_INDEX_PREFIX}${spaceId}`;
 
 /** The set of signal types grows over time; `tool_call` is the first (Stage 1). */
 export type SignalType = 'tool_call';

@@ -55,24 +55,47 @@ describe('SignalsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     createSignalsStorageClientMock.mockReturnValue(storageClient);
+    (storageClient.reconcileMappings as jest.Mock).mockResolvedValue(undefined);
     service = new SignalsService({ esClient, logger });
   });
 
-  it('creates the storage client with the provided es client and logger', () => {
-    expect(createSignalsStorageClientMock).toHaveBeenCalledWith({ esClient, logger });
+  it('creates a storage client bound to the requested space', async () => {
+    await service.ensureIndex('default');
+    expect(createSignalsStorageClientMock).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      spaceId: 'default',
+    });
+  });
+
+  it('creates one storage client per space and caches it', async () => {
+    await service.ensureIndex('default');
+    await service.ensureIndex('default');
+    await service.ensureIndex('marketing');
+
+    expect(createSignalsStorageClientMock).toHaveBeenCalledTimes(2);
+    expect(createSignalsStorageClientMock).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      spaceId: 'default',
+    });
+    expect(createSignalsStorageClientMock).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      spaceId: 'marketing',
+    });
   });
 
   describe('ensureIndex', () => {
-    it('reconciles the index mappings', async () => {
-      (storageClient.reconcileMappings as jest.Mock).mockResolvedValue(undefined);
-      await service.ensureIndex();
+    it('reconciles the space index mappings', async () => {
+      await service.ensureIndex('default');
       expect(storageClient.reconcileMappings).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('write', () => {
     it('is a no-op for an empty batch', async () => {
-      await service.write([]);
+      await service.write('default', []);
       expect(storageClient.bulk).not.toHaveBeenCalled();
     });
 
@@ -80,7 +103,7 @@ describe('SignalsService', () => {
       (storageClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
       const signal = makeToolCallSignal();
 
-      await service.write([signal]);
+      await service.write('default', [signal]);
 
       expect(storageClient.bulk).toHaveBeenCalledWith({
         operations: [{ index: { _id: signal.signal_id, document: signal } }],
@@ -93,8 +116,8 @@ describe('SignalsService', () => {
       (storageClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
       const signal = makeToolCallSignal();
 
-      await service.write([signal]);
-      await service.write([signal]);
+      await service.write('default', [signal]);
+      await service.write('default', [signal]);
 
       for (const call of (storageClient.bulk as jest.Mock).mock.calls) {
         expect(call[0].operations[0].index._id).toBe(signal.signal_id);
@@ -103,7 +126,7 @@ describe('SignalsService', () => {
 
     it('rejects when the storage client rejects (so the producer can retry)', async () => {
       (storageClient.bulk as jest.Mock).mockRejectedValue(new Error('bulk failed'));
-      await expect(service.write([makeToolCallSignal()])).rejects.toThrow('bulk failed');
+      await expect(service.write('default', [makeToolCallSignal()])).rejects.toThrow('bulk failed');
     });
   });
 
@@ -116,7 +139,7 @@ describe('SignalsService', () => {
       const signal = makeToolCallSignal();
       (storageClient.search as jest.Mock).mockResolvedValue(searchResponse([signal]));
 
-      const result = await service.list();
+      const result = await service.list('default');
 
       expect(storageClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -132,7 +155,7 @@ describe('SignalsService', () => {
     it('filters by signal_type', async () => {
       (storageClient.search as jest.Mock).mockResolvedValue(searchResponse([]));
 
-      await service.list({ signalType: 'tool_call', size: 50 });
+      await service.list('default', { signalType: 'tool_call', size: 50 });
 
       const request = (storageClient.search as jest.Mock).mock.calls[0][0];
       expect(request.size).toBe(50);
@@ -141,7 +164,7 @@ describe('SignalsService', () => {
 
     it('clamps size to the max', async () => {
       (storageClient.search as jest.Mock).mockResolvedValue(searchResponse([]));
-      await service.list({ size: 1_000_000 });
+      await service.list('default', { size: 1_000_000 });
       expect((storageClient.search as jest.Mock).mock.calls[0][0].size).toBe(10_000);
     });
   });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SIGNAL_INDEX } from '../../common/http_api/signals';
-import { storageSettings } from './storage';
+import { SIGNAL_INDEX_PREFIX, buildSignalsIndexName } from '../../common/http_api/signals';
+import { signalsSchema } from './storage';
 
 interface MappingProp {
   type: string;
@@ -14,13 +14,14 @@ interface MappingProp {
   properties?: Record<string, MappingProp>;
 }
 
-const props = storageSettings.schema.properties as unknown as Record<string, MappingProp>;
+const props = signalsSchema.properties as unknown as Record<string, MappingProp>;
 
-describe('signals storage settings', () => {
-  it('targets the `context-engine-signals` user index (not a hidden system index)', () => {
-    expect(storageSettings.name).toBe(SIGNAL_INDEX);
-    expect(SIGNAL_INDEX).toBe('context-engine-signals');
-    expect(SIGNAL_INDEX.startsWith('.')).toBe(false);
+describe('signals storage', () => {
+  it('names a per-space user index under the prefix (not a hidden system index)', () => {
+    expect(SIGNAL_INDEX_PREFIX).toBe('context-engine-signals-');
+    expect(buildSignalsIndexName('default')).toBe('context-engine-signals-default');
+    expect(buildSignalsIndexName('my-space')).toBe('context-engine-signals-my-space');
+    expect(buildSignalsIndexName('default').startsWith('.')).toBe(false);
   });
 
   it('maps `data` as flattened with ignore_above (subfields queryable; long free-text skipped)', () => {
