@@ -36,8 +36,8 @@ actions:
       get:
         tags:
           - Dashboards
-        summary: "Get dashboards"
-        operationId: get-dashboards
+        summary: "Search dashboards"
+        operationId: search-dashboards
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -85,8 +85,8 @@ actions:
       put:
         tags:
           - Dashboards
-        summary: "Update a dashboard"
-        operationId: update-dashboard
+        summary: "Upsert a dashboard"
+        operationId: upsert-dashboard
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -124,8 +124,8 @@ actions:
       get:
         tags:
           - Visualizations
-        summary: "Get visualizations"
-        operationId: get-visualizations
+        summary: "Search visualizations"
+        operationId: search-visualizations
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -136,7 +136,7 @@ actions:
       post:
         tags:
           - Visualizations
-        summary: "Create a visualization"
+        summary: "Create visualization"
         operationId: create-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
@@ -161,7 +161,7 @@ actions:
       get:
         tags:
           - Visualizations
-        summary: "Get a visualization"
+        summary: "Get visualization"
         operationId: get-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
@@ -173,8 +173,8 @@ actions:
       put:
         tags:
           - Visualizations
-        summary: "Update a visualization"
-        operationId: update-visualization
+        summary: "Upsert visualization"
+        operationId: upsert-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -185,7 +185,7 @@ actions:
       delete:
         tags:
           - Visualizations
-        summary: "Delete a visualization"
+        summary: "Delete visualization"
         operationId: delete-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
