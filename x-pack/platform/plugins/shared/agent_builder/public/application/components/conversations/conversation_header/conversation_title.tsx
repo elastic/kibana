@@ -18,7 +18,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
+import {
+  useConversationPermissions,
+  useConversationTitle,
+  useHasPersistedConversation,
+} from '../../../hooks/use_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -44,6 +48,7 @@ interface ConversationTitleProps {
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
+  const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -52,8 +57,54 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
 
-  // No popover for unsaved conversations — just show the title
-  if (!hasPersistedConversation) {
+  const menuItems = [
+    ...(canRename
+      ? [
+          <EuiContextMenuItem
+            key="rename"
+            icon="pencil"
+            onClick={() => {
+              setIsPopoverOpen(false);
+              setIsRenameModalOpen(true);
+            }}
+            data-test-subj="agentBuilderConversationRenameButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
+              detail: 'conversation',
+            })}
+          >
+            {labels.rename}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(canDelete
+      ? [
+          <EuiContextMenuItem
+            key="delete"
+            icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+            onClick={() => {
+              setIsPopoverOpen(false);
+              setIsDeleteModalOpen(true);
+            }}
+            css={css`
+              color: ${euiTheme.colors.danger};
+            `}
+            data-test-subj="agentBuilderConversationDeleteButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
+              detail: 'conversation',
+            })}
+          >
+            {labels.delete}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
+
+  // Nothing to open the popover for: an unsaved conversation, or one the user may not act on.
+  if (!hasPersistedConversation || menuItems.length === 0) {
     return (
       <h4
         id={ariaLabelledBy}
@@ -66,44 +117,6 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       </h4>
     );
   }
-
-  const menuItems = [
-    <EuiContextMenuItem
-      key="rename"
-      icon="pencil"
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setIsRenameModalOpen(true);
-      }}
-      data-test-subj="agentBuilderConversationRenameButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
-        detail: 'conversation',
-      })}
-    >
-      {labels.rename}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-      onClick={() => {
-        setIsPopoverOpen(false);
-        setIsDeleteModalOpen(true);
-      }}
-      css={css`
-        color: ${euiTheme.colors.danger};
-      `}
-      data-test-subj="agentBuilderConversationDeleteButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
-        detail: 'conversation',
-      })}
-    >
-      {labels.delete}
-    </EuiContextMenuItem>,
-  ];
 
   const titleButtonStyles = css`
     max-width: 100%;
@@ -119,7 +132,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const titleButton = (
     <EuiButtonEmpty
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       flush="left"
       onClick={() => setIsPopoverOpen((open) => !open)}

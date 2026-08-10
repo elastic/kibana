@@ -32,7 +32,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await convertToLensByTitle({ dashboard }, 'Goal - Basic');
     await lens.waitForVisualization('mtrVis');
 
-    await lens.hoverOverDimensionButton();
+    await lens.dimensions.hoverOverDimensionButton();
     const data = await lens.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
@@ -54,14 +54,14 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
 
     await convertToLensByTitle({ dashboard }, 'Goal - Agg with params');
     await lens.waitForVisualization('mtrVis');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 1');
 
-    await lens.hoverOverDimensionButton();
+    await lens.dimensions.hoverOverDimensionButton();
     const data = await lens.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
@@ -83,15 +83,15 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
 
     await convertToLensByTitle({ dashboard }, 'Goal - Sibling pipeline agg');
     await lens.waitForVisualization('mtrVis');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(3);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Overall Max of Count');
     await expect(dimensions[1]).toHaveText('Static value: 1');
     await expect(dimensions[2]).toHaveText('@timestamp');
 
-    await lens.hoverOverDimensionButton();
+    await lens.dimensions.hoverOverDimensionButton();
     const data = await lens.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
@@ -113,15 +113,15 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
 
     await convertToLensByTitle({ dashboard }, 'Goal - Color ranges');
     await lens.waitForVisualization('mtrVis');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(3);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 13300000000');
     await expect(dimensions[2]).toHaveText('machine.os.raw: Descending');
 
-    await lens.hoverOverDimensionButton();
+    await lens.dimensions.hoverOverDimensionButton();
     await expect
       .poll(async () => lens.getMetricVisualizationData(), { timeout: 20_000 })
       .toStrictEqual([
