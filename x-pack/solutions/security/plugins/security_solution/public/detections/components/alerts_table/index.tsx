@@ -446,7 +446,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // table's `useSearchAlertsQuery`, so no extra request is made — both hooks
   // share the same cache entry. When the flyout strays onto another page,
   // this query lazily fetches that page while the table stays put.
-  const { data: flyoutAlertsData, isFetching: isFetchingFlyoutAlerts } = useSearchAlertsQuery({
+  const {
+    data: flyoutAlertsData,
+    isFetching: isFetchingFlyoutAlerts,
+    isError: isFlyoutQueryError,
+  } = useSearchAlertsQuery({
     data,
     ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
     consumers: ALERT_TABLE_CONSUMERS,
@@ -470,13 +474,15 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     const offset = flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage;
     const alertOnRequestedPage = flyoutAlertsData?.alerts?.[offset];
     setState({
-      isFlyoutDocumentLoading: !alertOnRequestedPage || isFetchingFlyoutAlerts,
+      isFlyoutDocumentLoading:
+        !isFlyoutQueryError && (!alertOnRequestedPage || isFetchingFlyoutAlerts),
     });
   }, [
     flyoutDocumentIndex,
     flyoutAlertsData?.alerts,
     flyoutPageIndex,
     isFetchingFlyoutAlerts,
+    isFlyoutQueryError,
     reduxItemsPerPage,
     setState,
     tablePageIndex,
