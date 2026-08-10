@@ -121,7 +121,7 @@ export function registerInternalConversationRoutes({
                 schema.literal('useful'),
                 schema.literal('well_explained'),
               ]),
-              { maxSize: 6 }
+              { maxSize: 3 }
             )
           ),
           comment: schema.maybe(schema.string({ maxLength: 500 })),

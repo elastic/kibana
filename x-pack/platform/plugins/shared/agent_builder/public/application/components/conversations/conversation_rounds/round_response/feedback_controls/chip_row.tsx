@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 
@@ -66,22 +66,33 @@ interface ChipRowProps {
 export const ChipRow: React.FC<ChipRowProps> = ({ vote, selected, onToggle }) => {
   const chips = vote === 'down' ? DOWN_CHIPS : UP_CHIPS;
 
-  const idToSelectedMap = Object.fromEntries(chips.map(({ id }) => [id, selected.includes(id)]));
-
   return (
-    <EuiButtonGroup
-      type="multi"
-      legend={i18n.translate('xpack.agentBuilder.feedback.chipRow.legend', {
+    <EuiFlexGroup
+      gutterSize="s"
+      wrap
+      responsive={false}
+      role="group"
+      aria-label={i18n.translate('xpack.agentBuilder.feedback.chipRow.legend', {
         defaultMessage: 'Feedback options',
       })}
-      options={chips.map(({ id, label }) => ({
-        id,
-        label,
-        'data-test-subj': `roundFeedbackChip-${id}`,
-      }))}
-      idToSelectedMap={idToSelectedMap}
-      onChange={(id) => onToggle(id as FeedbackChipId)}
-      buttonSize="compressed"
-    />
+    >
+      {chips.map(({ id, label }) => {
+        const isSelected = selected.includes(id);
+        return (
+          <EuiFlexItem key={id} grow={false}>
+            <EuiButton
+              size="s"
+              color={isSelected ? 'primary' : 'text'}
+              fill={isSelected}
+              onClick={() => onToggle(id)}
+              aria-pressed={isSelected}
+              data-test-subj={`roundFeedbackChip-${id}`}
+            >
+              {label}
+            </EuiButton>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 };
