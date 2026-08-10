@@ -10,6 +10,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluate_dataset';
+import { ensureConnectorAccessible, ensureWorkflowInstalled } from '../src/workflow_fixture';
 import { goldenDataset } from '../datasets/rule_creation_golden';
 import { hardCases } from '../datasets/hard_cases';
 
@@ -24,20 +25,8 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       connector: AvailableConnectorWithId;
       log: ToolingLog;
     }) => {
-      log.info(`Verifying AI connector: ${connector.name} (${connector.id})`);
-      try {
-        await fetch(`/api/actions/connector/${encodeURIComponent(connector.id)}`, {
-          method: 'GET',
-        });
-        log.info('AI connector is accessible — proceeding with eval run');
-      } catch (err) {
-        throw new Error(
-          `AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
-            `Ensure it is configured and enabled in Stack Management > Connectors ` +
-            `before running this eval suite. ` +
-            `Original error: ${err instanceof Error ? err.message : String(err)}`
-        );
-      }
+      await ensureConnectorAccessible({ fetch, connector, log });
+      await ensureWorkflowInstalled({ fetch, log });
     }
   );
 

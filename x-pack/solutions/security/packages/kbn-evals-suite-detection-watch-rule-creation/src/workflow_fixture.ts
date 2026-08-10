@@ -1,0 +1,294 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { HttpHandler } from '@kbn/core/public';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+
+/**
+ * TODO: Remove this file once the workflow is added to @kbn/workflows/managed and
+ * installed by the security_solution plugin at startup (same pattern as
+ * installSecurityAlertAnalysisWorkflowAndMarkReady). Until then, ensureWorkflowInstalled
+ * creates it via the public API if it does not exist.
+ */
+
+export const ensureConnectorAccessible = async ({
+  fetch,
+  connector,
+  log,
+}: {
+  fetch: HttpHandler;
+  connector: AvailableConnectorWithId;
+  log: ToolingLog;
+}): Promise<void> => {
+  log.info(`Verifying AI connector: ${connector.name} (${connector.id})`);
+  try {
+    await fetch(`/api/actions/connector/${encodeURIComponent(connector.id)}`, { method: 'GET' });
+    log.info('AI connector is accessible — proceeding with eval run');
+  } catch (err) {
+    throw new Error(
+      `AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
+        `Ensure it is configured and enabled in Stack Management > Connectors ` +
+        `before running this eval suite. ` +
+        `Original error: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+};
+
+/**
+ * Ensures the rule-creation workflow document exists in Elasticsearch.
+ * Idempotent — skips creation if the workflow is already installed.
+ */
+export const ensureWorkflowInstalled = async ({
+  fetch,
+  log,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<void> => {
+  log.info(`Checking workflow: ${RULE_CREATION_WORKFLOW_ID}`);
+  try {
+    await fetch(`/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}`, {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+    });
+    log.info('Workflow already installed — skipping creation');
+  } catch {
+    log.info('Workflow not found — creating via API');
+    try {
+      await fetch('/api/workflows/workflow', {
+        method: 'POST',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        body: JSON.stringify({ id: RULE_CREATION_WORKFLOW_ID, yaml: RULE_CREATION_WORKFLOW_YAML }),
+      });
+      log.info(`Workflow ${RULE_CREATION_WORKFLOW_ID} created`);
+    } catch (createErr) {
+      throw new Error(
+        `Failed to install workflow "${RULE_CREATION_WORKFLOW_ID}". ` +
+          `Ensure the Workflows feature is available and enabled. ` +
+          `Original error: ${createErr instanceof Error ? createErr.message : String(createErr)}`
+      );
+    }
+  }
+};
+
+const RULE_CREATION_WORKFLOW_YAML = `version: "1"
+name: Detection Rule Creation Worker
+description: >
+  Drafts an ES|QL detection rule for a reported gap, previews it, and creates it
+  disabled once an analyst approves.
+enabled: true
+tags:
+  - security
+  - detection-rule-creation
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        technique:
+          type: string
+          description: MITRE ATT&CK technique id the new rule should cover.
+        gap_description:
+          type: string
+          description: Detection gap the new rule should cover.
+        evidence:
+          type: string
+          description: Hunt findings or event examples supporting the gap.
+        confidence:
+          type: number
+          description: Confidence in the detection gap from 0 to 1.
+        preview_invocation_count:
+          type: number
+          default: 2
+          description: Rule executions the preview simulates.
+      required:
+        - technique
+      additionalProperties: false
+outputs:
+  - name: created
+    type: boolean
+  - name: rule_name
+    type: string
+steps:
+  - name: draft_creation
+    type: ai.agent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      message: |-
+        Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
+        security.create_detection_rule to create a new ES|QL rule draft now. The
+        supplied context is sufficient; do not ask a follow-up question.
+
+        ATT&CK technique: {{ inputs.technique }}
+        Detection gap: {{ inputs.gap_description }}
+        Evidence: {{ inputs.evidence }}
+        Confidence: {{ inputs.confidence }}
+
+        Echo the tool's returned rule fields and attachment metadata into the
+        structured output. Never return id or rule_id.
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+          description:
+            type: string
+          query:
+            type: string
+          language:
+            type: string
+            enum: [esql]
+          type:
+            type: string
+            enum: [esql]
+          interval:
+            type: string
+          from:
+            type: string
+          to:
+            type: string
+          severity:
+            type: string
+            enum: [low, medium, high, critical]
+          risk_score:
+            type: number
+          threat:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          tags:
+            type: array
+            items:
+              type: string
+          attachment_id:
+            type: string
+          attachment_version:
+            type: number
+        required:
+          - name
+          - description
+          - query
+          - language
+          - type
+          - interval
+          - from
+          - to
+          - severity
+          - risk_score
+          - threat
+          - tags
+          - attachment_id
+
+  - name: preview_creation
+    type: workflow.execute
+    if: >-
+      \${{ steps.draft_creation.output.structured_output.query != null
+        and steps.draft_creation.output.structured_output.query != ''
+        and steps.draft_creation.output.structured_output.attachment_id != null }}
+    with:
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          name: "{{ steps.draft_creation.output.structured_output.name }}"
+          description: "{{ steps.draft_creation.output.structured_output.description }}"
+          query: "{{ steps.draft_creation.output.structured_output.query }}"
+          language: esql
+          type: esql
+          interval: "{{ steps.draft_creation.output.structured_output.interval }}"
+          from: "{{ steps.draft_creation.output.structured_output.from }}"
+          to: "{{ steps.draft_creation.output.structured_output.to }}"
+          severity: "{{ steps.draft_creation.output.structured_output.severity }}"
+          risk_score: "\${{ steps.draft_creation.output.structured_output.risk_score }}"
+          threat: "\${{ steps.draft_creation.output.structured_output.threat }}"
+          tags: "\${{ steps.draft_creation.output.structured_output.tags }}"
+          invocationCount: "\${{ inputs.preview_invocation_count }}"
+          timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+
+  - name: review_creation
+    type: waitForApproval
+    if: >-
+      \${{ steps.draft_creation.output.structured_output.query != null
+        and steps.draft_creation.output.structured_output.query != ''
+        and steps.draft_creation.output.structured_output.attachment_id != null }}
+    timeout: "72h"
+    with:
+      approveLabel: Create rule
+      rejectLabel: Dismiss
+      message: |-
+        New ES|QL detection rule: {{ steps.draft_creation.output.structured_output.name }}
+
+        {{ steps.draft_creation.output.structured_output.description }}
+
+        Query:
+        {{ steps.draft_creation.output.structured_output.query }}
+
+        ATT&CK technique: {{ inputs.technique }}
+        Expected matches: {% if steps.preview_creation.output.succeeded and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }}{% else %}preview inconclusive{% endif %}
+        {% if steps.preview_creation.output.error_text != '' %}
+        Preview errors: {{ steps.preview_creation.output.error_text }}
+        {% endif %}
+        Severity: {{ steps.draft_creation.output.structured_output.severity }}
+        Risk score: {{ steps.draft_creation.output.structured_output.risk_score }}
+
+        Review the draft: /app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }}
+
+  - name: classify_preview
+    type: data.set
+    with:
+      conclusive: >-
+        \${{ steps.preview_creation.output.succeeded == true
+          and steps.preview_creation.output.is_aborted == false }}
+
+  - name: create_rule
+    type: kibana.request
+    if: >-
+      \${{ steps.review_creation.output.response.approved == true
+        and steps.classify_preview.output.conclusive == true }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        name: "{{ steps.draft_creation.output.structured_output.name }}"
+        description: "{{ steps.draft_creation.output.structured_output.description }}"
+        query: "{{ steps.draft_creation.output.structured_output.query }}"
+        language: esql
+        type: esql
+        interval: "{{ steps.draft_creation.output.structured_output.interval }}"
+        from: "{{ steps.draft_creation.output.structured_output.from }}"
+        to: "{{ steps.draft_creation.output.structured_output.to }}"
+        severity: "{{ steps.draft_creation.output.structured_output.severity }}"
+        risk_score: "\${{ steps.draft_creation.output.structured_output.risk_score }}"
+        threat: "\${{ steps.draft_creation.output.structured_output.threat }}"
+        tags: "\${{ steps.draft_creation.output.structured_output.tags }}"
+        enabled: false
+        building_block_type: default
+
+  - name: record_inconclusive_creation
+    type: data.set
+    if: >-
+      \${{ steps.review_creation.output.response.approved == true
+        and steps.classify_preview.output.conclusive == false }}
+    with:
+      note: The rule was not created because its preview was inconclusive.
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      created: "\${{ steps.create_rule.error == null and steps.create_rule.output.id != null }}"
+      rule_name: "{{ steps.draft_creation.output.structured_output.name }}"
+`;
