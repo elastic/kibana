@@ -96,7 +96,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
         <EuiTab
           isSelected={selectedTab === 'esql'}
           onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="console" aria-hidden={true} />}
+          prepend={<EuiIcon type="commandLine" aria-hidden={true} />}
           append={
             selectedEsqlCount > 0 ? (
               <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
