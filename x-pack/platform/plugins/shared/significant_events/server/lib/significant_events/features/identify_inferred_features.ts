@@ -474,7 +474,6 @@ type InferredIterationResult =
       totalFilters: number;
       filtersCapped: boolean;
       hasFilteredDocuments: boolean;
-      entityFilteredErrored: boolean;
       outcome:
         | { state: 'failure' }
         | {
@@ -489,14 +488,6 @@ type InferredIterationResult =
             semanticVerifyReuses: number;
           };
     };
-
-export const isSampleHealthy = ({
-  totalFilters,
-  entityFilteredErrored,
-}: {
-  totalFilters: number;
-  entityFilteredErrored: boolean;
-}): boolean => !(totalFilters > 0 && entityFilteredErrored);
 
 async function runInferredIteration({
   samplingEsClient,
@@ -551,7 +542,7 @@ async function runInferredIteration({
     return { hasDocuments: false };
   }
 
-  const { totalFilters, filtersCapped, hasFilteredDocuments, entityFilteredErrored } = batchResult;
+  const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
   const docsCount = batchResult.documents.length;
   const docIds = batchResult.documents
     .map((doc) => doc._id)
@@ -616,7 +607,6 @@ async function runInferredIteration({
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
-      entityFilteredErrored,
       outcome: { state: 'failure' },
     };
   }
@@ -645,7 +635,6 @@ async function runInferredIteration({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    entityFilteredErrored,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -693,7 +682,6 @@ export interface IdentifyInferredFeaturesOptions {
 
 export interface IdentifyInferredFeaturesResult {
   hasDocuments: boolean;
-  sampleHealthy: boolean;
   docsCount: number;
   docIds: string[];
   discoveredFeatures: FeatureUpsert[];
@@ -794,7 +782,6 @@ export async function identifyInferredFeatures({
   if (!iterationResult.hasDocuments) {
     return {
       hasDocuments: false,
-      sampleHealthy: false,
       docsCount: 0,
       docIds: [],
       discoveredFeatures,
@@ -816,7 +803,6 @@ export async function identifyInferredFeatures({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    entityFilteredErrored,
     outcome,
   } = iterationResult;
 
@@ -850,7 +836,6 @@ export async function identifyInferredFeatures({
 
     return {
       hasDocuments: true,
-      sampleHealthy: false,
       docsCount,
       docIds,
       discoveredFeatures,
@@ -913,7 +898,6 @@ export async function identifyInferredFeatures({
 
   return {
     hasDocuments: true,
-    sampleHealthy: isSampleHealthy({ totalFilters, entityFilteredErrored }),
     docsCount,
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),

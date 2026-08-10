@@ -149,10 +149,10 @@ steps:
             with:
               hasSuccess: true
 
-      # 2e: Convergence early-stop. sampleHealthy gates: an errored entity-filtered arm can produce a false barren result.
+      # 2e: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
       - name: track_convergence
         type: if
-        condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' and steps.identify_inferred.output.sampleHealthy == true }}"
+        condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
         steps:
           - name: reset_convergence
             type: if

@@ -153,7 +153,6 @@ export async function fetchSampleDocuments({
       totalFilters: 0,
       filtersCapped: false,
       hasFilteredDocuments: false,
-      entityFilteredErrored: false,
     };
   }
 
@@ -163,11 +162,8 @@ export async function fetchSampleDocuments({
     .map((filter) => conditionToESQLAst({ not: filter }))
     .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
 
-  const [
-    { hits: entityFilteredHits, errored: entityFilteredErrored },
-    { hits: diverseHits },
-    { hits: randomHits },
-  ] = await Promise.all([
+  const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
+    await Promise.all([
     withSpan(
       {
         name: 'sample_documents_entity_filtered',
@@ -188,13 +184,10 @@ export async function fetchSampleDocuments({
           unmappedFields: 'LOAD',
           requestTimeout: samplingTimeoutMs,
         })
-    )
-      // resolve(no-hits) is genuine exhaustion; reject is degraded — don't collapse both to EMPTY_SAMPLE
-      .then(({ hits }) => ({ hits, errored: false }))
-      .catch((err) => {
-        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
-        return { hits: EMPTY_SAMPLE.hits, errored: true };
-      }),
+    ).catch((err) => {
+      logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+      return EMPTY_SAMPLE;
+    }),
     diverseSize > 0
       ? withSpan(
           {
@@ -263,7 +256,6 @@ export async function fetchSampleDocuments({
     totalFilters: features.length,
     filtersCapped: features.length > maxEntityFilters,
     hasFilteredDocuments: entityFilteredHits.length > 0,
-    entityFilteredErrored,
   };
 }
 

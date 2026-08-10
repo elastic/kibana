@@ -123,7 +123,6 @@ describe('fetchSampleDocuments', () => {
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
     expect(result.hasFilteredDocuments).toBe(false);
-    expect(result.entityFilteredErrored).toBe(false);
   });
 
   it('uses ES|QL entity filtering with LOAD and leaves the random arm unfiltered', async () => {
@@ -204,42 +203,6 @@ describe('fetchSampleDocuments', () => {
     ]);
     expect(result.filtersCapped).toBe(true);
     expect(result.hasFilteredDocuments).toBe(true);
-    expect(result.entityFilteredErrored).toBe(false);
-  });
-
-  it('reports genuine exhaustion (successful, no docs) as not errored', async () => {
-    const esClient = {} as ElasticsearchClient;
-    const features = [
-      createFeature({
-        id: 'feature-1',
-        updatedAt: '2026-01-02T00:00:00.000Z',
-        field: 'service.name',
-        value: 'checkout',
-      }),
-    ];
-
-    getSampleDocumentsEsqlMock
-      .mockResolvedValueOnce({ hits: [], total: 0 })
-      .mockResolvedValueOnce({ hits: [createHit('random-1')], total: 1 });
-
-    const result = await fetchSampleDocuments({
-      esClient,
-      index: 'logs.test-default',
-      start: 100,
-      end: 200,
-      features,
-      logger,
-      size: 5,
-      entityFilteredRatio: 0.4,
-      diverseRatio: 0,
-      maxEntityFilters: 10,
-      samplingTimeoutMs: 30_000,
-      iteration: 1,
-    });
-
-    expect(logger.warn).not.toHaveBeenCalled();
-    expect(result.hasFilteredDocuments).toBe(false);
-    expect(result.entityFilteredErrored).toBe(false);
   });
 
   it('falls back to random documents when entity-filtered ES|QL sampling fails', async () => {
@@ -277,6 +240,5 @@ describe('fetchSampleDocuments', () => {
     );
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
     expect(result.hasFilteredDocuments).toBe(false);
-    expect(result.entityFilteredErrored).toBe(true);
   });
 });
