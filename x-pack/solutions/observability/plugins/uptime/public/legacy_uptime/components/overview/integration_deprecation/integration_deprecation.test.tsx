@@ -21,6 +21,7 @@ describe('IntegrationDeprecation', () => {
     window.sessionStorage.clear();
     jest.restoreAllMocks();
   });
+
   it('shows deprecation notice when hasIntegrationMonitors is true', () => {
     jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
