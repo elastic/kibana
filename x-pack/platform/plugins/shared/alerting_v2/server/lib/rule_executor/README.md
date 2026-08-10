@@ -143,8 +143,11 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Task timeout | `5m` | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
+| Max groups per execution | `xpack.alerting_v2.rules.run.maxGroupsPerExecution`, default `10000`, ceiling tied to `alerts.max` | [`config.ts`](../../config.ts) |
 
 `ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+
+`CreateAlertEventsStep` caps the number of distinct `group_hash` values a single execution can produce at `maxGroupsPerExecution`. The batch builder tracks the group set across every streamed batch of one run; once the cap is reached, rows that would introduce a **new** group are dropped (rows for already-seen groups still pass) and a single warning is logged for the run.
 
 ## Pipeline state
 

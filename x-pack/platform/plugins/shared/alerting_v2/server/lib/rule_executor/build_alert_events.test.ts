@@ -16,11 +16,17 @@ import {
 } from './build_alert_events';
 import type { BuildAlertEventsBaseOpts } from './build_alert_events';
 
-function buildAlertEventsFromEsqlResponse(
-  opts: BuildAlertEventsBaseOpts & { esqlResponse: EsqlQueryResponse }
-) {
-  const { esqlResponse, ...baseOpts } = opts;
-  const buildBatch = createAlertEventsBatchBuilder(baseOpts);
+type BuildFromResponseOpts = Omit<BuildAlertEventsBaseOpts, 'maxGroupsPerExecution'> & {
+  esqlResponse: EsqlQueryResponse;
+  maxGroupsPerExecution?: number;
+};
+
+function buildAlertEventsFromEsqlResponse({
+  esqlResponse,
+  maxGroupsPerExecution = 10000,
+  ...baseOpts
+}: BuildFromResponseOpts) {
+  const buildBatch = createAlertEventsBatchBuilder({ ...baseOpts, maxGroupsPerExecution });
   const rows = (esqlResponse.values ?? []).map((row) => {
     const record: Record<string, unknown> = {};
     (esqlResponse.columns ?? []).forEach((col, i) => {
@@ -73,6 +79,7 @@ describe('createAlertEventsBatchBuilder', () => {
       ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxGroupsPerExecution: 10000,
     });
 
     const docs = buildBatch(rows);
@@ -107,6 +114,7 @@ describe('createAlertEventsBatchBuilder', () => {
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxGroupsPerExecution: 10000,
     });
 
     const docs = buildBatch([{ 'host.name': 'host-a' }]);
@@ -124,6 +132,7 @@ describe('createAlertEventsBatchBuilder', () => {
         ruleAttributes: { grouping: { fields: ['host.name'] } },
         scheduledTimestamp: '2024-12-31T23:59:00.000Z',
         type: 'signal',
+        maxGroupsPerExecution: 10000,
       })(rows);
 
     it.each(['info', 'low', 'medium', 'high', 'critical'] as const)(
@@ -181,6 +190,93 @@ describe('createAlertEventsBatchBuilder', () => {
       const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
 
       expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'SEV1' });
+    });
+  });
+
+  describe('maxGroupsPerExecution', () => {
+    const createBuilder = (maxGroupsPerExecution: number) =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: [] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution,
+      });
+
+    it('drops rows that would introduce a new group past the limit', () => {
+      const buildBatch = createBuilder(2);
+
+      const docs = buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+      ]);
+
+      // Kept the first 2 distinct groups; the 3rd is dropped (rows in - events out).
+      expect(docs).toHaveLength(2);
+    });
+
+    it('keeps emitting rows for groups already seen even past the limit', () => {
+      const buildBatch = createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: ['host.name'] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution: 2,
+      });
+
+      const docs = buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        // Repeats of already-seen groups still pass despite being at the cap.
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        // A brand-new group is dropped.
+        { 'host.name': 'host-c' },
+      ]);
+
+      // 4 rows for the 2 seen groups pass; the brand-new 5th group is dropped.
+      expect(docs).toHaveLength(4);
+    });
+
+    it('applies the cap across multiple batches from the same builder', () => {
+      const buildBatch = createBuilder(2);
+
+      const batch1 = buildBatch([{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]);
+      const batch2 = buildBatch([{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }]);
+
+      // First batch fills the cap (2 groups); the second batch is all new -> dropped.
+      expect(batch1).toHaveLength(2);
+      expect(batch2).toHaveLength(0);
+    });
+
+    it('does not drop anything when the group count stays within the limit', () => {
+      const buildBatch = createBuilder(10);
+
+      const docs = buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+      ]);
+
+      expect(docs).toHaveLength(3);
+    });
+
+    it('keeps non-dropped rows deterministic regardless of drops (index advances per row)', () => {
+      const cappedDocs = createBuilder(1)([{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]);
+      const uncappedDocs = createBuilder(10)([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+      ]);
+
+      // The first (kept) row must hash identically whether or not later rows
+      // were dropped, i.e. the fallback seed index is stable per row.
+      expect(cappedDocs).toHaveLength(1);
+      expect(cappedDocs[0].group_hash).toBe(uncappedDocs[0].group_hash);
     });
   });
 });

@@ -124,6 +124,7 @@ export interface BuildAlertEventsBaseOpts {
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
   scheduledTimestamp: string;
+  maxGroupsPerExecution: number;
 }
 
 export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
@@ -135,6 +136,7 @@ export function createAlertEventsBatchBuilder({
   ruleAttributes,
   type,
   scheduledTimestamp,
+  maxGroupsPerExecution,
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
@@ -144,19 +146,32 @@ export function createAlertEventsBatchBuilder({
   const wroteAt = new Date().toISOString();
   const source = 'internal';
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
+  const groupHashes = new Set<string>();
   let index = 0;
 
   return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
     const alertEventsBatch: AlertEvent[] = [];
 
     for (const rowDoc of batch) {
+      // Advance per row (even when dropped) so non-dropped rows keep deterministic hashes across retries.
+      const rowIndex = index++;
+
       const groupHash = buildGroupHash({
         rowDoc,
         groupKeyFields: groupingFields,
         get fallbackSeed(): string {
-          return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
+          return `${executionUuid}|row:${rowIndex}|${stableStringify(rowDoc)}`;
         },
       });
+
+      const isNewGroup = !groupHashes.has(groupHash);
+      if (isNewGroup && groupHashes.size >= maxGroupsPerExecution) {
+        continue;
+      }
+
+      if (isNewGroup) {
+        groupHashes.add(groupHash);
+      }
 
       const doc = buildRuleEventDocument({
         '@timestamp': wroteAt,
@@ -171,7 +186,6 @@ export function createAlertEventsBatchBuilder({
         severity: extractSeverity(rowDoc),
       });
 
-      index++;
       alertEventsBatch.push(doc);
     }
 

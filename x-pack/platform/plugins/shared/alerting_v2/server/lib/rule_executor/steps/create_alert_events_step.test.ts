@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
 import {
   collectStreamResults,
@@ -14,13 +16,35 @@ import {
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import type { PluginConfig } from '../../../config';
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
+  let mockLogger: jest.Mocked<Logger>;
+
+  function createStep(rulesConfigOverrides?: Partial<PluginConfig['rules']>) {
+    const config: PluginConfig = {
+      enabled: true,
+      invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      rules: {
+        minimumScheduleInterval: '1m',
+        maxScheduledPerMinute: 400,
+        run: { alerts: { max: 10000 }, maxGroupsPerExecution: 10000 },
+        ...rulesConfigOverrides,
+      },
+    };
+
+    const pluginConfigAccessor =
+      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+
+    const logger = createLoggerService();
+    mockLogger = logger.mockLogger;
+    return new CreateAlertEventsStep(logger.loggerService, pluginConfigAccessor);
+  }
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
-    step = new CreateAlertEventsStep(loggerService);
+    step = createStep();
   });
 
   it('builds alert-typed events for kind: alert rule', async () => {
@@ -132,5 +156,100 @@ describe('CreateAlertEventsStep', () => {
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+
+  describe('maxGroupsPerExecution', () => {
+    it('drops new groups past the limit and logs a warning exactly once', async () => {
+      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 2 } });
+
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert' });
+      const esqlRowBatch = [
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-c' },
+        { 'host.name': 'host-d' },
+      ];
+
+      const state = createRulePipelineState({ input, rule, esqlRowBatch });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected a continue result');
+      expect(result.state.alertEventsBatch).toHaveLength(2);
+      // The dropped rows surface as a telemetry counter for this batch.
+      expect(result.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 2,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('exceeded maxGroupsPerExecution=2')
+      );
+      // The single summary carries the full tally, not just "it happened".
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('dropped 2 new group(s) this run')
+      );
+    });
+
+    it('does not warn when the number of groups stays within the limit', async () => {
+      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 10 } });
+
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert' });
+      const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
+
+      const state = createRulePipelineState({ input, rule, esqlRowBatch });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected a continue result');
+      expect(result.state.alertEventsBatch).toHaveLength(2);
+      // Nothing dropped -> the counter is emitted as zero for the batch.
+      expect(result.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 0,
+      });
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('honors the limit across multiple batches and warns only once', async () => {
+      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 2 } });
+
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert' });
+      const batch1 = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
+      const batch2 = [{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }];
+
+      const state1 = createRulePipelineState({ input, rule, esqlRowBatch: batch1 });
+      const state2 = createRulePipelineState({ input, rule, esqlRowBatch: batch2 });
+
+      const results = await collectStreamResults(
+        step.executeStream(createPipelineStream([state1, state2]))
+      );
+
+      expect(results).toHaveLength(2);
+      const [first, second] = results;
+      if (first.type !== 'continue' || second.type !== 'continue') {
+        throw new Error('expected continue results');
+      }
+      // First batch fills the cap; second batch is entirely new groups -> dropped.
+      expect(first.state.alertEventsBatch).toHaveLength(2);
+      expect(second.state.alertEventsBatch).toHaveLength(0);
+      // The counter is per-batch; the collector sums it across the run.
+      expect(first.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 0,
+      });
+      expect(second.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 2,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      // The tally accumulates across batches, not just the last one.
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('dropped 2 new group(s) this run')
+      );
+    });
   });
 });

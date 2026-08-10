@@ -93,4 +93,30 @@ describe('alerting_v2 config schema', () => {
       expect(() => configSchema.validate({ rules: { run: { alerts: { max: 10001 } } } })).toThrow();
     });
   });
+
+  describe('rules.run.maxGroupsPerExecution', () => {
+    it('defaults to 10000', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.maxGroupsPerExecution).toBe(10000);
+    });
+
+    it('accepts a smaller configured value', () => {
+      expect(
+        configSchema.validate({ rules: { run: { maxGroupsPerExecution: 500 } } }).rules.run
+          .maxGroupsPerExecution
+      ).toBe(500);
+    });
+
+    it('rejects values below 1', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { maxGroupsPerExecution: 0 } } })
+      ).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { maxGroupsPerExecution: 10001 } } })
+      ).toThrow();
+    });
+  });
 });

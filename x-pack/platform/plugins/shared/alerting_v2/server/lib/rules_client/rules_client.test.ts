@@ -105,7 +105,7 @@ describe('RulesClient', () => {
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
-        run: { alerts: { max: 10000 } },
+        run: { alerts: { max: 10000 }, maxGroupsPerExecution: 10000 },
         ...rulesConfigOverrides,
       },
     };
