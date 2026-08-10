@@ -52,10 +52,7 @@ describe('classic_alerts_api', () => {
         services: { http: mockHttp },
       });
 
-      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [
-        string,
-        { body: string },
-      ];
+      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
       const body = JSON.parse(callOptions.body);
       expect(body._source).toEqual([...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS]);
       expect(episodes).toHaveLength(1);
@@ -128,10 +125,7 @@ describe('classic_alerts_api', () => {
 
       const rows = await fetchV1AlertsHistogram({ services: { http: mockHttp } });
 
-      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [
-        string,
-        { body: string },
-      ];
+      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
       const body = JSON.parse(callOptions.body);
       expect(body._source).toEqual([...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS]);
       expect(rows).toHaveLength(1);
