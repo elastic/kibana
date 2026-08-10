@@ -103,6 +103,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const filter = await testSubjects.find(RULE_TAGS_FILTER_SUBJ);
           return (await filter.findByTagName('input')).isEnabled();
         });
+        // Explicitly open the list via its toggle button; `comboBox.getOptions` alone does not
+        // reliably open this box, so the options never render and the list reads as empty.
+        await testSubjects.click('comboBoxToggleListButton');
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
@@ -139,6 +142,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const filter = await testSubjects.find(RULE_TAGS_FILTER_SUBJ);
             return (await filter.findByTagName('input')).isEnabled();
           });
+          // Explicitly open the list via its toggle button; `comboBox.getOptions` alone does not
+          // reliably open this box, so the options never render and the list reads as empty.
+          await testSubjects.click('comboBoxToggleListButton');
           const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
           expect(options.length).to.equal(1);
           expect(await options[0].getVisibleText()).to.equal(ruleName);
