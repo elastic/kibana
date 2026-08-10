@@ -389,6 +389,27 @@ describe('RiskInputsTab', () => {
     expect(queryByTestId('risk-input-alert-title')).not.toBeInTheDocument();
   });
 
+  it('does not show an error state when the user has no alert read privileges', () => {
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      hasAlertsRead: false,
+    });
+
+    const { queryByText } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByText(/error/i)).not.toBeInTheDocument();
+  });
+
   it('Displays 0.00 for the asset criticality contribution if the contribution value is less than -0.01', () => {
     mockUseUiSetting.mockReturnValue([true]);
 
