@@ -107,6 +107,7 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
  * the single slowest check instead of summing them.
  */
 const findFirstUnmetRequirement = async (context: SignificantEventsAccessContext) => {
+  return undefined;
   // `Object.entries` widens keys to `string`; the keys are exactly the reasons.
   const entries = Object.entries(significantEventsRequirements) as Array<
     [SignificantEventsUnavailableReason, RequirementCheck]

@@ -26,7 +26,6 @@ import { useWatches } from '../../../hooks/use_watches_api';
 import * as i18n from '../translations';
 
 /** Nav ids for the sections that are not per-watch. */
-export const WATCHES_NAV_OVERVIEW_ID = 'overview' as const;
 export const WATCHES_NAV_WORKERS_ID = 'workers' as const;
 export const WATCHES_NAV_SKILLS_ID = 'skills' as const;
 
@@ -47,14 +46,6 @@ interface GlobalNavItem {
   path: string;
   icon: string;
 }
-
-/** Sits above the watch list: the cross-watch view, not one of the watches. */
-const OVERVIEW_NAV_ITEM: GlobalNavItem = {
-  id: WATCHES_NAV_OVERVIEW_ID,
-  label: i18n.SUBNAV_OVERVIEW,
-  path: '/watches',
-  icon: 'grid',
-};
 
 const GLOBAL_NAV_ITEMS: GlobalNavItem[] = [
   {
@@ -131,21 +122,6 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
           margin-top: ${euiTheme.size.m};
         `}
       >
-        <EuiFlexItem grow={false}>
-          <NavButton
-            id={OVERVIEW_NAV_ITEM.id}
-            path={OVERVIEW_NAV_ITEM.path}
-            isActive={OVERVIEW_NAV_ITEM.id === active}
-          >
-            <EuiIcon type={OVERVIEW_NAV_ITEM.icon} size="m" aria-hidden={true} />
-            <span>{OVERVIEW_NAV_ITEM.label}</span>
-          </NavButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="s" />
-
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         {isLoading && watches.length === 0 ? (
           <EuiFlexItem grow={false}>
             <EuiSkeletonText

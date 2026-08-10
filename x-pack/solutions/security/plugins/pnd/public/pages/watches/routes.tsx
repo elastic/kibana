@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { WatchesPage } from '.';
 import { WatchDetailPage } from './watch_detail';
 import { WorkersPage } from './workers';
 import { SkillsPage } from './skills';
@@ -23,6 +23,7 @@ export const WatchesRoutes: React.FC = () => (
     <Route path="/watches/workers" component={WorkersPage} />
     <Route path="/watches/skills" component={SkillsPage} />
     <Route path="/watches/:watchId" component={WatchDetailPage} />
-    <Route path="/watches" exact component={WatchesPage} />
+    {/* No overview page — redirect bare /watches to the Workers section. */}
+    <Route path="/watches" exact render={() => <Redirect to="/watches/workers" />} />
   </Routes>
 );

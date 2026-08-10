@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
 } from '@kbn/workflows/managed';
@@ -47,9 +48,22 @@ export const installWorkflows = async ({
 }: {
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
+  console.log('Installing Significant Events managed workflows... <------------');
   // Install every workflow independently and report all failures at once. A fail-fast Promise.all
   // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
   const installs: Array<{ id: string; run: Promise<void> }> = [
+    {
+      id: 'TEMP scheduled detection',
+      run: client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+        spaceId: DEFAULT_SPACE_ID,
+        values: {
+          detectionIntervalMinutes: 30,
+          detectionBucketIntervalMinutes: 1,
+          detectionLookbackMinutes: 40,
+          targetCoverageMinutes: 30,
+        },
+      }),
+    },
     ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) => ({
       id: workflowId,
       run: client.install(workflowId, { spaceId }),

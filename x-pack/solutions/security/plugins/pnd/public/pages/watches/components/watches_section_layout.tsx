@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type {
   AppHeaderBadge,
@@ -98,7 +99,34 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
          * brings `overflow-y: auto` and `max-height: calc(100vh - offset)` with it. Nothing here may
          * introduce an `overflow` ancestor; see the note in `app_chrome_layout.tsx`.
          */
-        <EuiPageTemplate.Sidebar paddingSize="none" minWidth={PND_WATCHES_SUBNAV_WIDTH} sticky>
+        <EuiPageTemplate.Sidebar
+          paddingSize="none"
+          minWidth={PND_WATCHES_SUBNAV_WIDTH}
+          sticky
+          css={css`
+            /**
+             * EUI sets max-block-size via inline style to calc(100vh - euiFixedHeadersOffset).
+             * Kibana's grid layout sets --euiFixedHeadersOffset: 0 ("no fixed header"), so EUI
+             * produces max-block-size: 100vh. But the actual scroll container (#app-main-scroll)
+             * is shorter — it sits inside an application grid cell that is already inset from the
+             * viewport by Kibana's header height and margins. The sidebar stretches (flex-grow: 1)
+             * to the container height but is capped at max-block-size: 100vh, which is too tall by
+             * exactly that chrome overhead. At the bottom of a tall page the sidebar unsticks and
+             * scrolls by that same amount.
+             *
+             * Using Kibana's --kbn-layout--application-height (100vh minus chrome overhead) and
+             * subtracting the app's own top/bottom margins gives us the exact scroll container
+             * height so the sidebar stays stuck all the way to the last scroll pixel.
+             *
+             * !important is required because EUI applies this via an inline style.
+             */
+            max-block-size: calc(
+              var(--kbn-layout--application-height, 100vh) -
+                var(--kbn-layout--application-margin-top, 0px) -
+                var(--kbn-layout--application-margin-bottom, 0px)
+            ) !important;
+          `}
+        >
           <PndWatchesNav active={active} onCollapse={() => setCollapsed(true)} />
         </EuiPageTemplate.Sidebar>
       ) : null}
