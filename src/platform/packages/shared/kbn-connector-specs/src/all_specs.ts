@@ -73,3 +73,4 @@ export * from './specs/google_cloud_monitoring/google_cloud_monitoring';
 export * from './specs/opensearch_aws_opensearch_service/opensearch_aws_opensearch_service';
 export * from './specs/zabbix/zabbix';
 export * from './specs/gcp_iam/gcp_iam';
+export * from './specs/aws_ec2/aws_ec2';

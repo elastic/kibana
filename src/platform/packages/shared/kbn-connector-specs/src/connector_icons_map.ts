@@ -315,6 +315,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.aws_ec2',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsEc2" */ './specs/aws_ec2/icon')),
+  ],
+  [
     '.aws_x_ray',
     lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
   ],

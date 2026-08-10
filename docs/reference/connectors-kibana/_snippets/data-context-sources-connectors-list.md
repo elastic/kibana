@@ -4,6 +4,7 @@
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
 - [AWS CloudWatch](/reference/connectors-kibana/aws-cloudwatch-action-type.md): List and suppress alarms, query metrics and Logs Insights, and retrieve log events from AWS CloudWatch.
+- [AWS EC2](/reference/connectors-kibana/aws-ec2-action-type.md): Inspect, stop, start, reboot, and terminate EC2 instances, and quarantine them with security group changes.
 - [AWS X-Ray](/reference/connectors-kibana/aws-x-ray-action-type.md): Retrieve X-Ray insights, service graphs, and trace summaries and details for distributed tracing.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 - [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
