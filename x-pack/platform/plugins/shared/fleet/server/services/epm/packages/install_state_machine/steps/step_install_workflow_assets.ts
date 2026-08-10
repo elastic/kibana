@@ -9,13 +9,97 @@ import path from 'path';
 
 import pMap from 'p-map';
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../../../common/types';
 import type { KibanaAssetReference } from '../../../../../../common/types';
 import { getPathParts } from '../../../archive';
 import { appContextService } from '../../../../app_context';
+import { packagePolicyService } from '../../../../package_policy';
 import { saveKibanaAssetsRefs } from '../../install';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
+
+const VAR_PLACEHOLDER_PREFIX = 'REPLACE_WITH_';
+
+const formatManifestVarForSubstitution = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    const joined = value
+      .map((item) => String(item).trim())
+      .filter((item) => item.length > 0)
+      .join(',');
+    return joined.length > 0 ? joined : undefined;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim();
+  }
+
+  return undefined;
+};
+
+const getPlaceholderForVarName = (varName: string): string =>
+  `${VAR_PLACEHOLDER_PREFIX}${varName.toUpperCase()}`;
+
+export const substituteWorkflowConnectorIds = (
+  yaml: string,
+  vars: Record<string, unknown>,
+  logger?: Logger
+): string => {
+  let result = yaml;
+
+  const substitutions = Object.entries(vars)
+    .map(([varName, value]): [string, string | undefined] => [
+      getPlaceholderForVarName(varName),
+      formatManifestVarForSubstitution(value),
+    ])
+    .filter((entry): entry is [string, string] => entry[1] !== undefined)
+    .sort(([a], [b]) => b.length - a.length);
+
+  for (const [placeholder, formatted] of substitutions) {
+    result = result.replaceAll(placeholder, formatted);
+  }
+
+  if (logger) {
+    const placeholderRegex = new RegExp(`${VAR_PLACEHOLDER_PREFIX}[A-Z0-9_]+`, 'g');
+    const remaining = [...result.matchAll(placeholderRegex)].map((match) => match[0]);
+    for (const placeholder of new Set(remaining)) {
+      logger.warn(`Workflow placeholder ${placeholder} has no matching package policy var`);
+    }
+  }
+
+  return result;
+};
+
+export const resolvePackagePolicyConnectorVars = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string
+): Promise<Record<string, unknown>> => {
+  try {
+    const policies = await packagePolicyService.list(savedObjectsClient, {
+      perPage: 20,
+      kuery: `ingest-package-policies.package.name:${pkgName}`,
+    });
+    const policy = policies.items.find((item) => item.package?.name === pkgName);
+    if (!policy?.vars) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(policy.vars).map(([key, config]) => [key, config.value ?? config])
+    );
+  } catch {
+    return {};
+  }
+};
+
+/**
+ * Workflow IDs must match human-readable slug rules (lowercase alnum + hyphens only).
+ * Fleet package names often contain underscores (for example `sdlc_intel`).
+ */
+export const normalizeFleetPackageAssetIdSegment = (segment: string): string =>
+  segment.toLowerCase().replace(/_/g, '-');
 
 export const getFleetPackageWorkflowId = (params: {
   pkgName: string;
@@ -23,7 +107,32 @@ export const getFleetPackageWorkflowId = (params: {
   fileName: string;
 }): string => {
   const baseName = params.fileName.replace(/\.ya?ml$/i, '');
-  return `fleet-${params.spaceId}-${params.pkgName}-${baseName}`;
+  return `fleet-${normalizeFleetPackageAssetIdSegment(
+    params.spaceId
+  )}-${normalizeFleetPackageAssetIdSegment(params.pkgName)}-${baseName}`;
+};
+
+const FLEET_AGENT_PLACEHOLDER_PREFIX = 'REPLACE_WITH_FLEET_AGENT_';
+
+export const substituteFleetAgentIds = (
+  yaml: string,
+  params: { pkgName: string; spaceId: string }
+): string => {
+  let result = yaml;
+  const placeholderRegex = new RegExp(`${FLEET_AGENT_PLACEHOLDER_PREFIX}([a-z0-9_-]+)`, 'gi');
+  const matches = yaml.matchAll(placeholderRegex);
+
+  for (const match of matches) {
+    const fileBase = match[1];
+    const agentId = getFleetPackageWorkflowId({
+      pkgName: params.pkgName,
+      spaceId: params.spaceId,
+      fileName: `${fileBase}.yaml`,
+    });
+    result = result.replaceAll(match[0], agentId);
+  }
+
+  return result;
 };
 
 export async function stepInstallWorkflowAssets(
@@ -76,18 +185,31 @@ export async function stepInstallWorkflowAssets(
       return;
     }
 
+    const connectorVars = await resolvePackagePolicyConnectorVars(savedObjectsClient, pkgName);
+
     const assetRefs: KibanaAssetReference[] = [];
 
     await pMap(
       workflowEntries,
       async ({ fileName, yaml }) => {
         const workflowId = getFleetPackageWorkflowId({ pkgName, spaceId, fileName });
+        let workflowYaml = substituteWorkflowConnectorIds(yaml, connectorVars, logger);
+        workflowYaml = substituteFleetAgentIds(workflowYaml, { pkgName, spaceId });
         const existingWorkflow = await workflowsApi.getWorkflow(workflowId, spaceId);
 
         if (existingWorkflow) {
-          await workflowsApi.updateWorkflow(workflowId, { yaml }, spaceId, context.request!);
+          await workflowsApi.updateWorkflow(
+            workflowId,
+            { yaml: workflowYaml },
+            spaceId,
+            context.request!
+          );
         } else {
-          await workflowsApi.createWorkflow({ id: workflowId, yaml }, spaceId, context.request!);
+          await workflowsApi.createWorkflow(
+            { id: workflowId, yaml: workflowYaml },
+            spaceId,
+            context.request!
+          );
         }
 
         assetRefs.push({
