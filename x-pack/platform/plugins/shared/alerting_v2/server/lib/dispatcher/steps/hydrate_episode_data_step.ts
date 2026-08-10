@@ -20,6 +20,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import { getEpisodeDataQueries } from '../queries';
 import { parseDataJson } from './utils/parse_episode_data';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
 interface RawEpisodeData {
   episode_id: string;
@@ -61,6 +62,7 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     const requested = episodeIds.length;
     if (hydrated < requested) {
       this.logger.warn({
+        code: ALERTING_LOG_CODES.HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW,
         message: () =>
           `hydrate_episode_data: ${
             requested - hydrated
