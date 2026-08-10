@@ -47,7 +47,10 @@ const MetricsExperienceGridWrapper = (
   const { discoverShared, dataViews, notifications, docLinks, logger, core, storage } =
     useDiscoverServices();
 
-  const metricsState = useObservable(metricsStateAdapter.getState$(), metricsStateAdapter.getState());
+  const metricsState = useObservable(
+    metricsStateAdapter.getState$(),
+    metricsStateAdapter.getState()
+  );
 
   const gridSettings = useMemo<MetricsGridSettings>(
     () => ({
@@ -55,7 +58,11 @@ const MetricsExperienceGridWrapper = (
       gaugeAggregation: metricsState.gaugeAggregation,
       histogramPercentile: metricsState.histogramPercentile,
     }),
-    [metricsState.counterAggregation, metricsState.gaugeAggregation, metricsState.histogramPercentile]
+    [
+      metricsState.counterAggregation,
+      metricsState.gaugeAggregation,
+      metricsState.histogramPercentile,
+    ]
   );
 
   const onGridSettingsChange = useCallback(

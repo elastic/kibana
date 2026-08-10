@@ -291,7 +291,10 @@ describe('MetricsExperienceGridWrapper', () => {
       unifiedGridProps?.onMetricsSortChange?.(['recency', 'desc']);
     });
 
-    expect(metricsStateAdapter.updateState).toHaveBeenCalledWith({ field: 'recency', direction: 'desc' });
+    expect(metricsStateAdapter.updateState).toHaveBeenCalledWith({
+      field: 'recency',
+      direction: 'desc',
+    });
     expect(unifiedGridProps?.metricsSort).toEqual(['recency', 'desc']);
   });
 
