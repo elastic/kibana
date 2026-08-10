@@ -39,6 +39,20 @@ if is_pr; then
     SERVERLESS_BASELINE_FLAG=(--serverless-baseline "$GITHUB_SERVERLESS_RELEASE_SHA")
   fi
 
+  # On PRs, skip the synthetic test-mode rollback smoke (and the ES startup it requires)
+  # when no SO types changed. Keep it when the PR touches the check machinery itself, so
+  # such PRs still exercise the full migration test flow. If the diff cannot be computed,
+  # err on the side of running the full flow.
+  SKIP_TEST_FALLBACK_FLAG=(--skip-test-fallback)
+  if ! MACHINERY_CHANGES="$(git diff --name-only "$GITHUB_PR_MERGE_BASE"...HEAD -- \
+    'packages/kbn-check-saved-objects-cli' \
+    'src/core/packages/saved-objects' \
+    'src/core/packages/test-helpers/so-type-serializer')"; then
+    SKIP_TEST_FALLBACK_FLAG=()
+  elif [[ -n "$MACHINERY_CHANGES" ]]; then
+    SKIP_TEST_FALLBACK_FLAG=()
+  fi
+
   SO_REPORT_PATH="$(mktemp -t so-check-report.XXXXXX).json"
   CHECK_EXIT=0
 
@@ -46,10 +60,10 @@ if is_pr; then
     # The step might update files like removed_types.json and/or SO fixtures.
     # `check_for_changed_files` runs unconditionally so that any files produced by --fix
     # are auto-committed even when the check also reports non-fixable violations.
-    node scripts/check_saved_objects --baseline "$GITHUB_PR_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" --fix || CHECK_EXIT=$?
+    node scripts/check_saved_objects --baseline "$GITHUB_PR_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" "${SKIP_TEST_FALLBACK_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" --fix || CHECK_EXIT=$?
     check_for_changed_files "node scripts/check_saved_objects" true
   else
-    node scripts/check_saved_objects --baseline "$GITHUB_PR_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" || CHECK_EXIT=$?
+    node scripts/check_saved_objects --baseline "$GITHUB_PR_MERGE_BASE" "${SERVERLESS_BASELINE_FLAG[@]}" "${SKIP_TEST_FALLBACK_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" || CHECK_EXIT=$?
   fi
 
   echo --- Post Saved Objects PR comment

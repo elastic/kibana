@@ -64,8 +64,13 @@ export function runCheckSavedObjectsCli() {
       const server = flagsReader.boolean('server');
       const client = flagsReader.boolean('client');
       const test = flagsReader.boolean('test');
+      const skipTestFallback = flagsReader.boolean('skipTestFallback');
       const algorithmFlag = flagsReader.string('algorithm') ?? 'v2';
       const reportPath = flagsReader.string('reportPath');
+
+      // With '--skip-test-fallback' (normal mode only), ES is not started upfront:
+      // it is only needed for rollback tests, which run solely when SO types changed.
+      const lazyEsStart = skipTestFallback && !server && !client && !test;
 
       let migrationAlgorithms: MigrationAlgorithm[];
       if (algorithmFlag === 'both') {
@@ -139,7 +144,7 @@ export function runCheckSavedObjectsCli() {
             task: (ctx) => {
               ctx.esServer = startElasticsearch();
             },
-            enabled: !client, // we skip this step if '--client' is passed
+            enabled: !client && !lazyEsStart, // we skip this step if '--client' is passed
           },
           {
             title: `Wait for ES startup`,
@@ -192,8 +197,18 @@ export function runCheckSavedObjectsCli() {
             task: (ctx) => {
               ctx.test = true;
             },
-            enabled: !server && !test,
+            enabled: !server && !test && !skipTestFallback,
             skip: (ctx) => ctx.typesWithNewModelVersions.length > 0,
+          },
+          {
+            title: 'Start ES asynchronously (SO changes detected)',
+            task: (ctx) => {
+              ctx.esServer = startElasticsearch();
+            },
+            enabled: lazyEsStart,
+            skip: (ctx) =>
+              ctx.typesWithNewModelVersions.length === 0 &&
+              'No SO types gained model versions; rollback tests are not needed',
           },
           /**
            * ==================================================================
@@ -213,6 +228,7 @@ export function runCheckSavedObjectsCli() {
             title: 'Wait for ES startup',
             task: async (ctx) => await ctx.esServer,
             enabled: !server,
+            skip: (ctx) => !ctx.esServer && 'ES was not started; rollback tests are not needed',
           },
           {
             title: 'Automated rollback tests',
@@ -318,8 +334,9 @@ export function runCheckSavedObjectsCli() {
           baseline: 'gitRev',
           'serverless-baseline': 'serverlessGitRev',
           'report-path': 'reportPath',
+          'skip-test-fallback': 'skipTestFallback',
         },
-        boolean: ['fix', 'server', 'client', 'test'],
+        boolean: ['fix', 'server', 'client', 'test', 'skip-test-fallback', 'skipTestFallback'],
         string: ['gitRev', 'serverlessGitRev', 'algorithm', 'reportPath'],
         default: {
           verify: true,
@@ -332,6 +349,7 @@ export function runCheckSavedObjectsCli() {
         --server           Start ES in order to repeatedly execute the 'check_saved_objects' script
         --client           Do not start ES server (requires running the command above on a separate term)
         --test             Use a sample type registry with dummy types and hardcoded snapshots (no longer starts Kibana)
+        --skip-test-fallback  When no SO types changed, exit successfully without running the synthetic test-mode rollback smoke (also skips starting ES unless SO types changed)
         --algorithm <v2|zdt|both>  Migration algorithm to use for rollback tests (default: v2)
         --report-path <file>       Write a structured JSON report of changes and findings to this file
       `,

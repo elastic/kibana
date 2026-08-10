@@ -16,6 +16,7 @@ On a PR, the step:
 
 1. **Resolves a baseline commit**: It uses the PR merge-base commit (`GITHUB_PR_MERGE_BASE`). Because a snapshot may not exist for that exact SHA, the script walks the commit’s parent chain (up to a limit) until it finds a commit for which a snapshot exists in the cloud bucket (`findExistingSnapshotSha`).
 2. **Runs the check**: It calls `node scripts/check_saved_objects --baseline <resolved-sha> --algorithm both` (and `--fix` when auto-commit is enabled). The script fetches the baseline snapshot from the bucket, starts Kibana to build the current type registry, and runs validations comparing current state to that baseline.
+3. **Skips the test-data fallback**: The step passes `--skip-test-fallback`, so when the PR does not change any SO types, the run finishes right after validation without starting Elasticsearch. The flag is omitted (full flow, including the synthetic rollback smoke test) when the PR touches the check machinery itself (`packages/kbn-check-saved-objects-cli`, `src/core/packages/saved-objects`, or `src/core/packages/test-helpers/so-type-serializer`). The on-merge pipeline always runs the full flow.
 
 ### Work-in-progress SO types
 
@@ -54,6 +55,7 @@ node scripts/check_saved_objects --baseline <gitRev> [--algorithm <v2|zdt|both>]
 | `--server` | Start Elasticsearch only and keep it running so you can run the check multiple times without restarting ES. |
 | `--client` | Do not start Elasticsearch; assume it is already running (e.g. from a previous `--server` run). Use with `--baseline` to run the validation. |
 | `--test` | Use a built-in test type registry and hardcoded snapshots instead of starting Kibana or fetching a baseline. No network or ES required. |
+| `--skip-test-fallback` | Disable the fallback to test data (see below). When no SO types changed, the run exits successfully right after validation, and Elasticsearch is only started if SO types actually changed (rollback tests need it). Used by the PR pipeline to keep the check cheap on unrelated PRs. |
 
 You must provide a baseline (e.g. `--baseline <sha>`) unless you use `--server`, `--client`, or `--test`.
 
@@ -100,3 +102,5 @@ Each `--client` run starts Kibana, runs the validation against the given baselin
 ### Fallback to test data (no SO type changes)
 
 When the logic detects that there are **no changes in existing Saved Object types** compared to the baseline, the script will fall back to running with test data (same behavior as passing `--test`). This allows smoke testing the migration logic with dummy SO types.
+
+Pass `--skip-test-fallback` to disable this fallback. In that case a run with no SO type changes never starts Elasticsearch and finishes right after validation. The PR pipeline uses this flag (unless the PR modifies the check machinery itself); the on-merge pipeline keeps the fallback so the migration test flow is still exercised on every merge to `main`.
