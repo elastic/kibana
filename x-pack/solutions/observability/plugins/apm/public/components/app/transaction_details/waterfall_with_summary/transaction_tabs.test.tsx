@@ -12,7 +12,8 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
-import type { GenAiFields } from '../../../shared/genai_tab/get_genai_fields';
+import { GENAI_EBT_CLICK_ACTIONS, type GenAiFields } from '@kbn/apm-ui-shared';
+import { TRACE_SAMPLE_EBT_ELEMENTS } from './ebt_constants';
 
 const mockUseGenAiData = jest.fn();
 
@@ -109,6 +110,15 @@ describe('TransactionTabs', () => {
     expect(screen.queryByTestId('genAiTab')).toBeNull();
   });
 
+  it('adds the viewGenAi EBT click attributes to the GenAI tab', () => {
+    mockGenAiData({ isGenAiSpan: true });
+    renderTabs();
+
+    const genAiTab = screen.getByTestId('genAiTab');
+    expect(genAiTab).toHaveAttribute('data-ebt-action', GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI);
+    expect(genAiTab).toHaveAttribute('data-ebt-element', TRACE_SAMPLE_EBT_ELEMENTS.TABS);
+  });
+
   it('calls onTabClick with the genAi tab when the GenAI tab is clicked', async () => {
     mockGenAiData({ isGenAiSpan: true });
     const { onTabClick } = renderTabs();
@@ -123,7 +133,7 @@ describe('TransactionTabs', () => {
     renderTabs({ detailTab: TransactionTab.genAi });
 
     expect(screen.getByTestId('genAiTab')).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByTestId('genAiPillModel')).toHaveTextContent('gpt-4o');
+    expect(screen.getByTestId('genAiDetails')).toHaveTextContent('gpt-4o');
   });
 
   it('falls back to the timeline tab when the genAi tab is requested but not available', () => {

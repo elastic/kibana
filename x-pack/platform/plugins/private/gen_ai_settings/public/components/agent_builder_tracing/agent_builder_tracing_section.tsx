@@ -124,7 +124,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                         )}
                       </EuiSplitButton.ActionPrimary>
                       <EuiSplitButton.ActionSecondary
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         aria-label={i18n.translate(
                           'xpack.genAiSettings.agentBuilderTracing.dashboardMenuAriaLabel',
                           { defaultMessage: 'More dashboard options' }

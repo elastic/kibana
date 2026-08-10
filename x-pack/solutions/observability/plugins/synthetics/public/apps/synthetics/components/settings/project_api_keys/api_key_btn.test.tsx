@@ -6,19 +6,17 @@
  */
 
 import React from 'react';
-import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ApiKeyBtn } from './api_key_btn';
 
 describe('<APIKeyButton />', () => {
   const clickCallback = jest.fn();
 
-  it('calls delete monitor on monitor deletion', async () => {
-    const user = userEvent.setup({ delay: null });
+  it('calls delete monitor on monitor deletion', () => {
     render(<ApiKeyBtn apiKey="" loading={false} onClick={clickCallback} />);
 
     expect(screen.getByText('Generate Project API key')).toBeInTheDocument();
-    await user.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
+    fireEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
     expect(clickCallback).toHaveBeenCalled();
   });
 
