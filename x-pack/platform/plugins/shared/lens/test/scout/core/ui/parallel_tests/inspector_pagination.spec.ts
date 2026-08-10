@@ -51,7 +51,7 @@ spaceTest.describe('Lens inspector pagination', { tag: '@local-stateful-classic'
 
       // Bar charts default "Include empty rows" off; keep the empty buckets so this
       // pagination check still has two full pages of rows to page through.
-      await lens.enableIncludeEmptyRows();
+      await lens.dimensions.enableIncludeEmptyRows();
       await lens.closeDimensionEditor();
 
       await lens.configureDimension({

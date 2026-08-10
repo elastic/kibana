@@ -94,10 +94,10 @@ spaceTest.describe('Lens chart creation', { tag: '@local-stateful-classic' }, ()
 
     await lens.openFullEditor();
 
-    await lens.switchLayerIndexPattern(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
+    await lens.layers.switchLayerIndexPattern(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
 
     await expect
-      .poll(() => lens.getSelectedLayerIndexPattern())
+      .poll(() => lens.layers.getSelectedLayerIndexPattern())
       .toBe(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
   });
 });
