@@ -1898,7 +1898,7 @@
     },
     {
       "groupName": "platform security modules - ESM required",
-      "matchDepNames": ["@kayahr/text-encoding", "uuid", "@types/uuid"],
+      "matchDepNames": ["@kayahr/text-encoding", "uuid"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Security", "blocked"],
