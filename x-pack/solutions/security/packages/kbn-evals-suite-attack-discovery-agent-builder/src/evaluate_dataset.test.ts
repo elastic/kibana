@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { computeWorkflowAlertCounts } from './evaluate_dataset';
+import { computeWorkflowAlertCounts, findAdToolResult } from './evaluate_dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
 
 describe('evaluate_dataset wiring', () => {
@@ -17,6 +17,69 @@ describe('evaluate_dataset wiring', () => {
 
     expect(evaluator.name).toBe('AdToolResult');
     expect(evaluator.kind).toBe('CODE');
+  });
+});
+
+describe('findAdToolResult', () => {
+  // Fix 6 (Defect B): `buildSuccessResult`/`buildErrorResult`
+  // (run_attack_discovery_tool/index.ts) return `{ data, tool_result_id, type }`
+  // — `type` is a SIBLING of `data`, not a member of it. Reading
+  // `data.type` made it always `undefined`, so `getAdStatus`'s
+  // `resultType === 'error'` branch was unreachable and every AD tool error
+  // was mislabelled as `status: null` ("no data") instead of `'error'`.
+  //
+  // The payload below is the real shape captured from a live converse
+  // response against `security.attack-discovery.run`.
+  it("labels an error result 'error' rather than null", () => {
+    const result = findAdToolResult([
+      {
+        type: 'tool_call',
+        tool_id: 'security.attack-discovery.run',
+        results: [
+          {
+            data: { message: 'Attack Discovery workflows are not enabled for this space.' },
+            tool_result_id: 'h4HKuy',
+            type: 'error',
+          },
+        ],
+      },
+    ]);
+
+    expect(result?.status).toBe('error');
+  });
+
+  it('reports a successful run as completed with its counts', () => {
+    const result = findAdToolResult([
+      {
+        type: 'tool_call',
+        tool_id: 'security.attack-discovery.run',
+        results: [
+          {
+            data: {
+              status: 'completed',
+              execution_uuid: 'db82a24c-af29-40f5-b364-2b910ff3ccc0',
+              alerts_context_count: 2,
+              discovery_count: 1,
+            },
+            tool_result_id: 'ok1',
+            type: 'other',
+          },
+        ],
+      },
+    ]);
+
+    expect(result).toEqual({
+      status: 'completed',
+      executionUuid: 'db82a24c-af29-40f5-b364-2b910ff3ccc0',
+      alertsContextCount: 2,
+      discoveryCount: 1,
+    });
+  });
+
+  it('returns undefined when the AD tool step never ran', () => {
+    expect(
+      findAdToolResult([{ tool_id: 'security.attack-discovery.get_status', results: [] }])
+    ).toBeUndefined();
   });
 });
 

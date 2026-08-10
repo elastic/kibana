@@ -40,19 +40,22 @@ const getAdStatus = (value: unknown, resultType?: string): AdToolResult['status'
   return null;
 };
 
-const findAdToolResult = (
+export const findAdToolResult = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps']
 ): AttackDiscoveryAgentBuilderTaskOutput['adToolResult'] | undefined => {
   const adStep = steps.find((step) => step.tool_id === 'security.attack-discovery.run');
-  const adResultData = (adStep?.results?.[0] as { data?: Record<string, unknown> } | undefined)
-    ?.data;
+  // run_attack_discovery_tool/index.ts returns `{ data, tool_result_id, type }` — `type` is a sibling of `data`.
+  const adResult = adStep?.results?.[0] as
+    | { data?: Record<string, unknown>; type?: string }
+    | undefined;
+  const adResultData = adResult?.data;
   if (!adResultData) return undefined;
 
   const executionUuid =
     typeof adResultData.execution_uuid === 'string' ? adResultData.execution_uuid : undefined;
 
   return {
-    status: getAdStatus(adResultData.status, adResultData.type as string),
+    status: getAdStatus(adResultData.status, adResult?.type),
     executionUuid,
     // `security.attack-discovery.run` (run_attack_discovery_tool/index.ts)
     // reports `alerts_context_count` from `alertRetrievalResult.alertsContextCount`

@@ -126,7 +126,8 @@ export const seedAttackDiscoveryFixtures = async (
 export const cleanupAttackDiscoveryFixtures = async (esClient: EsClient): Promise<void> => {
   await esClient.deleteByQuery({
     index: attackDiscoveryFixtureIndex,
-    query: { term: { 'tags.keyword': attackDiscoveryFixtureMarker } },
+    // `tags` is mapped `keyword` directly on the alerts index — a `tags.keyword` term matches nothing.
+    query: { term: { tags: attackDiscoveryFixtureMarker } },
     conflicts: 'proceed',
     refresh: true,
   });

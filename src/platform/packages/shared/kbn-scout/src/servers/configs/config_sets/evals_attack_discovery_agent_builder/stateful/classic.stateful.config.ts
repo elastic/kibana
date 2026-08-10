@@ -19,6 +19,9 @@ export const servers: ScoutServerConfig = {
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      // Requires BOTH the feature flag above and this per-space uiSetting (defaults false),
+      // or `security.attack-discovery.run` errors and the pipeline never executes.
+      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
     ],
   },
 };
