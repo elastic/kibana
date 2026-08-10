@@ -470,6 +470,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: alerts,
+      hasAlertsRead: true,
     });
     mockUseRiskScore.mockReturnValue({
       loading: false,
@@ -616,6 +617,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
 
     const { getByTestId, getByText } = render(
@@ -683,6 +685,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [{ ...alertInputDataMock, _id: 'resolution-alert-id' }],
+      hasAlertsRead: true,
     });
 
     const { getByText, getByTestId } = render(
@@ -1477,6 +1480,7 @@ describe('RiskInputsTab - alert preview navigation', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
   });
 
