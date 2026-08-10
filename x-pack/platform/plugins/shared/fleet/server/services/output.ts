@@ -59,7 +59,6 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
   MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../constants';
 import {
@@ -645,7 +644,7 @@ class OutputService {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
 
-    await this._validateOutputServerless(output);
+    await this._validateOutputServerless(output, options?.id);
     if (isBeatsOutput(output)) {
       this._validateOutputSslPaths(output);
     }
@@ -1679,20 +1678,26 @@ class OutputService {
     if (outputId && !('hosts' in output)) {
       return;
     }
-    const defaultOutput = await this.get(SERVERLESS_DEFAULT_OUTPUT_ID);
+    // Preconfigured outputs in serverless are authoritative
+    if (
+      ('is_preconfigured' in output && output.is_preconfigured) ||
+      resolvedOriginalOutput?.is_preconfigured
+    ) {
+      return;
+    }
     let originalOutput = resolvedOriginalOutput;
-    if (outputId && !originalOutput) {
+    if (outputId && !originalOutput && !output.type) {
       originalOutput = await this.get(outputId);
     }
     const type = output.type || originalOutput?.type;
     if (type !== outputType.Elasticsearch) {
       return;
     }
-    // Guard for hosts access — defaultOutput is always the default ES output but the union requires narrowing
-    if (defaultOutput.type !== outputType.Elasticsearch || !('hosts' in output)) {
+    if (!('hosts' in output)) {
       return;
     }
-    if (deepEqual(output.hosts, defaultOutput.hosts)) {
+    const defaultHosts = this.getDefaultESHosts();
+    if (deepEqual(output.hosts, defaultHosts)) {
       return;
     }
     try {
@@ -1710,7 +1715,7 @@ class OutputService {
       appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
     }
     throw new OutputInvalidError(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+      `Elasticsearch output host must have default URL in serverless: ${defaultHosts}`
     );
   }
 }
