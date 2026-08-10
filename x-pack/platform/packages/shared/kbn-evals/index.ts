@@ -81,7 +81,6 @@ export type {
   TaskOutput,
   ExperimentTask,
   Evaluator,
-  EvaluatorParams,
   EvaluationResult,
   DatasetRunResult,
   EvalsExecutorClient,
@@ -167,21 +166,7 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
-export {
-  createEsqlEquivalenceEvaluator,
-  createCalibratedEsqlEquivalenceEvaluator,
-  createEsqlExecutionEvaluator,
-  createEsqlValidityEvaluator,
-  getDefaultTimeBounds,
-  substituteEsqlBindParams,
-  normalizeEsqlForEquivalence,
-  stripRedundantTimestampBindBounds,
-  ESQL_EQUIVALENCE_EVALUATOR_NAME,
-  ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME,
-  ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION,
-  ESQL_EXECUTION_EVALUATOR_NAME,
-  ESQL_VALIDITY_EVALUATOR_NAME,
-} from './src/evaluators/esql';
+export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';

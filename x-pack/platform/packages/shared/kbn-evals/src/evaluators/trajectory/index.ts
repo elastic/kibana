@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Evaluator, Example, TaskOutput } from '../../types';
+import type { Evaluator } from '../../types';
 
 function computeLCS(a: string[], b: string[]): string[] {
   const m = a.length;
@@ -52,15 +52,12 @@ function computeLCS(a: string[], b: string[]): string[] {
  * @param config.orderWeight - Weight for LCS-based order score (default: 0.5)
  * @param config.coverageWeight - Weight for set-based coverage score (default: 0.5)
  */
-export function createTrajectoryEvaluator<
-  TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
->(config: {
-  extractToolCalls: (output: TTaskOutput) => string[];
-  goldenPathExtractor: (expected: TExample['output']) => string[];
+export function createTrajectoryEvaluator(config: {
+  extractToolCalls: (output: unknown) => string[];
+  goldenPathExtractor: (expected: unknown) => string[];
   orderWeight?: number;
   coverageWeight?: number;
-}): Evaluator<TExample, TTaskOutput> {
+}): Evaluator {
   const { extractToolCalls, goldenPathExtractor, orderWeight = 0.5, coverageWeight = 0.5 } = config;
 
   if (Math.abs(orderWeight + coverageWeight - 1) > 1e-6) {

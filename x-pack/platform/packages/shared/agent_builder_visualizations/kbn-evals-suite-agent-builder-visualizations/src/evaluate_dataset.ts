@@ -7,8 +7,6 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createCalibratedEsqlEquivalenceEvaluator,
-  createEsqlExecutionEvaluator,
   createTrajectoryEvaluator,
   getStringMeta,
   type AgentBuilderClient,
@@ -22,6 +20,8 @@ import {
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
+import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
+import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 
 export type VisualizationDatasetExample = Example<
   {
@@ -116,12 +116,10 @@ export function createEvaluateDataset({
     groundTruthExtractor: (expected) => expected?.query ?? '',
   });
 
-  const trajectoryEvaluator = createTrajectoryEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    extractToolCalls: getToolIds,
-    goldenPathExtractor: (expected) => expected?.goldenToolPath ?? [],
+  const trajectoryEvaluator = createTrajectoryEvaluator({
+    extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
+    goldenPathExtractor: (expected) =>
+      (expected as VisualizationDatasetExample['output'])?.goldenToolPath ?? [],
     orderWeight: 0.4,
     coverageWeight: 0.6,
   });

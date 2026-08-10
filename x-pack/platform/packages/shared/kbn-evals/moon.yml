@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/es'
   - '@kbn/dot-text'
-  - '@kbn/esql-language'
 tags:
   - test-helper
   - package

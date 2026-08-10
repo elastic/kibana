@@ -11,8 +11,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
-import type { Evaluator, Example, TaskOutput } from '../../types';
-import { normalizeEsqlForEquivalence } from './normalize_for_equivalence';
+import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
+import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 

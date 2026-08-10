@@ -7,14 +7,8 @@
 
 import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type {
-  Evaluator,
-  EvaluationResult,
-  EvaluatorParams,
-  Example,
-  TaskOutput,
-} from '../../types';
-import { substituteEsqlBindParams } from './bind_params';
+import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
+import { substituteEsqlBindParams } from './esql_bind_params';
 
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 
@@ -27,6 +21,13 @@ interface QueryExecutionDetail {
   executionError?: string;
 }
 
+interface EvaluateArgs<TExample extends Example, TTaskOutput extends TaskOutput> {
+  input: TExample['input'];
+  output: TTaskOutput;
+  expected: TExample['output'];
+  metadata: TExample['metadata'];
+}
+
 /**
  * Resolves the per-example decision of whether to score hit-rate as part of
  * the composite. Either a static boolean or a function that inspects the
@@ -34,7 +35,7 @@ interface QueryExecutionDetail {
  */
 type IncludeHitDetection<TExample extends Example, TTaskOutput extends TaskOutput> =
   | boolean
-  | ((params: EvaluatorParams<TExample, TTaskOutput>) => boolean);
+  | ((params: EvaluateArgs<TExample, TTaskOutput>) => boolean);
 
 function extractErrorMessages(errors: ReadonlyArray<unknown>): string[] {
   return errors.map((e) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { normalizeEsqlForEquivalence } from './normalize_for_equivalence';
+import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 describe('normalizeEsqlForEquivalence', () => {
   it('strips a standalone @timestamp bind-param WHERE pipe', () => {
