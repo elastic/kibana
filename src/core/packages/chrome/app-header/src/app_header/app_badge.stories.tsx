@@ -133,7 +133,7 @@ export const Badges: Story = {
           },
           {
             name: 'Export',
-            icon: 'exportAction',
+            icon: 'upload',
             popoverWidth: 180,
             items: [
               {
@@ -150,7 +150,7 @@ export const Badges: Story = {
           },
           {
             name: 'Unlink',
-            icon: 'unlink',
+            icon: 'linkSlash',
             onClick: action('unlink-clicked'),
           },
         ],
