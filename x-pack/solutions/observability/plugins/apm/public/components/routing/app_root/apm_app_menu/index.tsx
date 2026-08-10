@@ -6,7 +6,6 @@
  */
 
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -38,9 +37,9 @@ import { getSloMenuItem } from './slo_menu_item';
 import { getStorageExplorerMenuItem } from './storage_explorer_menu_item';
 
 /**
- * Registers the global APM app menu via chrome.setAppMenu (kibana-team#3549 / #282982)
- * and hosts alert/SLO create flyouts opened from nested menu items.
- * Wrap route content as `children` so inline AppHeader pages can read the menu config.
+ * Builds the global APM app menu (kibana-team#3549 / #282982) and hosts alert/SLO flyouts.
+ * Inline AppHeader pages read the config via context; legacy ApmMainTemplate routes register
+ * it with chrome.setAppMenu so ClassicHeader / Chrome Next fallback can render it once.
  */
 export function ApmAppMenu({ children }: { children?: React.ReactNode }) {
   const { core, plugins, config, share, inspector } = useApmPluginContext();
@@ -209,7 +208,6 @@ export function ApmAppMenu({ children }: { children?: React.ReactNode }) {
 
   return (
     <ApmAppMenuProvider config={menu}>
-      <RegisterAppMenu config={menu} />
       <AlertingFlyout
         ruleType={ruleType}
         addFlyoutVisible={!!ruleType}

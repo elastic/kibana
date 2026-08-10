@@ -21,9 +21,8 @@ export function ApmAppMenuProvider({
 }
 
 /**
- * Global APM app menu registered via {@link RegisterAppMenu}.
- * Inline AppHeader pages should pass this as `header.menu` under Chrome Next
- * (AppHeader does not read `chrome.getAppMenu$()` on its own).
+ * Global APM app menu from {@link ApmAppMenu}.
+ * Inline AppHeader pages pass this as `header.menu`; legacy template routes register it via chrome.
  */
 export function useApmAppMenuConfig(): AppMenuConfig | undefined {
   return useContext(ApmAppMenuContext);

@@ -14,12 +14,12 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { ApmMainTemplate } from '.';
 
-const mockUseIsNextChrome = jest.fn(() => false);
 const mockUseApmAppMenuConfig = jest.fn((): AppMenuConfig | undefined => undefined);
+const mockRegisterAppMenu = jest.fn(({ config }: { config: AppMenuConfig }) => null);
 
 jest.mock('@kbn/core-chrome-browser-hooks', () => ({
   ...jest.requireActual('@kbn/core-chrome-browser-hooks'),
-  useIsNextChrome: () => mockUseIsNextChrome(),
+  RegisterAppMenu: (props: { config: AppMenuConfig }) => mockRegisterAppMenu(props),
 }));
 
 jest.mock('../../app_root/apm_app_menu/apm_app_menu_context', () => ({
@@ -93,7 +93,7 @@ function renderTemplate(ui: React.ReactElement) {
 describe('ApmMainTemplate', () => {
   beforeEach(() => {
     mockPageTemplate.mockClear();
-    mockUseIsNextChrome.mockReturnValue(false);
+    mockRegisterAppMenu.mockClear();
     mockUseApmAppMenuConfig.mockReturnValue(undefined);
   });
 
@@ -130,8 +130,7 @@ describe('ApmMainTemplate', () => {
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
   });
 
-  it('merges the registered app menu into AppHeader under Chrome Next', async () => {
-    mockUseIsNextChrome.mockReturnValue(true);
+  it('merges the registered app menu into AppHeader on migrated pages', async () => {
     mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
 
     renderTemplate(
@@ -143,19 +142,22 @@ describe('ApmMainTemplate', () => {
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Dependencies');
     // primaryActionItem stays outside the overflow limit and is always visible on the title row
     expect(await screen.findByTestId('apmAddDataHeaderLink')).toBeInTheDocument();
+    // Migrated pages must not register chrome.setAppMenu (avoids classic breadcrumb-bar duplicate)
+    expect(mockRegisterAppMenu).not.toHaveBeenCalled();
   });
 
-  it('does not inject the registered app menu into AppHeader under classic chrome', () => {
-    mockUseIsNextChrome.mockReturnValue(false);
+  it('registers the app menu with chrome on the legacy pageHeader path', () => {
     mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
 
     renderTemplate(
-      <ApmMainTemplate header={{ title: 'Dependencies' }}>
+      <ApmMainTemplate pageTitle="Legacy title">
         <div>body</div>
       </ApmMainTemplate>
     );
 
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Dependencies');
-    expect(screen.queryByTestId('apmSettingsHeaderLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('legacyPageHeader')).toBeInTheDocument();
+    expect(mockRegisterAppMenu).toHaveBeenCalledWith(
+      expect.objectContaining({ config: registeredMenu })
+    );
   });
 });

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { AppHeaderProps } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
-import { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { RegisterAppMenu } from '@kbn/core-chrome-browser-hooks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -93,7 +93,6 @@ export function ApmMainTemplate({
   ...pageTemplateProps
 }: ApmMainTemplateProps) {
   const location = useLocation();
-  const isNextChrome = useIsNextChrome();
   const registeredAppMenu = useApmAppMenuConfig();
 
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -161,13 +160,12 @@ export function ApmMainTemplate({
   };
 
   if (header) {
-    // Inline AppHeader sets chrome.next.inlineAppHeader, which suppresses Chrome's
-    // fallback header that would otherwise render chrome.setAppMenu(). Under Chrome Next,
-    // merge the registered global menu onto the title row unless the page overrides it.
-    // Classic chrome still shows the menu in the chrome action bar via RegisterAppMenu.
+    // Always put the global menu on inline AppHeader (classic + solution). Do not also
+    // call chrome.setAppMenu here — ClassicHeader would duplicate the same actions
+    // next to breadcrumbs (kibana-team#3549).
     const resolvedHeader: ApmMainTemplateHeaderProps = {
       ...header,
-      menu: header.menu ?? (isNextChrome ? registeredAppMenu : undefined),
+      menu: header.menu ?? registeredAppMenu,
     };
 
     return (
@@ -245,20 +243,24 @@ export function ApmMainTemplate({
   );
 
   return (
-    <ObservabilityPageTemplate
-      {...sharedTemplateProps}
-      pageSectionProps={pageSectionProps}
-      pageHeader={{
-        ...pageHeader,
-        color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-        tabs: undefined,
-        rightSideItems: [],
-        pageTitle: titleWithActions,
-        children: headerChildren,
-      }}
-    >
-      {children}
-    </ObservabilityPageTemplate>
+    <>
+      {/* Legacy routes: chrome owns the menu (ClassicHeader / Chrome Next fallback). */}
+      {registeredAppMenu ? <RegisterAppMenu config={registeredAppMenu} /> : null}
+      <ObservabilityPageTemplate
+        {...sharedTemplateProps}
+        pageSectionProps={pageSectionProps}
+        pageHeader={{
+          ...pageHeader,
+          color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+          tabs: undefined,
+          rightSideItems: [],
+          pageTitle: titleWithActions,
+          children: headerChildren,
+        }}
+      >
+        {children}
+      </ObservabilityPageTemplate>
+    </>
   );
 }
 

@@ -11,16 +11,15 @@ import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-c
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { useApmAppMenuConfig } from './apm_app_menu/apm_app_menu_context';
 import { ApmAppMenu } from './apm_app_menu';
 
 let latestMenuConfig: AppMenuConfig | undefined;
 
-jest.mock('@kbn/core-chrome-browser-hooks', () => ({
-  RegisterAppMenu: ({ config }: { config: AppMenuConfig }) => {
-    latestMenuConfig = config;
-    return null;
-  },
-}));
+function CaptureMenuConfig() {
+  latestMenuConfig = useApmAppMenuConfig();
+  return null;
+}
 
 jest.mock('../../alerting/ui_components/alerting_flyout', () => ({
   AlertingFlyout: () => null,
@@ -163,7 +162,9 @@ function renderAppMenu(mockContext?: Partial<ApmPluginContextValue>) {
   return render(
     <IntlProvider locale="en">
       <MockApmPluginContextWrapper value={mockContext as ApmPluginContextValue}>
-        <ApmAppMenu />
+        <ApmAppMenu>
+          <CaptureMenuConfig />
+        </ApmAppMenu>
       </MockApmPluginContextWrapper>
     </IntlProvider>
   );
