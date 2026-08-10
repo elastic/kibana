@@ -20,7 +20,7 @@ import { hasAnyDefaultLLMConnectors } from '../lib/update_default_llm_actions';
 import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 const bodySchema = schema.object({
-  apiKey: schema.string({ minLength: 1 }),
+  apiKey: schema.string({ minLength: 1, maxLength: 1000 }),
 });
 
 interface CloudConnectedStartDeps {
