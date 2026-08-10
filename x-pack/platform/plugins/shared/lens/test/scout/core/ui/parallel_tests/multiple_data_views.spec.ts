@@ -88,7 +88,7 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
         // then add a line layer and toggle DistanceKilometers (matches FTR order).
         await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.FLIGHTS);
         await addDataLayer(page, 'line');
-        await lens.activateLayerTab(1);
+        await lens.layers.activateLayerTab(1);
         await page.testSubj.locator('fieldToggle-DistanceKilometers').waitFor({ state: 'visible' });
         await page.testSubj.click('fieldToggle-DistanceKilometers');
 
@@ -96,7 +96,7 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
         // Two non-empty series (logstash + flights). Exact bucket values belong at the API layer.
         await expect
           .poll(async () =>
-            getNonEmptyLineSeriesCount(await lens.getCurrentChartDebugState('xyVisChart'))
+            getNonEmptyLineSeriesCount(await lens.workspace.getCurrentChartDebugState('xyVisChart'))
           )
           .toBe(2);
       });
@@ -110,7 +110,9 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
           await lens.waitForVisualization('xyVisChart');
           await expect
             .poll(async () =>
-              getNonEmptyLineSeriesCount(await lens.getCurrentChartDebugState('xyVisChart'))
+              getNonEmptyLineSeriesCount(
+                await lens.workspace.getCurrentChartDebugState('xyVisChart')
+              )
             )
             .toBe(2);
 
@@ -136,7 +138,9 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
           // Only the flights series remains non-empty.
           await expect
             .poll(async () =>
-              getNonEmptyLineSeriesCount(await lens.getCurrentChartDebugState('xyVisChart'))
+              getNonEmptyLineSeriesCount(
+                await lens.workspace.getCurrentChartDebugState('xyVisChart')
+              )
             )
             .toBe(1);
         }

@@ -535,7 +535,7 @@ src/platform/packages/shared/kbn-apm-utils @elastic/obs-signals-traces-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
 src/platform/packages/shared/kbn-background-search @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-bench @elastic/observability-ui
+src/platform/packages/shared/kbn-bench @elastic/kibana-core
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/actionable-obs-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
@@ -748,7 +748,7 @@ src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-library @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
-src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
+src/platform/packages/shared/kbn-workspaces @elastic/kibana-core
 src/platform/packages/shared/kbn-xstate-utils @elastic/streams-ui
 src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
@@ -1120,6 +1120,7 @@ x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
 x-pack/platform/packages/shared/ml/common-types @elastic/ml-ui
 x-pack/platform/packages/shared/ml/data-visualizer-server-schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
+x-pack/platform/packages/shared/ml/ml-cps @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
@@ -2781,7 +2782,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
-/x-pack/platform/test/reindex_service @elastic/kibana-management
 /x-pack/platform/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-data-discovery
@@ -2830,7 +2830,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/accessibility/apps/group1/painless_lab.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/license_management.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/remote_clusters.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/rollup_jobs.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/watcher.ts @elastic/kibana-management
