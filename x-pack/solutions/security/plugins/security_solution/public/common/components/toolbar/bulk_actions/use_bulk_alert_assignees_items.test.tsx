@@ -95,6 +95,12 @@ describe('useBulkAlertAssigneesItems', () => {
     expect(result.current.alertAssigneesItems[1]['data-test-subj']).toEqual(
       'remove-alert-assignees-menu-item'
     );
+    expect(result.current.alertAssigneesItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ icon: 'users', groupId: 'assignees' }),
+        expect.objectContaining({ icon: 'users', groupId: 'assignees' }),
+      ])
+    );
     expect(result.current.alertAssigneesPanels[0]['data-test-subj']).toEqual(
       'alert-assignees-context-menu-panel'
     );
