@@ -23,7 +23,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
 import type { Agent } from '../../types';
-import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
+
+import {
+  useGetAgentsQuery,
+  useStartServices,
+  useGetPackageInfoByKeyQuery,
+  sendGetAgents,
+} from '../../hooks';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
@@ -70,6 +77,19 @@ export const AgentlessEnrollmentFlyout = ({
       }
     };
   }, [agentDataInterval]);
+  // Fetch agent for the policy identified by `policyId` (including version-specific variants,
+  // e.g. `policyId#9.2`), polling every 30s until online.
+  const agentKuery = buildPolicyBaseIdWithFallbackKuery(
+    policyId,
+    `${AGENTS_PREFIX}.policy_base_id`,
+    `${AGENTS_PREFIX}.policy_id`
+  );
+  const { data: agentsData } = useGetAgentsQuery(
+    { kuery: agentKuery },
+    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
+  );
+  const agentData = agentsData?.data?.items?.[0];
+  const agentsError = agentsData?.error;
 
   // Fetch agent(s) data for the agent policy identified by the `policyId` prop
   // Polls every 30 seconds until agent is found and healthy
