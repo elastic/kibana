@@ -31,14 +31,8 @@ export const AddToCaseContextMenuItem = ({
   }
 
   return (
-    <EuiContextMenuItem
-      data-test-subj={dataTestSubj}
-      hasPanel
-      icon="briefcase"
-      onClick={onClick}
-    >
+    <EuiContextMenuItem data-test-subj={dataTestSubj} hasPanel icon="briefcase" onClick={onClick}>
       {ADD_TO_CASE}
     </EuiContextMenuItem>
   );
 };
-
