@@ -436,10 +436,12 @@ describe('RulesClient', () => {
         kind: 'signal',
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-signal-composed',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -458,7 +460,7 @@ describe('RulesClient', () => {
         message: 'kind "signal" requires query.format "standalone".',
       });
 
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws 400 when setting recovery_strategy or no_data_strategy on a signal rule', async () => {
@@ -469,10 +471,12 @@ describe('RulesClient', () => {
         kind: 'signal',
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-signal-recovery',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -485,7 +489,7 @@ describe('RulesClient', () => {
         message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
       });
 
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('allows updating an alert rule query to composed format', async () => {
@@ -496,10 +500,12 @@ describe('RulesClient', () => {
         kind: 'alert',
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-alert-composed',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -525,10 +531,12 @@ describe('RulesClient', () => {
         recovery_strategy: undefined,
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-signal-metadata',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -538,7 +546,7 @@ describe('RulesClient', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(rulesSavedObjectService.update).toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).toHaveBeenCalled();
     });
 
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {
@@ -2576,10 +2584,12 @@ describe('RulesClient', () => {
 
     it('attaches INVALID_SIGNAL_RULE code when a signal rule is updated to a composed query', async () => {
       const client = createClient();
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-signal-z',
         attributes: { ...baseSoAttrs, kind: 'signal' },
         version: 'v1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
