@@ -463,6 +463,7 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/fleet/server/services/agents/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
