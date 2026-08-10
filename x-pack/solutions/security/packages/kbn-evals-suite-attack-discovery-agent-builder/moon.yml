@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-attack-discovery-agent-builder'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-genai-research-and-development'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/evals-suite-attack-discovery-agent-builder'
   description: Moon project for @kbn/evals-suite-attack-discovery-agent-builder
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-genai-research-and-development'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
 dependsOn:
   - '@kbn/agent-builder-common'
