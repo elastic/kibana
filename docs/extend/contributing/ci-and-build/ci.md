@@ -28,6 +28,10 @@ Build documentation from the root `docs` folder.
 
 Labels can be added to a pull request to run conditional pipelines. Build artifacts are available on the "Artifacts" tab of the "Build Kibana Distribution and Plugins" step.
 
+Not every label is listed here — many are owned by individual teams and control team-specific pipelines. The labels below are commonly useful across the repository.
+
+By default, PR builds use *selective testing*: only the tests belonging to the modules your PR affects (and their downstream dependents) are run. The labels below can be used to force a full run when needed.
+
 ### `ci:all-cypress-suites`
 Some Cypress test suites only run when code changes are made in certain files. Adding this label forces all Cypress tests to run.
 
@@ -79,6 +83,9 @@ Run entity store performance tests on Elastic Cloud. A fresh deployment is creat
 ### `ci:no-auto-commit`
 Skip auto-committing changed files.
 
+### `ci:prevent-selective-testing`
+Disable selective testing and run the full Jest unit, Jest integration, and FTR suites regardless of which modules the PR affects. (Scout has its own label — see `scout:run-all-tests`.)
+
 ### `ci:project-deploy-elasticsearch`
 Create or update a serverless Elasticsearch project on Elastic Cloud QA.
 
@@ -99,6 +106,9 @@ Prevents an existing deployment from being shutdown due to inactivity.
 
 ### `ci:security-genai-run-evals`
 Run evaluations for the GenAI security evaluation suite.
+
+### `scout:run-all-tests`
+Disable Scout selective testing and run every Scout test, regardless of which modules the PR affects.
 
 
 ## Interpreting CI failures [interpreting-ci-failures]
