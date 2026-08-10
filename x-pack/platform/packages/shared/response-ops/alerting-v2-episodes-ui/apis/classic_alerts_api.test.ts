@@ -6,7 +6,6 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import {
   fetchV1AlertsAsEpisodes,
   fetchV1AlertsKpis,
