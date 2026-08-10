@@ -6,28 +6,22 @@
  */
 
 import { evaluate as evalsBase } from '@kbn/evals';
-import { VisualizationAgentEvaluationChatClient } from './chat_client';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { EvaluateDataset } from './evaluate_dataset';
 import { createEvaluateDataset } from './evaluate_dataset';
 
 export const evaluate = evalsBase.extend<
   {},
   {
-    chatClient: VisualizationAgentEvaluationChatClient;
     evaluateDataset: EvaluateDataset;
   }
 >({
-  chatClient: [
-    async ({ fetch, log, connector }, use) => {
-      await use(new VisualizationAgentEvaluationChatClient(fetch, log, connector.id));
-    },
-    { scope: 'worker' },
-  ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, inferenceClient, esClient, log }, use) => {
+    ({ agentBuilderClient, evaluators, executorClient, inferenceClient, esClient, log }, use) => {
       use(
         createEvaluateDataset({
-          chatClient,
+          agentBuilderClient,
+          agentId: agentBuilderDefaultAgentId,
           evaluators,
           executorClient,
           inferenceClient,

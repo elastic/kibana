@@ -10,6 +10,7 @@ import {
   createTrajectoryEvaluator,
   getStringMeta,
   withEvaluatorSpan,
+  type AgentBuilderClient,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -19,7 +20,6 @@ import {
 } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { VisualizationAgentEvaluationChatClient } from './chat_client';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
 import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
@@ -94,14 +94,16 @@ const useAgentTraceId = (evaluator: Evaluator): VisualizationAgentEvaluator => (
 });
 
 export function createEvaluateDataset({
-  chatClient,
+  agentBuilderClient,
+  agentId: defaultAgentId,
   evaluators,
   executorClient,
   inferenceClient,
   esClient,
   log,
 }: {
-  chatClient: VisualizationAgentEvaluationChatClient;
+  agentBuilderClient: AgentBuilderClient;
+  agentId: string;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
@@ -137,15 +139,17 @@ export function createEvaluateDataset({
       withEvaluatorSpan('EsqlExecution', {}, () => baseExecutionEvaluator.evaluate(args)),
   };
 
-  const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator({
+  const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
     inferenceClient,
     log,
-    predictionExtractor: (output) =>
-      (output as VisualizationAgentTaskOutput | undefined)?.esql ?? '',
-    groundTruthExtractor: (expected) => (expected as { query?: string } | undefined)?.query ?? '',
+    predictionExtractor: (output) => output.esql ?? '',
+    groundTruthExtractor: (expected) => expected?.query ?? '',
   });
 
-  const esqlEquivalenceEvaluator: Evaluator = {
+  const esqlEquivalenceEvaluator: VisualizationAgentEvaluator = {
     ...baseEquivalenceEvaluator,
     evaluate: (args) =>
       withEvaluatorSpan('EsqlFunctionalEquivalence', {}, () =>
@@ -172,15 +176,15 @@ export function createEvaluateDataset({
       input,
       metadata,
     }) => {
-      const agentId = getStringMeta(metadata, 'agentId');
-      const response = await chatClient.converse({
-        message: input?.question ?? '',
-        ...(agentId ? { agentId } : {}),
+      const agentId = getStringMeta(metadata, 'agentId') ?? defaultAgentId;
+      const response = await agentBuilderClient.converse({
+        agentId,
+        input: input?.question ?? '',
       });
 
       return {
-        errors: response.errors,
-        messages: response.messages,
+        errors: [],
+        messages: [{ message: response.message }],
         steps: response.steps,
         esql: extractVisualizationEsql(response).join('\n'),
         agentTraceId: response.traceId,

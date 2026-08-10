@@ -81,6 +81,7 @@ export type {
   TaskOutput,
   ExperimentTask,
   Evaluator,
+  EvaluatorParams,
   EvaluationResult,
   DatasetRunResult,
   EvalsExecutorClient,

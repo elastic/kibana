@@ -56,6 +56,13 @@ export function stripRedundantTimestampBindBounds(query: string): string {
     '$1'
   );
 
+  // Middle conjunct: `WHERE <a> AND <bounds> AND <b>` → `WHERE <a> AND <b>`
+  // Must run before the trailing pattern so nested AND chains are reduced correctly.
+  normalized = normalized.replace(
+    new RegExp(String.raw`(\|\s*WHERE\s+.+?)\s+AND\s+${TIMESTAMP_BOUND_CONJUNCT}\s+AND\s+`, 'gis'),
+    '$1 AND '
+  );
+
   // Trailing conjunct: `WHERE <rest> AND <bounds>` → `WHERE <rest>`
   // The `s` flag allows `.` to match newlines in case WHERE spans multiple lines.
   normalized = normalized.replace(

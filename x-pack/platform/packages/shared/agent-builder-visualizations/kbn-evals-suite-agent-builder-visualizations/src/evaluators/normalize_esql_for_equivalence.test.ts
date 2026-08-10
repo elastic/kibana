@@ -43,6 +43,16 @@ describe('normalizeEsqlForEquivalence', () => {
 | STATS c = COUNT(*)`);
   });
 
+  it('strips a middle @timestamp bind-param conjunct', () => {
+    const input = `FROM logs
+| WHERE a == "x" AND @timestamp >= ?_tstart AND @timestamp < ?_tend AND b == "y"
+| STATS c = COUNT(*)`;
+
+    expect(normalizeEsqlForEquivalence(input)).toBe(`FROM logs
+| WHERE a == "x" AND b == "y"
+| STATS c = COUNT(*)`);
+  });
+
   it('does not strip unrelated WHERE clauses', () => {
     const input = `FROM logs
 | WHERE response.keyword == "200"

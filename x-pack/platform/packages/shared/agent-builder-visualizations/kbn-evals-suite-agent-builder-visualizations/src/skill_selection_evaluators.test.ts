@@ -123,4 +123,39 @@ describe('visualizationSkillActivatedEvaluator', () => {
       })
     );
   });
+
+  it('does not treat an unrelated path that merely contains "visualization" as a match', async () => {
+    const result = await evaluateOutput(
+      createOutput([
+        {
+          type: 'tool_call',
+          tool_id: 'load_skill',
+          params: { skill: 'custom-visualization-helpers' },
+          results: [
+            {
+              data: {
+                skill: {
+                  path: 'skills/custom/visualization-helpers',
+                  id: 'custom-visualization-helpers',
+                  name: 'custom-visualization-helpers',
+                },
+              },
+            },
+          ],
+        },
+        {
+          type: 'tool_call',
+          tool_id: platformCoreTools.createVisualization,
+        },
+      ])
+    );
+
+    expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({
+        visualizationSkillLoaded: false,
+        createVisualizationCalled: true,
+      })
+    );
+  });
 });

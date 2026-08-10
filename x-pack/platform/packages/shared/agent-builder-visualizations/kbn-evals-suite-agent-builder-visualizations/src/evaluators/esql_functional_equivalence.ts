@@ -8,7 +8,7 @@
 import { createPrompt } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator } from '@kbn/evals';
+import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
@@ -136,9 +136,6 @@ const CalibratedEsqlEquivalencePrompt = createPrompt({
   } as const)
   .get();
 
-type EsqlPredictionExtractor<T = unknown> = (output: T) => string;
-type EsqlGroundTruthExtractor<T = unknown> = (expected: T) => string;
-
 function isEquivalenceJudgement(value: unknown): value is EquivalenceJudgement {
   return (
     typeof value === 'string' &&
@@ -151,7 +148,10 @@ function isEquivalenceJudgement(value: unknown): value is EquivalenceJudgement {
  * (equivalent / equivalent_with_caveats / not_equivalent). Results are stamped
  * with `metadata.judgeVersion`.
  */
-export function createCalibratedEsqlEquivalenceEvaluator({
+export function createCalibratedEsqlEquivalenceEvaluator<
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+>({
   inferenceClient,
   log,
   predictionExtractor,
@@ -159,9 +159,9 @@ export function createCalibratedEsqlEquivalenceEvaluator({
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
-  predictionExtractor: EsqlPredictionExtractor;
-  groundTruthExtractor: EsqlGroundTruthExtractor;
-}): Evaluator {
+  predictionExtractor: (output: TTaskOutput) => string;
+  groundTruthExtractor: (expected: TExample['output']) => string;
+}): Evaluator<TExample, TTaskOutput> {
   return {
     name: ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME,
     kind: 'LLM',

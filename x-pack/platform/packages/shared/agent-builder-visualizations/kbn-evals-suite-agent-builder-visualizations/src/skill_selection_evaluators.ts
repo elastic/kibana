@@ -11,11 +11,16 @@ import type { VisualizationAgentTaskOutput, VisualizationDatasetExample } from '
 import { getSkillReadPaths, getToolIds } from './extract_visualization';
 
 const CREATE_VISUALIZATION_TOOL_ID = platformCoreTools.createVisualization;
+const VISUALIZATION_CREATION_SKILL_ID = 'visualization-creation';
 
 const didLoadVisualizationSkill = (output: VisualizationAgentTaskOutput): boolean =>
   getSkillReadPaths(output)
     .map((path) => path.toLowerCase())
-    .some((path) => path.includes('visualization'));
+    .some(
+      (path) =>
+        path === VISUALIZATION_CREATION_SKILL_ID ||
+        path.endsWith(`/${VISUALIZATION_CREATION_SKILL_ID}`)
+    );
 
 const didCallCreateVisualizationTool = (output: VisualizationAgentTaskOutput): boolean =>
   getToolIds(output).includes(CREATE_VISUALIZATION_TOOL_ID);
