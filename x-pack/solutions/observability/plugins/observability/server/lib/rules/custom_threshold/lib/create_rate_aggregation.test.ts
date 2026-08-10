@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  createRateAggsBucketScript,
-  createRateAggsBuckets,
-} from './create_rate_aggregation';
+import { createRateAggsBucketScript, createRateAggsBuckets } from './create_rate_aggregation';
 
 describe('createRateAggsBucketScript', () => {
   const timeframe = { start: 0, end: 120_000 };
