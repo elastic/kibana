@@ -99,10 +99,10 @@ export interface UsePaginatedFlyoutOptions {
    */
   readonly resolveDocument?: (documentIndex: number) => Partial<ScopedPaginationSlice> | null;
   /**
-   * Factory that creates the flyout body element. Receives the stable
-   * `paginationInstanceId` so the document flyout can subscribe to its slice.
+   * Factory that creates the flyout body element. The store is provided to the
+   * body via `PaginationStoreProvider` by the hook before opening the flyout.
    */
-  readonly renderBody: (paginationInstanceId: string) => React.ReactNode;
+  readonly renderBody: () => React.ReactNode;
   /** History key for the V2 system flyout session. Must be a Symbol as required by the overlays API. */
   readonly historyKey: symbol;
   /** Which top-level UI opened the paginated document flyout. */
@@ -116,20 +116,20 @@ export interface UsePaginatedFlyoutOptions {
  */
 export interface UsePaginatedFlyoutReturn {
   /**
-   * Stable per-source-instance UUID minted once at mount. Thread this
-   * through the system flyout body to the document flyout.
-   */
-  readonly paginationInstanceId: string;
-  /**
    * Current snapshot of this source's pagination slice, subscribed via
    * `useSyncExternalStore`. Includes the stable `openDocumentFlyout` wrapper.
    * Re-renders only when this source's slice changes.
    */
   readonly slice: FlyoutPaginationValue;
   /**
-   * Merge a partial update into this source's pagination slice. Equivalent
-   * to `flyoutPaginationStore.setSlice(paginationInstanceId, partial)` but
-   * routed through the hook so the source never touches the store directly.
+   * Stable callback that opens (or navigates) the paginated flyout to the
+   * given absolute document index. Exposed so consumers (e.g. `ActionsCell`)
+   * can trigger navigation without accessing the store directly.
+   */
+  readonly openDocumentFlyout: (documentIndex: number) => void;
+  /**
+   * Merge a partial update into this source's pagination slice. Routed through
+   * the hook so the source never touches the store directly.
    */
   readonly setState: (partial: Partial<ScopedPaginationSlice>) => void;
   /**
