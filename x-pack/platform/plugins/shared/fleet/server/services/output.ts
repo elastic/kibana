@@ -839,24 +839,10 @@ class OutputService {
             .service_token as string;
         }
       } else if (isOtlpOutput(output)) {
-        const otlpData = data as OutputSoOtlpAttributes;
-        const tlsSecrets = output.secrets?.otlp_exporter?.tls;
-        const keyPemFallback = !output.otlp_exporter.tls?.key_pem && tlsSecrets?.key_pem;
-        const ownerAuthFallback =
-          !output.otlp_exporter.tls?.tpm?.owner_auth && tlsSecrets?.tpm?.owner_auth;
-        const authFallback = !output.otlp_exporter.tls?.tpm?.auth && tlsSecrets?.tpm?.auth;
-        if (keyPemFallback || ownerAuthFallback || authFallback) {
-          const tls = { ...otlpData.otlp_exporter.tls };
-          if (keyPemFallback) tls.key_pem = tlsSecrets!.key_pem as string;
-          if (ownerAuthFallback || authFallback) {
-            tls.tpm = {
-              ...tls.tpm,
-              ...(ownerAuthFallback && { owner_auth: tlsSecrets!.tpm!.owner_auth as string }),
-              ...(authFallback && { auth: tlsSecrets!.tpm!.auth as string }),
-            };
-          }
-          otlpData.otlp_exporter = { ...otlpData.otlp_exporter, tls };
-        }
+        this._mergeOtlpPlaintextTlsSecrets(
+          data as OutputSoOtlpAttributes,
+          output.secrets?.otlp_exporter?.tls
+        );
       }
     }
 
@@ -1490,24 +1476,10 @@ class OutputService {
             .secrets.service_token as string;
         }
       } else if (isOtlpOutput(updateSoData)) {
-        const otlpUpdateData = updateSoData as OutputSoOtlpAttributes;
-        const tlsSecrets = (data as Partial<NewOtlpOutput>).secrets?.otlp_exporter?.tls;
-        const keyPemFallback = !otlpUpdateData.otlp_exporter?.tls?.key_pem && tlsSecrets?.key_pem;
-        const ownerAuthFallback =
-          !otlpUpdateData.otlp_exporter?.tls?.tpm?.owner_auth && tlsSecrets?.tpm?.owner_auth;
-        const authFallback = !otlpUpdateData.otlp_exporter?.tls?.tpm?.auth && tlsSecrets?.tpm?.auth;
-        if (keyPemFallback || ownerAuthFallback || authFallback) {
-          const tls = { ...otlpUpdateData.otlp_exporter?.tls };
-          if (keyPemFallback) tls.key_pem = tlsSecrets!.key_pem as string;
-          if (ownerAuthFallback || authFallback) {
-            tls.tpm = {
-              ...tls.tpm,
-              ...(ownerAuthFallback && { owner_auth: tlsSecrets!.tpm!.owner_auth as string }),
-              ...(authFallback && { auth: tlsSecrets!.tpm!.auth as string }),
-            };
-          }
-          otlpUpdateData.otlp_exporter = { ...otlpUpdateData.otlp_exporter, tls };
-        }
+        this._mergeOtlpPlaintextTlsSecrets(
+          updateSoData as OutputSoOtlpAttributes,
+          (data as Partial<NewOtlpOutput>).secrets?.otlp_exporter?.tls
+        );
       }
     }
 
@@ -1634,6 +1606,28 @@ class OutputService {
     );
 
     return outputSO.updated_at;
+  }
+
+  private _mergeOtlpPlaintextTlsSecrets(
+    target: OutputSoOtlpAttributes,
+    tlsSecrets: NonNullable<NonNullable<NewOtlpOutput['secrets']>['otlp_exporter']>['tls']
+  ): void {
+    if (!tlsSecrets) return;
+    const currentTls = target.otlp_exporter?.tls;
+    const keyPemFallback = !currentTls?.key_pem && tlsSecrets.key_pem;
+    const ownerAuthFallback = !currentTls?.tpm?.owner_auth && tlsSecrets.tpm?.owner_auth;
+    const authFallback = !currentTls?.tpm?.auth && tlsSecrets.tpm?.auth;
+    if (!keyPemFallback && !ownerAuthFallback && !authFallback) return;
+    const tls = { ...currentTls };
+    if (keyPemFallback) tls.key_pem = tlsSecrets.key_pem as string;
+    if (ownerAuthFallback || authFallback) {
+      tls.tpm = {
+        ...tls.tpm,
+        ...(ownerAuthFallback && { owner_auth: tlsSecrets.tpm!.owner_auth as string }),
+        ...(authFallback && { auth: tlsSecrets.tpm!.auth as string }),
+      };
+    }
+    target.otlp_exporter = { ...target.otlp_exporter, tls };
   }
 
   private _validateOutputSslPaths(output: Partial<NewBeatsOutput>): void {

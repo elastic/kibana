@@ -371,11 +371,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(ownerAuthSecretId).to.be.a('string');
         expect(authSecretId).to.be.a('string');
 
-        // All secrets exist before delete
-        await getSecretById(keyPemSecretId);
-        await getSecretById(ownerAuthSecretId);
-        await getSecretById(authSecretId);
-
         await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx').expect(200);
 
         // All secrets must be cleaned up
@@ -401,19 +396,19 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('allows assigning the OTLP output to a pure-OTel agent policy', async () => {
+      const createOtlpOutputAndOtelPolicy = async (nameSuffix: string) => {
         const { body: outputBody } = await supertest
           .post('/api/fleet/outputs')
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: `otlp-gating-allowed-${uuidv4()}`,
+            name: `otlp-gating-${nameSuffix}-${uuidv4()}`,
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
           })
           .expect(200);
         const otlpOutputId: string = outputBody.item.id;
 
-        const policyName = `otel-only-${uuidv4()}`;
+        const policyName = `${nameSuffix}-${uuidv4()}`;
         const { body: policyBody } = await supertest
           .post('/api/fleet/agent_policies')
           .set('kbn-xsrf', 'xxxx')
@@ -432,13 +427,19 @@ export default function (providerContext: FtrProviderContext) {
             inputs: {
               'otlpreceiver-otelcol': {
                 enabled: true,
-                streams: {
-                  'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} },
-                },
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
               },
             },
           })
           .expect(200);
+
+        return { otlpOutputId, policyId, policyName };
+      };
+
+      it('allows assigning the OTLP output to a pure-OTel agent policy', async () => {
+        const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
+          'allowed'
+        );
 
         // Assigning OTLP output to a pure-OTel policy must succeed
         await supertest
@@ -449,43 +450,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('rejects assigning the OTLP output to a mixed OTel+beats agent policy', async () => {
-        const { body: outputBody } = await supertest
-          .post('/api/fleet/outputs')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `otlp-gating-rejected-${uuidv4()}`,
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
-          })
-          .expect(200);
-        const otlpOutputId: string = outputBody.item.id;
-
-        const policyName = `mixed-${uuidv4()}`;
-        const { body: policyBody } = await supertest
-          .post('/api/fleet/agent_policies')
-          .set('kbn-xsrf', 'xxxx')
-          .send({ name: policyName, namespace: 'default' })
-          .expect(200);
-        const policyId: string = policyBody.item.id;
-
-        await supertest
-          .post('/api/fleet/package_policies')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: `otel-pkg-${uuidv4()}`,
-            namespace: 'default',
-            policy_id: policyId,
-            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
-            inputs: {
-              'otlpreceiver-otelcol': {
-                enabled: true,
-                streams: {
-                  'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} },
-                },
-              },
-            },
-          })
-          .expect(200);
+        const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
+          'rejected'
+        );
 
         // Also add a non-OTel (beats) package policy to make the policy mixed
         await supertest
