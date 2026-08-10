@@ -99,7 +99,10 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           // asynchronously, so the layer tabs may not exist yet; `activateLayerTab` polls for
           // them rather than assuming a snapshot read is already settled.
           await lens.layers.activateLayerTab(1);
-          await lens.openDimensionEditor('lnsXY_xAnnotationsPanel > lns-dimensionTrigger', 1);
+          await lens.dimensions.openDimensionEditor(
+            'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+            1
+          );
           await lens.setAnnotationTextVisibility('name');
           await lens.closeDimensionEditor();
 

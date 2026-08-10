@@ -47,9 +47,14 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
           expect(await lens.layers.getLayerCount()).toBe(2);
 
           await lens.layers.ensureLayerTabIsActive(1);
-          await expect(lens.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText('Event');
+          await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText(
+            'Event'
+          );
 
-          await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
+          await lens.dimensions.openDimensionEditor(
+            `${ANNOTATIONS_PANEL} > lns-dimensionTrigger`,
+            1
+          );
           await lens.setAnnotationTextVisibility('name');
           await lens.closeDimensionEditor();
 
@@ -66,7 +71,11 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
             to: `${ANNOTATIONS_PANEL} > lns-empty-dimension`,
           });
 
-          await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1, 1);
+          await lens.dimensions.openDimensionEditor(
+            `${ANNOTATIONS_PANEL} > lns-dimensionTrigger`,
+            1,
+            1
+          );
           await expect(page.testSubj.locator('lnsXY_textVisibility_name')).toHaveAttribute(
             'aria-pressed',
             'true'
@@ -87,9 +96,11 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
         expect(await lens.layers.getLayerCount()).toBe(2);
 
         await lens.layers.ensureLayerTabIsActive(1);
-        await expect(lens.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText('Event');
+        await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText(
+          'Event'
+        );
 
-        await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
+        await lens.dimensions.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
         await page.testSubj.click('lnsXY_annotation_query');
         await lens.configureQueryAnnotation({
           queryString: '*',
