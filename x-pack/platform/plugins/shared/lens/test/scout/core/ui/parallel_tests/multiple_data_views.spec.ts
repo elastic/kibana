@@ -88,7 +88,7 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
         // then add a line layer and toggle DistanceKilometers (matches FTR order).
         await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.FLIGHTS);
         await addDataLayer(page, 'line');
-        await lens.activateLayerTab(1);
+        await lens.layers.activateLayerTab(1);
         await page.testSubj.locator('fieldToggle-DistanceKilometers').waitFor({ state: 'visible' });
         await page.testSubj.click('fieldToggle-DistanceKilometers');
 
