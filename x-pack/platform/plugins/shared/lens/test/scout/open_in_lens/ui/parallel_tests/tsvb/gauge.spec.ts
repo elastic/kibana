@@ -92,7 +92,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       { stop: '', color: undefined },
     ]);
     await lens.closePalettePanelFlyout();
-    await lens.closeDimensionEditorPanel();
+    await lens.dimensions.closeDimensionEditorPanel();
   });
 
   spaceTest(

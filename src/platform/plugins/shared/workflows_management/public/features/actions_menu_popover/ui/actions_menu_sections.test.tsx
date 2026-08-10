@@ -45,9 +45,9 @@ import { ActionsMenu } from './actions_menu';
 import type { EditorCommand, JumpToStepEntry } from '../types';
 
 const mockCommands: EditorCommand[] = [
-  { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
-  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
-  { id: 'find', label: 'Find and Replace', iconType: 'search' },
+  { id: 'foldAll', label: 'Collapse all', iconType: 'minusCircle' },
+  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusCircle' },
+  { id: 'find', label: 'Find and Replace', iconType: 'magnify' },
 ];
 
 const mockSteps: JumpToStepEntry[] = [

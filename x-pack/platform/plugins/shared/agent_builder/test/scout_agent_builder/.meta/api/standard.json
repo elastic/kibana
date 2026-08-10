@@ -1,5 +1,5 @@
 {
-  "sha1": "44408a755171bce73031cfd90e14d4a66aac70a1",
+  "sha1": "cb081135fd22c216c952332c3f3f217b791d103b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -185,6 +185,54 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
         "line": 702,
         "column": 27
+      }
+    },
+    {
+      "id": "6abb23769a7e549-2d12bd09f52b785",
+      "title": "Agent Builder — agent ai_indices API GET returns ai_indices: [] for the default agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_ai_indices_api.spec.ts",
+        "line": 50,
+        "column": 88
+      }
+    },
+    {
+      "id": "6abb23769a7e549-b860d680b6355e0",
+      "title": "Agent Builder — agent ai_indices API POST accepts ai_indices and round-trips them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_ai_indices_api.spec.ts",
+        "line": 60,
+        "column": 13
+      }
+    },
+    {
+      "id": "6abb23769a7e549-36d7d53483bfd88",
+      "title": "Agent Builder — agent ai_indices API PUT leaves stored ai_indices alone when the update omits them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_ai_indices_api.spec.ts",
+        "line": 82,
+        "column": 7
       }
     },
     {
@@ -533,7 +581,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 411,
+        "line": 414,
         "column": 29
       }
     },
@@ -547,8 +595,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 744,
-        "column": 7
+        "line": 782,
+        "column": 5
       }
     },
     {
@@ -561,8 +609,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 787,
-        "column": 16
+        "line": 826,
+        "column": 53
       }
     },
     {

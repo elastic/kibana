@@ -36,9 +36,9 @@ spaceTest.describe(
         'duplicate',
         testData.XY_CHART
       );
-      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText(
-        '@timestamp [1]'
-      );
+      await expect(
+        lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+      ).toHaveText('@timestamp [1]');
       await lens.dragFieldToDimensionTrigger(
         '@message.raw',
         'lnsXY_yDimensionPanel > lns-dimensionTrigger'
@@ -49,12 +49,12 @@ spaceTest.describe(
         'swap',
         testData.XY_CHART
       );
-      await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
         'Count of @timestamp'
       );
-      await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText(
-        'Top 9 values of @message.raw'
-      );
+      await expect(
+        lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+      ).toHaveText('Top 9 values of @message.raw');
     });
 
     spaceTest('combines breakdown with horizontal dimension', async ({ pageObjects }) => {
@@ -69,7 +69,7 @@ spaceTest.describe(
         'combine',
         testData.XY_CHART
       );
-      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         'Top values of clientip + 1 other'
       );
     });
@@ -85,7 +85,7 @@ spaceTest.describe(
         'combine',
         testData.XY_CHART
       );
-      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         'Top values of clientip + 1 other'
       );
     });
@@ -119,7 +119,7 @@ spaceTest.describe(
         testData.XY_CHART
       );
 
-      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         'Top values of clientip + 2 others'
       );
     });
