@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { AppHeaderProps } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
+import { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -27,6 +28,7 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
+import { useApmAppMenuConfig } from '../../app_root/apm_app_menu/apm_app_menu_context';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ActionsMenu } from './actions_menu';
 import { getNoDataConfig } from '../no_data_config';
@@ -91,6 +93,8 @@ export function ApmMainTemplate({
   ...pageTemplateProps
 }: ApmMainTemplateProps) {
   const location = useLocation();
+  const isNextChrome = useIsNextChrome();
+  const registeredAppMenu = useApmAppMenuConfig();
 
   const { services } = useKibana<ApmPluginStartDeps>();
   const { docLinks, observabilityShared, application, share } = services;
@@ -157,6 +161,15 @@ export function ApmMainTemplate({
   };
 
   if (header) {
+    // Inline AppHeader sets chrome.next.inlineAppHeader, which suppresses Chrome's
+    // fallback header that would otherwise render chrome.setAppMenu(). Under Chrome Next,
+    // merge the registered global menu onto the title row unless the page overrides it.
+    // Classic chrome still shows the menu in the chrome action bar via RegisterAppMenu.
+    const resolvedHeader: ApmMainTemplateHeaderProps = {
+      ...header,
+      menu: header.menu ?? (isNextChrome ? registeredAppMenu : undefined),
+    };
+
     return (
       <ObservabilityPageTemplate
         {...sharedTemplateProps}
@@ -165,7 +178,7 @@ export function ApmMainTemplate({
           paddingSize: 'none',
         }}
       >
-        <AppHeader spacing="standard" {...header} />
+        <AppHeader spacing="standard" {...resolvedHeader} />
         <EuiPageSection
           paddingSize="m"
           restrictWidth={false}
