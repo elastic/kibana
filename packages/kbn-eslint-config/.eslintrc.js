@@ -55,7 +55,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/integration_assistant/server/util/samples.ts',
   'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
-  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/read_kibana_config.ts',
   'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
   'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
   'x-pack/solutions/security/test/security_solution_playwright/api_utils/api_key.ts',
