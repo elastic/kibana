@@ -7,22 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface TransformConfig {
-  disableSourceMaps?: boolean;
-}
-
-export interface WorkerData {
-  config: TransformConfig;
-}
-
-export interface WorkerTask {
-  path: string;
-  source: string;
-}
-
-export interface WorkerResult {
-  code: string;
-  map?: any;
-}
-
-export type Transform = (path: string, source: string) => Promise<WorkerResult>;
+module.exports = require('./src/node');

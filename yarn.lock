@@ -4594,10 +4594,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-transform@link:src/platform/packages/private/kbn-babel-transform":
-  version "0.0.0"
-  uid ""
-
 "@kbn/background-search@link:src/platform/packages/shared/kbn-background-search":
   version "0.0.0"
   uid ""
