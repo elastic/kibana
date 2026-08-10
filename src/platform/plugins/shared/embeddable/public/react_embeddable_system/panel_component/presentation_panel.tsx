@@ -25,6 +25,7 @@ import type { PresentationPanelHoverActionsProps } from './panel_header/presenta
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelError } from './presentation_panel_error';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { VisibilityTracker } from './visibility_tracker';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -45,7 +46,7 @@ const PresentationPanelChrome = <
 }: React.PropsWithChildren<
   Omit<
     PresentationPanelProps<ApiType, ComponentPropsType>,
-    'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps'
+    'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps' | 'componentInternalApi'
   > & {
     setDragHandle: PresentationPanelHoverActionsProps['setDragHandle'];
   }
@@ -147,6 +148,7 @@ export const PresentationPanel = <
 >({
   Component,
   componentApi,
+  componentInternalApi,
   componentProps,
 
   setDragHandles,
@@ -174,6 +176,7 @@ export const PresentationPanel = <
   const InnerPanel = useMemo(() => {
     return (
       <>
+        <VisibilityTracker setVisibility={componentInternalApi.setVisibility} />
         {blockingError && <PresentationPanelError api={componentApi} error={blockingError} />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
@@ -185,7 +188,7 @@ export const PresentationPanel = <
         </div>
       </>
     );
-  }, [blockingError, componentApi, Component, componentProps]);
+  }, [blockingError, componentApi, Component, componentProps, componentInternalApi.setVisibility]);
 
   return hidePanelChrome ? (
     InnerPanel

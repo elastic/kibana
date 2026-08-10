@@ -85,8 +85,6 @@ export {
   type PublishesIsVisible,
   apiPublishesIsVisible,
   apiPublishesFetchSetting,
-  onVisibilityChange,
-  initializeVisibility,
 } from './interfaces/fetch/fetch_only_visible';
 export {
   apiHasAppContext,

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
-import type { PublishesPauseFetch, PublishingSubject } from '../..';
+import type { PublishingSubject } from '../..';
 
-export type FetchSetting = 'onlyVisible' | 'always';
+export type FetchSetting = 'visible' | 'all';
 
 /**
  * Parent APIs can publish a fetch setting that determines when child components should fetch data.
@@ -26,34 +25,9 @@ export const apiPublishesFetchSetting = (
 };
 
 export interface PublishesIsVisible {
-  isVisible$: BehaviorSubject<boolean>;
+  isVisible$: PublishingSubject<boolean>;
 }
 
 export const apiPublishesIsVisible = (unknownApi?: unknown): unknownApi is PublishesIsVisible => {
   return Boolean(unknownApi && (unknownApi as PublishesIsVisible)?.isVisible$ !== undefined);
-};
-
-export const onVisibilityChange = (api: unknown, isVisible: boolean) => {
-  if (apiPublishesIsVisible(api)) api.isVisible$.next(isVisible);
-};
-
-export const initializeVisibility = (
-  parentApi: unknown
-): (PublishesPauseFetch & PublishesIsVisible) | {} => {
-  if (!apiPublishesFetchSetting(parentApi)) return {};
-
-  const getIsFetchPaused = (parentFetchSetting: FetchSetting, isVisible: boolean) => {
-    if (parentFetchSetting === 'onlyVisible') return !isVisible;
-    return false; // If the fetch setting is 'always', we do not pause the fetch
-  };
-
-  const isVisible$ = new BehaviorSubject<boolean>(false);
-  const isFetchPaused$ = parentApi.fetchSetting$.pipe(
-    combineLatestWith(isVisible$),
-    map(([parentFetchSetting, isVisible]) => getIsFetchPaused(parentFetchSetting, isVisible))
-  );
-  return {
-    isVisible$,
-    isFetchPaused$,
-  };
 };
