@@ -12,6 +12,7 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataSource } from '@kbn/data-source';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
 
@@ -88,5 +89,9 @@ export interface DocView<TState extends object = object> {
   order: number;
   title: string;
   enabled?: boolean;
+  /** Optional element rendered before the tab title (e.g. a technical preview badge). */
+  prepend?: ReactElement;
+  /** Optional EBT click attributes (`data-ebt-*`) added to the rendered tab button. */
+  ebt?: EbtClickAttrs;
   render: DocViewRenderFunction<TState>;
 }

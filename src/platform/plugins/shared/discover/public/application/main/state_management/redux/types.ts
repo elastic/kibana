@@ -154,7 +154,7 @@ export enum TabInitializationStatus {
   Error = 'Error',
 }
 
-export const DEFAULT_PROFILE_STATE_FIELDS = [
+export const PROFILE_APP_STATE_DEFAULT_FIELDS = [
   'columns',
   'rowHeight',
   'breakdownField',
@@ -163,20 +163,26 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'hideSidebar',
 ] as const;
 
-export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
+export type ProfileAppStateDefaultField = (typeof PROFILE_APP_STATE_DEFAULT_FIELDS)[number];
 
-type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
+type NonEmptyProfileAppStateDefaultFields = [
+  ProfileAppStateDefaultField,
+  ...ProfileAppStateDefaultField[]
+];
 
-export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+export type ProfileAppStateDefaultFields = 'all' | 'none' | NonEmptyProfileAppStateDefaultFields;
 
-export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+export type ProfileAppStateSnapshot = Partial<Pick<DiscoverAppState, ProfileAppStateDefaultField>>;
 
-export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
+export type ProfileAppStateSnapshotsByProfileId = Record<
+  string,
+  ProfileAppStateSnapshot | undefined
+>;
 
-export interface DefaultProfileState {
+export interface ProfileAppStateDefaults {
   resetId: string;
-  fieldsToReset: DefaultProfileStateFields;
-  snapshotsByProfileId: ProfileStateSnapshotsByProfileId;
+  fieldsToReset: ProfileAppStateDefaultFields;
+  snapshotsByProfileId: ProfileAppStateSnapshotsByProfileId;
 }
 
 // This is used to identify heavy state values (e.g. long lists of nested objects)
@@ -216,7 +222,7 @@ export interface TabState extends TabItem {
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
-  defaultProfileState: DefaultProfileState;
+  profileAppStateDefaults: ProfileAppStateDefaults;
   profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
@@ -254,7 +260,6 @@ export interface DiscoverInternalState {
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   defaultProfileEsqlQuery: DefaultEsqlQueryConfig | undefined;
-  isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;

@@ -213,7 +213,7 @@ export const RedirectUriSection = () => {
           <EuiSpacer size="m" />
           <EuiButtonEmpty
             size="s"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={handleAddUri}
             data-test-subj="mcpClientAddUri"
           >

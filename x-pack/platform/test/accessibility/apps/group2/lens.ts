@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -21,11 +20,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
+  const retry = getService('retry');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
     const activeElement = await find.activeElement();
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+  };
+
+  // Focus is restored one macrotask later via setTimeout in the product's useFocusUpdate hook,
+  // so wait for it to settle rather than sampling activeElement once.
+  const expectFocus = async (testSubject: string) => {
+    await retry.waitForWithTimeout(`focus moves to ${testSubject}`, 5000, () =>
+      hasFocus(testSubject)
+    );
   };
 
   describe('Lens Accessibility', () => {
@@ -195,18 +203,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.clickVisType('lens');
         await timePicker.ensureHiddenNoDataPopover();
         await lens.createLayer();
-        expect(await hasFocus('lns-layerPanel-1')).to.be(true);
+        await expectFocus('lns-layerPanel-1');
       });
       it('should focus the remaining layer when the first is removed', async () => {
         await lens.removeLayer(0);
-        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        await expectFocus('lns-layerPanel-0');
         await lens.createLayer();
         await lens.removeLayer(1);
-        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        await expectFocus('lns-layerPanel-0');
       });
       it('should focus the only layer when resetting the layer', async () => {
         await lens.removeLayer();
-        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        await expectFocus('lns-layerPanel-0');
       });
     });
   });

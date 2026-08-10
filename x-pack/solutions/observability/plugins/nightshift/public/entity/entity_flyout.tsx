@@ -62,18 +62,15 @@ const confidenceDotColor = (
 
 function ConfidenceBadge({ confidence }: { confidence: number }) {
   const { euiTheme } = useEuiTheme();
-  const confidenceLabel = i18n.translate(
-    'xpack.observability.nightshift.entityFlyout.confidenceBadge',
-    {
-      defaultMessage: '{confidence}% confidence',
-      values: { confidence },
-    }
-  );
+  const confidenceLabel = i18n.translate('xpack.nightshift.entityFlyout.confidenceBadge', {
+    defaultMessage: '{confidence}% confidence',
+    values: { confidence },
+  });
 
   return (
     <EuiToolTip
       title={confidenceLabel}
-      content={i18n.translate('xpack.observability.nightshift.entityFlyout.confidenceTooltip', {
+      content={i18n.translate('xpack.nightshift.entityFlyout.confidenceTooltip', {
         defaultMessage:
           'How confident Nightshift is that this is a real, distinct entity in your system — based on observation frequency, data consistency, and cross-source corroboration.',
       })}
@@ -158,8 +155,8 @@ export function EntityFlyout({
   const handleOpenInChat = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
-      autoSendInitialMessage: true,
-      initialMessage: i18n.translate('xpack.observability.nightshift.entityFlyout.chatPrompt', {
+      autoSendInitialMessage: false,
+      initialMessage: i18n.translate('xpack.nightshift.entityFlyout.chatPrompt', {
         defaultMessage: 'Tell me about {entityName}',
         values: { entityName: title },
       }),
@@ -201,7 +198,7 @@ export function EntityFlyout({
         <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiBadge color="default">
-              {i18n.translate('xpack.observability.nightshift.entityFlyout.entityBadge', {
+              {i18n.translate('xpack.nightshift.entityFlyout.entityBadge', {
                 defaultMessage: 'Entity',
               })}
             </EuiBadge>
@@ -209,7 +206,7 @@ export function EntityFlyout({
           {isServiceEntity && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
-                {i18n.translate('xpack.observability.nightshift.entityFlyout.serviceBadge', {
+                {i18n.translate('xpack.nightshift.entityFlyout.serviceBadge', {
                   defaultMessage: 'Service',
                 })}
               </EuiBadge>
@@ -232,7 +229,7 @@ export function EntityFlyout({
         {feature.description && (
           <>
             <FlyoutSectionTitle>
-              {i18n.translate('xpack.observability.nightshift.entityFlyout.summaryTitle', {
+              {i18n.translate('xpack.nightshift.entityFlyout.summaryTitle', {
                 defaultMessage: 'Summary',
               })}
             </FlyoutSectionTitle>
@@ -247,7 +244,7 @@ export function EntityFlyout({
         )}
 
         <FlyoutSectionTitle>
-          {i18n.translate('xpack.observability.nightshift.entityFlyout.evidenceTitle', {
+          {i18n.translate('xpack.nightshift.entityFlyout.evidenceTitle', {
             defaultMessage: 'Evidence',
           })}
         </FlyoutSectionTitle>
@@ -256,7 +253,7 @@ export function EntityFlyout({
           <EvidenceList evidence={evidence} />
         ) : (
           <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.observability.nightshift.entityFlyout.noEvidenceDescription', {
+            {i18n.translate('xpack.nightshift.entityFlyout.noEvidenceDescription', {
               defaultMessage: 'No evidence available for this entity.',
             })}
           </EuiText>
@@ -265,7 +262,7 @@ export function EntityFlyout({
         <EuiSpacer size="l" />
 
         <FlyoutSectionTitle>
-          {i18n.translate('xpack.observability.nightshift.entityFlyout.rawDocumentTitle', {
+          {i18n.translate('xpack.nightshift.entityFlyout.rawDocumentTitle', {
             defaultMessage: 'Raw document',
           })}
         </FlyoutSectionTitle>
@@ -305,12 +302,9 @@ export function EntityFlyout({
                     detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
                   })}
                 >
-                  {i18n.translate(
-                    'xpack.observability.nightshift.entityFlyout.openInChatButtonLabel',
-                    {
-                      defaultMessage: 'Open in chat',
-                    }
-                  )}
+                  {i18n.translate('xpack.nightshift.entityFlyout.openInChatButtonLabel', {
+                    defaultMessage: 'Open in chat',
+                  })}
                 </AiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -320,13 +314,10 @@ export function EntityFlyout({
               color="subdued"
               data-test-subj="nightshiftEntityFlyoutChatUnavailable"
             >
-              {i18n.translate(
-                'xpack.observability.nightshift.entityFlyout.chatUnavailableDescription',
-                {
-                  defaultMessage:
-                    'Open in chat is unavailable for stream-level entities without Knowledge Indicator features.',
-                }
-              )}
+              {i18n.translate('xpack.nightshift.entityFlyout.chatUnavailableDescription', {
+                defaultMessage:
+                  'Open in chat is unavailable for stream-level entities without Knowledge Indicator features.',
+              })}
             </EuiText>
           )}
         </EuiFlyoutFooter>
