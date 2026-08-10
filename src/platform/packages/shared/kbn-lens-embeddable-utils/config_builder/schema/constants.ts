@@ -8,9 +8,7 @@
  */
 
 // @TODO: move it to shared type/values package
-export const LENS_HISTOGRAM_GRANULARITY_DEFAULT_NUMERIC_VALUE = 5;
 export const LENS_HISTOGRAM_GRANULARITY_MIN = 1;
-export const LENS_HISTOGRAM_GRANULARITY_MAX = 7;
 export const LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE = 'auto';
 export const LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT = true;
 

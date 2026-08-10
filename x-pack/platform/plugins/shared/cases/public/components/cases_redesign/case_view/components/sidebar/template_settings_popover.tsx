@@ -11,6 +11,10 @@ import {
   EuiComboBox,
   EuiIcon,
   EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
   EuiPopoverTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -241,31 +245,52 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
           <SidebarSectionSettingsButton data-test-subj={dataTestSubj} onClick={togglePopover} />
         }
       >
+        {/* "Change template", not "Template": the popover exists to replace the selection, and a
+            bare noun repeated the combo box's own placeholder directly beneath it. Matches Kibana's
+            verb-phrase convention for popovers that change a selection. */}
         <EuiPopoverTitle id={templatePopoverTitleId}>
-          {commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}
-        </EuiPopoverTitle>
-        <EuiComboBox
-          fullWidth
-          singleSelection={{ asPlainText: true }}
-          options={options}
-          selectedOptions={displayedSelectedOptions}
-          onChange={onTemplateChange}
-          aria-labelledby={templatePopoverTitleId}
-          isLoading={isLoadingTemplates}
-          placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
-          prepend={
-            isAppliedTemplateMissing ? (
-              <EuiIcon
-                type="warning"
-                color="warning"
-                aria-hidden={true}
-                data-test-subj={`${dataTestSubj}-template-not-found-icon`}
+          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>{redesignI18n.CHANGE_TEMPLATE}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* EuiIconTip rather than a bare icon in an EuiToolTip: it renders a focusable
+                  trigger, so the explanation is reachable by keyboard and not only on hover. */}
+              <EuiIconTip
+                type="info"
+                color="primary"
+                position="right"
+                content={redesignI18n.CHANGE_TEMPLATE_HINT}
+                aria-label={redesignI18n.CHANGE_TEMPLATE_HINT_ARIA}
+                iconProps={{ 'data-test-subj': 'template-settings-change-hint' }}
               />
-            ) : undefined
-          }
-          data-test-subj={`${dataTestSubj}-template-select`}
-          compressed
-        />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        {/* Says up front what switching does and does not do: the surprising part is that values
+            already saved on the case survive the switch, so it belongs before the choice rather
+            than as a surprise afterwards. */}
+        <EuiFormRow label={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL} fullWidth>
+          <EuiComboBox
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            options={options}
+            selectedOptions={displayedSelectedOptions}
+            onChange={onTemplateChange}
+            isLoading={isLoadingTemplates}
+            placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
+            prepend={
+              isAppliedTemplateMissing ? (
+                <EuiIcon
+                  type="warning"
+                  color="warning"
+                  aria-hidden={true}
+                  data-test-subj={`${dataTestSubj}-template-not-found-icon`}
+                />
+              ) : undefined
+            }
+            data-test-subj={`${dataTestSubj}-template-select`}
+            compressed
+          />
+        </EuiFormRow>
       </EuiPopover>
       {pendingTemplateId !== null && (
         <ConfirmChangeTemplateModal

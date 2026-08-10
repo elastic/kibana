@@ -17,6 +17,7 @@ import type {
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasType,
   HasUniqueId,
   PublishesRelatedPanels,
@@ -33,6 +34,7 @@ import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
+  CanCancelRequests &
   DataControlApi &
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {

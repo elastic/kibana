@@ -263,8 +263,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('deletes a tag from a case', async () => {
         if (await cases.common.isRedesignEnabled()) {
+          // Clearing the combo box persists the removal immediately; there is no confirm step.
           await comboBox.clear('case-tags');
-          await testSubjects.click('template-field-confirm-tags');
           await header.waitUntilLoadingHasFinished();
         } else {
           await testSubjects.click('tag-list-edit-button');
