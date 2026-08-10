@@ -245,6 +245,9 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const onCancel = () => history.push('/detail/aws/overview');
 
   return (
+    // Full-bleed white page canvas per design reference, overriding
+    // Kibana's default page background for this flow only.
+    <div style={{ background: '#FFFFFF', minHeight: '100%', width: '100%' }}>
     <div
       style={{
         maxWidth: 1240,
@@ -431,6 +434,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         )}
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
+    </div>
     </div>
   );
 };
