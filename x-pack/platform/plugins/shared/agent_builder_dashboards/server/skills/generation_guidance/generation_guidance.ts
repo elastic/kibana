@@ -37,7 +37,32 @@ For an existing dashboard:
 ## Panel Inputs
 
 - Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, markdown, or custom content). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+
+## Panel Type Selection
+
+Choose the panel type in this priority order:
+
+1. **Lens** (\`source: "request"\`, \`renderer: "lens"\` or omit renderer) — default for metric, time series, bar, line, pie, area, and data table visualizations.
+2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user explicitly asks for Vega.
+3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — for static explanatory text, links, or simple formatted notes with no data.
+4. **Custom content** (\`source: "config"\`, \`type: "custom_content"\`) — **last resort** for content that cannot be expressed as a chart or plain markdown. Typical use cases: KPI scorecards with colored status badges, health/status boards, mixed text-and-data layouts, or panels that combine multiple metrics in a custom HTML structure.
+
+**When to use custom content:**
+- The content needs an HTML/CSS layout that no single Lens chart type can express (e.g. a colored status grid, a scorecard with large KPI numbers and trend badges).
+- The panel mixes narrative text with live data values in a single view.
+- The user explicitly asks for a custom or HTML-based panel.
+
+**When NOT to use custom content:**
+- Any standard time series, bar, pie, metric, or data table → use Lens.
+- Scatter plots, faceted charts, layered charts, combination charts → use Vega.
+- Plain explanatory text with no data → use markdown.
+
+**How to create a custom content panel:**
+- Always set \`config.prompt\` to a concise description of what to display. The embeddable auto-generates an HTML template from this if \`template\` is omitted.
+- Optionally set \`config.template\` to a LiquidJS HTML template. No JavaScript (\`<script>\` tags are rejected). Providing a template makes the panel immediately renderable without an extra AI call.
+- Optionally set \`config.esqlQuery\` when the panel needs live data. Each row is accessible in the template as \`{{ row["field_name"].value }}\`.
+- Custom content panels support \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) to replace the prompt, template, or ES|QL query in place.
 
 ## Chart Type Guidance
 

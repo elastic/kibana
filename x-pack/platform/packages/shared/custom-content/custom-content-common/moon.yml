@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/packages/shared/custom-content/custom-content-common
-dependsOn: []
+dependsOn:
+  - '@kbn/zod'
 tags:
   - shared-common
   - package

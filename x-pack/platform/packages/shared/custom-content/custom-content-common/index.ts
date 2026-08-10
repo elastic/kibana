@@ -12,4 +12,5 @@ export {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 
-export type { CustomContentState } from './types';
+export { customContentStateSchema } from './schema';
+export type { CustomContentState } from './schema';
