@@ -31,6 +31,7 @@ import { getDashboardBackupService } from '../../services/dashboard_api_services
 import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
+import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { useShareOptions } from './share/use_share_options';
 
@@ -62,15 +63,16 @@ export const useDashboardMenuItems = ({
     );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
-  const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-  const canManageAccessControl = useMemo(() => {
-    const userAccessControl = accessControlClient.checkUserAccessControl({
-      accessControl,
-      createdBy: dashboardApi.createdBy,
-      userId: dashboardApi.user?.uid,
-    });
-    return dashboardApi?.user?.hasGlobalAccessControlPrivilege || userAccessControl;
-  }, [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]);
+  const { isInEditAccessMode, canManageAccessControl } = useMemo(
+    () =>
+      getDashboardAccessControlState({
+        accessControlClient,
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+        user: dashboardApi.user,
+      }),
+    [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]
+  );
 
   const isEditButtonDisabled = useMemo(() => {
     if (disableTopNav) return true;

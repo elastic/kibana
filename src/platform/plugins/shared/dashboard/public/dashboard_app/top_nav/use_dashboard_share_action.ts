@@ -14,6 +14,7 @@ import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { shareService } from '../../services/kibana_services';
+import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { useShareOptions } from './share/use_share_options';
@@ -39,15 +40,16 @@ export const useDashboardShareAction = ({
   );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
-  const isInEditAccessMode = accessControlClient.isInEditAccessMode(accessControl);
-  const canManageAccessControl = useMemo(() => {
-    const userAccessControl = accessControlClient.checkUserAccessControl({
-      accessControl,
-      createdBy: dashboardApi.createdBy,
-      userId: dashboardApi.user?.uid,
-    });
-    return dashboardApi?.user?.hasGlobalAccessControlPrivilege || userAccessControl;
-  }, [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]);
+  const { isInEditAccessMode, canManageAccessControl } = useMemo(
+    () =>
+      getDashboardAccessControlState({
+        accessControlClient,
+        accessControl,
+        createdBy: dashboardApi.createdBy,
+        user: dashboardApi.user,
+      }),
+    [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]
+  );
 
   const shareOptions = useShareOptions();
 
