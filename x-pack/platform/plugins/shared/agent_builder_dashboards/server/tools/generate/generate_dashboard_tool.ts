@@ -154,8 +154,6 @@ Use operations[] to:
         });
 
         const description = `Dashboard: ${finalDashboardData.title}`;
-        // Tag as agent so dashboard live updates can distinguish tool writes from
-        // ambient user self-sync refs that must not reset the open dashboard.
         const attachment = isNewDashboard
           ? await attachments.add(
               {
