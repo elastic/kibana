@@ -425,5 +425,57 @@ describe('browser normalizers', () => {
         },
       ]);
     });
+
+    it.each([
+      {
+        title: 'array',
+        certificateErrorSpkiAllowlist: [
+          '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----',
+          '-----BEGIN CERTIFICATE-----\nBBB\n-----END CERTIFICATE-----',
+        ],
+        expected: [
+          '-----BEGIN CERTIFICATE-----\nAAA\n-----END CERTIFICATE-----',
+          '-----BEGIN CERTIFICATE-----\nBBB\n-----END CERTIFICATE-----',
+        ],
+      },
+      {
+        title: 'string',
+        certificateErrorSpkiAllowlist:
+          '-----BEGIN CERTIFICATE-----\nCCC\n-----END CERTIFICATE-----',
+        expected: ['-----BEGIN CERTIFICATE-----\nCCC\n-----END CERTIFICATE-----'],
+      },
+    ])(
+      'normalizes certificateErrorSpkiAllowlist from $title',
+      ({ certificateErrorSpkiAllowlist, expected }) => {
+        const actual = normalizeProjectMonitors({
+          locations,
+          privateLocations,
+          monitors: [
+            {
+              ...monitors[0],
+              certificateErrorSpkiAllowlist,
+            },
+          ],
+          projectId,
+          namespace: 'test-space',
+          version: '8.5.0',
+        });
+
+        expect(actual[0].normalizedFields.certificate_error_spki_allowlist).toEqual(expected);
+      }
+    );
+
+    it('defaults certificateErrorSpkiAllowlist when omitted', () => {
+      const actual = normalizeProjectMonitors({
+        locations,
+        privateLocations,
+        monitors: [monitors[1]],
+        projectId,
+        namespace: 'test-space',
+        version: '8.5.0',
+      });
+
+      expect(actual[0].normalizedFields.certificate_error_spki_allowlist).toEqual([]);
+    });
   });
 });

@@ -44,6 +44,7 @@ export const browserMonitorFixture: Record<string, unknown> = {
   'filter_journeys.match': '',
   'filter_journeys.tags': [],
   ignore_https_errors: false,
+  certificate_error_spki_allowlist: [],
   throttling: {
     value: {
       download: '5',
