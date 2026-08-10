@@ -40,57 +40,54 @@ spaceTest.describe(
             'clientip',
             'lnsDatatable_rows > lns-dimensionTrigger'
           );
-          await expect(lens.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText([
-            'Top 9 values of clientip',
-          ]);
+          await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText(
+            ['Top 9 values of clientip']
+          );
 
           await lens.dragFieldToDimensionTrigger(
             'bytes',
             'lnsDatatable_rows > lns-empty-dimension'
           );
-          await expect(lens.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText([
-            'Top 9 values of clientip',
-            'bytes',
-          ]);
+          await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText(
+            ['Top 9 values of clientip', 'bytes']
+          );
           await lens.dragFieldToDimensionTrigger(
             '@message.raw',
             'lnsDatatable_rows > lns-empty-dimension'
           );
-          await expect(lens.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText([
-            'Top 9 values of clientip',
-            'bytes',
-            'Top 9 values of @message.raw',
-          ]);
+          await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText(
+            ['Top 9 values of clientip', 'bytes', 'Top 9 values of @message.raw']
+          );
         });
 
         await spaceTest.step('reorder table row dimensions', async () => {
           await lens.reorderDimensions('lnsDatatable_rows', 3, 1);
           await lens.waitForVisualization();
-          await expect(lens.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText([
-            'Top 9 values of @message.raw',
-            'Top 9 values of clientip',
-            'bytes',
-          ]);
+          await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText(
+            ['Top 9 values of @message.raw', 'Top 9 values of clientip', 'bytes']
+          );
         });
 
         await spaceTest.step('move column to compatible dimension group on bar chart', async () => {
           await lens.switchToVisualization('bar');
-          await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText([
-            'Top 9 values of @message.raw',
-          ]);
-          await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
-            'Top 9 values of clientip',
-          ]);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')
+          ).toHaveText(['Top 9 values of @message.raw']);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+          ).toHaveText(['Top 9 values of clientip']);
 
           await lens.dragDimensionToDimension({
             from: 'lns-layerPanel-0 > lnsXY_xDimensionPanel > lns-dimensionTrigger',
             to: 'lns-layerPanel-0 > lnsXY_splitDimensionPanel > lns-dimensionTrigger',
           });
 
-          await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveCount(0);
-          await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
-            'Top 9 values of @message.raw',
-          ]);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')
+          ).toHaveCount(0);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+          ).toHaveText(['Top 9 values of @message.raw']);
         });
 
         await spaceTest.step('move column to non-compatible dimension group', async () => {
@@ -99,12 +96,12 @@ spaceTest.describe(
             to: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
           });
 
-          await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveCount(
-            0
-          );
-          await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
-            'Count of @message.raw',
-          ]);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+          ).toHaveCount(0);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
+          ).toHaveText(['Count of @message.raw']);
         });
 
         await spaceTest.step('duplicate column within the same group', async () => {
@@ -116,7 +113,9 @@ spaceTest.describe(
             from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
             to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           });
-          await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
+          ).toHaveText([
             'Count of @message.raw',
             'Count of @message.raw [1]',
             'Count of @message.raw [2]',
@@ -128,13 +127,12 @@ spaceTest.describe(
             from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
             to: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           });
-          await expect(lens.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
-            'Count of @message.raw',
-            'Count of @message.raw [1]',
-          ]);
-          await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText([
-            'Top 9 values of @message.raw',
-          ]);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
+          ).toHaveText(['Count of @message.raw', 'Count of @message.raw [1]']);
+          await expect(
+            lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')
+          ).toHaveText(['Top 9 values of @message.raw']);
         });
       }
     );
