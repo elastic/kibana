@@ -11,7 +11,7 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
-} from '../../common/constants';
+} from '@kbn/custom-content-common';
 
 export const customContentStateSchema = z.object({
   prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),

@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-export const CUSTOM_CONTENT_EMBEDDABLE_TYPE = 'custom_content';
 export const CUSTOM_CONTENT_GENERATE_ROUTE = '/internal/custom_content/generate';
 export const CUSTOM_CONTENT_APP_NAME = 'Custom content';
 
-export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
-export const CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH = 1_000_000;
 export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 export const CUSTOM_CONTENT_SAMPLE_ROW_COUNT = 3;
-// Schema limit is larger than the generation byte cap to accommodate prepareHtml overhead
-// (DOMPurify WHOLE_DOCUMENT wrappers + CSP <meta> injection) applied before persisting.
-export const CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH = 510_000;
 
 // injectCsp() in prepare_html.ts de-dupes on an exact string match of this value.
 export const CUSTOM_CONTENT_CSP_META =

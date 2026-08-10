@@ -20,6 +20,8 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+} from '@kbn/custom-content-common';
+import {
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
   CUSTOM_CONTENT_GENERATE_ROUTE,

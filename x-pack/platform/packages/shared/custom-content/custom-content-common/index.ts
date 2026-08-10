@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { CustomContentPlugin } from './plugin';
+export {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
+} from './constants';
 
-export type { CustomContentEmbeddableState } from '../server';
-
-export const plugin = () => new CustomContentPlugin();
+export type { CustomContentState } from './types';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CustomContentPlugin } from './plugin';
-
-export type { CustomContentEmbeddableState } from '../server';
-
-export const plugin = () => new CustomContentPlugin();
+/** The content-only fields of a custom content panel, without presentation-layer title metadata. */
+export interface CustomContentState {
+  prompt?: string;
+  esqlQuery?: string;
+  template?: string;
+}
