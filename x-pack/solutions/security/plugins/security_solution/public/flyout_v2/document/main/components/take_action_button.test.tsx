@@ -251,6 +251,71 @@ describe('<TakeActionButton />', () => {
     expect(document.querySelector('[data-test-subj="takeActionPanelMenu"]')).toBeInTheDocument();
   });
 
+  it('renders explicitly ordered document actions with icons and separators', () => {
+    mockUseAddToCaseActions.mockReturnValue({
+      addToCaseActionItems: [
+        {
+          key: 'add-to-existing-case-action',
+          name: 'Add to existing case',
+          'data-test-subj': 'add-to-existing-case-action',
+        },
+      ],
+    });
+    mockUseAlertsActions.mockReturnValue({
+      actionItems: [
+        {
+          key: 'open',
+          name: 'Mark as open',
+          'data-test-subj': 'open-alert-status',
+        },
+      ],
+      panels: [],
+    });
+    mockUseAlertTagsActions.mockReturnValue({
+      alertTagsItems: [
+        {
+          key: 'manage-alert-tags',
+          name: 'Apply alert tags',
+          'data-test-subj': 'alert-tags-context-menu-item',
+        },
+      ],
+      alertTagsPanels: [],
+    });
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimelineActionItems: [
+        {
+          key: 'investigate-in-timeline-action-item',
+          name: 'Investigate in Timeline',
+          'data-test-subj': 'investigate-in-timeline-action-item',
+        },
+      ],
+    });
+    renderTakeActionButton({
+      ...defaultProps,
+      hit: createMockHit({ 'event.kind': 'signal' }),
+    });
+
+    fireEvent.click(screen.getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+    expect(
+      screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
+    ).toEqual([
+      'add-to-existing-case-action',
+      'open-alert-status',
+      'alert-tags-context-menu-item',
+      'investigate-in-timeline-action-item',
+    ]);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(3);
+    expect(
+      screen
+        .getByTestId('add-to-existing-case-action')
+        .querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeNull();
+    expect(
+      screen.getByTestId('open-alert-status').querySelector('[data-euiicon-type="dot"]')
+    ).not.toBeNull();
+  });
+
   it('should call useAddToCaseActions with the correct arguments', () => {
     renderTakeActionButton();
 

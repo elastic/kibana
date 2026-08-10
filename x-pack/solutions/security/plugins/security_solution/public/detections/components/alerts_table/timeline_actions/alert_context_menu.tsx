@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 import { useSelector } from 'react-redux-v7';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -50,11 +50,12 @@ import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/t
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
-import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAddToChatAction } from './use_add_to_chat_action';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { AlertRowActionMenu } from './action_menu/alert_row_action_menu';
+
 interface AlertContextMenuProps {
   ariaLabel?: string;
   ariaRowindex: number;
@@ -262,49 +263,29 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     alertId: ecsRowData._id,
   });
 
-  const items: AlertTableContextMenuItem[] = useMemo(
-    () =>
-      !isEvent && ruleId
-        ? [
-            ...addToCaseActionItems,
-            ...statusActionItems,
-            ...runWorkflowMenuItem,
-            ...alertTagsItems,
-            ...alertAssigneesItems,
-            ...exceptionActionItems,
-            ...(agentId ? osqueryActionItems : []),
-            ...addToChatActionItems,
-          ]
-        : [
-            ...addToCaseActionItems,
-            ...runDocumentWorkflowMenuItem,
-            ...(canCreateEndpointEventFilters ? eventFilterActionItems : []),
-            ...(agentId ? osqueryActionItems : []),
-          ],
-    [
-      runWorkflowMenuItem,
-      runDocumentWorkflowMenuItem,
-      isEvent,
-      ruleId,
-      addToCaseActionItems,
-      statusActionItems,
-      exceptionActionItems,
-      agentId,
-      osqueryActionItems,
-      eventFilterActionItems,
-      canCreateEndpointEventFilters,
-      alertTagsItems,
-      alertAssigneesItems,
-      addToChatActionItems,
-    ]
-  );
+  const isAlertActionMenu = !isEvent && Boolean(ruleId);
+  const hasItems = (
+    isAlertActionMenu
+      ? [
+          addToCaseActionItems,
+          statusActionItems,
+          runWorkflowMenuItem,
+          alertTagsItems,
+          alertAssigneesItems,
+          exceptionActionItems,
+          agentId ? osqueryActionItems : [],
+          addToChatActionItems,
+        ]
+      : [
+          addToCaseActionItems,
+          runDocumentWorkflowMenuItem,
+          canCreateEndpointEventFilters ? eventFilterActionItems : [],
+          agentId ? osqueryActionItems : [],
+        ]
+  ).some((actionItems) => actionItems.length > 0);
 
   const panels = useMemo(
     () => [
-      {
-        id: 0,
-        items,
-      },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
@@ -312,7 +293,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...runDocumentWorkflowPanels,
     ],
     [
-      items,
       alertTagsPanels,
       alertAssigneesPanels,
       statusActionPanels,
@@ -322,7 +302,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const button = useMemo(() => {
-    const hasItems = !!items.length;
     const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
 
     return (
@@ -339,7 +318,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         />
       </EuiToolTip>
     );
-  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
+  }, [ariaLabel, disabled, hasItems, isPopoverOpen, onButtonClick]);
 
   const osqueryFlyout = useMemo(() => {
     return (
@@ -366,10 +345,21 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <EuiContextMenu
-              initialPanelId={0}
+            <AlertRowActionMenu
+              addToCaseItems={addToCaseActionItems}
+              addToChatItems={addToChatActionItems}
+              alertAssigneeItems={alertAssigneesItems}
+              alertTagItems={alertTagsItems}
+              canCreateEndpointEventFilters={canCreateEndpointEventFilters}
+              eventFilterItems={eventFilterActionItems}
+              exceptionItems={exceptionActionItems}
+              hasAgent={Boolean(agentId)}
+              isAlert={isAlertActionMenu}
+              osqueryItems={osqueryActionItems}
               panels={panels}
-              data-test-subj="actions-context-menu"
+              runAlertWorkflowItems={runWorkflowMenuItem}
+              runDocumentWorkflowItems={runDocumentWorkflowMenuItem}
+              statusItems={statusActionItems}
             />
           </EuiPopover>
         </EventsTdContent>

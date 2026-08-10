@@ -186,6 +186,30 @@ describe('TakeAction', () => {
     expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
   });
 
+  it('renders explicitly ordered action groups with icons and separators', () => {
+    render(
+      <TestProviders>
+        <TakeAction {...defaultProps} />
+      </TestProviders>
+    );
+    openPopover();
+
+    expect(
+      screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
+    ).toEqual([
+      'markAsOpen',
+      'markAsAcknowledged',
+      'markAsClosed',
+      'addToCase',
+      'addToExistingCase',
+      'viewInAiAssistant',
+    ]);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(2);
+    screen.getAllByRole('menuitem').forEach((item) => {
+      expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
+    });
+  });
+
   it('renders the Add to chat action disabled when license is invalid', () => {
     mockUseAgentBuilderAvailability.mockReturnValue({
       isAgentBuilderEnabled: true,

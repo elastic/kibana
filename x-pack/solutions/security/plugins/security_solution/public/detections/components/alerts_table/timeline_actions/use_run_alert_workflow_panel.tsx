@@ -59,6 +59,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
 export const RUN_WORKFLOW_PANEL_ID = 'RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOW_BULK_PANEL_ID = 'BULK_RUN_WORKFLOW_PANEL_ID';
 export const RUN_WORKFLOWS_PANEL_WIDTH = 400;
+export const RUN_ALERT_WORKFLOW_ACTION_ID = 'run-workflow-action';
 
 export interface UseRunAlertWorkflowPanelProps {
   /** ECS document for the selected alert row. */
@@ -90,7 +91,7 @@ export const useRunAlertWorkflowPanel = ({
       {
         'aria-label': i18n.CONTEXT_MENU_RUN_WORKFLOW,
         'data-test-subj': 'run-workflow-action',
-        key: 'run-workflow-action',
+        key: RUN_ALERT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_WORKFLOW_PANEL_ID,
       },

@@ -16,6 +16,11 @@ import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
 
+export const ADD_TO_CASE_ACTION_IDS = {
+  addToExistingCase: 'add-to-existing-case-action',
+  addToNewCase: 'add-to-new-case-action',
+} as const;
+
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
@@ -114,7 +119,7 @@ export const useAddToCaseActions = ({
         {
           'aria-label': ariaLabel,
           'data-test-subj': 'add-to-existing-case-action',
-          key: 'add-to-existing-case-action',
+          key: ADD_TO_CASE_ACTION_IDS.addToExistingCase,
           onClick: handleAddToExistingCaseClick,
           name: ADD_TO_EXISTING_CASE,
         },
@@ -122,7 +127,7 @@ export const useAddToCaseActions = ({
         {
           'aria-label': ariaLabel,
           'data-test-subj': 'add-to-new-case-action',
-          key: 'add-to-new-case-action',
+          key: ADD_TO_CASE_ACTION_IDS.addToNewCase,
           onClick: handleAddToNewCaseClick,
           name: ADD_TO_NEW_CASE,
         },

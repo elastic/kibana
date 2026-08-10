@@ -231,6 +231,29 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(screen.getByTestId('bulk-actions-header')).toBeInTheDocument();
     });
 
+    it('should render icons and separators between action groups', async () => {
+      render(<TestComponent {...dataGridProps} />);
+
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      const menu = screen.getByTestId('alertsTableBulkActionMenu');
+      const menuItems = within(menu).getAllByRole('menuitem');
+      expect(menuItems.map((item) => item.getAttribute('data-test-subj'))).toEqual([
+        'attach-new-case',
+        'attach-existing-case',
+        'bulk-mute',
+        'bulk-unmute',
+      ]);
+      menuItems.forEach((item) => {
+        expect(item.querySelector('[data-euiicon-type]')).not.toBeNull();
+      });
+      expect(within(menu).getAllByTestId('alertsTableBulkActionMenuGroupSeparator')).toHaveLength(
+        1
+      );
+    });
+
     it('should show only mute/unmute actions when user does not have case write access', async () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: false, read: true });
 

@@ -108,6 +108,29 @@ describe('useRiskInputActionsPanels', () => {
     expect(container).toHaveTextContent('Add to new case');
   });
 
+  it('keeps action order, icons, and the explicit group separator visible', () => {
+    mockUseUserPrivileges.mockReturnValue({
+      timelinePrivileges: { read: true },
+    });
+    const { getAllByRole, getByTestId } = customRender();
+
+    expect(getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Add to new timeline',
+      'Add to new case',
+      'Add to existing case',
+    ]);
+    expect(getByTestId('securityActionMenuGroupSeparator')).toBeInTheDocument();
+    expect(
+      getByTestId('add-to-new-timeline').querySelector('[data-euiicon-type="timeline"]')
+    ).not.toBeNull();
+    expect(
+      getByTestId('add-to-new-case').querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeNull();
+    expect(
+      getByTestId('add-to-existing-case').querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeNull();
+  });
+
   it('does NOT display cases actions when user has NO cases permissions', () => {
     mockCanUseCases.mockReturnValue({
       create: false,

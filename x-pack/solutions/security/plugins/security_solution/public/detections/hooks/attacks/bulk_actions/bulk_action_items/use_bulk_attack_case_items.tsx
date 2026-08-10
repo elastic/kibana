@@ -19,6 +19,11 @@ import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 
+export const ATTACK_CASE_ACTION_IDS = {
+  addToExistingCase: 'attack-add-to-existing-case',
+  addToNewCase: 'attack-add-to-new-case',
+} as const;
+
 export interface UseBulkAttackCaseItemsProps {
   /** Title used to initialize "create case" flyout */
   title: string;
@@ -123,7 +128,7 @@ export const useBulkAttackCaseItems = ({
             {
               name: ADD_TO_EXISTING_CASE,
               label: ADD_TO_EXISTING_CASE,
-              key: 'attack-add-to-existing-case',
+              key: ATTACK_CASE_ACTION_IDS.addToExistingCase,
               'data-test-subj': 'attack-add-to-existing-case',
               disableOnQuery: true,
               disable: isAddToExistingCaseDisabled,
@@ -132,7 +137,7 @@ export const useBulkAttackCaseItems = ({
             {
               name: ADD_TO_NEW_CASE,
               label: ADD_TO_NEW_CASE,
-              key: 'attack-add-to-new-case',
+              key: ATTACK_CASE_ACTION_IDS.addToNewCase,
               'data-test-subj': 'attack-add-to-new-case',
               disableOnQuery: true,
               disable: isAddToNewCaseDisabled,

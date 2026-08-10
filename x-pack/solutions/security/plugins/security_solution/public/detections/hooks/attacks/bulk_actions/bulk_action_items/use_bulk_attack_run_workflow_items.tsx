@@ -21,6 +21,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
+export const RUN_ATTACK_WORKFLOW_ACTION_ID = 'run-attack-workflow-action';
+
 export interface UseBulkAttackRunWorkflowItemsProps {
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
@@ -72,7 +74,7 @@ export const useBulkAttackRunWorkflowItems = ({
       canRunWorkflow
         ? [
             {
-              key: 'run-attack-workflow-action',
+              key: RUN_ATTACK_WORKFLOW_ACTION_ID,
               name: alertsTableI18n.CONTEXT_MENU_RUN_WORKFLOW,
               label: alertsTableI18n.CONTEXT_MENU_RUN_WORKFLOW,
               panel: RUN_WORKFLOW_BULK_PANEL_ID,

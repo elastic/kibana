@@ -29,6 +29,11 @@ import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_c
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 
+export const ALERT_STATUS_ACTION_IDS = {
+  markAsAcknowledged: 'acknowledge',
+  markAsOpen: 'open',
+} as const;
+
 export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertWorkflowStatus;
@@ -199,7 +204,7 @@ export const useBulkActionItems = ({
     if (showAlertStatusActions && hasAlertsUpdate) {
       if (currentStatus !== FILTER_OPEN) {
         actionItems.push({
-          key: 'open',
+          key: ALERT_STATUS_ACTION_IDS.markAsOpen,
           'data-test-subj': 'open-alert-status',
           onClick: () => {
             closePopover?.();
@@ -210,7 +215,7 @@ export const useBulkActionItems = ({
       }
       if (currentStatus !== FILTER_ACKNOWLEDGED) {
         actionItems.push({
-          key: 'acknowledge',
+          key: ALERT_STATUS_ACTION_IDS.markAsAcknowledged,
           'data-test-subj': 'acknowledged-alert-status',
           onClick: () => {
             closePopover?.();

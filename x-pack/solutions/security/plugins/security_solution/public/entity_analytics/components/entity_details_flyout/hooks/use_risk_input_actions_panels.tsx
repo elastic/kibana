@@ -22,6 +22,12 @@ import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
+export const RISK_INPUT_ACTION_IDS = {
+  addToNewTimeline: 'add-to-new-timeline',
+  addToNewCase: 'add-to-new-case',
+  addToExistingCase: 'add-to-existing-case',
+} as const;
+
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
   const { cases: casesService, telemetry } = useKibana().services;
   const { addToExistingCase, addToNewCaseClick } = useRiskInputActions(inputs, closePopover);
@@ -45,6 +51,9 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
 
     return [
       {
+        key: RISK_INPUT_ACTION_IDS.addToNewTimeline,
+        icon: 'timeline',
+        'data-test-subj': RISK_INPUT_ACTION_IDS.addToNewTimeline,
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
@@ -116,9 +125,21 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         id: 0,
         items: [
           ...timelineActions,
+          ...(timelineActions.length > 0 && hasCasesPermissions
+            ? [
+                {
+                  key: 'separator-before-cases',
+                  isSeparator: true as const,
+                  'data-test-subj': 'securityActionMenuGroupSeparator',
+                },
+              ]
+            : []),
           ...(hasCasesPermissions
             ? [
                 {
+                  key: RISK_INPUT_ACTION_IDS.addToNewCase,
+                  icon: 'briefcase' as const,
+                  'data-test-subj': RISK_INPUT_ACTION_IDS.addToNewCase,
                   name: (
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
@@ -130,6 +151,9 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
                 },
 
                 {
+                  key: RISK_INPUT_ACTION_IDS.addToExistingCase,
+                  icon: 'briefcase' as const,
+                  'data-test-subj': RISK_INPUT_ACTION_IDS.addToExistingCase,
                   name: (
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
