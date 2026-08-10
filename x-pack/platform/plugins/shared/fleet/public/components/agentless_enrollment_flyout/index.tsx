@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
 
-import { useGetAgentsQuery, useGetPackageInfoByKeyQuery } from '../../hooks';
+import { useGetAgentsQuery, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
@@ -55,6 +55,7 @@ export const AgentlessEnrollmentFlyout = ({
   agentPolicy,
   connectors,
 }: AgentlessEnrollmentFlyoutProps) => {
+  const { notifications } = useStartServices();
   const [confirmEnrollmentStatus, setConfirmEnrollmentStatus] = useState<EuiStepStatus>('loading');
   const [confirmDataStatus, setConfirmDataStatus] = useState<EuiStepStatus>('disabled');
   const [agentOnline, setAgentOnline] = useState(false);
@@ -66,7 +67,7 @@ export const AgentlessEnrollmentFlyout = ({
     `${AGENTS_PREFIX}.policy_base_id`,
     `${AGENTS_PREFIX}.policy_id`
   );
-  const { data: agentsData } = useGetAgentsQuery(
+  const { data: agentsData, error: agentsError } = useGetAgentsQuery(
     { kuery: agentKuery },
     { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
   );
@@ -74,6 +75,14 @@ export const AgentlessEnrollmentFlyout = ({
 
   // Watches agent data and updates step statuses; stops polling when agent is online
   useEffect(() => {
+    if (agentsError) {
+      notifications.toasts.addError(agentsError as Error, {
+        title: i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
+          { defaultMessage: 'Error fetching managed integration status information' }
+        ),
+      });
+    }
     if (agentData) {
       if (agentData.status === 'online') {
         setConfirmEnrollmentStatus('complete');
@@ -90,7 +99,7 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentData]);
+  }, [agentData, agentsError, notifications.toasts]);
 
   // Calculate integration title from the base package info
   const { data: packageInfoData } = useGetPackageInfoByKeyQuery(
