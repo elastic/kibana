@@ -531,4 +531,26 @@ export class DataGrid {
       timeout: 30_000,
     });
   }
+
+  async sortColumnAsc(field: string, sortText = 'Sort Old-New') {
+    await expect(async () => {
+      await this.page.testSubj.locator(`dataGridHeaderCell-${field}`).hover();
+      await this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`).click();
+      await this.page.testSubj
+        .locator(`dataGridHeaderCellActionGroup-${field}`)
+        .waitFor({ state: 'visible' });
+    }).toPass({ timeout: 10_000 });
+    await this.page.getByRole('button', { name: sortText }).click();
+  }
+
+  async sortColumnDesc(field: string, sortText = 'Sort New-Old') {
+    await expect(async () => {
+      await this.page.testSubj.locator(`dataGridHeaderCell-${field}`).hover();
+      await this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`).click();
+      await this.page.testSubj
+        .locator(`dataGridHeaderCellActionGroup-${field}`)
+        .waitFor({ state: 'visible' });
+    }).toPass({ timeout: 10_000 });
+    await this.page.getByRole('button', { name: sortText }).click();
+  }
 }

@@ -138,6 +138,23 @@ export class DocViewer {
     return this.page.testSubj.locator(`docViewerFlyoutNavigationPage-${pageIndex}`);
   }
 
+  /**
+   * Navigation bar that wraps the page dots. Hidden when the pinned document
+   * is filtered out of the current result set.
+   */
+  getFlyoutNavigation(): Locator {
+    return this.page.testSubj.locator('docViewerFlyoutNavigation');
+  }
+
+  /**
+   * Value cell for a field in the doc-viewer fields table.
+   */
+  getFieldValue(fieldName: string): Locator {
+    return this.page.testSubj
+      .locator('docViewerFlyout')
+      .locator(`[data-test-subj="tableDocViewRow-${fieldName}-value"]`);
+  }
+
   getFieldSearchInput(): Locator {
     return this.page.testSubj
       .locator('docViewerFlyout')
