@@ -9,6 +9,10 @@ import React, { useCallback, useState } from 'react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { ExpandableContextMenuPanelProvider } from '../contexts/expandable_context_menu_panel_context';
 
+export const EXPANDABLE_CONTEXT_MENU_PANEL_MIN_WIDTH = 240;
+
+const panelStyle = { minWidth: EXPANDABLE_CONTEXT_MENU_PANEL_MIN_WIDTH };
+
 export interface ExpandableContextMenuPanelProps {
   items: React.ReactElement[];
   'data-test-subj'?: string;
@@ -46,11 +50,15 @@ export const ExpandableContextMenuPanel = ({
   return (
     <ExpandableContextMenuPanelProvider value={{ openPanel, closePanel }}>
       {panel ? (
-        <EuiContextMenuPanel title={panel.title} onClose={panel.title ? closePanel : undefined}>
+        <EuiContextMenuPanel
+          title={panel.title}
+          onClose={panel.title ? closePanel : undefined}
+          style={panelStyle}
+        >
           {panel.content}
         </EuiContextMenuPanel>
       ) : (
-        <EuiContextMenuPanel items={items} data-test-subj={testSubj} />
+        <EuiContextMenuPanel items={items} data-test-subj={testSubj} style={panelStyle} />
       )}
     </ExpandableContextMenuPanelProvider>
   );
