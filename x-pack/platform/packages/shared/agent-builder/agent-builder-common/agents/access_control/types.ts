@@ -66,6 +66,10 @@ export interface AgentAccessControl {
   entries: AgentAccessControlEntry[];
 }
 
+/**
+ * Applied to newly created agents only. Agents that carry no access control — built-ins, and
+ * documents predating the field — deliberately resolve to Public instead.
+ */
 export const getDefaultAgentAccessControl = (): AgentAccessControl => ({
   access_mode: AgentAccessControlMode.Private,
   entries: [],

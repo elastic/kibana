@@ -29,9 +29,8 @@ import type { AgentProperties } from '../persisted/client/storage';
  * used when the corresponding current field is missing so migrated documents keep current data as
  * the source of truth.
  *
- * Documents that predate both keep resolving to Public for backward compatibility, even though new
- * agents now default to Private (`getDefaultAgentAccessControl`). This must stay in sync with the
- * legacy clause of `buildReadAccessFilter` in `./query.ts`.
+ * Documents that predate both resolve to Public, not to the Private default applied to new agents.
+ * Must stay in sync with the legacy clause of `buildReadAccessFilter` in `./query.ts`.
  */
 export const normalizeAccessControl = (
   source: Pick<AgentProperties, 'access_control' | 'visibility' | 'acl'>
