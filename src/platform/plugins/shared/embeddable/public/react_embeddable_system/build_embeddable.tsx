@@ -8,9 +8,13 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import {
+  apiPublishesFetchSetting,
+  type HasPanelCapabilities,
+  type HasSerializedChildState,
+} from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type {
   DefaultEmbeddableApi,
@@ -60,6 +64,17 @@ export async function buildEmbeddable<
       ...panelCapabilitiesDefaults,
       ...apiRegistration,
       isVisible$,
+      ...(apiPublishesFetchSetting(parentApi) && {
+        isFetchPaused$: parentApi.fetchSetting$.pipe(
+          combineLatestWith(isVisible$),
+          map(([parentFetchSetting, isVisible]) => {
+            return parentFetchSetting === 'visible'
+              ? !isVisible
+              : // If the fetch setting is 'all', we do not pause the fetch
+                false;
+          })
+        ),
+      }),
       uuid,
       phase$: phaseTracker.getPhase$(),
       parentApi,
