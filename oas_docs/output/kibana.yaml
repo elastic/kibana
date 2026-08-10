@@ -116231,6 +116231,7 @@ components:
             - solid
             - gradient
           type: string
+          x-state: Added in 9.6.0
         fill_opacity:
           default: 0.3
           description: Area fill opacity (0-1 typical, max 2 for legacy)
