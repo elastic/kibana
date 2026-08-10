@@ -9,3 +9,5 @@
 
 export type { AutoOpsPromotionCalloutProps } from './src/callout';
 export { AutoOpsPromotionCallout } from './src/callout';
+export type { AutoOpsEnabledCalloutProps } from './src/enabled_callout';
+export { AutoOpsEnabledCallout, AUTOOPS_ENABLED_CALLOUT_DISMISSED_KEY } from './src/enabled_callout';

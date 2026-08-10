@@ -15,6 +15,10 @@ export interface UseCloudConnectStatusResult {
   isCloudConnected: boolean;
   isCloudConnectEisEnabled: boolean;
   isCloudConnectAutoopsEnabled: boolean;
+  /** The URL to the AutoOps service page for this cluster, from `metadata.service_url`. */
+  autoOpsServiceUrl?: string;
+  /** The URL to the AutoOps documentation, from `metadata.documentation_url`. */
+  autoOpsDocsUrl?: string;
   isLoading: boolean;
   error: Error | null;
 }
@@ -43,10 +47,23 @@ export const createUseCloudConnectStatusHook = ({
       load();
     }, [load]);
 
+    // TODO: remove this mock before merging
+    return {
+      isCloudConnected: true,
+      isCloudConnectEisEnabled: false,
+      isCloudConnectAutoopsEnabled: true,
+      autoOpsServiceUrl: 'https://cloud.elastic.co/performance/demo-deployment-id',
+      autoOpsDocsUrl: 'https://www.elastic.co/docs/current/en/autoops',
+      isLoading: false,
+      error: null,
+    };
+
     return {
       isCloudConnected: value != null,
       isCloudConnectEisEnabled: value?.services?.eis?.enabled ?? false,
       isCloudConnectAutoopsEnabled: value?.services?.auto_ops?.enabled ?? false,
+      autoOpsServiceUrl: value?.services?.auto_ops?.metadata?.service_url,
+      autoOpsDocsUrl: value?.services?.auto_ops?.metadata?.documentation_url,
       isLoading: loading,
       error: error ?? null,
     };

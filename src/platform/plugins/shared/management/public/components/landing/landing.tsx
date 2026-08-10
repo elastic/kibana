@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 
 import { EuiPageBody, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
-import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
+import { AutoOpsPromotionCallout, AutoOpsEnabledCallout } from '@kbn/autoops-promotion-callout';
 
 import { useAppContext } from '../management_app/management_context';
 import { ClassicEmptyPrompt } from './classic_empty_prompt';
@@ -56,6 +56,12 @@ export const ManagementLandingPage = ({
     !isAirGapped &&
     !autoOpsStatus.isLoading &&
     !autoOpsStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
+
+  // AutoOps enabled banner appears once the cluster has been connected and AutoOps is active
+  const shouldShowAutoOpsEnabledBanner =
+    !isAirGapped &&
+    autoOpsStatus.isCloudConnectAutoopsEnabled &&
     !hideAnnouncements;
   const cloudConnectUrl = coreStart.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
@@ -104,6 +110,19 @@ export const ManagementLandingPage = ({
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}
+                style={{ margin: `0 ${euiTheme.size.l}` }}
+              />
+            </div>
+          )}
+          {shouldShowAutoOpsEnabledBanner && (
+            <div
+              css={css`
+                max-width: 600px;
+              `}
+            >
+              <AutoOpsEnabledCallout
+                autoOpsUrl={autoOpsStatus.autoOpsServiceUrl}
+                docsUrl={autoOpsStatus.autoOpsDocsUrl}
                 style={{ margin: `0 ${euiTheme.size.l}` }}
               />
             </div>
