@@ -13,7 +13,7 @@ import {
   alertEventType,
   buildRuleEventDocument,
 } from '../../../resources/datastreams/alert_events';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getCannotActivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
@@ -41,7 +41,7 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
   }
 
   throw Boom.badRequest(getCannotActivateEpisodeMessage(alertEvent.episode_id), {
-    code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
     details: {
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
