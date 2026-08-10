@@ -13,7 +13,7 @@ import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
 import { cleanupForensicData } from '../../src/data_generators/cleanup';
 
 /**
- * Slice 2 Osquery tool sequences (minimum-sufficient per golden-dataset reconciliation).
+ * Osquery live-state tool sequences (minimum-sufficient per golden-dataset reconciliation).
  *
  * FR-012 capability detection: check_integration is the first step before any Osquery
  *   path. If Osquery is not installed, the agent falls back to ES|QL.
@@ -30,7 +30,7 @@ const PLATFORM_GENERATE_ESQL = 'platform.core.generate_esql' as const;
 const PLATFORM_EXECUTE_ESQL = 'platform.core.execute_esql' as const;
 
 evaluate.describe(
-  'Endpoint Forensic Analysis — slice 2 Osquery smoke',
+  'Endpoint Forensic Analysis — Osquery live state',
   { tag: tags.stateful.classic },
   () => {
     evaluate.beforeAll(
@@ -59,7 +59,7 @@ evaluate.describe(
       async ({ evaluateForensicDataset }) => {
         await evaluateForensicDataset({
           dataset: {
-            name: 'security: endpoint-forensic-analysis-slice2-capability-no-osquery',
+            name: 'security: endpoint-forensic-analysis-osquery-capability-no-osquery',
             description:
               'Slice 2: agent checks Osquery integration, finds it NOT installed, routes to ES|QL fallback.',
             examples: [
@@ -97,7 +97,7 @@ evaluate.describe(
       async ({ evaluateForensicDataset }) => {
         await evaluateForensicDataset({
           dataset: {
-            name: 'security: endpoint-forensic-analysis-slice2-capability-both-installed',
+            name: 'security: endpoint-forensic-analysis-osquery-capability-both-installed',
             description:
               'Slice 2: agent detects both Defend + Osquery, uses Osquery for live-state question.',
             examples: [
@@ -137,7 +137,7 @@ evaluate.describe(
       async ({ evaluateForensicDataset }) => {
         await evaluateForensicDataset({
           dataset: {
-            name: 'security: endpoint-forensic-analysis-slice2-pack-with-filters',
+            name: 'security: endpoint-forensic-analysis-osquery-pack-with-filters',
             description:
               'Slice 2: agent uses Elastic-built Osquery packs with analyst-scope filters applied.',
             examples: [
@@ -175,7 +175,7 @@ evaluate.describe(
       async ({ evaluateForensicDataset }) => {
         await evaluateForensicDataset({
           dataset: {
-            name: 'security: endpoint-forensic-analysis-slice2-saved-query-scheduled-tasks',
+            name: 'security: endpoint-forensic-analysis-osquery-saved-query-scheduled-tasks',
             description:
               'Slice 2: agent uses prebuilt saved query when it matches the investigative need.',
             examples: [
@@ -210,7 +210,7 @@ evaluate.describe(
     evaluate('custom read-only Osquery — unsigned DLLs', async ({ evaluateForensicDataset }) => {
       await evaluateForensicDataset({
         dataset: {
-          name: 'security: endpoint-forensic-analysis-slice2-custom-unsigned-dll',
+          name: 'security: endpoint-forensic-analysis-osquery-custom-unsigned-dll',
           description: 'Slice 2: agent authors custom read-only Osquery when no prebuilt matches.',
           examples: [
             {
