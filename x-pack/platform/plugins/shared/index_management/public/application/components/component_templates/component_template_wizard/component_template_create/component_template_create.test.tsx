@@ -99,7 +99,7 @@ describe('<ComponentTemplateCreate />', () => {
           fireEvent.change(nameInput, { target: { value: 'Invalid#Name' } });
           fireEvent.click(screen.getByTestId('nextButton'));
 
-          await screen.findByText("name must not contain a '#'");
+          await screen.findByText("Name must not contain a '#'.");
           expect(screen.getByTestId('nextButton')).toBeDisabled();
         });
 
