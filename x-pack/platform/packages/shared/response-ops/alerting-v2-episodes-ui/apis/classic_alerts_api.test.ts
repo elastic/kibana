@@ -52,8 +52,11 @@ describe('classic_alerts_api', () => {
         services: { http: mockHttp },
       });
 
-      const [, callOptions] = mockHttp.post.mock.calls[0];
-      const body = JSON.parse((callOptions as { body: string }).body);
+      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [
+        string,
+        { body: string },
+      ];
+      const body = JSON.parse(callOptions.body);
       expect(body._source).toEqual([...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS]);
       expect(episodes).toHaveLength(1);
       expect(episodes[0].supports_actions).toBe(false);
@@ -125,8 +128,11 @@ describe('classic_alerts_api', () => {
 
       const rows = await fetchV1AlertsHistogram({ services: { http: mockHttp } });
 
-      const [, callOptions] = mockHttp.post.mock.calls[0];
-      const body = JSON.parse((callOptions as { body: string }).body);
+      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [
+        string,
+        { body: string },
+      ];
+      const body = JSON.parse(callOptions.body);
       expect(body._source).toEqual([...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS]);
       expect(rows).toHaveLength(1);
       expect(rows[0].first_timestamp).toBe('2024-01-01T00:00:00.000Z');
