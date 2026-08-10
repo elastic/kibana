@@ -80,5 +80,8 @@ export const lensFlyoutProps: OverlayFlyoutOpenOptions = {
   css: inlineFlyoutStyles,
   'data-test-subj': 'customizeLens',
   isResizable: true,
-  outsideClickCloses: true,
+  // Close is owned by Lens FlyoutWrapper so it can run the same cancel path as Cancel.
+  hideCloseButton: true,
+  // Outside clicks would otherwise dismiss without cancel cleanup (orphan provisional panels).
+  outsideClickCloses: false,
 };

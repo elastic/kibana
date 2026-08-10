@@ -7,7 +7,6 @@
 
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
-import useUnmount from 'react-use/lib/useUnmount';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -81,7 +80,6 @@ export function LensEditConfigurationFlyout({
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
-  const editingFinishedRef = useRef(false);
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
@@ -174,12 +172,8 @@ export function LensEditConfigurationFlyout({
     annotationGroups,
   ]);
 
-  const cancelEditing = useCallback(() => {
-    if (editingFinishedRef.current) {
-      return;
-    }
-    editingFinishedRef.current = true;
-
+  const onCancel = useCallback(() => {
+    setIsInlineFlyoutVisible(false);
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
@@ -208,8 +202,10 @@ export function LensEditConfigurationFlyout({
     // Remove the user's preferred chart type from localStorage
     deleteUserChartTypeFromSessionStorage();
     onCancelCallback?.();
+    closeFlyout?.();
   }, [
     attributesChanged,
+    closeFlyout,
     visualization.activeId,
     savedObjectId,
     datasourceMap,
@@ -218,14 +214,6 @@ export function LensEditConfigurationFlyout({
     updateByRefInput,
     onCancelCallback,
   ]);
-
-  useUnmount(cancelEditing);
-
-  const onCancel = useCallback(() => {
-    setIsInlineFlyoutVisible(false);
-    cancelEditing();
-    closeFlyout?.();
-  }, [cancelEditing, closeFlyout]);
 
   const textBasedMode = isOfAggregateQueryType(attributes.state.query);
 
@@ -279,7 +267,6 @@ export function LensEditConfigurationFlyout({
     }
 
     deleteUserChartTypeFromSessionStorage();
-    editingFinishedRef.current = true;
     closeFlyout?.();
   }, [
     visualization.activeId,
