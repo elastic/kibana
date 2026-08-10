@@ -16,6 +16,7 @@ import * as i18n from './translations';
 const authSchema = lazySchema(() =>
   z
     .object({
+      paramNames: z.array(z.string()).default(['apiKey']),
       apiKey: z
         .string()
         .min(1, { message: i18n.API_KEY_QUERY_REQUIRED_MESSAGE })
@@ -39,7 +40,6 @@ type NormalizedAuthSchemaType = Record<string, string>;
 export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_query',
   schema: authSchema,
-  allowedConfigKeys: ['paramNames'],
   normalizeSchema: (defaults?: Record<string, unknown>) => {
     const meta = authSchema.meta() ?? {};
     const paramNames =
@@ -63,7 +63,7 @@ export const ApiKeyQueryAuth: AuthTypeSpec<AuthSchemaType> = {
         .meta(meta);
     }
 
-    return z.object({ ...authSchema.shape }).meta(meta);
+    return z.object({ apiKey: authSchema.shape.apiKey }).meta(meta);
   },
   configure: async (
     _: AuthContext,

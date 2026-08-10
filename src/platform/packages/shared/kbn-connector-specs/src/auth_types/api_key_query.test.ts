@@ -20,8 +20,9 @@ const mockCtx = {
 } as unknown as AuthContext;
 
 describe('ApiKeyQueryAuth', () => {
-  it('has id api_key_query and a default single apiKey field', () => {
+  it('has id api_key_query, a paramNames config field, and a default single apiKey field', () => {
     expect(ApiKeyQueryAuth.id).toBe('api_key_query');
+    expect(ApiKeyQueryAuth.schema.shape.paramNames).toBeDefined();
     expect(ApiKeyQueryAuth.schema.shape.apiKey).toBeDefined();
   });
 
