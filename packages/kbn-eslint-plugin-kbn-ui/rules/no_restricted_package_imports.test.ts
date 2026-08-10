@@ -127,8 +127,7 @@ tester.run('no_restricted_package_imports', NoRestrictedPackageImports, {
           messageId: 'restrictedImport',
           data: {
             package: '@kbn/ui-chrome-layout-constants',
-            alternative:
-              'This package is private; use the owning plugin or core facade instead.',
+            alternative: 'This package is private; use the owning plugin or core facade instead.',
             boundariesPath: BOUNDARIES_PATH,
           },
         },

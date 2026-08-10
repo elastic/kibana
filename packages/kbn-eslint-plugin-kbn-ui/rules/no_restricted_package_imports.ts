@@ -143,8 +143,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Disallow importing private @kbn/ui-* packages outside their owning packages',
+      description: 'Disallow importing private @kbn/ui-* packages outside their owning packages',
       category: 'Best Practices',
       recommended: true,
     },
@@ -195,9 +194,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
     const options = (context.options[0] ?? {}) as RuleOptions;
     // Tests inject `privatePackages`; production loads policy from disk and
     // discovers private kbn-ui package ids from manifests.
-    const config: BoundariesConfig = options.privatePackages
-      ? options
-      : loadBoundariesConfig();
+    const config: BoundariesConfig = options.privatePackages ? options : loadBoundariesConfig();
 
     assertBoundariesConfig(config);
 
