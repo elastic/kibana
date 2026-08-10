@@ -20,7 +20,6 @@ export type AlertingLabels = Partial<{
   space_id: string;
   policy_id: string;
   group_id: string;
-  /** Hash identifying an alert group, the director's per-alert-event key. */
   group_hash: string;
   episode_id: string;
   workflow_id: string;
@@ -32,7 +31,7 @@ export type AlertingLabels = Partial<{
   step: string;
   subsystem: string;
   /**
-   * Which member of a fixed, statically declared set failed — a saved object
+   * Which member of a fixed, statically declared set failed - e.g. a saved object
    * type, a datastream, an ES|QL view. Enum-like rather than an entity id.
    */
   resource: string;
