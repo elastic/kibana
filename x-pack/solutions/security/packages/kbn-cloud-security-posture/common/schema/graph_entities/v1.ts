@@ -7,19 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  COUNTRY_CODE_MAX_LENGTH,
   COUNTRY_CODES_MAX_SIZE,
   DETAIL_PAGE_SIZE_MAX,
   ENTITY_EUID_MAX_LENGTH,
-  ENUM_LIKE_MAX_LENGTH,
   ENTITY_IDS_MAX_SIZE,
   INDEX_PATTERN_MAX_LENGTH,
   INDEX_PATTERN_REGEX,
   INDEX_PATTERNS_MAX_SIZE,
-  IP_ADDRESS_MAX_LENGTH,
   IPS_MAX_SIZE,
-  LABEL_MAX_LENGTH,
-  SUB_TYPE_MAX_LENGTH,
   TIMESTAMP_STRING_MAX_LENGTH,
 } from '../graph/v1';
 
@@ -28,31 +23,23 @@ import {
 // ============================================
 
 export const entityItemSchema = schema.object({
-  id: schema.string({ maxLength: ENTITY_EUID_MAX_LENGTH }),
-  timestamp: schema.maybe(schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })),
-  name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
-  type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
-  subType: schema.maybe(schema.string({ maxLength: SUB_TYPE_MAX_LENGTH })),
-  ecsParentField: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
+  id: schema.string(),
+  timestamp: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
+  subType: schema.maybe(schema.string()),
+  ecsParentField: schema.maybe(schema.string()),
   // Risk score is not currently populated but will be in a future iteration
   risk: schema.maybe(schema.number()),
-  icon: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
+  icon: schema.maybe(schema.string()),
   availableInEntityStore: schema.maybe(schema.boolean()),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH })),
+      ip: schema.maybe(schema.string()),
     })
   ),
-  ips: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
-      maxSize: IPS_MAX_SIZE,
-    })
-  ),
-  countryCodes: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: COUNTRY_CODE_MAX_LENGTH }), {
-      maxSize: COUNTRY_CODES_MAX_SIZE,
-    })
-  ),
+  ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
+  countryCodes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })),
 });
 
 export const entitiesRequestSchema = schema.object({

@@ -7,18 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  COUNTRY_CODE_MAX_LENGTH,
   COUNTRY_CODES_MAX_SIZE,
   DETAIL_PAGE_SIZE_MAX,
   ENTITY_IDS_MAX_SIZE,
   ES_DOCUMENT_ID_MAX_LENGTH,
-  ENUM_LIKE_MAX_LENGTH,
   INDEX_PATTERN_MAX_LENGTH,
   INDEX_PATTERN_REGEX,
   INDEX_PATTERNS_MAX_SIZE,
-  IP_ADDRESS_MAX_LENGTH,
   IPS_MAX_SIZE,
-  LABEL_MAX_LENGTH,
   TIMESTAMP_STRING_MAX_LENGTH,
 } from '../graph/v1';
 
@@ -27,9 +23,9 @@ import {
 // ============================================
 
 const actorOrTargetSchema = schema.object({
-  id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
-  icon: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
-  name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
+  id: schema.string(),
+  icon: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
 });
 
 // ============================================
@@ -37,23 +33,15 @@ const actorOrTargetSchema = schema.object({
 // ============================================
 
 export const eventOrAlertItemSchema = schema.object({
-  id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
+  id: schema.string(),
   isAlert: schema.boolean(),
-  index: schema.maybe(schema.string({ maxLength: INDEX_PATTERN_MAX_LENGTH })),
-  timestamp: schema.maybe(schema.string({ maxLength: TIMESTAMP_STRING_MAX_LENGTH })),
-  action: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
+  index: schema.maybe(schema.string()),
+  timestamp: schema.maybe(schema.string()),
+  action: schema.maybe(schema.string()),
   actor: schema.maybe(actorOrTargetSchema),
   target: schema.maybe(actorOrTargetSchema),
-  ips: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
-      maxSize: IPS_MAX_SIZE,
-    })
-  ),
-  countryCodes: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: COUNTRY_CODE_MAX_LENGTH }), {
-      maxSize: COUNTRY_CODES_MAX_SIZE,
-    })
-  ),
+  ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
+  countryCodes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })),
 });
 
 export const eventsRequestSchema = schema.object({

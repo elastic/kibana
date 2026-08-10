@@ -25,17 +25,6 @@ export type {
   FindCspBenchmarkRuleResponse,
 } from './v3';
 
-// ---------------------------------------------------------------------------
-// String length ceilings for rules schemas — DoS protection.
-// ---------------------------------------------------------------------------
-
-// Rule state record key is the composite `benchmark_id;benchmark_version;rule_number`
-// (see buildRuleKey). It must fit the largest key the bulk-action request schema can
-// produce, so it sums the component ceilings plus the two `;` separators — otherwise a
-// request that passes validation could build a key that fails cspSettingsSchema.
-const RULE_STATE_KEY_MAX_LENGTH =
-  RULE_ID_MAX_LENGTH + BENCHMARK_VERSION_MAX_LENGTH + RULE_NUMBER_MAX_LENGTH + 2;
-
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
@@ -171,18 +160,13 @@ export interface CspBenchmarkRulesBulkActionResponse {
 
 const ruleStateAttributes = schema.object({
   muted: schema.boolean(),
-  benchmark_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
-  benchmark_version: schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH }),
-  rule_number: schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH }),
-  rule_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
+  benchmark_id: schema.string(),
+  benchmark_version: schema.string(),
+  rule_number: schema.string(),
+  rule_id: schema.string(),
 });
 
-// Rule state key is the composite `benchmark_id;benchmark_version;rule_number` built by
-// buildRuleKey — bounded to the sum of its component ceilings (see RULE_STATE_KEY_MAX_LENGTH).
-const rulesStates = schema.recordOf(
-  schema.string({ maxLength: RULE_STATE_KEY_MAX_LENGTH }),
-  ruleStateAttributes
-);
+const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);
 
 export const cspSettingsSchema = schema.object({
   rules: rulesStates,

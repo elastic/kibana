@@ -10,11 +10,6 @@ import { schema } from '@kbn/config-schema';
 import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import type { BenchmarkScore } from './v1';
 
-// Human-readable benchmark name (e.g. "CIS Kubernetes"); generous limit for display labels
-const BENCHMARK_NAME_MAX_LENGTH = 1024;
-// Version string like "1.0.0"; semver + patch level is well under 64 characters
-const BENCHMARK_VERSION_MAX_LENGTH = 64;
-
 export type { BenchmarkScore } from './v1';
 
 export interface Benchmark {
@@ -40,8 +35,8 @@ export const benchmarkResponseSchema = () =>
           schema.literal('cis_eks'),
           schema.literal('cis_gcp'),
         ]),
-        name: schema.string({ maxLength: BENCHMARK_NAME_MAX_LENGTH }),
-        version: schema.string({ maxLength: BENCHMARK_VERSION_MAX_LENGTH }),
+        name: schema.string(),
+        version: schema.string(),
         score: schema.object({
           postureScore: schema.number({ defaultValue: 0, min: 0 }),
           resourcesEvaluated: schema.number({ defaultValue: 0, min: 0 }),

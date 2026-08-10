@@ -93,25 +93,6 @@ export const TIMESTAMP_STRING_MAX_LENGTH = 100;
 // 1024 is a conservative ceiling.
 export const ENTITY_EUID_MAX_LENGTH = 1024;
 
-// Composite graph node/edge identifiers can nest multiple entity IDs, so their
-// bound must accommodate the deepest generated graph identifier.
-export const GRAPH_NODE_ID_MAX_LENGTH = 8192;
-
-// Enum-like display strings (entity type, icon name, ECS field name).
-export const ENUM_LIKE_MAX_LENGTH = 64;
-
-// Vendor-defined entity sub-types can exceed enum-like values.
-export const SUB_TYPE_MAX_LENGTH = 256;
-
-// Free-text display strings (entity name, rule name, label, tag).
-export const LABEL_MAX_LENGTH = 1024;
-
-// IPv4 is at most 15 chars and IPv6 at most 39 chars.
-export const IP_ADDRESS_MAX_LENGTH = 39;
-
-// ISO 3166-1 alpha-2 country codes are two chars; allow extended variants.
-export const COUNTRY_CODE_MAX_LENGTH = 10;
-
 /**
  * CPS project routing expressions accepted by the Graph API.
  * Values mirror `@kbn/cps-server-utils` (server-only package); declared here so the
@@ -214,9 +195,9 @@ export const DOCUMENT_TYPE_ALERT = 'alert' as const;
 export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 
 export const entitySchema = schema.object({
-  name: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
-  type: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
-  sub_type: schema.maybe(schema.string({ maxLength: SUB_TYPE_MAX_LENGTH })),
+  name: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
+  sub_type: schema.maybe(schema.string()),
   engine_type: schema.maybe(
     schema.oneOf([
       schema.literal('host'),
@@ -227,11 +208,7 @@ export const entitySchema = schema.object({
   ),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(
-        schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
-          maxSize: IPS_MAX_SIZE,
-        })
-      ),
+      ip: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
@@ -239,21 +216,21 @@ export const entitySchema = schema.object({
 });
 
 export const nodeDocumentDataSchema = schema.object({
-  id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
+  id: schema.string(),
   type: schema.oneOf([
     schema.literal(DOCUMENT_TYPE_EVENT),
     schema.literal(DOCUMENT_TYPE_ALERT),
     schema.literal(DOCUMENT_TYPE_ENTITY),
   ]),
-  index: schema.maybe(schema.string({ maxLength: INDEX_PATTERN_MAX_LENGTH })),
+  index: schema.maybe(schema.string()),
   event: schema.maybe(
     schema.object({
-      id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
+      id: schema.string(),
     })
   ),
   alert: schema.maybe(
     schema.object({
-      ruleName: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
+      ruleName: schema.maybe(schema.string()),
     })
   ),
   entity: schema.maybe(entitySchema),
@@ -305,9 +282,9 @@ export const nodeShapeSchema = schema.oneOf([
 ]);
 
 export const nodeBaseDataSchema = schema.object({
-  id: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
-  label: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
-  icon: schema.maybe(schema.string({ maxLength: ENUM_LIKE_MAX_LENGTH })),
+  id: schema.string(),
+  label: schema.maybe(schema.string()),
+  icon: schema.maybe(schema.string()),
 });
 
 export const entityNodeDataSchema = schema.allOf([
@@ -321,17 +298,11 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
-    tag: schema.maybe(schema.string({ maxLength: LABEL_MAX_LENGTH })),
+    tag: schema.maybe(schema.string()),
     count: schema.maybe(schema.number()),
-    ips: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
-        maxSize: IPS_MAX_SIZE,
-      })
-    ),
+    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
     countryCodes: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: COUNTRY_CODE_MAX_LENGTH }), {
-        maxSize: COUNTRY_CODES_MAX_SIZE,
-      })
+      schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })
     ),
     documentsData: schema.maybe(
       schema.arrayOf(nodeDocumentDataSchema, { maxSize: DOCUMENTS_DATA_MAX_SIZE })
@@ -350,22 +321,14 @@ export const labelNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('label'),
-    // `parentId` references a parent group node's `id`, which is a composite graph
-    // node id — bound it by the same ceiling as node ids, not raw entity ids.
-    parentId: schema.maybe(schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH })),
+    parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
-    ips: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: IP_ADDRESS_MAX_LENGTH }), {
-        maxSize: IPS_MAX_SIZE,
-      })
-    ),
+    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
     count: schema.maybe(schema.number()),
     uniqueEventsCount: schema.maybe(schema.number()),
     uniqueAlertsCount: schema.maybe(schema.number()),
     countryCodes: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: COUNTRY_CODE_MAX_LENGTH }), {
-        maxSize: COUNTRY_CODES_MAX_SIZE,
-      })
+      schema.arrayOf(schema.string(), { maxSize: COUNTRY_CODES_MAX_SIZE })
     ),
     documentsData: schema.maybe(
       schema.arrayOf(nodeDocumentDataSchema, { maxSize: DOCUMENTS_DATA_MAX_SIZE })
@@ -377,16 +340,14 @@ export const relationshipNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     shape: schema.literal('relationship'),
-    // `parentId` references a parent group node's `id`, which is a composite graph
-    // node id — bound it by the same ceiling as node ids, not raw entity ids.
-    parentId: schema.maybe(schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH })),
+    parentId: schema.maybe(schema.string()),
   }),
 ]);
 
 export const edgeDataSchema = schema.object({
-  id: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
-  source: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
-  target: schema.string({ maxLength: GRAPH_NODE_ID_MAX_LENGTH }),
+  id: schema.string(),
+  source: schema.string(),
+  target: schema.string(),
   color: edgeColorSchema,
   type: schema.maybe(schema.oneOf([schema.literal('solid'), schema.literal('dashed')])),
 });

@@ -34,7 +34,6 @@ export const DEFAULT_BENCHMARKS_PER_PAGE = 20;
 // 256 is a generous ceiling that blocks abusive inputs.
 const PACKAGE_POLICY_NAME_MAX_LENGTH = 256;
 export const BENCHMARK_PACKAGE_POLICY_PREFIX = 'package_policy.';
-
 export const benchmarksQueryParamsSchema = schema.object({
   /**
    * The page of objects to return

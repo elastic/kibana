@@ -34,10 +34,6 @@ export type {
   BulkActionBenchmarkRulesResponse,
 } from './v4';
 
-// ---------------------------------------------------------------------------
-// String length ceilings for rules schemas — DoS protection.
-// ---------------------------------------------------------------------------
-
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
