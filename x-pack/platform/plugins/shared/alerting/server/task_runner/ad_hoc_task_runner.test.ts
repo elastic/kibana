@@ -291,7 +291,7 @@ describe('Ad Hoc Task Runner', () => {
         end: '2024-03-01T05:00:00.000Z',
         rule: {
           name: 'test',
-          tags: [],
+          tags: ['tag-1', 'tag-2'],
           alertTypeId: 'siem.queryRule',
           actions: [],
           params: {
@@ -477,7 +477,7 @@ describe('Ad Hoc Task Runner', () => {
     expect(call.rule).not.toBe(null);
     expect(call.rule.id).toBe(RULE_ID);
     expect(call.rule.name).toBe('test');
-    expect(call.rule.tags).toEqual([]);
+    expect(call.rule.tags).toEqual(['tag-1', 'tag-2']);
     expect(call.rule.consumer).toBe('siem');
     expect(call.rule.enabled).toBe(true);
     expect(call.rule.schedule).toEqual({ interval: '1h' });
@@ -1657,6 +1657,7 @@ describe('Ad Hoc Task Runner', () => {
         name: mockedAdHocRunSO.attributes.rule.name,
         consumer: mockedAdHocRunSO.attributes.rule.consumer,
         revision: mockedAdHocRunSO.attributes.rule.revision,
+        tags: mockedAdHocRunSO.attributes.rule.tags,
       });
     }
 
