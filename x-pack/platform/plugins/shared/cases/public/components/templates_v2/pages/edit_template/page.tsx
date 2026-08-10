@@ -86,7 +86,6 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   return (
     <TemplateFormLayout
       form={form}
-      title={i18n.EDIT_TEMPLATE_TITLE}
       initialMetadata={initialMetadata}
       isSaving={isSaving}
       onCreate={handleSave}

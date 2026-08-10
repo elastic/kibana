@@ -21,7 +21,7 @@ import {
 } from './otel_appender.test.mocks';
 
 import { set } from '@kbn/safer-lodash-set';
-import { trace } from '@opentelemetry/api';
+import { metrics, trace } from '@opentelemetry/api';
 import { LogLevel } from '@kbn/logging';
 import { SeverityNumber } from '@opentelemetry/api-logs';
 import { OtelAppender } from './otel_appender';
@@ -253,7 +253,25 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: validConfig.headers,
+        selfObsMeterProvider: metrics.getMeterProvider(),
       });
+    });
+
+    it('enables SDK self-observability metrics on the exporter, processor, and logger provider', () => {
+      new OtelAppender(validConfig);
+
+      // The global meter provider (noop unless telemetry.metrics registered one) is handed to
+      // all three hooks: the exporter emits otel.sdk.exporter.log.*, the batch processor emits
+      // otel.sdk.processor.log.*, and the provider emits otel.sdk.log.created.
+      expect(mockOTLPLogExporter).toHaveBeenCalledWith(
+        expect.objectContaining({ selfObsMeterProvider: metrics.getMeterProvider() })
+      );
+      expect(mockBatchLogRecordProcessor).toHaveBeenCalledWith(
+        expect.objectContaining({ selfObsMeterProvider: metrics.getMeterProvider() })
+      );
+      expect(mockLoggerProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ meterProvider: metrics.getMeterProvider() })
+      );
     });
 
     it('passes httpAgentOptions when ssl is set (HTTP exporter)', () => {
@@ -265,6 +283,7 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: validConfig.headers,
+        selfObsMeterProvider: metrics.getMeterProvider(),
         httpAgentOptions: expect.objectContaining({ rejectUnauthorized: false }),
       });
     });
@@ -279,6 +298,7 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: validConfig.headers,
+        selfObsMeterProvider: metrics.getMeterProvider(),
         httpAgentOptions: expect.objectContaining({ rejectUnauthorized: true }),
       });
     });
@@ -306,6 +326,7 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: {},
+        selfObsMeterProvider: metrics.getMeterProvider(),
       });
     });
 

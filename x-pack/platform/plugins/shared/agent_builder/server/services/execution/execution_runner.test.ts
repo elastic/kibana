@@ -61,6 +61,7 @@ describe('handleAgentExecution', () => {
     const conversationClient = createConversationClientMock();
     conversationClient.getByOrigin.mockResolvedValue(conversation);
     conversationClient.update.mockResolvedValue(conversation);
+    conversationClient.upsertRound.mockResolvedValue(conversation);
 
     const roundCompleteEvent: ChatEvent = {
       type: ChatEventType.roundComplete,
@@ -144,6 +145,7 @@ describe('handleAgentExecution', () => {
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.getByOrigin.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(of(roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
@@ -230,6 +232,7 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
+      conversationClient.upsertRound.mockResolvedValue(conversation);
 
       executeAgentMock.mockReturnValue(
         of({
@@ -307,7 +310,7 @@ describe('collectAndWriteEvents', () => {
     executionId: 'execution-1',
   };
 
-  it('resolves with the collected events and appends them to the execution document', async () => {
+  it('appends the events to the execution document and resolves once flushed', async () => {
     const executionClient = createExecutionClient();
 
     await expect(
@@ -317,7 +320,7 @@ describe('collectAndWriteEvents', () => {
         executionClient: executionClient as never,
         logger: loggingSystemMock.createLogger(),
       })
-    ).resolves.toEqual([event]);
+    ).resolves.toBeUndefined();
 
     expect(executionClient.appendEvents).toHaveBeenCalledWith('execution-1', [event]);
   });

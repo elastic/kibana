@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,17 +55,21 @@ export const EsqlTab = ({ onAdd }: EsqlTabProps) => {
         </div>
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiButton
-        iconType="plusInCircle"
-        onClick={handleAdd}
-        isDisabled={!trimmedQuery}
-        data-test-subj="contextAddEsqlSourceButton"
-      >
-        <FormattedMessage
-          id="xpack.contextEngine.sourcePicker.esql.addButton"
-          defaultMessage="Add ES|QL source"
-        />
-      </EuiButton>
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="plusInCircle"
+            onClick={handleAdd}
+            isDisabled={!trimmedQuery}
+            data-test-subj="contextAddEsqlSourceButton"
+          >
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.esql.addButton"
+              defaultMessage="Add ES|QL source"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
