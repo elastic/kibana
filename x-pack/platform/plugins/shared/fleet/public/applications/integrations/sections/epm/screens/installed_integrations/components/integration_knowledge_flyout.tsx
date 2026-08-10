@@ -160,7 +160,7 @@ export const IntegrationKnowledgeFlyout: React.FunctionComponent<{
                       ),
                       aiAssistant: (
                         <EuiLink
-                          href={docLinks.links.observability.aiAssistant}
+                          href={docLinks.links.agentBuilder.aiAssistant}
                           target="_blank"
                           external
                         >

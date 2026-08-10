@@ -764,6 +764,7 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+    readonly aiAssistant: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;
