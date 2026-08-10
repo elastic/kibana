@@ -1,5 +1,5 @@
 {
-  "sha1": "12958eb2bff733504334beb98d2000672b5c44ef",
+  "sha1": "8820b251af80ad5106f85dd5f87e68138fa18d5b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -11,18 +11,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 25,
+        "column": 43
       }
     },
     {
@@ -31,18 +25,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 52,
+        "column": 11
       }
     },
     {
@@ -51,18 +39,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 89,
+        "column": 14
       }
     },
     {
@@ -71,18 +53,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 31,
+        "column": 27
       }
     },
     {
@@ -91,18 +67,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 54,
+        "column": 17
       }
     },
     {
@@ -111,18 +81,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
-        "line": 88,
-        "column": 12
+        "line": 81,
+        "column": 17
       }
     },
     {
@@ -131,18 +95,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
         "line": 114,
-        "column": 12
+        "column": 65
       }
     },
     {
@@ -151,18 +109,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
-        "line": 149,
-        "column": 12
+        "line": 144,
+        "column": 11
       }
     },
     {
@@ -171,17 +123,137 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
-        "line": 171,
+        "line": 167,
+        "column": 14
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-2f2a07b2a54ca12",
+      "title": "Metrics Explorer API works for multiple metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 18,
+        "column": 76
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-6cdeeab251efa2c",
+      "title": "Metrics Explorer API applies filterQuery to data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 61,
+        "column": 33
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-db7a97ed5478e5f",
+      "title": "Metrics Explorer API works for empty metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 102,
+        "column": 5
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-58c582dc928a3f4",
+      "title": "Metrics Explorer API works for custom metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-34d1752efbd9822",
+      "title": "Metrics Explorer API works with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 192,
+        "column": 18
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-3441251c1284cca",
+      "title": "Metrics Explorer API works with multiple groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 239,
+        "column": 23
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-8464d7187ba38e1",
+      "title": "Metrics Explorer API returns 400 when requesting more than 20 metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 290,
+        "column": 10
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-5da5489abcb4d97",
+      "title": "Metrics Explorer API works when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 322,
+        "column": 18
+      }
+    },
+    {
+      "id": "a663fa2ea3e35af-381e2cbcdc9c5b0",
+      "title": "Metrics Explorer API works when there is no data with groupBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
+        "line": 351,
         "column": 12
       }
     }
