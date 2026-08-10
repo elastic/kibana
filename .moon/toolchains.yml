@@ -1,5 +1,6 @@
 # https://moonrepo.dev/docs/config/toolchains
-$schema: 'https://moonrepo.dev/schemas/toolchains.json'
+$schema: 'https://moonrepo.dev/schemas/v2/toolchains.json'
+
 
 javascript:
   packageManager: pnpm
@@ -12,6 +13,10 @@ javascript:
 
 node:
   syncVersionManagerConfig: nvm
+
+# Required by moon v2 when javascript.packageManager is pnpm — enables the pnpm
+# toolchain for `command: pnpm` tasks and moon-initiated installs/dedupe.
+pnpm: {}
 
 typescript:
   includeProjectReferenceSources: false # This would add references to tsconfigs

@@ -1,5 +1,7 @@
 @types/mdast
 @types/unist
+eslint-plugin-n
+@xterm/xterm
 knip
 safe-stable-stringify
 ajv-draft-04
@@ -59,4 +61,5 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/plugin-emotion
 graphql

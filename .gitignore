@@ -1,5 +1,6 @@
 .artifacts
 docs/**/.artifacts
+docs-dev/**/.artifacts
 /.superset
 .aws-config.json
 .bk.yaml
@@ -489,6 +490,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/solutions/observability/plugins/exploratory_view/package.json
 /x-pack/solutions/observability/plugins/infra/package.json
 /x-pack/solutions/observability/plugins/metrics_data_access/package.json
+/x-pack/solutions/observability/plugins/nightshift/package.json
 /x-pack/solutions/observability/plugins/observability/package.json
 /x-pack/solutions/observability/plugins/observability_agent_builder/package.json
 /x-pack/solutions/observability/plugins/observability_ai_assistant_app/package.json

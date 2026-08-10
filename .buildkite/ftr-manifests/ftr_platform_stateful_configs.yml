@@ -57,7 +57,6 @@ disabled:
   - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
   - x-pack/platform/test/functional_gen_ai/inference/generate_security_labs_artifacts.config.ts
 
-defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
   - src/platform/test/analytics/config.ts
@@ -85,11 +84,9 @@ enabled:
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_4/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
-  - src/platform/test/functional/apps/discover/group3/config.ts
   - src/platform/test/functional/apps/discover/group4/config.ts
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group11/config.ts
-  - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group9/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
@@ -104,7 +101,6 @@ enabled:
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
   - src/platform/test/functional/apps/visualize/group4/config.ts
-  - src/platform/test/functional/apps/visualize/group5/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
   - src/platform/test/functional/apps/visualize/group7/config.ts
   - src/platform/test/functional/apps/visualize/group8/config.ts
@@ -230,7 +226,6 @@ enabled:
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
-  - x-pack/platform/test/functional/apps/index_management/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
@@ -270,7 +265,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
-  - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
@@ -344,7 +338,6 @@ enabled:
   - x-pack/platform/test/spaces_api_integration/access_control_objects/feature_disabled.config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
-  - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts

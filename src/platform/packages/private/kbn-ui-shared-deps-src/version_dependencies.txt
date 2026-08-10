@@ -374,7 +374,7 @@ ms@2.0.0
 ms@2.1.3
 multicast-dns@7.2.5
 nano-css@5.6.2
-nanoid@3.3.15
+nanoid@3.3.18
 negotiator@0.6.3
 negotiator@0.6.4
 neo-async@2.6.2
@@ -410,7 +410,7 @@ postcss-modules-scope@3.2.1
 postcss-modules-values@4.0.0
 postcss-selector-parser@7.1.4
 postcss-value-parser@4.2.0
-postcss@8.5.14
+postcss@8.5.26
 prettier@2.8.8
 process-nextick-args@2.0.1
 proxy-addr@2.0.7
