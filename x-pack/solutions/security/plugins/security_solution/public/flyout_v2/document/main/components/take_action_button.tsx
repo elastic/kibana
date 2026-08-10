@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -16,7 +16,10 @@ import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-typ
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
 import type { Status } from '../../../../../common/api/detection_engine';
-import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import {
+  ADD_TO_CASE_ACTION_IDS,
+  useAddToCaseActions,
+} from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
@@ -36,34 +39,9 @@ import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
-import type { FlyoutActionType } from '../../../../common/lib/telemetry';
-import { FLYOUT_ACTION } from '../../../../common/lib/telemetry';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
-import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
-
-// Maps each footer "Take action" menu item's existing `data-test-subj` to the `FlyoutActionType`
-// reported when it's clicked. Kept as one flat map (rather than one per action family) since
-// `wrapActionTelemetry` is applied once to the fully assembled `items` array below.
-const FOOTER_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
-  'add-to-case-action': FLYOUT_ACTION.ADD_TO_CASE,
-  'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
-  'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
-  'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
-  'alert-tags-context-menu-item': FLYOUT_ACTION.ADD_TAGS,
-  'alert-assignees-context-menu-item': FLYOUT_ACTION.ADD_ASSIGNEES,
-  'remove-alert-assignees-menu-item': FLYOUT_ACTION.REMOVE_ASSIGNEES,
-  'add-endpoint-exception-menu-item': FLYOUT_ACTION.ADD_ENDPOINT_EXCEPTION,
-  'add-exception-menu-item': FLYOUT_ACTION.ADD_RULE_EXCEPTION,
-  'isolate-host-action-item': FLYOUT_ACTION.ISOLATE_HOST,
-  'run-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
-  'run-document-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
-  'endpointResponseActions-action-item': FLYOUT_ACTION.RESPOND,
-  'osquery-action-item': FLYOUT_ACTION.RUN_OSQUERY,
-  'add-note-action': FLYOUT_ACTION.ADD_NOTE,
-  'investigate-in-timeline-action-item': FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
-  'explore-in-alerts-or-timeline': FLYOUT_ACTION.EXPLORE,
-};
+import { ActionMenu } from './action_menu';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -79,6 +57,7 @@ const TAKE_ACTION_MENU = i18n.translate(
 const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
   defaultMessage: 'Add note',
 });
+const ADD_NOTE_ACTION_ID = 'add-note-action';
 
 export interface TakeActionButtonProps {
   /**
@@ -113,6 +92,22 @@ export const TakeActionButton = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
     const closePopoverHandler = useCallback(() => setIsPopoverOpen(false), []);
+    const reportAddToCaseAction = useCallback(
+      (
+        actionId:
+          | typeof ADD_TO_CASE_ACTION_IDS.addToNewCase
+          | typeof ADD_TO_CASE_ACTION_IDS.addToExistingCase
+      ) => {
+        reportActionClicked({
+          flyoutType: 'document',
+          action:
+            actionId === ADD_TO_CASE_ACTION_IDS.addToNewCase
+              ? FLYOUT_ACTION.ADD_TO_CASE_NEW
+              : FLYOUT_ACTION.ADD_TO_CASE_EXISTING,
+        });
+      },
+      [reportActionClicked]
+    );
     const [isolateAction, setIsolateAction] = useState<HostIsolationAction | null>(null);
 
     const isInSecurityApp = useIsInSecurityApp();
@@ -150,10 +145,11 @@ export const TakeActionButton = memo(
       onAddIsolationStatusClick: setIsolateAction,
     });
 
-    const { addToCaseActionItems } = useAddToCaseActions({
+    const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
       ecsData,
       nonEcsData,
       onMenuItemClick: closePopoverHandler,
+      onActionClick: reportAddToCaseAction,
       onSuccess: refetchFlyoutData,
     });
 
@@ -191,7 +187,7 @@ export const TakeActionButton = memo(
       () => [
         {
           'data-test-subj': 'add-note-action',
-          key: 'add-note-action',
+          key: ADD_NOTE_ACTION_ID,
           name: ADD_NOTE,
           onClick: () => {
             closePopoverHandler();
@@ -296,66 +292,20 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const rawItems = useMemo(
-      () => [
-        ...(!isRemoteDocument ? addToCaseActionItems : []),
-        ...(!isRemoteDocument && isAlert ? statusActionItems : []),
-        ...(!isRemoteDocument && isAlert ? alertTagsItems : []),
-        ...(!isRemoteDocument && isAlert ? alertAssigneesItems : []),
-        ...(!isRemoteDocument && isAlert ? exceptionActionItems : []),
-        ...(!isRemoteDocument && isAlert ? hostIsolationActionItems : []),
-        ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
-        ...(!isRemoteDocument ? endpointResponseActionsConsoleItems : []),
-        ...(!isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : []),
-        ...(!isRemoteDocument && !isAlert ? noteItems : []),
-        ...(isInSecurityApp ? investigateInTimelineActionItems : []),
-        ...(!isInSecurityApp ? exploreActionItems : []),
-      ],
-      [
-        addToCaseActionItems,
-        alertAssigneesItems,
-        alertTagsItems,
-        documentWorkflowMenuItem,
-        endpointResponseActionsConsoleItems,
-        exceptionActionItems,
-        exploreActionItems,
-        hostIsolationActionItems,
-        investigateInTimelineActionItems,
-        isAlert,
-        isInSecurityApp,
-        isRemoteDocument,
-        noteItems,
-        osqueryActionItem,
-        osqueryAvailable,
-        runWorkflowMenuItem,
-        statusActionItems,
-      ]
-    );
-
-    const items = useMemo(
-      () => wrapActionTelemetry(rawItems, FOOTER_ACTION_TEST_SUBJ, reportActionClicked),
-      [rawItems, reportActionClicked]
-    );
-
-    const panels = useMemo(
-      () => [
-        { id: 0, items },
-        ...(!isRemoteDocument && isAlert ? statusActionPanels : []),
-        ...(!isRemoteDocument && isAlert ? alertAssigneesPanels : []),
-        ...(!isRemoteDocument && isAlert ? alertTagsPanels : []),
-        ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
-      ],
-      [
-        alertAssigneesPanels,
-        alertTagsPanels,
-        isAlert,
-        isRemoteDocument,
-        items,
-        runAlertWorkflowPanel,
-        runDocumentWorkflowPanel,
-        statusActionPanels,
-      ]
-    );
+    const hasItems = [
+      !isRemoteDocument ? addToCaseActionItems : [],
+      !isRemoteDocument && isAlert ? statusActionItems : [],
+      !isRemoteDocument && isAlert ? alertTagsItems : [],
+      !isRemoteDocument && isAlert ? alertAssigneesItems : [],
+      !isRemoteDocument && isAlert ? exceptionActionItems : [],
+      !isRemoteDocument && isAlert ? hostIsolationActionItems : [],
+      !isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : [],
+      !isRemoteDocument ? endpointResponseActionsConsoleItems : [],
+      !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
+      !isRemoteDocument && !isAlert ? noteItems : [],
+      isInSecurityApp ? investigateInTimelineActionItems : [],
+      !isInSecurityApp ? exploreActionItems : [],
+    ].some((actionItems) => actionItems.length > 0);
 
     const takeActionButton = (
       <EuiButton
@@ -363,7 +313,7 @@ export const TakeActionButton = memo(
         fill
         iconSide="right"
         iconType="chevronSingleDown"
-        isDisabled={items.length === 0}
+        isDisabled={!hasItems}
         onClick={togglePopoverHandler}
       >
         {TAKE_ACTION}
@@ -398,7 +348,32 @@ export const TakeActionButton = memo(
           anchorPosition="downLeft"
           repositionOnScroll
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
+          <ActionMenu
+            addToCaseItems={addToCaseActionItems}
+            addToCasePanels={addToCaseActionPanels}
+            alertAssigneeItems={alertAssigneesItems}
+            alertAssigneePanels={alertAssigneesPanels}
+            alertTagItems={alertTagsItems}
+            alertTagPanels={alertTagsPanels}
+            documentWorkflowItems={documentWorkflowMenuItem}
+            endpointResponseItems={endpointResponseActionsConsoleItems}
+            exceptionItems={exceptionActionItems}
+            exploreItems={exploreActionItems}
+            hostIsolationItems={hostIsolationActionItems}
+            investigateInTimelineItems={investigateInTimelineActionItems}
+            isAlert={isAlert}
+            isInSecurityApp={isInSecurityApp}
+            isRemoteDocument={isRemoteDocument}
+            noteItems={noteItems}
+            osqueryAvailable={Boolean(osqueryAvailable)}
+            osqueryItems={[osqueryActionItem]}
+            reportActionClicked={reportActionClicked}
+            runAlertWorkflowItems={runWorkflowMenuItem}
+            runAlertWorkflowPanels={runAlertWorkflowPanel}
+            runDocumentWorkflowPanels={runDocumentWorkflowPanel}
+            statusItems={statusActionItems}
+            statusPanels={statusActionPanels}
+          />
         </EuiPopover>
         {isExceptionFlyoutOpen && (
           <AddExceptionFlyoutWrapper
