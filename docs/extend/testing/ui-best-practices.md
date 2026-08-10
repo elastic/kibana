@@ -277,29 +277,31 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 :::::
 
-## Use EUI wrappers as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
+## Use EUI Component Objects as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
 
-If you must interact with EUI internals, use wrappers from Scout to keep that complexity out of tests.
+If you must drive an EUI component, use the [EUI test helpers](./eui-test-helpers.md) exposed through `page.components` to keep that complexity out of tests. Assign the Component Object to a `readonly` class field, like any other stable locator.
 
 :::::{dropdown} Example
 
 ```ts
-import { EuiComboBoxWrapper, ScoutPage } from '@kbn/scout';
+import type { EuiComboBoxObject, ScoutPage } from '@kbn/scout';
 
 export class StreamsAppPage {
-  public readonly fieldComboBox: EuiComboBoxWrapper;
+  public readonly fieldComboBox: EuiComboBoxObject;
 
   constructor(private readonly page: ScoutPage) {
-    this.fieldComboBox = new EuiComboBoxWrapper(this.page, 'fieldSelectorComboBox');
+    this.fieldComboBox = this.page.components.comboBox('fieldSelectorComboBox');
   }
 
   async selectField(value: string) {
-    await this.fieldComboBox.selectSingleOption(value);
+    await this.fieldComboBox.setSelectedOptions([value]);
   }
 }
 ```
 
 :::::
+
+Don't subclass a Component Object or bolt one-off methods onto it locally. If a helper is missing a capability, [contribute it upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite benefits.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
@@ -361,5 +363,6 @@ For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth
 - [Write UI tests](./write-ui-tests.md)
 - [Browser authentication](./browser-auth.md)
 - [Page objects](./page-objects.md)
+- [EUI test helpers](./eui-test-helpers.md)
 - [Accessibility (a11y) checks](./a11y-checks.md)
 - [Parallelism](./parallelism.md)
