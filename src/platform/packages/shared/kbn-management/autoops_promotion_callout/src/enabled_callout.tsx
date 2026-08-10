@@ -142,14 +142,13 @@ export const AutoOpsEnabledCallout = ({
         </EuiFlexItem>
         {!compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
       </EuiFlexGroup>
-      <div
-        style={{ position: 'absolute', top: euiTheme.size.s, insetInlineEnd: euiTheme.size.s }}
-      >
+      <div style={{ position: 'absolute', top: euiTheme.size.s, insetInlineEnd: euiTheme.size.s }}>
         <EuiToolTip
           content={i18n.translate('management.autoOpsEnabledCallout.dismissAriaLabel', {
             defaultMessage: 'Dismiss AutoOps enabled notification',
           })}
           position="left"
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             iconType="cross"

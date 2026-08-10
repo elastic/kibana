@@ -151,14 +151,13 @@ export const AutoOpsPromotionCallout = ({
         </EuiFlexItem>
         {!compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
       </EuiFlexGroup>
-      <div
-        style={{ position: 'absolute', top: euiTheme.size.s, insetInlineEnd: euiTheme.size.s }}
-      >
+      <div style={{ position: 'absolute', top: euiTheme.size.s, insetInlineEnd: euiTheme.size.s }}>
         <EuiToolTip
           content={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
             defaultMessage: 'Dismiss AutoOps promotion',
           })}
           position="left"
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             iconType="cross"
