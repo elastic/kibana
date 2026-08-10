@@ -85,12 +85,12 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     const { eisModels } = pageObjects;
 
     await test.step('open model family filter popover', async () => {
-      await eisModels.modelFamilyFilter.getByRole('button').click();
+      await eisModels.modelFamilyFilter.click();
     });
 
     await test.step('select Anthropic provider and close popover', async () => {
       await page.getByRole('option', { name: 'Anthropic' }).click();
-      await eisModels.modelFamilyFilter.getByRole('button').click();
+      await eisModels.modelFamilyFilter.click();
     });
 
     await test.step('only Anthropic model card is shown', async () => {

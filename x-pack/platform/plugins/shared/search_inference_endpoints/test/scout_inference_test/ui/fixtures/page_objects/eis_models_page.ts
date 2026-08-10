@@ -76,7 +76,10 @@ export class EisModelsPage {
     this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
 
     // Search and Filters
-    this.searchBar = this.page.testSubj.locator('eisModelsSearchBar');
+    // The search box belongs to the Content List toolbar, which derives its
+    // subjects from the toolbar root.
+    this.searchBar = this.page.testSubj.locator('contentListToolbar-searchBox');
+    // Resolves to the popover's filter button, so it is clicked directly.
     this.modelFamilyFilter = this.page.testSubj.locator('modelFamilyFilterMultiselect');
 
     // Model Cards
