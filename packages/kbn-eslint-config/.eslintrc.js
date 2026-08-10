@@ -41,8 +41,11 @@ const exactFilePathMatcher = (relativePath) =>
 const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
   'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
-  'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
-  'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
+  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
+  'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/agent_builder_smoke/stateful/classic.stateful.config.ts',
+  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
+  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
+  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/kbn-inference-cli/src/util/write_kibana_config.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
@@ -52,7 +55,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
-  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/read_kibana_config.ts',
   'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
   'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
 ].map(exactFilePathMatcher);
