@@ -44,6 +44,7 @@ import type {
   ViewMode,
   PublishesSearchSession,
   PublishesReload,
+  PublishesFetchSetting,
 } from '@kbn/presentation-publishing';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
@@ -177,7 +178,8 @@ export type DashboardApi = CanExpandPanels &
   PublishesEditablePauseFetch &
   TrackContentfulRender &
   TracksOverlays &
-  PublishesOnSave & {
+  PublishesOnSave &
+  PublishesFetchSetting & {
     /*
      * Emits on any dashboard state change
      *

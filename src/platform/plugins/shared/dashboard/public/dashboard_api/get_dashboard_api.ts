@@ -109,7 +109,7 @@ export function getDashboardApi({
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
-  const settingsManager = initializeSettingsManager(initialState);
+  const settingsManager = initializeSettingsManager(initialState, viewModeManager.api.viewMode$);
 
   const forcePublishOnReset$ = new Subject<void>();
 
@@ -345,6 +345,7 @@ export function getDashboardApi({
     } as DashboardApi,
     internalApi,
     cleanup: () => {
+      settingsManager.cleanup();
       trackOverlayApi.clearOverlays();
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
