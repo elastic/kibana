@@ -178,7 +178,13 @@ export const DocumentSummary = memo(
         <>
           {fetchError && (
             <>
-              <EuiCallOut title={GENERATION_ERROR_TITLE} color="danger" iconType="error" size="s">
+              <EuiCallOut
+                announceOnMount
+                title={GENERATION_ERROR_TITLE}
+                color="danger"
+                iconType="error"
+                size="s"
+              >
                 <EuiText size="xs">{fetchError}</EuiText>
               </EuiCallOut>
               <EuiSpacer size="s" />

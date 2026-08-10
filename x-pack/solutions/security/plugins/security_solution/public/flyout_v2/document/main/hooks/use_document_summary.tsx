@@ -269,7 +269,9 @@ export const useDocumentSummary = ({
         if (errorResponse.includes('Failed to load action')) {
           setIsConnectorMissing(true);
         } else {
-          setFetchError(hasInvalidResponse && !rawResponse.isError ? INVALID_RESPONSE : errorResponse);
+          setFetchError(
+            hasInvalidResponse && !rawResponse.isError ? INVALID_RESPONSE : errorResponse
+          );
           setHasSummary(false);
         }
       }
