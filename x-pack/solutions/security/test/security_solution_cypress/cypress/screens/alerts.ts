@@ -252,6 +252,8 @@ export const HOVER_ACTIONS = {
 export const ADD_TO_CASE_BUTTON = '[data-test-subj="alerts-table-add-to-case"]';
 export const ADD_TO_CASE_MODAL = '[data-test-subj="all-cases-modal"]';
 
+export const ADD_TO_CASE_BUTTON = '[data-test-subj="alerts-table-add-to-case"]';
+
 export const GROUP_ALERTS_BY_BTN = '[data-test-subj="alerts-table-group-selector"]';
 
 export const TAKE_ACTION_GROUPED_ALERTS_BTN = '[data-test-subj="take-action-button"]';
