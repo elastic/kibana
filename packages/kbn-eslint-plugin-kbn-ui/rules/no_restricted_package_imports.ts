@@ -45,8 +45,7 @@ const requireFromRepo = createRequire(__filename);
 
 let cachedBoundariesConfig: BoundariesConfig | undefined;
 
-const getKnownPackageIds = (): Set<string> =>
-  new Set(getPackages(REPO_ROOT).map((pkg) => pkg.id));
+const getKnownPackageIds = (): Set<string> => new Set(getPackages(REPO_ROOT).map((pkg) => pkg.id));
 
 const assertPathPrefix = (
   prefix: string,
@@ -89,7 +88,8 @@ export const assertBoundariesConfig = (
   const checkKnownPackageIds = options.checkKnownPackageIds ?? false;
   const checkPathsOnDisk = options.checkPathsOnDisk ?? false;
   const repoRoot = options.repoRoot ?? REPO_ROOT;
-  const knownPackageIds = options.knownPackageIds ?? (checkKnownPackageIds ? getKnownPackageIds() : undefined);
+  const knownPackageIds =
+    options.knownPackageIds ?? (checkKnownPackageIds ? getKnownPackageIds() : undefined);
 
   for (const prefix of config.alwaysAllowed ?? []) {
     assertPathPrefix(prefix, 'alwaysAllowed path', {
@@ -184,8 +184,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Disallow importing listed @kbn/ui-* packages outside allowlisted paths',
+      description: 'Disallow importing listed @kbn/ui-* packages outside allowlisted paths',
       category: 'Best Practices',
       recommended: true,
     },
@@ -233,8 +232,7 @@ export const NoRestrictedPackageImports: Rule.RuleModule = {
     const options = context.options[0] as BoundariesConfig | undefined;
     // Only treat options as the full policy when they list packages. An empty
     // `{}` / partial options object must not disable the on-disk boundaries.
-    const useInjected =
-      !!options?.packages && Object.keys(options.packages).length > 0;
+    const useInjected = !!options?.packages && Object.keys(options.packages).length > 0;
     const config = useInjected ? options : loadBoundariesConfig();
 
     if (useInjected) {
