@@ -5,81 +5,63 @@
  * 2.0.
  */
 
-import { __resetFlyoutPaginationStoreForTests, flyoutPaginationStore } from './store';
+import { createPaginationStore } from './store';
 import { absentSlice } from './types';
 
-const ID_A = 'slice-a';
-const ID_B = 'slice-b';
-
-describe('flyoutPaginationStore', () => {
-  beforeEach(() => {
-    __resetFlyoutPaginationStoreForTests();
+describe('createPaginationStore', () => {
+  it('initialises with absentSlice state', () => {
+    const store = createPaginationStore();
+    expect(store.getSnapshot()).toEqual(absentSlice);
   });
 
-  it('setSlice creates a new slice', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1, totalDocumentCount: 10 });
-    expect(flyoutPaginationStore.getSlice(ID_A).flyoutDocumentIndex).toBe(1);
-    expect(flyoutPaginationStore.getSlice(ID_A).totalDocumentCount).toBe(10);
+  it('setState merges partial updates', () => {
+    const store = createPaginationStore();
+    store.setState({ flyoutDocumentIndex: 3, totalDocumentCount: 20 });
+    expect(store.getSnapshot().flyoutDocumentIndex).toBe(3);
+    expect(store.getSnapshot().totalDocumentCount).toBe(20);
+    // Other fields survive
+    expect(store.getSnapshot().flyoutDocument).toBeNull();
   });
 
-  it('getSlice returns absentSlice for null, undefined, and unknown ids', () => {
-    expect(flyoutPaginationStore.getSlice(null)).toBe(absentSlice);
-    expect(flyoutPaginationStore.getSlice(undefined)).toBe(absentSlice);
-    expect(flyoutPaginationStore.getSlice('unknown')).toBe(absentSlice);
+  it('notifies subscribers on setState', () => {
+    const store = createPaginationStore();
+    const listener = jest.fn();
+    store.subscribe(listener);
+    store.setState({ flyoutDocumentIndex: 1 });
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it('getSlice returns the correct slice for a known id', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 7, pageSize: 25 });
-    const slice = flyoutPaginationStore.getSlice(ID_A);
-    expect(slice.flyoutDocumentIndex).toBe(7);
-    expect(slice.pageSize).toBe(25);
+  it('stops notifying after unsubscribe', () => {
+    const store = createPaginationStore();
+    const listener = jest.fn();
+    const unsubscribe = store.subscribe(listener);
+    unsubscribe();
+    store.setState({ flyoutDocumentIndex: 2 });
+    expect(listener).not.toHaveBeenCalled();
   });
 
-  it('removeSlice removes the slice so getSlice returns absentSlice', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 2 });
-    flyoutPaginationStore.removeSlice(ID_A);
-    expect(flyoutPaginationStore.getSlice(ID_A)).toBe(absentSlice);
+  it('two stores are independent', () => {
+    const a = createPaginationStore();
+    const b = createPaginationStore();
+    a.setState({ flyoutDocumentIndex: 5 });
+    expect(a.getSnapshot().flyoutDocumentIndex).toBe(5);
+    expect(b.getSnapshot().flyoutDocumentIndex).toBeNull();
   });
 
-  it('removeSlice is a no-op for unknown ids', () => {
-    expect(() => flyoutPaginationStore.removeSlice('nope')).not.toThrow();
+  it('multiple setState calls accumulate correctly', () => {
+    const store = createPaginationStore();
+    store.setState({ totalDocumentCount: 10 });
+    store.setState({ flyoutDocumentIndex: 2 });
+    expect(store.getSnapshot().totalDocumentCount).toBe(10);
+    expect(store.getSnapshot().flyoutDocumentIndex).toBe(2);
   });
 
-  it('mutating slice A does not change the object reference for slice B', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
-    flyoutPaginationStore.setSlice(ID_B, { flyoutDocumentIndex: 2 });
-    const snapshotB = flyoutPaginationStore.getSlice(ID_B);
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 99 });
-    expect(flyoutPaginationStore.getSlice(ID_B)).toBe(snapshotB);
-  });
-
-  it('removeSlice for A does not change the object reference for slice B', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
-    flyoutPaginationStore.setSlice(ID_B, { flyoutDocumentIndex: 2 });
-    const snapshotB = flyoutPaginationStore.getSlice(ID_B);
-    flyoutPaginationStore.removeSlice(ID_A);
-    expect(flyoutPaginationStore.getSlice(ID_B)).toBe(snapshotB);
-  });
-
-  it('__resetFlyoutPaginationStoreForTests clears all slices', () => {
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
-    __resetFlyoutPaginationStoreForTests();
-    expect(flyoutPaginationStore.getSlice(ID_A)).toBe(absentSlice);
-  });
-
-  it('subscribers are notified on setSlice and removeSlice, not on no-op setSlice', () => {
-    const spy = jest.fn();
-    const unsub = flyoutPaginationStore.subscribe(spy);
-
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
-    expect(spy).toHaveBeenCalledTimes(1);
-
-    flyoutPaginationStore.setSlice(ID_A, { flyoutDocumentIndex: 1 });
-    expect(spy).toHaveBeenCalledTimes(1);
-
-    flyoutPaginationStore.removeSlice(ID_A);
-    expect(spy).toHaveBeenCalledTimes(2);
-
-    unsub();
+  it('mutating store A does not change the snapshot reference of store B', () => {
+    const a = createPaginationStore();
+    const b = createPaginationStore();
+    b.setState({ flyoutDocumentIndex: 7 });
+    const snapshotB = b.getSnapshot();
+    a.setState({ flyoutDocumentIndex: 99 });
+    expect(b.getSnapshot()).toBe(snapshotB);
   });
 });

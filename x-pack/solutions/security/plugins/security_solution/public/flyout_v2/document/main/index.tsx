@@ -104,21 +104,13 @@ export interface DocumentFlyoutProps {
    * Optional test subject applied to the existing flyout header.
    */
   dataTestSubj?: string;
-  /**
-   * Per-source-instance UUID forwarded from a paginated document source.
-   * Passed down to `Header` and used to look up the loading/pagination state
-   * from `flyoutPaginationStore`. Absent for non-paginated flyout opens.
-   */
-  paginationInstanceId?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo((props: DocumentFlyoutProps) => {
-  const { flyoutDocument, isFlyoutDocumentLoading } = useFlyoutPagination(
-    props.paginationInstanceId
-  );
+  const { flyoutDocument, isFlyoutDocumentLoading } = useFlyoutPagination();
   const hit = flyoutDocument ?? props.hit;
 
   if (!hit) {
@@ -143,7 +135,6 @@ const DocumentFlyoutContent = memo(
     onAlertUpdated,
     renderCellActions,
     dataTestSubj,
-    paginationInstanceId,
     isPaginationLoading,
   }: DocumentFlyoutContentProps) => {
     const { openNotes, openDocumentFlyoutFromPattern } = useFlyoutApi();
@@ -267,7 +258,6 @@ const DocumentFlyoutContent = memo(
             onAlertUpdated={onAlertUpdated}
             onShowNotes={onShowNotesFromHeader}
             isPaginationLoading={isPaginationLoading}
-            paginationInstanceId={paginationInstanceId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

@@ -65,14 +65,6 @@ export interface DocumentFlyoutWrapperProps {
    * Optional test subject forwarded to the document flyout header without adding a layout wrapper.
    */
   dataTestSubj?: string;
-  /**
-   * Per-source-instance UUID that identifies which pagination slice in
-   * `flyoutPaginationStore` belongs to this flyout session. When provided,
-   * the flyout header renders in-flyout pagination controls (prev/next).
-   * Omitting it (e.g. when opened from the Analyzer graph) disables
-   * pagination for that session.
-   */
-  paginationInstanceId?: string;
 }
 
 /**
@@ -87,7 +79,6 @@ export const DocumentFlyoutWrapper = memo(
     renderCellActions,
     onAlertUpdated,
     dataTestSubj,
-    paginationInstanceId,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
@@ -164,7 +155,6 @@ export const DocumentFlyoutWrapper = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={handleAlertUpdated}
             dataTestSubj={dataTestSubj}
-            paginationInstanceId={paginationInstanceId}
           />
         </>
       );

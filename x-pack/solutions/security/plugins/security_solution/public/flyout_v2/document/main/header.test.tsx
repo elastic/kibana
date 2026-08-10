@@ -16,7 +16,8 @@ import {
 } from '../../shared/components/test_ids';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID } from './components/test_ids';
-import { __resetFlyoutPaginationStoreForTests, flyoutPaginationStore } from '../pagination/store';
+import { createPaginationStore } from '../pagination/store';
+import { PaginationStoreProvider } from '../pagination/context';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -147,17 +148,23 @@ const renderHeader = (props: RenderHeaderProps) =>
     </IntlProvider>
   );
 
-const mockUseGetFlyoutLink = useGetFlyoutLink as jest.Mock;
+const renderHeaderWithStore = (
+  props: RenderHeaderProps,
+  store: ReturnType<typeof createPaginationStore>
+) =>
+  render(
+    <PaginationStoreProvider value={store}>
+      <IntlProvider locale="en">
+        <Header {...defaultHeaderProps} {...props} />
+      </IntlProvider>
+    </PaginationStoreProvider>
+  );
 
-const INSTANCE_ID = 'test-instance-uuid';
+const mockUseGetFlyoutLink = useGetFlyoutLink as jest.Mock;
 
 describe('<DocumentHeader />', () => {
   beforeEach(() => {
     mockUseGetFlyoutLink.mockReturnValue(null);
-    __resetFlyoutPaginationStoreForTests();
-  });
-  afterEach(() => {
-    __resetFlyoutPaginationStoreForTests();
   });
 
   it('should pass the hit to the severity component', () => {
@@ -213,17 +220,14 @@ describe('<DocumentHeader />', () => {
   });
 
   it('should hide stale alert actions while a paginated document is loading', () => {
+    const store = createPaginationStore();
     act(() => {
-      flyoutPaginationStore.setSlice(INSTANCE_ID, {
-        flyoutDocumentIndex: 1,
-        totalDocumentCount: 5,
-      });
+      store.setState({ flyoutDocumentIndex: 1, totalDocumentCount: 5 });
     });
-    const { getByTestId, queryByTestId } = renderHeader({
-      hit: alertHit,
-      isPaginationLoading: true,
-      paginationInstanceId: INSTANCE_ID,
-    });
+    const { getByTestId, queryByTestId } = renderHeaderWithStore(
+      { hit: alertHit, isPaginationLoading: true },
+      store
+    );
 
     expect(getByTestId('mockHeaderTitle')).toBeInTheDocument();
     expect(getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).toBeInTheDocument();
@@ -285,39 +289,26 @@ describe('<DocumentHeader />', () => {
   });
 
   describe('alert pagination', () => {
-    it('does not render the pagination control when no paginationInstanceId is passed', () => {
-      // No paginationInstanceId → header has no slice to look up
+    it('does not render the pagination control when there is no PaginationStoreProvider', () => {
       const { queryByTestId } = renderHeader({ hit: alertHit });
       expect(queryByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('does not render the pagination control when only one document is in the result set', () => {
+      const store = createPaginationStore();
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_ID, {
-          flyoutDocumentIndex: 0,
-          pageSize: 50,
-          totalDocumentCount: 1,
-        });
+        store.setState({ flyoutDocumentIndex: 0, pageSize: 50, totalDocumentCount: 1 });
       });
-      const { queryByTestId } = renderHeader({
-        hit: alertHit,
-        paginationInstanceId: INSTANCE_ID,
-      });
+      const { queryByTestId } = renderHeaderWithStore({ hit: alertHit }, store);
       expect(queryByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('renders the pagination control with page count equal to the total document count', () => {
+      const store = createPaginationStore();
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_ID, {
-          flyoutDocumentIndex: 2,
-          pageSize: 50,
-          totalDocumentCount: 1432,
-        });
+        store.setState({ flyoutDocumentIndex: 2, pageSize: 50, totalDocumentCount: 1432 });
       });
-      const { getByTestId } = renderHeader({
-        hit: alertHit,
-        paginationInstanceId: INSTANCE_ID,
-      });
+      const { getByTestId } = renderHeaderWithStore({ hit: alertHit }, store);
       const pagination = getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID);
       expect(pagination).toBeInTheDocument();
       // The compressed EuiPagination renders a "{active+1} of {total}" label.
@@ -325,36 +316,32 @@ describe('<DocumentHeader />', () => {
     });
 
     it('uses the absolute document index when computing the active page', () => {
+      const store = createPaginationStore();
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_ID, {
+        store.setState({
           // 2nd document of the 2nd page (page size 50) → absolute index 51.
           flyoutDocumentIndex: 51,
           pageSize: 50,
           totalDocumentCount: 1432,
         });
       });
-      const { getByTestId } = renderHeader({
-        hit: alertHit,
-        paginationInstanceId: INSTANCE_ID,
-      });
+      const { getByTestId } = renderHeaderWithStore({ hit: alertHit }, store);
       const pagination = getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID);
       expect(pagination).toHaveTextContent('52 of 1432');
     });
 
     it('opens the next/prev document via the flyout pagination slice when pagination is clicked', () => {
+      const store = createPaginationStore();
       const openDocumentFlyoutImpl = jest.fn();
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_ID, {
+        store.setState({
           flyoutDocumentIndex: 49,
           pageSize: 50,
           totalDocumentCount: 1432,
           openDocumentFlyoutImpl,
         });
       });
-      const { getByTestId } = renderHeader({
-        hit: alertHit,
-        paginationInstanceId: INSTANCE_ID,
-      });
+      const { getByTestId } = renderHeaderWithStore({ hit: alertHit }, store);
       const pagination = getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID);
 
       const nextButton = pagination.querySelector('[data-test-subj="pagination-button-next"]');
@@ -374,21 +361,11 @@ describe('<DocumentHeader />', () => {
     });
 
     it('renders the pagination control even on non-alert documents (the source is the source of truth)', () => {
-      // For Flyout V2, every document in the result set is shown. When a
-      // paginated source is driving the flyout, render the pagination
-      // unconditionally for events or alerts; the source fills the store only
-      // when pagination makes sense.
+      const store = createPaginationStore();
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_ID, {
-          flyoutDocumentIndex: 1,
-          pageSize: 50,
-          totalDocumentCount: 5,
-        });
+        store.setState({ flyoutDocumentIndex: 1, pageSize: 50, totalDocumentCount: 5 });
       });
-      const { getByTestId } = renderHeader({
-        hit: eventHit,
-        paginationInstanceId: INSTANCE_ID,
-      });
+      const { getByTestId } = renderHeaderWithStore({ hit: eventHit }, store);
       expect(getByTestId(FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID)).toBeInTheDocument();
     });
   });

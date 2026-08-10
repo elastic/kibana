@@ -80,12 +80,6 @@ export interface HeaderProps {
    * rendered hit is kept around only to preserve non-mutating header context.
    */
   isPaginationLoading?: boolean;
-  /**
-   * Per-source-instance UUID passed in from a paginated document source.
-   * When present the header renders in-flyout `EuiPagination` chevrons keyed
-   * to the caller's slice. Absent for non-paginated flyout opens.
-   */
-  paginationInstanceId?: string;
 }
 
 /**
@@ -100,7 +94,6 @@ export const Header: FC<HeaderProps> = memo(
     onAlertUpdated,
     onShowNotes,
     isPaginationLoading = false,
-    paginationInstanceId,
   }) => {
     const { euiTheme } = useEuiTheme();
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
@@ -116,15 +109,9 @@ export const Header: FC<HeaderProps> = memo(
       timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
     });
 
-    const { flyoutDocumentIndex, totalDocumentCount, openDocumentFlyout } =
-      useFlyoutPagination(paginationInstanceId);
-    // Show pagination only when the flyout was opened from a paginated source
-    // (paginationInstanceId set) and there is more than one document to walk.
+    const { flyoutDocumentIndex, totalDocumentCount, openDocumentFlyout } = useFlyoutPagination();
     const showPagination =
-      paginationInstanceId != null &&
-      totalDocumentCount > 1 &&
-      flyoutDocumentIndex != null &&
-      flyoutDocumentIndex >= 0;
+      totalDocumentCount > 1 && flyoutDocumentIndex != null && flyoutDocumentIndex >= 0;
 
     // When pagination is rendered on the right side of the row it would sit
     // underneath the absolutely-positioned EuiFlyout close button (top: 8px,

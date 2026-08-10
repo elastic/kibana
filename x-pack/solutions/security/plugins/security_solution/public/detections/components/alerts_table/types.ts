@@ -78,11 +78,11 @@ export interface SecurityAlertsTableContext {
   userProfiles: AlertsUserProfilesData;
   pageScope: PageScope;
   /**
-   * Per-source-instance UUID minted by `AlertsTableComponent` at mount.
-   * Passed here so `ActionsCell` can dispatch row-expand actions via the
-   * correct pagination slice without relying on a global singleton.
+   * Stable callback from `usePaginatedFlyout` that opens the document at the
+   * given absolute index. Passed here so `ActionsCell` can dispatch row-expand
+   * actions without accessing the store directly.
    */
-  paginationInstanceId: string;
+  openDocumentFlyout: (documentIndex: number) => void;
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
