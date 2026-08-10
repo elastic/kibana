@@ -6,7 +6,8 @@ FROM logs-entityanalytics_entra_id.device-__namespace__
 | WHERE host.id IS NOT NULL
     AND (device.registered_owners.mail IS NOT NULL OR device.registered_owners.id IS NOT NULL OR device.registered_owners.user_principal_name IS NOT NULL)
 | EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(host.id))
-| EVAL ownerKey = MV_APPEND(MV_APPEND(device.registered_owners.mail, device.registered_owners.id), device.registered_owners.user_principal_name)
+| EVAL mailAndId = CASE(device.registered_owners.mail IS NULL, device.registered_owners.id, device.registered_owners.id IS NULL, device.registered_owners.mail, MV_APPEND(device.registered_owners.mail, device.registered_owners.id))
+| EVAL ownerKey = CASE(mailAndId IS NULL, device.registered_owners.user_principal_name, device.registered_owners.user_principal_name IS NULL, mailAndId, MV_APPEND(mailAndId, device.registered_owners.user_principal_name))
 | MV_EXPAND ownerKey
 | EVAL actorUserId = CONCAT(\\"user:\\", ownerKey, \\"@entra_id\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
@@ -22,7 +23,8 @@ FROM logs-entityanalytics_entra_id.device-__namespace__
 | WHERE host.id IS NOT NULL
     AND (device.registered_owners.mail IS NOT NULL OR device.registered_owners.id IS NOT NULL OR device.registered_owners.user_principal_name IS NOT NULL)
 | EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(host.id))
-| EVAL ownerKey = MV_APPEND(MV_APPEND(device.registered_owners.mail, device.registered_owners.id), device.registered_owners.user_principal_name)
+| EVAL mailAndId = CASE(device.registered_owners.mail IS NULL, device.registered_owners.id, device.registered_owners.id IS NULL, device.registered_owners.mail, MV_APPEND(device.registered_owners.mail, device.registered_owners.id))
+| EVAL ownerKey = CASE(mailAndId IS NULL, device.registered_owners.user_principal_name, device.registered_owners.user_principal_name IS NULL, mailAndId, MV_APPEND(mailAndId, device.registered_owners.user_principal_name))
 | MV_EXPAND ownerKey
 | EVAL actorUserId = CONCAT(\\"user:\\", ownerKey, \\"@entra_id\\")
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"

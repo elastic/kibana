@@ -34,15 +34,20 @@ const OKTA_OWNS_RULES: DirectEuidRule[] = [{ field: 'host.id', euidType: 'host' 
  * Reads device documents and inverts device→user: ownership exists only on the
  * device object, so the maintainer emits user-keyed relationship writes.
  *
- * `registered_owners` has a plain object mapping (not nested), so ES flattens
- * the array at ingest time and per-owner correlation is lost — `id`, `mail`, and
+ * `registered_owners` has a plain object mapping (not nested), so the indexed
+ * representation ES|QL reads flattens the array — `id`, `mail`, and
  * `user_principal_name` become independent multi-valued columns of potentially
- * different lengths. A ranked CASE would short-circuit on the first non-null
- * column and silently drop owners who lack that field.
+ * different lengths. A ranked CASE over the whole column would short-circuit on
+ * the first non-null one and silently drop owners who lack that field.
  *
- * `MV_APPEND` unions all three arrays unconditionally so every identifier for
- * every owner emits a candidate row. Lower-ranked identifiers of owners whose
- * higher-ranked one resolves will 404 — that is expected and harmless.
+ * The union must be null-guarded: `MV_APPEND` returns null if ANY argument is
+ * null, and under the engine's `unmapped_fields="nullify"` preamble an absent
+ * column is null — so an unguarded `MV_APPEND` drops every owner on any document
+ * missing one of the three fields. Each step therefore falls back to the other
+ * operand when one side is null.
+ *
+ * Lower-ranked identifiers of owners whose higher-ranked one resolves will 404 —
+ * that is expected and harmless.
  */
 function buildEntraIdOwnsEsqlQuery(namespace: string): string {
   const logIndex = `logs-${ENTRA_ID_DEVICE_DATASET}-${namespace}`;
@@ -51,7 +56,8 @@ function buildEntraIdOwnsEsqlQuery(namespace: string): string {
 | WHERE host.id IS NOT NULL
     AND (${OWNER_MAIL_FIELD} IS NOT NULL OR ${OWNER_ID_FIELD} IS NOT NULL OR ${OWNER_UPN_FIELD} IS NOT NULL)
 | EVAL targetEntityId = CONCAT("host:", TO_STRING(host.id))
-| EVAL ownerKey = MV_APPEND(MV_APPEND(${OWNER_MAIL_FIELD}, ${OWNER_ID_FIELD}), ${OWNER_UPN_FIELD})
+| EVAL mailAndId = CASE(${OWNER_MAIL_FIELD} IS NULL, ${OWNER_ID_FIELD}, ${OWNER_ID_FIELD} IS NULL, ${OWNER_MAIL_FIELD}, MV_APPEND(${OWNER_MAIL_FIELD}, ${OWNER_ID_FIELD}))
+| EVAL ownerKey = CASE(mailAndId IS NULL, ${OWNER_UPN_FIELD}, ${OWNER_UPN_FIELD} IS NULL, mailAndId, MV_APPEND(mailAndId, ${OWNER_UPN_FIELD}))
 | MV_EXPAND ownerKey
 | EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", ownerKey, "@entra_id")
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""

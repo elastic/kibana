@@ -126,6 +126,14 @@ const registerLogInvertedRelationshipMaintainerSuite = (
         // The `running` status flips before the latest alias is ready, so seeding
         // immediately after install races entity-store initialization.
         await waitForEntityStoreRunning(apiClient, defaultHeaders);
+
+        // Schedules the maintainer task records, matching the raw_identifiers
+        // suites. `runSync` persists run state against that task afterwards.
+        const initResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+          { headers: internalHeaders, responseType: 'json', body: {} }
+        );
+        expect([200, 201]).toContain(initResponse.statusCode);
       });
 
       apiTest.afterAll(async ({ apiClient, esClient }) => {

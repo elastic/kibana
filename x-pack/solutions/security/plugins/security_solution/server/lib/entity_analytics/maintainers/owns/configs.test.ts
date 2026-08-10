@@ -270,13 +270,12 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       expect(query).toContain('STATS owns = VALUES(targetEntityId) BY actorUserId');
     });
 
-    it('Step 2 uses MV_APPEND to union all owner identifier arrays before MV_EXPAND', () => {
+    it('Step 2 unions all owner identifier arrays before MV_EXPAND', () => {
       const query = entraConfig().esqlQueryOverride('default');
-      // `registered_owners` is a plain object mapping (not nested), so ES flattens
-      // it to parallel arrays of different lengths. A ranked CASE would short-circuit
-      // on the first non-null column and silently drop owners who lack that field.
-      // MV_APPEND unions all three arrays so every identifier for every owner emits
-      // a candidate row — correctness over minimising notFound hits.
+      // `registered_owners` is a plain object mapping (not nested), so the indexed
+      // representation is parallel arrays of different lengths. A ranked CASE over
+      // the whole column would short-circuit on the first non-null one and drop
+      // owners lacking that field, so all three are unioned instead.
       expect(query).toContain('MV_APPEND(');
       expect(query).toContain(`${OWNERS_FIELD}.mail`);
       expect(query).toContain(`${OWNERS_FIELD}.id`);
@@ -286,6 +285,21 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       expect(query.indexOf('MV_EXPAND ownerKey')).toBeLessThan(
         query.indexOf('CONCAT("user:", ownerKey')
       );
+    });
+
+    it('Step 2 null-guards every MV_APPEND (a null argument nulls the whole result)', () => {
+      const query = entraConfig().esqlQueryOverride('default');
+      // MV_APPEND returns null if ANY argument is null, and the engine's
+      // `unmapped_fields="nullify"` preamble makes an absent column null. An
+      // unguarded union therefore drops every owner on any document missing one
+      // of the three fields. Each append must fall back to the other operand.
+      const appendCalls = query.match(/MV_APPEND\(/g) ?? [];
+      expect(appendCalls.length).toBeGreaterThan(0);
+      for (const suffix of ['mail', 'id', 'user_principal_name']) {
+        expect(query).toContain(`${OWNERS_FIELD}.${suffix} IS NULL`);
+      }
+      // Every MV_APPEND must sit inside a CASE that has already excluded nulls.
+      expect(query).not.toMatch(/EVAL\s+\w+\s*=\s*MV_APPEND\(/);
     });
 
     it('Step 2 builds namespace-suffixed actor EUIDs and a namespace-less host target', () => {
