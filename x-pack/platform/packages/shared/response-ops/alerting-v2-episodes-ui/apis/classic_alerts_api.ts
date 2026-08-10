@@ -26,6 +26,8 @@ import {
 import {
   mapClassicAlertToEpisode,
   mapClassicAlertToHistogramRow,
+  CLASSIC_ALERT_EPISODE_SOURCE_FIELDS,
+  CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
 } from '../classic_alerts/map_alert';
 import {
   CLASSIC_ALERTS_HISTOGRAM_LIMIT,
@@ -56,7 +58,7 @@ interface RacFindBody {
   track_total_hits?: boolean;
   sort?: estypes.SortOptions[];
   aggs?: Record<string, estypes.AggregationsAggregationContainer>;
-  _source?: boolean;
+  _source?: boolean | string[];
 }
 
 interface RacFindHit {
@@ -138,6 +140,7 @@ export const fetchV1AlertsAsEpisodes = async ({
       sort: buildClassicAlertsSort(sortState),
       size: Math.min(pageSize, CLASSIC_ALERTS_LIST_PAGE_SIZE),
       track_total_hits: false,
+      _source: [...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS],
     },
     abortSignal
   );
@@ -210,6 +213,7 @@ export const fetchV1AlertsHistogram = async ({
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       size: CLASSIC_ALERTS_HISTOGRAM_LIMIT,
       track_total_hits: false,
+      _source: [...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS],
     },
     abortSignal
   );

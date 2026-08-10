@@ -18,6 +18,35 @@ import {
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+
+/**
+ * Minimum `_source` projection for `mapClassicAlertToEpisode`.
+ * Passing this to the RAC find request avoids transferring the full document.
+ */
+export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
+  TIMESTAMP,
+  ALERT_UUID,
+  ALERT_START,
+  ALERT_END,
+  ALERT_DURATION,
+  ALERT_STATUS,
+  ALERT_RULE_UUID,
+  ALERT_RULE_TAGS,
+  ALERT_SEVERITY,
+] as const;
+
+/**
+ * Minimum `_source` projection for `mapClassicAlertToHistogramRow`.
+ * Includes all possible breakdown fields so a single static list covers every breakdown.
+ */
+export const CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS = [
+  TIMESTAMP,
+  ALERT_START,
+  ALERT_END,
+  ALERT_STATUS,
+  ALERT_RULE_UUID,
+  ALERT_WORKFLOW_STATUS,
+] as const;
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';

@@ -14,6 +14,10 @@ import {
   fetchV1AlertsTags,
   fetchV1AlertById,
 } from './classic_alerts_api';
+import {
+  CLASSIC_ALERT_EPISODE_SOURCE_FIELDS,
+  CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
+} from '../classic_alerts/map_alert';
 
 const mockHttp = httpServiceMock.createStartContract();
 
@@ -49,10 +53,9 @@ describe('classic_alerts_api', () => {
         services: { http: mockHttp },
       });
 
-      expect(mockHttp.post).toHaveBeenCalledWith(
-        `${BASE_RAC_ALERTS_API_PATH}/find`,
-        expect.objectContaining({ body: expect.any(String) })
-      );
+      const [, callOptions] = mockHttp.post.mock.calls[0];
+      const body = JSON.parse((callOptions as { body: string }).body);
+      expect(body._source).toEqual([...CLASSIC_ALERT_EPISODE_SOURCE_FIELDS]);
       expect(episodes).toHaveLength(1);
       expect(episodes[0].supports_actions).toBe(false);
       expect(episodes[0].supports_timeline).toBe(false);
@@ -123,6 +126,9 @@ describe('classic_alerts_api', () => {
 
       const rows = await fetchV1AlertsHistogram({ services: { http: mockHttp } });
 
+      const [, callOptions] = mockHttp.post.mock.calls[0];
+      const body = JSON.parse((callOptions as { body: string }).body);
+      expect(body._source).toEqual([...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS]);
       expect(rows).toHaveLength(1);
       expect(rows[0].first_timestamp).toBe('2024-01-01T00:00:00.000Z');
       expect(rows[0].last_timestamp).toBe('2024-01-01T01:00:00.000Z');
