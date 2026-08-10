@@ -273,6 +273,17 @@ export const config: PluginConfigDescriptor = {
               enabled: schema.boolean({ defaultValue: false }),
             })
           ),
+          // POC (standalone agentless config): an API key's effective privileges are the
+          // intersection of its role descriptors and the creating principal's privileges, and
+          // Kibana's service account can neither write agent data streams nor touch the
+          // `agentless-*` state indices. Minting the ES output API key authenticated as this
+          // service token (an elastic/fleet-server token) reproduces v1 semantics, where
+          // fleet-server is the creating principal.
+          standaloneConfig: schema.maybe(
+            schema.object({
+              outputApiKeyServiceToken: schema.maybe(schema.string()),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,

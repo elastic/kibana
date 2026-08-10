@@ -52,6 +52,9 @@ export interface FleetConfigType {
     managedBulk?: {
       enabled: boolean;
     };
+    standaloneConfig?: {
+      outputApiKeyServiceToken?: string;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
