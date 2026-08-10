@@ -33,6 +33,8 @@ export const ALERTING_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
+  /** A signal rule's merged shape violates signal constraints. */
+  INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
@@ -347,6 +349,23 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
   /** Episode attachment isStale check failed; returns false. */
   AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
+  /** Rule attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_RULE_RESOLVE_FAILED: 'AGENT_BUILDER_RULE_RESOLVE_FAILED',
+  /** Rule attachment isStale check failed; returns false. */
+  AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED',
+  /** Action policy attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED: 'AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED',
+  /** Action policy attachment isStale check failed; returns false. */
+  AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED:
+    'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
+  /** `manage_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `manage_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** Skill schema docs could not be generated; skill registration aborted (error). */
+  AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
+  /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
+  AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────
   /**

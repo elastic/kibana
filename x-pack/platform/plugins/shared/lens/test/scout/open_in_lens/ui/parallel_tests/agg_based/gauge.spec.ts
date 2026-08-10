@@ -34,7 +34,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Basic');
     await lens.waitForVisualization('gaugeChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
@@ -51,7 +51,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Agg with params');
     await lens.waitForVisualization('gaugeChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
@@ -82,7 +82,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Color ranges');
     await lens.waitForVisualization('gaugeChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();

@@ -124,7 +124,7 @@ export const AiIndexList = ({ aiIndices, isLoading, error }: AiIndexListProps) =
 
       {matchCount === 0 ? (
         <EuiEmptyPrompt
-          iconType="search"
+          iconType="magnify"
           data-test-subj="contextAiIndexCardsNoMatches"
           title={
             <h2>
