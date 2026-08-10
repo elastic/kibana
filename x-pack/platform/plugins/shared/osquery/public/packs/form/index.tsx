@@ -183,7 +183,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     watch,
     trigger,
     setValue,
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting, isDirty, dirtyFields },
   } = hooksForm;
   const { policy_ids: policyIds, shards, pack_type: packType, schedule, queries } = watch();
 
@@ -295,8 +295,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           : [];
         const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
+        // Only emit pack-level schedule fields when the user actually touched
+        // the schedule section (dirtyFields.schedule) or when the pack already
+        // has an explicit persisted schedule (packHasExplicitSchedule). Suppressing
+        // this for an untouched legacy pack prevents a spurious legacy→interval
+        // transition on the server that would strip every bare per-query interval.
+        const scheduleIsDirtyOrExplicit = Boolean(dirtyFields.schedule) || packHasExplicitSchedule;
         const scheduleFields =
-          isRruleSchedulingEnabled && scheduleFormState ? serializeSchedule(scheduleFormState) : {};
+          isRruleSchedulingEnabled && scheduleFormState && scheduleIsDirtyOrExplicit
+            ? serializeSchedule(scheduleFormState)
+            : {};
 
         return {
           ...restPayload,
@@ -320,10 +328,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [
       createAsync,
       defaultValue?.saved_object_id,
+      dirtyFields.schedule,
       editMode,
       getShards,
       isRruleSchedulingEnabled,
       originalStartDate,
+      packHasExplicitSchedule,
       shards,
       showScheduleErrorsToast,
       updateAsync,

@@ -25,6 +25,7 @@ import {
   resolvePreservedQueries,
   hasQueries,
   START_DATE_EPOCH_FALLBACK,
+  convergePerQueryIntervals,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -197,11 +198,12 @@ describe('Pack utils', () => {
     // prebuilt pack must NOT override default_native_schedule on the wire.
     // Only an explicit schedule_type: 'interval' marker (set via the flyout)
     // should produce a per-query interval override.
+    // Uses distinct non-default values (80/100 under 120) so divergence is visible.
     test('stale marker-less per-query interval — NOT emitted, query inherits pack default', () => {
       const out = convertSOQueriesToPackConfig(
         [
-          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 3600 },
-          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 120 },
+          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 80 },
+          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 100 },
         ],
         {
           packSchedule: { schedule_type: 'interval', interval: 120 },
@@ -209,9 +211,9 @@ describe('Pack utils', () => {
         }
       );
       expect(out.default_native_schedule).toEqual({ interval: 120 });
-      // q1 has a stale interval (3600) without schedule_type — must NOT reach the wire.
+      // q1 has a stale interval (80) without schedule_type — must NOT reach the wire.
       expect(out.queries.q1).not.toHaveProperty('interval');
-      // q2 matches the pack interval and has no marker — also must NOT be emitted.
+      // q2 has a stale interval (100) without schedule_type — also must NOT be emitted.
       expect(out.queries.q2).not.toHaveProperty('interval');
     });
 
@@ -224,7 +226,7 @@ describe('Pack utils', () => {
             name: 'q2',
             query: 'SELECT 2',
             schedule_type: 'interval' as const,
-            interval: 3600,
+            interval: 80,
           },
         ],
         {
@@ -235,7 +237,7 @@ describe('Pack utils', () => {
       expect(out.default_native_schedule).toEqual({ interval: 120 });
       expect(out.queries.q1).not.toHaveProperty('interval');
       // q2 has an explicit flyout override — must reach the wire.
-      expect(out.queries.q2.interval).toBe(3600);
+      expect(out.queries.q2.interval).toBe(80);
     });
 
     test('legacy pack (no schedule_type) — per-query interval only, no default_*_schedule', () => {
@@ -726,11 +728,12 @@ describe('Pack utils', () => {
 
     // Regression guard for #279946: legacy→interval transition must drop bare
     // interval values (stale prebuilt-pack copies) from queries without an
-    // explicit schedule_type marker.
+    // explicit schedule_type marker. Uses 80 (not the synthesized default 3600)
+    // so the dropped value is distinguishable from the default.
     test('legacy→interval transition — drops bare interval without schedule_type marker', () => {
       expect(
         stripPriorModePerQueryFields(
-          { query: 'SELECT 1', interval: 3600 },
+          { query: 'SELECT 1', interval: 80 },
           'interval',
           undefined // prior mode: legacy (no pack schedule_type)
         )
@@ -740,23 +743,11 @@ describe('Pack utils', () => {
     test('legacy→interval transition — preserves explicit interval override (schedule_type: interval)', () => {
       expect(
         stripPriorModePerQueryFields(
-          { query: 'SELECT 1', interval: 3600, schedule_type: 'interval' },
+          { query: 'SELECT 1', interval: 80, schedule_type: 'interval' },
           'interval',
           undefined // prior mode: legacy
         )
-      ).toEqual({ query: 'SELECT 1', interval: 3600, schedule_type: 'interval' });
-    });
-
-    test('interval→interval (same mode edit) — bare interval WITHOUT prior legacy mode is preserved', () => {
-      // When the pack was already in interval mode (priorPackMode: 'interval'),
-      // a bare interval value is NOT dropped — only the legacy→interval transition strips it.
-      expect(
-        stripPriorModePerQueryFields(
-          { query: 'SELECT 1', interval: 3600 },
-          'interval',
-          'interval' // prior mode: already interval
-        )
-      ).toEqual({ query: 'SELECT 1', interval: 3600 });
+      ).toEqual({ query: 'SELECT 1', interval: 80, schedule_type: 'interval' });
     });
 
     test('mode cleared — drops both override flavours and interval', () => {
@@ -780,6 +771,49 @@ describe('Pack utils', () => {
       expect(stripPriorModePerQueryFields({ query: 'SELECT 1' }, undefined)).toEqual({
         query: 'SELECT 1',
       });
+    });
+  });
+
+  describe('convergePerQueryIntervals', () => {
+    test('drops marker-less bare interval in interval-mode pack', () => {
+      const result = convergePerQueryIntervals(
+        { q1: { query: 'SELECT 1', interval: 80 } },
+        'interval'
+      );
+      expect(result.q1).not.toHaveProperty('interval');
+    });
+
+    test('preserves explicit schedule_type: interval override', () => {
+      const result = convergePerQueryIntervals(
+        { q1: { query: 'SELECT 1', interval: 100, schedule_type: 'interval' } },
+        'interval'
+      );
+      expect(result.q1).toMatchObject({ interval: 100, schedule_type: 'interval' });
+    });
+
+    test('leaves rrule-override query untouched in interval-mode pack', () => {
+      const rruleQuery = {
+        query: 'SELECT 1',
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+      };
+      const result = convergePerQueryIntervals({ q1: rruleQuery }, 'interval');
+      expect(result.q1).toEqual(rruleQuery);
+    });
+
+    test('no-op in legacy mode (packScheduleType undefined)', () => {
+      const queries = { q1: { query: 'SELECT 1', interval: 80 } };
+      expect(convergePerQueryIntervals(queries, undefined)).toBe(queries);
+    });
+
+    test('no-op in rrule-mode pack', () => {
+      const queries = { q1: { query: 'SELECT 1', interval: 80 } };
+      expect(convergePerQueryIntervals(queries, 'rrule')).toBe(queries);
+    });
+
+    test('query without interval is untouched', () => {
+      const result = convergePerQueryIntervals({ q1: { query: 'SELECT 1' } }, 'interval');
+      expect(result.q1).toEqual({ query: 'SELECT 1' });
     });
   });
 

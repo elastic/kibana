@@ -21,6 +21,22 @@ jest.mock('../../lib/get_user_info', () => ({
   getUserInfo: jest.fn(),
 }));
 
+// uuid@11 ships ESM-only; under jest the CJS interop leaves `v4` uncallable
+// ("(0, _uuid.v4) is not a function"). Mock it with a deterministic counter so
+// route handlers that stamp `schedule_id: uuidv4()` run.
+jest.mock('uuid', () => {
+  let counter = 0;
+
+  // UUID-v4-shaped so callers asserting the v4 format pass; counter keeps them unique.
+  return {
+    v4: () => {
+      const n = (++counter).toString(16).padStart(12, '0');
+
+      return `00000000-0000-4000-8000-${n}`;
+    },
+  };
+});
+
 const fetchAllItemsFromListMock = (listMock: jest.Mock) =>
   jest.fn().mockImplementation(async () => {
     const { items = [] } = await listMock();
@@ -280,6 +296,79 @@ describe('createPackRoute', () => {
         updatedPackagePolicy.inputs[0].config.osquery.value.packs['default--my-pack'];
       // Deterministic rule: the maximum of the two differing shards.
       expect(writtenPack.shard).toBe(75);
+    });
+  });
+
+  describe('per-query interval convergence on create', () => {
+    it('marker-less bare per-query interval is dropped when pack uses interval mode', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          schedule_type: 'interval',
+          interval: 60,
+          queries: {
+            q1: { query: 'SELECT 1', interval: 300 }, // marker-less — should be converged away
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+
+      const createCall = mockClient.create.mock.calls[0];
+      const createdAttributes = createCall[1];
+      // Queries are stored as an object keyed by id, not an array.
+      const writtenQuery = createdAttributes.queries.q1;
+      // Marker-less bare interval must not reach the SO.
+      expect(writtenQuery).not.toHaveProperty('interval');
+      expect(writtenQuery).not.toHaveProperty('schedule_type');
+    });
+
+    it('explicit schedule_type: interval override is preserved on create', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          schedule_type: 'interval',
+          interval: 60,
+          queries: {
+            q1: { query: 'SELECT 1', interval: 300, schedule_type: 'interval' }, // explicit — must be preserved
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const createCall = mockClient.create.mock.calls[0];
+      const createdAttributes = createCall[1];
+      // Queries are stored as an object keyed by id, not an array.
+      const writtenQuery = createdAttributes.queries.q1;
+      // Explicit override must survive convergence.
+      expect(writtenQuery.interval).toBe(300);
+      expect(writtenQuery.schedule_type).toBe('interval');
     });
   });
 });

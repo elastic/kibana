@@ -330,6 +330,41 @@ export const stripPriorModePerQueryFields = (
   return rest;
 };
 
+/**
+ * Converge marker-less per-query intervals on write.
+ *
+ * In interval-mode packs, a per-query `interval` is only meaningful when the
+ * query carries an explicit `schedule_type: 'interval'` marker — without the
+ * marker it is a stale copied value that the agent never honours (the wire gate
+ * in `convertSOQueriesToPackConfig` already drops it). Applying this at write
+ * time keeps the stored SO consistent with what the agent actually runs.
+ *
+ * Queries in rrule mode and queries carrying an explicit `schedule_type:
+ * 'interval'` are left untouched.
+ */
+export const convergePerQueryIntervals = (
+  queries: Record<string, PackQueryInput>,
+  packScheduleType: ScheduleType | undefined | null
+): Record<string, PackQueryInput> => {
+  if (packScheduleType !== 'interval') return queries;
+
+  return Object.fromEntries(
+    Object.entries(queries).map(([key, query]) => {
+      if (query.schedule_type === 'interval' || query.schedule_type === 'rrule') {
+        return [key, query];
+      }
+
+      if (query.interval !== undefined) {
+        const { interval: _interval, ...rest } = query;
+
+        return [key, rest];
+      }
+
+      return [key, query];
+    })
+  );
+};
+
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
