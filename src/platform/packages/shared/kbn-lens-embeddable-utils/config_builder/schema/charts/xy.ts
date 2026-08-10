@@ -380,14 +380,9 @@ const xyStylingSchema = z
           .default(DEFAULT_AREAS_FILL_OPACITY)
           .optional()
           .meta({ description: 'Area fill opacity (0-1 typical, max 2 for legacy)' }),
-        fill: z
-          .enum(['solid', 'gradient'])
-          .default(DEFAULT_AREAS_FILL)
-          .optional()
-          .meta({
-            availability: { since: '9.6.0' },
-            description: 'Area fill type: solid or gradient. Defaults to solid.',
-          }),
+        fill: z.enum(['solid', 'gradient']).default(DEFAULT_AREAS_FILL).optional().meta({
+          description: 'Area fill type: solid or gradient. Defaults to solid.',
+        }),
       })
       .strict()
       .optional()
