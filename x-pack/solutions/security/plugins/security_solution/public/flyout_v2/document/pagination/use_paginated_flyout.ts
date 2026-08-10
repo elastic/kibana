@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { flyoutPaginationStore } from './store';
-import { useFlyoutPagination } from './use_flyout_pagination';
+import { createPaginationStore } from './store';
+import { PaginationStoreProvider } from './context';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../shared/hooks/use_open_flyout';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/telemetry';
@@ -20,10 +20,9 @@ import type {
 
 /**
  * Soft-reset payload applied by `closePaginatedFlyout` and the V2 internal
- * `onClose`. Clears every displayed-document field without removing the slice,
- * so that the registered `openDocumentFlyoutImpl` and `pageSize` survive across
- * open/close cycles. The `Partial<ScopedPaginationSlice>` annotation surfaces
- * a compile-time error if a future field addition needs to be handled here.
+ * `onClose`. Clears every displayed-document field without touching the store
+ * instance, so that the registered `openDocumentFlyoutImpl` survives across
+ * open/close cycles.
  */
 const SOFT_RESET: Partial<ScopedPaginationSlice> = {
   flyoutDocumentIndex: null,
@@ -35,20 +34,13 @@ const SOFT_RESET: Partial<ScopedPaginationSlice> = {
  * Writer hook for paginated flyout sources (alerts table, timeline).
  *
  * Responsibilities:
- * - Mints a stable per-source-instance UUID at mount.
- * - Subscribes to its own slice via `useFlyoutPagination` and returns it as
- *   `slice`.
- * - Exposes `setState` so the source can write to the slice without touching
- *   `flyoutPaginationStore` directly.
- * - Manages the V2 system flyout lifecycle: opens it once on the first
- *   `openPaginatedFlyout` call and reuses it; auto-closes on unmount.
- * - Registers `openDocumentFlyoutImpl` in the slice so the in-flyout
- *   `EuiPagination` can dispatch back through `openPaginatedFlyout`.
- * - Auto-removes the slice on unmount.
- *
- * Sources MUST NOT call `flyoutPaginationStore.setSlice` / `removeSlice` or
- * the flyout open APIs directly. All writes go through `setState` /
- * `openPaginatedFlyout` / `closePaginatedFlyout`.
+ * - Creates an isolated per-instance `PaginationStore` in a ref.
+ * - Subscribes to that store directly (source lives outside the provider).
+ * - Wraps the flyout body in `<PaginationStoreProvider>` before opening.
+ * - Manages the V2 system flyout lifecycle.
+ * - Registers `openDocumentFlyoutImpl` in the store.
+ * - Exposes `openDocumentFlyout` so consumers can dispatch opens without
+ *   touching the store directly.
  */
 export const usePaginatedFlyout = ({
   resolveDocument,
@@ -57,69 +49,47 @@ export const usePaginatedFlyout = ({
   origin,
   onClose,
 }: UsePaginatedFlyoutOptions): UsePaginatedFlyoutReturn => {
-  // Stable id: minted once at mount, never changes. Using a ref ensures the
-  // id survives re-renders and is serialisable into V2 system flyout params
-  // (unlike React's `useId` which is only stable within the same React tree).
-  const paginationInstanceId = useRef(
-    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2)
-  ).current;
+  // Per-instance store created once at mount. Lives in a ref so it never
+  // changes identity and its subscribe/getSnapshot are stable.
+  const storeRef = useRef(createPaginationStore());
+
+  // Subscribe directly (not via context) because this hook runs in the source
+  // tree, outside any PaginationStoreProvider.
+  const rawSlice = useSyncExternalStore(
+    storeRef.current.subscribe,
+    storeRef.current.getSnapshot,
+    storeRef.current.getSnapshot
+  );
 
   const openFlyout = useOpenFlyout();
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
-  // Tracks the currently-open V2 system flyout overlay so we can reuse it
-  // across subsequent `openPaginatedFlyout` calls.
   const v2OverlayRef = useRef<OverlayRef | null>(null);
 
-  // `resolveDocument` closes over mutable React state (e.g. tableContext,
-  // tablePageIndex) and will always change identity when that state updates —
-  // even when correctly memoized by the caller. Reading it through a ref lets
-  // `openPaginatedFlyout` (and its useEffect registration) stay stable without
-  // capturing a stale closure. This is the same pattern as React's proposed
-  // `useEffectEvent`.
+  // `resolveDocument` closes over mutable React state and will change identity
+  // on every render. Reading through a ref lets the stable `openPaginatedFlyout`
+  // always call the latest version.
   const resolveDocumentRef = useRef(resolveDocument);
   resolveDocumentRef.current = resolveDocument;
 
-  // Bundle mutable values used inside `openPaginatedFlyout` into a single ref
-  // so the callback can remain stable without capturing stale closures.
-  const infraRef = useRef({
-    openFlyout,
-    defaultFlyoutProperties,
-    renderBody,
-    origin,
-    onClose,
-  });
-  infraRef.current = {
-    openFlyout,
-    defaultFlyoutProperties,
-    renderBody,
-    origin,
-    onClose,
-  };
-
-  // Subscribe to this source's own slice (read path). The returned value
-  // includes the stable `openDocumentFlyout` wrapper for in-flyout EuiPagination.
-  const slice = useFlyoutPagination(paginationInstanceId);
+  // Bundle mutable infra values so the stable `openPaginatedFlyout` never
+  // captures a stale closure.
+  const infraRef = useRef({ openFlyout, defaultFlyoutProperties, renderBody, origin, onClose });
+  infraRef.current = { openFlyout, defaultFlyoutProperties, renderBody, origin, onClose };
 
   const setState = useCallback((partial: Partial<ScopedPaginationSlice>): void => {
-    flyoutPaginationStore.setSlice(paginationInstanceId, partial);
-    // paginationInstanceId is stable
+    storeRef.current.setState(partial);
+    // storeRef.current is stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const closePaginatedFlyout = useCallback((): void => {
-    // Soft-reset: clear displayed-document fields but keep the slice alive so
-    // that the `openDocumentFlyoutImpl` registered at mount survives and can be
-    // used again on the next open. Real teardown (removeSlice) happens only on
-    // the hook's unmount cleanup effect.
-    flyoutPaginationStore.setSlice(paginationInstanceId, SOFT_RESET);
+    storeRef.current.setState(SOFT_RESET);
     if (v2OverlayRef.current) {
       v2OverlayRef.current.close();
       v2OverlayRef.current = null;
     }
-    // paginationInstanceId is stable
+    // storeRef.current is stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,12 +98,11 @@ export const usePaginatedFlyout = ({
       const stateUpdate =
         explicitStateUpdate ?? resolveDocumentRef.current?.(documentIndex) ?? null;
 
-      flyoutPaginationStore.setSlice(paginationInstanceId, {
+      storeRef.current.setState({
         flyoutDocumentIndex: documentIndex,
         ...(stateUpdate ?? {}),
       });
 
-      // The pagination feature only targets the V2 system flyout.
       if (v2OverlayRef.current) return;
       const {
         openFlyout: infraOpenFlyout,
@@ -142,8 +111,9 @@ export const usePaginatedFlyout = ({
         origin: infraOrigin,
         onClose: infraOnClose,
       } = infraRef.current;
+      const store = storeRef.current;
       v2OverlayRef.current = infraOpenFlyout(
-        infraRenderBody(paginationInstanceId),
+        React.createElement(PaginationStoreProvider, { value: store }, infraRenderBody()),
         {
           ...infraDefaultProps,
           historyKey,
@@ -151,7 +121,7 @@ export const usePaginatedFlyout = ({
           onClose: (flyout: OverlayRef) => {
             flyout.close();
             v2OverlayRef.current = null;
-            flyoutPaginationStore.setSlice(paginationInstanceId, SOFT_RESET);
+            store.setState(SOFT_RESET);
             infraOnClose?.();
           },
         },
@@ -163,48 +133,46 @@ export const usePaginatedFlyout = ({
         }
       );
     },
-    // paginationInstanceId and historyKey are stable. Mutable values are read
-    // through refs.
+    // historyKey is stable. Mutable values are read through refs. storeRef.current is stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [historyKey]
   );
 
-  // Register `openDocumentFlyoutImpl` in the slice so the in-flyout
-  // `EuiPagination` (which calls `useFlyoutPagination.openDocumentFlyout`) can
-  // dispatch back through `openPaginatedFlyout`.
+  // Register `openDocumentFlyoutImpl` so the in-flyout `EuiPagination` can
+  // dispatch back through `openPaginatedFlyout` across the separate React root.
   useEffect(() => {
-    flyoutPaginationStore.setSlice(paginationInstanceId, {
+    storeRef.current.setState({
       openDocumentFlyoutImpl: (documentIndex: number) => openPaginatedFlyout(documentIndex),
     });
     return () => {
-      flyoutPaginationStore.setSlice(paginationInstanceId, { openDocumentFlyoutImpl: null });
+      storeRef.current.setState({ openDocumentFlyoutImpl: null });
     };
-    // paginationInstanceId is stable; openPaginatedFlyout is stable for the
-    // hook's lifetime.
+    // storeRef.current and openPaginatedFlyout are stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openPaginatedFlyout]);
 
-  // Auto-remove the slice and close the V2 overlay on unmount. This is the
-  // cleanest lifecycle path: navigation away from the source page fires
-  // the cleanup before any other effects, so downstream consumers don't see
-  // stale state.
+  // Close the overlay on unmount (navigation away from the source page).
   useEffect(() => {
     return () => {
-      flyoutPaginationStore.removeSlice(paginationInstanceId);
+      storeRef.current.setState(SOFT_RESET);
       if (v2OverlayRef.current) {
         v2OverlayRef.current.close();
         v2OverlayRef.current = null;
       }
     };
-    // paginationInstanceId is stable
+    // storeRef.current is stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return {
-    paginationInstanceId,
-    slice,
-    setState,
-    openPaginatedFlyout,
-    closePaginatedFlyout,
-  };
+  const openDocumentFlyout = useCallback(
+    (documentIndex: number): void => openPaginatedFlyout(documentIndex),
+    [openPaginatedFlyout]
+  );
+
+  const slice = useMemo(
+    () => ({ ...rawSlice, openDocumentFlyout }),
+    [rawSlice, openDocumentFlyout]
+  );
+
+  return { slice, setState, openPaginatedFlyout, closePaginatedFlyout, openDocumentFlyout };
 };

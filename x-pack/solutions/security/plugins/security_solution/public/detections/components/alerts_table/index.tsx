@@ -336,11 +336,10 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   }, []);
 
   const getDocumentFlyoutBody = useCallback(
-    (instanceId: string) => (
+    () => (
       <DocumentFlyout
         renderCellActions={renderFlyoutCellActions}
         onAlertUpdated={handleFlyoutAlertUpdated}
-        paginationInstanceId={instanceId}
       />
     ),
     [handleFlyoutAlertUpdated, renderFlyoutCellActions]
@@ -365,7 +364,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     [reduxItemsPerPage, tableContext, tablePageIndex]
   );
 
-  const { paginationInstanceId, slice, setState, openPaginatedFlyout } = usePaginatedFlyout({
+  const { openDocumentFlyout, slice, setState, openPaginatedFlyout } = usePaginatedFlyout({
     resolveDocument,
     renderBody: getDocumentFlyoutBody,
     historyKey: documentFlyoutHistoryKey,
@@ -566,9 +565,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       userProfiles,
       tableType,
       pageScope,
-      paginationInstanceId,
+      openDocumentFlyout,
     }),
-    [leadingControlColumn, pageScope, paginationInstanceId, tableType, userProfiles]
+    [leadingControlColumn, pageScope, openDocumentFlyout, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {

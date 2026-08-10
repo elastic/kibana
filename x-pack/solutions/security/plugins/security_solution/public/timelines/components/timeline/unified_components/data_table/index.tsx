@@ -196,9 +196,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     // Body factory for the V2 paginated timeline flyout.
     const getTimelineBody = useCallback(
-      (instanceId: string) => (
+      () => (
         <DocumentFlyout
-          paginationInstanceId={instanceId}
           onAlertUpdated={refetch}
           renderCellActions={timelineCellActionRenderer}
         />

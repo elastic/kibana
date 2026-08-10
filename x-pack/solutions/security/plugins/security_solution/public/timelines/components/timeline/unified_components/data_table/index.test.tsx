@@ -28,7 +28,6 @@ import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.moc
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useOpenFlyout } from '../../../../../flyout_v2/shared/hooks/use_open_flyout';
-import { flyoutPaginationStore } from '../../../../../flyout_v2/document/pagination/store';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
@@ -221,13 +220,14 @@ describe('unified data table', () => {
         expect(mockOpenSystemFlyout).toHaveBeenCalled();
       });
 
+      // element is the PaginationStoreProvider wrapper around DocumentFlyout
       const element = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
-      expect(element.props).toEqual(
-        expect.objectContaining({
-          paginationInstanceId: expect.any(String),
-          onAlertUpdated: refetchMock,
-        })
-      );
+      expect(element.props.value).toMatchObject({
+        subscribe: expect.any(Function),
+        getSnapshot: expect.any(Function),
+        setState: expect.any(Function),
+      });
+      expect(element.props.children.props.onAlertUpdated).toBe(refetchMock);
 
       expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
       expect(mockDocumentFlyout).not.toHaveBeenCalled();
@@ -251,10 +251,9 @@ describe('unified data table', () => {
       });
 
       const flyoutBody = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
-      const { paginationInstanceId } = flyoutBody.props;
 
       act(() => {
-        flyoutPaginationStore.getSlice(paginationInstanceId).openDocumentFlyoutImpl?.(1);
+        flyoutBody.props.value.getSnapshot().openDocumentFlyoutImpl?.(1);
       });
 
       await waitFor(() => {
@@ -279,8 +278,9 @@ describe('unified data table', () => {
         expect(mockOpenSystemFlyout).toHaveBeenCalled();
       });
 
+      // element is the PaginationStoreProvider; DocumentFlyout is its children
       const flyoutBody = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
-      const { renderCellActions } = flyoutBody.props;
+      const { renderCellActions } = flyoutBody.props.children.props;
 
       // Even when a cell passes an empty scopeId, the bound timeline scope must win so Filter
       // In/Out target the timeline's own filter manager instead of the page behind it.
