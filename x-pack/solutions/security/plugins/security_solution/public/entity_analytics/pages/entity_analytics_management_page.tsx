@@ -231,7 +231,7 @@ export const EntityAnalyticsManagementPage = () => {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{deleteError}</p>
           </EuiCallOut>
