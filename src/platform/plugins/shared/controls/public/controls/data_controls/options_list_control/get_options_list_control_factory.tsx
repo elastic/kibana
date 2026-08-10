@@ -175,7 +175,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
-      const fetchSubscription = fetchAndValidate$({
+      const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
           ...dataControlManager.api,
           loadMoreSubject,
@@ -189,7 +189,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$: selectionsManager.api.sort$,
-      }).subscribe((result) => {
+      });
+      const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           suggestionLoadError$.next((result as { error: Error }).error);
@@ -324,6 +325,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
+        cancelRequests,
         ...stateApi,
         ...dataControlManager.api,
         ...relatedPanelsApi,

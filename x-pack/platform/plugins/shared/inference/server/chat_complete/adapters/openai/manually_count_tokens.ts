@@ -10,25 +10,13 @@ import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
 import type { OpenAIRequest } from './types';
 import { mergeChunks } from '../../utils';
 
-const ENCODE_OPTIONS = { allowedSpecial: 'all' as const };
-
-function contentToString(
-  content: string | Array<{ type: string; text?: string; refusal?: string }> | null | undefined
-): string {
-  if (!content) return '';
-  if (typeof content === 'string') return content;
-  return content
-    .map((part) => (part.type === 'text' ? part.text ?? '' : part.refusal ?? ''))
-    .join('\n');
-}
-
 export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(
     request.messages
       .map(
         (msg) =>
-          `<|start|>${msg.role}\n${contentToString(msg.content)}\n${
+          `<|start|>${msg.role}\n${msg.content}\n${
             'name' in msg
               ? msg.name
               : 'function_call' in msg && msg.function_call
@@ -36,8 +24,7 @@ export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
               : ''
           }<|end|>`
       )
-      .join('\n'),
-    ENCODE_OPTIONS
+      .join('\n')
   ).length;
 
   // this is an approximation. OpenAI cuts off a function schema
@@ -49,8 +36,7 @@ export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
           ?.map(({ function: fn }) => {
             return `${fn.name}:${fn.description}:${JSON.stringify(fn.parameters)}`;
           })
-          .join('\n'),
-        ENCODE_OPTIONS
+          .join('\n')
       ).length
     : 0;
 
@@ -60,7 +46,7 @@ export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
 export const manuallyCountCompletionTokens = (chunks: ChatCompletionChunkEvent[]) => {
   const message = mergeChunks(chunks);
 
-  const tokenFromContent = encode(message.content, ENCODE_OPTIONS).length;
+  const tokenFromContent = encode(message.content).length;
 
   const tokenFromToolCalls = message.tool_calls?.length
     ? encode(
@@ -68,8 +54,7 @@ export const manuallyCountCompletionTokens = (chunks: ChatCompletionChunkEvent[]
           .map((toolCall) => {
             return JSON.stringify(toolCall);
           })
-          .join('\n'),
-        ENCODE_OPTIONS
+          .join('\n')
       ).length
     : 0;
 
