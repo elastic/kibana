@@ -455,16 +455,12 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       <EuiHorizontalRule margin="xl" />
       <EuiFlexGroup alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {selected.size > 0
-              ? `${selected.size} service${selected.size === 1 ? '' : 's'} selected`
-              : 'No services selected'}
-          </EuiText>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onCancel} flush="left">
+            Cancel
+          </EuiButtonEmpty>
         </EuiFlexItem>
+        <EuiFlexItem />
         {currentStep > 1 && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
