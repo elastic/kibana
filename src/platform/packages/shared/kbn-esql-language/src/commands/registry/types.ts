@@ -342,3 +342,11 @@ export enum UnmappedFieldsStrategy {
   LOAD = 'LOAD',
   LOAD_ALL = 'LOAD_ALL',
 }
+const UNMAPPED_FIELD_STRATEGIES = new Set<string>(Object.values(UnmappedFieldsStrategy));
+
+export function isUnmappedFieldsStrategy(
+  value: string | undefined
+): value is UnmappedFieldsStrategy {
+  if (!value) return false;
+  return UNMAPPED_FIELD_STRATEGIES.has(value);
+}

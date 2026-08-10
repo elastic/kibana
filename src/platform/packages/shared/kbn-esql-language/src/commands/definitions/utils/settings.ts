@@ -10,7 +10,11 @@
 import type { ESQLAstHeaderCommand, ESQLAstSetHeaderCommand } from '@elastic/esql/types';
 import { isBinaryExpression, isIdentifier, isMap, isStringLiteral } from '@elastic/esql';
 import { withAutoSuggest } from '../../../..';
-import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
+import {
+  isUnmappedFieldsStrategy,
+  UnmappedFieldsStrategy,
+  type ISuggestionItem,
+} from '../../registry/types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { EsqlSettingNames, settings } from '../generated/settings';
 
@@ -59,13 +63,6 @@ function getSettingData(settingCommand: ESQLAstSetHeaderCommand): {
     settingName,
     settingValue,
   };
-}
-
-export function isUnmappedFieldsStrategy(
-  value: string | undefined
-): value is UnmappedFieldsStrategy {
-  if (!value) return false;
-  return (Object.values(UnmappedFieldsStrategy) as string[]).includes(value);
 }
 
 /**

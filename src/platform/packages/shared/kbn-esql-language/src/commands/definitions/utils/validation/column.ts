@@ -9,12 +9,15 @@
 
 import type { ESQLColumn, ESQLIdentifier, ESQLSingleAstItem } from '@elastic/esql/types';
 import { isParametrized } from '@elastic/esql';
-import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
+import {
+  isUnmappedFieldsStrategy,
+  UnmappedFieldsStrategy,
+  type ICommandContext,
+} from '../../../registry/types';
 import { errors, getMessageFromId } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
 import { getExpressionType } from '../expressions';
 import type { ESQLMessage } from '../../types';
-import { isUnmappedFieldsStrategy } from '../settings';
 
 interface ColumnValidationOptions {
   skipUnsupportedOrConflictingColumnValidation?: boolean;
