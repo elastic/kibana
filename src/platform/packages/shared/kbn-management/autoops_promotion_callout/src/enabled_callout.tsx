@@ -142,27 +142,26 @@ export const AutoOpsEnabledCallout = ({
         </EuiFlexItem>
         {!compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
       </EuiFlexGroup>
-      <EuiToolTip
-        content={i18n.translate('management.autoOpsEnabledCallout.dismissAriaLabel', {
-          defaultMessage: 'Dismiss AutoOps enabled notification',
-        })}
-        disableScreenReaderOutput
+      <div
+        style={{ position: 'absolute', top: euiTheme.size.s, insetInlineEnd: euiTheme.size.s }}
       >
-        <EuiButtonIcon
-          iconType="cross"
-          onClick={handleDismiss}
-          style={{
-            position: 'absolute',
-            top: euiTheme.size.s,
-            insetInlineEnd: euiTheme.size.s,
-          }}
-          color="text"
-          aria-label={i18n.translate('management.autoOpsEnabledCallout.dismissAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('management.autoOpsEnabledCallout.dismissAriaLabel', {
             defaultMessage: 'Dismiss AutoOps enabled notification',
           })}
-          data-test-subj="autoOpsEnabledCallout-dismiss"
-        />
-      </EuiToolTip>
+          position="left"
+        >
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={handleDismiss}
+            color="text"
+            aria-label={i18n.translate('management.autoOpsEnabledCallout.dismissAriaLabel', {
+              defaultMessage: 'Dismiss AutoOps enabled notification',
+            })}
+            data-test-subj="autoOpsEnabledCallout-dismiss"
+          />
+        </EuiToolTip>
+      </div>
     </EuiPanel>
   );
 };
