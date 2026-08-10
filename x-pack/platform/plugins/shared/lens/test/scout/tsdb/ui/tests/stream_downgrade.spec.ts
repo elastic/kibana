@@ -85,7 +85,7 @@ const runScenario = async (
 
     // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars cover
     // the complete range before and after the stream rollover.
-    await pageObjects.lens.enableIncludeEmptyRows();
+    await pageObjects.lens.dimensions.enableIncludeEmptyRows();
     await pageObjects.lens.closeDimensionEditor();
 
     await pageObjects.lens.configureDimension({

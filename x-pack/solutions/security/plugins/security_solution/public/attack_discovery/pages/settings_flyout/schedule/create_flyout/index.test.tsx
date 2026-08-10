@@ -16,15 +16,41 @@ import * as i18n from './translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useScheduleApi } from '../logic/use_schedule_api';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
+import { useListWorkflows } from '../../workflow_configuration/hooks/use_list_workflows';
+import { useGenerateWorkflow } from '../../workflow_configuration/hooks/use_generate_workflow';
 
 jest.mock('@kbn/inference-connectors');
 jest.mock('../logic/use_schedule_api');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/hooks/use_connectors');
+jest.mock('../../workflow_configuration/hooks/use_list_workflows');
+jest.mock('../../workflow_configuration/hooks/use_generate_workflow');
 jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn().mockReturnValue({
     dataView: undefined,
     status: 'ready',
   }),
+}));
+// Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
+// alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
+// stub keeps the `alertSelection` marker and an `alertsRange` control wired to
+// `onSettingsChanged` so the unsaved-changes assertions still exercise it.
+jest.mock('../../alert_selection', () => ({
+  AlertSelection: ({
+    settings,
+    onSettingsChanged,
+  }: {
+    settings: Record<string, unknown>;
+    onSettingsChanged?: (settings: Record<string, unknown>) => void;
+  }) => (
+    <div data-test-subj="alertSelection">
+      <input
+        data-test-subj="alertsRange"
+        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+      />
+    </div>
+  ),
 }));
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
@@ -102,6 +128,26 @@ describe('CreateFlyout', () => {
       isLoading: false,
       data: mockConnectors,
     });
+
+    (useConnectors as jest.Mock).mockReturnValue({
+      connectors: mockConnectors,
+      setCurrentConnector: jest.fn(),
+    });
+
+    (useListWorkflows as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isSuccess: true,
+      status: 'success' as const,
+    });
+
+    (useGenerateWorkflow as jest.Mock).mockReturnValue({
+      cancelGeneration: jest.fn(),
+      generatedWorkflow: null,
+      isGenerating: false,
+      startGeneration: jest.fn(),
+    });
+
     setMockCreateSchedule({ mutateAsync: jest.fn() });
   });
 

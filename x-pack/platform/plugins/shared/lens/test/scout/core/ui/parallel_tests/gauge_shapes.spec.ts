@@ -80,19 +80,21 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
         await lens.closeFlyoutWithBackButton();
 
         await lens.waitForVisualization('gaugeChart');
-        await lens.openDimensionEditor('lnsGauge_goalDimensionPanel > lns-empty-dimension');
-        await lens.waitForStaticValueInput();
+        await lens.dimensions.openDimensionEditor(
+          'lnsGauge_goalDimensionPanel > lns-empty-dimension'
+        );
+        await lens.dimensions.waitForStaticValueInput();
         await lens.waitForVisualization('gaugeChart');
         await lens.closeDimensionEditor();
 
-        await lens.openDimensionEditor(
+        await lens.dimensions.openDimensionEditor(
           'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
         );
         await lens.setInputValue('lns-indexPattern-static_value-input', '1000');
         await expect.poll(async () => (await getGaugeBullet())?.domain?.[0]).toBe(1000);
         await lens.closeDimensionEditor();
 
-        await lens.openDimensionEditor(
+        await lens.dimensions.openDimensionEditor(
           'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
         );
         await lens.setInputValue('lns-indexPattern-static_value-input', '25000');

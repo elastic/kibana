@@ -43,7 +43,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
   spaceTest(
     'shows a badge for the secondary metric and caches static/dynamic configuration',
     async ({ page, pageObjects: { lens } }) => {
-      await lens.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
+      await lens.dimensions.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
       // Coloring defaults to "None", so the secondary value renders without a trend badge.
       await expect(lens.secondaryMetricBadge).toHaveCount(0);
 
@@ -117,7 +117,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
           keepOpen: true,
         });
 
-        await lens.enableIncludeEmptyRows();
+        await lens.dimensions.enableIncludeEmptyRows();
 
         await lens.waitForVisualization('mtrVis');
         await expect(lens.metricTilesLocator).toHaveCount(N_TILES);
@@ -157,7 +157,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
       });
 
       await spaceTest.step('shows the difference against the primary metric', async () => {
-        await lens.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
+        await lens.dimensions.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_color_mode_dynamic');
         await page.testSubj.click('lnsMetric_secondary_trend_baseline_primary');
 
@@ -184,7 +184,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
             .poll(() => lens.getSecondaryMetricBadgeText())
             .toMatch(TREND_VALUE_WITH_ARROW);
 
-          await lens.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
+          await lens.dimensions.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
           await expect(
             page.testSubj.locator('lnsMetric_secondary_trend_baseline_static')
           ).toBeEnabled();
