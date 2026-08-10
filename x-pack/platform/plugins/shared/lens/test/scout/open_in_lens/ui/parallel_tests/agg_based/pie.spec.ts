@@ -67,7 +67,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
 
     await convertToLensByTitle({ dashboard }, 'Pie - Agg with params');
     await lens.waitForVisualization('partitionVisChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
