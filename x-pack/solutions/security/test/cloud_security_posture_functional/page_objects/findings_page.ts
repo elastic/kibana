@@ -330,7 +330,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
       const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
       await menuItems[menuItemValueIndex].click();
-      return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      // Wait for accordion rows to be committed to the DOM after the spinner disappears,
+      // unless "None" was selected (which renders a flat table, not accordion rows).
+      if (value !== 'None') {
+        await testSubjects.existOrFail('grouping-accordion', { timeout: 5000 });
+      }
     },
     async openDropDown() {
       const element = await this.getElement();
