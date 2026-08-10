@@ -1,5 +1,5 @@
 {
-  "sha1": "085a1e536a5578e3b78b55731b9c81231531a219",
+  "sha1": "8a7d48e8eb5b869ac6514494bbbd38b72aefa642",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -727,7 +727,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 371,
+        "line": 369,
         "column": 27
       }
     },
@@ -8249,6 +8249,32 @@
       }
     },
     {
+      "id": "b6357d3d7fe0fc8-aada47ed9bc3de0",
+      "title": "Update rule API validation: should reject updating a signal rule query to composed format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 430,
+        "column": 24
+      }
+    },
+    {
+      "id": "b6357d3d7fe0fc8-59a4fa78ddb28c7",
+      "title": "Update rule API validation: should reject setting recovery_strategy on a signal rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 447,
+        "column": 29
+      }
+    },
+    {
       "id": "b6357d3d7fe0fc8-0be0aa964382938",
       "title": "Update rule API authorization: should return 200 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
@@ -8257,8 +8283,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 417,
-        "column": 49
+        "line": 455,
+        "column": 8
       }
     },
     {
@@ -8270,8 +8296,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 432,
-        "column": 27
+        "line": 470,
+        "column": 14
       }
     },
     {
@@ -8283,8 +8309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 451,
-        "column": 55
+        "line": 489,
+        "column": 52
       }
     },
     {
@@ -9239,6 +9265,20 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
         "line": 397,
         "column": 14
+      }
+    },
+    {
+      "id": "678cdb7d4718d40-7466317b0fa1c8e",
+      "title": "Rule change history HTTP list + detail: returns lean rows with server-side diffs and full snapshots on detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_history.spec.ts",
+        "line": 455,
+        "column": 24
       }
     },
     {
