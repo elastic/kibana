@@ -24,12 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 
-import {
-  sendGetAgents,
-  useStartServices,
-  useGetPackageInfoByKeyQuery,
-  useFleetStatus,
-} from '../../hooks';
+import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
