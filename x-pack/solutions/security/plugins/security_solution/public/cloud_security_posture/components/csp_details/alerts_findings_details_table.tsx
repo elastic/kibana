@@ -344,7 +344,7 @@ export const AlertsDetailsTable = memo(
             data-test-subj="securitySolutionFlyoutAlertsFindingsTableExpandButton"
             onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}
           >
-            <EuiIcon type={'expand'} aria-hidden={true} />
+            <EuiIcon type={'maximize'} aria-hidden={true} />
           </EuiLink>
         ),
       },

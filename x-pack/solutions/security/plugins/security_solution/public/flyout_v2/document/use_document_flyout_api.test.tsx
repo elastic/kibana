@@ -213,7 +213,6 @@ describe('useDocumentFlyoutApi', () => {
     result.current.openDocumentCorrelations({
       hit,
       scopeId: '',
-      isRulePreview: false,
       onShowAlert: jest.fn(),
     });
 
@@ -400,7 +399,6 @@ describe('useDocumentFlyoutApi', () => {
       result.current.openDocumentCorrelations({
         hit,
         scopeId: 'scope-1',
-        isRulePreview: false,
         onShowAlert: jest.fn(),
       });
 
@@ -410,7 +408,6 @@ describe('useDocumentFlyoutApi', () => {
           documentId: 'doc-id',
           indexName: 'doc-index',
           scopeId: 'scope-1',
-          isRulePreview: false,
         })
       );
       expect(mockBuildOnClose).toHaveBeenCalledWith(null);

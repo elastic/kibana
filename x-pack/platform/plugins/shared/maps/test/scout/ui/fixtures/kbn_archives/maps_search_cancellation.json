@@ -1,0 +1,45 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "name": "Kibana Sample Data Logs",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-07-27T22:57:06.520Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "7.11.0",
+  "updated_at": "2026-07-27T22:57:06.520Z"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "esqlApproximation": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[{\"meta\":{\"disabled\":false,\"type\":\"custom\",\"field\":\"query\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"error_query\":{\"indices\":[{\"name\":\"*\",\"error_type\":\"warning\",\"message\":\"'Watch out!'\",\"stall_time_seconds\":5}]}}}],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"autoApplyFilters\":true,\"hidePanelBorders\":false,\"hidePanelTitles\":false,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"type\":\"map\",\"embeddableConfig\":{\"attributes\":{\"title\":\"simple map\",\"layerListJSON\":\"[{\\\"locale\\\":\\\"autoselect\\\",\\\"sourceDescriptor\\\":{\\\"type\\\":\\\"EMS_TMS\\\",\\\"isAutoSelect\\\":true,\\\"lightModeDefault\\\":\\\"road_map_desaturated_v9\\\"},\\\"id\\\":\\\"d5e38fbd-e8c3-4559-9f17-6328d75cb680\\\",\\\"minZoom\\\":0,\\\"maxZoom\\\":24,\\\"alpha\\\":1,\\\"visible\\\":true,\\\"style\\\":{\\\"type\\\":\\\"EMS_VECTOR_TILE\\\",\\\"color\\\":\\\"\\\"},\\\"includeInFitToBounds\\\":true,\\\"type\\\":\\\"EMS_VECTOR_TILE\\\"},{\\\"sourceDescriptor\\\":{\\\"dateField\\\":\\\"\\\",\\\"geoField\\\":\\\"location\\\",\\\"esql\\\":\\\"from maps-cancellation-test | keep location | limit 10\\\",\\\"narrowByGlobalSearch\\\":true,\\\"narrowByGlobalTime\\\":false,\\\"narrowByMapBounds\\\":true,\\\"id\\\":\\\"aba2bc14-a193-4101-8a55-7d65fff3cd2e\\\",\\\"type\\\":\\\"ESQL\\\",\\\"applyForceRefresh\\\":true},\\\"id\\\":\\\"c7af283b-2976-4dd5-81a5-0402422c7c58\\\",\\\"minZoom\\\":0,\\\"maxZoom\\\":24,\\\"alpha\\\":0.75,\\\"visible\\\":true,\\\"style\\\":{\\\"type\\\":\\\"VECTOR\\\",\\\"properties\\\":{\\\"icon\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"value\\\":\\\"marker\\\"}},\\\"fillColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#16C5C0\\\"}},\\\"lineColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#009490\\\"}},\\\"lineWidth\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"size\\\":1}},\\\"iconSize\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"size\\\":6}},\\\"iconOrientation\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"orientation\\\":0}},\\\"labelText\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"value\\\":\\\"\\\"}},\\\"labelColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#FFFFFF\\\"}},\\\"labelSize\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"size\\\":14}},\\\"labelZoomRange\\\":{\\\"options\\\":{\\\"useLayerZoomRange\\\":true,\\\"minZoom\\\":0,\\\"maxZoom\\\":24}},\\\"labelBorderColor\\\":{\\\"type\\\":\\\"STATIC\\\",\\\"options\\\":{\\\"color\\\":\\\"#000000\\\"}},\\\"symbolizeAs\\\":{\\\"options\\\":{\\\"value\\\":\\\"circle\\\"}},\\\"labelBorderSize\\\":{\\\"options\\\":{\\\"size\\\":\\\"SMALL\\\"}},\\\"labelPosition\\\":{\\\"options\\\":{\\\"position\\\":\\\"CENTER\\\"}}},\\\"isTimeAware\\\":true},\\\"includeInFitToBounds\\\":true,\\\"type\\\":\\\"GEOJSON_VECTOR\\\",\\\"joins\\\":[],\\\"disableTooltips\\\":false}]\",\"mapStateJSON\":\"{\\\"adHocDataViews\\\":[],\\\"center\\\":{\\\"lon\\\":-116.87493,\\\"lat\\\":23.0046},\\\"filters\\\":[],\\\"query\\\":{\\\"query\\\":\\\"\\\",\\\"language\\\":\\\"kuery\\\"},\\\"refreshConfig\\\":{\\\"isPaused\\\":true,\\\"interval\\\":1000},\\\"settings\\\":{\\\"autoFitToDataBounds\\\":false,\\\"backgroundColor\\\":\\\"transparent\\\",\\\"customIcons\\\":[],\\\"disableInteractive\\\":false,\\\"disableTooltipControl\\\":false,\\\"hideToolbarOverlay\\\":false,\\\"hideLayerControl\\\":false,\\\"hideViewControl\\\":false,\\\"initialLocation\\\":\\\"LAST_SAVED_LOCATION\\\",\\\"fixedLocation\\\":{\\\"lat\\\":0,\\\"lon\\\":0,\\\"zoom\\\":2},\\\"browserLocation\\\":{\\\"zoom\\\":2},\\\"keydownScrollZoom\\\":false,\\\"maxZoom\\\":24,\\\"minZoom\\\":0,\\\"projection\\\":\\\"globeInterpolate\\\",\\\"showScaleControl\\\":false,\\\"showSpatialFilters\\\":true,\\\"showTimesliderToggleButton\\\":true,\\\"spatialFiltersAlpa\\\":0.3,\\\"spatialFiltersFillColor\\\":\\\"#DA8B45\\\",\\\"spatialFiltersLineColor\\\":\\\"#DA8B45\\\"},\\\"timeFilters\\\":{\\\"from\\\":\\\"now-7d/d\\\",\\\"to\\\":\\\"now\\\"},\\\"zoom\\\":1.93}\",\"uiStateJSON\":\"{\\\"isLayerTOCOpen\\\":true,\\\"openTOCDetails\\\":[]}\"},\"hiddenLayers\":[],\"isLayerTOCOpen\":true,\"mapBuffer\":{\"minLon\":-270,\"minLat\":-66.51326,\"maxLon\":0,\"maxLat\":66.51326},\"mapCenter\":{\"lon\":-116.87493,\"lat\":23.0046,\"zoom\":1.93},\"openTOCDetails\":[],\"drilldowns\":[]},\"panelIndex\":\"99539e0b-cc30-4c4b-9af1-46396ab8ca0d\",\"gridData\":{\"y\":0,\"x\":0,\"w\":24,\"h\":15,\"i\":\"99539e0b-cc30-4c4b-9af1-46396ab8ca0d\"}}]",
+    "timeRestore": false,
+    "title": "Embedded map"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-07-27T23:00:56.905Z",
+  "id": "7432f734-1df6-4a4c-8f90-ebdbb1b2e52e",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-07-27T23:00:56.905Z"
+}
