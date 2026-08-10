@@ -74,3 +74,4 @@
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.
+- [WHOIS](/reference/connectors-kibana/whois-action-type.md): Look up domain, IP, ASN, nameserver, and contact registration records over RDAP.

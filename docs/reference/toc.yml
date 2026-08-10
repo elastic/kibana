@@ -136,6 +136,7 @@ toc:
           - file: connectors-kibana/tavily-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
+          - file: connectors-kibana/whois-action-type.md
           - file: connectors-kibana/workday-action-type.md
           - file: connectors-kibana/zabbix-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
