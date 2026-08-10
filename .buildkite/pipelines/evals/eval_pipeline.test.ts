@@ -8,6 +8,7 @@
  */
 
 import { parse as yamlParse } from 'yaml';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
@@ -244,7 +245,7 @@ describe('eval_pipeline', () => {
     it('requests an explicit boot disk so ES stays above its merge disk watermark', () => {
       const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
 
-      expect(yaml).toContain('diskSizeGb: 130');
+      expect(yaml).toContain(`diskSizeGb: ${DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb}`);
     });
   });
 });

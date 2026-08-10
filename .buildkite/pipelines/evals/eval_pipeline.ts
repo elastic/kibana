@@ -10,6 +10,7 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
@@ -145,9 +146,11 @@ function normalizeEvaluationConnectorId(raw: string): string {
 /**
  * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
  * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
- * stops merging segments. Keep in sync with the fanout steps in `steps/evals/run_suite.sh`.
+ * stops merging segments. These steps spell out their own agent block, so the repo-wide default
+ * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
+ * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
  */
-const EVAL_AGENT_DISK_SIZE_GB = 130;
+const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
