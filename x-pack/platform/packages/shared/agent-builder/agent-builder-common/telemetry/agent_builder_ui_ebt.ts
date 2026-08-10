@@ -76,6 +76,8 @@ const ebtAction = {
     MCP_CLIENT_COPY_SECRET: 'mcp_client_copy_secret',
     MCP_CLIENT_REVOKE_OPEN: 'mcp_client_revoke_open',
     MCP_CLIENT_REVOKE_CONFIRM: 'mcp_client_revoke_confirm',
+    MCP_CLIENT_DELETE_OPEN: 'mcp_client_delete_open',
+    MCP_CLIENT_DELETE_CONFIRM: 'mcp_client_delete_confirm',
     MANAGE_APPLICATION_CONNECTIONS_LINK: 'manage_application_connections_link',
     MCP_DOCS: 'mcp_docs',
     ADD_REFERENCED_FILE: 'add_referenced_file',

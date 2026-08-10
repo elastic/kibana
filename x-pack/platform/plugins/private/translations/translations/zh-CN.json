@@ -40325,8 +40325,6 @@
     "xpack.security.management.applicationConnections.connectionColumns.clientName": "客户名称",
     "xpack.security.management.applicationConnections.connectionColumns.connectedBy": "连接者",
     "xpack.security.management.applicationConnections.connectionColumns.connectionName": "连接名称",
-    "xpack.security.management.applicationConnections.connectionColumns.revokedLabel": "已撤销",
-    "xpack.security.management.applicationConnections.connectionColumns.revokedRowLabel": "此连接已被撤销",
     "xpack.security.management.applicationConnections.connectionColumns.revokeLabel": "撤销",
     "xpack.security.management.applicationConnections.connectionColumns.selectRowLabel": "选择连接“{name}”",
     "xpack.security.management.applicationConnections.connectionColumns.status": "状态",

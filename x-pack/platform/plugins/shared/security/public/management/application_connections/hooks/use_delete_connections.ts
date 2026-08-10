@@ -9,29 +9,29 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 
 import { useApplicationConnectionsService } from './use_application_connections_service';
 import { queryKeys } from '../constants/query_keys';
-import type { OAuthConnection } from '../service/application_connections_api_client';
+import type {
+  BulkConnectionTarget,
+  BulkDeleteConnectionsResponse,
+} from '../service/application_connections_api_client';
 
-export interface UpdateConnectionNameParams {
-  clientId: string;
-  connectionId: string;
-  name: string;
+interface DeleteConnectionsParams {
+  connections: BulkConnectionTarget[];
 }
 
-export const useUpdateConnectionName = () => {
+export const useDeleteConnections = () => {
   const queryClient = useQueryClient();
   const apiClient = useApplicationConnectionsService();
 
   const { mutateAsync, isLoading } = useMutation<
-    OAuthConnection,
+    BulkDeleteConnectionsResponse,
     Error,
-    UpdateConnectionNameParams
+    DeleteConnectionsParams
   >({
-    mutationFn: ({ clientId, connectionId, name }) =>
-      apiClient.updateConnection(clientId, connectionId, { name }),
+    mutationFn: ({ connections }) => apiClient.bulkDeleteConnections(connections),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.applicationConnections.all });
     },
   });
 
-  return { updateConnectionName: mutateAsync, isUpdating: isLoading };
+  return { deleteConnections: mutateAsync, isDeleting: isLoading };
 };

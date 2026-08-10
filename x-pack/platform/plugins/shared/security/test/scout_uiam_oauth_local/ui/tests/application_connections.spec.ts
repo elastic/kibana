@@ -25,6 +25,7 @@ test.describe(
     let authHeaders: Record<string, string>;
     let clientId: string;
     const connectionIds: string[] = [];
+    const revokedConnectionIds: string[] = [];
     let expiredConnectionId: string;
 
     test.beforeAll(async ({ apiClient, samlAuth, config: { organizationId } }) => {
@@ -62,6 +63,27 @@ test.describe(
         connectionIds.push(connectionId);
       }
 
+      // Seed three already-revoked connections: one for the individual delete
+      // test and two for the bulk delete test. Delete is only offered once a
+      // connection is revoked, so seeding them revoked keeps those tests focused.
+      for (let index = 0; index < 3; index++) {
+        const connectionId = `scout-conn-revoked-${Date.now()}-${index}`;
+        const result = await seedTestOAuthConnection({
+          connectionId,
+          clientId,
+          organizationId: organizationId!,
+          userId,
+          resource: MCP_RESOURCE,
+          name: `scout revoked connection ${index}`,
+          scopes: ['all'],
+          revoked: true,
+        });
+        if (!result.success) {
+          throw new Error(`Failed to seed revoked OAuth connection: ${result.message}`);
+        }
+        revokedConnectionIds.push(connectionId);
+      }
+
       // Seed a separate expired (but not revoked) connection to verify the
       // "Expired" status is surfaced and the connection remains revocable.
       expiredConnectionId = `scout-conn-expired-${Date.now()}`;
@@ -86,7 +108,7 @@ test.describe(
 
     test.afterAll(async ({ apiClient }) => {
       await Promise.all(
-        [...connectionIds, expiredConnectionId]
+        [...connectionIds, ...revokedConnectionIds, expiredConnectionId]
           .filter(Boolean)
           .map((connectionId) => deleteTestOAuthConnection({ connectionId, clientId }))
       );
@@ -189,6 +211,38 @@ test.describe(
           );
           expect(rowText).toContain('Revoked');
         }).toPass();
+      }
+    });
+
+    test('deletes an individual revoked connection', async ({ page, pageObjects }) => {
+      const connectionId = revokedConnectionIds[0];
+
+      await pageObjects.applicationConnections.navigate();
+      await pageObjects.applicationConnections.switchToListView();
+      await pageObjects.applicationConnections.waitForListConnectionRow(connectionId);
+      await pageObjects.applicationConnections.deleteConnection(connectionId);
+
+      await expect(
+        page.testSubj.locator(`applicationConnectionsListViewRow-${connectionId}`)
+      ).toHaveCount(0);
+    });
+
+    test('bulk deletes multiple selected revoked connections', async ({ page, pageObjects }) => {
+      const bulkConnectionIds = [revokedConnectionIds[1], revokedConnectionIds[2]];
+
+      await pageObjects.applicationConnections.navigate();
+      await pageObjects.applicationConnections.switchToListView();
+      for (const connectionId of bulkConnectionIds) {
+        await pageObjects.applicationConnections.waitForListConnectionRow(connectionId);
+        await pageObjects.applicationConnections.selectListConnectionRow(connectionId);
+      }
+
+      await pageObjects.applicationConnections.bulkDeleteSelected();
+
+      for (const connectionId of bulkConnectionIds) {
+        await expect(
+          page.testSubj.locator(`applicationConnectionsListViewRow-${connectionId}`)
+        ).toHaveCount(0);
       }
     });
   }

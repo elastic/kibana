@@ -801,8 +801,12 @@ export class AgentBuilderApp {
     return id;
   }
 
-  async openMcpClientEdit(clientId: string) {
+  async openMcpClientActionsMenu(clientId: string) {
     await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+  }
+
+  async openMcpClientEdit(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
     await this.page.testSubj
       .locator(`mcpClientEditAction-${clientId}`)
       .waitFor({ state: 'visible' });
@@ -847,7 +851,7 @@ export class AgentBuilderApp {
   }
 
   async openMcpClientRevokeModal(clientId: string) {
-    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.openMcpClientActionsMenu(clientId);
     await this.page.testSubj
       .locator(`mcpClientRevokeAction-${clientId}`)
       .waitFor({ state: 'visible' });
@@ -859,6 +863,21 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('mcpClientRevokeConfirmInput', clientName);
     await this.page.testSubj.click('mcpClientRevokeConfirmButton');
     await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'detached' });
+  }
+
+  async openMcpClientDeleteModal(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientDeleteAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientDeleteAction-${clientId}`);
+    await this.page.testSubj.locator('mcpClientDeleteModal').waitFor({ state: 'visible' });
+  }
+
+  async confirmMcpClientDelete() {
+    const modal = this.page.testSubj.locator('mcpClientDeleteModal');
+    await modal.getByTestId('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
   }
 
   async getMcpClientRowStatus(clientId: string): Promise<string> {
