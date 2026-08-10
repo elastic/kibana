@@ -37,7 +37,7 @@ actions:
         tags:
           - Dashboards
         summary: "Get dashboards"
-        operationId: get-dashboards-redirect
+        operationId: get-dashboards
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -49,7 +49,7 @@ actions:
         tags:
           - Dashboards
         summary: "Create a dashboard"
-        operationId: create-dashboard-redirect
+        operationId: create-dashboard
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -74,7 +74,7 @@ actions:
         tags:
           - Dashboards
         summary: "Get a dashboard"
-        operationId: get-dashboard-redirect
+        operationId: get-dashboard
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -86,7 +86,7 @@ actions:
         tags:
           - Dashboards
         summary: "Update a dashboard"
-        operationId: update-dashboard-redirect
+        operationId: update-dashboard
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -98,7 +98,7 @@ actions:
         tags:
           - Dashboards
         summary: "Delete a dashboard"
-        operationId: delete-dashboard-redirect
+        operationId: delete-dashboard
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -125,7 +125,7 @@ actions:
         tags:
           - Visualizations
         summary: "Get visualizations"
-        operationId: get-visualizations-redirect
+        operationId: get-visualizations
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -137,7 +137,7 @@ actions:
         tags:
           - Visualizations
         summary: "Create a visualization"
-        operationId: create-visualization-redirect
+        operationId: create-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -162,7 +162,7 @@ actions:
         tags:
           - Visualizations
         summary: "Get a visualization"
-        operationId: get-visualization-redirect
+        operationId: get-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -174,7 +174,7 @@ actions:
         tags:
           - Visualizations
         summary: "Update a visualization"
-        operationId: update-visualization-redirect
+        operationId: update-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
@@ -186,7 +186,7 @@ actions:
         tags:
           - Visualizations
         summary: "Delete a visualization"
-        operationId: delete-visualization-redirect
+        operationId: delete-visualization
         description: |
           > This documentation is temporarily hosted at a separate location.
           >
