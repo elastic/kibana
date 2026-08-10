@@ -97,11 +97,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`button#observability`);
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
-        // Switching solution re-runs the async rule tags query; the combo box stays disabled (and opens empty) until it resolves.
-        await retry.waitFor(
-          'rule tags filter to finish loading',
-          async () => !(await comboBox.isDisabled(await testSubjects.find(RULE_TAGS_FILTER_SUBJ)))
-        );
+        // Switching solution re-runs the async rule tags query; wait for it to resolve (the combo box
+        // input becomes enabled) before opening the list, otherwise the list opens empty.
+        await retry.waitFor('rule tags filter to finish loading', async () => {
+          const filter = await testSubjects.find(RULE_TAGS_FILTER_SUBJ);
+          return (await filter.findByTagName('input')).isEnabled();
+        });
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
@@ -132,6 +133,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
           await find.clickByCssSelector(`button#ruleTags`);
+          // Rule tags load asynchronously; wait for the query to resolve (the combo box input becomes
+          // enabled) before reading options, otherwise the list opens empty or before labels render.
+          await retry.waitFor('rule tags filter to finish loading', async () => {
+            const filter = await testSubjects.find(RULE_TAGS_FILTER_SUBJ);
+            return (await filter.findByTagName('input')).isEnabled();
+          });
           const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
           expect(options.length).to.equal(1);
           expect(await options[0].getVisibleText()).to.equal(ruleName);
