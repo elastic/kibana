@@ -168,11 +168,8 @@ describe('getProfileAppStateDefaults', () => {
     });
 
     it('should retain Summary column from profile defaults without a stored width', async () => {
-      const {
-        profilesManagerMock: profilesManager,
-        scopedEbtManagerMock,
-        dataSourceProfileProviderMock,
-      } = createContextAwarenessMocks();
+      const { profilesManagerMock: profilesManager, dataSourceProfileProviderMock } =
+        createContextAwarenessMocks();
 
       dataSourceProfileProviderMock.profile.getDefaultAppState = jest.fn(() => () => ({
         columns: [{ name: 'message', width: 100 }, { name: '_source' }],
