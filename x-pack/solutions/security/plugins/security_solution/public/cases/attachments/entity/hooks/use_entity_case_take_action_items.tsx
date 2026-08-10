@@ -6,16 +6,61 @@
  */
 
 import React, { useCallback } from 'react';
+import { AddToCaseContextMenuItem } from '@kbn/response-ops-alerts-table';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityToAttach } from '..';
-import { AddToNewCase } from '../components/add_to_new_case';
-import { AddToExistingCase } from '../components/add_to_existing_case';
+import { ADD_TO_NEW_CASE, useAddToNewCase } from '../components/add_to_new_case';
+import { ADD_TO_EXISTING_CASE, useAddToExistingCase } from '../components/add_to_existing_case';
 import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
 } from '../../../../../common/cases/attachments/entity/test_ids';
 import { useEntityCasePermissions } from './use_case_permission';
+
+interface EntityAddToCaseContextMenuItemProps {
+  entity: EntityToAttach;
+  closePopover: () => void;
+  canAddToNewCase: boolean;
+  canAddToExistingCase: boolean;
+}
+
+const EntityAddToCaseContextMenuItem = ({
+  entity,
+  closePopover,
+  canAddToNewCase,
+  canAddToExistingCase,
+}: EntityAddToCaseContextMenuItemProps) => {
+  const addToNewCase = useAddToNewCase({ entity, onClick: closePopover });
+  const addToExistingCase = useAddToExistingCase({ entity, onClick: closePopover });
+
+  return (
+    <AddToCaseContextMenuItem
+      actions={[
+        ...(canAddToNewCase
+          ? [
+              {
+                id: 'addToNewCase',
+                label: ADD_TO_NEW_CASE,
+                dataTestSubj: ADD_TO_NEW_CASE_TEST_ID,
+                onClick: addToNewCase,
+              },
+            ]
+          : []),
+        ...(canAddToExistingCase
+          ? [
+              {
+                id: 'addToExistingCase',
+                label: ADD_TO_EXISTING_CASE,
+                dataTestSubj: ADD_TO_EXISTING_CASE_TEST_ID,
+                onClick: addToExistingCase,
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
+};
 
 /**
  * Builds the "add to case" menu items for an entity's flyout "Take action" popover.
@@ -38,33 +83,24 @@ export const useEntityCaseTakeActionItems = (
 
   return useCallback(
     (closePopover: () => void) => {
-      if (!entityAttachmentsEnabled || !attachmentsEnabled || !entity.name || !entity.id) {
+      if (
+        !entityAttachmentsEnabled ||
+        !attachmentsEnabled ||
+        !entity.name ||
+        !entity.id ||
+        (!canAddToNewCase && !canAddToExistingCase)
+      ) {
         return [];
       }
 
-      // Only surface the actions the user can actually perform; the rest are hidden
-      // rather than shown disabled, matching the alerts "add to case" convention.
       return [
-        ...(canAddToNewCase
-          ? [
-              <AddToNewCase
-                key="addToNewCase"
-                entity={entity}
-                onClick={closePopover}
-                data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
-              />,
-            ]
-          : []),
-        ...(canAddToExistingCase
-          ? [
-              <AddToExistingCase
-                key="addToExistingCase"
-                entity={entity}
-                onClick={closePopover}
-                data-test-subj={ADD_TO_EXISTING_CASE_TEST_ID}
-              />,
-            ]
-          : []),
+        <EntityAddToCaseContextMenuItem
+          key="addToCase"
+          entity={entity}
+          closePopover={closePopover}
+          canAddToNewCase={canAddToNewCase}
+          canAddToExistingCase={canAddToExistingCase}
+        />,
       ];
     },
     [entityAttachmentsEnabled, attachmentsEnabled, entity, canAddToNewCase, canAddToExistingCase]

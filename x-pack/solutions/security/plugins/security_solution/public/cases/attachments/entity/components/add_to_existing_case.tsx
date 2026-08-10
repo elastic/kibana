@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -28,6 +28,23 @@ export interface AddToExistingCaseProps {
   ['data-test-subj']?: string;
 }
 
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.cases.addToExistingCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const useAddToExistingCase = ({ entity, onClick }: AddToExistingCaseProps) => {
+  const { cases } = useKibana().services;
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
+
+  return useCallback(() => {
+    onClick();
+    selectCaseModal.open({ getAttachments: () => generateEntityAttachmentsWithoutOwner(entity) });
+  }, [entity, onClick, selectCaseModal]);
+};
+
 /**
  * Leverages the cases plugin api to display a modal listing all the existing cases.
  * Once a case is selected, an entity attachment is added to it and a confirmation
@@ -43,20 +60,11 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
   onClick,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { cases } = useKibana().services;
-  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
-
-  const menuItemClicked = useCallback(() => {
-    onClick();
-    selectCaseModal.open({ getAttachments: () => generateEntityAttachmentsWithoutOwner(entity) });
-  }, [entity, onClick, selectCaseModal]);
+  const menuItemClicked = useAddToExistingCase({ entity, onClick });
 
   return (
     <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj}>
-      <FormattedMessage
-        defaultMessage="Add to existing case"
-        id="xpack.securitySolution.entityAnalytics.cases.addToExistingCase"
-      />
+      {ADD_TO_EXISTING_CASE}
     </EuiContextMenuItem>
   );
 };
