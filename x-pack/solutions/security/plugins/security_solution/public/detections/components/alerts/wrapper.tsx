@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { HeaderPage } from '../../../common/components/header_page';
-import type { UseDataViewReturnValue } from '../../../data_view_manager/hooks/use_data_view';
 import { AlertsPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 
@@ -34,7 +33,7 @@ interface WrapperProps {
   /** the alerts data view, retrieved once by the parent via useDataView(PageScope.alerts) */
   dataView: DataView;
   /** the status of the alerts data view retrieval */
-  status: UseDataViewReturnValue['status'];
+  status: 'pristine' | 'loading' | 'ready' | 'error';
 }
 
 /**

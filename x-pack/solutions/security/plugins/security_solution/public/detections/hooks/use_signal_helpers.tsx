@@ -24,7 +24,7 @@ export const useSignalHelpers = (
 } => {
   const signalIndexName = useSignalIndexName();
 
-  const defaultDataViewPattern = dataView?.getIndexPattern() ?? '';
+  const defaultDataViewPattern = dataView.getIndexPattern() ?? '';
 
   const signalIndexNeedsInit = useMemo(() => {
     if (status === 'pristine') {
