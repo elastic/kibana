@@ -111,7 +111,7 @@ export const KnowledgeIndicatorsPanel = ({
             <EuiText size="s" color="subdued" data-test-subj="contextAiIndexKiHeaderSummary">
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.knowledgeIndicators.headerSummary"
-                defaultMessage="{count} KI's stored in {indexLink}"
+                defaultMessage="{count} KIs stored in {indexLink}"
                 values={{
                   count: <strong>{totalCount.toLocaleString()}</strong>,
                   indexLink: indexManagementHref ? (
