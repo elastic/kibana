@@ -290,6 +290,129 @@ describe('customContentEmbeddableFactory', () => {
       expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
     });
 
+    it('agentOverride prevents applySerializedState from reverting the agent-set template', async () => {
+      const chatEvents$ = new Subject<any>();
+      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            input: {
+              attachment_refs: [
+                {
+                  attachment_id: 'att-1',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+              ],
+            },
+          },
+          attachments: [
+            {
+              id: 'att-1',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: {
+                    panel_template: '<p>agent result</p>',
+                    embeddable_id: 'test-uuid',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      await act(async () => chatEvents$.next(roundCompleteEvent));
+      expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
+
+      act(() => {
+        embeddable.api.applySerializedState({ ...baseState, template: '<div>stale saved</div>' });
+      });
+
+      expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
+    });
+
+    it('handleFlyoutSave clears agentOverride so applySerializedState uses saved state', async () => {
+      const chatEvents$ = new Subject<any>();
+      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            input: {
+              attachment_refs: [
+                {
+                  attachment_id: 'att-1',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+              ],
+            },
+          },
+          attachments: [
+            {
+              id: 'att-1',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: {
+                    panel_template: '<p>agent result</p>',
+                    embeddable_id: 'test-uuid',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      await act(async () => chatEvents$.next(roundCompleteEvent));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+      await act(async () =>
+        capturedFlyoutProps!.onSave('FROM saved | LIMIT 10', '<div>user saved</div>')
+      );
+
+      act(() => {
+        embeddable.api.applySerializedState({ ...baseState, template: '<div>from server</div>' });
+      });
+
+      expect(embeddable.api.serializeState().template).toBe('<div>from server</div>');
+    });
+
     it('ignores events for a different embeddable_id', async () => {
       const chatEvents$ = new Subject<any>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
