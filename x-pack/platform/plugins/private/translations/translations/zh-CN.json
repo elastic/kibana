@@ -24857,7 +24857,6 @@
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.stepTitle": "运筹",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.totalRetentionInfiniteAriaLabel": "数据无限期保存",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError": "输入无效。",
-    "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.nameSpacesError": "组件模板名称不允许包含空格。",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription": "外部管理系统用于标识组件模板的编号。",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionFieldLabel": "版本（可选）",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle": "版本",

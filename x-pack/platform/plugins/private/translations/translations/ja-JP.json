@@ -24850,7 +24850,6 @@
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.stepTitle": "ロジスティクス",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.totalRetentionInfiniteAriaLabel": "データは無期限に保持されます",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError": "入力が無効です。",
-    "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.nameSpacesError": "コンポーネントテンプレート名にスペースは使用できません。",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription": "外部管理システムで、コンポーネントテンプレートを特定するために使用される番号。",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionFieldLabel": "バージョン（任意）",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle": "バージョン",
