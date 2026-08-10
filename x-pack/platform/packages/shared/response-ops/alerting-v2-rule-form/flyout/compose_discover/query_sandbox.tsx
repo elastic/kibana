@@ -477,7 +477,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
         {!isLoading && !hasRun && (
           <EuiEmptyPrompt
-            iconType="playFilled"
+            iconType="play"
             title={
               <h4>
                 <FormattedMessage
@@ -524,7 +524,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
         {hasRun && !isLoading && !isError && rows.length === 0 && query.trim() && (
           <EuiEmptyPrompt
-            iconType="search"
+            iconType="magnify"
             title={
               <h4>
                 <FormattedMessage
