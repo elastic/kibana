@@ -69,6 +69,7 @@ const buildItem = (
   totalRuleCount: 1,
   outcome: 'dispatched',
   episode_count: 3,
+  episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   ...overrides,
