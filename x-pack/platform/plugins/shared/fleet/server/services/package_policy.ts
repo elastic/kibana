@@ -208,6 +208,8 @@ import {
   installAssetsForCustomDatasetPolicy,
 } from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
+import { getRequestStore } from './request_store';
+import { updateWorkflowAssets } from './package_policies/update_workflow_assets';
 import {
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
@@ -215,7 +217,7 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 import { extractAccountType } from './cloud_connectors/integration_helpers';
-import { getAgentTemplateAssetsMap } from './epm/packages/get';
+import { getAgentTemplateAssetsMap, getPackageAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import {
@@ -1834,6 +1836,32 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     await this.compilePackagePolicyForVersions(soClient, pkgInfo, assetsMap, newPolicy);
+
+    // Re-apply workflow placeholder substitution when package policy vars changed
+    try {
+      const request = getRequestStore().getStore();
+      if (request) {
+        const workflowAssetsMap = await getPackageAssetsMap({
+          savedObjectsClient: soClient,
+          packageInfo: pkgInfo,
+          logger,
+        });
+        await updateWorkflowAssets({
+          savedObjectsClient: soClient,
+          packageInfo: pkgInfo,
+          assetsMap: workflowAssetsMap,
+          vars: newPolicy.vars || {},
+          request,
+          logger,
+        });
+      } else {
+        logger.debug(
+          `Skipping workflow asset update for package policy ${id}: missing request context`
+        );
+      }
+    } catch (error) {
+      logger.warn(`An error occurred updating workflow assets for package policy ${id}: ${error}`);
+    }
 
     // Bump revision of all associated agent policies (old and new), unless the
     // caller opted out via `bumpRevision: false` (e.g. silent updates that must
