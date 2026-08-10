@@ -109,6 +109,28 @@ export class DocViewer {
   }
 
   /**
+   * All field-type filter option chips rendered inside the open filter panel.
+   * Only meaningful after {@link openFieldTypeFilter} has resolved.
+   */
+  getFieldTypeFilterOptions(): Locator {
+    return this.page.testSubj
+      .locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
+      .locator('[data-test-subj*="typeFilter"]');
+  }
+
+  async clickFieldTypeFilterOption(type: string) {
+    await this.page.testSubj.click(`typeFilter-${type}`);
+  }
+
+  async clearAllFieldTypeFilters() {
+    await this.page.testSubj.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+  }
+
+  async toggleHideNullValues() {
+    await this.page.testSubj.click('unifiedDocViewerHideNullValuesSwitch');
+  }
+
+  /**
    * Pagination control for the document at `pageIndex` in the flyout navigation.
    * Only the currently active document's page control is rendered.
    */
