@@ -265,7 +265,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         margin-top: ${euiTheme.size.xs};
                       `}
                       size="m"
-                      type="console"
+                      type="commandLine"
                       aria-hidden
                     />
                   }
