@@ -27,7 +27,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import type { AgentDefinitionWithPermissions } from '../../../../../common/http_api/agents';
+import type { ListAgentResponseItem } from '../../../../../common/http_api/agents';
 import { resolveOwnerLabel } from '../../../utils/owner';
 import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -133,25 +133,25 @@ export const AgentsList: React.FC = () => {
   const dateFormat = settings?.client.get<string>('dateFormat');
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
-  const [aclAgent, setAclAgent] = React.useState<AgentDefinitionWithPermissions | null>(null);
+  const [aclAgent, setAclAgent] = React.useState<ListAgentResponseItem | null>(null);
 
-  const canManageAgentAccess = React.useCallback((agent: AgentDefinitionWithPermissions) => {
+  const canManageAgentAccess = React.useCallback((agent: ListAgentResponseItem) => {
     return agent.permissions.update_access_control;
   }, []);
 
-  const columns: Array<EuiBasicTableColumn<AgentDefinitionWithPermissions>> = useMemo(() => {
-    const agentAvatar: EuiTableComputedColumnType<AgentDefinitionWithPermissions> = {
+  const columns: Array<EuiBasicTableColumn<ListAgentResponseItem>> = useMemo(() => {
+    const agentAvatar: EuiTableComputedColumnType<ListAgentResponseItem> = {
       width: '48px',
       align: 'center',
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
-    const canEditAgent = (agent: AgentDefinitionWithPermissions) => agent.permissions.update_agent;
+    const canEditAgent = (agent: ListAgentResponseItem) => agent.permissions.update_agent;
 
-    const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
+    const agentNameAndDescription: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
       field: 'name',
       name: columnNames.name,
-      render: (name: string, agent: AgentDefinitionWithPermissions) => {
+      render: (name: string, agent: ListAgentResponseItem) => {
         const canEdit = canEditAgent(agent);
         const nameContent = !canEdit ? (
           <EuiText data-test-subj="agentBuilderAgentsListName" size="m">
@@ -193,7 +193,7 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
-    const agentLabels: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
+    const agentLabels: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
       width: '25%',
       field: 'labels',
       name: columnNames.labels,
@@ -207,7 +207,7 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
-    const agentAccessControlMode: EuiTableComputedColumnType<AgentDefinitionWithPermissions> = {
+    const agentAccessControlMode: EuiTableComputedColumnType<ListAgentResponseItem> = {
       width: '135px',
       name: columnNames.accessControlMode,
       render: (agent) => <AgentAccessControlModeBadge agent={agent} />,
@@ -236,7 +236,7 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
     };
 
-    const agentActions: EuiTableActionsColumnType<AgentDefinitionWithPermissions> = {
+    const agentActions: EuiTableActionsColumnType<ListAgentResponseItem> = {
       width: '120px',
       actions: [
         {
@@ -383,7 +383,7 @@ export const AgentsList: React.FC = () => {
           pageSizeOptions: [10, 25, 50, 100],
           showPerPageOptions: true,
         }}
-        onTableChange={({ page }: CriteriaWithPagination<AgentDefinitionWithPermissions>) => {
+        onTableChange={({ page }: CriteriaWithPagination<ListAgentResponseItem>) => {
           if (page) {
             setPageIndex(page.index);
             if (page.size !== pageSize) {

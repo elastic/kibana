@@ -8,11 +8,11 @@
 /**
  * This file hosts two distinct catalogs:
  *
- * - {@link ALERTING_V2_ERROR_CODES} — codes that travel out over HTTP. Part
+ * - {@link ALERTING_ERROR_CODES} — codes that travel out over HTTP. Part
  *   of the public API contract; see the README at
  *   `x-pack/platform/plugins/shared/alerting_v2/server/lib/errors/README.md`
  *   for status / details shape per code.
- * - {@link ALERTING_V2_LOG_CODES} — codes attached to `logger.error(...)` /
+ * - {@link ALERTING_LOG_CODES} — codes attached to `logger.error(...)` /
  *   `logger.warn(...)` calls for fire-and-forget failure paths (degraded but
  *   recoverable). Stable identifiers for log-based monitoring; never
  *   serialized into HTTP responses.
@@ -21,7 +21,7 @@
  * downstream consumers (API clients in one case, observability tooling in
  * the other). Adding new codes is backwards compatible.
  */
-export const ALERTING_V2_ERROR_CODES = {
+export const ALERTING_ERROR_CODES = {
   // ────────────────────────── Rules ──────────────────────────
   /** A rule with the given identifier does not exist. */
   RULE_NOT_FOUND: 'RULE_NOT_FOUND',
@@ -33,6 +33,8 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
+  /** A signal rule's merged shape violates signal constraints. */
+  INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
@@ -70,6 +72,13 @@ export const ALERTING_V2_ERROR_CODES = {
    * that are not already-running or conflict.
    */
   RULE_RUN_ERROR: 'RULE_RUN_ERROR',
+  /** A rule change-history event with the given identifier does not exist. */
+  RULE_CHANGE_NOT_FOUND: 'RULE_CHANGE_NOT_FOUND',
+  /**
+   * The rule change-history data stream is not initialized (or change history
+   * is disabled), so history cannot be read.
+   */
+  RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
@@ -124,8 +133,7 @@ export const ALERTING_V2_ERROR_CODES = {
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
 } as const;
 
-export type AlertingV2ErrorCode =
-  (typeof ALERTING_V2_ERROR_CODES)[keyof typeof ALERTING_V2_ERROR_CODES];
+export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALERTING_ERROR_CODES];
 
 /**
  * Catalog of stable, machine-readable codes attached to `logger.error(...)` /
@@ -139,7 +147,7 @@ export type AlertingV2ErrorCode =
  * `*_LOOKUP_FAILED` — the page was still returned, just without that piece
  * of enrichment).
  */
-export const ALERTING_V2_LOG_CODES = {
+export const ALERTING_LOG_CODES = {
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
@@ -230,6 +238,141 @@ export const ALERTING_V2_LOG_CODES = {
    * the workflow fan-out for this event was lost.
    */
   RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE: 'RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE',
+  /**
+   * The rule-changes-history subscriber failed to record a change entry for a
+   * rule domain event. The rule operation itself already succeeded; only the
+   * audit entry for this change was lost.
+   */
+  RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE: 'RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE',
+  /**
+   * A domain event was refused by the bus because its `type` collides with a
+   * reserved emitter event name. The publisher continued; no subscriber ran.
+   */
+  EVENT_BUS_PUBLISH_REJECTED: 'EVENT_BUS_PUBLISH_REJECTED',
+
+  // ──────────────────────────── Dispatcher ───────────────────────────
+  /**
+   * The action policy backing a dispatch group has no API key, so the group
+   * cannot be dispatched under the policy owner's credentials. The group is
+   * skipped; the rest of the dispatch tick continues.
+   */
+  DISPATCH_POLICY_MISSING_API_KEY: 'DISPATCH_POLICY_MISSING_API_KEY',
+  /**
+   * The workflow referenced by an action policy destination no longer exists.
+   * The group is skipped; the rest of the dispatch tick continues.
+   */
+  DISPATCH_WORKFLOW_NOT_FOUND: 'DISPATCH_WORKFLOW_NOT_FOUND',
+  /**
+   * The workflow referenced by an action policy destination exists but is
+   * disabled. The group is skipped until an operator enables the workflow.
+   */
+  DISPATCH_WORKFLOW_DISABLED: 'DISPATCH_WORKFLOW_DISABLED',
+  /** Scheduling a workflow execution for a dispatch group failed. */
+  DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
+  /**
+   * A dispatch group failed for a reason not covered by a more specific code
+   * (outer catch of the per-group dispatch loop). Sibling groups still run.
+   */
+  DISPATCH_GROUP_UNHANDLED_ERROR: 'DISPATCH_GROUP_UNHANDLED_ERROR',
+
+  // ────────────────────────── Action policies ────────────────────────
+  /**
+   * An action policy's KQL matcher failed to evaluate against an alert event.
+   * The policy is treated as a no-match so one malformed matcher cannot block
+   * the evaluation of the remaining policies.
+   */
+  POLICY_MATCHER_KQL_INVALID: 'POLICY_MATCHER_KQL_INVALID',
+
+  // ─────────────────────────── Rule executor ─────────────────────────
+  /**
+   * A rule-execution pipeline step threw. The failing step's name is carried
+   * in `labels.step` — this code stays stable across steps so a single filter
+   * returns every step failure.
+   */
+  RULE_EXECUTION_STEP_FAILED: 'RULE_EXECUTION_STEP_FAILED',
+  /**
+   * A metrics recorder threw while observing a pipeline step. Instrumentation
+   * only: the rule execution itself is unaffected.
+   */
+  RULE_EXECUTION_METRICS_RECORDER_FAILED: 'RULE_EXECUTION_METRICS_RECORDER_FAILED',
+  /**
+   * A rule-execution lifecycle event could not be published because the
+   * pipeline finished without the state the event is built from.
+   */
+  RULE_EXECUTION_EVENT_PUBLISH_SKIPPED: 'RULE_EXECUTION_EVENT_PUBLISH_SKIPPED',
+  /**
+   * Publishing a rule-execution lifecycle event to the domain event bus
+   * failed. The rule run itself already completed.
+   */
+  RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+
+  // ──────────────────────────── Rules client ─────────────────────────
+  /**
+   * A rule saved object was persisted but its paired Task Manager call
+   * failed, leaving the rule's task state diverged from its saved object.
+   */
+  RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+
+  // ────────────────────────── Storage & queries ──────────────────────
+  /** A bulk index request into an alerting datastream failed or was rejected. */
+  STORAGE_BULK_INDEX_FAILED: 'STORAGE_BULK_INDEX_FAILED',
+  /** An ES|QL query issued by the plugin failed to execute. */
+  QUERY_ESQL_EXECUTION_FAILED: 'QUERY_ESQL_EXECUTION_FAILED',
+
+  // ────────────────────────────── Resources ──────────────────────────
+  /**
+   * An Elasticsearch resource (datastream, index template, ES|QL view)
+   * failed to bootstrap. Rule execution stays degraded until it succeeds.
+   */
+  RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
+
+  // ──────────────────────── Maintenance windows ──────────────────────
+  /** Fetching active maintenance windows failed. */
+  MAINTENANCE_WINDOW_FETCH_FAILED: 'MAINTENANCE_WINDOW_FETCH_FAILED',
+  /**
+   * A maintenance window saved object could not be interpreted (missing or
+   * malformed events array) and was excluded from the active set.
+   */
+  MAINTENANCE_WINDOW_DOCUMENT_INVALID: 'MAINTENANCE_WINDOW_DOCUMENT_INVALID',
+  /**
+   * The point-in-time finder used to page maintenance windows failed to
+   * close. The windows were still read; the PIT expires on its own.
+   */
+  MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
+
+  // ─────────────────────────── Agent Builder ─────────────────────────
+  /** `refresh_episode` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
+  /** `get_rule` failed; tool returns an error result. */
+  AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
+  /** Episode attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
+  /** Episode attachment isStale check failed; returns false. */
+  AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
+  /** Rule attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_RULE_RESOLVE_FAILED: 'AGENT_BUILDER_RULE_RESOLVE_FAILED',
+  /** Rule attachment isStale check failed; returns false. */
+  AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED',
+  /** Action policy attachment resolve failed; returns undefined. */
+  AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED: 'AGENT_BUILDER_ACTION_POLICY_RESOLVE_FAILED',
+  /** Action policy attachment isStale check failed; returns false. */
+  AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED:
+    'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
+  /** `manage_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `manage_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
+  /** Skill schema docs could not be generated; skill registration aborted (error). */
+  AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
+  /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
+  AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
+
+  // ─────────────────────────────── Tasks ─────────────────────────────
+  /**
+   * A telemetry task run failed. Usage data for the interval is lost; the
+   * task retries on its next scheduled run.
+   */
+  TASKS_TELEMETRY_RUN_FAILED: 'TASKS_TELEMETRY_RUN_FAILED',
 } as const;
 
-export type AlertingV2LogCode = (typeof ALERTING_V2_LOG_CODES)[keyof typeof ALERTING_V2_LOG_CODES];
+export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

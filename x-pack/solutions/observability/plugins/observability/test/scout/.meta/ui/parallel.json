@@ -1,5 +1,5 @@
 {
-  "sha1": "f7b3c7db1620b6596817bca688160d86124b6287",
+  "sha1": "fd0e313ad63046f5c898c438579728568716e40e",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -386,8 +386,8 @@
       }
     },
     {
-      "id": "ef6f2482ea914d8-aff4cfecfe81669",
-      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate and update breadcrumbs",
+      "id": "ef6f2482ea914d8-2e928d73e90cb17",
+      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate to the correct destinations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -409,8 +409,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 86,
-        "column": 22
+        "line": 76,
+        "column": 38
       }
     },
     {
@@ -423,7 +423,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 94,
+        "line": 86,
         "column": 22
       }
     },
@@ -442,8 +442,8 @@
       }
     },
     {
-      "id": "d4c1536758c1f7d-6bb14cf244a9765",
-      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "d4c1536758c1f7d-305965b9cdeeb30",
+      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -456,8 +456,8 @@
       }
     },
     {
-      "id": "d4c1536758c1f7d-5a93e4386d422ad",
-      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate and update breadcrumbs",
+      "id": "d4c1536758c1f7d-e04393273fefb25",
+      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -465,8 +465,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 124,
-        "column": 92
+        "line": 122,
+        "column": 91
       }
     },
     {
@@ -479,8 +479,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 174,
-        "column": 10
+        "line": 166,
+        "column": 24
       }
     },
     {
@@ -493,8 +493,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 198,
-        "column": 11
+        "line": 192,
+        "column": 32
       }
     },
     {

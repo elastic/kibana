@@ -454,6 +454,12 @@ export const labels = {
             defaultMessage: '{selected} Selected',
             values: { selected },
           }),
+        selectionActionsAriaLabel: i18n.translate(
+          'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.selectionActionsAriaLabel',
+          {
+            defaultMessage: 'Tool selection actions',
+          }
+        ),
         clearSelection: i18n.translate(
           'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.clearSelection',
           {
