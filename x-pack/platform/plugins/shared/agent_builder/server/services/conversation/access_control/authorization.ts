@@ -76,14 +76,6 @@ export const hasConversationOwnerAccess = ({
   user: UserIdAndName;
 }): boolean => isConversationOwner({ conversation, user });
 
-/**
- * Checks whether the caller can rename the conversation.
- *
- * Admins are granted management of conversations they do not own only in `public` access mode.
- * The check is deliberately "public mode only" rather than "not private": a conversation that is
- * private but shared through access-control entries stays owner-only, so sharing a sensitive chat
- * with a few colleagues never hands it to every admin.
- */
 export const hasConversationRenameAccess = ({
   conversation,
   user,

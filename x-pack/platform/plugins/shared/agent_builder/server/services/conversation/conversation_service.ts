@@ -53,8 +53,6 @@ export class ConversationServiceImpl implements ConversationService {
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
     const user = await this.getCurrentUser({ request });
-    // Probed against the caller's own client so the result reflects their privileges, unlike the
-    // internal client the storage layer reads with.
     const isAdmin = await isAdminFromRequest({
       esClient: this.getScopedEsClient(request).asCurrentUser,
     });
