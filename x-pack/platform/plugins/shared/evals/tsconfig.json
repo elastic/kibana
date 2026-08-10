@@ -15,6 +15,7 @@
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/storage-adapter",
+    "@kbn/occ",
     "@kbn/es-errors",
     "@kbn/evals-common",
     "@kbn/zod-helpers",
