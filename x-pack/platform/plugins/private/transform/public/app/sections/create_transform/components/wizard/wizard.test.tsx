@@ -10,6 +10,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import type { ProjectRouting } from '@kbn/es-query';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 
@@ -304,7 +305,7 @@ describe('Transform: <Wizard />', () => {
   test('adopts the resolved default project routing from CPS manager readiness', async () => {
     const appDeps = appDependencies.useAppDependencies();
     let resolveWhenReady: () => void = () => {};
-    let defaultProjectRouting = PROJECT_ROUTING.ALL;
+    let defaultProjectRouting: ProjectRouting = PROJECT_ROUTING.ALL;
     appDeps.cps = {
       cpsManager: {
         whenReady: jest.fn(
