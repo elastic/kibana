@@ -264,7 +264,7 @@ export const attacksWorkflowsPromotionCalloutActionEvent: AttacksTelemetryEvent 
       type: 'keyword',
       _meta: {
         description:
-          'The action taken on the Attack Discovery Workflows promotion callout (view/enable/dismiss)',
+          'The action taken on the Attack Discovery Workflows promotion callout (view/enable/dismiss/learn_more)',
         optional: false,
       },
     },

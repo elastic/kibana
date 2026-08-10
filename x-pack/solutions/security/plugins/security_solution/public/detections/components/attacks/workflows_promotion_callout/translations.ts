@@ -36,11 +36,18 @@ export const CALLOUT_DISMISS_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const CALLOUT_MISSING_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.attacksPage.workflowsPromotionCallout.missingPrivileges',
+export const CALLOUT_MISSING_PRIVILEGES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.attacksPage.workflowsPromotionCallout.missingPrivilegesDescription',
   {
     defaultMessage:
-      'Ask an administrator with permission to edit Advanced Settings to enable Attack Discovery Workflows for this space.',
+      'Enabling this requires permission to edit Advanced Settings. Ask your admin to turn on the Attack Discovery Workflows setting for this space.',
+  }
+);
+
+export const CALLOUT_LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.attacksPage.workflowsPromotionCallout.learnMore',
+  {
+    defaultMessage: 'Learn more',
   }
 );
 

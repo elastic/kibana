@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
@@ -24,6 +25,8 @@ export const WORKFLOWS_PROMOTION_CALLOUT_DISMISS_TEST_ID =
   'attacks-page-workflows-promotion-callout-dismiss';
 export const WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID =
   'attacks-page-workflows-promotion-callout-missing-privileges';
+export const WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID =
+  'attacks-page-workflows-promotion-callout-learn-more';
 
 const STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT;
 
@@ -38,7 +41,7 @@ const STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.ATTACKS_PAGE_WORKFLOWS_PROMOT
  */
 const WorkflowsPromotionCalloutComponent: React.FC = () => {
   const {
-    services: { application, featureFlags, storage, telemetry, uiSettings },
+    services: { application, docLinks, featureFlags, storage, telemetry, uiSettings },
   } = useKibana();
   const { addError } = useAppToasts();
 
@@ -77,6 +80,12 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
     telemetry.reportEvent(AttacksEventTypes.WorkflowsPromotionCalloutAction, { action: 'dismiss' });
   }, [storage, telemetry]);
 
+  const onLearnMore = useCallback(() => {
+    telemetry.reportEvent(AttacksEventTypes.WorkflowsPromotionCalloutAction, {
+      action: 'learn_more',
+    });
+  }, [telemetry]);
+
   const onEnable = useCallback(async () => {
     telemetry.reportEvent(AttacksEventTypes.WorkflowsPromotionCalloutAction, { action: 'enable' });
     setIsEnabling(true);
@@ -97,42 +106,48 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
 
   return (
     <>
-      <EuiCallOut
-        color="primary"
-        onDismiss={onDismiss}
+      <KbnInfoCallout
+        size="m"
         title={i18n.CALLOUT_TITLE}
         data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_TEST_ID}
+        onDismiss={onDismiss}
         dismissButtonProps={{
           'aria-label': i18n.CALLOUT_DISMISS_ARIA_LABEL,
           'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_DISMISS_TEST_ID,
         }}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem>{i18n.CALLOUT_DESCRIPTION}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {canSaveAdvancedSettings ? (
-              <EuiButton
-                color="primary"
-                fill
-                size="s"
-                onClick={onEnable}
-                isLoading={isEnabling}
-                data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID}
-              >
-                {i18n.CALLOUT_ENABLE_BUTTON}
-              </EuiButton>
-            ) : (
-              <EuiText
-                size="s"
-                color="subdued"
-                data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID}
-              >
-                {i18n.CALLOUT_MISSING_PRIVILEGES}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiCallOut>
+        text={
+          canSaveAdvancedSettings ? (
+            <p>{i18n.CALLOUT_DESCRIPTION}</p>
+          ) : (
+            <p data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID}>
+              {i18n.CALLOUT_MISSING_PRIVILEGES_DESCRIPTION}
+            </p>
+          )
+        }
+        // When rendered wide enough, EUI places the action to the right of the
+        // text and vertically centers it; it stacks below on narrow widths.
+        actionProps={
+          canSaveAdvancedSettings
+            ? {
+                primary: {
+                  children: i18n.CALLOUT_ENABLE_BUTTON,
+                  onClick: onEnable,
+                  isLoading: isEnabling,
+                  'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID,
+                },
+              }
+            : {
+                primary: {
+                  children: i18n.CALLOUT_LEARN_MORE,
+                  href: docLinks.links.siem.runAttackDiscoveryInWorkflow,
+                  target: '_blank',
+                  rel: 'noopener',
+                  onClick: onLearnMore,
+                  'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID,
+                },
+              }
+        }
+      />
       <EuiSpacer size="l" />
     </>
   );

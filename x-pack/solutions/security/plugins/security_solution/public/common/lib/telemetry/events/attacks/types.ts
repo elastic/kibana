@@ -122,7 +122,7 @@ interface AttacksTourStepActionParams {
 }
 
 interface AttacksWorkflowsPromotionCalloutActionParams {
-  action: 'view' | 'enable' | 'dismiss';
+  action: 'view' | 'enable' | 'dismiss' | 'learn_more';
 }
 
 export interface AttacksTelemetryEventsMap {

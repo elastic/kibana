@@ -17,6 +17,7 @@ import {
   WorkflowsPromotionCallout,
   WORKFLOWS_PROMOTION_CALLOUT_DISMISS_TEST_ID,
   WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID,
+  WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID,
   WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID,
   WORKFLOWS_PROMOTION_CALLOUT_TEST_ID,
 } from '.';
@@ -28,6 +29,7 @@ const useKibanaMock = useKibana as jest.Mock;
 const useAppToastsMockHook = useAppToasts as jest.Mock;
 
 const STORAGE_KEY = 'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5';
+const DOCS_URL = 'https://docs.test/run-attack-discovery-in-a-workflow';
 
 const createStorageMock = (initial: Record<string, unknown> = {}) => {
   const store = new Map<string, unknown>(Object.entries(initial));
@@ -70,6 +72,7 @@ const renderCallout = ({
   useKibanaMock.mockReturnValue({
     services: {
       application: { capabilities: { advancedSettings: { save: canSaveAdvancedSettings } } },
+      docLinks: { links: { siem: { runAttackDiscoveryInWorkflow: DOCS_URL } } },
       featureFlags: { getBooleanValue: jest.fn(() => featureAvailable) },
       storage: storageMock,
       telemetry: { reportEvent },
@@ -128,7 +131,7 @@ describe('WorkflowsPromotionCallout', () => {
     expect(screen.queryByTestId(WORKFLOWS_PROMOTION_CALLOUT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('shows an admin hint instead of the enable button without the advancedSettings save privilege', () => {
+  it('shows the missing-privileges description and a Learn more link instead of the enable button without the advancedSettings save privilege', () => {
     renderCallout({ canSaveAdvancedSettings: false });
     expect(
       screen.getByTestId(WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID)
@@ -136,6 +139,19 @@ describe('WorkflowsPromotionCallout', () => {
     expect(
       screen.queryByTestId(WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID)
     ).not.toBeInTheDocument();
+
+    const learnMore = screen.getByTestId(WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID);
+    expect(learnMore).toBeInTheDocument();
+    expect(learnMore).toHaveAttribute('href', DOCS_URL);
+    expect(learnMore).toHaveAttribute('target', '_blank');
+  });
+
+  it('reports learn_more telemetry when the Learn more link is clicked', () => {
+    renderCallout({ canSaveAdvancedSettings: false });
+    fireEvent.click(screen.getByTestId(WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID));
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.WorkflowsPromotionCalloutAction, {
+      action: 'learn_more',
+    });
   });
 
   it('enables the setting for the space and reloads when the enable button is clicked', async () => {
