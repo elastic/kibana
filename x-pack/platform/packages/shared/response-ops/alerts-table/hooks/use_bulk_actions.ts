@@ -42,6 +42,20 @@ import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query'
 import { useTagsAction } from '../components/tags/use_tags_action';
 import { MUTE_SELECTED, UNMUTE_SELECTED } from '../translations';
 
+export const BULK_ADD_TO_CASE_ACTION_IDS = {
+  addToExistingCase: 'attach-existing-case',
+  addToNewCase: 'attach-new-case',
+} as const;
+
+export const BULK_ADD_TO_CHAT_ACTION_ID = 'bulk-add-to-chat';
+export const BULK_EDIT_TAGS_ACTION_ID = 'edit-tags';
+export const BULK_UNTRACK_ACTION_ID = 'mark-as-untracked';
+
+export const BULK_MUTE_ACTION_IDS = {
+  mute: 'bulk-mute',
+  unmute: 'bulk-unmute',
+} as const;
+
 interface BulkActionsProps {
   ruleTypeIds?: string[];
   query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
@@ -186,7 +200,7 @@ export const useBulkAddToCaseActions = ({
       ? [
           {
             label: ADD_TO_NEW_CASE,
-            key: 'attach-new-case',
+            key: BULK_ADD_TO_CASE_ACTION_IDS.addToNewCase,
             'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
             disabledLabel: ADD_TO_NEW_CASE,
@@ -199,7 +213,7 @@ export const useBulkAddToCaseActions = ({
           },
           {
             label: ADD_TO_EXISTING_CASE,
-            key: 'attach-existing-case',
+            key: BULK_ADD_TO_CASE_ACTION_IDS.addToExistingCase,
             disableOnQuery: true,
             disabledLabel: ADD_TO_EXISTING_CASE,
             'data-test-subj': 'attach-existing-case',
@@ -290,7 +304,7 @@ export const useBulkUntrackActions = ({
     return [
       {
         label: MARK_AS_UNTRACKED,
-        key: 'mark-as-untracked',
+        key: BULK_UNTRACK_ACTION_ID,
         disableOnQuery: false,
         disabledLabel: MARK_AS_UNTRACKED,
         'data-test-subj': 'mark-as-untracked',
@@ -391,7 +405,7 @@ export const useBulkMuteActions = ({
     () => [
       {
         label: MUTE_SELECTED,
-        key: 'bulk-mute',
+        key: BULK_MUTE_ACTION_IDS.mute,
         disableOnQuery: true,
         disabledLabel: MUTE_SELECTED,
         'data-test-subj': 'bulk-mute',
@@ -399,7 +413,7 @@ export const useBulkMuteActions = ({
       },
       {
         label: UNMUTE_SELECTED,
-        key: 'bulk-unmute',
+        key: BULK_MUTE_ACTION_IDS.unmute,
         disableOnQuery: true,
         disabledLabel: UNMUTE_SELECTED,
         'data-test-subj': 'bulk-unmute',
@@ -439,7 +453,7 @@ export const useBulkAddToChatActions = ({
     return [
       {
         label: ADD_TO_CHAT,
-        key: 'bulk-add-to-chat',
+        key: BULK_ADD_TO_CHAT_ACTION_ID,
         disableOnQuery: true,
         disabledLabel: ADD_TO_CHAT,
         'data-test-subj': 'bulk-add-to-chat',
@@ -516,7 +530,7 @@ export function useBulkActions({
       : [
           {
             label: EDIT_TAGS,
-            key: 'edit-tags',
+            key: BULK_EDIT_TAGS_ACTION_ID,
             disableOnQuery: true,
             disabledLabel: EDIT_TAGS,
             'data-test-subj': 'edit-tags',
