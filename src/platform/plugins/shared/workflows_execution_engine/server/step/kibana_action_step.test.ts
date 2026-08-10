@@ -96,4 +96,25 @@ describe('KibanaActionStepImpl', () => {
       expect.objectContaining({ path: '/api/test' })
     );
   });
+
+  it('strips an existing current-space prefix from raw request paths', async () => {
+    contextManager.getWorkflowSpaceId.mockReturnValue('custom');
+    step = createStep({ request: { method: 'GET', path: '/s/custom/api/test' } });
+    await (step as any)._run();
+    expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/api/test' })
+    );
+  });
+
+  it('strips an existing current-space prefix from form_data paths', async () => {
+    contextManager.getWorkflowSpaceId.mockReturnValue('custom');
+    step = createStep({
+      path: '/s/custom/api/test',
+      form_data: { file: { content: 'hello', filename: 'a.txt' } },
+    });
+    await (step as any)._run();
+    expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/api/test' })
+    );
+  });
 });

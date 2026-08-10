@@ -133,6 +133,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // Core's scoped self client owns redirect/TLS/dispatcher policy; workflows owners own future
     // YAML fetcher deprecation/removal UX, so this legacy transport field is intentionally ignored.
     const { fetcher: _fetcherOptions, ...cleanParams } = params;
+    // `callKibanaApi` owns the workflow-space prefix, so strip an existing current-space prefix
+    // from paths that already carry one (raw `request`/`form_data` paths were historically
+    // forwarded unchanged, and generated connector paths are built space-prefixed).
+    const currentSpacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+    const stripCurrentSpacePrefix = (path: string) =>
+      currentSpacePrefix && path.startsWith(`${currentSpacePrefix}/`)
+        ? path.slice(currentSpacePrefix.length)
+        : path;
     let requestConfig: {
       method: string;
       path: string;
@@ -147,27 +155,23 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     }
     if (cleanParams.request) {
       const { method = 'GET', path, body, query, headers } = cleanParams.request;
-      requestConfig = { method, path, body, query, headers };
+      requestConfig = { method, path: stripCurrentSpacePrefix(path), body, query, headers };
     } else if (cleanParams.form_data) {
       const { form_data, method = 'POST', path, query, headers } = cleanParams;
-      requestConfig = { method, path, query, headers, rawBody: this.buildFormData(form_data) };
+      requestConfig = {
+        method,
+        path: stripCurrentSpacePrefix(path),
+        query,
+        headers,
+        rawBody: this.buildFormData(form_data),
+      };
     } else {
       const { method, path, body, query, headers } = buildKibanaRequest(
         stepType,
         cleanParams,
         spaceId
       );
-      const generatedSpacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
-      requestConfig = {
-        method,
-        path:
-          generatedSpacePrefix && path.startsWith(`${generatedSpacePrefix}/`)
-            ? path.slice(generatedSpacePrefix.length)
-            : path,
-        body,
-        query,
-        headers,
-      };
+      requestConfig = { method, path: stripCurrentSpacePrefix(path), body, query, headers };
     }
 
     const normalizedMethod = requestConfig.method?.toUpperCase();
