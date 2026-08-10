@@ -53,6 +53,7 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
 export type OptionsListDSLFetchBody = {
   kind: 'dsl';
   index: string;
+  projectRouting?: string;
 } & OptionsListRequestBody;
 
 /**
@@ -71,6 +72,7 @@ export interface OptionsListESQLFetchBody {
   selectedOptions?: OptionsListDSLControlState['selected_options'];
   ignoreValidations?: boolean;
   isReload?: boolean;
+  projectRouting?: string;
 }
 
 export type OptionsListUnifiedFetchBody = OptionsListDSLFetchBody | OptionsListESQLFetchBody;

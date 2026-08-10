@@ -17,6 +17,7 @@ import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../..
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -48,9 +49,11 @@ import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { RULE_CREATED_EVENT } from './event_based_telemetry';
 
 export interface CreateRuleOptions {
   id?: string;
+  initialRevision?: number;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
@@ -58,6 +61,12 @@ export interface CreateRuleParams<Params extends RuleParams = never> {
   options?: CreateRuleOptions;
   changeTracking?: RuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
+  /**
+   * The id of the rule template this rule was created from, when known (e.g. gallery
+   * create-from-template, or Fleet installing a rule from a package template). Used only
+   * for telemetry - it is not persisted on the rule saved object.
+   */
+  templateId?: string;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -65,7 +74,13 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const { data: initialData, options, changeTracking, allowMissingConnectorSecrets } = createParams;
+  const {
+    data: initialData,
+    options,
+    changeTracking,
+    allowMissingConnectorSecrets,
+    templateId,
+  } = createParams;
 
   const actionsClient = await context.getActionsClient();
 
@@ -140,6 +155,9 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
   const username = await context.getUserName();
 
   let createdAPIKey = null;
@@ -229,7 +247,7 @@ export async function createRule<Params extends RuleParams = never>(
       throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
-      revision: 0,
+      revision: options?.initialRevision ?? 0,
       running: false,
     },
     params: {
@@ -263,8 +281,8 @@ export async function createRule<Params extends RuleParams = never>(
     rulesClientContext: context,
     changesContext: {
       action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
-      timestamp: createTime,
       metadata: changeTracking?.metadata,
+      refresh: changeTracking?.refresh,
     },
   });
 
@@ -290,7 +308,57 @@ export async function createRule<Params extends RuleParams = never>(
   // Convert domain rule to rule (Remove certain properties)
   const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
+  reportRuleCreatedEvent(context, {
+    id,
+    templateId,
+    createTime,
+    alertTypeId: data.alertTypeId,
+    enabled: data.enabled,
+    consumer: data.consumer,
+    producer: ruleType.producer,
+  });
+
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
+}
+
+/**
+ * Reports the rule-create EBT event. Fails open: telemetry must never break rule creation,
+ * so any error is caught and logged at debug level (mirrors the UIAM provisioning pattern
+ * in `reportProvisioningRunEvent`).
+ */
+function reportRuleCreatedEvent(
+  context: RulesClientContext,
+  {
+    id,
+    templateId,
+    createTime,
+    alertTypeId,
+    enabled,
+    consumer,
+    producer,
+  }: {
+    id: string;
+    templateId?: string;
+    createTime: number;
+    alertTypeId: string;
+    enabled: boolean;
+    consumer: string;
+    producer: string;
+  }
+): void {
+  try {
+    context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
+      rule_id: id,
+      ...(templateId ? { template_id: templateId } : {}),
+      created_at: new Date(createTime).toISOString(),
+      rule_type_id: alertTypeId,
+      enabled,
+      consumer,
+      producer,
+    });
+  } catch (e) {
+    context.logger.debug(`Failed to report rule create telemetry event: ${e}`);
+  }
 }

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getDefaultTransport, getInlineFields, FIELD_CONFIG } from './field_config';
+import { getDefaultTransport, getRequiredTextFields } from './field_config';
 import type { TransportType } from './field_config';
+import type { SignalFilter } from '../services_step/use_services_step';
 
 export interface ServiceVars {
   trigger: TransportType | null;
@@ -24,16 +25,19 @@ interface PersistedState {
   serviceVars: Record<string, ServiceVars>;
 }
 
-const SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
-export function useServiceSettings({ onNext }: { onNext: () => void }) {
+export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [persisted, setPersisted] = useSessionStorage<PersistedState>(SESSION_KEY, {
-    globalRegion: '',
-    serviceVars: {},
-  });
+  const [persisted, setPersisted] = useSessionStorage<PersistedState>(
+    SERVICE_SETTINGS_SESSION_KEY,
+    {
+      globalRegion: '',
+      serviceVars: {},
+    }
+  );
 
   const globalRegion = persisted?.globalRegion ?? '';
 
@@ -68,75 +72,78 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
     [persisted]
   );
 
-  const setServiceTransport = useCallback(
-    (serviceId: string, transport: TransportType) => {
+  // Applies multiple field changes (and optional transport) in a single write to avoid
+  // stale-closure overwrites when several vars are committed at once (flyout Save).
+  const setServiceFieldsAndTransport = useCallback(
+    (serviceId: string, newFields: Record<string, string>, transport: TransportType | null) => {
       const current = getServiceVars(serviceId);
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
-          [serviceId]: { ...current, trigger: transport },
+          [serviceId]: {
+            trigger: transport ?? current.trigger,
+            vars: { ...current.vars, ...newFields },
+          },
         },
       });
     },
     [persisted, setPersisted, getServiceVars]
   );
 
-  const setServiceField = useCallback(
-    (serviceId: string, fieldName: string, value: string) => {
-      const current = getServiceVars(serviceId);
-      setPersisted({
-        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        serviceVars: {
-          ...(persisted?.serviceVars ?? {}),
-          [serviceId]: { ...current, vars: { ...current.vars, [fieldName]: value } },
-        },
-      });
-    },
-    [persisted, setPersisted, getServiceVars]
+  const [searchQuery, setSearchQuery] = useState('');
+  const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
+
+  const filteredServices = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return selectedServices.filter(
+      (s) =>
+        (signalFilter === 'all' || s.signalType === signalFilter) &&
+        (q === '' || s.name.toLowerCase().includes(q))
+    );
+  }, [selectedServices, searchQuery, signalFilter]);
+
+  const incompleteServices = useMemo(
+    () =>
+      selectedServices.filter((service) => {
+        const config = getServiceVars(service.id);
+        const required = getRequiredTextFields(service, config.trigger);
+        return required.some((f) => (config.vars[f] ?? '').trim() === '');
+      }),
+    [selectedServices, getServiceVars]
   );
 
-  // Applies multiple field changes in a single write — avoids stale-closure overwrites
-  // when several vars are committed at once (e.g. from the flyout Apply button).
-  const setServiceFields = useCallback(
-    (serviceId: string, newFields: Record<string, string>) => {
-      const current = getServiceVars(serviceId);
-      setPersisted({
-        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        serviceVars: {
-          ...(persisted?.serviceVars ?? {}),
-          [serviceId]: { ...current, vars: { ...current.vars, ...newFields } },
-        },
-      });
-    },
-    [persisted, setPersisted, getServiceVars]
+  const incompleteServiceIds = useMemo(
+    () => new Set(incompleteServices.map((s) => s.id)),
+    [incompleteServices]
   );
 
-  const isReady = useMemo(() => {
-    if (!globalRegion.trim()) return false;
-    return selectedServices.every((service) => {
-      const config = getServiceVars(service.id);
-      const inlineFields = getInlineFields(service, config.trigger);
-      return inlineFields.every((f) => {
-        const meta = FIELD_CONFIG[f];
-        if (!meta) return true;
-        return (config.vars[f] ?? '').trim() !== '';
-      });
-    });
-  }, [globalRegion, selectedServices, getServiceVars]);
+  const isReady = useMemo(
+    () => !!globalRegion.trim() && incompleteServices.length === 0,
+    [globalRegion, incompleteServices]
+  );
+
+  const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
   const handleNext = useCallback(() => {
-    if (isReady) onNext();
-  }, [isReady, onNext]);
+    onContinue();
+  }, [onContinue]);
 
   return {
     globalRegion,
     setGlobalRegion,
     selectedServices,
+    filteredServices,
+    incompleteServices,
+    incompleteServiceIds,
+    searchQuery,
+    setSearchQuery,
+    signalFilter,
+    setSignalFilter,
     getServiceVars,
-    setServiceTransport,
-    setServiceField,
-    setServiceFields,
+    setServiceFieldsAndTransport,
+    globalRegionTouched,
+    setGlobalRegionTouched,
     isReady,
     handleNext,
   };

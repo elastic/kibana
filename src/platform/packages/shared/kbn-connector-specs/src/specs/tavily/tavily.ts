@@ -41,6 +41,7 @@ export const TavilyConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/tavily-action-type`,
   },
 
   auth: {
@@ -55,6 +56,7 @@ export const TavilyConnector: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://mcp.tavily.com/mcp/',
+          hidden: true,
           label: i18n.translate('connectorSpecs.tavily.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
@@ -162,13 +164,11 @@ export const TavilyConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Tavily MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

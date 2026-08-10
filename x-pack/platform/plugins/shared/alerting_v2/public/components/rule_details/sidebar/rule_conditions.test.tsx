@@ -28,7 +28,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule' },
+  metadata: { name: 'Test Signal Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
@@ -45,7 +45,7 @@ const alertRule: RuleApiResponse = {
   ...baseRule,
   id: 'rule-2',
   kind: 'alert',
-  metadata: { name: 'Test Alert Rule' },
+  metadata: { name: 'Test Alert Rule', version: 1 },
   recovery_strategy: 'query',
   query: {
     format: 'standalone',
@@ -87,6 +87,82 @@ describe('RuleConditions', () => {
       'After 3 matches or 5m'
     );
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Do nothing'
+    );
+  });
+
+  it('renders Custom recovery with the recovery condition snippet in its own row when recovery_strategy is query', () => {
+    renderConditions(alertRule);
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Custom');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).not.toHaveAttribute('colspan');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveAttribute(
+      'colspan',
+      '2'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+      'FROM metrics-* | WHERE avg(cpu) < 0.5'
+    );
+  });
+
+  it('renders only the recovery segment (not recomposed with base) for a composed query', () => {
+    renderConditions({
+      ...alertRule,
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        breach: { segment: 'WHERE avg(cpu) > 0.9' },
+        recovery: { segment: 'WHERE avg(cpu) < 0.5' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).toHaveTextContent(
+      'WHERE avg(cpu) < 0.5'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryConditionQuery')).not.toHaveTextContent(
+      'FROM metrics-*'
+    );
+  });
+
+  it('renders Default recovery with a dash for the condition row when recovery_strategy is not query', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'no_breach',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).not.toHaveAttribute(
+      'colspan'
+    );
+  });
+
+  it('renders a dash for recovery and the condition row when recovery_strategy is absent', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: undefined,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+  });
+
+  it('renders No recovery with a dash for the condition row when recovery_strategy is none', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'none',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('No recovery');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
   });
 
   it('renders Immediate for alert and recovery delay when counts are zero', () => {
@@ -162,12 +238,47 @@ describe('RuleConditions', () => {
     );
   });
 
+  it('renders no data behavior label for each strategy value', () => {
+    renderConditions({ ...alertRule, no_data_strategy: 'last_known_status' });
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Keep last known status'
+    );
+  });
+
+  it('renders "Use no data status" for emit strategy', () => {
+    renderConditions({ ...alertRule, no_data_strategy: 'emit' });
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Use no data status'
+    );
+  });
+
+  it('renders "Recover" for recover strategy', () => {
+    renderConditions({ ...alertRule, no_data_strategy: 'recover' });
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent('Recover');
+  });
+
+  it('renders "Do nothing" for none strategy', () => {
+    renderConditions({ ...alertRule, no_data_strategy: 'none' });
+    expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
+      'Do nothing'
+    );
+  });
+
+  it('does not render no data behavior for signal rules', () => {
+    renderConditions(baseRule);
+    expect(screen.queryByTestId('alertingV2RuleDetailsNoDataStrategy')).not.toBeInTheDocument();
+  });
+
   describe('variant="summary"', () => {
     it('hides recovery, alert delay, recovery delay, and no-data-config fields', () => {
       renderConditions(alertRule, 'summary');
       expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryDelay')).not.toBeInTheDocument();
-      // Recovery row has no test subj on the row itself; assert by its title text absence.
+      expect(screen.queryByTestId('alertingV2RuleDetailsNoDataStrategy')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertingV2RuleDetailsRecovery')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2RuleDetailsRecoveryCondition')
+      ).not.toBeInTheDocument();
       expect(screen.queryByText('Recovery')).not.toBeInTheDocument();
     });
 
@@ -184,6 +295,25 @@ describe('RuleConditions', () => {
       expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
       expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
       expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alert');
+    });
+  });
+
+  describe('description', () => {
+    it('renders description text before the ES|QL heading when it exists', () => {
+      const ruleWithDesc = {
+        ...baseRule,
+        metadata: { ...baseRule.metadata, name: 'Test Signal Rule', description: 'My rule desc' },
+      };
+      renderConditions(ruleWithDesc);
+      const desc = screen.getByTestId('ruleConditionsDescription');
+      expect(desc).toHaveTextContent('My rule desc');
+      const query = screen.getByTestId('alertingV2RuleDetailsBaseQuery');
+      expect(desc.compareDocumentPosition(query)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('does not render description when it is absent', () => {
+      renderConditions(baseRule);
+      expect(screen.queryByTestId('ruleConditionsDescription')).not.toBeInTheDocument();
     });
   });
 

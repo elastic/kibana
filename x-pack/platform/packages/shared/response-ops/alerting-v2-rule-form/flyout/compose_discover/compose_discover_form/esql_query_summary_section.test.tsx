@@ -8,17 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { RuleQuery } from '../compose_form_types';
+import type { RuleQuery } from '../../../form/types';
 import {
   EsqlQuerySummarySection,
   getEsqlSummaryState,
   type EsqlSummaryState,
 } from './esql_query_summary_section';
-
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-  ESQL_LANG_ID: 'esql',
-}));
 
 const BASE = 'FROM logs-*';
 const ALERT_SEGMENT = '| WHERE count > 100';
@@ -133,11 +128,6 @@ describe('EsqlQuerySummarySection callouts', () => {
       testSubj: 'esqlSummaryEmptyCallout',
     },
     {
-      state: 'split_failed',
-      query: composedQuery('', ALERT_SEGMENT),
-      testSubj: 'esqlSummarySplitFailedCallout',
-    },
-    {
       state: 'no_alert_condition',
       query: composedQuery(BASE, ''),
       testSubj: 'esqlSummaryNoAlertConditionCallout',
@@ -152,7 +142,6 @@ describe('EsqlQuerySummarySection callouts', () => {
   it('does not render a warning callout for success', () => {
     renderSection(true, composedQuery(BASE, ALERT_SEGMENT));
     expect(screen.queryByTestId('esqlSummaryEmptyCallout')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('esqlSummarySplitFailedCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
   });
 });

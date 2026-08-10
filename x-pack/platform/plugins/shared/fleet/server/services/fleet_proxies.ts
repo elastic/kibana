@@ -10,6 +10,7 @@ import type {
   SavedObject,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { omit } from 'lodash';
 import pMap from 'p-map';
 
@@ -114,13 +115,15 @@ export async function bulkCreateFleetProxies(
     { overwrite: options?.overwrite }
   );
 
-  const itemErrors = res.saved_objects.filter((so) => so.error);
+  const itemErrors = res.saved_objects.filter(isSavedObjectErrorResult);
   if (itemErrors.length > 0) {
     throw itemErrors[0].error;
   }
 
   logger.debug(`Bulk created ${proxies.length} fleet proxies`);
-  return res.saved_objects.map(savedObjectToFleetProxy);
+  return res.saved_objects
+    .filter((so): so is SavedObject<FleetProxySOAttributes> => !isSavedObjectErrorResult(so))
+    .map(savedObjectToFleetProxy);
 }
 
 export async function getFleetProxy(
@@ -210,7 +213,7 @@ export async function bulkGetFleetProxies(
 
   return res.saved_objects
     .map((so) => {
-      if (so.error) {
+      if (isSavedObjectErrorResult(so)) {
         if (!ignoreNotFound || so.error.statusCode !== 404) {
           throw so.error;
         }

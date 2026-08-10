@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -74,7 +74,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       paddingSize="s"
       css={css`
         max-width: 200px;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -82,12 +82,12 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
+          <div css={iconContainerStyles}>
             <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
+          <EuiText size="xs" css={titleStyles}>
             <strong>{displayName}</strong>
           </EuiText>
         </EuiFlexItem>

@@ -83,12 +83,21 @@ describe('EvaluateMatchersStep', () => {
     expect(matched).toHaveLength(2);
   });
 
-  it('skips episodes whose rule is not found', async () => {
-    const episode = createAlertEpisode({ rule_id: 'unknown-rule' });
+  it('external episode (null rule_id) is matched by a catch-all policy in its space', async () => {
+    const episode = createAlertEpisode({
+      source: 'pagerduty',
+      rule_id: null,
+      space_id: 'space-a',
+      group_hash: 'pd-1',
+      episode_id: 'pd-ep-1',
+    });
+    const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
 
-    const matched = await runStep([episode], new Map(), new Map());
+    const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
 
-    expect(matched).toHaveLength(0);
+    expect(matched).toHaveLength(1);
+    expect(matched[0].episode).toBe(episode);
+    expect(matched[0].policy).toBe(policy);
   });
 
   it('does not match when KQL matcher evaluates to false', async () => {
@@ -258,7 +267,7 @@ describe('EvaluateMatchersStep', () => {
     expect(mockLogger.warn).toHaveBeenCalledTimes(2);
   });
 
-  it('warn message includes policy id, rule id, episode id, and matcher', async () => {
+  it('warn message includes policy id, episode id, and matcher', async () => {
     const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p-broken', matcher: 'invalid kql (((' });
@@ -269,7 +278,6 @@ describe('EvaluateMatchersStep', () => {
     const messageArg = mockLogger.warn.mock.calls[0][0];
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
     expect(rendered).toContain('p-broken');
-    expect(rendered).toContain('r1');
     expect(rendered).toContain('ep-42');
     expect(rendered).toContain('invalid kql (((');
   });
@@ -286,6 +294,59 @@ describe('EvaluateMatchersStep', () => {
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
     expect(rendered).toContain(`${longMatcher.slice(0, 500)}…`);
     expect(rendered).not.toContain(longMatcher);
+  });
+
+  describe('external episode matching', () => {
+    it('external episode with null rule_id is matched by a space-scoped catch-all policy', async () => {
+      const episode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'pd-1',
+        episode_id: 'pd-ep-1',
+      });
+      const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
+
+      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+      expect(matched[0].episode).toBe(episode);
+      expect(matched[0].policy).toBe(policy);
+    });
+
+    it('external episode is not matched when the policy is in a different space', async () => {
+      const episode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'pd-1',
+        episode_id: 'pd-ep-1',
+      });
+      const policy = createActionPolicy({ id: 'p1', spaceId: 'space-b' });
+
+      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('policy with rule.name matcher does not match an external episode (no rule in context)', async () => {
+      const episode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        episode_id: 'pd-ep-2',
+      });
+      const policy = createActionPolicy({
+        id: 'p1',
+        spaceId: 'default',
+        matcher: 'rule.name: "My Rule"',
+      });
+
+      const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('rule-aware KQL matching', () => {

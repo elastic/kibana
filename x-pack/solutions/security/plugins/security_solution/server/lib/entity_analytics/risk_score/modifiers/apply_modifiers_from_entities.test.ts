@@ -90,6 +90,24 @@ describe('extractModifiersFromEntity', () => {
       const [crit] = extractModifiersFromEntity(entity, 0.5);
       expect(crit?.modifier_value).toBe(0.75); // 1.5 * 0.5
     });
+
+    it('records the contributor EUID in metadata when the entity carries attribution', () => {
+      const entity: RiskScoreModifierEntity = {
+        ...buildTestEntity({ id: 'user:target-1', criticality: 'high_impact' }),
+        criticalityContributorEUID: 'user:alias-1',
+      };
+      const [crit] = extractModifiersFromEntity(entity);
+      expect(crit?.metadata).toEqual({
+        criticality_level: 'high_impact',
+        contributor_euid: 'user:alias-1',
+      });
+    });
+
+    it('omits the contributor EUID from metadata when attribution is absent', () => {
+      const entity = buildTestEntity({ id: 'host:h1', criticality: 'high_impact' });
+      const [crit] = extractModifiersFromEntity(entity);
+      expect(crit?.metadata).toEqual({ criticality_level: 'high_impact' });
+    });
   });
 
   describe('watchlist modifier', () => {

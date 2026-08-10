@@ -541,5 +541,63 @@ describe('QueryFlyout', () => {
         expect(mockAddDanger).not.toHaveBeenCalled();
       });
     });
+
+    describe('legacy interval inheritance (elastic/kibana#277700)', () => {
+      it('shows and saves a legacy non-override query own interval, not the synthesized pack default', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['legacy-query'],
+          defaultValue: {
+            id: 'legacy-query',
+            query: 'select * from uptime;',
+            interval: '80',
+            shards: {},
+          },
+          // Legacy pack: synthesized interval default, no hasExplicitSchedule.
+          packSchedule: { schedule_type: 'interval', interval: 3600 },
+        });
+
+        // Override stays off — the query defers to the pack, but its own
+        // interval must NOT be overwritten by the synthesized default.
+        expect(screen.getByTestId('osquery-using-pack-schedule')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+        const saved = onSave.mock.calls[0][0];
+        expect(saved.interval).toBe('80');
+        expect(saved.interval).not.toBe('3600');
+        expect(saved).not.toHaveProperty('schedule_type');
+      });
+
+      it('inherits (strips) the interval for a non-override query when the pack schedule is explicit', async () => {
+        const onSave = jest.fn().mockResolvedValue(undefined);
+
+        renderFlyout({
+          onSave,
+          uniqueQueryIds: ['inherit-query'],
+          defaultValue: {
+            id: 'inherit-query',
+            query: 'select * from uptime;',
+            interval: '80',
+            shards: {},
+          },
+          // Real pack-level interval schedule → the query inherits it and emits
+          // no per-query interval.
+          packSchedule: { schedule_type: 'interval', interval: 3600, hasExplicitSchedule: true },
+        });
+
+        fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+        await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+        const saved = onSave.mock.calls[0][0];
+        expect(saved).not.toHaveProperty('interval');
+        expect(saved).not.toHaveProperty('schedule_type');
+      });
+    });
   });
 });

@@ -74,13 +74,16 @@ import { InspectIlmPolicyFlyout } from '@kbn/data-lifecycle-phases';
   policy={serializedPolicy}
   onBack={() => {}}
   onEditPolicy={(name) => navigateToIlmEditor(name)}
-  onSelectAndApply={(name) => applyPolicy(name)}
+  primaryAction={{
+    label: 'Select policy and apply',
+    onClick: (name) => applyPolicy(name),
+  }}
 />
 ```
 
-### `RetentionSelector`
+### `RetentionSelector` and `RetentionSelectorSearch`
 
-A searchable selector for retention options, with optional inspect affordances (e.g. “Inspect ILM policy”).
+A searchable selector for retention options, with optional inspect affordances (e.g. “Inspect ILM policy”). Use `RetentionSelectorSearch` when the search input needs to be rendered outside the selector body, such as in a flyout header.
 
 ```typescript
 import type { RetentionOption } from '@kbn/data-lifecycle-phases';
@@ -132,7 +135,7 @@ import { EditDataLifecycleFlyoutBody } from '@kbn/data-lifecycle-phases';
 
 ### `FlyoutFooterWithRetentionWarning` and `useRetentionWarning`
 
-A shared flyout footer with **Cancel / Apply** actions and an optional warning callout. The `useRetentionWarning` hook helps determine whether to show the warning based on the selected ILM policy (e.g. when downsampling steps cannot be applied).
+A shared flyout footer with **Cancel / Apply** actions and an optional warning callout. The `useRetentionWarning` hook helps determine whether to show the warning based on the selected ILM policy (e.g. when downsampling steps cannot be applied). Use `warningType="import_stream"` for imported lifecycle sources and `warningType="ilm_policy"` for selected ILM policies.
 
 ```typescript
 import { FlyoutFooterWithRetentionWarning, useRetentionWarning } from '@kbn/data-lifecycle-phases';
@@ -149,8 +152,10 @@ const showWarning = useRetentionWarning({
   onApply={applyChanges}
   isApplyDisabled={!isValid}
   showWarning={showWarning}
+  warningType="ilm_policy"
 />
 ```
+
 ### `EnterpriseGatingModal`
 
 A stateless modal for gating Enterprise-only data lifecycle actions (for example, enabling the frozen data phase). Consumers control visibility via `isOpen` and should hide/unmount the modal when `onCancel` is called.

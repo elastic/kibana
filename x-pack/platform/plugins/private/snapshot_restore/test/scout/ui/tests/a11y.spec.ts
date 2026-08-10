@@ -9,19 +9,23 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
+import {
+  type ManagedSnapshotRepository,
+  ensureSnapshotRepository,
+} from '../fixtures/snapshot_repository_helpers';
 
 // Modals, flyouts, and context menus render in EUI portals outside .kbnAppWrapper.
 const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
 
 test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.classic }, () => {
-  let repoName: string | undefined;
+  let repository: ManagedSnapshotRepository | undefined;
   let snapshotName: string | undefined;
   let policyName: string | undefined;
 
   test.afterEach(async ({ esClient, kbnClient }) => {
-    if (snapshotName && repoName) {
+    if (snapshotName && repository) {
       await esClient.snapshot
-        .delete({ snapshot: snapshotName, repository: repoName })
+        .delete({ snapshot: snapshotName, repository: repository.name })
         .catch(() => {});
       snapshotName = undefined;
     }
@@ -29,9 +33,10 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
       await esClient.slm.deleteLifecycle({ policy_id: policyName }).catch(() => {});
       policyName = undefined;
     }
-    if (repoName) {
-      await esClient.snapshot.deleteRepository({ name: [repoName] }).catch(() => {});
-      repoName = undefined;
+    if (repository) {
+      // Only removes a locally created `fs` repository; the managed Cloud repository is left intact.
+      await repository.cleanup();
+      repository = undefined;
     }
     await kbnClient.savedObjects.cleanStandardList();
   });
@@ -40,7 +45,17 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
     page,
     browserAuth,
     pageObjects,
+    config,
   }) => {
+    // On ECH every deployment ships with the managed `found-snapshots` repository, so Snapshot &
+    // Restore always has a repository and the empty-state UI (registerRepositoryButton) never
+    // renders. The test is skipped on Cloud; it still exercises the empty-state a11y locally where
+    // no default repository exists.
+    test.skip(
+      config.isCloud === true,
+      'On ECH the managed `found-snapshots` repository always exists, so the empty-state UI is never rendered.'
+    );
+
     const { snapshotRestore } = pageObjects;
 
     await browserAuth.loginAsAdmin();
@@ -76,18 +91,14 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
     browserAuth,
     pageObjects,
     esClient,
+    config,
   }) => {
     const { snapshotRestore } = pageObjects;
-    repoName = `testrepo-${Date.now()}`;
+    repository = await ensureSnapshotRepository(esClient, config.isCloud, `testrepo-${Date.now()}`);
     snapshotName = `testsnapshot-${Date.now()}`;
 
-    await esClient.snapshot.createRepository({
-      name: repoName,
-      verify: true,
-      repository: { type: 'fs', settings: { location: 'temp' } },
-    });
     await esClient.snapshot.create({
-      repository: repoName,
+      repository: repository.name,
       snapshot: snapshotName,
       wait_for_completion: true,
     });
@@ -112,27 +123,28 @@ test.describe('Snapshot & Restore — accessibility', { tag: tags.stateful.class
     browserAuth,
     pageObjects,
     esClient,
+    config,
   }) => {
     const { snapshotRestore } = pageObjects;
-    repoName = `policyrepo-${Date.now()}`;
+    repository = await ensureSnapshotRepository(
+      esClient,
+      config.isCloud,
+      `policyrepo-${Date.now()}`
+    );
     policyName = `testpolicy-${Date.now()}`;
-
-    await esClient.snapshot.createRepository({
-      name: repoName,
-      verify: true,
-      repository: { type: 'fs', settings: { location: 'temp' } },
-    });
 
     await browserAuth.loginAsAdmin();
     await page.gotoApp('management/data/snapshot_restore');
-    await snapshotRestore.waitForSnapshotsTab({ state: 'noSnapshots' });
+    // The wizard only needs a repository to select; the snapshot count is irrelevant (and non-zero
+    // on ECH, where the managed `found-snapshots` repository always holds SLM snapshots).
+    await snapshotRestore.waitForSnapshotsTab({ state: 'loaded' });
     await snapshotRestore.navToPolicies();
 
     await test.step('page one', async () => {
       await snapshotRestore.fillCreateNewPolicyPageOne(
         policyName!,
         '<daily-snap-{now/d}>',
-        repoName!
+        repository!.name
       );
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);

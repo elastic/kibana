@@ -78,11 +78,12 @@ export const runPanelPlacementStrategy = (
         }
       });
 
-      // Handle case of empty grid.
+      // Handle case where top-level grid has no panels (empty grid or section-only dashboard).
       if (maxY < 0) {
         return {
           ...currentLayout,
           panels: {
+            ...currentPanels,
             [newPanel.uuid]: { type: newPanel.type, grid: { x: 0, y: 0, w: width, h: height } },
           },
         };

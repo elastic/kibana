@@ -6,12 +6,10 @@
  */
 
 import { esql, type EsqlRequest } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/datastreams/alert_actions';
-import {
-  ALERT_EVENTS_DATA_STREAM,
-  type AlertEventType,
-} from '../../resources/datastreams/alert_events';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertEventType } from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, ActionGroupId } from './types';
+import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
 // Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
 // an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
@@ -19,6 +17,10 @@ import type { AlertEpisode, ActionGroupId } from './types';
 //
 // `_source` is dropped after JSON_EXTRACT because ES|QL does not auto-prune METADATA fields;
 // without the explicit DROP it rides through the INLINE STATS buffer and can exceed ~16.8 MB.
+//
+// Rows with a null subject are dropped here: a doc with source "internal" and no rule is
+// schema-valid and reaches the index, but has no series identity. Deriving its subject in
+// TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
 
@@ -29,23 +31,33 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status,
           data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
+      | EVAL ${SUBJECT_EVAL}
+      | WHERE subject IS NOT NULL
       | DROP episode.id, rule.id, episode.status, _source
-      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY rule_id, group_hash
+      | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE type IS NOT NULL,
           last_episode_status = LAST(episode_status, @timestamp) WHERE type IS NOT NULL,
           data_json = LAST(data_json, @timestamp) WHERE type IS NOT NULL,
-          severity = LAST(severity, @timestamp) WHERE type IS NOT NULL
-          BY rule_id, group_hash, episode_id
+          severity = LAST(severity, @timestamp) WHERE type IS NOT NULL,
+          source = LAST(source, @timestamp) WHERE type IS NOT NULL,
+          space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL,
+          rule_id = LAST(rule_id, @timestamp) WHERE type IS NOT NULL
+          BY subject, group_hash, episode_id
       | WHERE last_event_timestamp IS NOT NULL
-      | KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json, severity
+      | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, data_json, severity
       | RENAME last_episode_status AS episode_status
       | SORT last_event_timestamp asc
       | LIMIT 10000`.toRequest();
 };
 
 const PAIR_SEPARATOR = '::';
+
+// Shared subject-derivation expression used in both dispatchable and suppression queries.
+// null/absent source is treated as 'internal' for backward compat with legacy action rows.
+// Must produce the same key as `episodeSubject`, which documents why the space is folded in.
+const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, ${SUBJECT_SEPARATOR}, source))`;
 
 // ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
 // producing `parsing_exception: ESQL statement is too large`. Without chunking the dispatcher
@@ -82,7 +94,11 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
 // aggregations key on rule_id/group_hash so no row spans two chunks. minLastEventTimestamp
-// is computed from the full input so the snooze-expiry filter is consistent across chunks.
+// is computed from the full input so snooze-expiry classification is consistent across chunks.
+//
+// Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
+// in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
+// LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
 export const getAlertEpisodeSuppressionsQueries = (
   alertEpisodes: AlertEpisode[]
 ): EsqlRequest[] => {
@@ -98,32 +114,41 @@ export const getAlertEpisodeSuppressionsQueries = (
     }, undefined) ?? new Date(0).toISOString();
 
   const uniquePairKeys = [
-    ...new Set(alertEpisodes.map((ep) => `${ep.rule_id}${PAIR_SEPARATOR}${ep.group_hash}`)),
+    ...new Set(alertEpisodes.map((ep) => `${episodeSubject(ep)}${PAIR_SEPARATOR}${ep.group_hash}`)),
   ];
 
   return chunkInClauseLiterals(uniquePairKeys).map((chunk) => {
     const pairValues = chunk.map((key) => esql.str(key));
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-        | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
+        | EVAL ${SUBJECT_EVAL}
+        | WHERE subject IS NOT NULL
+        | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-        | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+        | EVAL _snooze_action = CASE(
+            action_type == "unsnooze", "unsnooze",
+            action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
+            action_type == "snooze", "snooze_expired"
+          )
         | INLINE STATS
-            last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
-            BY rule_id, group_hash
+            last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
+            BY subject, group_hash
         | STATS
             last_ack_action = LAST(action_type, @timestamp) WHERE action_type IN ("ack", "unack"),
             last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-            last_snooze_action = MAX(last_snooze_action)
-          BY rule_id, group_hash, episode_id
+            last_snooze_action = MAX(last_snooze_action),
+            source = LAST(source, @timestamp),
+            space_id = LAST(space_id, @timestamp),
+            rule_id = LAST(rule_id, @timestamp)
+          BY subject, group_hash, episode_id
         | EVAL should_suppress = CASE(
             last_snooze_action == "snooze", true,
             last_ack_action == "ack", true,
             last_deactivate_action == "deactivate", true,
             false
           )
-        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
+        | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action, source, space_id`.toRequest();
   });
 };
 

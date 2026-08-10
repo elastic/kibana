@@ -53,7 +53,7 @@ export function KeyValueTable({
 
           return (
             <EuiTableRow key={key}>
-              <EuiTableRowCell>
+              <EuiTableRowCell style={{ whiteSpace: 'nowrap' }}>
                 <strong data-test-subj="dot-key">{key}</strong>
               </EuiTableRowCell>
               <EuiTableRowCell data-test-subj="value">{valueList}</EuiTableRowCell>

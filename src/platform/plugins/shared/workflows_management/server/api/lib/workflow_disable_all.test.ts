@@ -69,7 +69,6 @@ const makeStorageClient = (pages: Array<Array<ReturnType<typeof makeHit>>>) => {
 const disableAllParams = (overrides: Partial<Parameters<typeof disableAllWorkflows>[0]> = {}) => ({
   taskScheduler: null,
   logger,
-  versioningEnabled: false,
   ...overrides,
 });
 
@@ -236,7 +235,7 @@ describe('disableAllWorkflows', () => {
     expect(doc.version).toBe(4);
   });
 
-  it('bumps version on space-scoped disable when versioningEnabled is true', async () => {
+  it('bumps version on space-scoped disable', async () => {
     const hit = makeHit('wf-1', true, 1, { version: 4 });
     const { storage, client } = makeStorageClient([[hit]]);
 
@@ -244,7 +243,6 @@ describe('disableAllWorkflows', () => {
       ...disableAllParams(),
       storage,
       spaceId: 'my-space',
-      versioningEnabled: true,
     });
 
     const doc = client.bulk.mock.calls[0][0].operations[0].index.document;

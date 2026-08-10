@@ -10,6 +10,7 @@ exports[`StatementListHeading component renders title and icon type 1`] = `
     grow={false}
   >
     <EuiIcon
+      aria-hidden={true}
       type="logstashInput"
     />
   </EuiFlexItem>

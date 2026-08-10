@@ -14,7 +14,7 @@ import type {
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import type {
   DatatableColumn,
   DatatableColumnMeta,
@@ -1009,10 +1009,14 @@ export class IndexUpdateService {
   }
 
   /* Partial doc update */
-  public updateDoc(id: string, update: Record<string, unknown>) {
+  public updateDoc(
+    id: string,
+    update: Record<string, unknown>,
+    columnsMeta: DataTableColumnsMeta = {}
+  ) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
       (acc, [key, value]) => {
-        acc[key] = parsePrimitive(value);
+        acc[key] = parsePrimitive(value, columnsMeta[key]?.type);
         return acc;
       },
       {}

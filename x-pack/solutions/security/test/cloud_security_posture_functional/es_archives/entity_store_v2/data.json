@@ -24,7 +24,12 @@
         "name": "ApiServiceAccount",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Critical",
+          "calculated_score": 95.0,
+          "calculated_score_norm": 95.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -63,7 +68,12 @@
         "name": "HostInstance1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 82.0,
+          "calculated_score_norm": 82.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -102,7 +112,12 @@
         "name": "HostInstance2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 74.5,
+          "calculated_score_norm": 74.5
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -141,7 +156,12 @@
         "name": "TargetService1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 65.0,
+          "calculated_score_norm": 65.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -180,7 +200,12 @@
         "name": "TargetService2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 55.0,
+          "calculated_score_norm": 55.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -219,7 +244,12 @@
         "name": "TargetService3",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 48.0,
+          "calculated_score_norm": 48.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -258,7 +288,12 @@
         "name": "TargetBucket1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_bucket-default-2025.07.16-000005",
         "sub_type": "GCP Storage Bucket",
-        "type": "Storage"
+        "type": "Storage",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 42.0,
+          "calculated_score_norm": 42.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -293,7 +328,12 @@
         "name": "TargetBucket2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_bucket-default-2025.07.16-000005",
         "sub_type": "GCP Storage Bucket",
-        "type": "Storage"
+        "type": "Storage",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 33.0,
+          "calculated_score_norm": 33.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -328,7 +368,12 @@
         "name": "TargetMultiService1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 28.0,
+          "calculated_score_norm": 28.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -367,7 +412,12 @@
         "name": "TargetMultiService2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 12.0,
+          "calculated_score_norm": 12.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -406,7 +456,12 @@
         "name": "MultiActor1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
         "sub_type": "GCP IAM User",
-        "type": "Identity"
+        "type": "Identity",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 8.0,
+          "calculated_score_norm": 8.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -445,7 +500,12 @@
         "name": "MultiActor2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
         "sub_type": "GCP IAM User",
-        "type": "Identity"
+        "type": "Identity",
+        "risk": {
+          "calculated_level": "Critical",
+          "calculated_score": 95.0,
+          "calculated_score_norm": 95.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -487,11 +547,16 @@
         "type": "Identity",
         "relationships": {
           "owns": {
-                        "ids": [
+            "ids": [
               "host:relationships-target-host-1",
               "host:relationships-target-host-2"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 82.0,
+          "calculated_score_norm": 82.0
         }
       },
       "event": {
@@ -531,7 +596,12 @@
         "name": "Relationships Target Host 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-default-2025.07.16-000005",
         "sub_type": "AWS EC2 Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 74.5,
+          "calculated_score_norm": 74.5
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -570,7 +640,12 @@
         "name": "Relationships Target Host 2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-default-2025.07.16-000005",
         "sub_type": "AWS EC2 Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 65.0,
+          "calculated_score_norm": 65.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -609,7 +684,12 @@
         "name": "Relationships Target Service",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-default-2025.07.16-000005",
         "sub_type": "AWS Lambda",
-        "type": "Service"
+        "type": "Service",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 55.0,
+          "calculated_score_norm": 55.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -652,7 +732,12 @@
         "name": "GCP Admin User",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-default-2025.07.16-000005",
         "sub_type": "GCP Service Account",
-        "type": "Service Account"
+        "type": "Service Account",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 48.0,
+          "calculated_score_norm": 48.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -698,18 +783,23 @@
         "type": "Service Account",
         "relationships": {
           "owns": {
-                        "ids": [
+            "ids": [
               "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
               "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
               "host:projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
             ]
           },
           "communicates_with": {
-                        "ids": [
+            "ids": [
               "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
               "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 42.0,
+          "calculated_score_norm": 42.0
         }
       },
       "event": {
@@ -753,7 +843,12 @@
         "name": "web-server-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 33.0,
+          "calculated_score_norm": 33.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -796,7 +891,12 @@
         "name": "api-gateway-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 28.0,
+          "calculated_score_norm": 28.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -839,7 +939,12 @@
         "name": "db-server-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 12.0,
+          "calculated_score_norm": 12.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -878,7 +983,12 @@
         "name": "MvExpandTestActor",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
         "sub_type": "GCP IAM User",
-        "type": "Identity"
+        "type": "Identity",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 8.0,
+          "calculated_score_norm": 8.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -917,7 +1027,12 @@
         "name": "MvExpandTargetIdentity",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
         "sub_type": "GCP IAM User",
-        "type": "Identity"
+        "type": "Identity",
+        "risk": {
+          "calculated_level": "Critical",
+          "calculated_score": 95.0,
+          "calculated_score_norm": 95.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -956,7 +1071,12 @@
         "name": "MvExpandTargetStorage",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_gcp_storage_bucket-default-2025.07.16-000005",
         "sub_type": "GCP Storage Bucket",
-        "type": "Storage"
+        "type": "Storage",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 82.0,
+          "calculated_score_norm": 82.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -999,12 +1119,17 @@
         "type": "Identity",
         "relationships": {
           "owns": {
-                        "ids": [
+            "ids": [
               "host:rel-hierarchy-host-1",
               "service:Hierarchy Service 1",
               "user:rel-hierarchy-identity-1@gcp"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 74.5,
+          "calculated_score_norm": 74.5
         }
       },
       "event": {
@@ -1047,11 +1172,16 @@
         "type": "Host",
         "relationships": {
           "communicates_with": {
-                        "ids": [
+            "ids": [
               "rel-hierarchy-storage-1",
               "rel-hierarchy-storage-2"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 65.0,
+          "calculated_score_norm": 65.0
         }
       },
       "event": {
@@ -1094,11 +1224,16 @@
         "type": "Service",
         "relationships": {
           "communicates_with": {
-                        "ids": [
+            "ids": [
               "rel-hierarchy-database-1",
               "rel-hierarchy-database-2"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 55.0,
+          "calculated_score_norm": 55.0
         }
       },
       "event": {
@@ -1141,21 +1276,26 @@
         "type": "Identity",
         "relationships": {
           "communicates_with": {
-                        "ids": [
+            "ids": [
               "rel-hierarchy-network-1",
               "rel-hierarchy-network-2"
             ]
           },
           "supervises": {
-                        "ids": [
+            "ids": [
               "user:rel-hierarchy-delegate-1@gcp"
             ]
           },
           "depends_on": {
-                        "ids": [
+            "ids": [
               "user:rel-hierarchy-delegate-1@gcp"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 48.0,
+          "calculated_score_norm": 48.0
         }
       },
       "event": {
@@ -1195,7 +1335,12 @@
         "name": "Hierarchy Storage Bucket 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_aws_s3_bucket-default-2025.07.16-000005",
         "sub_type": "AWS S3 Bucket",
-        "type": "Storage"
+        "type": "Storage",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 42.0,
+          "calculated_score_norm": 42.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1230,7 +1375,12 @@
         "name": "Hierarchy Storage Bucket 2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-storage_aws_s3_bucket-default-2025.07.16-000005",
         "sub_type": "AWS S3 Bucket",
-        "type": "Storage"
+        "type": "Storage",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 33.0,
+          "calculated_score_norm": 33.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1265,7 +1415,12 @@
         "name": "Hierarchy Database 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-database_aws_rds-default-2025.07.16-000005",
         "sub_type": "AWS RDS Instance",
-        "type": "Database"
+        "type": "Database",
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 28.0,
+          "calculated_score_norm": 28.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1300,7 +1455,12 @@
         "name": "Hierarchy Database 2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-database_aws_rds-default-2025.07.16-000005",
         "sub_type": "AWS RDS Instance",
-        "type": "Database"
+        "type": "Database",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 12.0,
+          "calculated_score_norm": 12.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1335,7 +1495,12 @@
         "name": "Hierarchy Network VPC 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-network_aws_vpc-default-2025.07.16-000005",
         "sub_type": "AWS VPC",
-        "type": "Networking"
+        "type": "Networking",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 8.0,
+          "calculated_score_norm": 8.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1370,7 +1535,12 @@
         "name": "Hierarchy Network VPC 2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-network_aws_vpc-default-2025.07.16-000005",
         "sub_type": "AWS VPC",
-        "type": "Networking"
+        "type": "Networking",
+        "risk": {
+          "calculated_level": "Critical",
+          "calculated_score": 95.0,
+          "calculated_score_norm": 95.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1405,7 +1575,12 @@
         "name": "Hierarchy Delegate Agent",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_organizations_admin-default-2025.07.16-000005",
         "sub_type": "AWS Organizations Admin",
-        "type": "User"
+        "type": "User",
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 82.0,
+          "calculated_score_norm": 82.0
+        }
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
@@ -1447,10 +1622,15 @@
         "type": "Service",
         "relationships": {
           "communicates_with": {
-                        "ids": [
+            "ids": [
               "user:rel-hierarchy-identity-1@gcp"
             ]
           }
+        },
+        "risk": {
+          "calculated_level": "High",
+          "calculated_score": 74.5,
+          "calculated_score_norm": 74.5
         }
       },
       "event": {
@@ -1472,7 +1652,9 @@
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
-        "EngineMetadata": { "Type": "host" },
+        "EngineMetadata": {
+          "Type": "host"
+        },
         "id": "host:origin-pinned-server",
         "name": "Origin Pinned Server",
         "source": "manual",
@@ -1480,12 +1662,27 @@
         "type": "Host",
         "relationships": {
           "communicates_with": {
-            "ids": ["host:relationship-target-server"]
+            "ids": [
+              "host:relationship-target-server"
+            ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 65.0,
+          "calculated_score_norm": 65.0
         }
       },
-      "host": { "name": "origin-pinned-server", "id": "pinned-hw-uuid-1", "ip": ["10.0.2.1"] },
-      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+      "host": {
+        "name": "origin-pinned-server",
+        "id": "pinned-hw-uuid-1",
+        "ip": [
+          "10.0.2.1"
+        ]
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
     }
   }
 }
@@ -1498,7 +1695,9 @@
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
-        "EngineMetadata": { "Type": "host" },
+        "EngineMetadata": {
+          "Type": "host"
+        },
         "id": "host:grouped-actor-server-1",
         "name": "Grouped Actor Server 1",
         "source": "manual",
@@ -1506,12 +1705,27 @@
         "type": "Host",
         "relationships": {
           "communicates_with": {
-            "ids": ["host:relationship-target-server"]
+            "ids": [
+              "host:relationship-target-server"
+            ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 55.0,
+          "calculated_score_norm": 55.0
         }
       },
-      "host": { "name": "grouped-actor-server-1", "id": "pinned-hw-uuid-2", "ip": ["10.0.2.2"] },
-      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+      "host": {
+        "name": "grouped-actor-server-1",
+        "id": "pinned-hw-uuid-2",
+        "ip": [
+          "10.0.2.2"
+        ]
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
     }
   }
 }
@@ -1524,7 +1738,9 @@
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
-        "EngineMetadata": { "Type": "host" },
+        "EngineMetadata": {
+          "Type": "host"
+        },
         "id": "host:grouped-actor-server-2",
         "name": "Grouped Actor Server 2",
         "source": "manual",
@@ -1532,12 +1748,27 @@
         "type": "Host",
         "relationships": {
           "communicates_with": {
-            "ids": ["host:relationship-target-server"]
+            "ids": [
+              "host:relationship-target-server"
+            ]
           }
+        },
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 48.0,
+          "calculated_score_norm": 48.0
         }
       },
-      "host": { "name": "grouped-actor-server-2", "id": "pinned-hw-uuid-3", "ip": ["10.0.2.3"] },
-      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+      "host": {
+        "name": "grouped-actor-server-2",
+        "id": "pinned-hw-uuid-3",
+        "ip": [
+          "10.0.2.3"
+        ]
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
     }
   }
 }
@@ -1550,15 +1781,30 @@
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
-        "EngineMetadata": { "Type": "host" },
+        "EngineMetadata": {
+          "Type": "host"
+        },
         "id": "host:relationship-target-server",
         "name": "Relationship Target Server",
         "source": "manual",
         "sub_type": "AWS EC2 Instance",
-        "type": "Host"
+        "type": "Host",
+        "risk": {
+          "calculated_level": "Moderate",
+          "calculated_score": 42.0,
+          "calculated_score_norm": 42.0
+        }
       },
-      "host": { "name": "relationship-target-server", "id": "pinned-hw-uuid-4", "ip": ["10.0.2.4"] },
-      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+      "host": {
+        "name": "relationship-target-server",
+        "id": "pinned-hw-uuid-4",
+        "ip": [
+          "10.0.2.4"
+        ]
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
     }
   }
 }
@@ -1571,7 +1817,9 @@
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
-        "EngineMetadata": { "Type": "host" },
+        "EngineMetadata": {
+          "Type": "host"
+        },
         "id": "host:different-subtype-actor-server",
         "name": "Different Subtype Actor Server",
         "source": "manual",
@@ -1579,12 +1827,215 @@
         "type": "Container",
         "relationships": {
           "communicates_with": {
-            "ids": ["host:relationship-target-server"]
+            "ids": [
+              "host:relationship-target-server"
+            ]
           }
+        },
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 33.0,
+          "calculated_score_norm": 33.0
         }
       },
-      "host": { "name": "different-subtype-actor-server", "id": "pinned-hw-uuid-5", "ip": ["10.0.2.5"] },
-      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+      "host": {
+        "name": "different-subtype-actor-server",
+        "id": "pinned-hw-uuid-5",
+        "ip": [
+          "10.0.2.5"
+        ]
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "48",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user:platform-admin-role",
+        "name": "platform-admin-role",
+        "source": "manual",
+        "sub_type": "AWS IAM Role",
+        "type": "IAM Role",
+        "relationships": {
+          "supervises": {
+            "ids": [
+              "user:app-team-lead",
+              "user:db-team-lead"
+            ]
+          }
+        },
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 28.0,
+          "calculated_score_norm": 28.0
+        }
+      },
+      "user": {
+        "name": "platform-admin-role",
+        "id": "platform-admin-role"
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "49",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user:security-admin-group",
+        "name": "security-admin-group",
+        "source": "manual",
+        "sub_type": "AWS IAM Group",
+        "type": "IAM Group",
+        "relationships": {
+          "supervises": {
+            "ids": [
+              "user:app-team-lead",
+              "user:db-team-lead"
+            ]
+          }
+        },
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 12.0,
+          "calculated_score_norm": 12.0
+        }
+      },
+      "user": {
+        "name": "security-admin-group",
+        "id": "security-admin-group"
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "50",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user:app-team-lead",
+        "name": "app-team-lead",
+        "source": "manual",
+        "sub_type": "AWS IAM User",
+        "type": "User",
+        "risk": {
+          "calculated_level": "Unknown",
+          "calculated_score": 8.0,
+          "calculated_score_norm": 8.0
+        }
+      },
+      "user": {
+        "name": "app-team-lead",
+        "id": "app-team-lead"
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "51",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user:db-team-lead",
+        "name": "db-team-lead",
+        "source": "manual",
+        "sub_type": "AWS IAM User",
+        "type": "User",
+        "risk": {
+          "calculated_level": "Critical",
+          "calculated_score": 95.0,
+          "calculated_score_norm": 95.0
+        }
+      },
+      "user": {
+        "name": "db-team-lead",
+        "id": "db-team-lead"
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "administers-target-server-admin",
+    "index": ".entities.v2.latest.security_default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "EngineMetadata": {
+          "Type": "user"
+        },
+        "id": "user:administers-target-server-admin",
+        "name": "Administers Target Server Admin",
+        "source": "manual",
+        "sub_type": "AWS IAM User",
+        "type": "User",
+        "relationships": {
+          "administers": {
+            "ids": [
+              "host:relationship-target-server"
+            ]
+          }
+        },
+        "risk": {
+          "calculated_level": "Low",
+          "calculated_score": 33.0,
+          "calculated_score_norm": 33.0
+        }
+      },
+      "user": {
+        "name": "administers-target-server-admin",
+        "id": "administers-target-server-admin"
+      },
+      "event": {
+        "ingested": "2024-09-01T12:00:00.000Z"
+      }
     }
   }
 }

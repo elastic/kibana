@@ -7,26 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import type { ChangeHistoryBadgeRenderFn } from '@kbn/change-history-ui';
+import type { ChangeHistoryBadgeRenderFn, ChangeHistoryListItem } from '@kbn/change-history-ui';
 
-import { CURRENT_VERSION_BADGE, CURRENT_VERSION_ONLY_BADGE, VERSION_BADGE } from './translations';
+import { getWorkflowChangeHistoryRowDisplay } from './get_workflow_change_history_row_display';
+import { VERSION_BADGE } from './translations';
 
-export const renderWorkflowChangeHistoryBadge: ChangeHistoryBadgeRenderFn = ({ item }) => {
-  const version = item.metadata?.version;
+const WorkflowChangeHistoryBadge = ({
+  item,
+}: {
+  item: ChangeHistoryListItem;
+}): JSX.Element | null => {
+  const { euiTheme } = useEuiTheme();
+  const display = getWorkflowChangeHistoryRowDisplay(item);
 
-  if (item.isCurrent) {
-    if (typeof version === 'number') {
-      return <EuiBadge color="hollow">{CURRENT_VERSION_BADGE(version)}</EuiBadge>;
-    }
-
-    return <EuiBadge color="hollow">{CURRENT_VERSION_ONLY_BADGE}</EuiBadge>;
+  if (display.kind === 'unsaved') {
+    return (
+      <EuiBadge
+        color={euiTheme.colors.backgroundLightWarning}
+        data-test-subj="workflowChangeHistoryUnsavedChangesBadge"
+      >
+        {display.badgeLabel}
+      </EuiBadge>
+    );
   }
 
-  if (typeof version !== 'number') {
-    return null;
+  if (display.kind === 'current') {
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+        {display.badgeLabel ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryCurrentVersionBadge">
+              {display.badgeLabel}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+        {display.version != null ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
+              {VERSION_BADGE(display.version)}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
   }
 
-  return <EuiBadge color="hollow">{VERSION_BADGE(version)}</EuiBadge>;
+  if (display.kind === 'version' && display.version != null) {
+    return (
+      <EuiBadge color="hollow" data-test-subj="workflowChangeHistoryVersionBadge">
+        {VERSION_BADGE(display.version)}
+      </EuiBadge>
+    );
+  }
+
+  return null;
 };
+
+export const renderWorkflowChangeHistoryBadge: ChangeHistoryBadgeRenderFn = ({ item }) => (
+  <WorkflowChangeHistoryBadge item={item} />
+);

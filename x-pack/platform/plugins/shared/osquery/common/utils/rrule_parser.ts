@@ -73,6 +73,15 @@ const parseWeekdays = (value: string): Weekday[] =>
       return weekday;
     });
 
+const ORDINAL_BYDAY_PREFIX = /^[+-]?\d+/;
+
+const hasOrdinalByDayToken = (value: string): boolean =>
+  value
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+    .some((item) => ORDINAL_BYDAY_PREFIX.test(item));
+
 /**
  * Parse an RFC 5545 RRULE string into {@link RRuleFields}. Inverse of
  * {@link serializeRRule}.
@@ -138,7 +147,12 @@ export const parseRRule = (rrule: string): RRuleFields => {
       }
 
       case 'BYDAY':
-        byweekday = parseWeekdays(rawValue);
+        if (hasOrdinalByDayToken(rawValue)) {
+          unknown.BYDAY = rawValue;
+        } else {
+          byweekday = parseWeekdays(rawValue);
+        }
+
         break;
       case 'BYMONTHDAY':
         bymonthday = parseIntegerList(rawValue, 'BYMONTHDAY', isValidByMonthday);

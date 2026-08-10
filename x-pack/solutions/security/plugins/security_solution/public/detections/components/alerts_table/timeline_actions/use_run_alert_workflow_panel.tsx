@@ -10,10 +10,16 @@ import React, { useMemo } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 import { RunWorkflowPanel } from './run_workflow_panel';
+
+// Managed workflows surfaced as rule actions (e.g. the alert analysis workflow) carry the
+// `rule_action` selector visibility context; requesting it here includes them in the list alongside
+// user-created workflows. Module-scoped so the reference stays stable across renders.
+const ALERT_WORKFLOW_VISIBILITY: WorkflowSelectorVisibility = { selectors: ['rule_action'] };
 
 export interface AlertWorkflowsPanelProps {
   /** Array of alert ids and their respective indices */
@@ -42,6 +48,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     <RunWorkflowPanel
       inputs={inputs}
       sortTriggerType="alert"
+      visibility={ALERT_WORKFLOW_VISIBILITY}
       executeButtonTestSubj="execute-alert-workflow-button"
       onClose={onClose}
       onExecute={onExecute}

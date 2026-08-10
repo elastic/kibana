@@ -114,6 +114,25 @@ describe('fromEs', () => {
     expect(definition.id).toEqual('_id');
   });
 
+  it('defaults the type to chat for legacy docs without a type', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source!.type;
+
+    const definition = fromEs(document);
+
+    expect(definition.type).toEqual(AgentType.chat);
+  });
+
+  it('preserves a non-chat type', () => {
+    const document = getSampleDoc();
+    document._source!.type = 'investigation';
+
+    const definition = fromEs(document);
+
+    expect(definition.type).toEqual('investigation');
+  });
+
   it('converts skill_ids and enable_elastic_capabilities from the config', () => {
     const document = getSampleDoc();
     document._source!.config!.skill_ids = ['skill-1', 'skill-2'];
@@ -123,6 +142,35 @@ describe('fromEs', () => {
 
     expect(definition.configuration.skill_ids).toEqual(['skill-1', 'skill-2']);
     expect(definition.configuration.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('converts ai_indices from the config', () => {
+    const document = getSampleDoc();
+    document._source!.config!.ai_indices = ['ai-index-1', 'ai-index-2'];
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.ai_indices).toEqual(['ai-index-1', 'ai-index-2']);
+  });
+
+  it('converts ai_indices from the legacy configuration field', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source.config;
+    document._source!.configuration = {
+      tools: [],
+      ai_indices: ['ai-index-1'],
+    };
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
+  });
+
+  it('leaves ai_indices unset when the config does not set it', () => {
+    const definition = fromEs(getSampleDoc());
+
+    expect(definition.configuration.ai_indices).toBeUndefined();
   });
 
   it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
@@ -278,6 +326,46 @@ describe('createRequestToEs', () => {
 
     expect(docProperties.config!.skill_ids).toEqual(['skill-a', 'skill-b']);
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('persists ai_indices in the config', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      configuration: {
+        tools: [],
+        ai_indices: ['ai-index-1', 'ai-index-2'],
+      },
+    };
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.config!.ai_indices).toEqual(['ai-index-1', 'ai-index-2']);
+  });
+
+  it('defaults the type to chat and persists an explicit type', () => {
+    const baseRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      configuration: { tools: [] },
+    };
+    const convert = (profile: AgentCreateRequest) =>
+      createRequestToEs({
+        profile,
+        user: { id: 'user-id', username: 'test-user' },
+        space: 'space',
+        creationDate: new Date(),
+      });
+
+    expect(convert(baseRequest).type).toBe(AgentType.chat);
+    expect(convert({ ...baseRequest, type: 'investigation' }).type).toBe('investigation');
   });
 
   it('persists create request access-control mode with empty entries', () => {
@@ -522,6 +610,101 @@ describe('updateRequestToEs', () => {
     expect(docProperties.config!.instructions).toBe('instructions');
   });
 
+  describe('ai_indices', () => {
+    const getAgentProps = (): AgentProperties => ({
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [],
+        ai_indices: ['ai-index-1'],
+      },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    });
+
+    const convert = (update: AgentUpdateRequest, currentProps = getAgentProps()) =>
+      updateRequestToEs({
+        agentId: 'id',
+        currentProps,
+        update,
+        updateDate: new Date(),
+      });
+
+    it('replaces ai_indices when the update sets it', () => {
+      const docProperties = convert({ configuration: { ai_indices: ['ai-index-2'] } });
+
+      expect(docProperties.config!.ai_indices).toEqual(['ai-index-2']);
+    });
+
+    it('clears ai_indices when the update sets an empty list', () => {
+      const docProperties = convert({ configuration: { ai_indices: [] } });
+
+      expect(docProperties.config!.ai_indices).toEqual([]);
+    });
+
+    it('preserves stored ai_indices when the update does not mention it', () => {
+      const docProperties = convert({
+        name: 'new name',
+        configuration: { instructions: 'new instructions' },
+      });
+
+      expect(docProperties.config!.ai_indices).toEqual(['ai-index-1']);
+    });
+
+    it('preserves stored ai_indices when the update has no configuration at all', () => {
+      const docProperties = convert({ name: 'new name' });
+
+      expect(docProperties.config!.ai_indices).toEqual(['ai-index-1']);
+    });
+
+    it('preserves ai_indices stored on a legacy configuration field', () => {
+      const currentProps = getAgentProps();
+      const legacyConfig = { tools: [], ai_indices: ['legacy-ai-index'] };
+      // @ts-ignore simulating legacy document without the new config field
+      delete currentProps.config;
+      currentProps.configuration = legacyConfig;
+
+      const docProperties = convert({ name: 'new name' }, currentProps);
+
+      expect(docProperties.config!.ai_indices).toEqual(['legacy-ai-index']);
+      expect(docProperties.configuration).toBeUndefined();
+    });
+  });
+
+  it('preserves the stored type on update (type is immutable)', () => {
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: 'investigation',
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { instructions: 'instructions', tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: { name: 'new name', configuration: { skill_ids: ['a-skill'] } },
+      updateDate: new Date(),
+    });
+
+    expect(docProperties.type).toBe('investigation');
+  });
+
   it('updates access-control mode without changing entries', () => {
     const newUpdateDate = new Date();
     const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
@@ -646,5 +829,58 @@ describe('updateRequestToEs', () => {
     });
     expect(docProperties.visibility).toBeUndefined();
     expect(docProperties.acl).toBeUndefined();
+  });
+
+  it('backfills created_by_id when the owner updates a legacy agent that only stored created_by_name', () => {
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_name: 'legacy-owner',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: { name: 'renamed' },
+      updateDate: new Date(),
+      user: { id: 'profile-or-realm-id', username: 'legacy-owner' },
+    });
+
+    expect(docProperties.created_by_id).toBe('profile-or-realm-id');
+    expect(docProperties.created_by_name).toBe('legacy-owner');
+  });
+
+  it('does not backfill created_by_id for a non-owner updater', () => {
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_name: 'legacy-owner',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: { name: 'renamed' },
+      updateDate: new Date(),
+      user: { id: 'editor-id', username: 'someone-else' },
+    });
+
+    expect(docProperties.created_by_id).toBeUndefined();
   });
 });

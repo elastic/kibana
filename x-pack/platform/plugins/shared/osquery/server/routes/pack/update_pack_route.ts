@@ -8,25 +8,10 @@
 import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import {
-  unset,
-  has,
-  difference,
-  filter,
-  map,
-  mapKeys,
-  mapValues,
-  uniq,
-  some,
-  isEmpty,
-  keyBy,
-} from 'lodash';
-import { produce } from 'immer';
+import { unset, has, filter, map, mapKeys, mapValues, some, isEmpty, keyBy } from 'lodash';
+import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -37,7 +22,6 @@ import type {
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { RRuleScheduleConfig } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -47,22 +31,26 @@ import {
   convertSOQueriesToPack,
   convertPackQueriesToSO,
   convertSOQueriesToPackConfig,
+  fetchAllPackagePolicies,
   getInitialPolicies,
   findMatchingShards,
+  groupAgentPolicyIdsByPackagePolicy,
   policyHasPack,
   removePackFromPolicy,
   makePackKey,
+  resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
+  resolvePreservedQueries,
 } from './utils';
 
 import { convertShardsToArray, convertShardsToObject } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
-import type { PackQueryInput } from './utils';
+import type { PackQueryInput, PreservableQueryFields } from './utils';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
@@ -176,22 +164,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           throw err;
         }
 
-        const existingScheduleIds = keyBy(
-          (currentPackSO.attributes.queries ?? []).filter(
-            (existingQuery: { id: string; schedule_id?: string }) => existingQuery.schedule_id
-          ),
-          'id'
-        );
-
-        // Broader index of every current SO query (regardless of
-        // `schedule_id` presence) — used to merge partial per-query
-        // `rrule_schedule` payloads against the existing per-query rrule
-        // on same-mode override edits. Without this, sending only
-        // `{ rrule_schedule: { rrule: '...' } }` on one query would
-        // overwrite its `start_date` / `splay` on the SO.
+        // Index of current SO queries by id, carrying schedule_id/start_date
+        // to preserve across edit-save.
         const existingQueriesById = keyBy(currentPackSO.attributes.queries ?? [], 'id') as Record<
           string,
-          { rrule_schedule?: PackQueryInput['rrule_schedule'] }
+          PreservableQueryFields
         >;
 
         const resolved = resolvePackScheduleForUpdate({
@@ -213,14 +190,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const now = moment().toISOString();
 
-        // On a pack-mode transition the request typically doesn't restate
-        // `queries`, but the SO carries per-query fields from the prior mode
-        // (e.g. `fast.interval: 30` from an old interval pack). Without a
-        // rewrite those fields stay on the SO and surface via GET/find,
-        // leaking cross-mode state. Hydrate from the current SO when the
-        // request omits `queries`, then strip prior-mode per-query fields so
-        // the merged set is consistent with the new pack mode before both
-        // validation and SO write.
+        // On a mode transition, hydrate queries from the SO when the request
+        // omits them, then strip prior-mode fields — otherwise stale
+        // cross-mode state leaks via GET.
         const baseQueries =
           gatedQueries ??
           (resolved.transitioned
@@ -230,21 +202,19 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               >)
             : undefined);
 
+        // Map each outgoing query to the stored row it preserves schedule_id from.
+        const resolvedExistingByKey = baseQueries
+          ? resolvePreservedQueries(baseQueries, existingQueriesById)
+          : {};
+
         const queries = baseQueries
           ? (mapValues(baseQueries, (queryData, queryId) => {
-              const existing = existingScheduleIds[queryId];
+              const existing = resolvedExistingByKey[queryId];
               const carried = resolved.transitioned
                 ? stripPriorModePerQueryFields(queryData, resolved.scheduleType)
                 : queryData;
 
-              // Mirror of the pack-level partial-merge in
-              // `resolvePackScheduleForUpdate`: on a same-mode rrule
-              // override edit, shallow-merge the request's per-query
-              // `rrule_schedule` over the existing one so the client can
-              // change just `splay` (or `rrule`) without restating the
-              // rest. Mode transitions skip the merge — they already had
-              // their prior-mode fields stripped by `carried`.
-              const existingRrule = existingQueriesById[queryId]?.rrule_schedule;
+              const existingRrule = existing?.rrule_schedule;
               const merged =
                 !resolved.transitioned &&
                 resolved.scheduleType === 'rrule' &&
@@ -291,30 +261,45 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] };
+        // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
+        // `list({ perPage: 1000 })` would drop the pack from policies past 1000.
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
+
         const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
           policyHasPack(packagePolicy, currentPackSO.attributes.name, spaceId)
         );
 
-        // When `policy_ids` is omitted from the request, preserve the pack's
-        // existing policy attachments. Otherwise an unrelated PUT (e.g. just
-        // toggling schedule_type) would strip the pack from every assigned
-        // policy because `getInitialPolicies` interprets the missing field as
-        // "intersect with empty set."
+        // Preserve existing policy attachments when policy_ids is omitted, so
+        // an unrelated PUT doesn't strip the pack from every policy.
         const currentAgentPolicyIds = map(
           filter(currentPackSO.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
         const effectivePolicyIds = policy_ids ?? currentAgentPolicyIds;
 
+        // Same preserve rule for shards: an omitted `shards` must not clear the
+        // stored shard map, or a global (`*`) pack silently stops resolving to
+        // any policy and the wire detach below strips it from every agent.
+        // An explicit `{}` still clears.
+        const effectiveShards =
+          request.body.shards === undefined
+            ? convertShardsToObject(currentPackSO.attributes.shards ?? [])
+            : shards;
+
+        // A PUT that mentions neither `policy_ids` nor `shards` is not asking to
+        // retarget the pack, so both the SO references and the wire attachments
+        // must survive it. Drives the references guard and the wire detach from
+        // one predicate so the two can't disagree and leave the pack scheduled
+        // on agents it is no longer referenced by (or vice versa).
+        const targetingChangeRequested = Boolean(policy_ids) || !isEmpty(shards);
+
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
           effectivePolicyIds,
-          shards
+          effectiveShards
         );
 
         if (invalidPolicies?.length) {
@@ -325,7 +310,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, policiesList);
 
-        const policyShards = findMatchingShards(agentPolicies, shards);
+        const policyShards = findMatchingShards(agentPolicies, effectiveShards);
 
         const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
@@ -334,7 +319,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           (reference) => reference.type !== LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
         );
         const getUpdatedReferences = () => {
-          if (!policy_ids && isEmpty(shards)) {
+          if (!targetingChangeRequested) {
             return currentPackSO.references;
           }
 
@@ -350,12 +335,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const references = getUpdatedReferences();
 
-        // Build the schedule slice for the SO write. Honor read→merge→write
-        // by only including a field on the patch when the request actually
-        // sent it (or when transitioning between modes). The patch slot
-        // uses the SO's strict shape — the value comes from
-        // `resolved.rrule_schedule`, which is the post-merge object
-        // already gated through `validatePackScheduleFields`.
         const scheduleSoPatch: Partial<
           Pick<PackSavedObject, 'schedule_type' | 'interval' | 'rrule_schedule'>
         > = {};
@@ -369,12 +348,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
 
           if (resolved.transitioned || rruleSchedulePresent) {
-            // Narrowing: `resolved.rrule_schedule` is typed as a partial
-            // because the request body may be partial. By the time we
-            // reach this write, `validatePackScheduleFields` has already
-            // 400'd any merged result that is not a full
-            // `RRuleScheduleConfig`, so the runtime value is either the
-            // strict shape, `null` (clear), or `undefined`.
+            // validatePackScheduleFields has already rejected any non-strict merged shape by this point.
             scheduleSoPatch.rrule_schedule = (resolved.rrule_schedule ??
               null) as RRuleScheduleConfig | null;
           }
@@ -391,7 +365,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_at: moment().toISOString(),
             updated_by: username,
             updated_by_profile_uid: profileUid,
-            shards: convertShardsToArray(shards),
+            shards: convertShardsToArray(effectiveShards),
             ...scheduleSoPatch,
           },
           {
@@ -410,7 +384,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           isRruleFeatureEnabled
         );
 
-        const buildFleetPackBlock = (agentPolicyId: string) => {
+        // `agentPolicyIds` carries every agent policy that resolved to the
+        // package policy being written (see groupAgentPolicyIdsByPackagePolicy
+        // below); a shared package policy needs one deterministic shard.
+        const buildFleetPackBlock = (agentPolicyIds: string[]) => {
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
             convertedQueries,
             {
@@ -425,8 +402,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
 
           return {
-            shard: policyShards[agentPolicyId] ?? 100,
+            shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
             pack_id: updatedPackSO.id,
+            pack_name: updatedPackSO.attributes.name,
             ...packDefaults,
             queries: builtQueries,
           };
@@ -455,17 +433,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_by: attrs.updated_by,
             updated_by_profile_uid: attrs.updated_by_profile_uid,
             policy_ids: policyIds,
-            // TODO: collapse `PackResponseData.shards` (currently `SOShard`,
-            // array form) onto the documented public contract `Record<string,
-            // number>`. The OAS, the GET responses, and the runtime validator's
-            // `oneOf(array, object)` all point to the object form being the real
-            // public shape; the array typing here is a leak of the internal SO
-            // storage shape. Fix would also let `find_pack_route` and
-            // `create_pack_route` stop returning array form silently. Tracked
-            // separately — this cast is the bridge until then.
+            // TODO: PackResponseData.shards should be the public object-map
+            // shape; array form here is a leak of internal SO storage.
             shards: convertShardsToObject(attrs.shards) as unknown as PackResponseData['shards'],
             saved_object_id: updatedPackSO.id,
-            // Discriminated response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attrs, isRruleFeatureEnabled),
           };
         };
@@ -474,17 +445,116 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.ok({ body: { data: buildResponseData() } });
         }
 
-        if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
-          if (enabled) {
-            const policyIds = policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
+        // The pack SO (source of truth) is already committed. These Fleet writes
+        // only project it onto the wire, so a concurrent-write 409 → response.conflict
+        // (client retries; reconciler also repairs). Other errors propagate.
+        try {
+          if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
+            if (enabled) {
+              const policyIds =
+                policy_ids || !isEmpty(effectiveShards) ? policiesList : currentAgentPolicyIds;
+              // Dedup by resolved package-policy id before writing: a
+              // shared package policy must be written exactly once.
+              const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+                policyIds,
+                packagePolicies
+              );
+
+              await Promise.all(
+                Array.from(packagePolicyWriteTargets.values()).map(
+                  ({ packagePolicy, agentPolicyIds }) =>
+                    packagePolicyService?.update(
+                      spaceScopedClient,
+                      esClient,
+                      packagePolicy.id,
+                      produce<PackagePolicy>(packagePolicy, (draft) => {
+                        unset(draft, 'id');
+                        if (!has(draft, 'inputs[0].streams')) {
+                          set(draft, 'inputs[0].streams', []);
+                        }
+
+                        const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
+                        removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                        set(
+                          draft,
+                          `inputs[0].config.osquery.value.packs.${pk}`,
+                          buildFleetPackBlock(agentPolicyIds)
+                        );
+
+                        return draft;
+                      })
+                    )
+                )
+              );
+            } else {
+              // Remove the pack from EVERY package policy that carries it on
+              // the wire (the `policyHasPack` scan in `currentPackagePolicies`),
+              // not just the ones reachable through the pack SO's agent-policy
+              // references. Post-upgrade (9.4.3 → 9.5.0) the wire attachments and
+              // the SO references can diverge; matching by references left the
+              // pack block on the wire, so agents kept running the schedule while
+              // the SO read `enabled: false`. This mirrors delete_pack_route.
+              await Promise.all(
+                currentPackagePolicies.map((packagePolicy) =>
+                  packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+
+                      return draft;
+                    })
+                  )
+                )
+              );
+            }
+          } else {
+            // Diff current vs. target. Resolve the still-targeted package
+            // policies (write targets) first, then remove the pack from every
+            // package policy that currently carries it on the wire but is no
+            // longer targeted. Scanning the wire (`currentPackagePolicies`)
+            // rather than resolving the SO's agent-policy references keeps
+            // detach correct even when references and wire attachments have
+            // diverged (e.g. after a 9.4.3 → 9.5.0 upgrade); see #279224.
+            // Gated on an actual retarget request: in the same drift state an
+            // edit-only PUT resolves to zero write targets, and detaching on
+            // that would silently unschedule an enabled pack everywhere.
+            const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+              policiesList,
+              packagePolicies
+            );
+            const writeTargetIds = new Set(
+              Array.from(packagePolicyWriteTargets.values()).map(
+                ({ packagePolicy }) => packagePolicy.id
+              )
+            );
+
+            if (targetingChangeRequested) {
+              await Promise.all(
+                currentPackagePolicies
+                  .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
+                  .map((packagePolicy) =>
+                    packagePolicyService?.update(
+                      spaceScopedClient,
+                      esClient,
+                      packagePolicy.id,
+                      produce<PackagePolicy>(packagePolicy, (draft) => {
+                        unset(draft, 'id');
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+
+                        return draft;
+                      })
+                    )
+                  )
+              );
+            }
 
             await Promise.all(
-              policyIds.map((agentPolicyId) => {
-                const packagePolicy = packagePolicies.find((policy) =>
-                  policy.policy_ids.includes(agentPolicyId)
-                );
-                if (packagePolicy) {
-                  return packagePolicyService?.update(
+              Array.from(packagePolicyWriteTargets.values()).map(
+                ({ packagePolicy, agentPolicyIds }) =>
+                  packagePolicyService?.update(
                     spaceScopedClient,
                     esClient,
                     packagePolicy.id,
@@ -494,136 +564,40 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         set(draft, 'inputs[0].streams', []);
                       }
 
+                      // Rename cleanup: drop the pack under its previous name so a
+                      // renamed pack doesn't linger under both keys.
+                      if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                      }
+
                       const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
                       removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
                       set(
                         draft,
                         `inputs[0].config.osquery.value.packs.${pk}`,
-                        buildFleetPackBlock(agentPolicyId)
+                        buildFleetPackBlock(agentPolicyIds)
                       );
 
                       return draft;
                     })
-                  );
-                }
-              })
-            );
-          } else {
-            await Promise.all(
-              currentAgentPolicyIds.map((agentPolicyId) => {
-                const packagePolicy = currentPackagePolicies.find((policy) =>
-                  policy.policy_ids.includes(agentPolicyId)
-                );
-                if (!packagePolicy) return;
-
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-
-                    return draft;
-                  })
-                );
-              })
+                  )
+              )
             );
           }
-        } else {
-          // `policiesList` is the post-validation set returned by
-          // `getInitialPolicies` (only ids that map to a real Fleet package
-          // policy). Diff against `currentAgentPolicyIds` to compute the
-          // remove / keep-and-update / add buckets. Validated empirically by
-          // the multi-policy fan-out probe.
-          const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
-          const agentPolicyIdsToUpdate = uniq(
-            difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
-          );
-          const agentPolicyIdsToAdd = uniq(difference(policiesList, currentAgentPolicyIds));
+        } catch (err) {
+          const conflictStatus =
+            (err as { output?: { statusCode?: number } }).output?.statusCode === 409 ||
+            SavedObjectsErrorHelpers.isConflictError(err);
+          if (conflictStatus) {
+            return response.conflict({
+              body: {
+                message:
+                  'The pack was saved, but its Fleet package policy was modified concurrently and could not be updated. Please retry the request.',
+              },
+            });
+          }
 
-          await Promise.all(
-            agentPolicyIdsToRemove.map((agentPolicyId) => {
-              const packagePolicy = currentPackagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-
-                    return draft;
-                  })
-                );
-              }
-            })
-          );
-
-          await Promise.all(
-            agentPolicyIdsToUpdate.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
-                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
-                    }
-
-                    const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
-                    removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
-                    set(
-                      draft,
-                      `inputs[0].config.osquery.value.packs.${pk}`,
-                      buildFleetPackBlock(agentPolicyId)
-                    );
-
-                    return draft;
-                  })
-                );
-              }
-            })
-          );
-
-          await Promise.all(
-            agentPolicyIdsToAdd.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-
-              if (packagePolicy) {
-                return packagePolicyService?.update(
-                  spaceScopedClient,
-                  esClient,
-                  packagePolicy.id,
-                  produce<PackagePolicy>(packagePolicy, (draft) => {
-                    unset(draft, 'id');
-                    if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
-                      set(draft, 'inputs[0].streams', []);
-                    }
-
-                    const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
-                    set(
-                      draft,
-                      `inputs[0].config.osquery.value.packs.${pk}`,
-                      buildFleetPackBlock(agentPolicyId)
-                    );
-
-                    return draft;
-                  })
-                );
-              }
-            })
-          );
+          throw err;
         }
 
         return response.ok({

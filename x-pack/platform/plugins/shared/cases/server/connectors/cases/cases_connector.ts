@@ -44,6 +44,7 @@ interface CasesConnectorParams {
     ) => Promise<SavedObjectsClientContract>;
     getUiSettingsClient: (request: KibanaRequest) => Promise<IUiSettingsClient>;
     isCasesAttachmentsEnabled: boolean;
+    isTemplatesEnabled: boolean;
   };
 }
 
@@ -136,6 +137,7 @@ export class CasesConnector extends SubActionConnector<
         casesClient,
         spaceId,
         isCasesAttachmentsEnabled: this.casesParams.isCasesAttachmentsEnabled,
+        isTemplatesEnabled: this.casesParams.isTemplatesEnabled,
       });
 
       this.logDebugCurrentState(

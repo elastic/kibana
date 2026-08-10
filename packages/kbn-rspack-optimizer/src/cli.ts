@@ -122,8 +122,10 @@ export function runRspackCli(options: CliOptions = {}): void {
 
       const inspectWorkers = flags['inspect-workers'] as boolean;
 
-      // When profiling, spawn a special worker that doesn't use require-in-the-middle
-      // This allows RsDoctor to work (envinfo conflicts with require-in-the-middle)
+      // When profiling, spawn a special worker that does not run the prototype hardening
+      // from @kbn/setup-node-env. This allows RsDoctor to work: its `envinfo` dependency
+      // calls Object.defineProperty(Function.prototype, 'toString', ...) at load time, which
+      // throws once `Object.seal(Function.prototype)` has been applied by the hardening.
       if (profile || profileStatsOnly) {
         if (watch) {
           log.info('Note: --watch is ignored in profile mode (profile builds are always one-time)');
@@ -139,8 +141,10 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       const effectiveDist = updateLimits || dist;
-      const effectiveExamples = updateLimits ? false : examples;
-      const effectiveTestPlugins = updateLimits ? false : testPlugins;
+      // CI validates distribution metrics built with example and test plugins, so limit updates
+      // must include the same plugin set.
+      const effectiveExamples = updateLimits || examples;
+      const effectiveTestPlugins = updateLimits || testPlugins;
 
       log.info('Building with RSPack unified compilation...');
 
@@ -232,7 +236,7 @@ export function runRspackCli(options: CliOptions = {}): void {
                                       Note: --watch is ignored in profile mode
 
           Environment Variables:
-            KBN_USE_RSPACK=true       Use RSPack optimizer instead of webpack
+            KBN_USE_RSPACK=false      Use legacy webpack optimizer instead of default RSPack
             KBN_HMR=false             Disable HMR (RSPack only, alternative to --no-hmr)
             KBN_HMR_PORT=5678         Override the HMR SSE server port (RSPack only, default: 5678)
         `,
@@ -266,8 +270,9 @@ export function runRspackCli(options: CliOptions = {}): void {
 /**
  * Run the profile build in a separate worker process.
  *
- * The worker uses a minimal Node.js setup that avoids require-in-the-middle
- * (from @kbn/setup-node-env/harden), which conflicts with envinfo used by RsDoctor.
+ * The worker uses a minimal Node.js setup that avoids the prototype sealing performed by
+ * @kbn/setup-node-env/harden (and @kbn/security-hardening). Sealing Function.prototype makes
+ * its `toString` non-configurable, which breaks envinfo (used by RsDoctor) when it loads.
  */
 function runProfileWorker(
   log: ToolingLog,

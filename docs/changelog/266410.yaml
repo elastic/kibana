@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/266410
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Entity Store v1 HTTP APIs, clients, and server-side components are removed
+impact: "Integrations and automations that call v1 `/api/entity_store/*` routes or rely on v1 engine management must migrate to Entity Store v2."
+action: "Update integrations to use Entity Store v2 APIs provided by the `entity_store` plugin. Remove references to v1 routes such as `/api/entity_store/engines*` and `/entities*`."

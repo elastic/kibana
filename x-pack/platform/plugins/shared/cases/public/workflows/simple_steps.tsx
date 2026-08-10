@@ -21,7 +21,9 @@ import { getAllAttachmentsStepCommonDefinition } from '../../common/workflows/st
 import { getCaseStepCommonDefinition } from '../../common/workflows/steps/get_case';
 import { getCasesByAlertIdStepCommonDefinition } from '../../common/workflows/steps/get_cases_by_alert_id';
 import { getCasesStepCommonDefinition } from '../../common/workflows/steps/get_cases';
+import { pushCasesStepCommonDefinition } from '../../common/workflows/steps/push_cases';
 import { setDescriptionStepCommonDefinition } from '../../common/workflows/steps/set_description';
+import { setExtendedFieldsStepCommonDefinition } from '../../common/workflows/steps/set_extended_fields';
 import { setSeverityStepCommonDefinition } from '../../common/workflows/steps/set_severity';
 import { setStatusStepCommonDefinition } from '../../common/workflows/steps/set_status';
 import { setTitleStepCommonDefinition } from '../../common/workflows/steps/set_title';
@@ -83,6 +85,10 @@ export const setDescriptionStepDefinition = createPublicCaseStepDefinition({
   ...setDescriptionStepCommonDefinition,
 });
 
+export const setExtendedFieldsStepDefinition = createPublicCaseStepDefinition({
+  ...setExtendedFieldsStepCommonDefinition,
+});
+
 export const setSeverityStepDefinition = createPublicCaseStepDefinition({
   ...setSeverityStepCommonDefinition,
 });
@@ -125,4 +131,8 @@ export const deleteObservableStepDefinition = createPublicCaseStepDefinition({
 
 export const getCasesStepDefinition = createPublicCaseStepDefinition({
   ...getCasesStepCommonDefinition,
+});
+
+export const pushCasesStepDefinition = createPublicCaseStepDefinition({
+  ...pushCasesStepCommonDefinition,
 });

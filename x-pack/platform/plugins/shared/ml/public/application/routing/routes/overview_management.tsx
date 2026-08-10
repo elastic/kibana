@@ -27,7 +27,6 @@ export const overviewRouteFactory = (navigateToApp: NavigateToApp): MlRoute => (
   title: i18n.translate('xpack.ml.management.machineLearningOverview.overviewLabel', {
     defaultMessage: 'Machine Learning Overview',
   }),
-  enableDatePicker: true,
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),

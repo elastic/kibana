@@ -16,7 +16,7 @@ export const download = async (
   fileUrl: string,
   filePathAtVolume: string,
   expectedMimeType: MimeType,
-  abortController?: AbortController
+  signal?: AbortSignal
 ): Promise<string> => {
   const writeStream = createWriteStream(filePathAtVolume);
 
@@ -24,7 +24,7 @@ export const download = async (
 
   try {
     res = await fetch(fileUrl, {
-      signal: abortController?.signal,
+      signal,
     });
   } catch (err: any) {
     if (err.name === 'AbortError') {

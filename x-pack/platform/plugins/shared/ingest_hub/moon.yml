@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ingest-hub-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/streams-ui'
 toolchains:
   default: node
 language: typescript
@@ -14,10 +14,11 @@ project:
   title: '@kbn/ingest-hub-plugin'
   description: Moon project for @kbn/ingest-hub-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/streams-ui'
   sourceRoot: x-pack/platform/plugins/shared/ingest_hub
 dependsOn:
   - '@kbn/core'
+  - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/shared-ux-utility'
   - '@kbn/shared-ux-router'
@@ -39,6 +40,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:

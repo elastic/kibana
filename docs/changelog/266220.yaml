@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/266220
+issues:
+- https://github.com/elastic/kibana/issues/215243
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Kibana platform
+title: Add CRUD API endpoints for Kibana platform

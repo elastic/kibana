@@ -7,8 +7,17 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import type { EuiPageHeaderProps, EuiPageSectionProps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSection,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
+import type { AppHeaderProps } from '@kbn/app-header';
+import { AppHeader } from '@kbn/app-header';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -16,7 +25,6 @@ import { useLocation } from 'react-router-dom';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
-import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
@@ -26,37 +34,62 @@ import { getNoDataConfig } from '../no_data_config';
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
 
-// Garantee's responsiveness of the header content
+// Guarantee's responsiveness of the header content
 const headerContentStyles = css`
   contain: inline-size;
 `;
 
+/**
+ * Preferred AppHeader contract for ApmMainTemplate (kibana-team#3549 / #282981).
+ * Search bars stay outside AppHeader via the template `searchBar` prop.
+ */
+export type ApmMainTemplateHeaderProps = AppHeaderProps;
+
+export type ApmMainTemplateProps = {
+  children: React.ReactNode;
+  searchBar?: React.ReactNode;
+  /**
+   * Inline AppHeader props. When set, the legacy `pageHeader` / `pageTitle` path is not used
+   * and only AppHeader renders (no double header).
+   */
+  header?: ApmMainTemplateHeaderProps;
+  /** @deprecated Prefer `header={{ title }}` (AppHeader contract). */
+  pageTitle?: React.ReactNode;
+  /** @deprecated Prefer `header` (AppHeader contract). */
+  pageHeader?: EuiPageHeaderProps;
+  /**
+   * Legacy only: injects ActionsMenu into the page header title row.
+   * With `header`, pass actions via `header.menu` instead.
+   */
+  showActionsMenu?: boolean;
+  /**
+   * Legacy only: injects ServiceGroupSaveButton into the page header title row.
+   * With `header`, pass actions via `header.menu` instead.
+   */
+  showServiceGroupSaveButton?: boolean;
+} & KibanaPageTemplateProps &
+  Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>;
+
 /*
  * This template contains:
- *  - The Shared Observability Nav (https://github.com/elastic/kibana/blob/f7698bd8aa8787d683c728300ba4ca52b202369c/x-pack/plugins/observability/public/components/shared/page_template/README.md)
- *  - The APM Header Action Menu
- *  - Page title
+ *  - The Shared Observability Nav
+ *  - Page header via AppHeader (`header`) or legacy ObservabilityPageTemplate pageHeader
+ *  - Optional search bar below the header
  *
- *  Optionally:
- *   - ServiceGroupSaveButton
+ * Optionally (legacy header path only):
+ *   - ServiceGroupSaveButton / ActionsMenu in the title row
  */
 export function ApmMainTemplate({
+  header,
   pageTitle,
   pageHeader,
   children,
   searchBar,
   showActionsMenu = false,
   showServiceGroupSaveButton = false,
+  pageSectionProps,
   ...pageTemplateProps
-}: {
-  pageTitle?: React.ReactNode;
-  pageHeader?: EuiPageHeaderProps;
-  children: React.ReactNode;
-  searchBar?: React.ReactNode;
-  showActionsMenu?: boolean;
-  showServiceGroupSaveButton?: boolean;
-} & KibanaPageTemplateProps &
-  Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
+}: ApmMainTemplateProps) {
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -80,7 +113,8 @@ export function ApmMainTemplate({
         return callApmApi('POST /internal/apm/data_view/static');
       }
     },
-    [application?.capabilities.savedObjectsManagement.edit]
+    [application?.capabilities.savedObjectsManagement.edit],
+    { useLegacyCallApmApi: true }
   );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
@@ -115,6 +149,39 @@ export function ApmMainTemplate({
     hasApmIntegrations,
     noDataConfig,
   });
+
+  const sharedTemplateProps = {
+    noDataConfig: shouldBypassNoDataScreen ? undefined : noDataConfig,
+    isPageDataLoaded: isLoading === false,
+    ...pageTemplateProps,
+  };
+
+  if (header) {
+    return (
+      <ObservabilityPageTemplate
+        {...sharedTemplateProps}
+        pageSectionProps={{
+          ...pageSectionProps,
+          paddingSize: 'none',
+        }}
+      >
+        <AppHeader spacing="standard" {...header} />
+        <EuiPageSection
+          paddingSize="m"
+          restrictWidth={false}
+          {...omitPaddingSize(pageSectionProps)}
+        >
+          {searchBar && (
+            <div css={headerContentStyles}>
+              {searchBar}
+              <EuiSpacer size="s" />
+            </div>
+          )}
+          {children}
+        </EuiPageSection>
+      </ObservabilityPageTemplate>
+    );
+  }
 
   const rightSideItems = [
     ...(pageHeader?.rightSideItems ?? []),
@@ -165,22 +232,29 @@ export function ApmMainTemplate({
   );
 
   return (
-    <EnvironmentsContextProvider>
-      <ObservabilityPageTemplate
-        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
-        isPageDataLoaded={isLoading === false}
-        pageHeader={{
-          ...pageHeader,
-          color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-          tabs: undefined,
-          rightSideItems: [],
-          pageTitle: titleWithActions,
-          children: headerChildren,
-        }}
-        {...pageTemplateProps}
-      >
-        {children}
-      </ObservabilityPageTemplate>
-    </EnvironmentsContextProvider>
+    <ObservabilityPageTemplate
+      {...sharedTemplateProps}
+      pageSectionProps={pageSectionProps}
+      pageHeader={{
+        ...pageHeader,
+        color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+        tabs: undefined,
+        rightSideItems: [],
+        pageTitle: titleWithActions,
+        children: headerChildren,
+      }}
+    >
+      {children}
+    </ObservabilityPageTemplate>
   );
+}
+
+function omitPaddingSize(
+  props: EuiPageSectionProps | undefined
+): Omit<EuiPageSectionProps, 'paddingSize'> | undefined {
+  if (!props) {
+    return undefined;
+  }
+  const { paddingSize: _paddingSize, ...rest } = props;
+  return rest;
 }

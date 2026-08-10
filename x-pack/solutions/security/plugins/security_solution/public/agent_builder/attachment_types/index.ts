@@ -11,9 +11,12 @@ import type {
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Subscription } from 'rxjs';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -110,6 +113,7 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -118,6 +122,7 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
@@ -132,6 +137,7 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
+        uiSettings,
       })
     );
   });
@@ -169,6 +175,33 @@ export const registerRuleAttachment = ({
 };
 
 /**
+ * Wires save subscriptions for AI rule creation. Dynamically imports
+ * {@link createAiRuleCreationHandler} so Detection Engine API clients, transforms, and Zod
+ * schemas stay off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — resolves during plugin
+ * start well before a user can save from chat.
+ */
+export const registerAiRuleCreationHandler = ({
+  aiRuleCreation,
+  notifications,
+  agentBuilder,
+  register,
+}: {
+  aiRuleCreation: AiRuleCreationService;
+  notifications: NotificationsStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  register: (subscription: Subscription) => void;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_ai_rule_creation_handler" */
+    '../../detection_engine/common/ai_rule_creation_handler'
+  ).then(({ createAiRuleCreationHandler }) => {
+    register(createAiRuleCreationHandler({ aiRuleCreation, notifications, agentBuilder }));
+  });
+};
+
+/**
  * Registers the `security.entity_analytics_dashboard` attachment renderer
  * (inline summary pill + Canvas dashboard with risk breakdown, donut chart,
  * and entity list). Dynamically imports
@@ -186,19 +219,80 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
+  experimentalFeatures,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
     './entity_analytics_dashboard_attachment'
   ).then(({ registerEntityAnalyticsDashboardAttachment: register }) => {
-    register({ attachments, application, agentBuilder, chrome, searchSession });
+    register({
+      attachments,
+      application,
+      agentBuilder,
+      chrome,
+      experimentalFeatures,
+      searchSession,
+      uiSettings,
+    });
+  });
+};
+
+/**
+ * Registers the `security.entity_graph` attachment renderer (inline read-only
+ * relationship-graph preview + "Open full graph" deep link). Dynamically imports
+ * [./entity_graph](./entity_graph/index.ts) so the heavy graph deps
+ * (`@kbn/cloud-security-posture-graph`) stay off the main `securitySolution`
+ * page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
+ * resolves during plugin start well before the user can receive a graph preview
+ * attachment from the LLM.
+ */
+export const registerEntityGraphAttachment = ({
+  attachments,
+  application,
+  http,
+  agentBuilder,
+  chrome,
+  searchSession,
+  experimentalFeatures,
+  uiSettings,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  http: HttpStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
+  experimentalFeatures: ExperimentalFeatures;
+  uiSettings: IUiSettingsClient;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_graph_attachment" */
+    './entity_graph'
+  ).then(({ createEntityGraphAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityGraph,
+      createEntityGraphAttachmentDefinition({
+        application,
+        http,
+        agentBuilder,
+        chrome,
+        searchSession,
+        experimentalFeatures,
+        uiSettings,
+      })
+    );
   });
 };
 

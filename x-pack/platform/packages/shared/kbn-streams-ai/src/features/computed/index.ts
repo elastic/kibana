@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaseFeature } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { errorLogsGenerator } from './error_logs';
@@ -54,10 +54,14 @@ generators.forEach((generator) => registry.register(generator));
 /**
  * Returns formatted LLM instructions for all computed feature types.
  * This is automatically included in prompts so the LLM knows how to use each feature type.
+ *
+ * `excludedTypes` skips types a consumer never receives, so the prompt won't
+ * describe a feature type that never appears in tool results.
  */
-export function getComputedFeatureInstructions(): string {
+export function getComputedFeatureInstructions(excludedTypes: readonly string[] = []): string {
   return registry
     .getAll()
+    .filter((generator) => !excludedTypes.includes(generator.type))
     .map((generator) => `**${generator.type}**: ${generator.llmInstructions}`)
     .join('\n\n');
 }

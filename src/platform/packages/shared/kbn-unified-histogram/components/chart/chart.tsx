@@ -390,6 +390,7 @@ export function UnifiedHistogramChart({
           query={query}
           currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
           onSuggestionContextEdit={onSuggestionContextEdit}
+          isApproximate={fetchParams.isApproximate}
         />
       )}
     </>

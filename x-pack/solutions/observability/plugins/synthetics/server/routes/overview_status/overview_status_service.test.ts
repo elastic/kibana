@@ -6,10 +6,18 @@
  */
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import {
+  HEARTBEAT_UNMAPPED_LOCATION_ID,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+} from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
-import { OverviewStatusService, SUMMARIES_PAGE_SIZE } from './overview_status_service';
+import {
+  HEARTBEAT_MONITORS_OVERVIEW_LIMIT,
+  OverviewStatusService,
+  SUMMARIES_PAGE_SIZE,
+} from './overview_status_service';
 import times from 'lodash/times';
 import { flatten } from 'lodash';
 import moment from 'moment';
@@ -132,7 +140,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -295,7 +302,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -404,7 +410,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -544,7 +549,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -695,7 +699,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -739,7 +742,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -782,7 +784,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -810,7 +811,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -854,7 +854,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -896,7 +895,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const service = new OverviewStatusService(routeContext);
@@ -1104,7 +1102,6 @@ describe('current status route', () => {
         },
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       } as any);
 
@@ -1181,7 +1178,6 @@ describe('current status route', () => {
         },
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       } as any);
 
@@ -1245,7 +1241,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
       const overviewStatusService = new OverviewStatusService(routeContext);
@@ -1354,7 +1349,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1439,7 +1433,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1536,7 +1529,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1562,23 +1554,21 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
-    it('does not surface a cross-space local monitor through the remote-only branch', async () => {
-      // Defence-in-depth: the ES query already filters on `meta.space_id` for
-      // both local and remote pings, so
-      // a doc from another local space would normally be dropped at filter
-      // time. Even if a stray cross-space doc reaches the reconciliation
-      // step (e.g. in this test where we mock the ES response directly), the
-      // JS-side guard in the remote-only branch must still drop it because
-      // its `_index` has no cluster alias prefix.
+    it('does not place a local no-saved-object ping into the remote branch', async () => {
+      // A local ping (no cluster-alias prefix on `_index`) with no saved object
+      // must never be decorated with `remote` info — it is not a CCS monitor.
+      // It is instead surfaced through the Heartbeat branch (covered in the
+      // "Heartbeat / Elastic Agent managed monitors" suite). Cross-space safety
+      // is enforced at query time via the `meta.space_id` filter applied to all
+      // pings, not by dropping local no-SO pings here.
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(
         getEsResponse({
           buckets: [
-            // Cross-space LOCAL monitor: not in `testMonitors`, local _index.
             {
               key: {
-                monitorId: 'cross-space-local',
+                monitorId: 'local-no-so',
                 locationId: japanLoc.id,
               },
               status: {
@@ -1587,9 +1577,8 @@ describe('current status route', () => {
                   {
                     metrics: {
                       'monitor.status': 'down',
-                      'monitor.name': 'Other-Space Monitor',
+                      'monitor.name': 'Local No SO Monitor',
                       'monitor.type': 'http',
-                      config_id: 'cross-space-local',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
@@ -1609,7 +1598,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1618,11 +1606,10 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      expect(result.downConfigs['cross-space-local']).toBeUndefined();
-      expect(result.upConfigs['cross-space-local']).toBeUndefined();
-      expect(result.pendingConfigs['cross-space-local']).toBeUndefined();
-      expect(result.down).toBe(0);
-      expect(result.up).toBe(0);
+      const entry = result.downConfigs['heartbeat-local-no-so-asia_japan'];
+      expect(entry).toBeDefined();
+      expect(entry.remote).toBeUndefined();
+      expect(entry.origin).toBe('heartbeat');
     });
 
     it('applies the same meta.space_id filter to local and remote pings when CCS is enabled', async () => {
@@ -1663,7 +1650,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1675,9 +1661,16 @@ describe('current status route', () => {
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
 
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      const spaceFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
       expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toEqual(['default', '*']);
+      const spaceTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(spaceTerms.terms['meta.space_id']).toEqual(['default', '*']);
+      // Space-less autodiscovery pings are always included.
+      expect(spaceFilter.bool.should).toContainEqual({
+        bool: { must_not: { exists: { field: 'meta.space_id' } } },
+      });
 
       const splitFilter = filters.find(
         (f: any) =>
@@ -1700,7 +1693,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
         },
       };
 
@@ -1711,10 +1703,13 @@ describe('current status route', () => {
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      const spaceFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
       expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toEqual(['default', '*']);
-      expect(spaceFilter.terms['meta.space_id']).not.toContain('production');
+      const spaceTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(spaceTerms.terms['meta.space_id']).toEqual(['default', '*']);
+      expect(spaceTerms.terms['meta.space_id']).not.toContain('production');
 
       expect(result.down).toBe(0);
       expect(result.up).toBe(0);
@@ -1739,7 +1734,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
           security: {
             authz: {
               mode: { useRbacForRequest: () => true },
@@ -1780,7 +1774,15 @@ describe('current status route', () => {
       expect(remoteBranch.bool.filter).toEqual(
         expect.arrayContaining([
           { wildcard: { _index: '*:*' } },
-          { terms: { 'meta.space_id': ['default', '*'] } },
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { terms: { 'meta.space_id': ['default', '*'] } },
+                { bool: { must_not: { exists: { field: 'meta.space_id' } } } },
+              ],
+            },
+          },
         ])
       );
     });
@@ -1824,7 +1826,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
           security: {
             authz: {
               mode: { useRbacForRequest: () => true },
@@ -1870,7 +1871,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: true } } },
           security: {
             authz: {
               mode: { useRbacForRequest: () => false },
@@ -1917,7 +1917,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -1970,7 +1969,6 @@ describe('current status route', () => {
         syntheticsEsClient,
         server: {
           isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
         },
       };
 
@@ -1985,7 +1983,7 @@ describe('current status route', () => {
       expect(queryFilter).toBeUndefined();
     });
 
-    it('includes meta.space_id filter when CCS is disabled', async () => {
+    it('skips CCS-only aggregations and decoration on serverless', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(
@@ -2017,57 +2015,7 @@ describe('current status route', () => {
         spaceId: 'default',
         syntheticsEsClient,
         server: {
-          isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
-        },
-      };
-
-      const overviewStatusService = new OverviewStatusService(routeContext);
-      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
-
-      await overviewStatusService.getOverviewStatus();
-
-      // Verify the ES query DOES contain a meta.space_id filter
-      const searchCall = esClient.search.mock.calls[0][0] as any;
-      const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
-      expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.terms['meta.space_id']).toContain('default');
-    });
-
-    it('does not populate remote field when CCS is disabled', async () => {
-      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-
-      esClient.search.mockResponseOnce(
-        getEsResponse({
-          buckets: [
-            {
-              key: {
-                monitorId: 'id1',
-                locationId: japanLoc.id,
-              },
-              status: {
-                key: japanLoc.id,
-                top: [
-                  {
-                    metrics: {
-                      'monitor.status': 'up',
-                    },
-                    sort: ['2022-09-15T16:19:16.724Z'],
-                  },
-                ],
-              },
-            },
-          ],
-        })
-      );
-
-      const routeContext: any = {
-        request: { query: {} },
-        syntheticsEsClient,
-        server: {
-          isElasticsearchServerless: false,
-          config: { experimental: { ccs: { enabled: false } } },
+          isElasticsearchServerless: true,
         },
       };
 
@@ -2076,7 +2024,31 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Remote field should not be populated when CCS is disabled.
+      // Active-space filter is still applied (single-space view) and the request
+      // omits the CCS-only `index_name` sub-agg.
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const spaceFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
+      expect(spaceFilter).toBeDefined();
+      const spaceTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
+      expect(spaceTerms.terms['meta.space_id']).toContain('default');
+
+      const monitorAggs = searchCall.aggs.monitors.aggs;
+      expect(monitorAggs.index_name).toBeUndefined();
+      // `location_name` resolves the human-readable observer.geo.name label for
+      // external monitors (remote CCS + local Heartbeat) that carry a location.
+      // Heartbeat detection is always-on, so it runs even on serverless (unlike
+      // the CCS-gated `index_name`). Location-less pings don't rely on it — they
+      // fall back to the placeholder label.
+      expect(monitorAggs.location_name).toBeDefined();
+      // `space_id` presence tells a deleted Kibana monitor's leftover pings
+      // (always stamped with `meta.space_id`) apart from autodiscovery pings.
+      // Heartbeat detection is always-on, so it runs even on serverless.
+      expect(monitorAggs.space_id).toBeDefined();
+
+      // No remote decoration without CCS.
       expect(result.upConfigs.id1).toBeDefined();
       expect(result.upConfigs.id1.remote).toBeUndefined();
     });
@@ -2514,6 +2486,394 @@ describe('current status route', () => {
 
       expect(result).toEqual({ priorRuns: [] });
       expect(esClient.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Heartbeat / Elastic Agent managed monitors', () => {
+    // A genuine autodiscovery ping carries neither `config_id` nor
+    // `meta.space_id` — its identity is `monitor.id`. Tests that want to model a
+    // Kibana-pushed (deleted) monitor add those markers explicitly.
+    const heartbeatBucket = (overrides: { monitorId: string; status: string; metrics?: any }) => ({
+      key: { monitorId: overrides.monitorId, locationId: japanLoc.id },
+      status: {
+        key: japanLoc.id,
+        top: [
+          {
+            metrics: {
+              'monitor.status': overrides.status,
+              'monitor.name': 'k8s autodiscovered monitor',
+              'monitor.type': 'http',
+              'monitor.interval': 600,
+              tags: ['kube-system'],
+              ...overrides.metrics,
+            },
+            sort: ['2025-05-28T10:00:00.000Z'],
+          },
+        ],
+      },
+      location_name: { buckets: [{ key: 'My K8s Cluster', doc_count: 1 }] },
+    });
+
+    it('surfaces a local monitor with no saved object as origin: heartbeat', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [heartbeatBucket({ monitorId: 'hb-1', status: 'up' })],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const entry = result.upConfigs['heartbeat-hb-1-asia_japan'];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+      expect(entry.remote).toBeUndefined();
+      expect(entry.isEnabled).toBe(true);
+      expect(entry.isStatusAlertEnabled).toBe(false);
+      expect(entry.name).toBe('k8s autodiscovered monitor');
+      expect(entry.type).toBe('http');
+      // monitor.interval is treated as seconds and rendered in minutes,
+      // mirroring the remote-only monitor path.
+      expect(entry.schedule).toBe('10');
+      expect(entry.tags).toEqual(['kube-system']);
+      expect(entry.locations).toEqual([{ id: japanLoc.id, label: 'My K8s Cluster', status: 'up' }]);
+      expect(result.up).toBe(1);
+    });
+
+    const runWithBuckets = async (buckets: any[]) => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse({ buckets }));
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+      return service.getOverviewStatus();
+    };
+
+    // Kibana stamps both `config_id` and `meta.space_id` onto every monitor it
+    // pushes. A monitor deleted from Kibana leaves behind pings that still carry
+    // them until they age out; a standalone Heartbeat user could also set either
+    // field. In all those cases the ping must NOT be surfaced as an
+    // autodiscovery (`heartbeat`) monitor — only a ping with neither marker is.
+    it('does not surface a no-saved-object ping that carries meta.space_id as heartbeat', async () => {
+      const result = await runWithBuckets([
+        {
+          ...heartbeatBucket({ monitorId: 'has-space', status: 'up' }),
+          space_id: { buckets: [{ key: 'default', doc_count: 1 }] },
+        },
+      ]);
+
+      expect(result.upConfigs['heartbeat-has-space-asia_japan']).toBeUndefined();
+      expect(result.up).toBe(0);
+    });
+
+    it('does not surface a no-saved-object ping that carries config_id as heartbeat', async () => {
+      const result = await runWithBuckets([
+        heartbeatBucket({
+          monitorId: 'has-config',
+          status: 'up',
+          metrics: { config_id: 'so-uuid-1234' },
+        }),
+      ]);
+
+      expect(result.upConfigs['heartbeat-has-config-asia_japan']).toBeUndefined();
+      expect(result.upConfigs['heartbeat-so-uuid-1234-asia_japan']).toBeUndefined();
+      expect(result.up).toBe(0);
+    });
+
+    it('surfaces a ping with neither config_id nor meta.space_id as heartbeat', async () => {
+      const result = await runWithBuckets([heartbeatBucket({ monitorId: 'bare', status: 'up' })]);
+
+      const entry = result.upConfigs['heartbeat-bare-asia_japan'];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+      expect(result.up).toBe(1);
+    });
+
+    it('falls back to monitor.id and location id when ping metadata is missing', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'hb-bare', locationId: japanLoc.id },
+              status: {
+                key: japanLoc.id,
+                top: [
+                  { metrics: { 'monitor.status': 'down' }, sort: ['2025-05-28T10:00:00.000Z'] },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const entry = result.downConfigs['heartbeat-hb-bare-asia_japan'];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+      expect(entry.name).toBe('hb-bare');
+      expect(entry.type).toBe('unknown');
+      expect(entry.schedule).toBe('');
+      expect(entry.tags).toEqual([]);
+      expect(entry.locations[0].label).toBe(japanLoc.id);
+    });
+
+    it('surfaces a location-less autodiscovery monitor under the placeholder location', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      // Kubernetes/Docker autodiscovery pings carry no `observer.name`, so the
+      // composite `locationId` source (with `missing_bucket: true`) returns a
+      // null key and the `observer.geo.name` sub-agg is empty.
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'hb-no-loc', locationId: null },
+              status: {
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'k8s autodiscovered monitor',
+                      'monitor.type': 'http',
+                    },
+                    sort: ['2025-05-28T10:00:00.000Z'],
+                  },
+                ],
+              },
+              location_name: { buckets: [] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const entry = result.upConfigs[`heartbeat-hb-no-loc-${HEARTBEAT_UNMAPPED_LOCATION_ID}`];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+      expect(entry.locations).toEqual([
+        {
+          id: HEARTBEAT_UNMAPPED_LOCATION_ID,
+          label: HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+          status: 'up',
+        },
+      ]);
+      expect(result.up).toBe(1);
+    });
+
+    it('surfaces a space-less heartbeat monitor when a space is active', async () => {
+      // Regression: earlier Heartbeat tests omit `spaceId`, which short-circuits
+      // `getSpaceFilters` entirely. Autodiscovery pings carry no `meta.space_id`,
+      // so with a space active the filter must still permit field-missing docs —
+      // otherwise a plain `terms` clause silently drops them ("nothing shows").
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'hb-no-space', locationId: null },
+              status: {
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'k8s autodiscovered monitor',
+                      'monitor.type': 'http',
+                    },
+                    sort: ['2025-05-28T10:00:00.000Z'],
+                  },
+                ],
+              },
+              location_name: { buckets: [] },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const [[searchBody]] = esClient.search.mock.calls;
+      const spaceFilter = (searchBody as any).query.bool.filter.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.terms?.['meta.space_id'])
+      );
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.bool.should).toContainEqual({
+        bool: { must_not: { exists: { field: 'meta.space_id' } } },
+      });
+
+      const entry = result.upConfigs[`heartbeat-hb-no-space-${HEARTBEAT_UNMAPPED_LOCATION_ID}`];
+      expect(entry).toBeDefined();
+      expect(entry.origin).toBe('heartbeat');
+    });
+
+    it('requests the observer.name composite source with missing_bucket enabled', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      await service.getOverviewStatus();
+
+      const [[searchBody]] = esClient.search.mock.calls;
+      const sources = (searchBody as any).aggs.monitors.composite.sources;
+      const locationSource = sources.find((source: any) => source.locationId);
+      expect(locationSource.locationId.terms).toEqual({
+        field: 'observer.name',
+        missing_bucket: true,
+      });
+    });
+
+    it('does not surface monitors that already have a saved object', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [heartbeatBucket({ monitorId: 'id1', status: 'up' })],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      // id1 is a real saved-object monitor.
+      service.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.upConfigs['heartbeat-id1-asia_japan']).toBeUndefined();
+      // id1 is surfaced via its saved object instead.
+      expect(result.upConfigs.id1).toBeDefined();
+      expect(result.upConfigs.id1.origin).toBeUndefined();
+    });
+
+    it('caps the number of distinct heartbeat monitors surfaced', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      const overLimit = HEARTBEAT_MONITORS_OVERVIEW_LIMIT + 50;
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: times(overLimit).map((i) =>
+            heartbeatBucket({ monitorId: `hb-${i}`, status: 'up' })
+          ),
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const heartbeatKeys = Object.keys(result.upConfigs).filter((k) => k.startsWith('heartbeat-'));
+      expect(heartbeatKeys).toHaveLength(HEARTBEAT_MONITORS_OVERVIEW_LIMIT);
+    });
+
+    it('excludes heartbeat monitors when includeHeartbeatMonitors is false', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            heartbeatBucket({ monitorId: 'hb-1', status: 'up' }),
+            heartbeatBucket({ monitorId: 'hb-2', status: 'down' }),
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { includeHeartbeatMonitors: false } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await service.getOverviewStatus();
+
+      const heartbeatKeys = [
+        ...Object.keys(result.upConfigs),
+        ...Object.keys(result.downConfigs),
+      ].filter((k) => k.startsWith('heartbeat-'));
+      expect(heartbeatKeys).toHaveLength(0);
+      // Counts follow the exclusion — the skipped monitors are not tallied.
+      expect(result.up).toBe(0);
+      expect(result.down).toBe(0);
     });
   });
 });

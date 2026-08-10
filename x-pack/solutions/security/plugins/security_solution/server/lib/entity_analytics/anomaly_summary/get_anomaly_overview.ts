@@ -6,17 +6,21 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
-import { deriveBucketInterval } from '../../../../common/entity_analytics/anomalies/derive_bucket_interval';
+import {
+  deriveBucketInterval,
+  formatAnomalousValue,
+} from '../../../../common/entity_analytics/anomalies';
 import type {
   AnomalyOverviewEntry,
   AnomalyOverviewHit,
+  AnomalyScoreRange,
 } from '../../../../common/api/entity_analytics';
-import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import { buildScoreRangeFilter, getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
 const NUM_RECENT_ANOMALIES = 3;
@@ -39,13 +43,14 @@ interface OverviewAggs {
 interface GetEntityAnomalyOverviewParams {
   entityId: string;
   entityType: EntityType;
+  entityRecord: Entity;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
+  request: KibanaRequest;
   soClient: SavedObjectsClientContract;
 }
 
@@ -70,18 +75,20 @@ interface AnomalyOverview {
   totalAnomaliesCount: number;
   from: number;
   to: number;
+  hasJobsMissingThreatTactics: boolean;
 }
 
 export const getEntityAnomalyOverview = async ({
   entityId,
   entityType,
+  entityRecord,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   threatTactics,
   logger,
   ml,
+  request,
   soClient,
 }: GetEntityAnomalyOverviewParams): Promise<AnomalyOverview> => {
   const effectiveToMs = toMs ?? Date.now();
@@ -94,14 +101,21 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount: 0,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics: false,
   };
 
-  const mlSystem = ml.mlSystemProvider({} as KibanaRequest, soClient);
-  const allSecurityJobIds = await getSecurityMlJobIds({ ml, soClient });
+  const mlSystem = ml.mlSystemProvider(request, soClient);
+  const allSecurityJobIds = await getSecurityMlJobIds({ ml, request, soClient });
 
   if (allSecurityJobIds.length === 0) return empty;
 
-  const allJobConfigs = await getJobConfig({ jobIds: allSecurityJobIds, logger, ml, soClient });
+  const allJobConfigs = await getJobConfig({
+    jobIds: allSecurityJobIds,
+    logger,
+    ml,
+    request,
+    soClient,
+  });
 
   let resolvedJobIds = allSecurityJobIds;
   if (threatTactics && threatTactics.length > 0) {
@@ -113,6 +127,14 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
+  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+  if (!entityFilter) {
+    logger.warn(
+      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+    );
+    return empty;
+  }
+
   let aggs: OverviewAggs | undefined;
   let rawHits: RawAnomalyRecord[] = [];
   let totalAnomaliesCount = 0;
@@ -122,24 +144,14 @@ export const getEntityAnomalyOverview = async ({
       {
         size: NUM_RECENT_ANOMALIES,
         track_total_hits: true,
-        runtime_mappings: {
-          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-        },
         query: {
           bool: {
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              {
-                range: {
-                  record_score: {
-                    gte: minScore ?? 1,
-                    ...(maxScore !== undefined ? { lte: maxScore } : {}),
-                  },
-                },
-              },
+              buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
-              { term: { entity_id: entityId } },
+              entityFilter,
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
             ],
           },
@@ -165,7 +177,9 @@ export const getEntityAnomalyOverview = async ({
     );
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
-    rawHits = compact(resp.hits.hits.map((h) => h._source));
+    rawHits = compact(
+      resp.hits.hits.map((h) => (h._source ? { ...h._source, _id: h._id } : undefined))
+    );
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
@@ -181,15 +195,27 @@ export const getEntityAnomalyOverview = async ({
     presentJobIds.map((id) => [id, allJobConfigs.get(id)?.threatTactics ?? []])
   );
 
+  const hasJobsMissingThreatTactics = presentJobIds.some(
+    (id) => !allJobConfigs.get(id)?.hasThreatTactics
+  );
+
   const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
     .filter((b) => b.doc_count > 0 && b.max_score.value !== null)
     .map((b) => {
-      const bucketJobIds = b.jobs.buckets.map((j) => j.key);
+      const jobsBucket = b?.jobs?.buckets ?? [];
+      const bucketJobIds = jobsBucket.map((j) => j.key);
       const tactics = [...new Set(bucketJobIds.flatMap((id) => tacticsByJob.get(id) ?? []))];
+      const tacticCounts = jobsBucket.reduce<Record<string, number>>((acc, { key, doc_count }) => {
+        for (const tactic of tacticsByJob.get(key) ?? []) {
+          acc[tactic] = (acc[tactic] ?? 0) + doc_count;
+        }
+        return acc;
+      }, {});
       return {
         timestamp: new Date(b.key).toISOString(),
         maxScore: b.max_score.value as number,
         threatTactics: tactics,
+        tacticCounts,
       };
     });
 
@@ -198,19 +224,25 @@ export const getEntityAnomalyOverview = async ({
   const recentAnomalies: AnomalyOverviewHit[] = rawHits.map((anomaly) => {
     const jobConfig = allJobConfigs.get(anomaly.job_id);
     const detector = jobConfig?.detectors[anomaly.detector_index];
+    const detectorFunction = detector?.function ?? anomaly.function;
 
-    let anomalousValue: string | undefined;
+    const anomalousValue = detectorFunction
+      ? formatAnomalousValue({
+          detectorFunction,
+          fieldName: detector?.field_name ?? anomaly.field_name,
+          actual: anomaly.actual,
+          byFieldValue: anomaly.by_field_value ?? undefined,
+        })
+      : anomaly.actual?.[0] != null
+      ? String(anomaly.actual[0])
+      : null;
 
-    if (detector?.function === 'rare') {
-      anomalousValue = anomaly.by_field_value;
-    } else {
-      anomalousValue = anomaly.actual?.[0] != null ? String(anomaly.actual[0]) : undefined;
-    }
     return {
+      recordId: anomaly._id ?? '',
       jobId: anomaly.job_id,
       jobName: jobConfig?.jobName ?? anomaly.job_id,
       timestamp: new Date(anomaly.timestamp).toISOString(),
-      anomalousValue: anomalousValue ?? null,
+      anomalousValue,
     };
   });
 
@@ -221,5 +253,6 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics,
   };
 };

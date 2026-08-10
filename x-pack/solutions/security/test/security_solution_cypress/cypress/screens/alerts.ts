@@ -149,10 +149,10 @@ export const ALERT_SUMMARY_CHARTS_COLLAPSED = getDataTestSubjectSelector('chart-
 
 export const ALERTS_HISTOGRAM = getDataTestSubjectSelector('alerts-histogram-panel');
 
-export const ALERTS_HISTOGRAM_LEGEND =
-  '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
-
 export const ALERTS_HISTOGRAM_SERIES = '[data-ech-series-name]';
+
+export const ALERTS_HISTOGRAM_LEGEND_BUTTON = (ruleName: string) =>
+  `[data-test-subj="alerts-histogram-panel"] [data-test-subj="legend-${ruleName}"]`;
 
 export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 

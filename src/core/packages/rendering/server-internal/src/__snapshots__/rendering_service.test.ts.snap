@@ -17,6 +17,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -93,6 +94,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -116,6 +118,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -188,6 +191,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -211,6 +215,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -287,6 +292,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -310,6 +316,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -382,6 +389,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -405,6 +413,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -477,6 +486,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -500,6 +510,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -576,6 +587,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -599,6 +611,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -671,6 +684,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -694,6 +708,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -766,6 +781,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -789,6 +805,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -861,6 +878,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -884,6 +902,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -956,6 +975,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -984,6 +1004,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1060,6 +1081,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1083,6 +1105,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1157,6 +1180,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1185,6 +1209,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1261,6 +1286,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1289,6 +1315,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1361,6 +1388,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1384,6 +1412,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1456,6 +1485,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1484,6 +1514,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1560,6 +1591,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1588,6 +1620,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1660,6 +1693,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1688,6 +1722,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1760,6 +1795,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1788,6 +1824,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1862,6 +1899,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1890,6 +1928,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1964,6 +2003,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,

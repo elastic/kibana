@@ -6,44 +6,19 @@
  */
 
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
-import type { ConstructorOptions } from '../rules_client';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RulesClient } from '../rules_client';
 import { RuleChangeTrackingDisabledError } from '../methods/get_rule_history';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '../../types';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 import type { IScopedChangeTrackingService } from '../lib/change_tracking';
+import { getRulesClientMockParams } from '../../test_utils';
 
 describe('getHistory()', () => {
-  const taskManager = taskManagerMock.createStart();
-  const ruleTypeRegistry = ruleTypeRegistryMock.create();
-  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const eventLogClient = eventLogClientMock.create();
-
-  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-  const authorization = alertingAuthorizationMock.create();
-  const actionsAuthorization = actionsAuthorizationMock.create();
-  const auditLogger = auditLoggerMock.create();
-  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
   const changeTrackingService: jest.Mocked<IScopedChangeTrackingService> = {
     log: jest.fn(),
@@ -52,38 +27,15 @@ describe('getHistory()', () => {
   };
 
   const kibanaVersion = 'v9.5.0';
-  const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+
+  const {
+    rulesClientParams,
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
-    authorization: authorization as unknown as AlertingAuthorization,
-    actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-    spaceId: 'default',
-    namespace: 'default',
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    getUserName: jest.fn(),
-    createAPIKey: jest.fn(),
-    cloneAPIKey: jest.fn(),
-    logger: loggingSystemMock.create().get(),
-    internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: encryptedSavedObjects,
-    getActionsClient: jest.fn(),
-    getEventLogClient: jest.fn(),
-    kibanaVersion,
+    authorization,
     auditLogger,
-    isAuthenticationTypeAPIKey: jest.fn(),
-    getAuthenticationAPIKey: jest.fn(),
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-    getAlertIndicesAlias: jest.fn(),
-    alertsService: null,
-    backfillClient: backfillClientMock.create(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    isSystemAction: jest.fn(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
-    isServerless: false,
-    changeTrackingService,
-  };
+  } = getRulesClientMockParams({ kibanaVersion, changeTrackingService });
 
   beforeEach(() => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
@@ -162,6 +114,7 @@ describe('getHistory()', () => {
         hash: '',
         fields: {
           hashed: [],
+          redacted: [],
         },
         snapshot: {
           id: ruleSO.id,
@@ -315,6 +268,97 @@ describe('getHistory()', () => {
     });
   });
 
+  describe('deleted rule', () => {
+    const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      RULE_SAVED_OBJECT_TYPE,
+      '1'
+    );
+
+    const makeSnapshotItem = (attrs: Partial<RawRule> = {}) => {
+      const ruleSO = getRuleSavedObject();
+      const mergedAttrs = { ...ruleSO.attributes, ...attrs };
+      return generateChangeHistoryDocument({
+        object: {
+          id: ruleSO.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          hash: '',
+          fields: { hashed: [], redacted: [] },
+          snapshot: {
+            id: ruleSO.id,
+            alertTypeId: mergedAttrs.alertTypeId,
+            consumer: mergedAttrs.consumer,
+            name: mergedAttrs.name,
+            enabled: mergedAttrs.enabled,
+            tags: mergedAttrs.tags,
+            schedule: mergedAttrs.schedule,
+            actions: mergedAttrs.actions,
+            params: mergedAttrs.params,
+            createdBy: mergedAttrs.createdBy,
+            updatedBy: mergedAttrs.updatedBy,
+            createdAt: mergedAttrs.createdAt,
+            updatedAt: mergedAttrs.updatedAt,
+            revision: mergedAttrs.revision,
+            muteAll: mergedAttrs.muteAll,
+          },
+        },
+      });
+    };
+
+    test('returns history items when rule is deleted', async () => {
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);
+
+      const historyItem = makeSnapshotItem();
+
+      // first call: auth-info lookup (size: 1)
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+      // second call: actual history fetch
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+
+      const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(changeTrackingService.getHistory).toHaveBeenCalledTimes(2);
+      expect(result.items).toHaveLength(1);
+    });
+
+    test('uses snapshot alertTypeId and consumer for authorization when rule is deleted', async () => {
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);
+
+      const historyItem = makeSnapshotItem({ alertTypeId: 'snap-type', consumer: 'snap-consumer' });
+
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: [historyItem] });
+
+      await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleTypeId: 'snap-type', consumer: 'snap-consumer' })
+      );
+    });
+
+    test('returns empty result when rule is deleted and no history records exist', async () => {
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);
+      changeTrackingService.getHistory.mockResolvedValueOnce({ total: 0, items: [] });
+
+      const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(result).toEqual({ total: 0, items: [] });
+      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+      // only the auth-info lookup; no second history call
+      expect(changeTrackingService.getHistory).toHaveBeenCalledTimes(1);
+    });
+
+    test('rethrows non-404 errors from getRuleSo', async () => {
+      const serverError = new Error('Internal server error');
+      unsecuredSavedObjectsClient.get.mockRejectedValueOnce(serverError);
+
+      await expect(rulesClient.getHistory({ module: 'security', ruleId: '1' })).rejects.toThrow(
+        'Internal server error'
+      );
+
+      expect(changeTrackingService.getHistory).not.toHaveBeenCalled();
+    });
+  });
+
   describe('rule hydration', () => {
     test('hydrates `rule` from `object.snapshot` on each item', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
@@ -380,6 +424,7 @@ describe('getHistory()', () => {
           hash: '',
           fields: {
             hashed: [],
+            redacted: [],
           },
           snapshot: {
             references: ruleSO.references,

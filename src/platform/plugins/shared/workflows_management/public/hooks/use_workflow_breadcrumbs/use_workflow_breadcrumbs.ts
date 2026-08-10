@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common';
@@ -17,37 +17,57 @@ const workflowsTitle = i18n.translate('workflows.breadcrumbs.title', {
   defaultMessage: 'Workflows',
 });
 
+const breadcrumbText = (breadcrumb: ChromeBreadcrumb): string =>
+  typeof breadcrumb.text === 'string' ? breadcrumb.text : '';
+
 /**
  * Sets the breadcrumbs for the Workflows app in app and in the document title.
  * If `workflowTitle` is provided, it will be appended to the breadcrumbs list.
  */
 export const useWorkflowsBreadcrumbs = (workflowTitle?: string) => {
-  const { chrome, application, serverless } = useKibana().services;
+  const setBreadcrumbs = useSetWorkflowsBreadcrumbs();
 
   useEffect(() => {
-    const trailingBreadcrumbs: ChromeBreadcrumb[] = workflowTitle ? [{ text: workflowTitle }] : [];
-    if (serverless) {
-      // In serverless, we leading breadcrumbs are managed by the serverless plugin, only the trailing breadcrumbs need to be set here
-      serverless.setBreadcrumbs(trailingBreadcrumbs);
-    } else {
-      // In non-serverless, we need to set all the breadcrumbs, and the trailing breadcrumbs under "project" for the solution navigation mode
-      const allBreadcrumbs: ChromeBreadcrumb[] = [
-        {
-          text: workflowsTitle,
-          href: application?.getUrlForApp(PLUGIN_ID),
-          onClick: (event) => {
-            if (event) {
-              event.preventDefault();
-            }
-            application?.navigateToApp(PLUGIN_ID);
-          },
-        },
-        ...trailingBreadcrumbs,
-      ];
+    setBreadcrumbs(workflowTitle ? [{ text: workflowTitle }] : []);
+  }, [setBreadcrumbs, workflowTitle]);
+};
 
-      chrome.setBreadcrumbs(allBreadcrumbs, { project: { value: trailingBreadcrumbs } });
-    }
-    // Apply the document title in any case
-    chrome.docTitle.change([...(workflowTitle ? [workflowTitle] : []), workflowsTitle]);
-  }, [chrome, application, serverless, workflowTitle]);
+/**
+ * Returns a setter for the Workflows app breadcrumbs. Unlike
+ * {@link useWorkflowsBreadcrumbs} (which sets a single trailing title via an
+ * effect), this lets callers imperatively set an array of trailing breadcrumbs
+ * — e.g. a clickable "Library" crumb plus the loaded template name — once data
+ * is available. The leading "Workflows" root and the document title are handled
+ * the same way as {@link useWorkflowsBreadcrumbs}.
+ */
+export const useSetWorkflowsBreadcrumbs = () => {
+  const { chrome, application, serverless } = useKibana().services;
+
+  return useCallback(
+    (trailingBreadcrumbs: ChromeBreadcrumb[]) => {
+      if (serverless) {
+        // In serverless the leading breadcrumbs are managed by the serverless plugin.
+        serverless.setBreadcrumbs(trailingBreadcrumbs);
+      } else {
+        const allBreadcrumbs: ChromeBreadcrumb[] = [
+          {
+            text: workflowsTitle,
+            href: application?.getUrlForApp(PLUGIN_ID),
+            onClick: (event) => {
+              if (event) {
+                event.preventDefault();
+              }
+              application?.navigateToApp(PLUGIN_ID);
+            },
+          },
+          ...trailingBreadcrumbs,
+        ];
+        chrome.setBreadcrumbs(allBreadcrumbs, { project: { value: trailingBreadcrumbs } });
+      }
+
+      const trailingTitles = trailingBreadcrumbs.map(breadcrumbText).filter(Boolean).reverse();
+      chrome.docTitle.change([...trailingTitles, workflowsTitle]);
+    },
+    [chrome, application, serverless]
+  );
 };

@@ -18,6 +18,7 @@ import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
 import { Generate } from '../generate';
+import { useHasWorkflowsPrivileges } from '../../../hooks/use_has_workflows_privileges';
 import type { SettingsOverrideOptions } from '../../history/types';
 import * as i18n from './translations';
 
@@ -36,6 +37,8 @@ const EmptyPromptComponent: React.FC<Props> = ({
   isDisabled = false,
   onGenerate,
 }) => {
+  const { hasWorkflowsExecute } = useHasWorkflowsPrivileges();
+
   const historyTitle = useMemo(
     () => (
       <EuiFlexGroup
@@ -96,8 +99,14 @@ const EmptyPromptComponent: React.FC<Props> = ({
   );
 
   const actions = useMemo(() => {
-    return <Generate isLoading={isLoading} isDisabled={isDisabled} onGenerate={onGenerate} />;
-  }, [isDisabled, isLoading, onGenerate]);
+    return (
+      <Generate
+        isLoading={isLoading}
+        isDisabled={isDisabled || !hasWorkflowsExecute}
+        onGenerate={onGenerate}
+      />
+    );
+  }, [hasWorkflowsExecute, isDisabled, isLoading, onGenerate]);
 
   if (isLoading || aiConnectorsCount == null || attackDiscoveriesCount > 0) {
     return null;

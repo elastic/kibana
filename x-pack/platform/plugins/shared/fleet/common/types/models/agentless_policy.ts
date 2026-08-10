@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { AgentlessPolicySchema } from './agentless_policy_schema';
 
 /**
- * Response DTO returned by the agentless policies API.
+ * Response DTO returned by the managed integrations API.
  *
  * Derived from the route schema so the type and the schema can never diverge.
  * See `NewAgentlessPolicy` in `../rest_spec/agentless_policy` for the request contract.

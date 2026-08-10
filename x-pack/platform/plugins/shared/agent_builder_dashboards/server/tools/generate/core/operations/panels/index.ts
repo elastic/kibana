@@ -11,7 +11,8 @@ import type { PanelTypeDefinition } from './panel_type';
 import {
   visPanelConfigInputSchema,
   visPanelDefinition,
-  panelRequestSchema,
+  lensPanelRequestSchema,
+  vegaPanelRequestSchema,
   editPanelRequestInputSchema,
   type VisPanelResolutionRequest,
 } from './vis';
@@ -76,7 +77,10 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
     visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
     markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   ]),
-  panelRequestSchema.extend({ sectionId: sectionIdField }),
+  z.discriminatedUnion('renderer', [
+    lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
+    vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
+  ]),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -84,7 +88,7 @@ export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
-  panelRequestSchema,
+  z.discriminatedUnion('renderer', [lensPanelRequestSchema, vegaPanelRequestSchema]),
 ]);
 
 /**

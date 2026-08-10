@@ -13,31 +13,27 @@ import { ActionPolicyActionsMenu } from '../../../components/action_policy/actio
 
 interface ActionPolicyActionsCellProps {
   policy: ActionPolicyResponse;
+  canWrite: boolean;
   onViewDetails: (policy: ActionPolicyResponse) => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
-  onEnable: (id: string) => void;
-  onDisable: (id: string) => void;
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
-  isStateLoading: boolean;
   isDisabled?: boolean;
 }
 
 export const ActionPolicyActionsCell = ({
   policy,
+  canWrite,
   onViewDetails,
   onEdit,
   onClone,
   onDelete,
-  onEnable,
-  onDisable,
   onSnooze,
   onCancelSnooze,
   onUpdateApiKey,
-  isStateLoading,
   isDisabled = false,
 }: ActionPolicyActionsCellProps) => {
   return (
@@ -63,41 +59,45 @@ export const ActionPolicyActionsCell = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit.description', {
-            defaultMessage: 'Edit this action policy',
-          })}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="pencil"
-            color="text"
-            aria-label={i18n.translate(
-              'xpack.alertingV2.actionPoliciesList.action.edit.description',
-              { defaultMessage: 'Edit this action policy' }
-            )}
-            onClick={() => onEdit(policy.id)}
-            isDisabled={isDisabled}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ActionPolicyActionsMenu
-          policy={policy}
-          onViewDetails={onViewDetails}
-          onEdit={onEdit}
-          onClone={onClone}
-          onDelete={onDelete}
-          onEnable={onEnable}
-          onDisable={onDisable}
-          onSnooze={onSnooze}
-          onCancelSnooze={onCancelSnooze}
-          onUpdateApiKey={onUpdateApiKey}
-          isStateLoading={isStateLoading}
-          isDisabled={isDisabled}
-        />
-      </EuiFlexItem>
+      {canWrite && (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.alertingV2.actionPoliciesList.action.edit.description',
+                {
+                  defaultMessage: 'Edit this action policy',
+                }
+              )}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="pencil"
+                color="text"
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.actionPoliciesList.action.edit.description',
+                  { defaultMessage: 'Edit this action policy' }
+                )}
+                onClick={() => onEdit(policy.id)}
+                isDisabled={isDisabled}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ActionPolicyActionsMenu
+              policy={policy}
+              onViewDetails={onViewDetails}
+              onEdit={onEdit}
+              onClone={onClone}
+              onDelete={onDelete}
+              onSnooze={onSnooze}
+              onCancelSnooze={onCancelSnooze}
+              onUpdateApiKey={onUpdateApiKey}
+              isDisabled={isDisabled}
+            />
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };

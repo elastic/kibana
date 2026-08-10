@@ -23,7 +23,7 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
-export { isToolAction } from './src/connector_spec';
+export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
@@ -38,6 +38,20 @@ export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
 export type { ConnectorAuthorizationReason } from './src/errors';
-export { AUTH_MODE_BY_AUTH_TYPE_ID } from './src/auth_mode_by_auth_type_id';
+export {
+  AUTH_MODE_BY_AUTH_TYPE_ID,
+  getAuthModeForAuthTypeId,
+} from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
+export { clientTypes } from './src/lib/clients';
+export type {
+  ClientTypeSpec,
+  BuildContext,
+  ConnectorNetworkSettings,
+  ConnectorResponseSettings,
+  CredentialAccessor,
+  ClientRegistry,
+  ClientTypeId,
+  ClientTypeSpecs,
+} from './src/lib/clients';

@@ -1,5 +1,5 @@
 {
-  "sha1": "7f8ebe49ef61bc4f17e512a54445e0c4b0ed04a9",
+  "sha1": "d3bef4f3c9918b96dbd4c8b05da89cbb95a2f1b5",
   "tests": [
     {
       "id": "8fe9df63e0d68b2-2d457382a48710c",
@@ -10,6 +10,19 @@
         "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/global.setup.ts",
         "line": 13,
         "column": 16
+      }
+    },
+    {
+      "id": "7a42b236e507511-6de323acbc10cee",
+      "title": "Date range picker presets persistence persists save and delete across reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/date_range_picker_presets_persistence.spec.ts",
+        "line": 29,
+        "column": 12
       }
     },
     {

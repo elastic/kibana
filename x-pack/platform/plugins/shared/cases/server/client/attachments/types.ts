@@ -136,6 +136,11 @@ export interface GetAllDocumentsAttachedToCase {
   caseId: string;
   filter?: KueryNode;
   attachmentTypes?: AttachmentType[];
+  /**
+   * Extra unified attachment `type` values (e.g. `security.entity`) to include alongside
+   * the alert/event types, so non-alert unified attachments participate in the query.
+   */
+  unifiedAttachmentTypes?: string[];
 }
 
 /**

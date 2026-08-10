@@ -11,6 +11,7 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { actionTypeRegistryMock } from '../test_utils/action_type_registry.mock';
@@ -18,6 +19,8 @@ import type { ActionTypeModel } from '../types';
 import { useActionTypeModel } from './use_action_type_model';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
+
+const mockDocLinks = docLinksServiceMock.createStartContract();
 
 describe('useActionTypeModel', () => {
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
@@ -79,6 +82,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: undefined,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -102,6 +106,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'test-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -126,6 +131,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -166,6 +172,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -193,6 +200,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -216,6 +224,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -257,6 +266,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'workflows-spec-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: { get: uiSettingsGet } as any,
         }),
       { wrapper: createWrapper() }

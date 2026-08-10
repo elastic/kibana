@@ -11,7 +11,7 @@ import type {
   Conversation,
   ConversationIdSetEvent,
 } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
 
 export const createConversationCreatedEvent = (
   conversation: Conversation
@@ -21,6 +21,8 @@ export const createConversationCreatedEvent = (
     data: {
       conversation_id: conversation.id,
       title: conversation.title,
+      access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+      user: conversation.user,
     },
   };
 };
@@ -33,6 +35,7 @@ export const createConversationUpdatedEvent = (
     data: {
       conversation_id: conversation.id,
       title: conversation.title,
+      access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     },
   };
 };
