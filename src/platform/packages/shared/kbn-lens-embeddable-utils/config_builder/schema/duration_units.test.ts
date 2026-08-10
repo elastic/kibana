@@ -15,13 +15,14 @@ type LegacyDurationFormat = z.infer<typeof legacyDurationFormatSchema>;
 
 describe('Duration unit schemas', () => {
   describe('durationFormatSchema (GA)', () => {
-    it('validates fine-grained input units', () => {
+    it('validates fine-grained input units without inventing decimals/compact', () => {
       const input = {
         type: 'duration',
         from: 'us',
         to: 'auto-approximate',
       } satisfies DurationFormat;
 
+      // Approximate: decimals/compact are optional and must stay absent (transform omits them).
       expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
@@ -32,6 +33,7 @@ describe('Duration unit schemas', () => {
         to: 'auto',
       } satisfies DurationFormat;
 
+      // Precise: schema does not default; complete-out is the transform's job.
       expect(durationFormatSchema.parse(input)).toEqual(input);
     });
 
@@ -40,6 +42,30 @@ describe('Duration unit schemas', () => {
         type: 'duration',
         from: 'mo',
         to: 'auto',
+      } satisfies DurationFormat;
+
+      expect(durationFormatSchema.parse(input)).toEqual(input);
+    });
+
+    it('preserves explicit decimals and compact', () => {
+      const input = {
+        type: 'duration',
+        from: 'ms',
+        to: 'auto',
+        decimals: 0,
+        compact: true,
+      } satisfies DurationFormat;
+
+      expect(durationFormatSchema.parse(input)).toEqual(input);
+    });
+
+    it('accepts decimals/compact on approximate without requiring them', () => {
+      const input = {
+        type: 'duration',
+        from: 's',
+        to: 'auto-approximate',
+        decimals: 7,
+        compact: true,
       } satisfies DurationFormat;
 
       expect(durationFormatSchema.parse(input)).toEqual(input);
