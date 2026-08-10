@@ -428,6 +428,75 @@ describe('validateFile', () => {
       ]);
     });
 
+    it('keeps a sibling-branch union error failing under strict (union-artifact pruning is managed-only)', async () => {
+      // Same shape as the managed `every`/`rrule` union test below, but under
+      // `strict`: the LiquidJS-tolerated `every` must not relax the sibling
+      // `rrule` branch's errors on the union node.
+      const yaml = [
+        'version: "1"',
+        'triggers:',
+        '  - type: scheduled',
+        '    with:',
+        '      every: "{{ inputs.interval }}"',
+        '',
+      ].join('\n');
+      const result = await validateFile({
+        yaml,
+        validateSchema: failFn([
+          {
+            instancePath: '/triggers/0/with/every',
+            schemaPath: '#/.../every/anyOf/0/pattern',
+            keyword: 'pattern',
+            params: { pattern: '^(([6-9]\\d|\\d{3,})s|\\d+[mhd])$' },
+            message: 'must match pattern',
+          },
+          {
+            instancePath: '/triggers/0/with',
+            schemaPath: '#/.../with/anyOf',
+            keyword: 'anyOf',
+            params: {},
+            message: 'must match a schema in anyOf',
+          },
+          {
+            instancePath: '/triggers/0/with',
+            schemaPath: '#/.../with/anyOf/1/required',
+            keyword: 'required',
+            params: { missingProperty: 'rrule' },
+            message: "must have required property 'rrule'",
+          },
+          {
+            instancePath: '/triggers/0/with',
+            schemaPath: '#/.../with/anyOf/1/additionalProperties',
+            keyword: 'additionalProperties',
+            params: { additionalProperty: 'every' },
+            message: 'must NOT have additional properties',
+          },
+        ] as ErrorObject[]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(false);
+      expect(schemaIssuesOf(result)).toEqual([
+        {
+          source: 'schema',
+          path: 'triggers.0.with',
+          message: "must have required property 'rrule'",
+        },
+        {
+          source: 'schema',
+          path: 'triggers.0.with',
+          message: "must NOT have additional property 'every'",
+        },
+      ]);
+      expect(warningsOf(result)).toEqual([
+        {
+          source: 'liquidjs-expression',
+          severity: 'warning',
+          message: 'strict validation skipped (liquidjs expression)',
+          path: 'triggers.0.with.every',
+        },
+      ]);
+    });
+
     it('keeps a templated step type as a failing error (structural, anchored on the object)', async () => {
       const yaml = [
         'version: "1"',

@@ -256,7 +256,9 @@ const pruneAncestorNoise = (
  * they would otherwise survive as spurious failures. Any genuine content error
  * lives at a deeper path (e.g. `.../with/rrule/interval`) and is never at the
  * union node itself, so removing errors anchored exactly on the union node is
- * safe.
+ * safe. Only invoked under `--variant managed` (see `toSchemaIssues`): a
+ * LiquidJS-caused union artifact under strict/template/auto stays a failing
+ * error, unchanged from prior behavior.
  */
 const pruneToleratedUnionArtifacts = (
   errors: ErrorObject[],
@@ -342,10 +344,12 @@ const toSchemaIssues = (
 ): ValidationIssue[] => {
   const toleratedPaths = collectToleratedPaths(errors, target, tolerateManagedPlaceholders);
 
-  const realErrors = pruneToleratedUnionArtifacts(
-    errors.filter((error) => !toleratedPaths.has(error.instancePath)),
-    toleratedPaths
-  );
+  const filteredErrors = errors.filter((error) => !toleratedPaths.has(error.instancePath));
+  // Union-artifact pruning is a managed-only relaxation; strict/template/auto
+  // keep a LiquidJS-caused sibling-branch error as failing.
+  const realErrors = tolerateManagedPlaceholders
+    ? pruneToleratedUnionArtifacts(filteredErrors, toleratedPaths)
+    : filteredErrors;
   const denoised = pruneAncestorNoise(pruneBranchNoise(realErrors), toleratedPaths);
   const errorIssues = dedupeAndCap(denoised.map(toIssue));
 
