@@ -21,15 +21,14 @@ test.describe(
       await browserAuth.loginWithCustomRole(NO_CASES_ROLE);
     });
 
-    test('returns Application not found when the Observability app is inaccessible', async ({
-      page,
-      pageObjects,
-    }) => {
-      const { casesPage } = pageObjects;
-      await casesPage.gotoCasesList();
-      const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
-      await expect(notFoundContent).toBeVisible();
-      await expect(notFoundContent).toContainText('Application not found');
-    });
-  }
-);
+  test('returns Application unavailable when the Observability app is inaccessible', async ({
+    page,
+    pageObjects,
+  }) => {
+    const { casesPage } = pageObjects;
+    await casesPage.gotoCasesList();
+    const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
+    await expect(notFoundContent).toBeVisible();
+    await expect(notFoundContent).toContainText('Application unavailable');
+  });
+});
