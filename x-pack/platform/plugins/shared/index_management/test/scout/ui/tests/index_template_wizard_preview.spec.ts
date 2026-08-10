@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldTextWrapper, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
@@ -29,14 +29,9 @@ test.describe('Index template wizard - Preview template', { tag: tags.stateful.c
       await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Create template');
       await expect(page.testSubj.locator('stepTitle')).toHaveText('Logistics');
 
-      const nameField = new EuiFieldTextWrapper(page, { dataTestSubj: 'nameField' });
-      await nameField.fill('a-star');
-      const indexPatternsField = new EuiFieldTextWrapper(page, {
-        dataTestSubj: 'indexPatternsField',
-      });
-      await indexPatternsField.fill('a*');
-      const priorityField = new EuiFieldTextWrapper(page, { dataTestSubj: 'priorityField' });
-      await priorityField.fill('1000');
+      await page.testSubj.locator('nameField').locator('input').fill('a-star');
+      await page.testSubj.locator('indexPatternsField').locator('input').fill('a*');
+      await page.testSubj.locator('priorityField').locator('input').fill('1000');
       await pageObjects.indexManagement.clickNextButton();
     });
 
