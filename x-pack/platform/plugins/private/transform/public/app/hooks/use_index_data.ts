@@ -49,11 +49,18 @@ interface UseIndexDataOptions {
   query: TransformConfigQuery;
   populatedFields: string[];
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'];
+  projectRouting?: StepDefineExposedState['projectRouting'];
   timeRangeMs?: TimeRangeMs;
 }
 
+const isMissingProjectScopedIndexError = (error: unknown): boolean => {
+  const message = getErrorMessage(error);
+  return message.includes('index_not_found_exception') || message.includes('no such index');
+};
+
 export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnType => {
-  const { dataView, query, populatedFields, combinedRuntimeMappings, timeRangeMs } = options;
+  const { dataView, query, populatedFields, combinedRuntimeMappings, projectRouting, timeRangeMs } =
+    options;
   const { analytics } = useAppDependencies();
 
   // Store the performance metric's start time using a ref
@@ -161,6 +168,7 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
       ...(isRuntimeMappings(combinedRuntimeMappings)
         ? { runtime_mappings: combinedRuntimeMappings }
         : {}),
+      ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     },
     // Check whether fetching should be enabled
     dataViewFields.length > 0
@@ -218,16 +226,24 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
         }),
       isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
       combinedRuntimeMappings,
+      projectRouting,
       chartsVisible
     );
 
   useEffect(() => {
     if (histogramsForFieldsError !== null) {
+      if (
+        projectRouting !== undefined &&
+        isMissingProjectScopedIndexError(histogramsForFieldsError)
+      ) {
+        return;
+      }
+
       showDataGridColumnChartErrorMessageToast(histogramsForFieldsError, toastNotifications);
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [histogramsForFieldsError]);
+  }, [histogramsForFieldsError, projectRouting]);
 
   useEffect(() => {
     if (histogramsForFieldsData) {
