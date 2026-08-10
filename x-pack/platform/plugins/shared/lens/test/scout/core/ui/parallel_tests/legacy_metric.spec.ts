@@ -56,7 +56,7 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
       });
 
       await spaceTest.step('colors the metric text based on its value', async () => {
-        await lens.openDimensionEditor('lns-dimensionTrigger');
+        await lens.dimensions.openDimensionEditor('lns-dimensionTrigger');
         await lens.setLegacyMetricColoringMode('labels');
 
         // Coloring updates are debounced, so assert the computed color (auto-retries)
