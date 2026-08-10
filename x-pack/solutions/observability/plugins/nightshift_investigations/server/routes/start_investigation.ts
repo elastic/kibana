@@ -27,6 +27,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         type: z.enum(['significant_event', 'alert']),
         id: z.string().min(1),
       }),
+      concurrency_key: z.string().optional(),
       context: z.record(z.unknown()).optional(),
     }),
   }),
