@@ -9,13 +9,13 @@ import { EuiToastWrapper, type ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from './constants';
 
 /**
- * Waits for a stable inline app-menu signal so the APM page is considered loaded.
- * Prefers Alerts (kept visible); falls back to Add data (primary action).
+ * Waits for a stable app-menu signal so the APM page is considered loaded.
+ * Prefer Add data (primary action) — same role Settings played before it moved into More.
+ * Alerts is privilege-gated and is not a reliable ready signal for all roles.
  */
 export async function waitForApmAppMenuReady(page: ScoutPage): Promise<void> {
   await page
-    .getByTestId('apmAlertAndRulesHeaderLink')
-    .or(page.getByTestId('apmAddDataHeaderLink'))
+    .getByTestId('apmAddDataHeaderLink')
     .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }
 
