@@ -11,6 +11,10 @@ import isPlainObject from 'lodash/isPlainObject';
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { VISUALIZE_SAVED_OBJECT_TYPE, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_ROADMAP_ID,
+} from '@kbn/maps-ems-plugin/common';
 import type {
   PanelTypeMigrationPanel,
   PanelTypeMigrationResult,
@@ -38,12 +42,15 @@ const REGION_MAP_VIS_TYPE = 'region_map' as const;
 interface LegacyTileMapParams {
   mapType?: unknown;
   colorSchema?: unknown;
+  isDesaturated?: unknown;
+  wms?: unknown;
 }
 
 interface LegacyRegionMapParams {
   colorSchema?: unknown;
   selectedLayer?: unknown;
   selectedJoinField?: unknown;
+  wms?: unknown;
 }
 
 interface LegacyVisState {
@@ -326,6 +333,90 @@ function createTileMapLayerDescriptor(params: {
   };
 }
 
+function normalizeLegacyEmsBasemapId(id: string): string {
+  // Legacy tile/region maps stored older raster style ids.
+  // Maps uses vector basemap ids (Borealis theme), so map known raster ids.
+  if (id === 'road_map_desaturated') return DEFAULT_EMS_ROADMAP_DESATURATED_ID;
+  return id;
+}
+
+function createBasemapLayersFromLegacyParams(params: {
+  legacyParams: unknown;
+}): Array<Record<string, unknown>> {
+  const { legacyParams } = params;
+
+  if (!isPlainObject(legacyParams)) return [];
+  const wms = (legacyParams as any).wms;
+
+  // Prefer explicit EMS TMS basemap selection if present.
+  const selectedTmsLayer = isPlainObject(wms) ? (wms as any).selectedTmsLayer : undefined;
+  const selectedTmsLayerId =
+    isPlainObject(selectedTmsLayer) && typeof (selectedTmsLayer as any).id === 'string'
+      ? normalizeLegacyEmsBasemapId((selectedTmsLayer as any).id)
+      : undefined;
+
+  // Legacy tile_map had a boolean for desaturated basemap style.
+  const isDesaturated =
+    typeof (legacyParams as any).isDesaturated === 'boolean'
+      ? (legacyParams as any).isDesaturated
+      : undefined;
+
+  const emsBasemapId =
+    selectedTmsLayerId ??
+    (isDesaturated === true ? DEFAULT_EMS_ROADMAP_DESATURATED_ID : DEFAULT_EMS_ROADMAP_ID);
+
+  const emsBasemapLayer = {
+    id: uuidv4(),
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
+    alpha: 1,
+    visible: true,
+    minZoom: 0,
+    maxZoom: 24,
+    includeInFitToBounds: true,
+    sourceDescriptor: {
+      type: SOURCE_TYPES.EMS_TMS,
+      isAutoSelect: false,
+      id: emsBasemapId,
+    },
+    style: { type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE, color: '' },
+    locale: 'autoselect',
+  };
+
+  // If legacy WMS was enabled, include it as an additional raster layer on top of the basemap.
+  if (isPlainObject(wms) && (wms as any).enabled === true && typeof (wms as any).url === 'string') {
+    const options = (wms as any).options;
+    const layers =
+      isPlainObject(options) && typeof (options as any).layers === 'string'
+        ? (options as any).layers
+        : '';
+    const styles =
+      isPlainObject(options) && typeof (options as any).styles === 'string'
+        ? (options as any).styles
+        : '';
+
+    const wmsLayer = {
+      id: uuidv4(),
+      type: LAYER_TYPE.RASTER_TILE,
+      alpha: 1,
+      visible: true,
+      minZoom: 0,
+      maxZoom: 24,
+      includeInFitToBounds: true,
+      sourceDescriptor: {
+        type: SOURCE_TYPES.WMS,
+        serviceUrl: (wms as any).url,
+        layers,
+        styles,
+      },
+      style: { type: LAYER_STYLE_TYPE.TILE },
+    };
+
+    return [emsBasemapLayer, wmsLayer];
+  }
+
+  return [emsBasemapLayer];
+}
+
 function getEmsLayerIdFromRegionMapSelectedLayer(selectedLayer: any): string | undefined {
   if (!selectedLayer || typeof selectedLayer !== 'object') return undefined;
 
@@ -451,6 +542,7 @@ function buildMapAttributesFromTileMap(args: {
     metricAgg,
     metricFieldName,
   });
+  const basemapLayers = createBasemapLayersFromLegacyParams({ legacyParams: args.params });
 
   const { center, zoom } = getMapCenterAndZoom(args.uiState);
 
@@ -458,7 +550,7 @@ function buildMapAttributesFromTileMap(args: {
     title: args.title,
     isLayerTOCOpen: true,
     settings: { projection: 'mercator' },
-    layers: [layer],
+    layers: [...basemapLayers, layer],
     ...(center ? { center } : {}),
     ...(zoom !== undefined ? { zoom } : {}),
   }) as Record<string, unknown>;
@@ -507,6 +599,7 @@ function buildMapAttributesFromRegionMap(args: {
     metricAgg,
     metricFieldName,
   });
+  const basemapLayers = createBasemapLayersFromLegacyParams({ legacyParams: args.params });
 
   const { center, zoom } = getMapCenterAndZoom(args.uiState);
 
@@ -514,7 +607,7 @@ function buildMapAttributesFromRegionMap(args: {
     title: args.title,
     isLayerTOCOpen: true,
     settings: { projection: 'mercator' },
-    layers: [layer],
+    layers: [...basemapLayers, layer],
     ...(center ? { center } : {}),
     ...(zoom !== undefined ? { zoom } : {}),
   }) as Record<string, unknown>;

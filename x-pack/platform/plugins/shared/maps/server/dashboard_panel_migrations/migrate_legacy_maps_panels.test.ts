@@ -57,11 +57,15 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     expect(result.config.attributes.settings.projection).toBe('mercator');
     expect(result.config.attributes.center).toEqual({ lat: 42.0, lon: -88.9 });
     expect(result.config.attributes.zoom).toBe(5);
-    expect(result.config.attributes.layers).toHaveLength(1);
-    expect(result.config.attributes.layers[0].sourceDescriptor.indexPatternId).toBe('data-view-1');
-    expect(result.config.attributes.layers[0].sourceDescriptor.geoField).toBe('geo.coordinates');
-    expect(result.config.attributes.layers[0].style.type).toBe('VECTOR');
-    expect(result.config.attributes.layers[0].style.properties.iconSize.type).toBe('DYNAMIC');
+    expect(result.config.attributes.layers).toHaveLength(2);
+    expect(result.config.attributes.layers[0].type).toBe('EMS_VECTOR_TILE');
+    expect(result.config.attributes.layers[0].sourceDescriptor.type).toBe('EMS_TMS');
+    expect(result.config.attributes.layers[0].sourceDescriptor.id).toBe('road_map');
+
+    expect(result.config.attributes.layers[1].sourceDescriptor.indexPatternId).toBe('data-view-1');
+    expect(result.config.attributes.layers[1].sourceDescriptor.geoField).toBe('geo.coordinates');
+    expect(result.config.attributes.layers[1].style.type).toBe('VECTOR');
+    expect(result.config.attributes.layers[1].style.properties.iconSize.type).toBe('DYNAMIC');
   });
 
   it('migrates a by-value region_map panel to a map panel', async () => {
@@ -96,12 +100,15 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     expect(results).toHaveLength(1);
 
     const result = results[0] as any;
-    expect(result.config.attributes.layers).toHaveLength(1);
     expect(result.config.attributes.settings.projection).toBe('mercator');
-    expect(result.config.attributes.layers[0].joins).toHaveLength(1);
-    expect(result.config.attributes.layers[0].joins[0].leftField).toBe('iso2');
-    expect(result.config.attributes.layers[0].joins[0].right.indexPatternId).toBe('data-view-1');
-    expect(result.config.attributes.layers[0].joins[0].right.term).toBe('geo.src');
+    expect(result.config.attributes.layers).toHaveLength(2);
+    expect(result.config.attributes.layers[0].type).toBe('EMS_VECTOR_TILE');
+    expect(result.config.attributes.layers[0].sourceDescriptor.type).toBe('EMS_TMS');
+
+    expect(result.config.attributes.layers[1].joins).toHaveLength(1);
+    expect(result.config.attributes.layers[1].joins[0].leftField).toBe('iso2');
+    expect(result.config.attributes.layers[1].joins[0].right.indexPatternId).toBe('data-view-1');
+    expect(result.config.attributes.layers[1].joins[0].right.term).toBe('geo.src');
   });
 
   it('migrates a by-reference tile_map panel to a map panel', async () => {
@@ -151,7 +158,10 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     const result = results[0] as any;
     expect(result.panelId).toBe('panel-1');
     expect(result.config.attributes.settings.projection).toBe('mercator');
-    expect(result.config.attributes.layers[0].type).toBe('HEATMAP');
-    expect(result.config.attributes.layers[0].style.type).toBe('HEATMAP');
+    expect(result.config.attributes.layers).toHaveLength(2);
+    expect(result.config.attributes.layers[0].type).toBe('EMS_VECTOR_TILE');
+    expect(result.config.attributes.layers[0].sourceDescriptor.type).toBe('EMS_TMS');
+    expect(result.config.attributes.layers[1].type).toBe('HEATMAP');
+    expect(result.config.attributes.layers[1].style.type).toBe('HEATMAP');
   });
 });
