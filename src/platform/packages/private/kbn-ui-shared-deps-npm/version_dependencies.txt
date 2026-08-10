@@ -320,7 +320,7 @@ minimatch@3.1.5
 moment-timezone@0.6.0
 moment@2.30.1
 ms@2.1.3
-nanoid@3.3.11
+nanoid@3.3.17
 neo-async@2.6.2
 node-emoji@1.10.0
 node-releases@2.0.27
@@ -365,7 +365,7 @@ postcss-modules-scope@3.2.0
 postcss-modules-values@4.0.0
 postcss-selector-parser@6.1.2
 postcss-value-parser@4.2.0
-postcss@8.5.14
+postcss@8.5.26
 prismjs@1.27.0
 process-nextick-args@2.0.1
 process@0.11.10
@@ -502,7 +502,6 @@ use-sync-external-store@1.4.0
 util-deprecate@1.0.2
 util@0.12.5
 utility-types@3.11.0
-uuid@11.1.1
 uuid@14.0.1
 uuid@8.3.2
 value-equal@0.4.0
