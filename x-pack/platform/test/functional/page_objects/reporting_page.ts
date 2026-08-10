@@ -175,13 +175,14 @@ export class ReportingPageObject extends FtrService {
   }
 
   async checkUsePrintLayout() {
-    // The print layout checkbox slides in as part of an animation, and tests can
-    // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
-    // the animation to complete before we attempt a click.
-    const menuAnimationDelay = 500;
-    await this.retry.tryForTime(menuAnimationDelay, () =>
-      this.testSubjects.click('usePrintLayout')
-    );
+    // Re-click only while the switch still reads off so a click that didn't register is retried without ever toggling it back off.
+    await this.retry.waitFor('print layout switch to be on', async () => {
+      if ((await this.testSubjects.getAttribute('usePrintLayout', 'aria-checked')) === 'true') {
+        return true;
+      }
+      await this.testSubjects.click('usePrintLayout');
+      return false;
+    });
   }
 
   async clickGenerateReportButton() {
