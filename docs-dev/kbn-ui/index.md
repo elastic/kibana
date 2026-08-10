@@ -74,6 +74,24 @@ src/platform/kbn-ui/
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
 
+## Who should import what
+
+Use `visibility` in each package's `kibana.jsonc` to mark the intended audience:
+
+| `visibility` | Who imports `@kbn/ui-*` directly | Examples |
+|---|---|---|
+| **`shared`** | Any Kibana package or plugin | `@kbn/ui-callout` |
+| **`private`** | Owning Kibana package/plugin only. App authors use the owning API instead. | `@kbn/ui-chrome-layout*`, `@kbn/ui-side-navigation`, `@kbn/ui-feedback` |
+
+`visibility: private` under `src/platform/kbn-ui/` is enforced in two places:
+
+- across groups by `@kbn/imports/no_group_crossing_imports`
+- within platform by `@kbn/kbn-ui/no_restricted_package_imports`, which bans importing those packages outside allowlisted paths
+
+Allowlists and suggested alternatives live in [`src/platform/kbn-ui/_tooling/eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js): `alwaysAllowed` (`src/core/`, `src/platform/kbn-ui/`) plus optional per-package `overrides` / `alternative`. New private packages under `src/platform/kbn-ui/` are restricted automatically from their `kibana.jsonc` (`manifest.visibility`).
+
+Do not import private `@kbn/ui-*` packages from application plugins. Use chrome APIs, `@kbn/core-chrome-layout-constants` / `-utils`, or the feedback plugin instead.
+
 ## Development [kbn-ui-development]
 
 All `@kbn/ui-*` packages share a single Storybook and docset.
@@ -105,7 +123,9 @@ docs-builder serve --path docs-dev
 ## Contributing
 
 1. Create a new package directory under `src/platform/kbn-ui/`.
-2. Add a `kibana.jsonc` with `"group": "platform"`, `"visibility": "shared"`, and the `@kbn/ui-<name>` id.
+2. Add a `kibana.jsonc` with `"group": "platform"`, the `@kbn/ui-<name>` id, and the right `visibility`:
+   - `"shared"` if Kibana app authors should import it directly
+   - `"private"` if only an owning package/plugin should import it
 3. Export a single public API from `index.ts` — no subpath imports.
 4. Include unit tests alongside source files.
 5. Respect the dependency and portability rules above.
