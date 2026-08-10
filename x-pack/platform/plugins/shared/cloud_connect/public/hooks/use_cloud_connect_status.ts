@@ -47,17 +47,6 @@ export const createUseCloudConnectStatusHook = ({
       load();
     }, [load]);
 
-    // TODO: remove this mock before merging
-    return {
-      isCloudConnected: true,
-      isCloudConnectEisEnabled: false,
-      isCloudConnectAutoopsEnabled: true,
-      autoOpsServiceUrl: 'https://cloud.elastic.co/performance/demo-deployment-id',
-      autoOpsDocsUrl: 'https://www.elastic.co/docs/current/en/autoops',
-      isLoading: false,
-      error: null,
-    };
-
     return {
       isCloudConnected: value != null,
       isCloudConnectEisEnabled: value?.services?.eis?.enabled ?? false,
