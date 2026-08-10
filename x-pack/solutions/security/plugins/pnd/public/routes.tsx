@@ -15,7 +15,7 @@ import {
   NAV_STREAMS,
   NAV_THREAT_HUNT,
 } from './components/app_chrome/translations';
-import { BriefPage } from './pages/brief';
+import { ConversationsPage } from './pages/conversations';
 import { ChatsPage } from './pages/chats';
 import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
@@ -27,7 +27,7 @@ import { InvestigationDetailPage } from './pages/investigations/investigation_de
  */
 export const PndRoutes: React.FC = () => (
   <Routes>
-    <Route path="/" exact component={BriefPage} />
+    <Route path="/" exact component={ConversationsPage} />
     <Route path="/chats" component={ChatsPage} />
     <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
     <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />

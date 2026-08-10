@@ -50,9 +50,6 @@ export const createPndSecondaryNavigationTree = (): NodeDefinition[] => [
     // that `NodeDefinition` cannot express.
     link: pndLink(SecurityPageName.pndWatches),
     icon: 'eye',
-    // Every /watches route keeps this entry highlighted, including per-watch settings pages.
-    getIsActive: ({ pathNameSerialized, prepend }) =>
-      pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
   },
   {
     link: pndLink(SecurityPageName.pndRecords),
