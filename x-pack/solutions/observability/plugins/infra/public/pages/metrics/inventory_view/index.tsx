@@ -29,11 +29,14 @@ export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  useMetricsBreadcrumbs([
-    {
-      text: inventoryTitle,
-    },
-  ]);
+  useMetricsBreadcrumbs(
+    [
+      {
+        text: inventoryTitle,
+      },
+    ],
+    { parent: 'app' }
+  );
 
   return (
     <InventoryViewsProvider>

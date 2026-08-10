@@ -55,8 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: SignificantEventsSupertestRepositoryClient;
 
-  // Failing: See https://github.com/elastic/kibana/issues/282938
-  describe.skip('Features', function () {
+  describe('Features', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -66,8 +65,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/282939
-    describe.skip('Exclude and restore', () => {
+    describe('Exclude and restore', () => {
       it('creates a feature and lists it', async () => {
         const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
         expect(id).to.be.a('string');
