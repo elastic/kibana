@@ -14,27 +14,21 @@
  * driver. Supports any MongoDB deployment reachable via a connection URI:
  * Atlas (mongodb+srv://...), self-hosted replica sets, or standalone instances.
  *
- * Because MongoDB speaks a binary wire protocol (not HTTP), this connector
- * instantiates a fresh MongoClient per action call and closes it when done,
- * ignoring the Axios client injected by the framework. This is a standalone
- * stopgap: once the connector-specs framework gains first-class pooled binary
- * transport support (RO-599, kibana#275613) this handler will be migrated to
- * use those facilities instead of connecting per call.
+ * Because MongoDB speaks a binary wire protocol (not HTTP), this connector uses
+ * the pooled `mongodb` client type (RO-599, kibana#275613) via `ctx.getClient('mongodb')`
+ * rather than the Axios client injected by the framework. The client type
+ * (`lib/clients/mongodb_client_type.ts`) owns connecting, host-allowlist enforcement,
+ * and credential decoding; handlers here only run queries.
  *
- * Auth: HTTP Basic (username + password), read directly from ctx.secrets and
- * passed to MongoClient as `auth: { username, password }`.
- *
- * Known limitation: unlike a framework-provided client, this standalone version
- * does not enforce a host allowlist (SSRF protection) on the configured URI.
- * This is a temporary gap, to be closed when this migrates to the real
- * client-registry framework.
+ * Auth: HTTP Basic (username + password). Credentials are decoded from
+ * `CredentialAccessor.getAuthHeaders()` by the client type, not read directly here.
  */
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { Db, CollectionInfo } from 'mongodb';
+import type { CollectionInfo } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
-import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import type { ConnectorSpec } from '../../connector_spec';
 import type {
   FindInput,
   AggregateInput,
@@ -96,59 +90,6 @@ const resolveDb = async (inputDatabase: string | undefined, uri: string): Promis
   );
 };
 
-/**
- * Whether the URI already specifies an authSource query param.
- * Malformed URIs are treated as "no authSource" — the MongoClient constructor
- * below gets the same URI and will surface a clearer connection error itself.
- */
-const hasAuthSource = async (uri: string): Promise<boolean> => {
-  try {
-    const ConnectionString = await loadConnectionString();
-    return new ConnectionString(uri).searchParams.has('authSource');
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Connect to MongoDB, run fn, always close.
- * Creates a fresh client per call (maxPoolSize: 1) as this standalone version
- * does not yet provide a pooled driver transport.
- */
-const withClient = async <T>(
-  ctx: ActionContext,
-  database: string,
-  fn: (db: Db) => Promise<T>
-): Promise<T> => {
-  // Dynamic import keeps the mongodb driver out of the browser bundle.
-  // Both kbn-optimizer and kbn-rspack-optimizer declare 'mongodb' as a browser
-  // external so this import is never resolved during browser bundling.
-  const { MongoClient } = await import(/* webpackChunkName: "mongodbDriver" */ 'mongodb');
-  const { uri } = ctx.config as { uri: string };
-  const { username, password } = ctx.secrets as { username: string; password: string };
-
-  const client = new MongoClient(uri, {
-    auth: { username, password },
-    // Default to admin so credentials created there work without ?authSource=admin in the URI.
-    // The driver gives programmatic options precedence over the connection string, so only
-    // apply this default when the URI omits authSource — otherwise ?authSource=<db> in the URI
-    // (which the help text and docs tell users to use) would be silently ignored.
-    ...((await hasAuthSource(uri)) ? {} : { authSource: 'admin' }),
-    maxPoolSize: 1,
-    serverSelectionTimeoutMS: 5_000,
-    connectTimeoutMS: 10_000,
-    // Bound in-flight query execution; prevents runaway scans from blocking indefinitely.
-    timeoutMS: 30_000,
-  });
-  try {
-    await client.connect();
-    return await fn(client.db(database));
-  } finally {
-    // Ignore close errors so they never replace the original operation error.
-    await client.close().catch(() => {});
-  }
-};
-
 const DISALLOWED_OPERATORS_LIST = [...DISALLOWED_OPERATORS].join(', ');
 
 /**
@@ -189,8 +130,9 @@ export const MongoDBConnector: ConnectorSpec = {
   },
 
   // Credentials (username/password) are stored as encrypted secrets via the
-  // basic auth type. The Axios client injected by the framework is not used
-  // by any handler — this connector talks to MongoDB over its native driver.
+  // basic auth type. The mongodb client type decodes them from
+  // CredentialAccessor.getAuthHeaders() at connection time; no handler here
+  // reads ctx.secrets or uses the Axios client injected by the framework.
   auth: {
     types: ['basic'],
   },
@@ -235,16 +177,18 @@ export const MongoDBConnector: ConnectorSpec = {
         assertReadOnly(input.projection);
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const cursor = db.collection(input.collection).find(input.filter ?? {}, {
+        const client = await ctx.getClient('mongodb');
+        const cursor = client
+          .db(database)
+          .collection(input.collection)
+          .find(input.filter ?? {}, {
             projection: input.projection,
             sort: input.sort,
             limit: input.limit ?? 100,
             skip: input.skip,
           });
-          const documents = await cursor.toArray();
-          return { count: documents.length, documents };
-        });
+        const documents = await cursor.toArray();
+        return { count: documents.length, documents };
       },
     },
 
@@ -279,10 +223,13 @@ export const MongoDBConnector: ConnectorSpec = {
 
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const results = await db.collection(input.collection).aggregate(pipeline).toArray();
-          return { count: results.length, results };
-        });
+        const client = await ctx.getClient('mongodb');
+        const results = await client
+          .db(database)
+          .collection(input.collection)
+          .aggregate(pipeline)
+          .toArray();
+        return { count: results.length, results };
       },
     },
 
@@ -298,10 +245,12 @@ export const MongoDBConnector: ConnectorSpec = {
         assertReadOnly(input.filter);
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const count = await db.collection(input.collection).countDocuments(input.filter ?? {});
-          return { count };
-        });
+        const client = await ctx.getClient('mongodb');
+        const count = await client
+          .db(database)
+          .collection(input.collection)
+          .countDocuments(input.filter ?? {});
+        return { count };
       },
     },
 
@@ -314,16 +263,18 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: ListCollectionsInput) => {
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const { nameFilter } = input;
-          const filter = nameFilter ? { name: { $regex: escapeRegExp(nameFilter) } } : {};
-          const collections = await db.listCollections<CollectionInfo>(filter).toArray();
-          return {
-            database,
-            count: collections.length,
-            collections: collections.map((c) => ({ name: c.name, type: c.type })),
-          };
-        });
+        const client = await ctx.getClient('mongodb');
+        const { nameFilter } = input;
+        const filter = nameFilter ? { name: { $regex: escapeRegExp(nameFilter) } } : {};
+        const collections = await client
+          .db(database)
+          .listCollections<CollectionInfo>(filter)
+          .toArray();
+        return {
+          database,
+          count: collections.length,
+          collections: collections.map((c) => ({ name: c.name, type: c.type })),
+        };
       },
     },
 
@@ -340,10 +291,12 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: InsertOneInput) => {
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const result = await db.collection(input.collection).insertOne(input.document);
-          return { insertedId: String(result.insertedId), acknowledged: result.acknowledged };
-        });
+        const client = await ctx.getClient('mongodb');
+        const result = await client
+          .db(database)
+          .collection(input.collection)
+          .insertOne(input.document);
+        return { insertedId: String(result.insertedId), acknowledged: result.acknowledged };
       },
     },
 
@@ -359,17 +312,17 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: UpdateOneInput) => {
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const result = await db
-            .collection(input.collection)
-            .updateOne(input.filter, input.update, { upsert: input.upsert ?? false });
-          return {
-            matchedCount: result.matchedCount,
-            modifiedCount: result.modifiedCount,
-            upsertedId: result.upsertedId != null ? String(result.upsertedId) : null,
-            acknowledged: result.acknowledged,
-          };
-        });
+        const client = await ctx.getClient('mongodb');
+        const result = await client
+          .db(database)
+          .collection(input.collection)
+          .updateOne(input.filter, input.update, { upsert: input.upsert ?? false });
+        return {
+          matchedCount: result.matchedCount,
+          modifiedCount: result.modifiedCount,
+          upsertedId: result.upsertedId != null ? String(result.upsertedId) : null,
+          acknowledged: result.acknowledged,
+        };
       },
     },
 
@@ -384,10 +337,12 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: DeleteOneInput) => {
         const { uri } = ctx.config as { uri: string };
         const database = await resolveDb(input.database, uri);
-        return withClient(ctx, database, async (db) => {
-          const result = await db.collection(input.collection).deleteOne(input.filter);
-          return { deletedCount: result.deletedCount, acknowledged: result.acknowledged };
-        });
+        const client = await ctx.getClient('mongodb');
+        const result = await client
+          .db(database)
+          .collection(input.collection)
+          .deleteOne(input.filter);
+        return { deletedCount: result.deletedCount, acknowledged: result.acknowledged };
       },
     },
   },
@@ -402,9 +357,8 @@ export const MongoDBConnector: ConnectorSpec = {
       // Ping against admin — it always exists and doesn't require the
       // configured URI to include a database path. A resolved value means
       // success; the executor treats a thrown error as failure.
-      await withClient(ctx, 'admin', async (db) => {
-        await db.command({ ping: 1 });
-      });
+      const client = await ctx.getClient('mongodb');
+      await client.db('admin').command({ ping: 1 });
       return {};
     },
   },

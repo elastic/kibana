@@ -12,8 +12,8 @@ import { getConnectorSpec } from '../../..';
 import { MongoDBConnector } from './mongodb';
 
 // ---------------------------------------------------------------------------
-// Mock the mongodb driver (dynamic import)
-// Jest hoists jest.mock() calls so they intercept dynamic import() as well.
+// Mock the pooled client (ctx.getClient) — client construction/lifecycle now
+// lives in lib/clients/mongodb_client_type.ts and is tested there.
 // ---------------------------------------------------------------------------
 
 const mockCountDocuments = jest.fn();
@@ -22,31 +22,21 @@ const mockAggregateToArray = jest.fn();
 const mockListCollections = jest.fn();
 const mockListCollectionsToArray = jest.fn();
 const mockCommand = jest.fn();
-const mockConnect = jest.fn();
-const mockClose = jest.fn();
 const mockDb = jest.fn();
 const mockCollection = jest.fn();
 const mockInsertOne = jest.fn();
 const mockUpdateOne = jest.fn();
 const mockDeleteOne = jest.fn();
-const mockMongoClientCtor = jest.fn().mockImplementation(() => ({
-  connect: mockConnect,
-  db: mockDb,
-  close: mockClose,
-}));
-
-jest.mock('mongodb', () => ({
-  MongoClient: mockMongoClientCtor,
-}));
+const mockGetClient = jest.fn();
 
 // ---------------------------------------------------------------------------
 // Test context
 // ---------------------------------------------------------------------------
 
 const mockContext = {
-  client: {} as ActionContext['client'], // unused — connector uses native driver
+  client: {} as ActionContext['client'], // unused — connector uses the mongodb client type
+  getClient: mockGetClient,
   config: { uri: 'mongodb://localhost:27017/test_db' },
-  secrets: { username: 'testuser', password: 'testpass' },
   log: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
 } as unknown as ActionContext;
 
@@ -57,9 +47,8 @@ const mockContext = {
 beforeEach(() => {
   jest.clearAllMocks();
 
-  mockConnect.mockResolvedValue(undefined);
-  mockClose.mockResolvedValue(undefined);
   mockCommand.mockResolvedValue({ ok: 1 });
+  mockGetClient.mockResolvedValue({ db: mockDb });
 
   // db() returns an object with collection(), listCollections(), and command()
   mockListCollections.mockReturnValue({ toArray: mockListCollectionsToArray });
@@ -155,42 +144,6 @@ describe('MongoDBConnector schema', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Connection options (auth + authSource)
-// ---------------------------------------------------------------------------
-
-describe('connection options', () => {
-  it('passes username/password from secrets as MongoClient auth', async () => {
-    await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
-
-    expect(mockMongoClientCtor).toHaveBeenCalledWith(
-      'mongodb://localhost:27017/test_db',
-      expect.objectContaining({ auth: { username: 'testuser', password: 'testpass' } })
-    );
-  });
-
-  it('defaults authSource to admin when the URI omits it', async () => {
-    await MongoDBConnector.actions.count.handler(mockContext, { collection: 'orders' });
-
-    expect(mockMongoClientCtor).toHaveBeenCalledWith(
-      'mongodb://localhost:27017/test_db',
-      expect.objectContaining({ authSource: 'admin' })
-    );
-  });
-
-  it('does not override authSource when the URI already specifies one', async () => {
-    const ctxWithAuthSource = {
-      ...mockContext,
-      config: { uri: 'mongodb://localhost:27017/test_db?authSource=other_db' },
-    } as unknown as ActionContext;
-
-    await MongoDBConnector.actions.count.handler(ctxWithAuthSource, { collection: 'orders' });
-
-    const [, options] = mockMongoClientCtor.mock.calls[0];
-    expect(options.authSource).toBeUndefined();
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Database resolution
 // ---------------------------------------------------------------------------
 
@@ -241,8 +194,7 @@ describe('listCollections', () => {
       ],
     });
     expect(mockListCollections).toHaveBeenCalledWith({});
-    expect(mockConnect).toHaveBeenCalledTimes(1);
-    expect(mockClose).toHaveBeenCalledTimes(1);
+    expect(mockGetClient).toHaveBeenCalledWith('mongodb');
   });
 
   it('passes nameFilter to the server as a regex filter', async () => {
@@ -270,15 +222,6 @@ describe('listCollections', () => {
       nameFilter: 'my.log',
     });
     expect(mockListCollections).toHaveBeenCalledWith({ name: { $regex: 'my\\.log' } });
-  });
-
-  it('closes the client even if the operation throws', async () => {
-    mockListCollectionsToArray.mockRejectedValue(new Error('network error'));
-
-    await expect(MongoDBConnector.actions.listCollections.handler(mockContext, {})).rejects.toThrow(
-      'network error'
-    );
-    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -336,14 +279,6 @@ describe('find', () => {
       {},
       expect.objectContaining({ limit: 100 })
     );
-  });
-
-  it('closes the client even if find throws', async () => {
-    mockFindToArray.mockRejectedValue(new Error('cursor error'));
-    await expect(
-      MongoDBConnector.actions.find.handler(mockContext, { collection: 'orders' })
-    ).rejects.toThrow('cursor error');
-    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 
   it('rejects $where in the filter', async () => {
@@ -597,17 +532,6 @@ describe('insertOne', () => {
     expect(mockInsertOne).toHaveBeenCalledWith({ status: 'pending' });
     expect(result).toEqual({ insertedId: 'abc123', acknowledged: true });
   });
-
-  it('closes the client even if insertOne throws', async () => {
-    mockInsertOne.mockRejectedValue(new Error('write error'));
-    await expect(
-      MongoDBConnector.actions.insertOne.handler(mockContext, {
-        collection: 'orders',
-        document: {},
-      })
-    ).rejects.toThrow('write error');
-    expect(mockClose).toHaveBeenCalledTimes(1);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -682,17 +606,6 @@ describe('deleteOne', () => {
     expect(mockDeleteOne).toHaveBeenCalledWith({ _id: 'abc' });
     expect(result).toEqual({ deletedCount: 1, acknowledged: true });
   });
-
-  it('closes the client even if deleteOne throws', async () => {
-    mockDeleteOne.mockRejectedValue(new Error('write error'));
-    await expect(
-      MongoDBConnector.actions.deleteOne.handler(mockContext, {
-        collection: 'orders',
-        filter: {},
-      })
-    ).rejects.toThrow('write error');
-    expect(mockClose).toHaveBeenCalledTimes(1);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -717,21 +630,11 @@ describe('test handler', () => {
     expect(mockDb).toHaveBeenCalledWith('admin');
   });
 
-  it('throws with a message on connection failure', async () => {
-    mockConnect.mockRejectedValue(new Error('Authentication failed'));
-
-    expect(testHandler).toBeDefined();
-    if (!testHandler) return;
-    await expect(testHandler.handler(mockContext)).rejects.toThrow('Authentication failed');
-  });
-
-  it('closes the client even when ping fails after connect', async () => {
-    mockConnect.mockResolvedValue(undefined);
+  it('propagates a ping failure', async () => {
     mockCommand.mockRejectedValue(new Error('ping error'));
 
     expect(testHandler).toBeDefined();
     if (!testHandler) return;
     await expect(testHandler.handler(mockContext)).rejects.toThrow('ping error');
-    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -90,11 +90,7 @@ Delete one
 
 ## Connector networking configuration [mongodb-connector-networking-configuration]
 
-The MongoDB connector talks to MongoDB over its native wire protocol, not HTTP, so the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) that apply to HTTP-based connectors (such as `xpack.actions.allowedHosts`) do **not** apply here.
-
-::::{warning}
-**Known limitation:** this connector does not currently enforce a host allowlist on the configured connection URI. Any host reachable from the {{kib}} server can be targeted, regardless of `xpack.actions.allowedHosts` or other network-restriction settings. Restrict who can create or edit MongoDB connectors accordingly. This is a temporary gap for this technical preview connector and will be closed in a future release.
-::::
+The MongoDB connector talks to MongoDB over its native wire protocol, not HTTP. Even so, every host in the configured connection URI (including every host in a multi-host replica-set or sharded-cluster URI) is checked against [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) before connecting, the same allowlist enforced for HTTP-based connectors.
 
 ## Get connection credentials [mongodb-api-credentials]
 
