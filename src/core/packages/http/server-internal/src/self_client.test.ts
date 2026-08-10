@@ -39,10 +39,8 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
     ...overrides,
   } as KibanaRequest);
 
-const createFakeRequest = (
-  headers: Record<string, string> = {},
-  spaceId?: string
-): KibanaRequest => mockRouter.createFakeKibanaRequest({ headers, spaceId });
+const createFakeRequest = (headers: Record<string, string> = {}, spaceId?: string): KibanaRequest =>
+  mockRouter.createFakeKibanaRequest({ headers, spaceId });
 
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
