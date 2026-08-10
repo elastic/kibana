@@ -43,12 +43,7 @@ import type {
   BeatsSoBaseAttributes,
   BeatsOutputSOAttributes,
 } from '../types';
-import type {
-  NewBeatsOutput,
-  NewOtlpOutput,
-  UpdateOutput,
-  UpdateTypedOutput,
-} from '../../common/types';
+import type { NewBeatsOutput, UpdateOutput, UpdateTypedOutput } from '../../common/types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -862,18 +857,6 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets.service_token as string;
         }
-      } else if (isOtlpOutput(output)) {
-        const otlpData = data as OutputSoOtlpAttributes;
-        const otlpExporterSecrets = output.secrets?.otlp_exporter;
-        if (!output.otlp_exporter.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
-          otlpData.otlp_exporter = {
-            ...otlpData.otlp_exporter,
-            tls: {
-              ...otlpData.otlp_exporter.tls,
-              key_pem: otlpExporterSecrets.tls.key_pem as string,
-            },
-          };
-        }
       }
     }
 
@@ -1372,7 +1355,7 @@ class OutputService {
       }
     }
 
-    if (isBeatsOutput(updateSoData)) {
+    if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
       // ssl is omitted from updateSoData so must be read from the incoming domain payload
       const ssl = typedFullUpdateData?.ssl;
       if (ssl) {
@@ -1420,8 +1403,8 @@ class OutputService {
       }
     }
 
-    if (outputTypeSupportPresets(updateSoData) && updateSoData.hosts) {
-      updateSoData.hosts = updateSoData.hosts.map(normalizeHostsForAgents);
+    if (outputTypeSupportPresets(updateData) && updateData.hosts) {
+      updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
     // Kafka does not support proxies — clear any proxy_id silently (#267281)
@@ -1476,7 +1459,7 @@ class OutputService {
         secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
-      updateSoData.secrets = secretsRes.outputUpdate.secrets;
+      updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (isBeatsOutput(typedFullUpdateData) && isBeatsOutput(updateData)) {
@@ -1498,23 +1481,10 @@ class OutputService {
         if (!typedFullUpdateData.service_token && typedFullUpdateData.secrets?.service_token) {
           updateData.service_token = typedFullUpdateData.secrets.service_token as string;
         }
-      } else if (isOtlpOutput(updateData)) {
-        const otlpUpdateData = updateData as OutputSoOtlpAttributes;
-        const domainData = data as Partial<NewOtlpOutput>;
-        const otlpExporterSecrets = domainData.secrets?.otlp_exporter;
-        if (!otlpUpdateData.otlp_exporter?.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
-          otlpUpdateData.otlp_exporter = {
-            ...otlpUpdateData.otlp_exporter,
-            tls: {
-              ...otlpUpdateData.otlp_exporter?.tls,
-              key_pem: otlpExporterSecrets.tls.key_pem as string,
-            },
-          };
-        }
       }
     }
 
-    patchUpdateDataWithRequireEncryptedAADFields(updateSoData, originalOutput);
+    patchUpdateDataWithRequireEncryptedAADFields(updateData, originalOutput);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -1526,7 +1496,7 @@ class OutputService {
     await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
-      updateSoData
+      updateData
     );
 
     if (secretsToDelete.length) {
