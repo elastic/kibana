@@ -34,10 +34,10 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Basic');
     await lens.waitForVisualization('gaugeChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(3);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Count');
 
     const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
@@ -51,10 +51,10 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Agg with params');
     await lens.waitForVisualization('gaugeChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(3);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 100');
@@ -82,10 +82,10 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Color ranges');
     await lens.waitForVisualization('gaugeChart');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(3);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 15000000000');
