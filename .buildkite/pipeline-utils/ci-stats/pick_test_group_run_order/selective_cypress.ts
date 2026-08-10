@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope } from '../../affected-packages';
+import { Minimatch } from 'minimatch';
 import { SCOUT_TESTS_ONLY_IGNORE_PATTERNS, SCOUT_TESTS_ONLY_SCOPE_GLOBS } from './selective_scout';
 
 /**
- * Cypress skip fast path for the PR pipeline.
+ * Cypress trigger relevance for the PR pipeline.
  *
  * Cypress suites are added to the PR pipeline by path matchers that cover
- * whole plugin directories, so a PR that only touches Scout test trees (which
- * live inside plugins) or FTR test trees still triggers every matching
- * Cypress suite. Neither tree can affect Cypress: Scout files aren't
- * importable from Cypress code, and FTR trees only share the surfaces that
- * are explicitly carved out in `CYPRESS_RELEVANT_EXCLUDE_GLOBS`.
+ * whole plugin directories, so changes inside Scout test trees (which live
+ * inside plugins) or FTR test trees trigger every matching Cypress suite
+ * even though neither tree can affect Cypress: Scout files aren't importable
+ * from Cypress code, and FTR trees only share the surfaces that are
+ * explicitly carved out in `CYPRESS_RELEVANT_EXCLUDE_GLOBS`.
+ *
+ * The PR pipeline filters such changes out before evaluating the Cypress
+ * suites' path matchers, so they only see changes that can actually affect
+ * Cypress. Label triggers (e.g. `ci:all-cypress-suites`) are not affected.
  */
 
 /**
@@ -57,18 +61,33 @@ const CYPRESS_RELEVANT_EXCLUDE_GLOBS: readonly string[] = [
   'x-pack/solutions/*/test/fixtures/**',
 ];
 
+const compileMatchers = (patterns: readonly string[]) =>
+  patterns.map((pattern) => new Minimatch(pattern, { dot: true }));
+
+const matchesAny = (path: string, matchers: ReturnType<typeof compileMatchers>): boolean =>
+  matchers.some((matcher) => matcher.match(path));
+
+const ignoreMatchers = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
+const excludeMatchers = compileMatchers(CYPRESS_RELEVANT_EXCLUDE_GLOBS);
+const scopeMatchers = compileMatchers([
+  ...SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+  ...FTR_TEST_TREE_SCOPE_GLOBS,
+]);
+
 /**
- * Returns `true` when every changed file is either documentation noise
- * (README, *.md, CHANGELOG*) or sits inside a Scout or FTR test tree that
- * Cypress cannot consume. Falls back to `false` on an empty diff or anything
- * unrecognised, so unrelated changes keep the Cypress suites' default path
- * matchers in charge.
+ * Returns `false` when the changed path cannot affect Cypress suites: either
+ * documentation noise (README, *.md, CHANGELOG* — consistent with the PR
+ * pipeline's `skip_ci_on_only_changed` policy) or a file inside a Scout or
+ * FTR test tree that Cypress does not consume. Anything unrecognised is
+ * treated as relevant, so unrelated changes keep the Cypress suites' default
+ * path matchers in charge.
  */
-export function isCypressSkippableDiff(changedFiles: readonly string[]): boolean {
-  return allChangedFilesInScope(
-    changedFiles,
-    [...SCOUT_TESTS_ONLY_SCOPE_GLOBS, ...FTR_TEST_TREE_SCOPE_GLOBS],
-    SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
-    CYPRESS_RELEVANT_EXCLUDE_GLOBS
-  );
+export function isCypressRelevantPath(path: string): boolean {
+  if (matchesAny(path, ignoreMatchers)) {
+    return false;
+  }
+  if (matchesAny(path, excludeMatchers)) {
+    return true;
+  }
+  return !matchesAny(path, scopeMatchers);
 }

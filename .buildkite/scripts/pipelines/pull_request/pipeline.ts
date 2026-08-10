@@ -25,7 +25,7 @@ import {
   emitPipeline,
   getPipeline,
   getPrChangesCached,
-  isCypressSkippableDiff,
+  isCypressRelevantPath,
   isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
@@ -79,10 +79,24 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     // Scout/FTR test trees can't affect Cypress, but the Cypress suites' path matchers
-    // cover whole plugin directories, so gate them below. Labels still force suites on.
-    const cypressSkippable = isCypressSkippableDiff(prChangedPaths);
-    if (cypressSkippable) {
-      console.warn('Scout/FTR-test-tree-only diff detected — skipping Cypress test suites');
+    // below cover whole plugin directories, so those matchers are evaluated only against
+    // changes that can affect Cypress. Labels still force suites on. Past 3000 files the
+    // GitHub file list is truncated, so keep it unfiltered and let doAnyChangesMatch's
+    // own safety valve run everything.
+    const cypressRelevantChanges =
+      prChanges.length >= 3000
+        ? prChanges
+        : prChanges.filter(
+            (change) =>
+              isCypressRelevantPath(change.filename) ||
+              (!!change.previous_filename && isCypressRelevantPath(change.previous_filename))
+          );
+    if (cypressRelevantChanges.length < prChanges.length) {
+      console.warn(
+        `Cypress trigger evaluation ignores ${
+          prChanges.length - cypressRelevantChanges.length
+        } of ${prChanges.length} changed file(s) (Scout/FTR test trees or docs)`
+      );
     }
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
@@ -134,8 +148,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^src\/platform\/plugins\/shared\/data/,
           /^x-pack\/platform\/plugins\/shared\/actions/,
           /^x-pack\/platform\/plugins\/shared\/alerting/,
@@ -143,7 +157,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
           /^x-pack\/platform\/plugins\/shared\/rule_registry/,
           /^x-pack\/platform\/plugins\/shared\/task_manager/,
           /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -151,11 +167,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^x-pack\/platform\/plugins\/shared\/cases/,
           /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -165,12 +183,14 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^x-pack\/platform\/plugins\/shared\/fleet/,
           /^x-pack\/test\/fleet_cypress/,
           /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -316,10 +336,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
-        ]))) ||
+      (await doAnyChangesMatch(
+        [/^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -333,8 +353,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
           /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
           /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -342,7 +362,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
           /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
           /^fleet_packages\.json/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -355,8 +377,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^package.json/,
           /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
           /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
@@ -385,7 +407,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -419,8 +443,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^package.json/,
           /^src\/platform\/packages\/shared\/kbn-discover-utils/,
           /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -480,7 +504,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
           /^x-pack\/test\/functional\/es_archives\/security_solution/,
           /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -490,8 +516,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^package.json/,
           /^src\/platform\/packages\/shared\/kbn-discover-utils/,
           /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -548,7 +574,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
           /^x-pack\/test\/functional\/es_archives\/security_solution/,
           /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -561,13 +589,15 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      ((!cypressSkippable &&
-        (await doAnyChangesMatch([
+      ((await doAnyChangesMatch(
+        [
           /^x-pack\/platform\/plugins\/shared\/osquery/,
           /^x-pack\/solutions\/security\/test\/osquery_cypress/,
           /^x-pack\/solutions\/security\/plugins\/security_solution/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
         ALL_UI_TEST_SUITES) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
@@ -581,14 +611,16 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^x-pack\/packages\/kbn-cloud-security-posture/,
           /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
           /^x-pack\/solutions\/security\/plugins\/security_solution/,
           /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -647,12 +679,14 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (!cypressSkippable &&
-        (await doAnyChangesMatch([
+      (await doAnyChangesMatch(
+        [
           /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
           /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
           /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
-        ]))) ||
+        ],
+        cypressRelevantChanges
+      )) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
