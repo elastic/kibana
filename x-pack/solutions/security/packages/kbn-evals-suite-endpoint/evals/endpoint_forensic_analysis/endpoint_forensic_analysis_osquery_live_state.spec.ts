@@ -61,7 +61,7 @@ evaluate.describe(
           dataset: {
             name: 'security: endpoint-forensic-analysis-osquery-capability-no-osquery',
             description:
-              'Slice 2: agent checks Osquery integration, finds it NOT installed, routes to ES|QL fallback.',
+              'Capability detection: agent checks Osquery integration, finds it NOT installed, routes to ES|QL fallback.',
             examples: [
               {
                 input: {
@@ -99,7 +99,7 @@ evaluate.describe(
           dataset: {
             name: 'security: endpoint-forensic-analysis-osquery-capability-both-installed',
             description:
-              'Slice 2: agent detects both Defend + Osquery, uses Osquery for live-state question.',
+              'Capability detection: agent detects both Defend + Osquery, uses Osquery for live-state question.',
             examples: [
               {
                 input: {
@@ -139,7 +139,7 @@ evaluate.describe(
           dataset: {
             name: 'security: endpoint-forensic-analysis-osquery-pack-with-filters',
             description:
-              'Slice 2: agent uses Elastic-built Osquery packs with analyst-scope filters applied.',
+              'Packs: agent uses Elastic-built Osquery packs with analyst-scope filters applied.',
             examples: [
               {
                 input: {
@@ -177,7 +177,7 @@ evaluate.describe(
           dataset: {
             name: 'security: endpoint-forensic-analysis-osquery-saved-query-scheduled-tasks',
             description:
-              'Slice 2: agent uses prebuilt saved query when it matches the investigative need.',
+              'Saved query: agent uses prebuilt saved query when it matches the investigative need.',
             examples: [
               {
                 input: {
@@ -211,7 +211,8 @@ evaluate.describe(
       await evaluateForensicDataset({
         dataset: {
           name: 'security: endpoint-forensic-analysis-osquery-custom-unsigned-dll',
-          description: 'Slice 2: agent authors custom read-only Osquery when no prebuilt matches.',
+          description:
+            'Custom query: agent authors custom read-only Osquery when no prebuilt matches.',
           examples: [
             {
               input: {
