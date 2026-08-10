@@ -60811,6 +60811,9 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Webフックポートが必要です。",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "ユーザー名が必要です。",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "フィールドを選択してください。",
-    "xpack.watcher.watcherDescription": "アラートの作成、管理、監視によりデータへの変更を検知します。"
+    "xpack.watcher.watcherDescription": "アラートの作成、管理、監視によりデータへの変更を検知します。",
+    "core.euiFlyoutMenu.history.tooltip": "最近アクセスしたページ",
+    "core.euiFlyoutMenu.pagination.first": "最初",
+    "core.euiFlyoutMenu.pagination.last": "最後"
   }
 }

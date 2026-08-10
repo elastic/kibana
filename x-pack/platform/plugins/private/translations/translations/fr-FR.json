@@ -60350,6 +60350,9 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Le port webhook est requis.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Le nom d'utilisateur est requis.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Ce champ est requis.",
-    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes."
+    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes.",
+    "core.euiFlyoutMenu.history.tooltip": "Récemment visité",
+    "core.euiFlyoutMenu.pagination.first": "Premier",
+    "core.euiFlyoutMenu.pagination.last": "Dernier"
   }
 }
