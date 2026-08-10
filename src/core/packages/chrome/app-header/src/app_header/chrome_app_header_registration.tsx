@@ -11,6 +11,10 @@ import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import type { ChromeAppHeaderConfig } from '@kbn/core-chrome-browser';
 
+/**
+ * Low-level registration hook for wrappers that need Chrome-owned header placement.
+ * Prefer rendering `AppHeader` directly. New uses should be reviewed by `@elastic/appex-sharedux`.
+ */
 export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) => {
   const chrome = useChromeService();
   const unregisterRef = useRef<(() => void) | undefined>(undefined);
@@ -36,6 +40,12 @@ export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) =>
   }, [chrome, config, isActive]);
 };
 
+/**
+ * Registers header configuration for Chrome-owned top-bar placement.
+ * Prefer rendering `AppHeader` directly. Use this only when sticky or shared top navigation, or
+ * other layout constraints, require Chrome to own the header slot. New uses should be reviewed by
+ * `@elastic/appex-sharedux`.
+ */
 export const ChromeAppHeaderRegistration = React.memo<ChromeAppHeaderConfig>((props) => {
   const { title, back, tabs, badges, menu, favorite, share, description, metadata, spacing } =
     props;
