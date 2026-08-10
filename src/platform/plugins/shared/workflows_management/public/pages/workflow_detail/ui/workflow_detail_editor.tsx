@@ -444,16 +444,14 @@ const componentStyles = {
     // display:flex so the YAML editor's internal flex:1 root stretches to fill
     display: 'flex',
     flexDirection: 'column',
-    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease, transform ${GRAPH_FADE_DURATION_MS}ms ease`,
+    transition: `opacity ${GRAPH_FADE_DURATION_MS}ms ease`,
   }),
   layerVisible: css({
     opacity: 1,
-    transform: 'scale(1)',
     pointerEvents: 'auto',
   }),
   layerHidden: css({
     opacity: 0,
-    transform: 'scale(0.985)',
     pointerEvents: 'none',
   }),
   readOnlyBadge: ({ euiTheme }: UseEuiTheme) =>
