@@ -9,11 +9,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { Footer } from './footer';
-import {
-  ADD_TO_NEW_CASE_TEST_ID,
-  ADD_TO_EXISTING_CASE_TEST_ID,
-} from '../../../../../common/cases/attachments/entity/test_ids';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+
+const ADD_TO_CASE_TEST_ID = 'add-to-case-action';
+
+jest.mock('@kbn/response-ops-alerts-table', () => ({
+  ...jest.requireActual('@kbn/response-ops-alerts-table'),
+  AddToCaseContextMenuItem: () => <div data-test-subj="add-to-case-action" />,
+}));
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
@@ -51,16 +54,13 @@ jest.mock(
   })
 );
 
-// Render the real menu items but with minimal markup — footer tests only care about presence.
 jest.mock('../../../../cases/attachments/entity/components/add_to_new_case', () => ({
-  AddToNewCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={testSubj} />
-  ),
+  ADD_TO_NEW_CASE: 'Add to new case',
+  useAddToNewCase: () => jest.fn(),
 }));
 jest.mock('../../../../cases/attachments/entity/components/add_to_existing_case', () => ({
-  AddToExistingCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
-    <div data-test-subj={testSubj} />
-  ),
+  ADD_TO_EXISTING_CASE: 'Add to existing case',
+  useAddToExistingCase: () => jest.fn(),
 }));
 
 const USER_IDENTITY_FIELDS = { 'user.name': 'alice' };
@@ -97,39 +97,34 @@ const renderFooter = (
 describe('Footer – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('renders Add to new case and Add to existing case when all conditions are met', () => {
+  it('renders the Add to case submenu when all conditions are met', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD);
 
-    expect(screen.getByTestId(ADD_TO_NEW_CASE_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(ADD_TO_CASE_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders no case actions when entityAttachmentsEnabled is false', () => {
     renderFooter(false, true, ENTITY_STORE_RECORD);
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders no case actions when cases attachmentsEnabled config is false', () => {
     renderFooter(true, false, ENTITY_STORE_RECORD);
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders no case actions when there is no entity store record (entityStoreId is undefined)', () => {
     renderFooter(true, true, undefined);
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('renders no case actions when userName resolves to an empty string', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD, { 'user.name': '' });
 
-    expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_TO_CASE_TEST_ID)).not.toBeInTheDocument();
   });
 });
 

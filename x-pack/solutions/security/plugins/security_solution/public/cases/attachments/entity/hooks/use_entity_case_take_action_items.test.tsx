@@ -43,26 +43,26 @@ describe('useEntityCaseTakeActionItems', () => {
     mockUseKibana().services.cases.config = { attachmentsEnabled: true };
   });
 
-  it('returns both items when the user can add to new and existing cases', () => {
-    expect(renderItemKeys()).toEqual(['addToNewCase', 'addToExistingCase']);
+  it('returns the case submenu when the user can add to new and existing cases', () => {
+    expect(renderItemKeys()).toEqual(['addToCase']);
   });
 
-  it('hides "add to new case" when the user cannot create a new case', () => {
+  it('keeps the case submenu when the user can only add to an existing case', () => {
     mockUseEntityCasePermissions.mockReturnValue({
       canAddToNewCase: false,
       canAddToExistingCase: true,
     });
 
-    expect(renderItemKeys()).toEqual(['addToExistingCase']);
+    expect(renderItemKeys()).toEqual(['addToCase']);
   });
 
-  it('hides "add to existing case" when the user cannot update a case', () => {
+  it('keeps the case submenu when the user can only add to a new case', () => {
     mockUseEntityCasePermissions.mockReturnValue({
       canAddToNewCase: true,
       canAddToExistingCase: false,
     });
 
-    expect(renderItemKeys()).toEqual(['addToNewCase']);
+    expect(renderItemKeys()).toEqual(['addToCase']);
   });
 
   it('returns no items when the user has neither case permission', () => {

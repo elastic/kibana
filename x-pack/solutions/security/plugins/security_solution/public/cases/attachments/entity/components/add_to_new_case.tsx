@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -28,6 +28,23 @@ export interface AddToNewCaseProps {
   ['data-test-subj']?: string;
 }
 
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.cases.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const useAddToNewCase = ({ entity, onClick }: AddToNewCaseProps) => {
+  const { cases } = useKibana().services;
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
+
+  return useCallback(() => {
+    onClick();
+    createCaseFlyout.open({ attachments: generateEntityAttachmentsWithoutOwner(entity) });
+  }, [createCaseFlyout, entity, onClick]);
+};
+
 /**
  * Leverages the cases plugin api to display a flyout to create a new case.
  * Once a case is created, an entity attachment is added to it and a confirmation
@@ -43,20 +60,11 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
   onClick,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { cases } = useKibana().services;
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
-
-  const menuItemClicked = useCallback(() => {
-    onClick();
-    createCaseFlyout.open({ attachments: generateEntityAttachmentsWithoutOwner(entity) });
-  }, [createCaseFlyout, entity, onClick]);
+  const menuItemClicked = useAddToNewCase({ entity, onClick });
 
   return (
     <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj}>
-      <FormattedMessage
-        defaultMessage="Add to new case"
-        id="xpack.securitySolution.entityAnalytics.cases.addToNewCase"
-      />
+      {ADD_TO_NEW_CASE}
     </EuiContextMenuItem>
   );
 };
