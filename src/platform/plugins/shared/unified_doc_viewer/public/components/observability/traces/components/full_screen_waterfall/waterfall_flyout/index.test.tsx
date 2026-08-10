@@ -16,6 +16,8 @@ import { FlyoutContentId } from '../../../common/constants';
 import { setUnifiedDocViewerServices } from '../../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
 import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
+import { GENAI_EBT_CLICK_ACTIONS } from '@kbn/apm-ui-shared';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -35,6 +37,16 @@ jest.mock('../../../../../doc_viewer_source', () => ({
       Doc Viewer Source Mock
     </div>
   ),
+}));
+
+jest.mock('../../../doc_viewer_genai', () => ({
+  __esModule: true,
+  DocViewerObsTracesGenAi: ({ hit }: any) => (
+    <div data-test-subj="docViewerGenAi" data-hit-id={hit?.id}>
+      Doc Viewer GenAI Mock
+    </div>
+  ),
+  default: () => null,
 }));
 
 describe('WaterfallFlyout', () => {
@@ -143,6 +155,67 @@ describe('WaterfallFlyout', () => {
       });
 
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('GenAI tab', () => {
+    const genAiHit = buildDataTableRecord(
+      {
+        _id: 'genai-doc-id',
+        _index: 'test-index',
+        _source: {
+          '@timestamp': '2023-01-01T00:00:00.000Z',
+          attributes: { 'gen_ai.request.model': 'gpt-4o' },
+        },
+      },
+      dataViewMock
+    );
+
+    it('does not show the GenAI tab for documents without gen_ai fields', () => {
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      expect(screen.queryByTestId('unifiedDocViewerTracesGenAiTab')).not.toBeInTheDocument();
+    });
+
+    it('shows the GenAI tab and renders its content for documents with gen_ai fields', async () => {
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
+      expect(genAiTab).toBeInTheDocument();
+
+      fireEvent.click(genAiTab);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docViewerGenAi')).toHaveAttribute('data-hit-id', genAiHit.id);
+      });
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+
+    it('adds the viewGenAi EBT click attributes to the GenAI tab', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
+      expect(genAiTab).toHaveAttribute('data-ebt-action', GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI);
+      expect(genAiTab).toHaveAttribute(
+        'data-ebt-element',
+        TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS
+      );
+    });
+
+    it('falls back to the Overview tab when switching to a document without gen_ai fields', async () => {
+      const { rerender } = render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      fireEvent.click(screen.getByTestId('unifiedDocViewerTracesGenAiTab'));
+      await waitFor(() => {
+        expect(screen.getByTestId('docViewerGenAi')).toBeInTheDocument();
+      });
+
+      rerender(<WaterfallFlyout {...defaultProps} hit={mockHit} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('customChildren')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('unifiedDocViewerTracesGenAiTab')).not.toBeInTheDocument();
     });
   });
 

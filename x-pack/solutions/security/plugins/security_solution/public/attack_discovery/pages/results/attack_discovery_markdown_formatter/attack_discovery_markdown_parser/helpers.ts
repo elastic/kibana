@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ParsedField } from '../types';
+
 const iconLookup: Record<string, string> = {
   'host.name': 'desktop',
   'user.name': 'user',
@@ -24,3 +26,19 @@ const iconLookup: Record<string, string> = {
 export const getIconFromFieldName = (fieldName: string): string => {
   return iconLookup[fieldName] || '';
 };
+
+/**
+ * Matches every `{{ fieldName value }}` token in a string.
+ * Capture group 1 = field name, capture group 2 = field value.
+ */
+export const FIELD_TOKEN_REGEX = /\{\{\s*(\S+)\s+(.*?)\s*\}\}/g;
+
+/**
+ * Constructs a `ParsedField` from the two capture groups of `FIELD_TOKEN_REGEX`.
+ */
+export const parseFieldToken = (fieldName: string, fieldValue: string): ParsedField => ({
+  name: fieldName,
+  icon: getIconFromFieldName(fieldName),
+  operator: ':',
+  value: fieldValue,
+});
