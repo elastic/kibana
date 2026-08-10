@@ -10,31 +10,17 @@ tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'kbn-ui']
 
 ## `@kbn/kbn-ui/no_restricted_package_imports`
 
-Stops app code from importing kbn-ui platform implementation packages (chrome layout, side navigation, feedback, and so on) and points each caller at the contract to use instead. Enabled as an error in the shared ESLint config.
+Bans importing listed kbn-ui platform implementation packages outside allowlisted paths, and shows each package's `alternative` (the contract to use instead). Enabled as an error in the shared ESLint config.
 
-The list lives in `src/platform/kbn-ui/_tooling/eslint_boundaries.js`. Packages under `packages` (and their subpaths) are banned outside allowlisted paths; unlisted packages stay unrestricted.
-
-- `alwaysAllowed`: prefixes that may import any restricted package (today: `src/platform/kbn-ui/`).
-- per-package `overrides` (`path` + `reason`): extra importers for one package (owning plugin, core chrome, …).
-- `alternative`: text shown in the lint error.
-
-On load the rule checks that listed package ids exist, each `alternative` is non-empty, and every path prefix ends with `/` and exists on disk.
-
-To restrict a package, add it under `packages`. To allow a non-allowlisted importer, add an override in that file — not in the root ESLint config.
+Policy: `src/platform/kbn-ui/_tooling/eslint_boundaries.js`. List a package under `packages` to restrict it; add `overrides` for owners that must import it. Do not put path exceptions in the root ESLint config.
 
 ### Examples
 
-✅ valid (file under an allowlisted prefix for that package)
-
 ```ts
-// x-pack/platform/plugins/private/feedback/public/plugin.tsx
+// valid — allowlisted owner
 import type { FeedbackRegistryEntry } from '@kbn/ui-feedback';
-```
 
-❌ invalid
-
-```ts
-// any app plugin
+// invalid — app plugin
 import { Feedback } from '@kbn/ui-feedback';
 import { ChromeLayout } from '@kbn/ui-chrome-layout';
 ```

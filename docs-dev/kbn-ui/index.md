@@ -74,25 +74,15 @@ src/platform/kbn-ui/
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
 
-## Who should import what [kbn-ui-who-should-import]
+## Package visibility [kbn-ui-package-visibility]
 
 `@kbn/ui-*` packages come in two kinds. The kind decides whether app code may import the package.
 
 **Shared** — reusable UI for plugins. Import directly (for example `@kbn/ui-callout`).
 
-**Platform implementation** — chrome layout, side navigation, feedback UI, Storybook config. These back core or plugin contracts; app code must not import them. Use the chrome layout APIs, the feedback plugin API, `@kbn/core-chrome-layout-constants` / `-utils`, etc. The lint error names the alternative for each package.
+**Platform implementation** — chrome layout, side navigation, feedback UI. These back core or plugin contracts; app code must not import them. Use the corresponding platform APIs or packages instead. The lint error names the alternative for each package. See [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js).
 
-| You are… | Do |
-| --- | --- |
-| App author | Import shared packages. For platform implementation packages, use the core/plugin contract — never the `@kbn/ui-*` package. |
-| kbn-ui / owner | Packages under `src/platform/kbn-ui/` may import each other. Core chrome and owning plugins import via per-package overrides in the boundaries file. |
-
-Enforcement is `@kbn/kbn-ui/no_restricted_package_imports` plus [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js):
-
-- Unlisted packages stay freely importable.
-- Listed packages are restricted to `alwaysAllowed` (today: `src/platform/kbn-ui/`) plus that package's `overrides` (for example `src/core/packages/chrome/` for layout/nav, or the feedback plugin for `@kbn/ui-feedback`).
-
-To restrict a package, add it under `packages` with a non-empty `alternative`. Path prefixes must end with `/` and exist on disk; each override needs a `reason`.
+To restrict a package, add it under `packages` with a non-empty `alternative`.
 
 ## Development [kbn-ui-development]
 
@@ -126,7 +116,7 @@ docs-builder serve --path docs-dev
 
 1. Create a new package directory under `src/platform/kbn-ui/`.
 2. Add a `kibana.jsonc` with `"group": "platform"` and the `@kbn/ui-<name>` id.
-3. If it is a platform implementation package, restrict it: add it under `packages` in [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js) with an `alternative` naming the contract apps should use, plus `overrides` for owners that must import it. See [Who should import what](#kbn-ui-who-should-import).
+3. If it is a platform implementation package, restrict it: add it under `packages` in [`eslint_boundaries.js`](../../src/platform/kbn-ui/_tooling/eslint_boundaries.js) with an `alternative` naming the contract apps should use, plus `overrides` for owners that must import it. See [Package visibility](#kbn-ui-package-visibility).
 4. Export a single public API from `index.ts` — no subpath imports.
 5. Include unit tests alongside source files.
 6. Respect the dependency and portability rules above.
