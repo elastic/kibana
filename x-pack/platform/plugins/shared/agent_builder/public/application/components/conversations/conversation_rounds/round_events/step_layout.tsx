@@ -84,7 +84,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
         {isClickable && isExpandable && (
           <EuiFlexItem grow={false}>
             <EuiIcon
-              type={isExpanded ? 'arrowDown' : 'arrowRight'}
+              type={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               color={euiTheme.colors.textDisabled}
               size="s"
               aria-hidden={true}

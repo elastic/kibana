@@ -43,7 +43,7 @@ const TODO_STATUS_DISPLAY: Record<TodoStatus, TodoStatusDisplay> = {
     }),
   },
   completed: {
-    iconType: 'checkInCircleFilled',
+    iconType: 'checkCircleFill',
     iconColor: 'success',
     isInactive: true,
     label: i18n.translate('xpack.agentBuilder.conversation.todos.statusCompleted', {
