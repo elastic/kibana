@@ -1,11 +1,11 @@
-# @kbn/shared-ux-flyout-meta-blocks
+# @kbn/flyout-meta-blocks
 
 `MetaBlocks` renders a compact, responsive row of key-value pairs — the metadata line used beneath a flyout title.
 
 ## Usage
 
 ```tsx
-import { MetaBlocks } from '@kbn/shared-ux-flyout-meta-blocks';
+import { MetaBlocks } from '@kbn/flyout-meta-blocks';
 
 <MetaBlocks
   items={[

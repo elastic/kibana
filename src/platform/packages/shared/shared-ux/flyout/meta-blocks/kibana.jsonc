@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/shared-ux-flyout-meta-blocks",
+  "id": "@kbn/flyout-meta-blocks",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared"
