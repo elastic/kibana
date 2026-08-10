@@ -6,17 +6,11 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { BlockListFlyout } from '../../../block_list/containers/flyout';
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
-import { AddToNewCase } from '../../../../../cases/attachments/indicator/components/add_to_new_case';
-import { AddToExistingCase } from '../../../../../cases/attachments/indicator/components/add_to_existing_case';
+import { IndicatorAddToCaseContextMenuItem } from '../../../../../cases/attachments/indicator/components/add_to_case_context_menu_item';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
 import {
@@ -52,17 +46,12 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
 
   const items = useMemo(
     () => [
-      <AddToExistingCase
-        key={'attachmentsExistingCase'}
+      <IndicatorAddToCaseContextMenuItem
+        key="attachmentsCase"
         indicator={indicator}
         onClick={closePopover}
-        data-test-subj={ADD_TO_EXISTING_TEST_ID}
-      />,
-      <AddToNewCase
-        key={'attachmentsNewCase'}
-        indicator={indicator}
-        onClick={closePopover}
-        data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
+        addToNewCaseTestSubj={ADD_TO_NEW_CASE_TEST_ID}
+        addToExistingCaseTestSubj={ADD_TO_EXISTING_TEST_ID}
       />,
       <AddToBlockListContextMenu
         key={'addToBlocklist'}
@@ -102,7 +91,7 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
         anchorPosition="downLeft"
         aria-label={MORE_ACTIONS_BUTTON_LABEL}
       >
-        <EuiContextMenuPanel items={items} />
+        <ExpandableContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

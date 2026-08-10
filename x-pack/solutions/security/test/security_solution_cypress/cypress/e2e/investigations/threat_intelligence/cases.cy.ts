@@ -7,6 +7,7 @@
 
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
+  ADD_TO_CASE_ITEM,
   navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
@@ -49,12 +50,14 @@ describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
     const documentsNumber = 22;
     openIndicatorsTableMoreActions(documentsNumber - 1);
 
+    cy.get(ADD_TO_CASE_ITEM).first().click();
     cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
     cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
 
     openFlyout(documentsNumber - 1);
     openFlyoutTakeAction();
 
+    cy.get(ADD_TO_CASE_ITEM).first().click();
     cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
     cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
   });

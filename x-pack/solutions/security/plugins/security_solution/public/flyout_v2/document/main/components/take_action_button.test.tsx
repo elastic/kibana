@@ -9,7 +9,10 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import {
+  ADD_TO_CASE_ACTION_IDS,
+  useAddToCaseActions,
+} from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
@@ -249,6 +252,120 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
     expect(document.querySelector('[data-test-subj="takeActionPanelMenu"]')).toBeInTheDocument();
+  });
+
+  it('renders explicitly ordered document actions with icons and separators', () => {
+    mockUseAddToCaseActions.mockReturnValue({
+      addToCaseActionItems: [
+        {
+          key: 'add-to-case-action',
+          name: 'Add to case',
+          'data-test-subj': 'add-to-case-action',
+        },
+      ],
+      addToCaseActionPanels: [],
+    });
+    mockUseAlertsActions.mockReturnValue({
+      actionItems: [
+        {
+          key: 'open',
+          name: 'Mark as open',
+          'data-test-subj': 'open-alert-status',
+        },
+      ],
+      panels: [],
+    });
+    mockUseAlertTagsActions.mockReturnValue({
+      alertTagsItems: [
+        {
+          key: 'manage-alert-tags',
+          name: 'Apply alert tags',
+          'data-test-subj': 'alert-tags-context-menu-item',
+        },
+      ],
+      alertTagsPanels: [],
+    });
+    mockUseAlertAssigneesActions.mockReturnValue({
+      alertAssigneesItems: [
+        {
+          key: 'assign-alert',
+          name: 'Assign alert',
+          'data-test-subj': 'alert-assignees-context-menu-item',
+        },
+      ],
+      alertAssigneesPanels: [],
+    });
+    mockUseAlertExceptionActions.mockReturnValue({
+      exceptionActionItems: [
+        {
+          key: 'add-endpoint-exception-menu-item',
+          name: 'Add endpoint exception',
+          'data-test-subj': 'add-endpoint-exception-menu-item',
+        },
+      ],
+    });
+    mockUseRunAlertWorkflowPanel.mockReturnValue({
+      runWorkflowMenuItem: [
+        {
+          key: 'run-workflow-action',
+          name: 'Run workflow',
+          'data-test-subj': 'run-workflow-action',
+        },
+      ],
+      runAlertWorkflowPanel: [],
+    });
+    mockUseHostIsolationAction.mockReturnValue([
+      {
+        key: 'isolate-host-action-item',
+        name: 'Isolate host',
+        'data-test-subj': 'isolate-host-action-item',
+      },
+    ]);
+    mockUseResponderActionItem.mockReturnValue([
+      {
+        key: 'endpointResponseActions-action-item',
+        name: 'Respond',
+        'data-test-subj': 'endpointResponseActions-action-item',
+      },
+    ]);
+    mockIsOsqueryAvailable.mockReturnValue(true);
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimelineActionItems: [
+        {
+          key: 'investigate-in-timeline-action-item',
+          name: 'Investigate in Timeline',
+          'data-test-subj': 'investigate-in-timeline-action-item',
+        },
+      ],
+    });
+    renderTakeActionButton({
+      ...defaultProps,
+      hit: createMockHit({ 'event.kind': 'signal' }),
+    });
+
+    fireEvent.click(screen.getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+    expect(
+      screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
+    ).toEqual([
+      'open-alert-status',
+      'alert-assignees-context-menu-item',
+      'add-to-case-action',
+      'alert-tags-context-menu-item',
+      'add-endpoint-exception-menu-item',
+      'run-workflow-action',
+      'isolate-host-action-item',
+      'endpointResponseActions-action-item',
+      'osquery-action-item',
+      'investigate-in-timeline-action-item',
+    ]);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(4);
+    expect(
+      screen.getByTestId('add-to-case-action').querySelector('[data-euiicon-type="briefcase"]')
+    ).not.toBeNull();
+    expect(
+      screen.getByTestId('open-alert-status').querySelector('[data-euiicon-type="dot"]')
+    ).not.toBeNull();
   });
 
   it('should call useAddToCaseActions with the correct arguments', () => {
@@ -961,6 +1078,20 @@ describe('<TakeActionButton />', () => {
       expect(mockReportActionClicked).toHaveBeenCalledWith({
         flyoutType: FLYOUT_TYPE.DOCUMENT,
         action: FLYOUT_ACTION.RUN_OSQUERY,
+      });
+    });
+
+    it.each([
+      [ADD_TO_CASE_ACTION_IDS.addToNewCase, FLYOUT_ACTION.ADD_TO_CASE_NEW],
+      [ADD_TO_CASE_ACTION_IDS.addToExistingCase, FLYOUT_ACTION.ADD_TO_CASE_EXISTING],
+    ])('reports the selected case action', (actionId, expectedAction) => {
+      renderTakeActionButton();
+
+      mockUseAddToCaseActions.mock.calls[0][0].onActionClick?.(actionId);
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: expectedAction,
       });
     });
 

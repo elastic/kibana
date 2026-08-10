@@ -11,6 +11,8 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getExploreButtonInfo } from '../utils/get_explore_url';
 
+export const EXPLORE_ACTION_ID = 'explore-action';
+
 export interface UseExploreActionsParams {
   /**
    * The raw document record, used to extract alert metadata
@@ -56,7 +58,7 @@ export const useExploreActions = ({
     () => [
       {
         'data-test-subj': 'explore-in-alerts-or-timeline',
-        key: 'explore-action',
+        key: EXPLORE_ACTION_ID,
         name: (
           <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexStart">
             <EuiFlexItem grow={false}>{label}</EuiFlexItem>
