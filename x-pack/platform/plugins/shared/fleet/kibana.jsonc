@@ -42,7 +42,8 @@
       "automaticImport",
       "alerting",
       "sloShared",
-      "reporting"
+      "reporting",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "kibanaReact",

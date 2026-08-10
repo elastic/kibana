@@ -43,6 +43,7 @@ export const item: GetInfoResponse['item'] = {
   ],
   assets: {
     kibana: {
+      workflow: [],
       alerting_rule_template: [],
       slo_template: [],
       dashboard: [
