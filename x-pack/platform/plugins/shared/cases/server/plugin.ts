@@ -553,7 +553,7 @@ export class CasePlugin
   };
 
   private getCasesClientWithRequest =
-    (core: CoreStart, requestSource?: string) =>
+    (core: CoreStart, requestSource: string) =>
     async (request: KibanaRequest): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 

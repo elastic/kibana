@@ -18,10 +18,7 @@ import {
   commentExternalReference,
   commentPersistableState,
 } from './mock';
-import { createCasesClientInternalMock, createCasesClientMock } from '../mocks';
-import { newCase, mappings, mockCases } from '../../mocks';
-import type { CasesClientArgs } from '..';
-import { createCasesSubClient } from './client';
+import { mappings, mockCases } from '../../mocks';
 
 import {
   createIncident,
@@ -77,16 +74,6 @@ const allComments = [
   commentExternalReference,
   commentPersistableState,
 ];
-
-jest.mock('./create', () => ({ create: jest.fn().mockResolvedValue({ id: 123 }) }));
-jest.mock('./get', () => ({
-  get: jest.fn().mockResolvedValue({}),
-  resolve: jest.fn().mockResolvedValue({}),
-  getCasesByAlertID: jest.fn().mockResolvedValue([]),
-  getReporters: jest.fn().mockResolvedValue([]),
-  getTags: jest.fn().mockResolvedValue([]),
-  getCategories: jest.fn().mockResolvedValue([]),
-}));
 
 describe('utils', () => {
   describe('dedupAssignees', () => {
@@ -2442,71 +2429,6 @@ describe('enrichCasesWithFieldLabels', () => {
       priority_as_keyword: 'INPUT_TEXT',
       effort_as_integer: 'INPUT_NUMBER',
       team_as_keyword: 'USER_PICKER',
-    });
-  });
-
-  describe('wrapTelemetry', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    const mockIncrementCounter = jest.fn();
-
-    const clientArgs = {
-      usageCounter: { incrementCounter: mockIncrementCounter },
-      requestSource: 'rest_api',
-    } as unknown as CasesClientArgs;
-    const mockCasesClient = createCasesClientMock();
-    const mockCasesClientInternal = createCasesClientInternalMock();
-    const client = createCasesSubClient(clientArgs, mockCasesClient, mockCasesClientInternal);
-
-    it('should call incrementCounter with correct parameters', async () => {
-      await client.create(newCase);
-      expect(mockIncrementCounter).toHaveBeenCalledWith({
-        counterName: 'create_case',
-        counterType: 'cases_client.rest_api',
-      });
-    });
-
-    it('resolve and get method are ignored from telemetry', async () => {
-      await client.get({ id: '1' });
-      await client.resolve({ id: '1' });
-      expect(mockIncrementCounter).not.toHaveBeenCalledWith({
-        counterName: 'get_case',
-        counterType: 'cases_client.rest_api',
-      });
-      expect(mockIncrementCounter).not.toHaveBeenCalledWith({
-        counterName: 'resolve_case',
-        counterType: 'cases_client.rest_api',
-      });
-    });
-
-    it('undefined requestSource should default to unknown', async () => {
-      const clientArgsWithoutRequestSource = {
-        usageCounter: { incrementCounter: mockIncrementCounter },
-      } as unknown as CasesClientArgs;
-      const clientWithoutRequestSource = createCasesSubClient(
-        clientArgsWithoutRequestSource,
-        mockCasesClient,
-        mockCasesClientInternal
-      );
-      await clientWithoutRequestSource.create(newCase);
-      expect(mockIncrementCounter).toHaveBeenCalledWith({
-        counterName: 'create_case',
-        counterType: 'cases_client.unknown',
-      });
-    });
-
-    it('should not throw if usageCounter is undefined', async () => {
-      const clientArgsWithoutUsageCounter = {
-        requestSource: 'rest_api',
-      } as unknown as CasesClientArgs;
-      const clientWithoutUsageCounter = createCasesSubClient(
-        clientArgsWithoutUsageCounter,
-        mockCasesClient,
-        mockCasesClientInternal
-      );
-      await expect(clientWithoutUsageCounter.create(newCase)).resolves.toEqual({ id: 123 });
     });
   });
 });

@@ -37,7 +37,7 @@ import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
 import { addFile } from './add_file';
-import { wrapTelemetry } from '../cases/utils';
+import { wrapTelemetry } from '../telemetry';
 
 /**
  * API for interacting with the attachments to a case.
