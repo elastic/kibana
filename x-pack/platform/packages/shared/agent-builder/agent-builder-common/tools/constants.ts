@@ -92,6 +92,7 @@ export const internalTools = {
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
+  searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
   listFiles: 'list_files',

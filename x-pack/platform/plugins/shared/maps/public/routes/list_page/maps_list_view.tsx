@@ -114,12 +114,7 @@ const labels = {
 
 const CreateMapButton = ({ isReadOnly }: { isReadOnly: boolean }) =>
   isReadOnly ? null : (
-    <EuiButton
-      fill
-      iconType="plusInCircle"
-      onClick={navigateToNewMap}
-      data-test-subj="newItemButton"
-    >
+    <EuiButton fill iconType="plusCircle" onClick={navigateToNewMap} data-test-subj="newItemButton">
       <FormattedMessage
         id="xpack.maps.mapListing.createMapButtonLabel"
         defaultMessage="Create map"

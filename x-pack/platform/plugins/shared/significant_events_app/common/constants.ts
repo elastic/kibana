@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-/**
- * Base route of the Significant Events application. Registered as `appRoute` in the
- * plugin and used by the typed router to build absolute links.
- */
-export const SIGNIFICANT_EVENTS_APP_ROUTE = '/app/significant_events';
+export { SIGNIFICANT_EVENTS_APP_ROUTE } from '@kbn/significant-events-plugin/common';

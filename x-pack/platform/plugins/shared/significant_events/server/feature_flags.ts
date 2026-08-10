@@ -21,8 +21,10 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
@@ -32,7 +34,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from './types';
 import { isObservabilityDeployment } from './routes/utils/assert_significant_events_access';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
+import { SIGNIFICANT_EVENTS_TIERED_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
@@ -41,16 +43,24 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
+  DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+  MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+  MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+  MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '../common/constants';
 
 // Fields are optional and unknown keys are ignored so that a config persisted
@@ -87,9 +97,9 @@ export function registerFeatureFlags(
   }
 
   core.pricing
-    .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
-    .then((isTierAvailable) => {
-      if (isTierAvailable) {
+    .isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
+    .then((isSignificantEventsAvailable) => {
+      if (isSignificantEventsAvailable) {
         core.uiSettings.register({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
             category: ['observability'],
@@ -125,7 +135,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryEnabledDescription',
               {
                 defaultMessage:
-                  'When enabled, Significant Events detection, discovery, and triage run automatically in this Kibana space.',
+                  'When enabled, Significant Events detection and discovery run automatically in this Kibana space.',
               }
             ),
             type: 'boolean',
@@ -247,7 +257,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesDescription',
               {
                 defaultMessage:
-                  'How often scheduled Significant Events discovery and triage review runs in this Kibana space.',
+                  'How often scheduled Significant Events discovery review runs in this Kibana space.',
               }
             ),
             type: 'number',
@@ -283,32 +293,6 @@ export function registerFeatureFlags(
             readonly: true,
             readonlyMode: 'ui',
           },
-          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: {
-            category: ['observability'],
-            name: i18n.translate(
-              'xpack.significantEvents.scheduledSigEventsDiscoveryTriageBatchSizeName',
-              {
-                defaultMessage: 'Scheduled Significant Events triage batch size',
-              }
-            ) as string,
-            value: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-            description: i18n.translate(
-              'xpack.significantEvents.scheduledSigEventsDiscoveryTriageBatchSizeDescription',
-              {
-                defaultMessage:
-                  'Maximum discoveries sent to each scheduled triage pass in this Kibana space.',
-              }
-            ),
-            type: 'number',
-            schema: schema.number({
-              min: MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-              max: MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-            }),
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-            readonly: true,
-            readonlyMode: 'ui',
-          },
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: {
             category: ['observability'],
             name: i18n.translate(
@@ -322,7 +306,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryMaxReviewPassesDescription',
               {
                 defaultMessage:
-                  'Maximum discovery and triage pass pairs to run during one scheduled review execution in this Kibana space.',
+                  'Maximum discovery passes to run during one scheduled review execution in this Kibana space.',
               }
             ),
             type: 'number',
@@ -335,6 +319,87 @@ export function registerFeatureFlags(
             readonly: true,
             readonlyMode: 'ui',
           },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleDetectionThresholdName',
+                {
+                  defaultMessage: 'Significant Events flaky rule detection threshold',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleDetectionThresholdDescription',
+                {
+                  defaultMessage:
+                    'Rules with at least this many change-point detections inside the detection lookback window are treated as flaky and suppressed from escalation.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({
+                min: MIN_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+                max: MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
+              }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleProbeAfterMinutesName',
+                {
+                  defaultMessage: 'Significant Events flaky rule probe (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleProbeAfterMinutesDescription',
+                {
+                  defaultMessage:
+                    'A suppressed rule is let through to the agent once its oldest unprocessed detection is at least this old. Must stay below the 24h detection lookback window.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({
+                min: MIN_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+                max: MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
+              }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleExemptSeverityScoreName',
+                {
+                  defaultMessage: 'Significant Events flaky rule severity exemption',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleExemptSeverityScoreDescription',
+                {
+                  defaultMessage:
+                    'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Set above 100 to disable the exemption.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({
+                min: MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+                max: MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+              }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
         });
 
         core.uiSettings.registerGlobal({
