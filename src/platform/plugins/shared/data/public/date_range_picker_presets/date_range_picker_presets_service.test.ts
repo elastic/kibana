@@ -34,7 +34,7 @@ const quickRangePresets: PresetItem[] = [
 
 const lockedQuickRangePresets: PresetItem[] = quickRangePresets.map((preset) => ({
   ...preset,
-  isDeletable: false,
+  isEditable: false,
 }));
 
 const setup = () => {
@@ -79,7 +79,7 @@ describe('DateRangePickerPresetsService', () => {
       );
 
       expect(await firstValueFrom(service.getPresets$())).toEqual([
-        { start: 'now-1h', end: 'now', label: 'Last hour', isDeletable: true },
+        { start: 'now-1h', end: 'now', label: 'Last hour' },
         ...lockedQuickRangePresets,
       ]);
     });
@@ -91,8 +91,8 @@ describe('DateRangePickerPresetsService', () => {
       core.userStorage.get$.mockReturnValue(of(storedPresets([newest, oldest])));
 
       expect(await firstValueFrom(service.getPresets$())).toEqual([
-        { ...newest, isDeletable: true },
-        { ...oldest, isDeletable: true },
+        newest,
+        oldest,
         ...lockedQuickRangePresets,
       ]);
     });
@@ -111,7 +111,7 @@ describe('DateRangePickerPresetsService', () => {
       );
 
       expect(await firstValueFrom(service.getPresets$())).toEqual([
-        { start: 'now-1h', end: 'now', isDeletable: true },
+        { start: 'now-1h', end: 'now' },
         ...lockedQuickRangePresets,
       ]);
     });
@@ -122,7 +122,7 @@ describe('DateRangePickerPresetsService', () => {
       core.uiSettings.get.mockReturnValue([{ from: 'now-1y', to: 'now', display: 'Last year' }]);
 
       expect(await firstValueFrom(service.getPresets$())).toEqual([
-        { start: 'now-1y', end: 'now', label: 'Last year', isDeletable: false },
+        { start: 'now-1y', end: 'now', label: 'Last year', isEditable: false },
       ]);
     });
   });
@@ -230,11 +230,11 @@ describe('DateRangePickerPresetsService', () => {
       );
     });
 
-    it('does not persist the isDeletable flag', async () => {
+    it('does not persist the isEditable flag', async () => {
       const { core, service } = setup();
       core.userStorage.get.mockResolvedValue(storedPresets([]));
 
-      await service.savePreset({ start: 'now-1h', end: 'now', isDeletable: true });
+      await service.savePreset({ start: 'now-1h', end: 'now', isEditable: true });
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([{ start: 'now-1h', end: 'now' }])

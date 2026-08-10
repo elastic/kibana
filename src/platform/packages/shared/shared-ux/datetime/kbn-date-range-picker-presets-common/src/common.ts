@@ -16,8 +16,8 @@ export interface PresetItem {
   start: string;
   end: string;
   label?: string;
-  /** Only user-owned presets can be removed; presets from `timepicker:quickRanges` are locked. */
-  isDeletable?: boolean;
+  /** Presets from `timepicker:quickRanges` set this to `false`: they are administrator-owned. */
+  isEditable?: boolean;
 }
 
 /**
@@ -79,7 +79,7 @@ export const migrateStoredPresets = (
   return DEFAULT_STORED_PRESETS;
 };
 
-/** Composes the displayed list: the user's own deletable presets, then the locked quick ranges. */
+/** Composes the displayed list: the user's own editable presets, then the locked quick ranges. */
 export const mergePresets = (
   userPresets: readonly PresetItem[],
   uiSettingsPresets: readonly PresetItem[]
@@ -87,10 +87,11 @@ export const mergePresets = (
   const userKeys = new Set(userPresets.map(getPresetKey));
 
   return [
-    ...userPresets.map((preset) => ({ ...preset, isDeletable: true })),
+    // The user's own presets keep the `isEditable` default; only the quick ranges are marked.
+    ...userPresets,
     ...uiSettingsPresets
       .filter((preset) => !userKeys.has(getPresetKey(preset)))
-      .map((preset) => ({ ...preset, isDeletable: false })),
+      .map((preset) => ({ ...preset, isEditable: false })),
   ];
 };
 
@@ -116,7 +117,7 @@ export interface DateRangePickerPresetsService {
   getUiSettingsPresets(): PresetItem[];
 
   /**
-   * Presets to display: the user's own deletable presets followed by the locked
+   * Presets to display: the user's own editable presets followed by the locked
    * {@link getUiSettingsPresets}. Emits again whenever the stored value changes.
    */
   getPresets$(): Observable<PresetItem[]>;

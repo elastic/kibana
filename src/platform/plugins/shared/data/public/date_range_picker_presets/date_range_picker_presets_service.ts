@@ -45,7 +45,7 @@ const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
  * than on `userStorage`/`uiSettings` directly.
  *
  * Storage holds the user's own presets only. The quick ranges are merged in on
- * every read, so they stay administrator-owned: undeletable here, and picked up
+ * every read, so they stay administrator-owned: not editable here, and picked up
  * as soon as the uiSetting changes.
  */
 export class DateRangePickerPresetsService implements IDateRangePickerPresetsService {

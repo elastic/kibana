@@ -26,7 +26,7 @@ const uiSettingsPresets: PresetItem[] = [
 
 const lockedPresets: PresetItem[] = uiSettingsPresets.map((preset) => ({
   ...preset,
-  isDeletable: false,
+  isEditable: false,
 }));
 
 const createServiceMock = (

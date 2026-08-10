@@ -124,7 +124,7 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
-    it('offers deletion only for presets marked as deletable', async () => {
+    it('offers deletion for every preset except those marked as not editable', async () => {
       const onPresetDelete = jest.fn();
 
       renderWithEuiTheme(
@@ -133,8 +133,8 @@ describe('DateRangePickerControl', () => {
           defaultValue="last 20 minutes"
           onPresetDelete={onPresetDelete}
           presets={[
-            { start: 'now-1h', end: 'now', label: 'Last 1 hour', isDeletable: true },
-            { start: 'now/d', end: 'now/d', label: 'Today', isDeletable: false },
+            { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
+            { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
           ]}
         />
       );

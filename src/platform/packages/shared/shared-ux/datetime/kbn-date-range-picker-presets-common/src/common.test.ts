@@ -70,13 +70,13 @@ describe('migrateStoredPresets', () => {
 });
 
 describe('mergePresets', () => {
-  it('lists deletable user presets before locked quick ranges', () => {
+  it('lists editable user presets before locked quick ranges', () => {
     const userPresets = [{ start: 'now-7d', end: 'now', label: 'Last 7 days' }];
 
     expect(mergePresets(userPresets, quickRanges)).toEqual([
-      { start: 'now-7d', end: 'now', label: 'Last 7 days', isDeletable: true },
-      { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isDeletable: false },
-      { start: 'now/d', end: 'now/d', label: 'Today', isDeletable: false },
+      { start: 'now-7d', end: 'now', label: 'Last 7 days' },
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isEditable: false },
+      { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
     ]);
   });
 
@@ -84,15 +84,15 @@ describe('mergePresets', () => {
     const userPresets = [{ start: 'now/d', end: 'now/d', label: 'My today' }];
 
     expect(mergePresets(userPresets, quickRanges)).toEqual([
-      { start: 'now/d', end: 'now/d', label: 'My today', isDeletable: true },
-      { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isDeletable: false },
+      { start: 'now/d', end: 'now/d', label: 'My today' },
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isEditable: false },
     ]);
   });
 
   it('returns only locked quick ranges when the user has none', () => {
     expect(mergePresets([], quickRanges)).toEqual([
-      { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isDeletable: false },
-      { start: 'now/d', end: 'now/d', label: 'Today', isDeletable: false },
+      { start: 'now-15m', end: 'now', label: 'Last 15 minutes', isEditable: false },
+      { start: 'now/d', end: 'now/d', label: 'Today', isEditable: false },
     ]);
   });
 });
