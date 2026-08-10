@@ -8,6 +8,7 @@
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { z } from '@kbn/zod/v4';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionType } from './types';
@@ -118,7 +119,7 @@ describe('actionTypeRegistry', () => {
       );
     });
 
-    test('throws if empty supported feature ids provided', () => {
+    test('throws if empty supported feature ids provided for non-spec source', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() =>
         actionTypeRegistry.register(
@@ -128,6 +129,52 @@ describe('actionTypeRegistry', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-connector-type\\"."`
+      );
+    });
+
+    test('allows registering spec connector type with empty supportedFeatureIds (support-only)', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            source: ACTION_TYPE_SOURCES.spec,
+            supportedFeatureIds: [],
+          })
+        )
+      ).not.toThrow();
+      expect(actionTypeRegistry.has('my-connector-type')).toBe(true);
+    });
+
+    test('throws if spec connector type has invalid non-empty feature id', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            source: ACTION_TYPE_SOURCES.spec,
+            supportedFeatureIds: ['notAValidFeatureId'],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid feature ids \\"notAValidFeatureId\\" for connector type \\"my-connector-type\\"."`
+      );
+    });
+
+    test('list() excludes support-only spec connector when filtering by featureId', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'support-only',
+          name: 'Support Only',
+          source: ACTION_TYPE_SOURCES.spec,
+          supportedFeatureIds: [],
+        })
+      );
+      expect(actionTypeRegistry.list({ featureId: 'workflows' }).map((t) => t.id)).not.toContain(
+        'support-only'
+      );
+      expect(actionTypeRegistry.list({ featureId: 'agentBuilder' }).map((t) => t.id)).not.toContain(
+        'support-only'
       );
     });
 

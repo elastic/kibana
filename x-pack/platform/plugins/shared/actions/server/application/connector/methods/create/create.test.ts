@@ -669,6 +669,35 @@ describe('create()', () => {
     });
   });
 
+  test('rejects public creation of a support-only spec connector', async () => {
+    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        supportedFeatureIds: [],
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      })
+    );
+
+    await expect(
+      create({
+        context: mockContext,
+        action: {
+          name: 'support-only',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrow(
+      'Connector type my-connector-type is support-only and cannot be used to create connectors yet.'
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
   describe('spec connector config.authType', () => {
     test('persists config.authType from secrets when config is empty (spec source)', async () => {
       (authTypeRegistry.get as jest.Mock).mockReturnValue({
