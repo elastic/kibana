@@ -64,9 +64,10 @@ export interface RawAppStatePayload {
   appState: DiscoverAppState;
   /**
    * Marks app state changes that come from URL syncing or other internal updates
-   * instead of direct user actions. These updates skip profile state snapshot
-   * syncing so they do not overwrite restorable profile state. This should
-   * rarely be needed outside of URL syncing and specific edge cases.
+   * instead of direct user actions. These updates skip profile app state
+   * snapshot syncing so they do not overwrite restorable profile app state
+   * defaults. This should rarely be needed outside of URL syncing and specific
+   * edge cases.
    */
   isSystemTriggered?: boolean;
 }
@@ -88,12 +89,12 @@ export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
-export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
+export const syncProfileAppStateSnapshot: InternalStateThunkActionCreator<
   [TabActionPayload<{ appState?: DiscoverAppState }>]
 > = (payload) =>
-  function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
+  function syncProfileAppStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = selectDataSourceProfileId(runtimeStateManager, payload.tabId);
-    dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
+    dispatch(internalStateSlice.actions.syncProfileAppStateSnapshot({ ...payload, profileId }));
   };
 
 /**
@@ -126,7 +127,7 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
 
     if (!payload.isSystemTriggered) {
       dispatch(
-        syncProfileStateSnapshot({
+        syncProfileAppStateSnapshot({
           tabId: payload.tabId,
           appState: mergedAppState,
         })
@@ -397,9 +398,9 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
-    // Mark all profile state fields to reset when transitioning to data view mode
+    // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
@@ -444,9 +445,9 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
   function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
-    // Mark all profile state fields to reset when transitioning to ES|QL mode
+    // Mark all profile app state default fields to reset when transitioning to ES|QL mode
     dispatch(
-      internalStateSlice.actions.setProfileStateFieldsToReset({
+      internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })

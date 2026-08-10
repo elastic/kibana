@@ -14,7 +14,18 @@ import type {
   StorageIndexAdapter,
 } from '@kbn/storage-adapter';
 import { isResponseError } from '@kbn/es-errors';
-import { DATASET_UUID_NAMESPACE, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
+import { OccWriter, isOccConflictError } from '@kbn/occ';
+import type { OccDocument } from '@kbn/occ';
+import type { Logger } from '@kbn/logging';
+import {
+  DATASET_UUID_NAMESPACE,
+  DatasetMaturityEnum,
+  MAX_DATASET_TAG_FACETS,
+  MAX_EXAMPLES_PER_DATASET,
+  MAX_TAG_LENGTH,
+  MAX_TAGS_PER_DATASET,
+  type DatasetMaturity,
+} from '@kbn/evals-common';
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
@@ -42,6 +53,32 @@ export interface DatasetExampleInput {
   metadata?: Record<string, unknown> | null;
 }
 
+export interface CreateDatasetInput {
+  name: string;
+  description: string;
+  tags?: string[];
+  maturity?: DatasetMaturity;
+  examples?: DatasetExampleInput[];
+}
+
+export interface UpsertDatasetInput {
+  name: string;
+  description: string;
+  tags?: string[];
+  maturity?: DatasetMaturity;
+  examples: DatasetExampleInput[];
+}
+
+/**
+ * Fields a caller may change on an existing dataset. `undefined` leaves a field
+ * as-is. An empty `tags` array or a `null` `maturity` clears it.
+ */
+export interface UpdateDatasetInput {
+  description?: string;
+  tags?: string[];
+  maturity?: DatasetMaturity | null;
+}
+
 export interface DatasetDocument extends DatasetStorageProperties {
   id: string;
   // Normalized on read: legacy documents missing the stored field are
@@ -53,7 +90,7 @@ export interface DatasetWithExamples extends DatasetDocument {
   examples: ExampleDocument[];
 }
 
-export type DatasetSortField = 'name' | 'created_at' | 'updated_at' | 'examples_count';
+export type DatasetSortField = 'name' | 'created_at' | 'updated_at' | 'examples_count' | 'maturity';
 export type DatasetSortOrder = 'asc' | 'desc';
 
 const DATASET_SORTABLE_FIELDS: readonly DatasetSortField[] = [
@@ -61,12 +98,15 @@ const DATASET_SORTABLE_FIELDS: readonly DatasetSortField[] = [
   'created_at',
   'updated_at',
   'examples_count',
+  'maturity',
 ];
 
 export interface DatasetListOptions {
   page?: number;
   perPage?: number;
   search?: string;
+  tags?: string[];
+  maturity?: DatasetMaturity[];
   sortField?: DatasetSortField;
   sortOrder?: DatasetSortOrder;
 }
@@ -75,9 +115,25 @@ export interface DatasetListItem extends DatasetDocument {
   examples_count: number;
 }
 
+export interface DatasetFacetBucket {
+  value: string;
+  count: number;
+}
+
+/**
+ * Values the caller can filter on, and how many datasets carry each. Counts
+ * honour the search term but ignore the tag and maturity filters, so the
+ * available options don't disappear as filters are applied.
+ */
+export interface DatasetFacets {
+  tags: DatasetFacetBucket[];
+  maturity: DatasetFacetBucket[];
+}
+
 export interface DatasetListResult {
   datasets: DatasetListItem[];
   total: number;
+  facets: DatasetFacets;
 }
 
 export interface UpsertDatasetResult {
@@ -99,16 +155,54 @@ export type DatasetExamplesStorageAdapter = StorageIndexAdapter<
 export class DatasetClient {
   private readonly datasetsStorage: InternalIStorageClient<DatasetStorageDocument>;
   private readonly examplesStorage: InternalIStorageClient<DatasetExampleStorageDocument>;
+  private readonly datasetWriter: OccWriter<DatasetStorageProperties>;
+  private readonly logger?: Logger;
 
   constructor({
     datasetsStorageAdapter,
     examplesStorageAdapter,
+    logger,
   }: {
     datasetsStorageAdapter: DatasetsStorageAdapter;
     examplesStorageAdapter: DatasetExamplesStorageAdapter;
+    logger?: Logger;
   }) {
     this.datasetsStorage = datasetsStorageAdapter.getClient();
     this.examplesStorage = examplesStorageAdapter.getClient();
+    this.logger = logger;
+
+    // Every dataset write is a read-modify-write of the whole document, because the
+    // storage adapter can only replace documents outright. Without a conditional write
+    // a suite touching the dataset for an example batch would silently revert tags a
+    // user saved in between, which is the loss this field is supposed to survive.
+    this.datasetWriter = new OccWriter<DatasetStorageProperties>({
+      get: async (id) => {
+        const current = await this.getDatasetForWrite(id);
+        return current ?? null;
+      },
+      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
+        const response = await this.datasetsStorage.index({
+          id,
+          document,
+          refresh: true,
+          ...(ifSeqNo != null && ifPrimaryTerm != null
+            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+            : {}),
+        });
+
+        // Typed optional, but Elasticsearch always returns both for a write that
+        // landed. Failing here beats handing back made-up values that the next
+        // conditional write would treat as real.
+        if (response._seq_no == null || response._primary_term == null) {
+          throw new Error(`Indexing dataset "${id}" returned no _seq_no/_primary_term`);
+        }
+
+        return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+      },
+      maxRetries: 5,
+      retryDelayMs: 150,
+      logger,
+    });
   }
 
   static getDatasetId(name: string): string {
@@ -128,11 +222,13 @@ export class DatasetClient {
     });
   }
 
-  async create(
-    name: string,
-    description: string,
-    examples: DatasetExampleInput[] = []
-  ): Promise<DatasetWithExamples> {
+  async create({
+    name,
+    description,
+    tags,
+    maturity,
+    examples = [],
+  }: CreateDatasetInput): Promise<DatasetWithExamples> {
     const datasetId = DatasetClient.getDatasetId(name);
     const now = new Date().toISOString();
 
@@ -140,13 +236,15 @@ export class DatasetClient {
       await this.datasetsStorage.index({
         id: datasetId,
         op_type: 'create',
-        document: {
-          name,
-          description,
-          examples_count: 0,
-          created_at: now,
-          updated_at: now,
-        },
+        document: buildDatasetDocument(
+          {
+            name,
+            description,
+            created_at: now,
+            updated_at: now,
+          },
+          { tags, maturity, examples_count: 0 }
+        ),
       });
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -233,7 +331,7 @@ export class DatasetClient {
     // index and scans all dataset name terms, so cost grows with the number of
     // datasets. This is fine at evals scale; if dataset counts grow large, switch
     // `name` to a `text`/`search_as_you_type` mapping with a `match` query.
-    const query = search
+    const searchQuery = search
       ? {
           bool: {
             should: [
@@ -256,12 +354,40 @@ export class DatasetClient {
         }
       : { match_all: {} };
 
+    // Tags are ANDed (narrow down to datasets carrying all of them) while
+    // maturity levels are ORed, because a dataset has exactly one maturity.
+    // Filter tags reuse the per-dataset cap: a dataset can never carry more
+    // than that many tags, so a longer conjunction cannot match anything.
+    const tagFilters = normalizeTags(options.tags ?? []).map((tag) => ({ term: { tags: tag } }));
+    const maturityFilter = dedupe(options.maturity ?? []);
+    const filters = [
+      ...tagFilters,
+      ...(maturityFilter.length > 0 ? [{ terms: { maturity: maturityFilter } }] : []),
+    ];
+
     const datasetsResponse = await this.datasetsStorage.search({
       track_total_hits: true,
       from,
       size: perPage,
       sort: [{ [sortField]: { order: sortOrder } }],
-      query,
+      query: filters.length > 0 ? { bool: { must: [searchQuery], filter: filters } } : searchQuery,
+      // `global` escapes the request query so the facet counts aren't narrowed by
+      // the tag/maturity filters, then `scoped` re-applies just the search term.
+      // Otherwise selecting a tag would hide every tag it doesn't co-occur with.
+      aggs: {
+        facets: {
+          global: {},
+          aggs: {
+            scoped: {
+              filter: searchQuery,
+              aggs: {
+                tags: { terms: { field: 'tags', size: MAX_DATASET_TAG_FACETS } },
+                maturity: { terms: { field: 'maturity', size: MATURITY_FACET_SIZE } },
+              },
+            },
+          },
+        },
+      },
     });
 
     const datasets = datasetsResponse.hits.hits
@@ -281,33 +407,22 @@ export class DatasetClient {
         typeof datasetsResponse.hits.total === 'number'
           ? datasetsResponse.hits.total
           : datasetsResponse.hits.total?.value ?? 0,
+      facets: parseFacets(datasetsResponse.aggregations),
     };
   }
 
   async update(
     datasetId: string,
-    updates: Pick<DatasetStorageProperties, 'description'>
+    updates: UpdateDatasetInput
   ): Promise<DatasetWithExamples | undefined> {
-    // A description-only update doesn't change the example count, so read just
-    // the dataset document and reuse the denormalized count rather than loading
-    // every example via `get()`.
-    const existing = await this.getDatasetById(datasetId);
-    if (!existing) {
+    const updatedAt = new Date().toISOString();
+    const written = await this.writeDatasetIfPresent(datasetId, (current) =>
+      buildDatasetDocument(current, { ...updates, updated_at: updatedAt })
+    );
+
+    if (!written) {
       return undefined;
     }
-
-    const updatedAt = new Date().toISOString();
-
-    await this.datasetsStorage.index({
-      id: datasetId,
-      document: {
-        name: existing.name,
-        description: updates.description,
-        examples_count: existing.examples_count,
-        created_at: existing.created_at,
-        updated_at: updatedAt,
-      },
-    });
 
     return this.get(datasetId);
   }
@@ -495,15 +610,17 @@ export class DatasetClient {
     return { deleted: ids.length };
   }
 
-  async upsert(
-    name: string,
-    description: string,
-    examples: DatasetExampleInput[]
-  ): Promise<UpsertDatasetResult> {
+  async upsert({
+    name,
+    description,
+    tags,
+    maturity,
+    examples,
+  }: UpsertDatasetInput): Promise<UpsertDatasetResult> {
     const existing = await this.getByName(name);
 
     if (!existing) {
-      const created = await this.create(name, description, examples);
+      const created = await this.create({ name, description, tags, maturity, examples });
       return {
         dataset_id: created.id,
         added: created.examples.length,
@@ -556,26 +673,25 @@ export class DatasetClient {
     ]);
 
     const examplesChanged = added > 0 || toDelete.length > 0;
-    const descriptionChanged = description !== existing.description;
+    // Only fields the caller declared are compared, so tags and maturity set
+    // through the UI survive an upsert from code that doesn't mention them.
+    const metadataPatch: DatasetPatch = {
+      ...(description !== existing.description ? { description } : {}),
+      ...(tags !== undefined && !haveSameTags(tags, existing.tags) ? { tags } : {}),
+      ...(maturity !== undefined && maturity !== existing.maturity ? { maturity } : {}),
+    };
+    const metadataChanged = Object.keys(metadataPatch).length > 0;
 
     // Write the dataset document at most once. When examples changed we recompute
-    // the count (and fold in any new description); otherwise the count is
-    // unchanged, so a description-only edit reuses the known count.
+    // the count (and fold in any metadata edit); otherwise the count is
+    // unchanged, so a metadata-only edit reuses the known count.
     if (examplesChanged) {
-      await this.touchDataset(existing.id, {
-        description: descriptionChanged ? description : undefined,
-      });
-    } else if (descriptionChanged) {
-      await this.datasetsStorage.index({
-        id: existing.id,
-        document: {
-          name: existing.name,
-          description,
-          examples_count: existing.examples_count,
-          created_at: existing.created_at,
-          updated_at: new Date().toISOString(),
-        },
-      });
+      await this.touchDataset(existing.id, metadataPatch);
+    } else if (metadataChanged) {
+      const updatedAt = new Date().toISOString();
+      await this.writeDatasetIfPresent(existing.id, (current) =>
+        buildDatasetDocument(current, { ...metadataPatch, updated_at: updatedAt })
+      );
     }
 
     return {
@@ -583,6 +699,38 @@ export class DatasetClient {
       added,
       removed: toDelete.length,
       unchanged,
+    };
+  }
+
+  /**
+   * Reads a dataset along with the `_seq_no`/`_primary_term` a conditional write has
+   * to send back. Separate from `getDatasetById` so `seq_no_primary_term` can't be
+   * forgotten: without it both are undefined and the write silently becomes
+   * unconditional.
+   */
+  private async getDatasetForWrite(
+    datasetId: string
+  ): Promise<OccDocument<DatasetStorageProperties> | undefined> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      seq_no_primary_term: true,
+      query: {
+        term: {
+          _id: datasetId,
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._seq_no == null || hit._primary_term == null) {
+      return undefined;
+    }
+
+    return {
+      id: datasetId,
+      source: hit._source,
+      occ: { seqNo: hit._seq_no, primaryTerm: hit._primary_term },
     };
   }
 
@@ -745,33 +893,71 @@ export class DatasetClient {
 
   /**
    * Recomputes the denormalized `examples_count` for a dataset and writes it
-   * back. By default this also advances `updated_at` (a "touch"); pass
-   * `bumpUpdatedAt: false` to refresh the count while preserving the timestamp.
-   * Recompute-after-write (rather than incrementing) keeps the count correct
-   * even when duplicate examples are skipped or writes race.
+   * back, optionally applying a metadata patch in the same write. By default
+   * this also advances `updated_at` (a "touch"); pass `bumpUpdatedAt: false` to
+   * refresh the count while preserving the timestamp. Recompute-after-write
+   * (rather than incrementing) keeps the count correct even when duplicate
+   * examples are skipped or writes race.
+   *
+   * The count is taken once rather than per attempt, since `mutate` is synchronous:
+   * a retry can write a count another writer has moved past, which self-corrects on
+   * the next example change.
    */
   private async touchDataset(
     datasetId: string,
-    options: { bumpUpdatedAt?: boolean; description?: string } = {}
+    patch: DatasetPatch & { bumpUpdatedAt?: boolean } = {}
   ): Promise<void> {
-    const { bumpUpdatedAt = true, description } = options;
-    const dataset = await this.getDatasetById(datasetId);
-    if (!dataset) {
-      return;
+    const { bumpUpdatedAt = true, ...metadata } = patch;
+    const examplesCount = await this.countExamplesByDatasetId(datasetId);
+    const updatedAt = bumpUpdatedAt ? new Date().toISOString() : undefined;
+
+    await this.writeDatasetIfPresent(
+      datasetId,
+      (current) =>
+        buildDatasetDocument(current, {
+          ...metadata,
+          examples_count: examplesCount,
+          ...(updatedAt ? { updated_at: updatedAt } : {}),
+        }),
+      { tolerateConflict: isEmpty(metadata) }
+    );
+  }
+
+  /**
+   * Conditional read-modify-write that skips an already-deleted dataset instead of
+   * resurrecting it, which is what these callers used to get from reading the
+   * document before writing it back. Returns false when there was nothing to write.
+   */
+  private async writeDatasetIfPresent(
+    datasetId: string,
+    mutate: (current: DatasetStorageProperties) => DatasetStorageProperties,
+    { tolerateConflict = false }: { tolerateConflict?: boolean } = {}
+  ): Promise<boolean> {
+    const exists = await this.datasetExists(datasetId);
+    if (!exists) {
+      return false;
     }
 
-    const examplesCount = await this.countExamplesByDatasetId(datasetId);
+    try {
+      await this.datasetWriter.readModifyWrite({ id: datasetId, mutate });
+      return true;
+    } catch (error) {
+      if (tolerateConflict && isOccConflictError(error)) {
+        this.logger?.warn(
+          `Gave up refreshing dataset "${datasetId}" after repeated write conflicts; its example count may lag until the next change`
+        );
+        return true;
+      }
 
-    await this.datasetsStorage.index({
-      id: datasetId,
-      document: {
-        name: dataset.name,
-        description: description ?? dataset.description,
-        examples_count: examplesCount,
-        created_at: dataset.created_at,
-        updated_at: bumpUpdatedAt ? new Date().toISOString() : dataset.updated_at,
-      },
-    });
+      // A delete landing between the check above and the write makes the writer throw.
+      // Existence is re-read rather than matching its message, which is untyped text:
+      // a dataset that is genuinely gone is a miss, like one absent from the start.
+      if (!(await this.datasetExists(datasetId))) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 
   /**
@@ -779,16 +965,22 @@ export class DatasetClient {
    * field. Idempotent: only datasets missing the field are processed, so reruns
    * (and fresh/empty deployments) are no-ops. Intended to run once on plugin
    * start.
+   *
+   * Unlike the other write paths this one isn't version-checked, since bulk needs
+   * per-item conflict handling. The exposure is a single start-up pass over
+   * documents old enough to be missing the field, so an edit would have to land in
+   * that window to be lost.
    */
   async backfillDatasetCounts(): Promise<{ updated: number }> {
     const batchSize = 100;
     let updated = 0;
 
     for (;;) {
+      // Reads the whole document rather than a field projection: the rewrite
+      // below replaces the document, so anything left out would be dropped.
       const response = await this.datasetsStorage.search({
         track_total_hits: false,
         size: batchSize,
-        _source: ['name', 'description', 'created_at', 'updated_at'],
         query: {
           bool: {
             must_not: [{ exists: { field: 'examples_count' } }],
@@ -811,13 +1003,9 @@ export class DatasetClient {
         (hit) => ({
           index: {
             _id: hit._id,
-            document: {
-              name: hit._source.name,
-              description: hit._source.description,
+            document: buildDatasetDocument(hit._source, {
               examples_count: counts.get(hit._id) ?? 0,
-              created_at: hit._source.created_at,
-              updated_at: hit._source.updated_at,
-            },
+            }),
           },
         })
       );
@@ -835,6 +1023,88 @@ export class DatasetClient {
  * is matched literally inside a `wildcard` query rather than interpreted.
  */
 const escapeWildcard = (input: string): string => input.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+
+const MATURITY_FACET_SIZE = Object.keys(DatasetMaturityEnum).length;
+
+interface DatasetPatch {
+  description?: string;
+  tags?: string[];
+  maturity?: DatasetMaturity | null;
+  examples_count?: number;
+  updated_at?: string;
+}
+
+/**
+ * Rebases a patch onto the current document, since the storage adapter can only
+ * replace whole ones. Routing every write through here is what keeps fields the
+ * caller didn't mention, such as tags on an example insert, from being dropped.
+ * Empty tags and unset maturity are omitted rather than stored as `[]`/`null`.
+ */
+const buildDatasetDocument = (
+  existing: DatasetStorageProperties,
+  patch: DatasetPatch = {}
+): DatasetStorageProperties => {
+  const tags = patch.tags === undefined ? existing.tags : normalizeTags(patch.tags);
+  const maturity = patch.maturity === undefined ? existing.maturity : patch.maturity;
+
+  return {
+    name: existing.name,
+    description: patch.description ?? existing.description,
+    examples_count: patch.examples_count ?? existing.examples_count ?? 0,
+    created_at: existing.created_at,
+    updated_at: patch.updated_at ?? existing.updated_at,
+    ...(tags && tags.length > 0 ? { tags } : {}),
+    ...(maturity ? { maturity } : {}),
+  };
+};
+
+/**
+ * Lowercases so `Golden` and `golden` don't become two facets, then trims, dedupes
+ * and caps. Duplicates route validation to also cover callers that skip a route.
+ */
+const normalizeTags = (tags: string[]): string[] => {
+  const normalized = new Set<string>();
+
+  for (const tag of tags) {
+    if (normalized.size === MAX_TAGS_PER_DATASET) {
+      break;
+    }
+    const value = tag.trim().toLowerCase().slice(0, MAX_TAG_LENGTH);
+    if (value) {
+      normalized.add(value);
+    }
+  }
+
+  return Array.from(normalized);
+};
+
+const dedupe = <T>(values: T[]): T[] => Array.from(new Set(values));
+
+const haveSameTags = (next: string[], current: string[] = []): boolean => {
+  const normalized = normalizeTags(next);
+  const currentTags = new Set(current);
+  return normalized.length === currentTags.size && normalized.every((tag) => currentTags.has(tag));
+};
+
+interface TermsAggregation {
+  buckets?: Array<{ key: string; doc_count: number }>;
+}
+
+const toFacetBuckets = (aggregation: TermsAggregation | undefined): DatasetFacetBucket[] =>
+  (aggregation?.buckets ?? []).map(({ key, doc_count: count }) => ({ value: key, count }));
+
+const parseFacets = (aggregations: Record<string, unknown> | undefined): DatasetFacets => {
+  const scoped = (
+    aggregations?.facets as
+      | { scoped?: { tags?: TermsAggregation; maturity?: TermsAggregation } }
+      | undefined
+  )?.scoped;
+
+  return {
+    tags: toFacetBuckets(scoped?.tags),
+    maturity: toFacetBuckets(scoped?.maturity),
+  };
+};
 
 const EMPTY_EXAMPLE_METADATA = { description: 'empty-example' } as const;
 
