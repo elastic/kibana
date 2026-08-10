@@ -10,7 +10,6 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
-  ConversationWithoutRounds,
   ConversationRoundFeedback,
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
@@ -25,11 +24,18 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import type {
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
+  getConversationPermissions,
   hasConversationConverseAccess,
+  hasConversationDeleteAccess,
   hasConversationOwnerAccess,
+  hasConversationRenameAccess,
   type ConversationAccess,
 } from '../access_control';
 import type {
@@ -57,7 +63,7 @@ import {
 } from './converters';
 
 export interface ConversationClient {
-  get(conversationId: string): Promise<Conversation>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
@@ -78,7 +84,7 @@ export interface ConversationClient {
     roundId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
 }
 
@@ -126,7 +132,9 @@ class ConversationClientImpl implements ConversationClient {
     this.logger = logger;
   }
 
-  async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
+  async list(
+    options: ConversationListOptions = {}
+  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
     const { agentId } = options;
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
@@ -162,13 +170,15 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
+    return response.hits.hits.map((hit) =>
+      this.toResponseConversationWithoutRounds(hit as Document)
+    );
   }
 
-  async get(conversationId: string): Promise<Conversation> {
+  async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return fromEs(document);
+    return this.toResponseConversation(document);
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -384,7 +394,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async delete(conversationId: string): Promise<boolean> {
-    await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    await this.getDocumentWithAccess({ conversationId, access: 'delete' });
 
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });
@@ -395,6 +405,28 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
+  }
+
+  private toResponseConversation(document: Document): ConversationWithPermissions {
+    return {
+      ...fromEs(document),
+      permissions: getConversationPermissions({
+        conversation: document._source!,
+        user: this.user,
+      }),
+    };
+  }
+
+  private toResponseConversationWithoutRounds(
+    document: Document
+  ): ConversationWithoutRoundsWithPermissions {
+    return {
+      ...fromEsWithoutRounds(document),
+      permissions: getConversationPermissions({
+        conversation: document._source!,
+        user: this.user,
+      }),
+    };
   }
 
   private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {
@@ -469,6 +501,14 @@ class ConversationClientImpl implements ConversationClient {
 
       case 'owner':
         allowed = hasConversationOwnerAccess({ conversation, user: this.user });
+        break;
+
+      case 'rename':
+        allowed = hasConversationRenameAccess({ conversation, user: this.user });
+        break;
+
+      case 'delete':
+        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
         break;
     }
 

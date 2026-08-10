@@ -48,11 +48,8 @@ export function registerInternalConversationRoutes({
 
       const client = await conversationsService.getScopedClient({ request });
       const updatedConversation = await client.update(
-        {
-          id: conversationId,
-          title,
-        },
-        { access: 'owner', retryOnConflict: true }
+        { id: conversationId, title },
+        { access: 'rename', retryOnConflict: true }
       );
 
       return response.ok<RenameConversationResponse>({
