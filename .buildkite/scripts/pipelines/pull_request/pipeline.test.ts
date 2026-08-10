@@ -212,6 +212,76 @@ describe('pull_request pipeline generation', () => {
     );
   });
 
+  describe('Cypress suite skipping on Scout/FTR-test-tree-only diffs', () => {
+    const CYPRESS_STEP_SCRIPTS = [
+      'response_ops.sh',
+      'response_ops_cases.sh',
+      'fleet_cypress.sh',
+      'defend_workflows.sh',
+      'security_solution_explore.sh',
+      'security_solution_investigations.sh',
+      'osquery_cypress.sh',
+    ];
+
+    it('omits Cypress suites when the diff only touches Scout/FTR test trees, even when path matchers hit', async () => {
+      mockDoAnyChangesMatch.mockResolvedValue(true);
+      mockGetPrChangesCached.mockResolvedValue([
+        { filename: 'x-pack/platform/test/functional/apps/index_management/home_page.ts' },
+        {
+          filename:
+            'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/foo.spec.ts',
+        },
+        { filename: '.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml' },
+      ]);
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Scout/FTR-test-tree-only diff detected — skipping Cypress test suites'
+      );
+      for (const script of CYPRESS_STEP_SCRIPTS) {
+        expect(output).not.toContain(script);
+      }
+    });
+
+    it('keeps Cypress suites on for a skippable diff when ci:all-cypress-suites is set', async () => {
+      process.env.GITHUB_PR_LABELS = 'ci:all-cypress-suites';
+      mockDoAnyChangesMatch.mockResolvedValue(false);
+      mockGetPrChangesCached.mockResolvedValue([
+        { filename: 'x-pack/platform/test/functional/apps/index_management/home_page.ts' },
+      ]);
+      jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      for (const script of CYPRESS_STEP_SCRIPTS) {
+        expect(output).toContain(script);
+      }
+    });
+
+    it('keeps Cypress suites on when the diff also touches plugin source code', async () => {
+      mockDoAnyChangesMatch.mockResolvedValue(true);
+      mockGetPrChangesCached.mockResolvedValue([
+        { filename: 'x-pack/platform/test/functional/apps/index_management/home_page.ts' },
+        { filename: 'x-pack/solutions/security/plugins/security_solution/public/app/index.tsx' },
+      ]);
+      jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      for (const script of CYPRESS_STEP_SCRIPTS) {
+        expect(output).toContain(script);
+      }
+    });
+  });
+
   it('emits empty pipeline for automated version bump PRs from kibanamachine', async () => {
     mockIsAutomatedVersionBumpPR.mockResolvedValueOnce(true);
     const emitted = waitForEmission();

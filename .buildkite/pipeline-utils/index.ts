@@ -12,6 +12,7 @@ export * from './agent_images';
 export * from './buildkite';
 export * as CiStats from './ci-stats';
 export { isScoutTestsOnlyDiff } from './ci-stats/pick_test_group_run_order/selective_scout';
+export { isCypressSkippableDiff } from './ci-stats/pick_test_group_run_order/selective_cypress';
 export * from './github';
 export * as TestFailures from './test-failures';
 export * from './utils';
