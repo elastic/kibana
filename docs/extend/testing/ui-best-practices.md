@@ -301,7 +301,7 @@ export class StreamsAppPage {
 
 :::::
 
-Don't subclass a Component Object or bolt one-off methods onto it locally. If a helper is missing a capability, [contribute it upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite benefits.
+When a Component Object doesn't do what you need, don't work around it locally — neither by subclassing it, nor by writing your own helper that drives the EUI component's internals directly. Both leave the gap in place for everyone else, and local code that depends on EUI's DOM is what Component Objects exist to avoid. [Contribute the missing capability upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) instead, so every suite gets it.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
