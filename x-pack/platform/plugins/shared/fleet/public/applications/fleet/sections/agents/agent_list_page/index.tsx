@@ -141,6 +141,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     latestAgentActionErrors,
     setLatestAgentActionErrors,
     scheduledActionsCount,
+    scheduledActionsCapped,
     isUsingFilter,
     onTableChange,
     clearFilters: clearFiltersFromSession,
@@ -575,6 +576,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
         scheduledActionsCount={scheduledActionsCount}
+        scheduledActionsCapped={scheduledActionsCapped}
         sortField={sort.field}
         sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}

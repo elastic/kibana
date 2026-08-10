@@ -36,7 +36,7 @@ import {
 import { getKuery } from '../utils/get_kuery';
 
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
-import { isScheduledAction } from '../components/agent_activity_flyout/agent_activity_helper';
+import { isScheduledAction } from '../utils/is_scheduled_action';
 
 import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
@@ -253,18 +253,24 @@ export function useFetchAgentsData() {
     },
   });
 
-  const { data: scheduledActionsCount } = useQuery({
+  const { data: scheduledActionsData } = useQuery({
     refetchInterval: REFRESH_INTERVAL_MS,
     queryKey: ['get-scheduled-action-statuses'],
-    initialData: 0,
+    initialData: { count: 0, isCapped: false },
     queryFn: async () => {
       const response = await sendGetActionStatus({
         perPage: MAX_AGENT_ACTIONS,
         scheduledOnly: true,
       });
-      return (response.data?.items ?? [])
-        .filter((action) => action.type === 'UNENROLL' && isScheduledAction(action))
-        .reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0);
+      const items = response.data?.items ?? [];
+      const matching = items.filter(
+        (action) => action.type === 'UNENROLL' && isScheduledAction(action)
+      );
+      return {
+        count: matching.reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0),
+        // True when we received a full page: the real total may be higher.
+        isCapped: items.length >= MAX_AGENT_ACTIONS,
+      };
     },
   });
 
@@ -483,7 +489,8 @@ export function useFetchAgentsData() {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
-    scheduledActionsCount,
+    scheduledActionsCount: scheduledActionsData.count,
+    scheduledActionsCapped: scheduledActionsData.isCapped,
     isUsingFilter,
     clearFilters: sessionState.clearFilters,
     onTableChange: sessionState.onTableChange,

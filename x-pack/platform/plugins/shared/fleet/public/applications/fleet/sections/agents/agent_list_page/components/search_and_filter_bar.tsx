@@ -68,6 +68,7 @@ export interface SearchAndFilterBarProps {
   shouldShowAgentActivityTour?: boolean;
   latestAgentActionErrors: number;
   scheduledActionsCount: number;
+  scheduledActionsCapped: boolean;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
@@ -103,6 +104,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   shouldShowAgentActivityTour,
   latestAgentActionErrors,
   scheduledActionsCount,
+  scheduledActionsCapped,
   sortField,
   sortOrder,
   unsupportedMigrateAgents,
@@ -193,6 +195,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
             <EuiFlexItem grow={false}>
               <ScheduledActionsBadge
                 scheduledActionsCount={scheduledActionsCount}
+                isCapped={scheduledActionsCapped}
                 onClick={onClickAgentActivity}
               />
             </EuiFlexItem>

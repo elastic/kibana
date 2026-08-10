@@ -12,8 +12,9 @@ import React from 'react';
 
 export const ScheduledActionsBadge: React.FunctionComponent<{
   scheduledActionsCount: number;
+  isCapped: boolean;
   onClick: () => void;
-}> = ({ scheduledActionsCount, onClick }) => {
+}> = ({ scheduledActionsCount, isCapped, onClick }) => {
   if (scheduledActionsCount === 0) {
     return null;
   }
@@ -21,11 +22,19 @@ export const ScheduledActionsBadge: React.FunctionComponent<{
   return (
     <EuiToolTip
       content={
-        <FormattedMessage
-          id="xpack.fleet.agentList.scheduledActionsBadge.tooltip"
-          defaultMessage="{count, plural, one {# agent is} other {# agents are}} scheduled to be unenrolled. Click to review."
-          values={{ count: scheduledActionsCount }}
-        />
+        isCapped ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.scheduledActionsBadge.tooltipCapped"
+            defaultMessage="{count}+ agents are scheduled to be unenrolled. Click to review."
+            values={{ count: scheduledActionsCount }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentList.scheduledActionsBadge.tooltip"
+            defaultMessage="{count, plural, one {# agent is} other {# agents are}} scheduled to be unenrolled. Click to review."
+            values={{ count: scheduledActionsCount }}
+          />
+        )
       }
     >
       <EuiBadge
