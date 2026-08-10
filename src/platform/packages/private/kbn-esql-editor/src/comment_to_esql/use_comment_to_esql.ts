@@ -457,6 +457,7 @@ export const useCommentToEsql = ({
     editorRef,
     editorModel,
     clearGhostHintRef,
+    autoAcceptCallbackRef,
     showGeneratingDecoration,
     cleanup,
     generateESQL,
