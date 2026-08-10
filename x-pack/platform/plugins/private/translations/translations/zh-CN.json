@@ -55254,7 +55254,6 @@
     "xpack.streams.fromBuilderItem.removeLabel": "移除",
     "xpack.streams.getAvailableProcessors.strong.arithmeticOrLogicalExpressionsLabel": "算术或逻辑表达式",
     "xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel": "拖动手柄",
-    "xpack.streams.ilmPhaseSelect.buttonAriaLabel": "添加 ILM 阶段按钮",
     "xpack.streams.ilmPhaseSelect.popoverAriaLabel": "添加 ILM 阶段弹出窗口",
     "xpack.streams.importContentPackFlyout.cancel": "取消",
     "xpack.streams.importContentPackFlyout.closeIcon": "关闭",
