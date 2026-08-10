@@ -154,9 +154,9 @@ describe('project watch', () => {
       expect(projected.mandate).toBe('Detection engineering');
     });
 
-    it('projects both scheduled and manual triggers', () => {
-      expect(projected.triggers.map(({ type }) => type)).toEqual(['schedule', 'manual']);
-      expect(projected.schedule.cadence).toBe('sweep');
+    it('projects a manual-only trigger', () => {
+      expect(projected.triggers.map(({ type }) => type)).toEqual(['manual']);
+      expect(projected.schedule.cadence).toBe('manual');
     });
 
     it('dispatches to exactly one worker per run', () => {
