@@ -12,6 +12,7 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
   generateRuleSchemaDoc,
@@ -24,7 +25,7 @@ import {
   generateNoDataStrategyDoc,
 } from './schema_to_skill_docs';
 
-export const createRuleManagementSkill = () =>
+export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
   defineSkillType({
     id: RULE_MANAGEMENT_SKILL_ID,
     name: RULE_MANAGEMENT_SKILL_ID,
@@ -202,5 +203,5 @@ Do not offer notifications if the rule is still incomplete (missing name, query,
 If the rule's kind is \`signal\`, follow the "Notifications Require Alert Kind" guidance above before proceeding.
 
 If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup. Do **not** compose action policies or notification workflows from this skill.`,
-    getInlineTools: () => [manageRuleTool()],
+    getInlineTools: () => [manageRuleTool(deps)],
   });
