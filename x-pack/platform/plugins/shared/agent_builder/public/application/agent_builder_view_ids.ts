@@ -32,4 +32,5 @@ export const agentBuilderViewIds = {
   manageToolDetails: 'agent_builder_manage_tools_detail',
   manageMcpClients: 'agent_builder_manage_mcp_clients',
   manageMcpClientCreate: 'agent_builder_manage_mcp_clients_create',
+  manageContext: 'agent_builder_manage_context',
 } as const;

@@ -10,6 +10,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map } from 'rxjs';
 import type { FullscreenEntryPointSource } from '@kbn/agent-builder-common';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { CONTEXT_ENGINE_APP_ID } from '@kbn/context-engine-plugin/common/features';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import type { CreateOAuthClientResponse } from '../../../common/http_api/oauth_clients';
 import { useKibana } from './use_kibana';
@@ -86,10 +87,22 @@ export const useNavigation = () => {
     [application]
   );
 
+  const navigateToContextEngine = useCallback(
+    (path: string) => application.navigateToApp(CONTEXT_ENGINE_APP_ID, { path }),
+    [application]
+  );
+
+  const createContextEngineUrl = useCallback(
+    (path: string) => application.getUrlForApp(CONTEXT_ENGINE_APP_ID, { path }),
+    [application]
+  );
+
   return {
     createAgentBuilderUrl,
     navigateToAgentBuilderUrl,
     navigateToManageConnectors,
     manageConnectorsUrl,
+    navigateToContextEngine,
+    createContextEngineUrl,
   };
 };

@@ -8,14 +8,16 @@
 import { useMemo } from 'react';
 import type { RouteAccessConfig } from '../route_config';
 import { useFeatureFlags } from './use_feature_flags';
+import { useIsContextEngineEnabled } from './use_is_context_engine_enabled';
 import { useIsUIAMEnabled } from './use_is_uiam_enabled';
 
 export const useRouteAccessConfig = (): RouteAccessConfig => {
   const featureFlags = useFeatureFlags();
   const isUIAMEnabled = useIsUIAMEnabled();
+  const isContextEngineEnabled = useIsContextEngineEnabled();
 
   return useMemo(
-    () => ({ featureFlags, capabilities: { isUIAMEnabled } }),
-    [featureFlags, isUIAMEnabled]
+    () => ({ featureFlags, capabilities: { isUIAMEnabled, isContextEngineEnabled } }),
+    [featureFlags, isUIAMEnabled, isContextEngineEnabled]
   );
 };

@@ -30,6 +30,7 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
 import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
+import { AgentBuilderContextPage } from './pages/context';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
@@ -41,6 +42,7 @@ export interface FeatureFlags {
 
 export interface Capabilities {
   isUIAMEnabled: boolean;
+  isContextEngineEnabled: boolean;
 }
 
 export interface RouteAccessConfig {
@@ -55,6 +57,7 @@ export interface RouteDefinition {
   sidebarView: SidebarView;
   isExperimental?: boolean;
   requiresUIAM?: boolean;
+  requiresContextEngine?: boolean;
   navLabel?: string;
   navIcon?: string;
 }
@@ -77,6 +80,9 @@ const navLabels = {
   }),
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
+  }),
+  context: i18n.translate('xpack.agentBuilder.routeConfig.context', {
+    defaultMessage: 'Context',
   }),
 };
 
@@ -235,6 +241,15 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     element: <AgentBuilderToolDetailsPage />,
   },
+  // Listed last so the sidebar reads Agents · Skills · Tools · Context, matching the design
+  {
+    path: '/manage/context',
+    viewId: agentBuilderViewIds.manageContext,
+    sidebarView: 'manage',
+    navLabel: navLabels.context,
+    requiresContextEngine: true,
+    element: <AgentBuilderContextPage />,
+  },
 ];
 
 export const allRoutes: RouteDefinition[] = [...agentRoutes, ...manageRoutes];
@@ -293,10 +308,11 @@ export interface SidebarNavItem {
 }
 
 const isRouteEnabled = (route: RouteDefinition, config: RouteAccessConfig): boolean => {
-  const { isExperimental, requiresUIAM } = route;
+  const { isExperimental, requiresUIAM, requiresContextEngine } = route;
   const { featureFlags, capabilities } = config;
   if (isExperimental && !featureFlags.experimental) return false;
   if (requiresUIAM && !capabilities.isUIAMEnabled) return false;
+  if (requiresContextEngine && !capabilities.isContextEngineEnabled) return false;
   return true;
 };
 

@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export const CONTEXT_ENGINE_PATHS = {
-  landing: '/',
-  create: '/ai_index/create',
-  detail: '/ai_index/:id',
-} as const;
-
-export const getAiIndexDetailPath = (id: string): string => `/ai_index/${id}`;
+export { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../../common/paths';

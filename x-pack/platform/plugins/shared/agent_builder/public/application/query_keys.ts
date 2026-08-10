@@ -80,4 +80,7 @@ export const queryKeys = {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
   },
+  aiIndices: {
+    list: ['aiIndices', 'list'] as const,
+  },
 };
