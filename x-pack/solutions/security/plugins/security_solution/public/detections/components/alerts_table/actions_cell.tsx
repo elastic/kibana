@@ -20,7 +20,6 @@ import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useFlyoutPagination } from '../../../flyout_v2/document/pagination/use_flyout_pagination';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 
 const onRowSelected = () => {};
@@ -38,7 +37,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   refresh: alertsTableRefresh,
   clearSelection,
   leadingControlColumn,
-  paginationInstanceId,
+  openDocumentFlyout: contextOpenDocumentFlyout,
 }) => {
   const license = useLicense();
   const { alertsTableRef } = useAlertsContext();
@@ -52,17 +51,14 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   } = useSelector((state: State) => selectTableById(state, tableType) ?? defaults);
   const eventContext = useContext(StatefulEventContext);
   const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
-  const { openDocumentFlyout } = useFlyoutPagination(paginationInstanceId);
 
   // `rowIndex` is absolute (it crosses page boundaries), which is also what
   // the pagination slice expects (`flyoutDocumentIndex`). See `ActionsCellHost`
   // in `@kbn/response-ops-alerts-table` for where the page-relative index is
   // computed back from this absolute one.
   const onExpandFlyout = useCallback(() => {
-    if (paginationInstanceId) {
-      openDocumentFlyout(rowIndex);
-    }
-  }, [openDocumentFlyout, paginationInstanceId, rowIndex]);
+    contextOpenDocumentFlyout(rowIndex);
+  }, [contextOpenDocumentFlyout, rowIndex]);
 
   // Derive ecsAlert (nested) from alert
   const ecsAlert = useMemo(() => expandDottedObject(alert) as Ecs, [alert]);
@@ -138,7 +134,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       setEventsLoading={setEventsLoading}
       setEventsDeleted={noop}
       refetch={alertsTableRefresh}
-      onExpandFlyout={isNewFlyoutEnabled && paginationInstanceId ? onExpandFlyout : undefined}
+      onExpandFlyout={isNewFlyoutEnabled && contextOpenDocumentFlyout ? onExpandFlyout : undefined}
     />
   );
 };

@@ -7,8 +7,6 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { usePaginatedFlyout } from './use_paginated_flyout';
-import { __resetFlyoutPaginationStoreForTests, flyoutPaginationStore } from './store';
-import { absentSlice } from './types';
 import {
   FLYOUT_ORIGIN,
   FLYOUT_SESSION_KIND,
@@ -52,33 +50,30 @@ describe('usePaginatedFlyout', () => {
   const openFlyout = jest.fn().mockReturnValue({ close });
 
   beforeEach(() => {
-    __resetFlyoutPaginationStoreForTests();
     jest.clearAllMocks();
     jest.mocked(useOpenFlyout).mockReturnValue(openFlyout);
   });
 
-  it('paginationInstanceId is stable across re-renders', () => {
+  it('openDocumentFlyout is stable across re-renders', () => {
     const { result, rerender } = renderHook(() => usePaginatedFlyout(makeOptions()));
-    const first = result.current.paginationInstanceId;
+    const first = result.current.openDocumentFlyout;
     rerender();
-    expect(result.current.paginationInstanceId).toBe(first);
+    expect(result.current.openDocumentFlyout).toBe(first);
   });
 
-  it('setState writes to the slice', () => {
+  it('setState writes to the store', () => {
     const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
-    const id = result.current.paginationInstanceId;
 
     act(() => {
       result.current.setState({ flyoutDocumentIndex: 5, totalDocumentCount: 50 });
     });
 
-    expect(flyoutPaginationStore.getSlice(id).flyoutDocumentIndex).toBe(5);
-    expect(flyoutPaginationStore.getSlice(id).totalDocumentCount).toBe(50);
+    expect(result.current.slice.flyoutDocumentIndex).toBe(5);
+    expect(result.current.slice.totalDocumentCount).toBe(50);
   });
 
   it('closePaginatedFlyout soft-resets displayed-document fields and preserves openDocumentFlyoutImpl', () => {
     const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
-    const id = result.current.paginationInstanceId;
 
     act(() => {
       result.current.setState({ flyoutDocumentIndex: 3, totalDocumentCount: 10 });
@@ -88,18 +83,14 @@ describe('usePaginatedFlyout', () => {
       result.current.closePaginatedFlyout();
     });
 
-    const slice = flyoutPaginationStore.getSlice(id);
-    // Slice still exists — NOT absentSlice
-    expect(slice).not.toBe(absentSlice);
     // Document-state fields are cleared
-    expect(slice.flyoutDocumentIndex).toBeNull();
-    expect(slice.flyoutDocument).toBeNull();
-    expect(slice.isFlyoutDocumentLoading).toBe(false);
-    // totalDocumentCount is source-level state, not a displayed-document field,
-    // so it survives the soft-reset (see SOFT_RESET's comment).
-    expect(slice.totalDocumentCount).toBe(10);
+    expect(result.current.slice.flyoutDocumentIndex).toBeNull();
+    expect(result.current.slice.flyoutDocument).toBeNull();
+    expect(result.current.slice.isFlyoutDocumentLoading).toBe(false);
+    // totalDocumentCount is source-level state and survives the soft-reset
+    expect(result.current.slice.totalDocumentCount).toBe(10);
     // openDocumentFlyoutImpl is still registered (set by the useEffect)
-    expect(slice.openDocumentFlyoutImpl).not.toBeNull();
+    expect(result.current.slice.openDocumentFlyoutImpl).not.toBeNull();
   });
 
   it('openDocumentFlyoutImpl survives an open → close → open cycle (regression)', () => {
@@ -116,14 +107,13 @@ describe('usePaginatedFlyout', () => {
       result.current.closePaginatedFlyout();
     });
 
-    // Second open — openDocumentFlyoutImpl must still be registered so the
-    // in-flyout EuiPagination can dispatch back through openPaginatedFlyout
+    // Second open — openDocumentFlyoutImpl must still be registered
     act(() => {
       result.current.openPaginatedFlyout(1);
     });
     expect(openFlyout).toHaveBeenCalledTimes(2);
 
-    // And a third cycle for good measure
+    // Third cycle
     act(() => {
       result.current.closePaginatedFlyout();
     });
@@ -135,48 +125,43 @@ describe('usePaginatedFlyout', () => {
 
   it('registers openDocumentFlyoutImpl after mount', () => {
     const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
-    const id = result.current.paginationInstanceId;
-    expect(flyoutPaginationStore.getSlice(id).openDocumentFlyoutImpl).not.toBeNull();
+    expect(result.current.slice.openDocumentFlyoutImpl).not.toBeNull();
   });
 
-  it('removes slice on unmount so getSlice returns absentSlice', () => {
+  it('clears the overlay on unmount when one is open', () => {
     const { result, unmount } = renderHook(() => usePaginatedFlyout(makeOptions()));
-    const id = result.current.paginationInstanceId;
 
     act(() => {
-      result.current.setState({ flyoutDocumentIndex: 2 });
+      result.current.openPaginatedFlyout(0);
     });
 
     unmount();
 
-    expect(flyoutPaginationStore.getSlice(id)).toBe(absentSlice);
+    expect(close).toHaveBeenCalledTimes(1);
   });
 
-  it('two concurrent hook instances have isolated slices', () => {
+  it('two concurrent hook instances have isolated stores', () => {
     const { result: r1 } = renderHook(() => usePaginatedFlyout(makeOptions()));
     const { result: r2 } = renderHook(() => usePaginatedFlyout(makeOptions()));
-    const id1 = r1.current.paginationInstanceId;
-    const id2 = r2.current.paginationInstanceId;
 
     act(() => {
       r1.current.setState({ flyoutDocumentIndex: 5, totalDocumentCount: 50 });
     });
 
-    expect(flyoutPaginationStore.getSlice(id1).flyoutDocumentIndex).toBe(5);
-    expect(flyoutPaginationStore.getSlice(id2).flyoutDocumentIndex).toBeNull();
+    expect(r1.current.slice.flyoutDocumentIndex).toBe(5);
+    expect(r2.current.slice.flyoutDocumentIndex).toBeNull();
   });
 
   it('openPaginatedFlyout calls resolveDocument and sets flyoutDocumentIndex', () => {
     const resolveDocument = jest.fn().mockReturnValue(null);
     const { result } = renderHook(() => usePaginatedFlyout(makeOptions({ resolveDocument })));
-    const id = result.current.paginationInstanceId;
 
     act(() => {
       result.current.openPaginatedFlyout(5);
     });
 
     expect(resolveDocument).toHaveBeenCalled();
-    expect(flyoutPaginationStore.getSlice(id).flyoutDocumentIndex).toBe(5);
+    expect(result.current.slice.flyoutDocumentIndex).toBe(5);
   });
 
   describe('system flyout lifecycle', () => {
@@ -189,19 +174,23 @@ describe('usePaginatedFlyout', () => {
       });
 
       expect(openFlyout).toHaveBeenCalledTimes(1);
-      expect(openFlyout).toHaveBeenCalledWith(
-        null,
-        expect.objectContaining({
-          historyKey: TEST_HISTORY_KEY,
-          session: FLYOUT_SESSION_KIND.START,
-        }),
-        {
-          surface: FLYOUT_SURFACE.FLYOUT,
-          flyoutType: FLYOUT_TYPE.DOCUMENT,
-          session: FLYOUT_SESSION_KIND.START,
-          origin: FLYOUT_ORIGIN.ALERTS_TABLE,
-        }
-      );
+      const [element, options, meta] = openFlyout.mock.calls[0];
+      // The first arg is a PaginationStoreProvider wrapping the body
+      expect(element.props.value).toMatchObject({
+        subscribe: expect.any(Function),
+        getSnapshot: expect.any(Function),
+        setState: expect.any(Function),
+      });
+      expect(options).toMatchObject({
+        historyKey: TEST_HISTORY_KEY,
+        session: FLYOUT_SESSION_KIND.START,
+      });
+      expect(meta).toEqual({
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
+      });
     });
 
     it('closePaginatedFlyout closes the V2 overlay', () => {

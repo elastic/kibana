@@ -6,48 +6,42 @@
  */
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import { flyoutPaginationStore } from './store';
-import { absentSlice, type FlyoutPaginationValue, type ScopedPaginationSlice } from './types';
+import { usePaginationStore } from './context';
+import { absentSlice, type FlyoutPaginationValue } from './types';
 
 const absentValue: FlyoutPaginationValue = {
   ...absentSlice,
   openDocumentFlyout: () => {},
 };
 
-/**
- * Hook that subscribes to the pagination slice owned by `instanceId` and
- * returns its current state. Returns `absentValue` when `instanceId` is
- * `null`, `undefined`, or unknown — consumers render no pagination in that
- * case and no exception is thrown.
- *
- * The `instanceId` is a per-source-instance UUID minted once at source
- * mount (by `usePaginatedFlyout`) and passed through flyout params →
- * `DocumentDetailsContext` → this hook. It is stable for the lifetime of
- * the source, so the `subscribe`/`getSnapshot` functions are effectively
- * stable across renders.
- */
-export const useFlyoutPagination = (
-  instanceId: string | null | undefined
-): FlyoutPaginationValue => {
-  const slice = useSyncExternalStore<ScopedPaginationSlice>(
-    flyoutPaginationStore.subscribe,
-    () => flyoutPaginationStore.getSlice(instanceId ?? null),
-    () => flyoutPaginationStore.getSlice(instanceId ?? null)
-  );
+// Module-level stubs for when there is no PaginationStoreProvider. Defined
+// outside the hook so useSyncExternalStore receives stable function references.
+const noopSubscribe = (_listener: () => void): (() => void) => () => {};
+const getAbsentSnapshot = (): typeof absentSlice => absentSlice;
 
-  // Reads the impl at call-time so swapping the impl (e.g. when the
-  // source re-registers it after a page change) is always picked up
-  // without the caller needing to re-render.
+/**
+ * Hook that reads the pagination store injected by the nearest
+ * `PaginationStoreProvider`. Returns `absentValue` when there is no provider
+ * (e.g. flyout opened without pagination support), so callers can safely
+ * destructure without null-checking.
+ */
+export const useFlyoutPagination = (): FlyoutPaginationValue => {
+  const store = usePaginationStore();
+
+  const subscribe = useMemo(() => (store ? store.subscribe : noopSubscribe), [store]);
+  const getSnapshot = useMemo(() => (store ? store.getSnapshot : getAbsentSnapshot), [store]);
+
+  const slice = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
   const openDocumentFlyout = useCallback(
     (documentIndex: number): void => {
-      if (!instanceId) return;
-      flyoutPaginationStore.getSlice(instanceId).openDocumentFlyoutImpl?.(documentIndex);
+      store?.getSnapshot().openDocumentFlyoutImpl?.(documentIndex);
     },
-    [instanceId]
+    [store]
   );
 
   return useMemo<FlyoutPaginationValue>(() => {
-    if (slice === absentSlice && !instanceId) return absentValue;
+    if (!store) return absentValue;
     return { ...slice, openDocumentFlyout };
-  }, [instanceId, slice, openDocumentFlyout]);
+  }, [store, slice, openDocumentFlyout]);
 };

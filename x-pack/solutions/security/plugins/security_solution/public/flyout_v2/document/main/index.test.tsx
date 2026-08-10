@@ -28,7 +28,8 @@ import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_
 import type { OpenFlyoutLinkRenderer } from '../../shared/components/open_flyout_link';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { __resetFlyoutPaginationStoreForTests, flyoutPaginationStore } from '../pagination/store';
+import { createPaginationStore } from '../pagination/store';
+import { PaginationStoreProvider } from '../pagination/context';
 import { FLYOUT_V2_LOADING_SPINNER_TEST_ID } from './components/test_ids';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
@@ -91,37 +92,27 @@ const createAlertHit = (extra: DataTableRecord['flattened'] = {}): DataTableReco
     isAnchor: false,
   } as DataTableRecord);
 
-const INSTANCE_ID = 'test-instance-uuid';
-
 describe('<DocumentFlyout />', () => {
   const startServices = createStartServicesMock();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
-    __resetFlyoutPaginationStoreForTests();
-  });
-
-  afterEach(() => {
-    __resetFlyoutPaginationStoreForTests();
   });
 
   it('renders the document owned by the pagination slice when hit is omitted', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    const store = createPaginationStore();
     act(() => {
-      flyoutPaginationStore.setSlice(INSTANCE_ID, {
-        flyoutDocument: createAlertHit(),
-      });
+      store.setState({ flyoutDocument: createAlertHit() });
     });
 
     const { getByTestId } = render(
-      <TestProviders>
-        <DocumentFlyout
-          renderCellActions={jest.fn()}
-          onAlertUpdated={jest.fn()}
-          paginationInstanceId={INSTANCE_ID}
-        />
-      </TestProviders>
+      <PaginationStoreProvider value={store}>
+        <TestProviders>
+          <DocumentFlyout renderCellActions={jest.fn()} onAlertUpdated={jest.fn()} />
+        </TestProviders>
+      </PaginationStoreProvider>
     );
 
     expect(getByTestId('mock-header')).toBeInTheDocument();
@@ -297,19 +288,21 @@ describe('<DocumentFlyout />', () => {
   describe('cross-page pagination loading branch', () => {
     it('renders the header and a centered spinner instead of the body when isFlyoutDocumentLoading is true', () => {
       (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+      const store = createPaginationStore();
       act(() => {
-        flyoutPaginationStore.setSlice(INSTANCE_ID, { isFlyoutDocumentLoading: true });
+        store.setState({ isFlyoutDocumentLoading: true });
       });
 
       const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <DocumentFlyout
-            hit={createAlertHit()}
-            renderCellActions={jest.fn()}
-            onAlertUpdated={jest.fn()}
-            paginationInstanceId={INSTANCE_ID}
-          />
-        </TestProviders>
+        <PaginationStoreProvider value={store}>
+          <TestProviders>
+            <DocumentFlyout
+              hit={createAlertHit()}
+              renderCellActions={jest.fn()}
+              onAlertUpdated={jest.fn()}
+            />
+          </TestProviders>
+        </PaginationStoreProvider>
       );
 
       // Header is preserved so the in-flyout pagination control (rendered by
