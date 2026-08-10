@@ -16,9 +16,12 @@ import {
 } from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
+  parseWorkflowNameFromYaml,
   resolveAiIndexIdFromAttachments,
   saveAutomationHandler,
   getSaveAutomationErrorMessage,
+  tryResolveAiIndexDisplayLabelFromAttachments,
+  tryResolveWorkflowDisplayNameFromAttachments,
 } from './handler';
 
 jest.mock('../../assert_context_engine_write_access', () => ({
@@ -83,31 +86,60 @@ describe('resolveAiIndexIdFromAttachments', () => {
   });
 });
 
+describe('save automation confirmation labels', () => {
+  it('parses workflow names from yaml', () => {
+    expect(parseWorkflowNameFromYaml('name: "Pilot Workflow"\nsteps: []')).toBe('Pilot Workflow');
+  });
+
+  it('resolves workflow display names from attachments', () => {
+    const attachments = createAttachmentStateManager();
+    expect(
+      tryResolveWorkflowDisplayNameFromAttachments(
+        attachments as unknown as Parameters<
+          typeof tryResolveWorkflowDisplayNameFromAttachments
+        >[0],
+        WORKFLOW_ATTACHMENT_ID
+      )
+    ).toBe('pilot');
+  });
+
+  it('resolves ai index display labels from attachments', () => {
+    const attachments = createAttachmentStateManager();
+    expect(
+      tryResolveAiIndexDisplayLabelFromAttachments(
+        attachments as unknown as Parameters<typeof tryResolveAiIndexDisplayLabelFromAttachments>[0]
+      )
+    ).toBe('my-ai-index');
+  });
+});
+
 describe('getSaveAutomationErrorMessage', () => {
-  it('returns domain error messages', () => {
+  it('returns error.message for Error instances', () => {
     expect(getSaveAutomationErrorMessage(new AiIndexManagedError('my-ai-index'))).toBe(
       "AI index 'my-ai-index' is managed and cannot be modified via the API"
     );
     expect(getSaveAutomationErrorMessage(new AiIndexConflictError('my-ai-index'))).toContain(
       'my-ai-index'
     );
-  });
-
-  it('returns a generic message for internal errors', () => {
+    expect(
+      getSaveAutomationErrorMessage(
+        Object.assign(new Error("Workflow with id 'wf-1' already exists"), { statusCode: 409 })
+      )
+    ).toBe("Workflow with id 'wf-1' already exists");
     expect(
       getSaveAutomationErrorMessage(
         Object.assign(new Error('search failed'), { statusCode: 500, meta: {} })
       )
-    ).toBe('An unexpected error occurred while saving the workflow automation.');
-    expect(getSaveAutomationErrorMessage('boom')).toBe(
-      'An unexpected error occurred while saving the workflow automation.'
-    );
-  });
-
-  it('returns expected business error messages', () => {
+    ).toBe('search failed');
     expect(
       getSaveAutomationErrorMessage(new Error("Workflow 'wf-1' was not found in this space."))
     ).toBe("Workflow 'wf-1' was not found in this space.");
+  });
+
+  it('returns a generic message for non-Error values', () => {
+    expect(getSaveAutomationErrorMessage('boom')).toBe(
+      'An unexpected error occurred while saving the workflow automation.'
+    );
   });
 });
 

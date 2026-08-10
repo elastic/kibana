@@ -20,11 +20,6 @@ import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '@kbn/context-engine-plugin/common/agent_builder_attachments';
-import {
-  AiIndexConflictError,
-  AiIndexManagedError,
-  AiIndexNotFoundError,
-} from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
@@ -54,6 +49,95 @@ const isWorkflowYamlData = (data: unknown): data is WorkflowYamlAttachmentData =
   }
 
   return typeof data.yaml === 'string' && data.yaml.length > 0;
+};
+
+export const parseWorkflowNameFromYaml = (yaml: string): string | undefined => {
+  const match = /^name:\s*(.+)$/m.exec(yaml);
+  if (!match) {
+    return undefined;
+  }
+
+  const raw = match[1].trim();
+  if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
+    return raw.slice(1, -1);
+  }
+
+  return raw;
+};
+
+export const tryResolveWorkflowDisplayNameFromAttachments = (
+  attachments: AttachmentStateManager | undefined,
+  workflowAttachmentId: string
+): string | undefined => {
+  if (!attachments) {
+    return undefined;
+  }
+
+  const attachment = attachments.getAll().find((entry) => entry.id === workflowAttachmentId);
+  if (!attachment || attachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
+    return undefined;
+  }
+
+  const latestVersion = getLatestVersion(attachment);
+  if (!latestVersion || !isWorkflowYamlData(latestVersion.data)) {
+    return undefined;
+  }
+
+  return latestVersion.data.name ?? parseWorkflowNameFromYaml(latestVersion.data.yaml);
+};
+
+export const tryResolveAiIndexDisplayLabelFromAttachments = (
+  attachments: AttachmentStateManager | undefined,
+  aiIndexId?: string
+): string => {
+  if (!attachments) {
+    return aiIndexId ?? 'the AI index';
+  }
+
+  for (const attachment of attachments.getAll()) {
+    if (attachment.type !== AI_INDEX_ATTACHMENT_TYPE) {
+      continue;
+    }
+
+    const latestVersion = getLatestVersion(attachment);
+    const data = latestVersion?.data;
+    if (!data || typeof data !== 'object' || !('id' in data) || typeof data.id !== 'string') {
+      continue;
+    }
+
+    if (aiIndexId !== undefined && data.id !== aiIndexId) {
+      continue;
+    }
+
+    if (
+      'description' in data &&
+      typeof data.description === 'string' &&
+      data.description.length > 0
+    ) {
+      return data.description;
+    }
+
+    return data.id;
+  }
+
+  return aiIndexId ?? 'the AI index';
+};
+
+export const tryResolveWorkflowDisplayNameById = async ({
+  workflowsManagement,
+  workflowId,
+  spaceId,
+}: {
+  workflowsManagement: WorkflowsManagementApi;
+  workflowId: string;
+  spaceId: string;
+}): Promise<string | undefined> => {
+  try {
+    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+    return workflow?.name;
+  } catch {
+    return undefined;
+  }
 };
 
 export const resolveAiIndexIdFromAttachments = (
@@ -291,24 +375,8 @@ export const saveAutomationHandler = async ({
   };
 };
 
-const SAVE_AUTOMATION_DOMAIN_ERRORS = [
-  AiIndexNotFoundError,
-  AiIndexManagedError,
-  AiIndexConflictError,
-] as const;
-
-const isInternalError = (error: Error): boolean => 'statusCode' in error || 'meta' in error;
-
 export const getSaveAutomationErrorMessage = (error: unknown): string => {
-  if (SAVE_AUTOMATION_DOMAIN_ERRORS.some((ErrorType) => error instanceof ErrorType)) {
-    return (error as Error).message;
-  }
-
   if (error instanceof Error) {
-    if (isInternalError(error)) {
-      return 'An unexpected error occurred while saving the workflow automation.';
-    }
-
     return error.message;
   }
 

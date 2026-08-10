@@ -143,8 +143,17 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       }
 
       if (confirmStatus === ConfirmationStatus.unprompted) {
+        const spaceId = getCurrentSpaceId({
+          request: manager.deps.request,
+          spaces: manager.deps.spaces,
+        });
         const definition = tool.confirmation.getConfirmation
-          ? await tool.confirmation.getConfirmation({ toolParams })
+          ? await tool.confirmation.getConfirmation({
+              toolParams,
+              attachments: manager.deps.attachmentStateManager,
+              request: manager.deps.request,
+              spaceId,
+            })
           : undefined;
         return {
           prompt: createToolConfirmationPrompt({ confirmationId, tool, definition }),

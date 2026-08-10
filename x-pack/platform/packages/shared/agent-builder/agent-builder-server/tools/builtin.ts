@@ -20,6 +20,7 @@ import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
+import type { AttachmentStateManager } from '../attachments';
 import type { ToolHandlerFn } from './handler';
 
 /**
@@ -77,15 +78,24 @@ export interface ToolAvailabilityConfig {
 
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
+export interface BuiltInToolConfirmationContext<
+  TParams extends Record<string, unknown> = Record<string, unknown>
+> {
+  toolParams: TParams;
+  attachments?: AttachmentStateManager;
+  request?: KibanaRequest;
+  spaceId?: string;
+}
+
 export interface BuiltInToolConfirmationPolicy<
   TParams extends Record<string, unknown> = Record<string, unknown>
 > extends ToolConfirmationPolicy {
   /**
    * If set, will be used to get the confirmation
    */
-  getConfirmation?: (opts: {
-    toolParams: TParams;
-  }) => MaybePromise<ToolPolicyConfirmationDefinition>;
+  getConfirmation?: (
+    opts: BuiltInToolConfirmationContext<TParams>
+  ) => MaybePromise<ToolPolicyConfirmationDefinition>;
 }
 
 export interface BuiltInToolSpecificConfig<

@@ -20,7 +20,13 @@ import {
 import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
-import { getSaveAutomationErrorMessage, saveAutomationHandler } from './handler';
+import {
+  getSaveAutomationErrorMessage,
+  saveAutomationHandler,
+  tryResolveAiIndexDisplayLabelFromAttachments,
+  tryResolveWorkflowDisplayNameById,
+  tryResolveWorkflowDisplayNameFromAttachments,
+} from './handler';
 
 const MAX_ATTACHMENT_ID_LENGTH = 256;
 
@@ -99,6 +105,46 @@ export const createSaveAutomationTool = ({
     Requires an ai_index attachment in the conversation unless aiIndexId is provided explicitly.
   `,
   schema: saveAutomationSchema,
+  confirmation: {
+    askUser: 'always',
+    getConfirmation: async ({ toolParams, attachments, spaceId }) => {
+      const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(
+        attachments,
+        typeof toolParams.aiIndexId === 'string' ? toolParams.aiIndexId : undefined
+      );
+      const workflowAttachmentId =
+        typeof toolParams.workflowAttachmentId === 'string'
+          ? toolParams.workflowAttachmentId
+          : undefined;
+      const workflowId =
+        typeof toolParams.workflowId === 'string' ? toolParams.workflowId : undefined;
+
+      let workflowLabel = 'workflow';
+      if (workflowAttachmentId) {
+        const workflowName = tryResolveWorkflowDisplayNameFromAttachments(
+          attachments,
+          workflowAttachmentId
+        );
+        workflowLabel = workflowName
+          ? `workflow "${workflowName}"`
+          : `draft workflow attachment "${workflowAttachmentId}"`;
+      } else if (workflowId) {
+        const workflowName = await tryResolveWorkflowDisplayNameById({
+          workflowsManagement: getWorkflowsManagement(),
+          workflowId,
+          spaceId: spaceId ?? 'default',
+        });
+        workflowLabel = workflowName ? `workflow "${workflowName}"` : `workflow "${workflowId}"`;
+      }
+
+      return {
+        title: 'Save workflow automation',
+        message: `Save ${workflowLabel} to Kibana and attach it to AI index "${aiIndexLabel}"?`,
+        confirm_text: 'Save and attach',
+        cancel_text: 'Cancel',
+      };
+    },
+  },
   handler: async (params, { request, spaceId, attachments, logger }) => {
     try {
       const result = await saveAutomationHandler({
