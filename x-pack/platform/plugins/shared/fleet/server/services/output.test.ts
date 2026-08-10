@@ -1597,11 +1597,7 @@ describe('Output Service', () => {
     let savedEsoImpl: ((...args: any[]) => any) | undefined;
 
     beforeEach(() => {
-      mockedAppContextService.getCloud.mockReturnValue({
-        isServerlessEnabled: true,
-        elasticsearchUrl: DEFAULT_HOST,
-      } as any);
-      mockedAppContextService.getConfig.mockReturnValue(CONFIG_WITHOUT_ES_HOSTS);
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: true } as any);
       mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
         canEncrypt: true,
       } as any);
