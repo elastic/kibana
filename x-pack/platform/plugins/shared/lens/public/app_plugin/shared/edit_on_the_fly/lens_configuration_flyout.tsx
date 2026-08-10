@@ -173,6 +173,7 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onCancel = useCallback(() => {
+    setIsInlineFlyoutVisible(false);
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
@@ -364,10 +365,7 @@ export function LensEditConfigurationFlyout({
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
-      closeFlyout?.();
-      setIsInlineFlyoutVisible(false);
-      // Remove the user's preferred chart type from sessionStorage
-      deleteUserChartTypeFromSessionStorage();
+      onCancel();
     }
   };
 
