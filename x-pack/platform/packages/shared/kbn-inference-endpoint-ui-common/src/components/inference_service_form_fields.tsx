@@ -595,6 +595,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           const selectInput = providerSuperSelect(isInvalid);
           const formRow = (
             <EuiFormRow
+              id="providerSelectBox"
               fullWidth
               label={
                 <FormattedMessage
