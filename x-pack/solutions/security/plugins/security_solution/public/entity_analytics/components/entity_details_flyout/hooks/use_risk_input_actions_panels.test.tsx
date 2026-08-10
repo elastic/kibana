@@ -17,7 +17,7 @@ import { useSendBulkToTimeline } from '../../../../detections/components/alerts_
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import { SECURITY_ACTION_IDS } from '../../../../common/components/security_action_menu';
+import { RISK_INPUT_ACTION_IDS } from './action_menu/definitions';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 const mockCanUseCases = jest.fn();
@@ -146,18 +146,16 @@ describe('useRiskInputActionsPanels', () => {
       () =>
         useRiskInputActionsPanels([alertInputDataMock], () => {}, {
           customActions: [{ id: 'custom', items: [{ name: 'Custom action' }] }],
-          actionOrder: ['custom', SECURITY_ACTION_IDS.addToCase],
+          actionOrder: ['custom', RISK_INPUT_ACTION_IDS.addToCase],
         }),
       {
         wrapper: TestProviders,
       }
     );
 
-    expect(result.current[0].items?.map(({ name }) => name)).toEqual([
-      'Custom action',
-      expect.anything(),
-      expect.anything(),
-    ]);
+    expect(
+      result.current[0].items?.filter((item) => !('isSeparator' in item)).map(({ name }) => name)
+    ).toEqual(['Custom action', expect.anything(), expect.anything()]);
   });
 
   it('calls sendBulkEventsToTimelineHandler when timeline action is clicked', () => {

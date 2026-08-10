@@ -16,10 +16,9 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { AttacksGroupTakeActionItems } from '../../../detections/components/attacks/table/attacks_group_take_action_items';
 import { AttackAiAssistantButton } from '../../../detections/components/attacks/table/attack_details/attack_ai_assistant_button';
 import { FOOTER_TEST_ID, FOOTER_TAKE_ACTION_BUTTON_TEST_ID } from './constants/test_ids';
-import {
-  SECURITY_ACTION_MENU_PRESETS,
-  type SecurityActionMenuActionId,
-  type SecurityActionMenuContribution,
+import type {
+  SecurityActionMenuActionId,
+  SecurityActionMenuContribution,
 } from '../../../common/components/security_action_menu';
 
 export interface FooterProps {
@@ -110,7 +109,6 @@ export const Footer = memo(
               isRemoteDocument={isRemoteDocument}
               customActions={customActions}
               actionOrder={actionOrder}
-              preset={SECURITY_ACTION_MENU_PRESETS.attackFlyout}
             />
           </EuiPopover>
         </EuiFlexItem>

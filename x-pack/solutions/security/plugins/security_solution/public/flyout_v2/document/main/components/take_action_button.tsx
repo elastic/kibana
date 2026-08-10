@@ -42,12 +42,16 @@ import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import {
-  SECURITY_ACTION_IDS,
   SecurityActionMenuContent,
+  createSecurityActionMenuContributions,
   hasSecurityActionMenuItems,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  DOCUMENT_FLYOUT_ACTION_MENU_DEFINITION,
+  DOCUMENT_FLYOUT_ACTION_MENU_PRESET,
+} from './action_menu/definitions';
 
 // Maps each footer "Take action" menu item's existing `data-test-subj` to the `FlyoutActionType`
 // reported when it's clicked. Kept as one flat map (rather than one per action family) since
@@ -220,12 +224,13 @@ export const TakeActionButton = memo(
       [closePopoverHandler, onShowNotes]
     );
 
-    const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
-      ecsRowData: ecsData,
-      closePopover: closePopoverHandler,
-    });
+    const { runWorkflowMenuItem: runAlertWorkflowMenuItem, runAlertWorkflowPanel } =
+      useRunAlertWorkflowPanel({
+        ecsRowData: ecsData,
+        closePopover: closePopoverHandler,
+      });
 
-    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+    const { runWorkflowMenuItem: runDocumentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
         documents: [
@@ -314,73 +319,74 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const contributions: SecurityActionMenuContribution[] = useMemo(
-      () => [
-        {
-          id: SECURITY_ACTION_IDS.addToCase,
-          items: !isRemoteDocument ? addToCaseActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.status,
-          items: !isRemoteDocument && isAlert ? statusActionItems : [],
-          panels: !isRemoteDocument && isAlert ? statusActionPanels : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.tags,
-          items: !isRemoteDocument && isAlert ? alertTagsItems : [],
-          panels: !isRemoteDocument && isAlert ? alertTagsPanels : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.assignees,
-          items: !isRemoteDocument && isAlert ? alertAssigneesItems : [],
-          panels: !isRemoteDocument && isAlert ? alertAssigneesPanels : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.exceptions,
-          items: !isRemoteDocument && isAlert ? exceptionActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.hostIsolation,
-          items: !isRemoteDocument && isAlert ? hostIsolationActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.alertWorkflow,
-          items: !isRemoteDocument && isAlert ? runWorkflowMenuItem : [],
-          panels: !isRemoteDocument && isAlert ? runAlertWorkflowPanel : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.documentWorkflow,
-          items: !isRemoteDocument && !isAlert ? documentWorkflowMenuItem : [],
-          panels: !isRemoteDocument && !isAlert ? runDocumentWorkflowPanel : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.responder,
-          items: !isRemoteDocument ? endpointResponseActionsConsoleItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.osquery,
-          items: !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.addNote,
-          items: !isRemoteDocument && !isAlert ? noteItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.investigateInTimeline,
-          items: isInSecurityApp ? investigateInTimelineActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.explore,
-          items: !isInSecurityApp ? exploreActionItems : [],
-        },
-      ],
+    const contributions = useMemo(
+      () =>
+        createSecurityActionMenuContributions(DOCUMENT_FLYOUT_ACTION_MENU_DEFINITION, {
+          addToCase: {
+            items: addToCaseActionItems,
+            visibleWhen: [!isRemoteDocument],
+          },
+          changeStatus: {
+            items: statusActionItems,
+            panels: statusActionPanels,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          applyAlertTags: {
+            items: alertTagsItems,
+            panels: alertTagsPanels,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          manageAlertAssignees: {
+            items: alertAssigneesItems,
+            panels: alertAssigneesPanels,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          addExceptions: {
+            items: exceptionActionItems,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          isolateHost: {
+            items: hostIsolationActionItems,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          runAlertWorkflow: {
+            items: runAlertWorkflowMenuItem,
+            panels: runAlertWorkflowPanel,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          runDocumentWorkflow: {
+            items: runDocumentWorkflowMenuItem,
+            panels: runDocumentWorkflowPanel,
+            visibleWhen: [!isRemoteDocument, !isAlert],
+          },
+          respond: {
+            items: endpointResponseActionsConsoleItems,
+            visibleWhen: [!isRemoteDocument],
+          },
+          runOsquery: {
+            items: [osqueryActionItem],
+            visibleWhen: [!isRemoteDocument, osqueryAvailable],
+          },
+          addNote: {
+            items: noteItems,
+            visibleWhen: [!isRemoteDocument, !isAlert],
+          },
+          investigateInTimeline: {
+            items: investigateInTimelineActionItems,
+            visibleWhen: [isInSecurityApp],
+          },
+          explore: {
+            items: exploreActionItems,
+            visibleWhen: [!isInSecurityApp],
+          },
+        }),
       [
         addToCaseActionItems,
         alertAssigneesItems,
         alertAssigneesPanels,
         alertTagsItems,
         alertTagsPanels,
-        documentWorkflowMenuItem,
+        runDocumentWorkflowMenuItem,
         endpointResponseActionsConsoleItems,
         exceptionActionItems,
         exploreActionItems,
@@ -394,7 +400,7 @@ export const TakeActionButton = memo(
         osqueryAvailable,
         runAlertWorkflowPanel,
         runDocumentWorkflowPanel,
-        runWorkflowMenuItem,
+        runAlertWorkflowMenuItem,
         statusActionItems,
         statusActionPanels,
       ]
@@ -454,7 +460,7 @@ export const TakeActionButton = memo(
           repositionOnScroll
         >
           <SecurityActionMenuContent
-            preset="documentFlyoutV2"
+            preset={DOCUMENT_FLYOUT_ACTION_MENU_PRESET}
             contributions={telemetryContributions}
             actionOrder={actionOrder}
             closeMenu={closePopoverHandler}

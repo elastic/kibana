@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_ACTION_MENU_PRESET_ORDER } from './presets';
-import type {
-  SecurityActionMenuActionId,
-  SecurityActionMenuContribution,
-  SecurityActionMenuPreset,
-} from './types';
+import type { SecurityActionMenuContribution, SecurityActionMenuPreset } from './types';
 
 const validateContributions = (contributions: readonly SecurityActionMenuContribution[]): void => {
-  const ids = new Set<SecurityActionMenuActionId>();
+  const ids = new Set<string>();
 
   contributions.forEach(({ id, placement }) => {
     if (ids.has(id)) {
@@ -29,8 +24,8 @@ const validateContributions = (contributions: readonly SecurityActionMenuContrib
     }
   });
 
-  const visitState = new Map<SecurityActionMenuActionId, 'visiting' | 'visited'>();
-  const placementTargets = new Map<SecurityActionMenuActionId, SecurityActionMenuActionId>();
+  const visitState = new Map<string, 'visiting' | 'visited'>();
+  const placementTargets = new Map<string, string>();
   contributions.forEach(({ id, placement }) => {
     const target = placement?.before ?? placement?.after;
     if (target != null && ids.has(target)) {
@@ -38,7 +33,7 @@ const validateContributions = (contributions: readonly SecurityActionMenuContrib
     }
   });
 
-  const visit = (id: SecurityActionMenuActionId): void => {
+  const visit = (id: string): void => {
     const state = visitState.get(id);
     if (state === 'visiting') {
       throw new Error(`Security action placement contains a cycle involving "${id}"`);
@@ -58,19 +53,22 @@ const validateContributions = (contributions: readonly SecurityActionMenuContrib
   contributions.forEach(({ id }) => visit(id));
 };
 
-export const orderSecurityActionMenuContributions = ({
+export const orderSecurityActionMenuContributions = <
+  TActionId extends string,
+  TGroupId extends string
+>({
   preset,
   contributions,
   actionOrder = [],
 }: {
-  preset?: SecurityActionMenuPreset;
-  contributions: readonly SecurityActionMenuContribution[];
-  actionOrder?: readonly SecurityActionMenuActionId[];
-}): SecurityActionMenuContribution[] => {
+  preset?: SecurityActionMenuPreset<TActionId, TGroupId>;
+  contributions: readonly SecurityActionMenuContribution<TActionId>[];
+  actionOrder?: readonly string[];
+}): Array<SecurityActionMenuContribution<TActionId>> => {
   validateContributions(contributions);
 
-  const defaultOrder = preset == null ? [] : SECURITY_ACTION_MENU_PRESET_ORDER[preset];
-  const defaultOrderIndex = new Map(defaultOrder.map((id, index) => [id, index]));
+  const defaultOrder = preset?.groups.flatMap(({ actionIds }) => actionIds) ?? [];
+  const defaultOrderIndex = new Map<string, number>(defaultOrder.map((id, index) => [id, index]));
   let ordered = contributions
     .map((contribution, index) => ({ contribution, index }))
     .sort((left, right) => {
@@ -79,13 +77,13 @@ export const orderSecurityActionMenuContributions = ({
       return leftOrder - rightOrder || left.index - right.index;
     })
     .map(({ contribution }) => contribution);
+  const contributionsById = new Map<string, SecurityActionMenuContribution<TActionId>>(
+    ordered.map((contribution) => [contribution.id, contribution])
+  );
 
   const requestedOrder = [...new Set(actionOrder)];
   if (requestedOrder.length > 0) {
     const requestedOrderSet = new Set(requestedOrder);
-    const contributionsById = new Map(
-      ordered.map((contribution) => [contribution.id, contribution])
-    );
     ordered = [
       ...requestedOrder.flatMap((id) => {
         const contribution = contributionsById.get(id);
@@ -95,13 +93,10 @@ export const orderSecurityActionMenuContributions = ({
     ];
   }
 
-  const contributionsById = new Map(ordered.map((contribution) => [contribution.id, contribution]));
-  const outgoing = new Map<SecurityActionMenuActionId, Set<SecurityActionMenuActionId>>(
-    ordered.map(({ id }) => [id, new Set<SecurityActionMenuActionId>()] as const)
+  const outgoing = new Map<string, Set<string>>(
+    ordered.map(({ id }) => [id, new Set<string>()] as const)
   );
-  const incomingCount = new Map<SecurityActionMenuActionId, number>(
-    ordered.map(({ id }) => [id, 0])
-  );
+  const incomingCount = new Map<string, number>(ordered.map(({ id }) => [id, 0]));
 
   ordered.forEach(({ id, placement }) => {
     const beforeId = placement?.before;
@@ -125,7 +120,7 @@ export const orderSecurityActionMenuContributions = ({
     }
   });
 
-  const result: SecurityActionMenuContribution[] = [];
+  const result: Array<SecurityActionMenuContribution<TActionId>> = [];
   const remainingIds = new Set(ordered.map(({ id }) => id));
   while (remainingIds.size > 0) {
     const next = ordered.find(

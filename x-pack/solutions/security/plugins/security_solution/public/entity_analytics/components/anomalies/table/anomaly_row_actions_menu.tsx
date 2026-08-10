@@ -15,11 +15,15 @@ import {
   ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX,
 } from '../test_ids';
 import {
-  SECURITY_ACTION_IDS,
   SecurityActionMenuContent,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  ANOMALY_ACTION_IDS,
+  ANOMALY_TABLE_ROW_ACTION_MENU_PRESET,
+  type AnomalyActionId,
+} from './action_menu/definitions';
 
 interface AnomalyRowActionsMenuProps {
   row: TableRow;
@@ -40,10 +44,10 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({
 
   const { actions } = useAnomalyTableRowActions({ row, timeRange });
 
-  const contributions: SecurityActionMenuContribution[] = useMemo(
+  const contributions: Array<SecurityActionMenuContribution<AnomalyActionId>> = useMemo(
     () => [
       {
-        id: SECURITY_ACTION_IDS.anomalyNavigation,
+        id: ANOMALY_ACTION_IDS.navigationActions,
         items: actions.map((action) => ({
           name: action.label,
           icon: action.icon,
@@ -76,7 +80,7 @@ export const AnomalyRowActionsMenu: React.FC<AnomalyRowActionsMenuProps> = ({
       anchorPosition="downRight"
     >
       <SecurityActionMenuContent
-        preset="anomalyRow"
+        preset={ANOMALY_TABLE_ROW_ACTION_MENU_PRESET}
         contributions={contributions}
         customActions={customActions}
         actionOrder={actionOrder}

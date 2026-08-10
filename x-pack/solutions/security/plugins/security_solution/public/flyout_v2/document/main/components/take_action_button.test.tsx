@@ -244,11 +244,17 @@ describe('<TakeActionButton />', () => {
   });
 
   it('should open the popover when the button is clicked', () => {
-    const { getByTestId } = renderTakeActionButton();
+    mockUseAddToCaseActions.mockReturnValue({
+      addToCaseActionItems: [{ name: 'Add to case' }],
+    });
+    const { getAllByTestId, getByTestId } = renderTakeActionButton();
 
     fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
     expect(document.querySelector('[data-test-subj="takeActionPanelMenu"]')).toBeInTheDocument();
+    expect(getAllByTestId('securityActionMenuGroupSeparator').length).toBeGreaterThan(0);
+    expect(document.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-euiicon-type="pencil"]')).toBeInTheDocument();
   });
 
   it('should call useAddToCaseActions with the correct arguments', () => {

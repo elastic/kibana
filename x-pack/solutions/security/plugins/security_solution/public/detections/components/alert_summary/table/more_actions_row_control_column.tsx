@@ -14,11 +14,15 @@ import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { useAlertTagsActions } from '../../alerts_table/timeline_actions/use_alert_tags_actions';
 import { useAddToCaseActions } from '../../alerts_table/timeline_actions/use_add_to_case_actions';
 import {
-  SECURITY_ACTION_IDS,
+  SHARED_ACTION_IDS,
   SecurityActionMenuContent,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  ALERT_SUMMARY_ACTION_MENU_PRESET,
+  type AlertSummaryActionId,
+} from '../action_menu/definitions';
 
 export const MORE_ACTIONS_BUTTON_TEST_ID = 'alert-summary-table-row-action-more-actions';
 
@@ -93,14 +97,14 @@ export const MoreActionsRowControlColumn = memo(
       ecsRowData: ecsAlert,
     });
 
-    const contributions: SecurityActionMenuContribution[] = useMemo(
+    const contributions: Array<SecurityActionMenuContribution<AlertSummaryActionId>> = useMemo(
       () => [
         {
-          id: SECURITY_ACTION_IDS.addToCase,
+          id: SHARED_ACTION_IDS.addToCase,
           items: addToCaseActionItems,
         },
         {
-          id: SECURITY_ACTION_IDS.tags,
+          id: SHARED_ACTION_IDS.applyAlertTags,
           items: alertTagsItems,
           panels: alertTagsPanels,
         },
@@ -116,7 +120,7 @@ export const MoreActionsRowControlColumn = memo(
         panelPaddingSize="none"
       >
         <SecurityActionMenuContent
-          preset="easeAlertRow"
+          preset={ALERT_SUMMARY_ACTION_MENU_PRESET}
           contributions={contributions}
           customActions={customActions}
           actionOrder={actionOrder}

@@ -10,32 +10,31 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 
-export const SECURITY_ACTION_MENU_PRESETS = {
-  alertRow: 'alertRow',
-  documentFlyoutV2: 'documentFlyoutV2',
-  documentFlyoutLegacy: 'documentFlyoutLegacy',
-  easeAlertRow: 'easeAlertRow',
-  easeAlertFlyout: 'easeAlertFlyout',
-  attackDiscovery: 'attackDiscovery',
-  attackGroup: 'attackGroup',
-  attackFlyout: 'attackFlyout',
-  entityRiskInput: 'entityRiskInput',
-  anomalyRow: 'anomalyRow',
-} as const;
-
-export type SecurityActionMenuPreset =
-  (typeof SECURITY_ACTION_MENU_PRESETS)[keyof typeof SECURITY_ACTION_MENU_PRESETS];
-
 export type SecurityActionMenuActionId = string;
 
-export interface SecurityActionMenuPlacement {
-  before?: SecurityActionMenuActionId;
-  after?: SecurityActionMenuActionId;
+export interface SecurityActionMenuPlacement<TActionId extends string = string> {
+  before?: TActionId;
+  after?: TActionId;
 }
 
-export interface SecurityActionMenuContribution {
-  id: SecurityActionMenuActionId;
+export interface SecurityActionMenuContribution<TActionId extends string = string> {
+  id: TActionId;
   items: EuiContextMenuPanelItemDescriptor[];
   panels?: EuiContextMenuPanelDescriptor[];
-  placement?: SecurityActionMenuPlacement;
+  placement?: SecurityActionMenuPlacement<string>;
+}
+
+export interface SecurityActionMenuGroup<
+  TActionId extends string = string,
+  TGroupId extends string = string
+> {
+  id: TGroupId;
+  actionIds: readonly TActionId[];
+}
+
+export interface SecurityActionMenuPreset<
+  TActionId extends string = string,
+  TGroupId extends string = string
+> {
+  groups: readonly SecurityActionMenuGroup<TActionId, TGroupId>[];
 }

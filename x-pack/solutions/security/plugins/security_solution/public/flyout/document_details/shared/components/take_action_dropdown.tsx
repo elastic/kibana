@@ -35,12 +35,16 @@ import { getOsqueryActionItem } from '../../../../detections/components/osquery/
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import {
-  SECURITY_ACTION_IDS,
   SecurityActionMenuContent,
+  createSecurityActionMenuContributions,
   hasSecurityActionMenuItems,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  DOCUMENT_FLYOUT_ACTION_MENU_DEFINITION,
+  DOCUMENT_FLYOUT_ACTION_MENU_PRESET,
+} from '../../../../flyout_v2/document/main/components/action_menu/definitions';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyout.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -319,7 +323,7 @@ export const TakeActionDropdown = memo(
       closePopoverHandler
     );
 
-    const { runWorkflowMenuItem: alertWorkflowMenuItem, runAlertWorkflowPanel } =
+    const { runWorkflowMenuItem: runAlertWorkflowMenuItem, runAlertWorkflowPanel } =
       useRunAlertWorkflowPanel({
         closePopover: closePopoverHandler,
         ecsRowData: dataAsNestedObject,
@@ -336,84 +340,83 @@ export const TakeActionDropdown = memo(
       [dataAsNestedObject._id, dataAsNestedObject._index, searchHit]
     );
 
-    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+    const { runWorkflowMenuItem: runDocumentWorkflowMenuItem, runDocumentWorkflowPanel } =
       useRunDocumentWorkflowPanel({
         closePopover: closePopoverHandler,
         documents,
       });
 
     const hasAlertActions = !isEvent && Boolean(alertSummaryData.ruleId);
-    const contributions: SecurityActionMenuContribution[] = useMemo(
-      () => [
-        {
-          id: SECURITY_ACTION_IDS.addToCase,
-          items: !isRemoteDocument ? addToCaseActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.status,
-          items: !isRemoteDocument && hasAlertActions ? statusActionItems : [],
-          panels: !isRemoteDocument && hasAlertActions ? statusActionPanels : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.tags,
-          items: !isRemoteDocument && hasAlertActions ? alertTagsItems : [],
-          panels: !isRemoteDocument && hasAlertActions ? alertTagsPanels : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.assignees,
-          items: !isRemoteDocument && hasAlertActions ? alertAssigneesItems : [],
-          panels: !isRemoteDocument && hasAlertActions ? alertAssigneesPanels : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.exceptions,
-          items: !isRemoteDocument && hasAlertActions ? exceptionActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.eventFilter,
-          items:
-            !isRemoteDocument &&
-            !hasAlertActions &&
-            isEndpointEvent &&
-            canCreateEndpointEventFilters
-              ? eventFilterActionItems
-              : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.alertWorkflow,
-          items: !isRemoteDocument && isAlert ? alertWorkflowMenuItem : [],
-          panels: !isRemoteDocument && isAlert ? runAlertWorkflowPanel : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.documentWorkflow,
-          items: !isRemoteDocument && !isAlert ? documentWorkflowMenuItem : [],
-          panels: !isRemoteDocument && !isAlert ? runDocumentWorkflowPanel : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.hostIsolation,
-          items: !isRemoteDocument ? hostIsolationActionItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.responder,
-          items: !isRemoteDocument ? endpointResponseActionsConsoleItems : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.osquery,
-          items: !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
-        },
-        {
-          id: SECURITY_ACTION_IDS.investigateInTimeline,
-          items: investigateInTimelineActionItems,
-        },
-      ],
+    const contributions = useMemo(
+      () =>
+        createSecurityActionMenuContributions(DOCUMENT_FLYOUT_ACTION_MENU_DEFINITION, {
+          addToCase: {
+            items: addToCaseActionItems,
+            visibleWhen: [!isRemoteDocument],
+          },
+          changeStatus: {
+            items: statusActionItems,
+            panels: statusActionPanels,
+            visibleWhen: [!isRemoteDocument, hasAlertActions],
+          },
+          applyAlertTags: {
+            items: alertTagsItems,
+            panels: alertTagsPanels,
+            visibleWhen: [!isRemoteDocument, hasAlertActions],
+          },
+          manageAlertAssignees: {
+            items: alertAssigneesItems,
+            panels: alertAssigneesPanels,
+            visibleWhen: [!isRemoteDocument, hasAlertActions],
+          },
+          addExceptions: {
+            items: exceptionActionItems,
+            visibleWhen: [!isRemoteDocument, hasAlertActions],
+          },
+          addEndpointEventFilter: {
+            items: eventFilterActionItems,
+            visibleWhen: [
+              !isRemoteDocument,
+              !hasAlertActions,
+              isEndpointEvent,
+              canCreateEndpointEventFilters,
+            ],
+          },
+          runAlertWorkflow: {
+            items: runAlertWorkflowMenuItem,
+            panels: runAlertWorkflowPanel,
+            visibleWhen: [!isRemoteDocument, isAlert],
+          },
+          runDocumentWorkflow: {
+            items: runDocumentWorkflowMenuItem,
+            panels: runDocumentWorkflowPanel,
+            visibleWhen: [!isRemoteDocument, !isAlert],
+          },
+          isolateHost: {
+            items: hostIsolationActionItems,
+            visibleWhen: [!isRemoteDocument],
+          },
+          respond: {
+            items: endpointResponseActionsConsoleItems,
+            visibleWhen: [!isRemoteDocument],
+          },
+          runOsquery: {
+            items: [osqueryActionItem],
+            visibleWhen: [!isRemoteDocument, osqueryAvailable],
+          },
+          investigateInTimeline: {
+            items: investigateInTimelineActionItems,
+          },
+        }),
       [
         addToCaseActionItems,
         alertAssigneesItems,
         alertAssigneesPanels,
         alertTagsItems,
         alertTagsPanels,
-        alertWorkflowMenuItem,
+        runAlertWorkflowMenuItem,
         canCreateEndpointEventFilters,
-        documentWorkflowMenuItem,
+        runDocumentWorkflowMenuItem,
         endpointResponseActionsConsoleItems,
         eventFilterActionItems,
         exceptionActionItems,
@@ -460,7 +463,7 @@ export const TakeActionDropdown = memo(
         repositionOnScroll
       >
         <SecurityActionMenuContent
-          preset="documentFlyoutLegacy"
+          preset={DOCUMENT_FLYOUT_ACTION_MENU_PRESET}
           contributions={contributions}
           customActions={customActions}
           actionOrder={actionOrder}

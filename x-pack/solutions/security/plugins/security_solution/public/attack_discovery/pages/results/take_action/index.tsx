@@ -34,12 +34,17 @@ import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useAttackRunWorkflowContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import {
-  SECURITY_ACTION_IDS,
-  SECURITY_ACTION_MENU_PRESETS,
   SecurityActionMenuContent,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  ATTACK_DISCOVERY_ACTION_IDS,
+  ATTACK_DISCOVERY_RESULTS_ACTION_MENU_PRESET,
+  type AttackDiscoveryActionId,
+} from './action_menu/definitions';
+
+type AttackDiscoveryContribution = SecurityActionMenuContribution<AttackDiscoveryActionId>;
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
@@ -313,7 +318,7 @@ const TakeActionComponent: React.FC<Props> = ({
     [buttonSize, buttonText, onButtonClick]
   );
 
-  const contributions: SecurityActionMenuContribution[] = useMemo(() => {
+  const contributions = useMemo<AttackDiscoveryContribution[]>(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
 
     const isOpen = attackDiscoveries.every(
@@ -424,24 +429,24 @@ const TakeActionComponent: React.FC<Props> = ({
 
     return [
       {
-        id: SECURITY_ACTION_IDS.attackStatus,
+        id: ATTACK_DISCOVERY_ACTION_IDS.changeAttackDiscoveryStatus,
         items: [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem],
       },
       {
-        id: SECURITY_ACTION_IDS.attackRunWorkflow,
+        id: ATTACK_DISCOVERY_ACTION_IDS.runWorkflow,
         items: runWorkflowItems,
         panels: runWorkflowPanels,
       },
       {
-        id: SECURITY_ACTION_IDS.addToCase,
+        id: ATTACK_DISCOVERY_ACTION_IDS.addToCase,
         items: caseItems,
       },
       {
-        id: SECURITY_ACTION_IDS.attackAi,
+        id: ATTACK_DISCOVERY_ACTION_IDS.openAiAssistant,
         items: aiItems,
       },
       {
-        id: SECURITY_ACTION_IDS.attackDataset,
+        id: ATTACK_DISCOVERY_ACTION_IDS.addToDataset,
         items: datasetItems,
       },
     ];
@@ -481,7 +486,7 @@ const TakeActionComponent: React.FC<Props> = ({
         panelPaddingSize="none"
       >
         <SecurityActionMenuContent
-          preset={SECURITY_ACTION_MENU_PRESETS.attackDiscovery}
+          preset={ATTACK_DISCOVERY_RESULTS_ACTION_MENU_PRESET}
           contributions={contributions}
           customActions={customActions}
           actionOrder={actionOrder}

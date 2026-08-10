@@ -12,14 +12,17 @@ import {
   type ComposeSecurityActionMenuProps,
 } from './compose_security_action_menu';
 
-interface SecurityActionMenuContentProps extends ComposeSecurityActionMenuProps {
+interface SecurityActionMenuContentProps<
+  TActionId extends string = string,
+  TGroupId extends string = string
+> extends ComposeSecurityActionMenuProps<TActionId, TGroupId> {
   dataTestSubj?: string;
 }
 
-export const SecurityActionMenuContent = ({
+export const SecurityActionMenuContent = <TActionId extends string, TGroupId extends string>({
   dataTestSubj,
   ...composeProps
-}: SecurityActionMenuContentProps) => {
+}: SecurityActionMenuContentProps<TActionId, TGroupId>) => {
   const menu = composeSecurityActionMenu(composeProps);
 
   return <EuiContextMenu initialPanelId={0} panels={menu.panels} data-test-subj={dataTestSubj} />;

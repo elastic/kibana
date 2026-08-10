@@ -29,12 +29,15 @@ import type { AttacksActionTelemetrySource } from '../../../../common/lib/teleme
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import {
-  SECURITY_ACTION_IDS,
-  SECURITY_ACTION_MENU_PRESETS,
   SecurityActionMenuContent,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  ATTACK_ACTION_IDS,
+  ATTACKS_TABLE_GROUP_ACTION_MENU_PRESET,
+  type AttackActionId,
+} from '../action_menu/definitions';
 
 export interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -53,9 +56,6 @@ export interface AttacksGroupTakeActionItemsProps {
   isRemoteDocument: boolean;
   customActions?: readonly SecurityActionMenuContribution[];
   actionOrder?: readonly SecurityActionMenuActionId[];
-  preset?:
-    | typeof SECURITY_ACTION_MENU_PRESETS.attackGroup
-    | typeof SECURITY_ACTION_MENU_PRESETS.attackFlyout;
 }
 
 const ADD_TO_DATASET = i18n.translate(
@@ -72,7 +72,6 @@ export function AttacksGroupTakeActionItems({
   isRemoteDocument,
   customActions,
   actionOrder,
-  preset = SECURITY_ACTION_MENU_PRESETS.attackGroup,
 }: AttacksGroupTakeActionItemsProps) {
   const {
     services: { evals },
@@ -226,46 +225,46 @@ export function AttacksGroupTakeActionItems({
     [addToDatasetAction]
   );
 
-  const contributions: SecurityActionMenuContribution[] = useMemo(
+  const contributions: Array<SecurityActionMenuContribution<AttackActionId>> = useMemo(
     () => [
       {
-        id: SECURITY_ACTION_IDS.addToCase,
+        id: ATTACK_ACTION_IDS.addToCase,
         items: !isRemoteDocument ? casesItems : [],
       },
       {
-        id: SECURITY_ACTION_IDS.attackWorkflow,
+        id: ATTACK_ACTION_IDS.changeAttackStatus,
         items: !isRemoteDocument ? workflowItems : [],
         panels: !isRemoteDocument ? workflowPanels : [],
       },
       {
-        id: SECURITY_ACTION_IDS.attackTags,
+        id: ATTACK_ACTION_IDS.applyAttackTags,
         items: !isRemoteDocument ? tagsItems : [],
         panels: !isRemoteDocument ? tagsPanels : [],
       },
       {
-        id: SECURITY_ACTION_IDS.attackAssignees,
+        id: ATTACK_ACTION_IDS.manageAttackAssignees,
         items: !isRemoteDocument ? assignItems : [],
         panels: !isRemoteDocument ? assignPanels : [],
       },
       {
-        id: SECURITY_ACTION_IDS.attackRunWorkflow,
+        id: ATTACK_ACTION_IDS.runWorkflow,
         items: !isRemoteDocument ? runWorkflowItems : [],
         panels: !isRemoteDocument ? runWorkflowPanels : [],
       },
       {
-        id: SECURITY_ACTION_IDS.attackAi,
+        id: ATTACK_ACTION_IDS.openAiAssistant,
         items: !isRemoteDocument && showAiAssistantAction ? viewInAiAssistantItems : [],
       },
       {
-        id: SECURITY_ACTION_IDS.attackDataset,
+        id: ATTACK_ACTION_IDS.addToDataset,
         items: !isRemoteDocument ? datasetItems : [],
       },
       {
-        id: SECURITY_ACTION_IDS.investigateInTimeline,
+        id: ATTACK_ACTION_IDS.investigateInTimeline,
         items: isInSecurityApp ? navigationItems : [],
       },
       {
-        id: SECURITY_ACTION_IDS.explore,
+        id: ATTACK_ACTION_IDS.exploreInAttacks,
         items: !isInSecurityApp ? navigationItems : [],
       },
     ],
@@ -290,7 +289,7 @@ export function AttacksGroupTakeActionItems({
 
   return (
     <SecurityActionMenuContent
-      preset={preset}
+      preset={ATTACKS_TABLE_GROUP_ACTION_MENU_PRESET}
       contributions={contributions}
       customActions={customActions}
       actionOrder={actionOrder}

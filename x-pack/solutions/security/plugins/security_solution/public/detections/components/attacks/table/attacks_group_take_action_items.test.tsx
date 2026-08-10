@@ -152,6 +152,12 @@ describe('AttacksGroupTakeActionItems', () => {
     });
   });
 
+  it('renders separators between non-empty action groups', () => {
+    const { getAllByTestId } = renderAttack(mockAttack);
+
+    expect(getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(2);
+  });
+
   describe('telemetry', () => {
     it('passes telemetrySource to all hooks', () => {
       renderAttack(mockAttack);

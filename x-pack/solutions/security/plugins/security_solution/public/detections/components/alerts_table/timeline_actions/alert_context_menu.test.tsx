@@ -193,6 +193,10 @@ describe('Alert table context menu', () => {
 
       expect(wrapper.getByTestId(addToExistingCaseButton)).toBeTruthy();
       expect(wrapper.getByTestId(addToNewCaseButton)).toBeTruthy();
+      expect(wrapper.getAllByTestId('securityActionMenuGroupSeparator').length).toBeGreaterThan(0);
+      wrapper.getAllByRole('menuitem').forEach((menuItem) => {
+        expect(menuItem.querySelector('[data-euiicon-type]')).toBeInTheDocument();
+      });
     });
 
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {

@@ -55,12 +55,17 @@ import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAddToChatAction } from './use_add_to_chat_action';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
 import {
-  SECURITY_ACTION_IDS,
   SecurityActionMenuContent,
   hasSecurityActionMenuItems,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
+import {
+  addAlertActionMenuIcons,
+  ALERT_ACTION_IDS,
+  ALERTS_TABLE_ROW_ACTION_MENU_PRESET,
+  type AlertActionId,
+} from './action_menu/definitions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -273,64 +278,64 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     alertId: ecsRowData._id,
   });
 
-  const contributions: SecurityActionMenuContribution[] = useMemo(() => {
+  const contributions: Array<SecurityActionMenuContribution<AlertActionId>> = useMemo(() => {
     const addToCaseContribution = {
-      id: SECURITY_ACTION_IDS.addToCase,
+      id: ALERT_ACTION_IDS.addToCase,
       items: addToCaseActionItems,
     };
     const osqueryContribution = {
-      id: SECURITY_ACTION_IDS.osquery,
+      id: ALERT_ACTION_IDS.runOsquery,
       items: agentId ? osqueryActionItems : [],
     };
 
     if (!isEvent && ruleId) {
-      return [
+      return addAlertActionMenuIcons([
         addToCaseContribution,
         {
-          id: SECURITY_ACTION_IDS.status,
+          id: ALERT_ACTION_IDS.changeAlertStatus,
           items: statusActionItems,
           panels: statusActionPanels,
         },
         {
-          id: SECURITY_ACTION_IDS.alertWorkflow,
+          id: ALERT_ACTION_IDS.runWorkflow,
           items: runWorkflowMenuItem,
           panels: runAlertWorkflowPanel,
         },
         {
-          id: SECURITY_ACTION_IDS.tags,
+          id: ALERT_ACTION_IDS.applyAlertTags,
           items: alertTagsItems,
           panels: alertTagsPanels,
         },
         {
-          id: SECURITY_ACTION_IDS.assignees,
+          id: ALERT_ACTION_IDS.manageAlertAssignees,
           items: alertAssigneesItems,
           panels: alertAssigneesPanels,
         },
         {
-          id: SECURITY_ACTION_IDS.exceptions,
+          id: ALERT_ACTION_IDS.addAlertExceptions,
           items: exceptionActionItems,
         },
         osqueryContribution,
         {
-          id: SECURITY_ACTION_IDS.addToChat,
+          id: ALERT_ACTION_IDS.addToChat,
           items: addToChatActionItems,
         },
-      ];
+      ]);
     }
 
-    return [
+    return addAlertActionMenuIcons([
       addToCaseContribution,
       {
-        id: SECURITY_ACTION_IDS.documentWorkflow,
+        id: ALERT_ACTION_IDS.runWorkflow,
         items: runDocumentWorkflowMenuItem,
         panels: runDocumentWorkflowPanels,
       },
       {
-        id: SECURITY_ACTION_IDS.eventFilter,
+        id: ALERT_ACTION_IDS.addEndpointEventFilter,
         items: canCreateEndpointEventFilters ? eventFilterActionItems : [],
       },
       osqueryContribution,
-    ];
+    ]);
   }, [
     addToCaseActionItems,
     addToChatActionItems,
@@ -396,7 +401,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             repositionOnScroll
           >
             <SecurityActionMenuContent
-              preset="alertRow"
+              preset={ALERTS_TABLE_ROW_ACTION_MENU_PRESET}
               contributions={contributions}
               customActions={customActions}
               actionOrder={actionOrder}

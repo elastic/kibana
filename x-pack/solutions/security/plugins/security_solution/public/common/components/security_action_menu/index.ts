@@ -6,12 +6,25 @@
  */
 
 export { SecurityActionMenuContent } from './security_action_menu_content';
+export { composeSecurityActionMenu } from './compose_security_action_menu';
+export { createSecurityActionMenuContributions } from './create_contributions';
 export { hasSecurityActionMenuItems } from './has_security_action_menu_items';
-export { SECURITY_ACTION_IDS } from './presets';
-export { SECURITY_ACTION_MENU_PRESETS } from './types';
+export {
+  applySecurityActionMenuItemMetadata,
+  SHARED_ACTION_IDS,
+  SHARED_ACTION_MENU_ITEM_DEFINITIONS,
+} from './shared_actions';
+export type { SecurityActionMenuItemDefinition } from './shared_actions';
+export type {
+  SecurityActionMenuDefinition,
+  SecurityActionMenuSourceDefinition,
+  SecurityActionMenuSourceInput,
+  SecurityActionMenuSourceInputs,
+} from './create_contributions';
 export type {
   SecurityActionMenuActionId,
   SecurityActionMenuContribution,
+  SecurityActionMenuGroup,
   SecurityActionMenuPlacement,
   SecurityActionMenuPreset,
 } from './types';

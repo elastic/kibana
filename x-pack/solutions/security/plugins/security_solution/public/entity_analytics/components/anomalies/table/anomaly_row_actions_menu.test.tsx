@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { SECURITY_ACTION_IDS } from '../../../../common/components/security_action_menu';
 import { useAnomalyTableRowActions } from '../../../api/hooks/use_anomaly_table_row_actions';
 import {
   ANOMALIES_TABLE_ROW_ACTIONS_BUTTON_TEST_ID,
@@ -16,6 +15,7 @@ import {
 } from '../test_ids';
 import { AnomalyRowActionsMenu } from './anomaly_row_actions_menu';
 import type { TableRow } from './types';
+import { ANOMALY_ACTION_IDS } from './action_menu/definitions';
 
 jest.mock('../../../api/hooks/use_anomaly_table_row_actions');
 
@@ -81,7 +81,7 @@ describe('AnomalyRowActionsMenu', () => {
               items: [{ name: 'Custom action', 'data-test-subj': 'customAnomalyAction' }],
             },
           ]}
-          actionOrder={['custom', SECURITY_ACTION_IDS.anomalyNavigation]}
+          actionOrder={['custom', ANOMALY_ACTION_IDS.navigationActions]}
         />
       </TestProviders>
     );

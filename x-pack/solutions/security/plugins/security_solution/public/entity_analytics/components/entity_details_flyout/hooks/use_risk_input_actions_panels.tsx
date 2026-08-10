@@ -23,11 +23,15 @@ import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import {
-  SECURITY_ACTION_IDS,
+  composeSecurityActionMenu,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../../common/components/security_action_menu';
-import { composeSecurityActionMenu } from '../../../../common/components/security_action_menu/compose_security_action_menu';
+import {
+  RISK_INPUT_ACTION_IDS,
+  ENTITY_DETAILS_FLYOUT_RISK_INPUT_ACTION_MENU_PRESET,
+  type RiskInputActionId,
+} from './action_menu/definitions';
 
 export interface UseRiskInputActionsPanelsOptions {
   customActions?: readonly SecurityActionMenuContribution[];
@@ -116,21 +120,21 @@ export const useRiskInputActionsPanels = (
         : [],
     [addToExistingCase, addToNewCaseClick, hasCasesPermissions]
   );
-  const contributions: SecurityActionMenuContribution[] = useMemo(
+  const contributions: Array<SecurityActionMenuContribution<RiskInputActionId>> = useMemo(
     () => [
       {
-        id: SECURITY_ACTION_IDS.riskInputTimeline,
+        id: RISK_INPUT_ACTION_IDS.addToNewTimeline,
         items: timelineActions,
       },
       {
-        id: SECURITY_ACTION_IDS.addToCase,
+        id: RISK_INPUT_ACTION_IDS.addToCase,
         items: casesActions,
       },
     ],
     [casesActions, timelineActions]
   );
   const { panels } = composeSecurityActionMenu({
-    preset: 'entityRiskInput',
+    preset: ENTITY_DETAILS_FLYOUT_RISK_INPUT_ACTION_MENU_PRESET,
     contributions,
     customActions,
     actionOrder,

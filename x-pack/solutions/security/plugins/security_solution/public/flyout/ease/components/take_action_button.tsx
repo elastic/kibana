@@ -13,11 +13,15 @@ import { useEaseDetailsContext } from '../context';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import {
-  SECURITY_ACTION_IDS,
+  SHARED_ACTION_IDS,
   SecurityActionMenuContent,
   type SecurityActionMenuActionId,
   type SecurityActionMenuContribution,
 } from '../../../common/components/security_action_menu';
+import {
+  ALERT_SUMMARY_ACTION_MENU_PRESET,
+  type AlertSummaryActionId,
+} from '../../../detections/components/alert_summary/action_menu/definitions';
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'alert-summary-flyout-take-action';
 
@@ -91,14 +95,14 @@ export const TakeActionButton = memo(({ customActions, actionOrder }: TakeAction
     ecsRowData: dataAsNestedObject,
   });
 
-  const contributions: SecurityActionMenuContribution[] = useMemo(
+  const contributions: Array<SecurityActionMenuContribution<AlertSummaryActionId>> = useMemo(
     () => [
       {
-        id: SECURITY_ACTION_IDS.addToCase,
+        id: SHARED_ACTION_IDS.addToCase,
         items: addToCaseActionItems,
       },
       {
-        id: SECURITY_ACTION_IDS.tags,
+        id: SHARED_ACTION_IDS.applyAlertTags,
         items: alertTagsItems,
         panels: alertTagsPanels,
       },
@@ -114,7 +118,7 @@ export const TakeActionButton = memo(({ customActions, actionOrder }: TakeAction
       panelPaddingSize="none"
     >
       <SecurityActionMenuContent
-        preset="easeAlertFlyout"
+        preset={ALERT_SUMMARY_ACTION_MENU_PRESET}
         contributions={contributions}
         customActions={customActions}
         actionOrder={actionOrder}
