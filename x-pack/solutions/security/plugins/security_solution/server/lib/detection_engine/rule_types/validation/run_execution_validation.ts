@@ -34,7 +34,7 @@ export interface RunExecutionValidationResult {
   skipExecution: boolean;
   warnings: string[];
   frozenIndicesQueriedCount: number;
-  hasDateNanosTimestampFields: boolean;
+  dateNanosTimestampFields: string[];
   mixedTimestampFields: string[];
 }
 
@@ -61,7 +61,7 @@ export const runExecutionValidation = async (
   const warnings: string[] = [];
   let skipExecution = false;
   let frozenIndicesQueriedCount = 0;
-  let hasDateNanosTimestampFields = false;
+  let dateNanosTimestampFields: string[] = [];
   let mixedTimestampFields: string[] = [];
 
   if (isMachineLearningParams(params)) {
@@ -69,7 +69,7 @@ export const runExecutionValidation = async (
       skipExecution: false,
       warnings: [],
       frozenIndicesQueriedCount: 0,
-      hasDateNanosTimestampFields: false,
+      dateNanosTimestampFields: [],
       mixedTimestampFields: [],
     };
   }
@@ -145,7 +145,7 @@ export const runExecutionValidation = async (
       skipExecution,
       warnings,
       frozenIndicesQueriedCount,
-      hasDateNanosTimestampFields,
+      dateNanosTimestampFields,
       mixedTimestampFields,
     };
   }
@@ -174,7 +174,7 @@ export const runExecutionValidation = async (
     }
 
     // date_nanos sort values need special handling in search_after pagination
-    hasDateNanosTimestampFields = timestampFields.some(
+    dateNanosTimestampFields = timestampFields.filter(
       (field) => 'date_nanos' in (fieldCapsResponse.body.fields[field] ?? {})
     );
     mixedTimestampFields = timestampFields.filter((field) => {
@@ -209,7 +209,7 @@ export const runExecutionValidation = async (
     skipExecution,
     warnings,
     frozenIndicesQueriedCount,
-    hasDateNanosTimestampFields,
+    dateNanosTimestampFields,
     mixedTimestampFields,
   };
 };

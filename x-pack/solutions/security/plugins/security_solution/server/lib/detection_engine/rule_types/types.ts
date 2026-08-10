@@ -94,8 +94,8 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   mergeStrategy: ConfigType['alertMergeStrategy'];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  /** True when a timestamp field is mapped as date_nanos somewhere in the input indices */
-  hasDateNanosTimestampFields: boolean;
+  /** Timestamp fields mapped as date_nanos in at least one of the input indices */
+  dateNanosTimestampFields: string[];
   /** Timestamp fields mapped as both date and date_nanos across the input indices */
   mixedTimestampFields: string[];
   aggregatableTimestampField: string;

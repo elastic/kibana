@@ -59,57 +59,70 @@ describe('runExecutionValidation', () => {
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   });
 
-  describe('hasDateNanosTimestampFields', () => {
-    it('is true when the primary timestamp is mapped as date_nanos', async () => {
+  describe('dateNanosTimestampFields', () => {
+    it('collects the primary timestamp when it is mapped as date_nanos', async () => {
       mockFieldCaps({ '@timestamp': { date_nanos: { type: 'date_nanos' } } });
       const result = await run();
-      expect(result.hasDateNanosTimestampFields).toBe(true);
+      expect(result.dateNanosTimestampFields).toEqual(['@timestamp']);
     });
 
-    it('is true when date and date_nanos mappings are mixed', async () => {
+    it('collects a field mixing date and date_nanos mappings', async () => {
       mockFieldCaps({
         '@timestamp': { date: { type: 'date' }, date_nanos: { type: 'date_nanos' } },
       });
       const result = await run();
-      expect(result.hasDateNanosTimestampFields).toBe(true);
+      expect(result.dateNanosTimestampFields).toEqual(['@timestamp']);
       expect(result.mixedTimestampFields).toEqual(['@timestamp']);
     });
 
-    it('is true when only the secondary timestamp is mapped as date_nanos', async () => {
+    it('collects a field mixing date_nanos and unmapped indices without marking it mixed', async () => {
+      mockFieldCaps({
+        '@timestamp': { date: { type: 'date' } },
+        'event.ingested': {
+          date_nanos: { type: 'date_nanos' },
+          unmapped: { type: 'unmapped' },
+        },
+      });
+      const result = await run(getQueryRuleParams(), 'event.ingested');
+      expect(result.dateNanosTimestampFields).toEqual(['event.ingested']);
+      expect(result.mixedTimestampFields).toEqual([]);
+    });
+
+    it('collects only the secondary timestamp when it alone is mapped as date_nanos', async () => {
       mockFieldCaps({
         '@timestamp': { date: { type: 'date' } },
         'event.ingested': { date_nanos: { type: 'date_nanos' } },
       });
       const result = await run(getQueryRuleParams(), 'event.ingested');
-      expect(result.hasDateNanosTimestampFields).toBe(true);
+      expect(result.dateNanosTimestampFields).toEqual(['event.ingested']);
       expect(result.mixedTimestampFields).toEqual([]);
     });
 
-    it('is false when timestamps are mapped as date only', async () => {
+    it('is empty when timestamps are mapped as date only', async () => {
       mockFieldCaps({ '@timestamp': { date: { type: 'date' } } });
       const result = await run();
-      expect(result.hasDateNanosTimestampFields).toBe(false);
+      expect(result.dateNanosTimestampFields).toEqual([]);
       expect(result.mixedTimestampFields).toEqual([]);
     });
 
-    it('is false when the timestamp field is unmapped', async () => {
+    it('is empty when the timestamp field is unmapped', async () => {
       mockFieldCaps({ '@timestamp': { unmapped: { type: 'unmapped' } } });
       const result = await run();
-      expect(result.hasDateNanosTimestampFields).toBe(false);
+      expect(result.dateNanosTimestampFields).toEqual([]);
     });
 
-    it('is false when the fieldCaps request fails', async () => {
+    it('is empty when the fieldCaps request fails', async () => {
       scopedClusterClient.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
       const result = await run();
-      expect(result.hasDateNanosTimestampFields).toBe(false);
+      expect(result.dateNanosTimestampFields).toEqual([]);
       expect(result.warnings).toEqual([
         expect.stringContaining('Timestamp fields check failed to execute'),
       ]);
     });
 
-    it('is false for machine learning rules', async () => {
+    it('is empty for machine learning rules', async () => {
       const result = await run(getMlRuleParams());
-      expect(result.hasDateNanosTimestampFields).toBe(false);
+      expect(result.dateNanosTimestampFields).toEqual([]);
       expect(scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
     });
   });

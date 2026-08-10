@@ -880,7 +880,7 @@ describe('searchAfterAndBulkCreate', () => {
       const { success, warningMessages } = await searchAfterAndBulkCreate({
         sharedParams: {
           ...sharedParams,
-          hasDateNanosTimestampFields: true,
+          dateNanosTimestampFields: ['@timestamp'],
         },
         services: ruleServices,
         eventsTelemetry: undefined,
@@ -919,7 +919,7 @@ describe('searchAfterAndBulkCreate', () => {
       const { success, warningMessages } = await searchAfterAndBulkCreate({
         sharedParams: {
           ...sharedParams,
-          hasDateNanosTimestampFields: true,
+          dateNanosTimestampFields: ['@timestamp'],
         },
         services: ruleServices,
         eventsTelemetry: undefined,
@@ -948,7 +948,7 @@ describe('searchAfterAndBulkCreate', () => {
       const { success, warningMessages, createdSignalsCount } = await searchAfterAndBulkCreate({
         sharedParams: {
           ...sharedParams,
-          hasDateNanosTimestampFields: true,
+          dateNanosTimestampFields: ['@timestamp'],
         },
         services: ruleServices,
         eventsTelemetry: undefined,
@@ -960,6 +960,44 @@ describe('searchAfterAndBulkCreate', () => {
       expect(createdSignalsCount).toEqual(1);
       expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
       expect(warningMessages).toEqual([expect.stringContaining('Pagination stopped')]);
+    });
+
+    test('should clamp an oversized sort value coming from a date mapped timestamp', async () => {
+      // @timestamp is date_nanos, event.ingested is a plain date: docs missing it sort last on
+      // Long.MAX_VALUE, which JS rounds up past what Elasticsearch accepts
+      const unsafeSortId = Number('9223372036854775807');
+      ruleServices.scopedClusterClient.asCurrentUser.search
+        .mockResolvedValueOnce(
+          repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3), undefined, undefined, [
+            '2026-07-30T12:00:00.000000001Z',
+            unsafeSortId,
+          ])
+        )
+        .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+      ruleServices.alertWithPersistence.mockResolvedValueOnce({
+        createdAlerts: [createdAlert],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const { success, warningMessages } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          dateNanosTimestampFields: ['@timestamp'],
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(true);
+      expect(warningMessages).toEqual([]);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search_after: ['2026-07-30T12:00:00.000000001Z', '9223372036854775807'],
+        })
+      );
     });
 
     test('should not warn about an unusable cursor on the final partial page', async () => {
@@ -979,7 +1017,7 @@ describe('searchAfterAndBulkCreate', () => {
         sharedParams: {
           ...sharedParams,
           searchAfterSize: 100,
-          hasDateNanosTimestampFields: true,
+          dateNanosTimestampFields: ['@timestamp'],
         },
         services: ruleServices,
         eventsTelemetry: undefined,

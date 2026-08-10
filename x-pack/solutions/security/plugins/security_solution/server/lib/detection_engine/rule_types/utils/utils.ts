@@ -800,6 +800,21 @@ export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   });
 };
 
+/**
+ * Same Long.MAX_VALUE clamping as {@link getSafeSortIds}, for cursors that mix formatted
+ * date_nanos values with plain date ones. Null and empty values are left as they are so callers
+ * can stop paging via {@link getUnusableCursorWarning}: replacing them with the sentinel would
+ * put the cursor outside the range a date_nanos field accepts.
+ */
+export const getSafeNanosSortIds = (sortIds: estypes.SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    if (sortId != null && sortId !== '' && Number(sortId) >= Number.MAX_SAFE_INTEGER) {
+      return '9223372036854775807';
+    }
+    return sortId;
+  });
+};
+
 // in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
 // on date-mapped shards yield cursors that either format to null or never advance
 // (the same docs match again every page); callers stop paging instead of failing or looping

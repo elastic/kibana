@@ -46,6 +46,7 @@ import {
   calculateFromValue,
   stringifyAfterKey,
   getUnusableCursorWarning,
+  getSafeNanosSortIds,
 } from './utils';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -1545,6 +1546,29 @@ describe('utils', () => {
     test('returns a warning when the cursor did not advance', () => {
       const warning = getUnusableCursorWarning(sortIds, [...sortIds]);
       expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
+    });
+  });
+
+  describe('getSafeNanosSortIds', () => {
+    test('returns undefined when sort ids are undefined', () => {
+      expect(getSafeNanosSortIds(undefined)).toBeUndefined();
+    });
+
+    test('leaves formatted date_nanos values untouched', () => {
+      const sortIds = ['2262-04-11T23:47:16.854775806Z', '2026-07-30T12:00:00.000000001Z'];
+      expect(getSafeNanosSortIds(sortIds)).toEqual(sortIds);
+    });
+
+    test('replaces an oversized number with Long.MAX_VALUE', () => {
+      expect(getSafeNanosSortIds([Number('9223372036854775807')])).toEqual(['9223372036854775807']);
+    });
+
+    test('keeps null and empty values so callers can stop paging', () => {
+      expect(getSafeNanosSortIds([null, ''])).toEqual([null, '']);
+    });
+
+    test('leaves millisecond timestamps untouched', () => {
+      expect(getSafeNanosSortIds(['1234567891111'])).toEqual(['1234567891111']);
     });
   });
 });

@@ -26,7 +26,7 @@ interface BuildEventsSearchQuery<
   trackTotalHits?: boolean;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
-  hasDateNanosTimestampFields?: boolean;
+  dateNanosTimestampFields?: string[];
   mixedTimestampFields?: string[];
 }
 
@@ -130,7 +130,7 @@ export const buildEventsSearchQuery = <
   trackTotalHits,
   additionalFilters,
   overrideBody,
-  hasDateNanosTimestampFields,
+  dateNanosTimestampFields,
   mixedTimestampFields,
 }: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
@@ -154,12 +154,19 @@ export const buildEventsSearchQuery = <
     ...(additionalFilters ? additionalFilters : []),
   ];
 
-  const getNanosSortOptions = (field: string) => {
-    if (!hasDateNanosTimestampFields) {
-      return undefined;
+  // sort options are decided per field: a field mapped as date elsewhere in the pattern must
+  // keep millisecond semantics, otherwise its `missing` sentinel lands outside the nanos range
+  const getSortOptions = (field: string) => {
+    const order = sortOrder ?? 'asc';
+    if (!dateNanosTimestampFields?.includes(field)) {
+      return { order, unmapped_type: 'date' as const };
     }
 
     return {
+      order,
+      // indices where the field is absent have to resolve as nanos too, or the nanos `missing`
+      // sentinel is read as milliseconds and yields a cursor millions of years in the future
+      unmapped_type: 'date_nanos' as const,
       format: NANOS_SORT_FORMAT,
       missing: sortOrder === 'desc' ? NANOS_SORT_MISSING_DESC : NANOS_SORT_MISSING_ASC,
       ...(mixedTimestampFields?.includes(field)
@@ -169,21 +176,9 @@ export const buildEventsSearchQuery = <
   };
 
   const sort: estypes.Sort = [];
-  sort.push({
-    [primaryTimestamp]: {
-      order: sortOrder ?? 'asc',
-      unmapped_type: 'date',
-      ...getNanosSortOptions(primaryTimestamp),
-    },
-  });
+  sort.push({ [primaryTimestamp]: getSortOptions(primaryTimestamp) });
   if (secondaryTimestamp) {
-    sort.push({
-      [secondaryTimestamp]: {
-        order: sortOrder ?? 'asc',
-        unmapped_type: 'date',
-        ...getNanosSortOptions(secondaryTimestamp),
-      },
-    });
+    sort.push({ [secondaryTimestamp]: getSortOptions(secondaryTimestamp) });
   }
 
   const searchQuery = {
