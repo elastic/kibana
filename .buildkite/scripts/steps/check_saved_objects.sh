@@ -39,10 +39,9 @@ if is_pr; then
     SERVERLESS_BASELINE_FLAG=(--serverless-baseline "$GITHUB_SERVERLESS_RELEASE_SHA")
   fi
 
-  # On PRs, skip the synthetic test-mode rollback smoke (and the ES startup it requires)
-  # when no SO types changed. Keep it when the PR touches the check machinery itself, so
-  # such PRs still exercise the full migration test flow. If the diff cannot be computed,
-  # err on the side of running the full flow.
+  # Run the synthetic test-mode rollback smoke even if no SO types changed when the PR
+  # touches the check machinery itself (or the diff cannot be computed). All other PRs
+  # pass --skip-test-fallback: no test-mode fallback, and no ES unless SO types changed.
   SKIP_TEST_FALLBACK_FLAG=(--skip-test-fallback)
   if ! MACHINERY_CHANGES="$(git diff --name-only "$GITHUB_PR_MERGE_BASE"...HEAD -- \
     'packages/kbn-check-saved-objects-cli' \
