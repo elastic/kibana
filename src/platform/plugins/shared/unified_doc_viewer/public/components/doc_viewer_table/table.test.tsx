@@ -16,6 +16,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS, HIDE_NULL_VALUES } from './table';
+import { LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES } from './table_filters';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { userEvent } from '@testing-library/user-event';
@@ -208,6 +209,68 @@ describe('DocViewerTable', () => {
         expect(screen.getByText('extension.keyword')).toBeInTheDocument();
         expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(false);
       });
+
+      it('should show multiple selected columns plus timestamp when switch is on', async () => {
+        storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
+
+        setupComponent({ columns: ['bytes', 'extension.keyword'], filter: jest.fn() });
+
+        expect(screen.getByText('@timestamp')).toBeInTheDocument();
+        expect(screen.getByText('bytes')).toBeInTheDocument();
+        expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+
+        const fieldOrder = Array.from(document.querySelectorAll('.kbnDocViewer__fieldName')).map(
+          (el) => el.textContent?.trim() ?? ''
+        );
+        // Only the three selected/timestamp fields should appear
+        expect(fieldOrder).toEqual(
+          expect.arrayContaining(['@timestamp', 'bytes', 'extension.keyword'])
+        );
+        expect(fieldOrder).toHaveLength(3);
+      });
+
+      it('should move pinned field to top when show only selected is on', async () => {
+        storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
+        storage.set('discover:pinnedFields', { test: ['extension.keyword'] });
+
+        setupComponent({ columns: ['bytes', 'extension.keyword'], filter: jest.fn() });
+
+        const fieldOrder = Array.from(document.querySelectorAll('.kbnDocViewer__fieldName')).map(
+          (el) => el.textContent?.trim() ?? ''
+        );
+
+        // Pinned field moves to the top of the visible list
+        expect(fieldOrder[0]).toBe('extension.keyword');
+        expect(fieldOrder).toContain('@timestamp');
+        expect(fieldOrder).toContain('bytes');
+      });
+
+      it('should keep pinned field at top after toggling switch off', async () => {
+        storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
+        storage.set('discover:pinnedFields', { test: ['bytes'] });
+
+        const { user } = setupComponent({
+          columns: ['bytes', 'extension.keyword'],
+          filter: jest.fn(),
+        });
+
+        // Verify initial state: bytes is pinned and at the top
+        let fieldOrder = Array.from(document.querySelectorAll('.kbnDocViewer__fieldName')).map(
+          (el) => el.textContent?.trim() ?? ''
+        );
+        expect(fieldOrder[0]).toBe('bytes');
+
+        // Toggle the switch OFF
+        await user.click(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch'));
+
+        // After toggling OFF, bytes should still be first (pinned), and all fields visible
+        fieldOrder = Array.from(document.querySelectorAll('.kbnDocViewer__fieldName')).map(
+          (el) => el.textContent?.trim() ?? ''
+        );
+        expect(fieldOrder[0]).toBe('bytes');
+        expect(fieldOrder).toContain('@timestamp');
+        expect(fieldOrder).toContain('extension.keyword');
+      });
     });
 
     describe('when there is no filter function', () => {
@@ -370,6 +433,25 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('message')).toBeInTheDocument();
       expect(screen.queryByText('optional.field')).toBeNull();
       expect(screen.queryByText('another.nullable')).toBeNull();
+    });
+  });
+
+  describe('filter by field type', () => {
+    it('should keep pinned fields visible even when their type is filtered out', () => {
+      // Pre-seed: only "number" type selected, and "extension.keyword" (keyword) is pinned.
+      // The data view id is "test" (see createStubDataView above).
+      storage.set('discover:pinnedFields', { test: ['extension.keyword'] });
+      storage.set(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES, '["number"]');
+
+      setupComponent();
+
+      // bytes (number) passes the type filter → visible as a regular row
+      expect(screen.getByText('bytes')).toBeInTheDocument();
+      // extension.keyword (keyword) would be filtered out, but it is pinned →
+      // the bypass at table.tsx:278 keeps it visible
+      expect(screen.getByText('extension.keyword')).toBeInTheDocument();
+      // @timestamp (date) fails the type filter and is not pinned → hidden
+      expect(screen.queryByText('@timestamp')).toBeNull();
     });
   });
 });

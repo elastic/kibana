@@ -100,7 +100,7 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(client, transformRawDocs, typeRegistry.getLegacyTypes()),
+    next: next(client, transformRawDocs, typeRegistry.getLegacyTypes(), logger),
     model,
     abort: async (state?: State) => {
       await cleanup(client, state);

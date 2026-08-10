@@ -15,7 +15,12 @@ jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
 }));
 
+jest.mock('../skills/connector_authoring/utils', () => ({
+  isChatCallableConnectorType: jest.fn(),
+}));
+
 const { getConnectorSpec } = jest.requireMock('@kbn/connector-specs');
+const { isChatCallableConnectorType } = jest.requireMock('../skills/connector_authoring/utils');
 
 const mockFinder = {
   find: jest.fn(),
@@ -65,15 +70,22 @@ describe('connectorSmlType', () => {
   });
 
   describe('list', () => {
-    const makeSo = (id: string, namespaces: string[], updatedAt: string) => ({
+    const makeSo = (
+      id: string,
+      namespaces: string[],
+      updatedAt: string,
+      actionTypeId = '.mcp'
+    ) => ({
       id,
       updated_at: updatedAt,
       namespaces,
+      attributes: { actionTypeId },
     });
 
     beforeEach(() => {
       mockFinder.find.mockReset();
       mockFinder.close.mockReset().mockResolvedValue(undefined);
+      isChatCallableConnectorType.mockReturnValue(true);
     });
 
     it('yields items from a single page', async () => {
@@ -165,7 +177,13 @@ describe('connectorSmlType', () => {
     it('falls back to empty spaces array when namespaces is undefined', async () => {
       async function* singlePage() {
         yield {
-          saved_objects: [{ id: 'conn-1', updated_at: '2024-01-01T00:00:00.000Z' }],
+          saved_objects: [
+            {
+              id: 'conn-1',
+              updated_at: '2024-01-01T00:00:00.000Z',
+              attributes: { actionTypeId: '.mcp' },
+            },
+          ],
         };
       }
       mockFinder.find.mockReturnValue(singlePage());
@@ -173,6 +191,60 @@ describe('connectorSmlType', () => {
       const result = await collectPages(connectorSmlType.list(createContext() as never));
 
       expect(result[0].spaces).toEqual([]);
+    });
+
+    it('excludes connectors whose actionTypeId is not chat-callable', async () => {
+      isChatCallableConnectorType.mockImplementation((id: string) => id === '.mcp');
+
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-chat', ['default'], '2024-01-01T00:00:00.000Z', '.mcp'),
+            makeSo('conn-nonchat', ['default'], '2024-01-02T00:00:00.000Z', '.email'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('conn-chat');
+    });
+
+    it('passes actionTypeId to isChatCallableConnectorType for each connector', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z', '.slack'),
+            makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z', '.mcp'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.slack');
+      expect(isChatCallableConnectorType).toHaveBeenCalledWith('.mcp');
+    });
+
+    it('yields nothing when no connectors pass the chat-callable filter', async () => {
+      isChatCallableConnectorType.mockReturnValue(false);
+
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z', '.email'),
+            makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z', '.pagerduty'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toEqual([]);
     });
   });
 

@@ -18,6 +18,7 @@ const mockFlushCancelOnGateFailureMetadata = jest.fn();
 const mockRunPreBuild = jest.fn();
 const mockGetEvalTriggerStep = jest.fn();
 const mockIsAutomatedVersionBumpPR = jest.fn();
+const mockGetPrChangesCached = jest.fn();
 
 jest.mock('#pipeline-utils', () => {
   const actual = jest.requireActual('#pipeline-utils');
@@ -30,6 +31,7 @@ jest.mock('#pipeline-utils', () => {
     getAgentImageConfig: mockGetAgentImageConfig,
     flushCancelOnGateFailureMetadata: mockFlushCancelOnGateFailureMetadata,
     isAutomatedVersionBumpPR: mockIsAutomatedVersionBumpPR,
+    getPrChangesCached: mockGetPrChangesCached,
   };
 });
 
@@ -81,6 +83,7 @@ describe('pull_request pipeline generation', () => {
     mockRunPreBuild.mockResolvedValue(undefined);
     mockGetEvalTriggerStep.mockReturnValue(null);
     mockIsAutomatedVersionBumpPR.mockResolvedValue(false);
+    mockGetPrChangesCached.mockResolvedValue([]);
   });
 
   afterEach(() => {

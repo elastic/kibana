@@ -62,6 +62,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.createdAt).toBe(created.createdAt);
       expect(response.body.createdBy).toBe(created.createdBy);
       expect(response.body.updatedAt).not.toBe(created.updatedAt);
+      expect(response.body.metadata.version).toBe(created.metadata.version + 1);
     }
   );
 
@@ -125,7 +126,10 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         format: 'standalone',
         breach: { query: 'FROM new-index-* | LIMIT 100' },
       });
-      expect(response.body.metadata).toStrictEqual(created.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...created.metadata,
+        version: created.metadata.version + 1,
+      });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );
@@ -323,6 +327,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { name: 'whatever' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -337,6 +342,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { name: 'a'.repeat(MAX_NAME_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -351,6 +357,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { name: '' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -365,6 +372,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { description: 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -379,6 +387,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -393,6 +402,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadata: { unknownField: 'nope' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -407,6 +417,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { metadta: { name: 'typo field' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -421,6 +432,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { schedule: { every: '1s' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -446,6 +458,58 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { state_transition: { pending_count: 3, pending_timeframe: '5m' } },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_STATE_TRANSITION');
+    }
+  );
+
+  const buildSignalRuleData = (name: string) =>
+    buildCreateRuleData({
+      kind: 'signal',
+      state_transition: undefined,
+      recovery_strategy: undefined,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 10' },
+      },
+      metadata: { name },
+    });
+
+  apiTest(
+    'validation: should reject updating a signal rule query to composed format',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildSignalRuleData('signal-to-composed')
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
+      // The rejected update must not have persisted: the query stays standalone.
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.query.format).toBe('standalone');
+    }
+  );
+
+  apiTest(
+    'validation: should reject setting recovery_strategy on a signal rule',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildSignalRuleData('signal-with-recovery')
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'no_breach' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
     }
   );
 

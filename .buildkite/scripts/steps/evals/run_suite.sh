@@ -112,7 +112,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
   # If the judge connector is EIS-backed, we still need EIS connectors even when running a LiteLLM project.
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
 
@@ -147,8 +147,8 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
 
     if [[ -z "${CONNECTOR_IDS:-}" ]]; then
       echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
-      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
-        export EVAL_PROJECT="${EVALUATION_CONNECTOR_ID}"
+      if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
+        export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
       fi
     else
       echo "--- Uploading eval connector fanout steps"
@@ -194,7 +194,7 @@ EOF
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
           EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-          EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
+          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -203,7 +203,7 @@ EOF
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
           EVAL_GREP: "${EVAL_GREP:-}"
-          EVALUATION_REPETITIONS: "${EVALUATION_REPETITIONS:-}"
+          EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -287,11 +287,107 @@ EOF
 EOF
       fi
 
+      # PR-only steps: post-comparison comment + refresh baseline block/trigger.
+      # Both live here in the fanout so they start only after all model steps
+      # complete and execution IDs are written by evaluate.ts.
+      if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        suite_display_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
+
+        # Post-comparison step (inside the fanout group — 6-space indent).
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (post comparison)"
+        key: "kbn-evals-${group_key_safe}-post-comparison"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+        # Refresh baseline block + trigger (top-level — 2-space indent).
+        # The trigger fires a fresh main eval run so the PR comment is updated
+        # with a same-day baseline when the auto-discovered one is stale.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+  - block: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-block"
+    depends_on:
+      - "kbn-evals-${group_key_safe}-post-comparison"
+    allow_dependency_failure: true
+  - trigger: kibana-evals-on-demand-llm-evals
+    label: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-trigger"
+    async: true
+    soft_fail: true
+    depends_on:
+      - "kbn-evals-${group_key_safe}-refresh-block"
+    build:
+      branch: main
+      message: "Fresh baseline for PR #${BUILDKITE_PULL_REQUEST}: ${EVAL_SUITE_ID}"
+      env:
+        EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+        EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        FRESH_BASELINE_PR_EXPERIMENT_ID: "bk-${BUILDKITE_BUILD_ID}"
+        EVAL_PR_NUMBER: "${BUILDKITE_PULL_REQUEST}"
+        EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+        EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+        EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+        EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+EOF
+      elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
+        # Fresh-baseline mode: emit the post-comparison step inside the fanout so
+        # it starts only after all model steps have written their execution IDs to
+        # Buildkite metadata.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (fresh baseline comparison)"
+        key: "kbn-evals-${group_key_safe}-fresh-compare"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+      fi
+
       if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
         echo "Fanout pipeline upload failed. Dumping generated YAML with line numbers:"
         nl -ba "$FANOUT_PIPELINE_FILE" || true
         exit 1
       fi
+
+      # Publish the connector list so the post-comparison step can discover
+      # which models ran without querying the experiments API.
+      _connectors_csv="$(printf '%s' "$CONNECTOR_IDS" | tr '\n' ',' | sed 's/,$//')"
+      buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
+
       echo "Fanout uploaded. Exiting parent step."
       exit 0
     fi
@@ -334,7 +430,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_RUNTIME="true"
   fi
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_RUNTIME="true"
   fi
   if [[ "${EVAL_MODEL_GROUPS:-}" == *"eis/"* ]]; then

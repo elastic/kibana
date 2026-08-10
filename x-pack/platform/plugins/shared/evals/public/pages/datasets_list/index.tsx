@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -33,17 +33,28 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import type { DatasetSummary } from '@kbn/evals-common';
+import {
+  MAX_DATASET_DESCRIPTION_LENGTH,
+  MAX_DATASET_NAME_LENGTH,
+  type DatasetMaturity,
+  type DatasetSummary,
+} from '@kbn/evals-common';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
+import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import {
+  DatasetMaturityBadge,
+  DatasetTagBadges,
+  DatasetTagFilters,
+  DatasetTagsFields,
+} from '../../components/dataset_tags';
 import * as i18n from './translations';
 
-// `created_at` is intentionally omitted: the list surfaces a "Last updated"
-// column but not a creation-date one, so it isn't offered as a sort option here.
-// The API (sort_field) still supports `created_at` for other consumers.
-type SortableField = Extract<keyof DatasetSummary, 'name' | 'examples_count' | 'updated_at'>;
+type SortableField = Extract<
+  keyof DatasetSummary,
+  'name' | 'examples_count' | 'updated_at' | 'maturity'
+>;
 
 export const DatasetsListPage: React.FC = () => {
   const history = useHistory();
@@ -55,10 +66,14 @@ export const DatasetsListPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [searchText, setSearchText] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedMaturity, setSelectedMaturity] = useState<DatasetMaturity[]>([]);
   const [datasetPendingDelete, setDatasetPendingDelete] = useState<DatasetSummary | null>(null);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [maturity, setMaturity] = useState<DatasetMaturity | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
 
   const createDataset = useCreateDataset();
@@ -72,9 +87,18 @@ export const DatasetsListPage: React.FC = () => {
     page: pageIndex + 1,
     perPage: pageSize,
     search: debouncedSearch || undefined,
+    tags: selectedTags,
+    maturity: selectedMaturity,
     sortField,
     sortOrder: sortDirection,
   });
+
+  const toggleTagFilter = useCallback((tag: string) => {
+    setSelectedTags((current) =>
+      current.includes(tag) ? current.filter((value) => value !== tag) : [...current, tag]
+    );
+    setPageIndex(0);
+  }, []);
 
   const columns: Array<EuiBasicTableColumn<DatasetSummary>> = useMemo(() => {
     const baseColumns: Array<EuiBasicTableColumn<DatasetSummary>> = [
@@ -102,6 +126,24 @@ export const DatasetsListPage: React.FC = () => {
         name: i18n.COLUMN_EXAMPLES,
         sortable: true,
         width: '120px',
+      },
+      {
+        field: 'tags',
+        name: i18n.COLUMN_TAGS,
+        render: (datasetTags: string[] | undefined) =>
+          datasetTags?.length ? (
+            <DatasetTagBadges tags={datasetTags} maxVisibleTags={3} onTagClick={toggleTagFilter} />
+          ) : (
+            '-'
+          ),
+      },
+      {
+        field: 'maturity',
+        name: i18n.COLUMN_MATURITY,
+        sortable: true,
+        width: '110px',
+        render: (datasetMaturity: DatasetMaturity | undefined) =>
+          datasetMaturity ? <DatasetMaturityBadge maturity={datasetMaturity} /> : '-',
       },
       {
         field: 'updated_at',
@@ -134,7 +176,7 @@ export const DatasetsListPage: React.FC = () => {
     }
 
     return baseColumns;
-  }, [history, canManage]);
+  }, [history, canManage, toggleTagFilter]);
 
   const pagination = {
     pageIndex,
@@ -164,6 +206,8 @@ export const DatasetsListPage: React.FC = () => {
   const openCreateFlyout = () => {
     setName('');
     setDescription('');
+    setTags([]);
+    setMaturity(null);
     setCreateError(null);
     setIsCreateFlyoutOpen(true);
   };
@@ -173,9 +217,11 @@ export const DatasetsListPage: React.FC = () => {
     setCreateError(null);
   };
 
-  const clearSearch = () => {
+  const clearFilters = () => {
     setSearchText('');
     setDebouncedSearch('');
+    setSelectedTags([]);
+    setSelectedMaturity([]);
     setPageIndex(0);
   };
 
@@ -190,6 +236,8 @@ export const DatasetsListPage: React.FC = () => {
       const { dataset_id: datasetId } = await createDataset.mutateAsync({
         name: name.trim(),
         description: description.trim(),
+        ...(tags.length > 0 ? { tags } : {}),
+        ...(maturity ? { maturity } : {}),
       });
       closeCreateFlyout();
       history.push(`/datasets/${datasetId}`);
@@ -198,10 +246,17 @@ export const DatasetsListPage: React.FC = () => {
     }
   };
 
+  // Deliberately not the facets from the list query above: those follow the search
+  // term, and the tags offered while creating a dataset shouldn't depend on what
+  // happens to be typed in the search box.
+  const suggestedTags = useDatasetTagSuggestions({ enabled: isCreateFlyoutOpen });
+
   const datasets = data?.datasets ?? [];
   const hasActiveSearch = debouncedSearch.trim().length > 0;
-  const showNoDatasetsYet = !isLoading && !error && !hasActiveSearch && datasets.length === 0;
-  const showNoMatches = !isLoading && !error && hasActiveSearch && datasets.length === 0;
+  const hasSelectedFacets = selectedTags.length > 0 || selectedMaturity.length > 0;
+  const hasActiveFilters = hasActiveSearch || hasSelectedFacets;
+  const showNoDatasetsYet = !isLoading && !error && !hasActiveFilters && datasets.length === 0;
+  const showNoMatches = !isLoading && !error && hasActiveFilters && datasets.length === 0;
   const showSearchBar = !error && !showNoDatasetsYet;
 
   return (
@@ -215,23 +270,42 @@ export const DatasetsListPage: React.FC = () => {
               justifyContent="spaceBetween"
               gutterSize="m"
             >
-              <EuiFlexItem css={{ maxWidth: 500 }}>
-                <EuiFieldSearch
-                  placeholder={i18n.SEARCH_PLACEHOLDER}
-                  value={searchText}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSearchText(value);
-                    if (!value) {
-                      setDebouncedSearch('');
-                    }
-                    setPageIndex(0);
-                  }}
-                  isClearable
-                  fullWidth
-                  aria-label={i18n.SEARCH_PLACEHOLDER}
-                  data-test-subj="datasetsSearch"
-                />
+              <EuiFlexItem>
+                <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
+                  <EuiFlexItem css={{ maxWidth: 500 }}>
+                    <EuiFieldSearch
+                      placeholder={i18n.SEARCH_PLACEHOLDER}
+                      value={searchText}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSearchText(value);
+                        if (!value) {
+                          setDebouncedSearch('');
+                        }
+                        setPageIndex(0);
+                      }}
+                      isClearable
+                      fullWidth
+                      aria-label={i18n.SEARCH_PLACEHOLDER}
+                      data-test-subj="datasetsSearch"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <DatasetTagFilters
+                      facets={data?.facets}
+                      selectedTags={selectedTags}
+                      selectedMaturity={selectedMaturity}
+                      onTagsChange={(nextTags) => {
+                        setSelectedTags(nextTags);
+                        setPageIndex(0);
+                      }}
+                      onMaturityChange={(nextMaturity) => {
+                        setSelectedMaturity(nextMaturity);
+                        setPageIndex(0);
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
@@ -275,10 +349,16 @@ export const DatasetsListPage: React.FC = () => {
           <EuiEmptyPrompt
             iconType="search"
             title={<h2>{i18n.NO_MATCHES_TITLE}</h2>}
-            body={<p>{i18n.getNoMatchesBody(debouncedSearch)}</p>}
+            body={
+              <p>
+                {hasActiveSearch
+                  ? i18n.getNoMatchesBody(debouncedSearch)
+                  : i18n.NO_FILTER_MATCHES_BODY}
+              </p>
+            }
             actions={[
-              <EuiButton onClick={clearSearch} iconType="cross">
-                {i18n.CLEAR_SEARCH_BUTTON}
+              <EuiButton onClick={clearFilters} iconType="cross">
+                {hasSelectedFacets ? i18n.CLEAR_FILTERS_BUTTON : i18n.CLEAR_SEARCH_BUTTON}
               </EuiButton>,
             ]}
           />
@@ -325,6 +405,7 @@ export const DatasetsListPage: React.FC = () => {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   isInvalid={Boolean(createError)}
+                  maxLength={MAX_DATASET_NAME_LENGTH}
                   fullWidth
                 />
               </EuiFormRow>
@@ -333,9 +414,17 @@ export const DatasetsListPage: React.FC = () => {
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   rows={3}
+                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
                   fullWidth
                 />
               </EuiFormRow>
+              <DatasetTagsFields
+                tags={tags}
+                maturity={maturity}
+                onTagsChange={setTags}
+                onMaturityChange={setMaturity}
+                suggestedTags={suggestedTags}
+              />
             </EuiForm>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

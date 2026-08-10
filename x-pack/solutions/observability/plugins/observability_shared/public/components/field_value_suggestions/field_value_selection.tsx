@@ -212,6 +212,13 @@ export function FieldValueSelection({
     <Wrapper>
       <EuiPopover
         id="popover"
+        aria-label={i18n.translate(
+          'xpack.observabilityShared.fieldValueSelection.popoverAriaLabel',
+          {
+            defaultMessage: 'Filter options for {label}',
+            values: { label },
+          }
+        )}
         panelPaddingSize="none"
         button={button || (asFilterButton ? filterButton : anchorButton)}
         isOpen={isPopoverOpen || forceOpen}

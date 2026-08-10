@@ -9,16 +9,9 @@
 
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { DistributiveOmit } from '@elastic/eui';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderMetadataItems,
-  AppHeaderSpacing,
-  AppHeaderTab,
-  AppHeaderTitle,
-} from '../types';
+import type { AppHeaderBack, AppHeaderConfig, AppHeaderSpacing, AppHeaderTitle } from '../types';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
@@ -27,20 +20,12 @@ import { TitleArea } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
 import { AppHeaderMetadata } from './app_header_metadata';
+import { AppHeaderDescription } from './app_header_description';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 import { useCanAccessIntegrations, useResolvedBadges, useShareAction } from './hooks';
 
-export interface AppHeaderViewProps {
-  title?: AppHeaderTitle;
+export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
   back?: AppHeaderBack | AppHeaderBack[];
-  tabs?: AppHeaderTab[];
-  badges?: AppHeaderBadge[];
-  menu?: AppMenuConfig;
-  /**
-   * @deprecated Temporary slot for `FavoriteButton` or a thin wrapper around it. Replace this with
-   * the typed favorite action API tracked in https://github.com/elastic/kibana/issues/271402.
-   */
-  favorite?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
   /**
    * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
    * sticky-header mechanism for the correct scrolling container.
@@ -55,12 +40,12 @@ export interface AppHeaderViewProps {
   spacing?: AppHeaderSpacing;
   docLink?: string;
   showAddIntegrations?: boolean;
-}
+};
 
-interface AppHeaderViewInternalProps extends AppHeaderViewProps {
+type AppHeaderViewInternalProps = AppHeaderViewProps & {
   titleAppend?: ReactNode;
   borderless?: boolean;
-}
+};
 
 const getPublicAppHeaderViewProps = ({
   title,
@@ -69,24 +54,29 @@ const getPublicAppHeaderViewProps = ({
   badges,
   menu,
   favorite,
+  description,
   metadata,
   sticky,
   spacing,
   docLink,
   showAddIntegrations,
-}: AppHeaderViewProps): AppHeaderViewProps => ({
-  title,
-  back,
-  tabs,
-  badges,
-  menu,
-  favorite,
-  metadata,
-  sticky,
-  spacing,
-  docLink,
-  showAddIntegrations,
-});
+}: AppHeaderViewProps): AppHeaderViewProps => {
+  const secondaryContent = description ? { description } : metadata ? { metadata } : {};
+
+  return {
+    title,
+    back,
+    tabs,
+    badges,
+    menu,
+    favorite,
+    ...secondaryContent,
+    sticky,
+    spacing,
+    docLink,
+    showAddIntegrations,
+  };
+};
 
 const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
   ({
@@ -97,6 +87,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     menu,
     favorite,
     titleAppend,
+    description,
     metadata,
     sticky,
     spacing,
@@ -117,6 +108,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       title === undefined &&
       !resolvedBadges?.length &&
       !tabs?.length &&
+      !description &&
       !metadata?.length &&
       !titleAppend &&
       !favorite;
@@ -135,6 +127,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !!titleAppend ||
       !!shareAction ||
       !!favorite ||
+      !!description ||
       !!metadata?.length ||
       !!docLink ||
       showIntegrations ||
@@ -153,7 +146,20 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
-        metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
+        secondaryContent={
+          description ? (
+            <AppHeaderDescription description={description} />
+          ) : metadata?.length ? (
+            <AppHeaderMetadata metadata={metadata} />
+          ) : undefined
+        }
+        secondaryContentTestSubj={
+          description
+            ? APP_HEADER_TEST_SUBJECTS.description
+            : metadata?.length
+            ? APP_HEADER_TEST_SUBJECTS.metadata
+            : undefined
+        }
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
         spacing={resolvedSpacing}
@@ -171,13 +177,13 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => {
 
 AppHeaderView.displayName = 'AppHeaderView';
 
-export interface AppHeaderProps extends AppHeaderViewProps {
+export type AppHeaderProps = AppHeaderViewProps & {
   title: AppHeaderTitle;
-}
+};
 
-interface InlineAppHeaderProps extends AppHeaderViewInternalProps {
+type InlineAppHeaderProps = AppHeaderViewInternalProps & {
   title: AppHeaderTitle;
-}
+};
 
 const InlineAppHeader = React.memo<InlineAppHeaderProps>((props) => {
   const chrome = useChromeService();
@@ -197,9 +203,9 @@ export const AppHeader = React.memo<AppHeaderProps>((props) => (
 
 AppHeader.displayName = 'AppHeader';
 
-export interface DiscoverAppHeaderProps extends AppHeaderProps {
+export type DiscoverAppHeaderProps = AppHeaderProps & {
   tabsBar?: ReactNode;
-}
+};
 
 export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => (
   <InlineAppHeader
