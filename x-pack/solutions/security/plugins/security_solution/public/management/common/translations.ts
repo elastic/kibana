@@ -366,6 +366,9 @@ export const CONSOLE_COMMANDS = {
           'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
       }
     ),
+    rawArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.rawArgAbout', {
+      defaultMessage: 'Generates a raw memory dump',
+    }),
     agentResultMissing: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.agentResultMissing',
       { defaultMessage: 'Agent result missing' }
