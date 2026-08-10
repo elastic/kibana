@@ -23,9 +23,16 @@ describe('MetaBlocks', () => {
     );
 
     expect(screen.getByText('Last updated')).toBeInTheDocument();
-    expect(screen.getByText('Dec 3, 2025')).toBeInTheDocument();
+    expect(screen.getByTestId('metablocks-container')).toHaveTextContent('Dec 3, 2025');
     expect(screen.getByText('Owner')).toBeInTheDocument();
     expect(screen.getByText('Platform')).toBeInTheDocument();
+  });
+
+  it('truncates string values in the middle, keeping the full text available', () => {
+    const resource = 'etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system';
+    render(<MetaBlocks items={[{ title: 'Resource', value: resource }]} />);
+
+    expect(screen.getByTestId('fullText')).toHaveTextContent(resource);
   });
 
   it('renders nothing when there are no items', () => {
