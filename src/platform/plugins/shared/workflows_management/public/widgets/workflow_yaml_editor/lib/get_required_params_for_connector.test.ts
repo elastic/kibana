@@ -447,6 +447,133 @@ describe('getRequiredParamsForConnector', () => {
     });
   });
 
+  describe('discriminated union schemas', () => {
+    const idsUnion = z
+      .union([z.string().min(1), z.array(z.string().min(1)).min(1)])
+      .describe('A single ID or a list of IDs to support bulk updates');
+
+    const setAttackStatusSchema = z.discriminatedUnion('status', [
+      z.object({
+        ids: idsUnion,
+        update_related_alerts: z.boolean().optional().default(false),
+        status: z.literal('closed').describe('The new status for the attacks'),
+        reason: z.string().optional(),
+      }),
+      z.object({
+        ids: idsUnion,
+        update_related_alerts: z.boolean().optional().default(false),
+        status: z.enum(['open', 'acknowledged']).describe('The new status for the attacks'),
+      }),
+    ]);
+
+    beforeEach(() => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        { type: 'security.setAttackStatus', paramsSchema: setAttackStatusSchema },
+      ]);
+      isInternalConnector.mockReturnValue(false);
+    });
+
+    it('should return the discriminator and shared required fields in declaration order', () => {
+      const result = getRequiredParamsForConnector('security.setAttackStatus');
+      expect(result.map((p) => p.name)).toEqual(['ids', 'status']);
+    });
+
+    it('should render the discriminator example from the first variant', () => {
+      const result = getRequiredParamsForConnector('security.setAttackStatus');
+      expect(result.find((p) => p.name === 'status')?.example).toBe('closed');
+    });
+
+    it('should render a `string | string[]` field as an array placeholder', () => {
+      const result = getRequiredParamsForConnector('security.setAttackStatus');
+      expect(result.find((p) => p.name === 'ids')?.example).toEqual(['']);
+    });
+
+    it('should omit fields that are optional in any variant', () => {
+      const result = getRequiredParamsForConnector('security.setAttackStatus');
+      expect(result.find((p) => p.name === 'update_related_alerts')).toBeUndefined();
+    });
+
+    it('should omit fields that only exist on a single variant', () => {
+      const result = getRequiredParamsForConnector('security.setAttackStatus');
+      expect(result.find((p) => p.name === 'reason')).toBeUndefined();
+    });
+  });
+
+  describe('non-discriminated union schemas', () => {
+    const setAlertTagsSchema = z.union([
+      z.object({
+        alert_ids: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]),
+        tags_to_add: z.array(z.string()).min(1),
+        tags_to_remove: z.array(z.string()).default([]),
+      }),
+      z.object({
+        alert_ids: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]),
+        tags_to_add: z.array(z.string()).default([]),
+        tags_to_remove: z.array(z.string()).min(1),
+      }),
+    ]);
+
+    beforeEach(() => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        { type: 'security.setAlertTags', paramsSchema: setAlertTagsSchema },
+      ]);
+      isInternalConnector.mockReturnValue(false);
+    });
+
+    it('should fall back to the required fields of the first union member', () => {
+      const result = getRequiredParamsForConnector('security.setAlertTags');
+      expect(result.map((p) => p.name)).toEqual(['alert_ids', 'tags_to_add']);
+    });
+
+    it('should render an array field as an array placeholder', () => {
+      const result = getRequiredParamsForConnector('security.setAlertTags');
+      expect(result.find((p) => p.name === 'tags_to_add')?.example).toEqual(['']);
+    });
+  });
+
+  describe('type-aware placeholders', () => {
+    const defaultConnector = (paramsSchema: z.ZodType) => ({
+      type: 'custom.typed',
+      paramsSchema,
+    });
+
+    beforeEach(() => {
+      isInternalConnector.mockReturnValue(false);
+    });
+
+    it('should render an enum field as its first option', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        defaultConnector(z.object({ level: z.enum(['low', 'medium', 'high']) })),
+      ]);
+      const result = getRequiredParamsForConnector('custom.typed');
+      expect(result.find((p) => p.name === 'level')?.example).toBe('low');
+    });
+
+    it('should render a boolean field as false', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        defaultConnector(z.object({ enabled: z.boolean() })),
+      ]);
+      const result = getRequiredParamsForConnector('custom.typed');
+      expect(result.find((p) => p.name === 'enabled')?.example).toBe(false);
+    });
+
+    it('should render a number field as zero', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        defaultConnector(z.object({ count: z.number() })),
+      ]);
+      const result = getRequiredParamsForConnector('custom.typed');
+      expect(result.find((p) => p.name === 'count')?.example).toBe(0);
+    });
+
+    it('should resolve fields through a wrapped (optional/default) top-level schema', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        defaultConnector(z.object({ case_id: z.string() }).optional() as unknown as z.ZodType),
+      ]);
+      const result = getRequiredParamsForConnector('custom.typed');
+      expect(result.map((p) => p.name)).toEqual(['case_id']);
+    });
+  });
+
   describe('discriminated union scaffolding', () => {
     const buildAttachmentUnion = () =>
       z.discriminatedUnion('type', [

@@ -126,36 +126,36 @@ describe('TemplateFieldsFormReady — batch mode carry-over (applyDefaults)', ()
   describe('TOGGLE', () => {
     const field: InlineField = {
       name: 'enabled',
-      type: 'keyword',
+      type: 'boolean',
       control: FieldType.TOGGLE,
     };
 
     it("carries over 'true' (string) unchanged", () => {
-      const values = getInitialValues([field], { enabledAsKeyword: 'true' });
-      expect(values.enabled_as_keyword).toBe('true');
+      const values = getInitialValues([field], { enabledAsBoolean: 'true' });
+      expect(values.enabled_as_boolean).toBe('true');
     });
 
     it("carries over 'false' (string) unchanged", () => {
-      const values = getInitialValues([field], { enabledAsKeyword: 'false' });
-      expect(values.enabled_as_keyword).toBe('false');
+      const values = getInitialValues([field], { enabledAsBoolean: 'false' });
+      expect(values.enabled_as_boolean).toBe('false');
     });
 
     it('carries over native boolean true unchanged', () => {
-      const values = getInitialValues([field], { enabledAsKeyword: true });
-      expect(values.enabled_as_keyword).toBe(true);
+      const values = getInitialValues([field], { enabledAsBoolean: true });
+      expect(values.enabled_as_boolean).toBe(true);
     });
 
     it('carries over native boolean false unchanged', () => {
-      const values = getInitialValues([field], { enabledAsKeyword: false });
-      expect(values.enabled_as_keyword).toBe(false);
+      const values = getInitialValues([field], { enabledAsBoolean: false });
+      expect(values.enabled_as_boolean).toBe(false);
     });
 
-    it('drops a stale non-boolean value inherited from a different keyword control (e.g. SELECT)', () => {
-      // A field key collision across templates (same name, different control type, both keyword-typed)
-      // could carry over an arbitrary string like 'high' from a previous SELECT/RADIO_GROUP field.
-      // The server rejects non-boolean toggle values with a 400, so we sanitize it out here.
-      const values = getInitialValues([field], { enabledAsKeyword: 'high' });
-      expect(values.enabled_as_keyword).toBe('');
+    it('drops a stale non-boolean value that somehow reached a toggle key', () => {
+      // A toggle should only ever hold true/false; an arbitrary string like 'high' can only arrive
+      // via a stale/hand-edited value. The server rejects non-boolean toggle values with a 400, so
+      // we sanitize it out here.
+      const values = getInitialValues([field], { enabledAsBoolean: 'high' });
+      expect(values.enabled_as_boolean).toBe('');
     });
   });
 

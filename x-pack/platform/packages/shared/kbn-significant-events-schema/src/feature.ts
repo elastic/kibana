@@ -65,8 +65,6 @@ export const identifiedFeatureSchema = baseFeatureSchema
     })
   );
 
-export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
-
 export const ignoredFeatureSchema = z.object({
   feature_id: z.string().max(MAX_ID_LENGTH),
   feature_title: z.string().max(MAX_TITLE_LENGTH),
@@ -111,6 +109,39 @@ export function normalizeFeatureSlug(id: string): string {
   return id.trim().toLowerCase();
 }
 
+// Matches trailing dotted versions, 4+ digit numbers, and 8+ character hex hashes.
+const FEATURE_STATE_SUFFIX_PATTERNS = [
+  /[-_.]v?\d+(?:\.\d+)+$/,
+  /[-_.]\d{4,}$/,
+  /[-_.][0-9a-f]{8,}$/,
+] as const;
+
+/** Removes mutable suffixes for matching without changing stored ids or UUIDs. */
+export function normalizeFeatureSlugForMatching(id: string): string {
+  const normalized = normalizeFeatureSlug(id);
+  if (normalized.length > MAX_ID_LENGTH) {
+    return normalized;
+  }
+
+  let candidate = normalized;
+
+  while (candidate.length > 0) {
+    const previous = candidate;
+    for (const suffixPattern of FEATURE_STATE_SUFFIX_PATTERNS) {
+      candidate = candidate.replace(suffixPattern, '');
+    }
+
+    if (candidate.length === 0) {
+      return normalized;
+    }
+    if (candidate === previous) {
+      return candidate;
+    }
+  }
+
+  return normalized;
+}
+
 /**
  * Computes a deterministic, stable uuid for a feature from its identifying
  * pair (slug, stream_name). The slug is normalized via `normalizeFeatureSlug`.
@@ -119,10 +150,6 @@ export function normalizeFeatureSlug(id: string): string {
 export function computeFeatureUuid(feature: Pick<BaseFeature, 'id' | 'stream_name'>): string {
   const slug = normalizeFeatureSlug(feature.id);
   return v5(objectHash([feature.stream_name, slug]), v5.DNS);
-}
-
-export function isFeature(feature: unknown): feature is Feature {
-  return featureSchema.safeParse(feature).success;
 }
 
 export function isFeatureWithFilter(feature: unknown): feature is FeatureWithFilter {
@@ -154,6 +181,9 @@ const mergeArrays = (a: string[] | undefined, b: string[] | undefined): string[]
   return merged.length > 0 ? merged : undefined;
 };
 
+const getStringArray = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+
 export function toBaseFeature(feature: Feature): BaseFeature {
   return {
     id: feature.id,
@@ -175,6 +205,36 @@ export function toBaseFeature(feature: Feature): BaseFeature {
 export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): BaseFeature {
   const mergedMeta = { ...(existing.meta ?? {}), ...(incoming.meta ?? {}) };
   const mergedProperties = { ...(existing.properties ?? {}), ...(incoming.properties ?? {}) };
+  const existingVersion = existing.properties.version;
+  const incomingVersion = incoming.properties.version;
+  const versionHistory = getStringArray(existing.meta?.version_history);
+  // Unioning incoming aliases is safe: model-written meta.aliases is stripped at the identify
+  // boundary, so whatever arrives here was assigned by code after a verified reuse.
+  const aliases = uniq([
+    ...getStringArray(existing.meta?.aliases),
+    ...getStringArray(incoming.meta?.aliases),
+  ]).slice(-10);
+
+  if (versionHistory.length > 0) {
+    mergedMeta.version_history = versionHistory;
+  } else {
+    delete mergedMeta.version_history;
+  }
+  if (aliases.length > 0) {
+    mergedMeta.aliases = aliases;
+  } else {
+    delete mergedMeta.aliases;
+  }
+
+  if (
+    typeof existingVersion === 'string' &&
+    existingVersion.trim().length > 0 &&
+    typeof incomingVersion === 'string' &&
+    incomingVersion.trim().length > 0 &&
+    existingVersion !== incomingVersion
+  ) {
+    mergedMeta.version_history = uniq([...versionHistory, existingVersion]).slice(-10);
+  }
 
   return {
     id: existing.id,

@@ -26,7 +26,7 @@ import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { UserCapabilities } from '../../services/user_capabilities';
 import type { RuleApiResponse } from '../../services/rules_api';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -243,7 +243,7 @@ export const RulesListPage = () => {
       <AppHeader
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
+        badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
       />

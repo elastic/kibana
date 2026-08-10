@@ -62,7 +62,7 @@ import type {
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
 import type {
-  CasesFindResponse,
+  CasesSearchResponse,
   CasesSimilarResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
@@ -463,6 +463,7 @@ export const allCases: CasesFindResponseUI = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+  mttr: 2000,
 };
 
 export const similarCases: CasesSimilarResponseUI = {
@@ -630,7 +631,7 @@ export const casesSnake: Cases = [
   caseWithRegisteredAttachmentsSnake,
 ];
 
-export const allCasesSnake: CasesFindResponse = {
+export const allCasesSnake: CasesSearchResponse = {
   cases: casesSnake,
   page: 1,
   per_page: 5,
@@ -638,6 +639,7 @@ export const allCasesSnake: CasesFindResponse = {
   count_closed_cases: 130,
   count_in_progress_cases: 40,
   count_open_cases: 20,
+  mttr: 2000,
 };
 
 export const similarCasesSnake: CasesSimilarResponse = {

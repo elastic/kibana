@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   dataViewReferenceSchema,
   dataViewSchema,
@@ -29,18 +29,18 @@ import type {
   savedRuntimeFieldSchema,
 } from './runtime_fields/schema_saved_runtime_fields';
 
-export type AsCodeFieldSettings = TypeOf<typeof fieldSettingsSchema>;
-export type AsCodeCompositeRuntimeField = TypeOf<typeof compositeRuntimeFieldSchema>;
-export type AsCodeRuntimeBaseField = TypeOf<typeof runtimeFieldBaseSchema>;
-export type AsCodeRuntimeField = TypeOf<typeof runtimeFieldSchema>;
-export type AsCodeDataViewReference = TypeOf<typeof dataViewReferenceSchema>;
-export type AsCodeDataViewSpec = TypeOf<typeof dataViewSpecSchema>;
-export type AsCodeDataView = TypeOf<typeof dataViewSchema>;
-export type AsCodeEsqlDataSource = TypeOf<typeof esqlDataSourceSchema>;
+export type AsCodeFieldSettings = z.output<typeof fieldSettingsSchema>;
+export type AsCodeCompositeRuntimeField = z.output<typeof compositeRuntimeFieldSchema>;
+export type AsCodeRuntimeBaseField = z.output<typeof runtimeFieldBaseSchema>;
+export type AsCodeRuntimeField = z.output<typeof runtimeFieldSchema>;
+export type AsCodeDataViewReference = z.output<typeof dataViewReferenceSchema>;
+export type AsCodeDataViewSpec = z.output<typeof dataViewSpecSchema>;
+export type AsCodeDataView = z.output<typeof dataViewSchema>;
+export type AsCodeEsqlDataSource = z.output<typeof esqlDataSourceSchema>;
 
 // Saved schemas
-export type AsCodeSavedFieldSettings = TypeOf<typeof savedFieldSettingsSchema>;
-export type AsCodeSavedCompositeRuntimeField = TypeOf<typeof savedCompositeRuntimeFieldSchema>;
-export type AsCodeSavedPrimitiveRuntimeField = TypeOf<typeof savedPrimitiveRuntimeFieldSchema>;
-export type AsCodeSavedRuntimeField = TypeOf<typeof savedRuntimeFieldSchema>;
-export type AsCodeSavedDataView = TypeOf<typeof savedDataViewSpecSchema>;
+export type AsCodeSavedFieldSettings = z.output<typeof savedFieldSettingsSchema>;
+export type AsCodeSavedCompositeRuntimeField = z.output<typeof savedCompositeRuntimeFieldSchema>;
+export type AsCodeSavedPrimitiveRuntimeField = z.output<typeof savedPrimitiveRuntimeFieldSchema>;
+export type AsCodeSavedRuntimeField = z.output<typeof savedRuntimeFieldSchema>;
+export type AsCodeSavedDataView = z.output<typeof savedDataViewSpecSchema>;

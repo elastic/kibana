@@ -71,6 +71,8 @@ export interface PersistedEntityAiSummary {
   generated_at: number;
   /** Username of the user who triggered generation (set server-side). */
   generated_by: string;
+  /** Profile UID of the user who triggered generation, used for resolving display name. If not present, the generated_by value is used. */
+  author_profile_uid?: string;
   staleness: EntitySummaryStaleness;
   anomaly_job_ids?: string[];
   variant_id?: string;

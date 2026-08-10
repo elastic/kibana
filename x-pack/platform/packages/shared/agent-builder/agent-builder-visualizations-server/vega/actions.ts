@@ -23,6 +23,8 @@ export interface AuthorSpecAction {
   spec?: Record<string, unknown>;
   /** Panel / visualization title from the authoring response schema. */
   title?: string;
+  /** One-sentence factual description of the authored chart and presentation choices. */
+  authoringNote?: string;
   attempt: number;
   error?: string;
 }
@@ -35,9 +37,10 @@ export interface ValidateSpecAction {
   spec?: string;
   /** Panel / visualization title carried through from the matching authoring attempt. */
   title?: string;
+  /** Authoring note carried through from the matching authoring attempt. */
+  authoringNote?: string;
   attempt: number;
   error?: string;
-  warnings?: string[];
 }
 
 export type VegaAction = GenerateEsqlAction | AuthorSpecAction | ValidateSpecAction;

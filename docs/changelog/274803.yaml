@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/274803
+type: breaking-change
+subtype: api
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.6.0
+title: "Limit exception list entry string lengths for endpoint artifacts"
+description: "Endpoint artifact exception list validators now enforce maximum string lengths on entry fields (for example blocklist, trusted applications, trusted devices, and event filters). Values longer than the limit are rejected."
+impact: "Creating or updating endpoint exception list items with string values longer than the new limits fails validation. Other exception list types are unaffected."
+action: "Shorten entry values that exceed the limits before saving. Typical limits are 4096 characters for entry values and 1024 characters for field names in advanced trusted apps and event filters."

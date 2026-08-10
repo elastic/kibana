@@ -14,7 +14,7 @@ import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/publi
 import type { AnyAction, ThunkDispatch } from 'redux-toolkit-v1';
 import {
   internalStateActions,
-  selectCurrentProfileUrlStateDefinition,
+  selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,
   selectTab,
   selectTabAppState,
@@ -24,8 +24,7 @@ import {
 } from '../redux';
 import { internalStateSlice } from '../redux/internal_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
-import type { ProfileStateMap } from '../../../../context_awareness';
-import { ProfileStateType } from '../../../../context_awareness';
+import { ProfileStateType, type ProfileStateMap } from '../../../../../common/context_awareness';
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
@@ -165,7 +164,7 @@ export const createUrlSyncObservables = ({
       }
 
       const hasNextProfileUrlState = Object.keys(nextProfileUrlStateMap).length > 0;
-      const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
+      const profileUrlStateDefinition = selectCurrentProfileStateDefinition(
         runtimeStateManager,
         tabId
       );

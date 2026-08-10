@@ -131,8 +131,24 @@ export class DataGrid {
     );
   }
 
+  /**
+   * Returns the leaf value node of a data-grid cell. Prefer this over
+   * `getCell` when asserting on the rendered value: the gridcell wrapper's
+   * text content concatenates child nodes (adding stray newlines), whereas the
+   * value node holds the formatted value exactly.
+   */
+  getCellValue(rowIndex: number, columnId: string): Locator {
+    return this.getCell(rowIndex, columnId).locator('.unifiedDataTable__cellValue');
+  }
+
   getColumnHeader(name: string): Locator {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  }
+
+  async getColumnTitles(
+    scope: Locator = this.page.testSubj.locator('docTable')
+  ): Promise<string[]> {
+    return this.readHeaderLabels(scope, Number.MAX_SAFE_INTEGER);
   }
 
   async getColumnWidth(field: string): Promise<number> {
@@ -467,6 +483,10 @@ export class DataGrid {
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    // Gate on the data fetch first so the visibility budget below isn't spent
+    // waiting for an in-flight search rather than for the table to render.
+    await this.waitForLoad();
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 

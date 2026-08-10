@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentActions } from './attachment_actions';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
@@ -94,8 +95,11 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const headerStyles = css`
     position: relative;
+    display: flex;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
+    border-top-left-radius: ${AB_PANEL_RADIUS}px;
+    border-top-right-radius: ${AB_PANEL_RADIUS}px;
     min-height: ${HEADER_HEIGHT}px;
   `;
 

@@ -10,13 +10,19 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, EXTERNAL_LINK, LINKS_API_PATH } from '../fixtures';
+import { apiTest, COMMON_HEADERS, EXTERNAL_LINK, KBN_ARCHIVES, LINKS_API_PATH } from '../fixtures';
 
-const buildUrl = (params: Record<string, string | number | undefined>) => {
+const buildUrl = (params: Record<string, string | string[] | number | undefined>) => {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined) {
-      searchParams.set(key, String(value));
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          searchParams.append(key, String(item));
+        }
+      } else {
+        searchParams.set(key, String(value));
+      }
     }
   }
   const query = searchParams.toString();
@@ -31,6 +37,8 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     await kbnClient.savedObjects.clean({ types: ['links'] });
     viewerCredentials = await requestAuth.getApiKey('viewer');
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+
+    await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
 
     const titles = [
       'Alpha Links Panel',
@@ -50,6 +58,15 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
         responseType: 'json',
       });
     }
+
+    await apiClient.post(LINKS_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: { title: 'Tagged Links Panel', links: [EXTERNAL_LINK], tags: ['tag-2'] },
+      responseType: 'json',
+    });
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -66,8 +83,8 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.meta.total).toBe(5);
-    expect(response.body.data).toHaveLength(5);
+    expect(response.body.meta.total).toBe(6);
+    expect(response.body.data).toHaveLength(6);
     expect(response.body.meta.page).toBe(1);
     expect(response.body.meta.per_page).toBe(20);
   });
@@ -97,7 +114,7 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.meta.total).toBe(5);
+    expect(response.body.meta.total).toBe(6);
     expect(response.body.data).toHaveLength(2);
     expect(response.body.meta.per_page).toBe(2);
   });
@@ -123,7 +140,7 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(secondPage).toHaveStatusCode(200);
-    expect(secondPage.body.data).toHaveLength(2);
+    expect(secondPage.body.data).toHaveLength(3);
     expect(secondPage.body.meta.page).toBe(2);
 
     const firstPageIds: string[] = firstPage.body.data.map((item: { id: string }) => item.id);
@@ -144,5 +161,41 @@ apiTest.describe('links - search', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.meta.total).toBe(0);
     expect(response.body.data).toHaveLength(0);
+  });
+
+  apiTest('should narrow results by tag_names (single name)', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: 'bar' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].data.title).toBe('Tagged Links Panel');
+  });
+
+  apiTest('should return empty results when tag_names matches no tag', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ tag_names: 'does-not-exist' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(0);
+    expect(response.body.data).toHaveLength(0);
+  });
+
+  apiTest('should exclude results by excluded_tag_names', async ({ apiClient }) => {
+    const response = await apiClient.get(buildUrl({ excluded_tag_names: 'bar' }), {
+      headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.meta.total).toBe(5);
+    expect(response.body.data).toHaveLength(5);
+    const titles = response.body.data.map((d: { data: { title: string } }) => d.data.title);
+    expect(titles).not.toContain('Tagged Links Panel');
   });
 });

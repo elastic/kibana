@@ -35,11 +35,16 @@ jest.mock('./use_query_execution', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../form/hooks/use_data_fields', () => ({
-  useDataFields: () => ({ data: {}, isLoading: false }),
+  useDataFields: () => ({
+    data: {
+      '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+    },
+    isLoading: false,
+  }),
 }));
 
 jest.mock('../../form/contexts/rule_form_context', () => ({

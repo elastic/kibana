@@ -198,6 +198,7 @@ export function useAgentEdit({
 
   return {
     state,
+    agentType: agent?.type,
     isLoading,
     isSubmitting:
       createMutation.isLoading || updateMutation.isLoading || updateAccessControlMutation.isLoading,

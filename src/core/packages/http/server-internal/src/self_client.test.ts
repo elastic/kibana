@@ -8,8 +8,10 @@
  */
 
 import { NEVER } from 'rxjs';
-import type { IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, IAuthHeadersStorage, KibanaRequest } from '@kbn/core-http-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import { createInternalHttpSelfClient } from './self_client';
 
 const originalFetch = global.fetch;
@@ -26,20 +28,23 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
     ...overrides,
   } as KibanaRequest);
 
+const createFakeRequest = (headers: FakeRawRequest['headers']): KibanaRequest =>
+  kibanaRequestFactory({ headers });
+
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
   authHeaders = { authorization: 'Bearer scoped' },
+  authRequestHeaders = {
+    get: jest.fn().mockReturnValue(authHeaders),
+    set: jest.fn(),
+  } as jest.Mocked<IAuthHeadersStorage>,
   target = 'auto',
 }: {
   publicBaseUrl?: string | null;
   authHeaders?: Record<string, string>;
+  authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
 } = {}) => {
-  const authRequestHeaders = {
-    get: jest.fn().mockReturnValue(authHeaders),
-    set: jest.fn(),
-  } as jest.Mocked<IAuthHeadersStorage>;
-
   const self = createInternalHttpSelfClient({
     authRequestHeaders,
     basePath: {
@@ -184,6 +189,48 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(result.body).toEqual({ ok: true });
     expect(result.response).toBeInstanceOf(Response);
     expect(result.request).toBeInstanceOf(Request);
+  });
+
+  it('uses the authorization header from a fake request instead of auth header storage', async () => {
+    const authRequestHeaders = new AuthHeadersStorage();
+    const request = createFakeRequest({
+      authorization: 'ApiKey fake-request-api-key',
+      cookie: 'sid=must-not-forward',
+      'x-elastic-internal-origin': 'must-not-forward',
+    });
+    authRequestHeaders.set(request, { authorization: 'Bearer auth-storage-token' });
+    const { self } = createClient({ authRequestHeaders });
+
+    await self.asScoped(request).fetch('/api/status');
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.get('authorization')).toBe('ApiKey fake-request-api-key');
+    expect(outboundRequest.headers.get('cookie')).toBeNull();
+    expect(outboundRequest.headers.get('x-elastic-internal-origin')).toBeNull();
+  });
+
+  it('does not add authorization for a fake request without it', async () => {
+    const authRequestHeaders = new AuthHeadersStorage();
+    const request = createFakeRequest({});
+    authRequestHeaders.set(request, { authorization: 'Bearer auth-storage-token' });
+    const { self } = createClient({ authRequestHeaders });
+
+    await self.asScoped(request).fetch('/api/status', { forwardRequestHeaders: true });
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.has('authorization')).toBe(false);
+  });
+
+  it('preserves UIAM authorization from a fake request unchanged', async () => {
+    const authRequestHeaders = new AuthHeadersStorage();
+    const request = createFakeRequest({ authorization: 'ApiKey essu_credential_123' });
+    authRequestHeaders.set(request, { authorization: 'Bearer auth-storage-token' });
+    const { self } = createClient({ authRequestHeaders });
+
+    await self.asScoped(request).fetch('/api/status');
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.headers.get('authorization')).toBe('ApiKey essu_credential_123');
   });
 
   it('forwards safe request headers when forwardRequestHeaders is enabled', async () => {

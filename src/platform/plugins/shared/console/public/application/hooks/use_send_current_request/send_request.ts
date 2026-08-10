@@ -13,6 +13,7 @@ import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
 import type { BaseResponseType } from '../../../types';
+import { isNDJSONContentType } from '../../containers/editor/utils/output_data';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -38,6 +39,19 @@ export interface RequestResult<V = unknown> {
 
 const getContentType = (response: Response | undefined) =>
   (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
+
+const formatNdjson = (text: string): string =>
+  text
+    .split('\n')
+    .filter((line) => line.trim())
+    .map((line) => {
+      try {
+        return JSON.stringify(JSON.parse(line), null, 2);
+      } catch {
+        return line;
+      }
+    })
+    .join('\n');
 
 const extractStatusCodeAndText = (response: Response | undefined, path: string) => {
   const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
@@ -129,6 +143,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (response) {
+          const contentType = getContentType(response);
           let value;
           if (statusCode === 200 && !body) {
             // If the request resolves with a 200 status code but has an empty or null body,
@@ -138,6 +153,10 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           // check if object is ArrayBuffer
           else if (body instanceof ArrayBuffer) {
             value = body;
+          } else if (body instanceof Blob) {
+            // ndjson (and zip) responses arrive as a Blob from the core HTTP client
+            const text = await body.text();
+            value = isNDJSONContentType(contentType) ? formatNdjson(text) : text;
           } else {
             value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
           }
@@ -158,7 +177,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
               timeMs: Date.now() - startTime,
               statusCode,
               statusText,
-              contentType: getContentType(response),
+              contentType,
               value,
             },
             request: {
@@ -177,8 +196,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
+        const errorContentType = getContentType(response);
+
         if (statusCode === 200 && !errorBody) {
           value = 'OK';
+        } else if (errorBody instanceof Blob) {
+          const text = await errorBody.text();
+          value = isNDJSONContentType(errorContentType) ? formatNdjson(text) : text;
         } else if (errorBody) {
           value = JSON.stringify(errorBody, null, 2);
         } else {
@@ -200,7 +224,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         const result = {
           response: {
             value,
-            contentType: getContentType(response),
+            contentType: errorContentType,
             timeMs: Date.now() - startTime,
             statusCode,
             statusText,

@@ -31,7 +31,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
-import { ALL_DATA_SOURCE_TYPES, DATA_SOURCE_TYPES_TO_ICONS } from '../../common';
+import {
+  ALL_DATA_SOURCE_TYPES,
+  DATA_SOURCE_TYPES_TO_ICONS,
+  validateIndexNameRules,
+} from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
@@ -50,7 +54,7 @@ import {
   emptyDataSourceFlyoutFormValues,
 } from './data_source_flyout_initial_values';
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { DataFederationKibanaServices } from '../types';
 
 export interface CreateDataSourceFlyoutProps {
@@ -118,6 +122,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
         if (isEditMode) {
           return true;
+        }
+
+        const nameValidation = validateIndexNameRules(trimmed);
+        if (nameValidation) {
+          return nameValidation.message;
         }
 
         const normalized = trimmed.toLowerCase();

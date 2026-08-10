@@ -9,12 +9,6 @@ import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamType } from '@kbn/streams-schema';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
-interface EndpointLatencyProps {
-  name: string;
-  endpoint: string;
-  duration_ms: number;
-}
-
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
   connector_id: string;
@@ -34,6 +28,9 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps {
   docs_count: number;
   features_new: number;
   features_updated: number;
+  features_remapped: number;
+  semantic_verify_calls: number;
+  semantic_verify_reuses: number;
   total_filters: number;
   filters_capped: boolean;
   has_filtered_documents: boolean;
@@ -110,20 +107,26 @@ interface DetectionScanProps {
   took_ms: number;
   /** Wall-clock (ms) around the reader call, including transport and parsing. */
   duration_ms: number;
-  /** Number of distinct rules covered by the change-point scan. */
+  /** Rule-backed queries requested for the scan (all analysis profiles). */
+  rules_requested: number;
+  /** Distinct rules that returned a change-point series bucket. */
   rules_scanned: number;
-  /** Rule-backed query count using the critical 1m cadence. */
+  /** Rule-backed query count on the critical analysis profile. */
   critical_rule_count: number;
-  /** Rule-backed query count using the default 5m cadence. */
+  /** Rule-backed query count on the default analysis profile. */
   default_rule_count: number;
-  /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
-  alerting_engine: 'v1' | 'v2';
+  /** Alerting engine backing the read. */
+  alerting_engine: 'v2';
   /** The alerts-source index that was read (e.g. `.rule-events`). */
   alerts_source_index: string;
-  /** The scan lookback window, e.g. `now-30m`. */
+  /** Critical analysis lookback duration, e.g. `now-40m`. */
   lookback: string;
-  /** The change-point bucket interval, e.g. `30s`. */
+  /** Critical analysis outer bucket interval, e.g. `1m`. */
   bucket_interval: string;
+  /** Default analysis lookback duration, e.g. `now-125m`. */
+  default_lookback: string;
+  /** Default analysis outer bucket interval, e.g. `5m`. */
+  default_bucket_interval: string;
   /** The Kibana space in which the scan ran. */
   space_id: string;
 }
@@ -146,28 +149,20 @@ interface AgentToolEventWriteProps {
   error_message?: string;
 }
 
-interface AgentToolDiscoveryWriteProps {
-  success: boolean;
-  kind: 'discovery' | 'clearance' | 'handled';
-  event_id: string;
-  stream_names: string[];
-  written: boolean;
-  error_message?: string;
-}
-
 interface AgentToolEventSearchProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
   has_stream_filter: boolean;
   status_filter?: SignificantEventStatus;
+  view: 'compact' | 'full';
+  page: number;
   error_message?: string;
 }
 
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
@@ -176,7 +171,6 @@ export {
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
-  type EndpointLatencyProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,
