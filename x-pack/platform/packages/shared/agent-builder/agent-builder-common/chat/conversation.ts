@@ -369,7 +369,6 @@ export type FeedbackChipId =
   | 'inaccurate'
   | 'incomplete'
   | 'didnt_follow_instructions'
-  | 'other'
   | 'accurate'
   | 'useful'
   | 'well_explained';

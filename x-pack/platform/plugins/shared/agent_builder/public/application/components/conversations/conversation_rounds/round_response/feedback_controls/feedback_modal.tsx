@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { ChipRow, CHIP_OTHER } from './chip_row';
+import { ChipRow } from './chip_row';
 import { CommentBox } from './comment_box';
 
 const labels = {
@@ -71,11 +71,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       <EuiModalBody>
         <ChipRow vote={vote} selected={chips} onToggle={onToggleChip} />
         <EuiSpacer size="m" />
-        <CommentBox
-          value={comment}
-          onChange={onCommentChange}
-          shouldFocus={chips.includes(CHIP_OTHER)}
-        />
+        <CommentBox value={comment} onChange={onCommentChange} />
       </EuiModalBody>
 
       <EuiModalFooter>

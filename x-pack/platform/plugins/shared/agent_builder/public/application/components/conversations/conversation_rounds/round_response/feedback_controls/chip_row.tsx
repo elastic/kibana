@@ -6,12 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
-
-export const CHIP_OTHER: FeedbackChipId = 'other';
 
 interface Chip {
   id: FeedbackChipId;
@@ -35,12 +32,6 @@ const DOWN_CHIPS: Chip[] = [
     id: 'didnt_follow_instructions',
     label: i18n.translate('xpack.agentBuilder.feedback.chip.didntFollowInstructions', {
       defaultMessage: "Didn't follow instructions",
-    }),
-  },
-  {
-    id: CHIP_OTHER,
-    label: i18n.translate('xpack.agentBuilder.feedback.chip.other', {
-      defaultMessage: 'Other',
     }),
   },
 ];
@@ -73,40 +64,24 @@ interface ChipRowProps {
 }
 
 export const ChipRow: React.FC<ChipRowProps> = ({ vote, selected, onToggle }) => {
-  const { euiTheme } = useEuiTheme();
   const chips = vote === 'down' ? DOWN_CHIPS : UP_CHIPS;
 
+  const idToSelectedMap = Object.fromEntries(chips.map(({ id }) => [id, selected.includes(id)]));
+
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {chips.map(({ id, label }) => {
-        const isSelected = selected.includes(id);
-        return (
-          <EuiFlexItem key={id} grow={false}>
-            <button
-              type="button"
-              aria-pressed={isSelected}
-              data-test-subj={`roundFeedbackChip-${id}`}
-              onClick={() => onToggle(id)}
-              css={css`
-                padding: 2px 10px;
-                border-radius: ${euiTheme.border.radius.medium};
-                border: 1px solid ${isSelected ? euiTheme.colors.primary : euiTheme.border.color};
-                background: ${isSelected ? euiTheme.colors.lightestShade : 'transparent'};
-                color: ${isSelected ? euiTheme.colors.primary : euiTheme.colors.text};
-                cursor: pointer;
-                font-size: ${euiTheme.font.scale.xs}${euiTheme.font.defaultUnits};
-                line-height: 20px;
-                transition: border-color 0.15s ease, background 0.15s ease;
-                &:hover {
-                  border-color: ${euiTheme.colors.primary};
-                }
-              `}
-            >
-              {label}
-            </button>
-          </EuiFlexItem>
-        );
+    <EuiButtonGroup
+      type="multi"
+      legend={i18n.translate('xpack.agentBuilder.feedback.chipRow.legend', {
+        defaultMessage: 'Feedback options',
       })}
-    </EuiFlexGroup>
+      options={chips.map(({ id, label }) => ({
+        id,
+        label,
+        'data-test-subj': `roundFeedbackChip-${id}`,
+      }))}
+      idToSelectedMap={idToSelectedMap}
+      onChange={(id) => onToggle(id as FeedbackChipId)}
+      buttonSize="compressed"
+    />
   );
 };

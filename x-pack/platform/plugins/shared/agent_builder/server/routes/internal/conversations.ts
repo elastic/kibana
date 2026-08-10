@@ -117,11 +117,11 @@ export function registerInternalConversationRoutes({
                 schema.literal('inaccurate'),
                 schema.literal('incomplete'),
                 schema.literal('didnt_follow_instructions'),
-                schema.literal('other'),
                 schema.literal('accurate'),
                 schema.literal('useful'),
                 schema.literal('well_explained'),
-              ])
+              ]),
+              { maxSize: 6 }
             )
           ),
           comment: schema.maybe(schema.string({ maxLength: 500 })),
