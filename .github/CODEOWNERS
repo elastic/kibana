@@ -3246,10 +3246,10 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analy
 /src/platform/packages/shared/kbn-connector-schemas/mcp @elastic/workchat-eng
 
 # Inference API
-/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-genai-research-and-development
-/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-genai-research-and-development
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/search-kibana @elastic/security-generative-ai
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/search-kibana
-/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-genai-research-and-development
+/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/search-kibana @elastic/security-generative-ai
 
 # HTTP
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/http @elastic/workflows-eng

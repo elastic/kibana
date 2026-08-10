@@ -45,8 +45,20 @@ export const createAttackDiscoveryRubricEvaluator = ({
     name: 'Rubric',
     kind: 'LLM',
     evaluate: async ({ expected, output, input, metadata }) => {
-      const submissionInsights = truncateInsightsForRubric(output?.insights);
       const referenceInsights = truncateInsightsForRubric(expected?.attackDiscoveries);
+      // Without a reference discovery there is nothing for the judge to compare
+      // against: rubric item 1 alone would score the submission N and pin the
+      // aggregate at a ceiling. Mirrors the `criteria.length === 0` guard in
+      // attack_discovery_criteria_evaluator.
+      if (referenceInsights.length === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No reference attack discoveries — skipping rubric evaluation.',
+        };
+      }
+
+      const submissionInsights = truncateInsightsForRubric(output?.insights);
 
       const submission = JSON.stringify({ attackDiscoveries: submissionInsights }, null, 2);
       const reference = JSON.stringify({ attackDiscoveries: referenceInsights }, null, 2);

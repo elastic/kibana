@@ -6,6 +6,7 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
+import { expectsAttackDiscovery } from '../constants';
 import type {
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
@@ -20,7 +21,15 @@ export const createAttackDiscoveryBasicEvaluator = (): Evaluator<
   return {
     name: ATTACK_DISCOVERY_BASIC_EVALUATOR_NAME,
     kind: 'CODE',
-    evaluate: async ({ output }) => {
+    evaluate: async ({ output, expected }) => {
+      if (!expectsAttackDiscovery(expected?.expectedToolPath)) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'Example does not produce Attack Discovery insights — nothing to score.',
+        };
+      }
+
       const insights = output?.insights;
       if (!insights || !Array.isArray(insights)) {
         return { score: 0, label: 'missing_insights' };
