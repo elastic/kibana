@@ -198,13 +198,12 @@ EOF
       fi
 
       # Suites that don't fit one step declare `shards` in evals.suites.json; each shard becomes a
-      # separate step (with its own Scout stack) filtered by Playwright --grep/--grep-invert.
+      # separate step (with its own Scout stack) running only the spec files it lists.
       # An explicit grep/grep-invert is a manual override, so it takes precedence over the shards.
       # Expanded into parallel arrays rather than read positionally from a delimited row, because
-      # bash collapses runs of tabs when splitting and would shift a shard with an empty `grep`.
+      # bash collapses runs of tabs when splitting and would shift a shard with an empty field.
       shard_ids=()
-      shard_greps=()
-      shard_grep_inverts=()
+      shard_spec_files=()
       shard_count=0
       if [[ -z "${EVAL_GREP:-}" && -z "${EVAL_GREP_INVERT:-}" ]]; then
         shard_count="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '(.shards // []) | length' 2>/dev/null || echo 0)"
@@ -213,15 +212,34 @@ EOF
 
       for ((shard_index = 0; shard_index < shard_count; shard_index++)); do
         shard_ids+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].id // ""')")
-        shard_greps+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].grep // ""')")
-        shard_grep_inverts+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].grepInvert // ""')")
+        shard_spec_files+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '(.shards[$i].specFiles // []) | join(" ")')")
       done
 
       # No shards configured: a single step per connector, honouring any manual grep overrides.
       if ((shard_count == 0)); then
         shard_ids=("")
-        shard_greps=("${EVAL_GREP:-}")
-        shard_grep_inverts=("${EVAL_GREP_INVERT:-}")
+        shard_spec_files=("")
+      fi
+
+      # A moved or renamed spec would just stop being run by its shard, and the step would still go
+      # green having run the rest. Fail the whole fanout here instead, before any stack is booted.
+      if ((shard_count > 0)); then
+        suite_root="$(dirname "$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.configPath // ""')")"
+        missing_spec_files=()
+        for ((shard_index = 0; shard_index < shard_count; shard_index++)); do
+          read -r -a shard_spec_file_list <<<"${shard_spec_files[$shard_index]}"
+          for spec_file in ${shard_spec_file_list[@]+"${shard_spec_file_list[@]}"}; do
+            if [[ ! -f "${suite_root}/${spec_file}" ]]; then
+              missing_spec_files+=("${shard_ids[$shard_index]}: ${spec_file}")
+            fi
+          done
+        done
+        if ((${#missing_spec_files[@]} > 0)); then
+          echo "Shard spec files missing from ${suite_root}/:" >&2
+          printf '  %s\n' "${missing_spec_files[@]}" >&2
+          echo "Update the suite's shards in .buildkite/pipelines/evals/evals.suites.json." >&2
+          exit 1
+        fi
       fi
 
       # Explicit env override wins, then the suite's own budget, then the 120m default that lets
@@ -235,8 +253,7 @@ EOF
 
         for ((shard_index = 0; shard_index < ${#shard_ids[@]}; shard_index++)); do
           shard_id="${shard_ids[$shard_index]}"
-          shard_grep="${shard_greps[$shard_index]}"
-          shard_grep_invert="${shard_grep_inverts[$shard_index]}"
+          shard_spec_file_args="${shard_spec_files[$shard_index]}"
 
           step_key="kbn-evals-${group_key_safe}-${key_safe}"
           step_label="LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
@@ -266,8 +283,9 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
-          EVAL_GREP: "${shard_grep}"
-          EVAL_GREP_INVERT: "${shard_grep_invert}"
+          EVAL_GREP: "${EVAL_GREP:-}"
+          EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
+          EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
@@ -590,7 +608,9 @@ done
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
 # If EVAL_GREP / EVAL_GREP_INVERT are set, pass Playwright --grep / --grep-invert to filter tests
-# by name/pattern. Sharded suites use these to split one suite across several steps.
+# by name/pattern. This is the manual override for ad-hoc runs.
+# If EVAL_SPEC_FILES is set, pass those paths as Playwright file filters. Sharded suites use this
+# to split one suite across several steps; the fanout step has already checked the paths exist.
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
 EVAL_RUN_ARGS=()
 if [[ -n "${EVAL_GREP:-}" ]]; then
@@ -598,6 +618,10 @@ if [[ -n "${EVAL_GREP:-}" ]]; then
 fi
 if [[ -n "${EVAL_GREP_INVERT:-}" ]]; then
   EVAL_RUN_ARGS+=(--grep-invert "${EVAL_GREP_INVERT}")
+fi
+if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
+  read -r -a EVAL_SPEC_FILE_LIST <<<"${EVAL_SPEC_FILES}"
+  EVAL_RUN_ARGS+=(${EVAL_SPEC_FILE_LIST[@]+"${EVAL_SPEC_FILE_LIST[@]}"})
 fi
 
 run_eval_suite() {

@@ -14,11 +14,11 @@ import Path from 'path';
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 // Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
-// whole file. Each shard becomes its own fanout step, filtered by Playwright --grep/--grep-invert.
+// whole file. Each shard becomes its own fanout step running the spec files it lists, resolved
+// relative to the suite root.
 export interface EvalsSuiteShard {
   id: string;
-  grep?: string;
-  grepInvert?: string;
+  specFiles: string[];
 }
 
 export interface EvalsSuiteMetadataEntry {

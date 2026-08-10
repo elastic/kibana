@@ -10,24 +10,23 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 /**
- * CI splits this suite across Buildkite steps by grepping describe titles, so the shard greps in
- * `.buildkite/pipelines/evals/evals.suites.json` and the titles in the specs are one contract.
- * Renaming a describe without updating the greps drops its tests into the catch-all shard, which
- * still passes but can push that step past its timeout. Renaming one means updating the other.
+ * CI splits this suite across Buildkite steps, each running the spec files its shard lists in
+ * `.buildkite/pipelines/evals/evals.suites.json`. That list and the specs on disk are one contract:
+ * a spec nobody claims never runs, and a spec two shards claim runs twice on every model. Adding or
+ * moving a spec means updating the shards.
  */
 
 interface EvalsSuiteShard {
   id: string;
-  grep?: string;
-  grepInvert?: string;
+  specFiles: string[];
 }
 
 const SUITE_ID = 'significant-events';
+const SUITE_ROOT = Path.resolve(__dirname, '..');
 const SUITES_CONFIG = Path.resolve(REPO_ROOT, '.buildkite/pipelines/evals/evals.suites.json');
 
-// Playwright greps the full title, and a top-level describe title is always a prefix of it, so
-// membership is decidable from these alone. Nested describes are indented; `^` keeps them out.
-const TOP_LEVEL_DESCRIBE = /^evaluate\.describe\(\s*(['"`])(.+?)\1/gm;
+// Config paths are posix; `Path.relative` follows the platform.
+const toPosix = (value: string) => value.split(Path.sep).join('/');
 
 const collectSpecFiles = (dir: string): string[] =>
   Fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -35,15 +34,10 @@ const collectSpecFiles = (dir: string): string[] =>
     if (entry.isDirectory()) {
       return collectSpecFiles(entryPath);
     }
-    return entry.name.endsWith('.spec.ts') ? [entryPath] : [];
+    return entry.name.endsWith('.spec.ts') ? [toPosix(Path.relative(SUITE_ROOT, entryPath))] : [];
   });
 
-const describeTitles = collectSpecFiles(__dirname).flatMap((specFile) =>
-  Array.from(Fs.readFileSync(specFile, 'utf-8').matchAll(TOP_LEVEL_DESCRIBE), ([, , title]) => ({
-    title,
-    specFile: Path.relative(REPO_ROOT, specFile),
-  }))
-);
+const specFilesOnDisk = collectSpecFiles(__dirname);
 
 const shards: EvalsSuiteShard[] =
   (
@@ -52,39 +46,43 @@ const shards: EvalsSuiteShard[] =
     }
   ).suites.find((suite) => suite.id === SUITE_ID)?.shards ?? [];
 
-const shardsRunning = (title: string): string[] =>
-  shards
-    .filter(({ grep, grepInvert }) => {
-      if (grep && !RegExp(grep).test(title)) {
-        return false;
-      }
-      return !(grepInvert && RegExp(grepInvert).test(title));
-    })
-    .map(({ id }) => id);
+const declarations = shards.flatMap(({ id, specFiles = [] }) =>
+  specFiles.map((specFile) => ({ shardId: id, specFile }))
+);
 
 describe('significant-events shard coverage', () => {
   it('has both sides of the contract to compare', () => {
-    // Both tests below pass vacuously if either side comes back empty.
+    // The tests below pass vacuously if either side comes back empty.
     expect(shards.length).toBeGreaterThan(0);
-    expect(describeTitles.length).toBeGreaterThan(0);
+    expect(specFilesOnDisk.length).toBeGreaterThan(0);
   });
 
-  it('runs every top-level describe in exactly one shard', () => {
-    const problems = describeTitles
-      .map((entry) => ({ ...entry, shardIds: shardsRunning(entry.title) }))
+  it('assigns every spec file on disk to exactly one shard', () => {
+    const problems = specFilesOnDisk
+      .map((specFile) => ({
+        specFile,
+        shardIds: declarations
+          .filter((entry) => entry.specFile === specFile)
+          .map(({ shardId }) => shardId),
+      }))
       .filter(({ shardIds }) => shardIds.length !== 1)
-      .map(
-        ({ title, specFile, shardIds }) =>
-          `"${title}" (${specFile}) runs in ${shardIds.length} shards: [${shardIds.join(', ')}]`
+      .map(({ specFile, shardIds }) =>
+        shardIds.length === 0
+          ? `"${specFile}" is in no shard, so nothing runs it`
+          : `"${specFile}" is in ${
+              shardIds.length
+            } shards, so it runs more than once: [${shardIds.join(', ')}]`
       );
 
     expect(problems).toEqual([]);
   });
 
-  it('leaves no shard without tests to run', () => {
-    const problems = shards
-      .filter(({ id }) => !describeTitles.some(({ title }) => shardsRunning(title).includes(id)))
-      .map(({ id }) => `shard "${id}" matches no describe, so its grep is stale`);
+  it('points every declared spec file at one that exists', () => {
+    const problems = declarations
+      .filter(({ specFile }) => !specFilesOnDisk.includes(specFile))
+      .map(
+        ({ shardId, specFile }) => `shard "${shardId}" lists "${specFile}", which does not exist`
+      );
 
     expect(problems).toEqual([]);
   });

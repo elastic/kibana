@@ -21,8 +21,13 @@ const suites = (
 
 const shardedSuites = suites.filter((suite) => (suite.shards?.length ?? 0) > 0);
 
+// `run_suite.sh` lowercases the id and rewrites every other character to `-` to build the step key,
+// so ids outside this set are not distinct from each other once keyed. Requiring the safe form up
+// front keeps the id and the key identical, with no transform to reason about.
+const STEP_KEY_SAFE_ID = /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/;
+
 describe('evals.suites.json shards', () => {
-  it('gives every shard a non-empty id, unique within its suite', () => {
+  it('gives every shard an id that survives step-key slugification, unique within its suite', () => {
     const problems: string[] = [];
 
     for (const { id: suiteId, shards = [] } of shardedSuites) {
@@ -36,6 +41,11 @@ describe('evals.suites.json shards', () => {
           problems.push(`${suiteId}: shard at index ${index} has no id`);
           return;
         }
+        if (!STEP_KEY_SAFE_ID.test(shardId)) {
+          // e.g. `feature/a` and `feature-a` both key as `feature-a`, colliding the step keys and
+          // merging the two shards' failure-log metadata.
+          problems.push(`${suiteId}: shard id "${shardId}" is not lowercase [a-z0-9_-]`);
+        }
         if (seen.has(shardId)) {
           problems.push(`${suiteId}: duplicate shard id "${shardId}"`);
         }
@@ -46,41 +56,46 @@ describe('evals.suites.json shards', () => {
     expect(problems).toEqual([]);
   });
 
-  it('filters every shard by grep or grepInvert', () => {
+  it('gives every shard at least one spec file to run', () => {
     const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) =>
       shards
-        // A shard with neither runs the entire suite, overlapping the other shards, and stays green.
-        .filter((shard) => !shard.grep?.trim() && !shard.grepInvert?.trim())
-        .map((shard) => `${suiteId}: shard "${shard.id}" has neither grep nor grepInvert`)
+        // A shard with no spec files runs the whole suite, overlapping every other shard.
+        .filter((shard) => !shard.specFiles?.length)
+        .map((shard) => `${suiteId}: shard "${shard.id}" lists no specFiles`)
     );
 
     expect(problems).toEqual([]);
   });
 
-  it('uses patterns Playwright can compile', () => {
-    const compiles = (pattern: string): boolean => {
-      try {
-        RegExp(pattern);
-        return true;
-      } catch {
-        return false;
-      }
-    };
-
+  it('keeps spec file paths safe to interpolate into the fanout pipeline', () => {
+    // The paths are space-joined into one env var and re-split by the fanout step, then written
+    // into a double-quoted YAML scalar that Buildkite interpolates. Whitespace would split one path
+    // into two; `\` and `"` would break the scalar; `$` would be substituted away.
     const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) =>
       shards.flatMap((shard) =>
-        (
-          [
-            ['grep', shard.grep],
-            ['grepInvert', shard.grepInvert],
-          ] as const
-        )
-          .filter(([, pattern]) => pattern && !compiles(pattern))
-          .map(
-            ([field, pattern]) => `${suiteId}: shard "${shard.id}" has invalid ${field}: ${pattern}`
-          )
+        (shard.specFiles ?? [])
+          .filter((specFile) => !/^[\w./-]+\.spec\.ts$/.test(specFile))
+          .map((specFile) => `${suiteId}: shard "${shard.id}" has unsafe specFile "${specFile}"`)
       )
     );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('never lists the same spec file in two shards of a suite', () => {
+    const problems = shardedSuites.flatMap(({ id: suiteId, shards = [] }) => {
+      const owners = new Map<string, string[]>();
+
+      for (const shard of shards) {
+        for (const specFile of shard.specFiles ?? []) {
+          owners.set(specFile, [...(owners.get(specFile) ?? []), shard.id]);
+        }
+      }
+
+      return [...owners]
+        .filter(([, shardIds]) => shardIds.length > 1)
+        .map(([specFile, shardIds]) => `${suiteId}: "${specFile}" is in [${shardIds.join(', ')}]`);
+    });
 
     expect(problems).toEqual([]);
   });

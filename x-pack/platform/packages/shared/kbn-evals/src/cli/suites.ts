@@ -29,14 +29,14 @@ const SKIP_DIRS = new Set([
 
 /**
  * Splits a suite across several CI steps so a long suite fits inside the Buildkite step timeout.
- * Each shard becomes its own step (per connector) with its own Scout stack, filtered by Playwright
- * `--grep` / `--grep-invert`. Prefer expressing the last shard as `grepInvert` of the others so a
- * newly added test is never silently excluded from every shard.
+ * Each shard becomes its own step (per connector) with its own Scout stack, running only the spec
+ * files it lists. Paths are relative to the suite root (the directory holding `configPath`) and
+ * must partition the suite: CI fails the fanout if one is missing, and the suite's own coverage
+ * test fails if a spec is listed twice or not at all.
  */
 export interface EvalSuiteShard {
   id: string;
-  grep?: string;
-  grepInvert?: string;
+  specFiles: string[];
 }
 
 export interface EvalSuiteMetadata {
