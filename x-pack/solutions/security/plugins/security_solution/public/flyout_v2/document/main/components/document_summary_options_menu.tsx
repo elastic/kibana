@@ -7,8 +7,10 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AnonymizationSwitch } from './anonymization_switch';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AnonymizationSwitch } from '../../../shared/components/anonymization_switch';
 
 export const DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID =
   'document-flyout-ai-summary-options-menu-button';
@@ -50,6 +52,11 @@ export const DocumentSummaryOptionsMenu = memo(
     const [isPopoverOpen, setPopover] = useState(false);
     const togglePopover = useCallback(() => setPopover((open) => !open), []);
 
+    const onChangeShowAnonymizedValues = useCallback(
+      (e: EuiSwitchEvent) => setShowAnonymizedValues(e.target.checked),
+      [setShowAnonymizedValues]
+    );
+
     const button = useMemo(
       () => (
         <EuiToolTip content={OPTIONS_MENU} disableScreenReaderOutput>
@@ -74,13 +81,19 @@ export const DocumentSummaryOptionsMenu = memo(
               <AnonymizationSwitch
                 hasSummary={hasSummary}
                 showAnonymizedValues={showAnonymizedValues}
-                setShowAnonymizedValues={setShowAnonymizedValues}
+                onChange={onChangeShowAnonymizedValues}
+                disabledTooltip={
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.settings.anonymizeValues.disabled.tooltip"
+                    defaultMessage="The alert summary has not generated, and does not contain anonymized fields."
+                  />
+                }
               />
             </EuiPanel>
           ),
         },
       ],
-      [hasSummary, showAnonymizedValues, setShowAnonymizedValues]
+      [hasSummary, showAnonymizedValues, onChangeShowAnonymizedValues]
     );
     return (
       <EuiPopover

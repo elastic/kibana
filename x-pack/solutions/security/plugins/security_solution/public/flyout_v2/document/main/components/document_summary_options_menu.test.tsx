@@ -12,7 +12,7 @@ import {
   DOCUMENT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID,
   DocumentSummaryOptionsMenu,
 } from './document_summary_options_menu';
-import { DOCUMENT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID } from './anonymization_switch';
+import { DOCUMENT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID } from '../../../shared/components/anonymization_switch';
 import userEvent from '@testing-library/user-event';
 
 describe('DocumentSummaryOptionsMenu', () => {
