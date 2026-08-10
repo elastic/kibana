@@ -219,6 +219,29 @@ const openFlyoutForRule = (title: string) => {
   fireEvent.click(link);
 };
 
+// The opened row is highlighted purely via CSS: the table wrapper carries an Emotion
+// class whose rule targets `.euiTableRow[data-rule-id="<opened id>"]`. Resolve the
+// wrapper's current class to find the highlighted row id — stale rules from previous
+// positions linger in the stylesheet, so the class must be matched explicitly.
+const getHighlightedRuleId = (): string | null => {
+  const wrapper = screen.getByTestId('rules-translation-table').parentElement;
+  const cssClass = Array.from(wrapper?.classList ?? []).find((cls) => cls.startsWith('css-'));
+  if (!cssClass) {
+    return null;
+  }
+  const cssText = Array.from(document.querySelectorAll('style'))
+    .map((tag) => {
+      const sheet = tag.sheet as CSSStyleSheet | null;
+      const fromRules = sheet ? Array.from(sheet.cssRules).map((rule) => rule.cssText) : [];
+      return [tag.textContent ?? '', ...fromRules].join('\n');
+    })
+    .join('\n');
+  const match = new RegExp(`\\.${cssClass}\\s+\\.euiTableRow\\[data-rule-id="([^"]+)"\\]`).exec(
+    cssText
+  );
+  return match?.[1] ?? null;
+};
+
 describe('MigrationRulesTable', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
@@ -487,12 +510,15 @@ describe('MigrationRulesTable', () => {
         );
         renderTable();
         openFlyoutForRule('First Rule');
+        expect(getHighlightedRuleId()).toBe('rule-1');
 
         fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
         expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
+        expect(getHighlightedRuleId()).toBe('rule-3');
 
         fireEvent.click(screen.getByTestId('migrationFlyoutPreviousButton'));
         expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
+        expect(getHighlightedRuleId()).toBe('rule-1');
       });
 
       it('should disable both arrows when only failed rules surround the opened rule', () => {
@@ -509,6 +535,7 @@ describe('MigrationRulesTable', () => {
 
         expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
         expect(screen.getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+        expect(getHighlightedRuleId()).toBe('rule-2');
       });
     });
   });
