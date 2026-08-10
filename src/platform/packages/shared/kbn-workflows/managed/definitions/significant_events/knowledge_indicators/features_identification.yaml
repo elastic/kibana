@@ -7,6 +7,7 @@
 # Flow:
 #   init → while(iterationCount < max) {
 #     identify_inferred → if(noDocuments) break → update_state → mark_success
+#     → track_convergence → if(converged) break
 #   } → if(allFailed) fail → identify_computed → output
 #
 # Concurrency is keyed per stream so only one identification run can be active
@@ -154,7 +155,7 @@ steps:
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
         steps:
-          - name: reset_convergence
+          - name: update_counter
             type: if
             condition: "${{ steps.identify_inferred.output.iterationResult.newFeatures.size > 0 }}"
             steps:
@@ -162,10 +163,7 @@ steps:
                 type: data.set
                 with:
                   barrenCount: 0
-          - name: increment_convergence
-            type: if
-            condition: "${{ steps.identify_inferred.output.iterationResult.newFeatures.size == 0 }}"
-            steps:
+            else:
               - name: bump_counter
                 type: data.set
                 with:
