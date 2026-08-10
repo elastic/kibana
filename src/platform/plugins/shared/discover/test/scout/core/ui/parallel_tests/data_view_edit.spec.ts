@@ -10,9 +10,10 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-const INDEX_000001 = 'data-view-index-000001';
-const INDEX_000002 = 'data-view-index-000002';
-const INDEX_000003 = 'data-view-index-000003';
+// Distinct prefix from the data view creation spec: both run in parallel against the same
+// cluster, so sharing index names would let one spec's teardown delete the other's data.
+const STARTER_INDEX = 'data-view-edit-000001';
+const TARGET_INDEX = 'data-view-edit-000003';
 const STARTER_DATA_VIEW_ID = 'data-view-edit-starter';
 
 spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-classic' }, () => {
@@ -22,29 +23,29 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
     await esClient.bulk({
       refresh: 'wait_for',
       operations: [
-        { index: { _index: INDEX_000001 } },
+        { index: { _index: STARTER_INDEX } },
         { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
-        { index: { _index: INDEX_000002 } },
-        { '@timestamp': now, b: 'GET /search HTTP/1.1 200 1070000' },
-        { index: { _index: INDEX_000003 } },
+        // The 1970 document stays outside the "This week" range, so editing the data view to
+        // this index yields 3 hits while the time field is set and 4 once it is removed.
+        { index: { _index: TARGET_INDEX } },
         {
           timestamp: new Date('1970-01-01').toISOString(),
           c: 'GET /search HTTP/1.1 200 1070000',
           d: 'GET /search HTTP/1.1 200 1070000',
         },
-        { index: { _index: INDEX_000003 } },
+        { index: { _index: TARGET_INDEX } },
         {
           timestamp: now,
           c: 'GET /search HTTP/1.1 200 1070000',
           d: 'GET /search HTTP/1.1 200 1070000',
         },
-        { index: { _index: INDEX_000003 } },
+        { index: { _index: TARGET_INDEX } },
         {
           timestamp: now,
           c: 'GET /search HTTP/1.1 200 1070000',
           d: 'GET /search HTTP/1.1 200 1070000',
         },
-        { index: { _index: INDEX_000003 } },
+        { index: { _index: TARGET_INDEX } },
         {
           timestamp: now,
           c: 'GET /search HTTP/1.1 200 1070000',
@@ -55,7 +56,7 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
 
     await apiServices.dataViews.create({
       id: STARTER_DATA_VIEW_ID,
-      title: INDEX_000001,
+      title: STARTER_INDEX,
       timeFieldName: '@timestamp',
       override: true,
       spaceId: discoverScoutSpace.id,
@@ -74,31 +75,10 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
 
   spaceTest.afterAll(async ({ esClient, discoverScoutSpace }) => {
     await Promise.all([
-      esClient.indices.delete({ index: INDEX_000001, ignore_unavailable: true }),
-      esClient.indices.delete({ index: INDEX_000002, ignore_unavailable: true }),
-      esClient.indices.delete({ index: INDEX_000003, ignore_unavailable: true }),
+      esClient.indices.delete({ index: STARTER_INDEX, ignore_unavailable: true }),
+      esClient.indices.delete({ index: TARGET_INDEX, ignore_unavailable: true }),
     ]);
     await discoverScoutSpace.uiSettings.unset('defaultIndex');
-  });
-
-  spaceTest('creates an ad hoc data view from the search bar', async ({ pageObjects }) => {
-    const { discover, unifiedFieldList } = pageObjects;
-
-    await discover.createDataViewFromSearchBar({ name: 'data-view-index-', adHoc: true });
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-    expect(await discover.getHitCountInt()).toBe(2);
-    expect(await unifiedFieldList.getAvailableFieldCount()).toBe(3);
-  });
-
-  spaceTest('creates a saved data view from the search bar', async ({ pageObjects }) => {
-    const { discover, unifiedFieldList } = pageObjects;
-
-    await discover.createDataViewFromSearchBar({ name: INDEX_000001, adHoc: false });
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-    await expect.poll(() => discover.getHitCountInt()).toBe(1);
-    expect(await unifiedFieldList.getAvailableFieldCount()).toBe(2);
   });
 
   spaceTest(
@@ -110,7 +90,7 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
         'edits data view to use a different index pattern and time field',
         async () => {
           await discover.editDataViewFromSearchBar({
-            newIndexPattern: INDEX_000003,
+            newIndexPattern: TARGET_INDEX,
             newTimeField: 'timestamp',
           });
           await unifiedFieldList.waitUntilSidebarHasLoaded();

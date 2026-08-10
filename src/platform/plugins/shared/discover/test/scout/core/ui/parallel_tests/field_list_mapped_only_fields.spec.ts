@@ -12,10 +12,10 @@ import { spaceTest } from '../fixtures';
 
 // Distinct prefix so parallel workers don't cross-contaminate each other's
 // ES indices when the wildcard data views are searched.
-const NEW_FIELDS_INDEX = 'fl-new-fields-001';
+const MAPPED_ONLY_INDEX = 'fl-mapped-only-001';
 
 spaceTest.describe(
-  'Discover — field list new fields in background handling',
+  'Discover — field list mapped fields without values',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -31,23 +31,23 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ esClient, discoverScoutSpace }) => {
-      await esClient.indices.delete({ index: NEW_FIELDS_INDEX, ignore_unavailable: true });
+      await esClient.indices.delete({ index: MAPPED_ONLY_INDEX, ignore_unavailable: true });
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
     spaceTest(
-      'adds newly ingested fields to the available fields section',
+      'does not show mapped fields that have no values',
       async ({ esClient, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
         const now = new Date().toISOString();
 
         await esClient.index({
-          index: NEW_FIELDS_INDEX,
+          index: MAPPED_ONLY_INDEX,
           document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
           refresh: true,
         });
 
-        await discover.createDataViewFromSearchBar({ name: 'fl-new-fields-', adHoc: true });
+        await discover.createDataViewFromSearchBar({ name: MAPPED_ONLY_INDEX, adHoc: true });
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await discover.getHitCountInt()).toBe(1);
@@ -59,24 +59,29 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'detects new field after indexing a document with it',
+      'does not show a mapped field that has no values after re-query',
       async ({ esClient, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
         const now = new Date().toISOString();
 
-        await esClient.indices.delete({ index: NEW_FIELDS_INDEX, ignore_unavailable: true });
+        await esClient.indices.delete({ index: MAPPED_ONLY_INDEX, ignore_unavailable: true });
         await esClient.index({
-          index: NEW_FIELDS_INDEX,
+          index: MAPPED_ONLY_INDEX,
           document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
           refresh: true,
         });
 
-        await discover.createDataViewFromSearchBar({ name: 'fl-new-fields-', adHoc: true });
+        await discover.createDataViewFromSearchBar({ name: MAPPED_ONLY_INDEX, adHoc: true });
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
+        await esClient.indices.putMapping({
+          index: MAPPED_ONLY_INDEX,
+          properties: { b: { type: 'keyword' } },
+        });
+
         await esClient.index({
-          index: NEW_FIELDS_INDEX,
-          document: { '@timestamp': now, b: 'GET /search HTTP/1.1 200 1070000' },
+          index: MAPPED_ONLY_INDEX,
+          document: { '@timestamp': now, a: 'GET /search HTTP/1.1 200 1070000' },
           refresh: true,
         });
 
@@ -86,10 +91,7 @@ spaceTest.describe(
               await discover.submitQuery();
               await discover.waitUntilSearchingHasFinished();
               await unifiedFieldList.waitUntilSidebarHasLoaded();
-              return (
-                (await discover.getHitCountInt()) === 2 &&
-                (await unifiedFieldList.getAvailableFieldCount()) === 3
-              );
+              return (await discover.getHitCountInt()) === 2;
             },
             { timeout: 30_000, intervals: [1_000] }
           )
@@ -98,7 +100,6 @@ spaceTest.describe(
         expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
           '@timestamp',
           'a',
-          'b',
         ]);
       }
     );
