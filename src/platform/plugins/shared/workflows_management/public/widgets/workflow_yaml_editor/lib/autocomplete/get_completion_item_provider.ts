@@ -8,10 +8,12 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX } from '@kbn/workflows';
 import {
-  type ConnectorTypeInfo,
-  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
-} from '@kbn/workflows';
+  getUnavailableConnectorActionBadgeHtml,
+  getUnavailableConnectorActionMessage,
+  UNAVAILABLE_CONNECTOR_ACTION_LABEL,
+} from './connector_action_availability';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
@@ -21,6 +23,7 @@ import type { WorkflowEsqlCompletionServices } from './suggestions/workflow_esql
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import { getConnectorActionCapabilities } from '../../../../shared/lib/action_type_utils';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
@@ -116,32 +119,34 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
   return typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
 }
 
-function getConnectorActionCapabilities(
-  connectorId: string,
-  connectorTypes: Record<string, ConnectorTypeInfo>
-): { connectorStepTypes: Set<string>; supportedStepTypes: Set<string> } | undefined {
-  const connectorTypeValues = Object.values(connectorTypes);
-  const connectorStepTypes = new Set(
-    connectorTypeValues.flatMap(({ actionTypeId, subActions }) => {
-      const stepTypePrefix = actionTypeId.replace(/^\./, '');
-      return subActions.map(({ name }) => `${stepTypePrefix}.${name}`);
-    })
-  );
+function markConnectorActionUnavailable(
+  suggestion: monaco.languages.CompletionItem,
+  connectorName: string
+): monaco.languages.CompletionItem {
+  const unavailableMessage = getUnavailableConnectorActionMessage(connectorName);
+  const documentationNotice = `${getUnavailableConnectorActionBadgeHtml()}\n\n${unavailableMessage}`;
+  const existingDocumentation =
+    typeof suggestion.documentation === 'string'
+      ? suggestion.documentation
+      : suggestion.documentation?.value;
+  const documentation = {
+    ...(typeof suggestion.documentation === 'object' ? suggestion.documentation : {}),
+    supportHtml: true,
+    value: existingDocumentation
+      ? `${documentationNotice}\n\n${existingDocumentation}`
+      : documentationNotice,
+  };
 
-  for (const { actionTypeId, instances } of connectorTypeValues) {
-    const stepTypePrefix = actionTypeId.replace(/^\./, '');
-    const instance = instances.find(({ id }) => id === connectorId);
-    if (instance?.supportedSubActions !== undefined) {
-      return {
-        connectorStepTypes,
-        supportedStepTypes: new Set(
-          instance.supportedSubActions.map((subAction) => `${stepTypePrefix}.${subAction}`)
-        ),
-      };
-    }
-  }
-
-  return undefined;
+  return {
+    ...suggestion,
+    label:
+      typeof suggestion.label === 'string'
+        ? { label: suggestion.label, description: UNAVAILABLE_CONNECTOR_ACTION_LABEL }
+        : { ...suggestion.label, description: UNAVAILABLE_CONNECTOR_ACTION_LABEL },
+    documentation,
+    sortText: `zzzz-${suggestion.sortText ?? getDeduplicationKey(suggestion)}`,
+    preselect: false,
+  };
 }
 
 /**
@@ -278,11 +283,18 @@ export function getCompletionItemProvider(
             ? getConnectorActionCapabilities(connectorId, connectorTypes)
             : undefined;
         if (capabilities) {
-          suggestions = suggestions.filter((suggestion) => {
+          suggestions = suggestions.flatMap((suggestion) => {
             const key = getDeduplicationKey(suggestion);
-            return (
-              !capabilities.connectorStepTypes.has(key) || capabilities.supportedStepTypes.has(key)
-            );
+            if (!capabilities.connectorStepTypes.has(key)) {
+              return [suggestion];
+            }
+            if (!capabilities.selectedConnectorStepTypes.has(key)) {
+              return [];
+            }
+            if (capabilities.supportedStepTypes.has(key)) {
+              return [suggestion];
+            }
+            return [markConnectorActionUnavailable(suggestion, capabilities.connectorName)];
           });
         }
       }

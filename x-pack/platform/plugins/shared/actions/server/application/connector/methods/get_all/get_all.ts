@@ -21,6 +21,7 @@ import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
+import { getInMemoryConnectorAuthType } from '../../lib/connector_from_in_memory_connector';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 interface GetAllHelperOpts {
@@ -122,6 +123,7 @@ async function getAllHelper({
   const mergedResult = [
     ...savedObjectsActions,
     ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
+      const authType = getInMemoryConnectorAuthType(connector);
       return {
         id: connector.id,
         actionTypeId: connector.actionTypeId,
@@ -131,6 +133,7 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         authMode: getAuthMode(connector.authMode),
+        ...(authType !== undefined ? { authType } : {}),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),

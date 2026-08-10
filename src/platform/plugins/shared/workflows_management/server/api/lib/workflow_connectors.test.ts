@@ -172,6 +172,13 @@ describe('getAvailableConnectors', () => {
           actionTypeId: '.slack2',
           config: {},
         }),
+        mockConnector({
+          id: 'slack-preconfigured',
+          actionTypeId: '.slack2',
+          isPreconfigured: true,
+          config: undefined,
+          authType: 'webhook',
+        }),
       ]),
     };
     const actionsClientWithRequest = {
@@ -185,11 +192,12 @@ describe('getAvailableConnectors', () => {
       request,
     });
 
-    const [webhook, bot, missingAuth] = result.connectorTypes['.slack2'].instances;
+    const [webhook, bot, missingAuth, preconfigured] = result.connectorTypes['.slack2'].instances;
     expect(webhook.supportedSubActions).toEqual(['sendMessage']);
     expect(bot.supportedSubActions).toContain('sendMessage');
     expect(bot.supportedSubActions).not.toContain('searchMessages');
     expect(missingAuth.supportedSubActions).toEqual([]);
+    expect(preconfigured.supportedSubActions).toEqual(['sendMessage']);
   });
 
   it('returns an empty payload when there are neither connectors nor action types', async () => {

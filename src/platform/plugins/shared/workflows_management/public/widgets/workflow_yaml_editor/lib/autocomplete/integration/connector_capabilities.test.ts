@@ -9,6 +9,7 @@
 
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { setMockStabilityBadgeThemeForTests } from '../../stability/set_mock_stability_badge_theme_for_tests';
 import { getFakeAutocompleteContextParams } from '../context/build_autocomplete_context.test';
 import { getCompletionItemProvider } from '../get_completion_item_provider';
 import {
@@ -79,6 +80,10 @@ const getSlackSuggestionIds = (suggestions: monaco.languages.CompletionItem[]) =
     .filter((filterText) => filterText?.startsWith('slack2.'));
 
 describe('getCompletionItemProvider - connector capabilities', () => {
+  beforeAll(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
+
   beforeEach(() => {
     clearAllYamlProviders();
     interceptMonacoYamlProvider();
@@ -104,7 +109,7 @@ describe('getCompletionItemProvider - connector capabilities', () => {
     clearAllYamlProviders();
   });
 
-  it('suggests only actions supported by the selected connector authentication', async () => {
+  it('marks actions unsupported by the selected connector credentials as unavailable', async () => {
     const suggestions = await getSuggestions(`
 name: Slack
 enabled: true
@@ -117,10 +122,21 @@ steps:
     with: {}
 `);
 
-    expect(getSlackSuggestionIds(suggestions)).toEqual(['slack2.sendMessage']);
+    expect(getSlackSuggestionIds(suggestions)).toEqual([
+      'slack2.searchMessages',
+      'slack2.sendMessage',
+    ]);
+    expect(
+      suggestions.find(({ filterText }) => filterText === 'slack2.searchMessages')
+    ).toMatchObject({
+      label: {
+        description: 'Unavailable',
+      },
+      preselect: false,
+    });
   });
 
-  it('provides supported actions without relying on the YAML schema provider', async () => {
+  it('provides supported and unavailable actions without the YAML schema provider', async () => {
     clearAllYamlProviders();
 
     const suggestions = await getSuggestions(`
@@ -137,6 +153,7 @@ steps:
 
     expect(getSlackSuggestionIds(suggestions)).toEqual([
       'slack2.createConversation',
+      'slack2.searchMessages',
       'slack2.sendMessage',
     ]);
   });

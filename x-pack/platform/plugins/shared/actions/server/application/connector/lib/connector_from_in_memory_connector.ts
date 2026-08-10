@@ -11,6 +11,11 @@ import type { Connector } from '../types';
 import { isConnectorDeprecated } from './is_connector_deprecated';
 import { getAuthMode } from './get_auth_mode';
 
+export const getInMemoryConnectorAuthType = (connector: InMemoryConnector): string | undefined => {
+  const authType = connector.secrets.authType ?? connector.config.authType;
+  return typeof authType === 'string' ? authType : undefined;
+};
+
 export function connectorFromInMemoryConnector({
   id,
   inMemoryConnector,
@@ -20,6 +25,7 @@ export function connectorFromInMemoryConnector({
   inMemoryConnector: InMemoryConnector;
   actionTypeRegistry: ActionTypeRegistry;
 }): Connector {
+  const authType = getInMemoryConnectorAuthType(inMemoryConnector);
   const connector: Connector = {
     id,
     actionTypeId: inMemoryConnector.actionTypeId,
@@ -29,6 +35,7 @@ export function connectorFromInMemoryConnector({
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
     authMode: getAuthMode(inMemoryConnector.authMode),
+    ...(authType !== undefined ? { authType } : {}),
   };
 
   if (inMemoryConnector.exposeConfig) {

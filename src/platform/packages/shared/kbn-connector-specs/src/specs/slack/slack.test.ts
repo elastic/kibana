@@ -1489,11 +1489,20 @@ describe('Slack', () => {
       const result = await Slack.actions.sendMessage.handler(webhookContext, {
         text: 'Hello',
         blocks,
+        threadTs: '1234567890.123456',
+        unfurlLinks: false,
+        unfurlMedia: true,
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://hooks.slack.com/services/test',
-        { text: 'Hello', blocks },
+        {
+          text: 'Hello',
+          blocks,
+          thread_ts: '1234567890.123456',
+          unfurl_links: false,
+          unfurl_media: true,
+        },
         expect.any(Object)
       );
       expect(result).toEqual({ ok: true });

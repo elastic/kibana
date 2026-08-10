@@ -39,10 +39,8 @@ const getSupportedSubActions = (connector: FindActionResult): string[] | undefin
   if (!connectorSpec) {
     return undefined;
   }
-  // Spec connectors mirror only the non-sensitive auth discriminator into config when saved.
-  // This lets Workflows derive capabilities without exposing connector secrets.
-  const authType = getConnectorAuthType({ config: connector.config });
-  return authType === undefined ? [] : getSupportedActionNames(connectorSpec, authType);
+  const authType = connector.authType ?? getConnectorAuthType({ config: connector.config });
+  return getSupportedActionNames(connectorSpec, authType);
 };
 
 /**

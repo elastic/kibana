@@ -18,8 +18,8 @@ import {
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
 import { getSuggestions as mockedGetSuggestions } from './suggestions/get_suggestions';
-
 import { isDeprecatedStepType } from '../../../../../common/schema';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -45,6 +45,10 @@ describe('getCompletionItemProvider', () => {
   let mockPosition: monaco.Position;
   let mockCompletionContext: monaco.languages.CompletionContext;
   let getState: jest.Mock;
+
+  beforeAll(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -252,7 +256,7 @@ describe('getCompletionItemProvider', () => {
       expect(result?.suggestions?.[0].label).toBe('scheduled');
     });
 
-    it('should filter workflow and YAML connector actions for the selected connector', async () => {
+    it('should mark unsupported actions as unavailable for the selected connector', async () => {
       (mockedBuildAutocompleteContext as jest.Mock).mockReturnValueOnce({
         path: ['steps', 0, 'type'],
         yamlDocument: { getIn: jest.fn().mockReturnValue('slack-webhook') },
@@ -287,6 +291,7 @@ describe('getCompletionItemProvider', () => {
           label: 'slack2.searchMessages',
           insertText: 'slack2.searchMessages',
           filterText: 'slack2.searchMessages',
+          documentation: 'Slack - Search Messages',
         },
         {
           label: 'slack2.sendMessage',
@@ -315,8 +320,29 @@ describe('getCompletionItemProvider', () => {
       );
 
       expect(result?.suggestions?.map((suggestion) => suggestion.filterText)).toEqual([
+        'slack2.searchMessages',
         'slack2.sendMessage',
       ]);
+      const unavailableSuggestion = result?.suggestions?.find(
+        ({ filterText }) => filterText === 'slack2.searchMessages'
+      );
+      expect(unavailableSuggestion).toMatchObject({
+        label: {
+          label: 'slack2.searchMessages',
+          description: 'Unavailable',
+        },
+        sortText: 'zzzz-slack2.searchMessages',
+        preselect: false,
+      });
+      expect(unavailableSuggestion?.documentation).toMatchObject({
+        supportHtml: true,
+        value: expect.stringContaining(
+          'This action is not available for connector "Slack webhook" with its current credentials.\n\nSlack - Search Messages'
+        ),
+      });
+      expect((unavailableSuggestion?.documentation as monaco.IMarkdownString).value).toContain(
+        'alt="Unavailable"'
+      );
     });
 
     it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {

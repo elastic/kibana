@@ -8,12 +8,16 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
+import {
+  buildSuggestTechPreviewBadgeRules,
+  buildSuggestUnavailableBadgeRules,
+} from './get_suggest_tech_preview_badge_styles';
 
 const createMockEuiThemeContext = (): UseEuiTheme => ({
   euiTheme: {
     colors: {
       textPrimary: '#343741',
+      textSubdued: '#69707d',
       backgroundBasePlain: '#ffffff',
       backgroundBaseInteractiveSelect: '#e6f0f8',
       vis: {
@@ -30,7 +34,7 @@ const createMockEuiThemeContext = (): UseEuiTheme => ({
 });
 
 describe('buildSuggestTechPreviewBadgeRules', () => {
-  it('generates aria-label scoped rules with flask mask styling', () => {
+  it('generates aria-label scoped rules with flask badge styling', () => {
     const css = buildSuggestTechPreviewBadgeRules(
       ['cases.caseCreated'],
       createMockEuiThemeContext()
@@ -46,5 +50,17 @@ describe('buildSuggestTechPreviewBadgeRules', () => {
     const css = buildSuggestTechPreviewBadgeRules(['say"hello'], createMockEuiThemeContext());
 
     expect(css).toContain('[aria-label^="say\\"hello"]');
+  });
+});
+
+describe('buildSuggestUnavailableBadgeRules', () => {
+  it('generates a neutral hollow badge for unavailable suggestions', () => {
+    const css = buildSuggestUnavailableBadgeRules(createMockEuiThemeContext());
+
+    expect(css).toContain('[aria-label*="Unavailable"]');
+    expect(css).toContain('.main > .left::after');
+    expect(css).toContain('border: 1px solid #d3dae6');
+    expect(css).toContain('background-color: #ffffff');
+    expect(css).toContain('color: #69707d !important');
   });
 });

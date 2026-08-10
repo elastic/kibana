@@ -189,9 +189,15 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 const getSendMessagePayload = ({
   text,
   blocks,
+  threadTs,
+  unfurlLinks,
+  unfurlMedia,
 }: SlackSendMessageInput): Record<string, unknown> => ({
   ...(text !== undefined ? { text } : {}),
   ...(blocks !== undefined ? { blocks } : {}),
+  ...(threadTs !== undefined ? { thread_ts: threadTs } : {}),
+  ...(unfurlLinks !== undefined ? { unfurl_links: unfurlLinks } : {}),
+  ...(unfurlMedia !== undefined ? { unfurl_media: unfurlMedia } : {}),
 });
 
 async function sendMessageViaWebhook(
@@ -229,15 +235,6 @@ async function sendMessageViaWebApi(
     ...getSendMessagePayload(input),
     channel: input.channel,
   };
-  if (input.threadTs) {
-    payload.thread_ts = input.threadTs;
-  }
-  if (input.unfurlLinks !== undefined) {
-    payload.unfurl_links = input.unfurlLinks;
-  }
-  if (input.unfurlMedia !== undefined) {
-    payload.unfurl_media = input.unfurlMedia;
-  }
 
   ctx.log.debug(`Slack sendMessage request: channel=${input.channel}`);
   const response = await slackRequestWithRateLimitRetry({

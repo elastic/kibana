@@ -16,7 +16,7 @@ import {
   type StepInfo,
   type WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import { getActionTypeIdFromStepType } from '../../../shared/lib/action_type_utils';
+import { getConnectorActionCapabilities } from '../../../shared/lib/action_type_utils';
 import type { YamlValidationResult } from '../model/types';
 
 const validateStep = (
@@ -29,15 +29,14 @@ const validateStep = (
     return undefined;
   }
 
-  const connectorType = connectorTypes[getActionTypeIdFromStepType(step.stepType)];
-  const instance = connectorType?.instances.find(({ id }) => id === connectorId);
+  const capabilities = getConnectorActionCapabilities(connectorId, connectorTypes);
   const subAction = step.stepType.replace(/^\./, '').split('.').slice(1).join('.');
   const typeRange = step.propInfos.type?.valueNode.range;
 
   if (
-    !instance?.supportedSubActions ||
+    !capabilities?.selectedConnectorStepTypes.has(step.stepType) ||
     !subAction ||
-    instance.supportedSubActions.includes(subAction) ||
+    capabilities.supportedStepTypes.has(step.stepType) ||
     !typeRange
   ) {
     return undefined;
@@ -55,7 +54,7 @@ const validateStep = (
       {
         defaultMessage:
           'Action "{action}" is not available for connector "{connectorName}" because of its authentication method.',
-        values: { action: subAction, connectorName: instance.name },
+        values: { action: subAction, connectorName: capabilities.connectorName },
       }
     ),
     hoverMessage: null,

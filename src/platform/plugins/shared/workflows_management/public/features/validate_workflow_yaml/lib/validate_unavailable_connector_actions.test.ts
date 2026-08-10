@@ -97,4 +97,23 @@ describe('validateUnavailableConnectorActions', () => {
       )
     ).toEqual([]);
   });
+
+  it('does not report unknown actions as authentication failures', () => {
+    const step = createStepInfo({
+      stepId: 'unknown_slack',
+      stepType: 'slack2.unknownAction',
+      propInfos: {
+        type: createPropInfo(['type'], 'slack2.unknownAction', 10),
+        'connector-id': createPropInfo(['connector-id'], 'slack-webhook', 30),
+      },
+    });
+
+    expect(
+      validateUnavailableConnectorActions(
+        createWorkflowLookup([step]),
+        connectorTypes,
+        mockLineCounter
+      )
+    ).toEqual([]);
+  });
 });
