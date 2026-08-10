@@ -322,7 +322,14 @@ export const AgentsList: React.FC = () => {
       agentLastUpdatedBy,
       agentActions,
     ];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess, profileMap, dateFormat]);
+  }, [
+    createAgentBuilderUrl,
+    deleteAgent,
+    manageAgents,
+    canManageAgentAccess,
+    profileMap,
+    dateFormat,
+  ]);
 
   const errorMessage = useMemo(
     () =>
