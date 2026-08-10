@@ -27,7 +27,7 @@ export const HideTabsBar: FC<{
   const dispatch = useInternalStateDispatch();
   const { chrome } = useDiscoverServices();
   const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
-  const topNavMenuItems = useTopNavMenuItems();
+  const { topNavMenuItems } = useTopNavMenuItems();
 
   useEffect(() => {
     dispatch(internalStateActions.setTabsBarVisibility(TabsBarVisibility.hidden));
