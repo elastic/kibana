@@ -646,9 +646,15 @@ export class RulesClient {
   }
 
   @withApm
-  public async getTags(params: { search?: string; kind?: RuleKind } = {}): Promise<string[]> {
+  public async getTags(
+    params: { search?: string; kind?: RuleKind; size?: number } = {}
+  ): Promise<string[]> {
     const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
-    return this.rulesSavedObjectService.findTags({ search: params.search, filter: soFilter });
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      filter: soFilter,
+      size: params.size,
+    });
   }
 
   @withApm

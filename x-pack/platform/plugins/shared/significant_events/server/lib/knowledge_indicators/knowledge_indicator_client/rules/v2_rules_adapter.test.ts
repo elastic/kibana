@@ -312,6 +312,7 @@ describe('RulesAdapterV2', () => {
       expect(mock.getTags).toHaveBeenCalledWith({
         search: STREAMS_RULE_STREAM_TAG_PREFIX,
         kind: 'signal',
+        size: 10000,
       });
     });
   });

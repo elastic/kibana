@@ -308,5 +308,27 @@ describe('RulesSavedObjectService', () => {
 
       expect(tags).toEqual([]);
     });
+
+    it('forwards a custom size to the terms aggregation', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ size: 10000 });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.size).toBe(10000);
+    });
+
+    it('clamps size to the allowed range', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ size: 0 });
+      expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(1);
+
+      mockSavedObjectsClient.find.mockClear();
+      await rulesSavedObjectService.findTags({ size: 99999 });
+      expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(
+        10000
+      );
+    });
   });
 });

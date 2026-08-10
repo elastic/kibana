@@ -1312,7 +1312,11 @@ describe('RulesClient', () => {
       const tags = await client.getTags();
 
       expect(tags).toEqual(['cpu', 'memory']);
-      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({ filter: undefined });
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
+        filter: undefined,
+        size: undefined,
+      });
     });
 
     it('translates kind: alert to an SO filter', async () => {
@@ -1323,7 +1327,9 @@ describe('RulesClient', () => {
       await client.getTags({ kind: 'alert' });
 
       expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
+        size: undefined,
       });
     });
 
@@ -1335,7 +1341,9 @@ describe('RulesClient', () => {
       await client.getTags({ kind: 'signal' });
 
       expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: signal`,
+        size: undefined,
       });
     });
 
@@ -1349,6 +1357,21 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
         search: 'pro',
         filter: undefined,
+        size: undefined,
+      });
+    });
+
+    it('forwards size to the saved-object service', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['a']);
+
+      await client.getTags({ search: 'sigevents:stream:', size: 10000 });
+
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: 'sigevents:stream:',
+        filter: undefined,
+        size: 10000,
       });
     });
   });

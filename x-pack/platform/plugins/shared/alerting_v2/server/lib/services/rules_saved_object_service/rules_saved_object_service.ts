@@ -27,6 +27,16 @@ import { RuleSavedObjectsClientToken } from './tokens';
  */
 const SCHEDULE_INTERVAL_AGG_SIZE = 1000;
 
+/** Default terms-agg size for `findTags` (HTTP typeahead contract). */
+const DEFAULT_FIND_TAGS_SIZE = 20;
+
+/**
+ * Maximum terms-agg size for internal `findTags` / `getTags` callers.
+ * Not exposed on the HTTP route; server-side consumers that need broader
+ * enumeration (e.g. Significant Events stream discovery) may request up to this.
+ */
+const MAX_FIND_TAGS_SIZE = 10000;
+
 interface ScheduleEveryAggregationResult {
   schedule_intervals: {
     sum_other_doc_count: number;
@@ -120,7 +130,7 @@ export interface RulesSavedObjectServiceContract {
   }>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
-  findTags(params?: { search?: string; filter?: string }): Promise<string[]>;
+  findTags(params?: { search?: string; filter?: string; size?: number }): Promise<string[]>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
 
@@ -436,9 +446,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
   }
 
-  public async findTags({ search, filter }: { search?: string; filter?: string } = {}): Promise<
-    string[]
-  > {
+  public async findTags({
+    search,
+    filter,
+    size = DEFAULT_FIND_TAGS_SIZE,
+  }: { search?: string; filter?: string; size?: number } = {}): Promise<string[]> {
+    const resolvedSize = Math.min(Math.max(size, 1), MAX_FIND_TAGS_SIZE);
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -447,7 +460,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         tags: {
           terms: {
             field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
-            size: 20,
+            size: resolvedSize,
             order: { _count: 'desc' },
             ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
           },
