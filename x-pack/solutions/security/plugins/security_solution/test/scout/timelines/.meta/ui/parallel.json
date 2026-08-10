@@ -1,5 +1,9 @@
 {
   "sha1": "5a3f058ad2552283b6061bdd9717484562b09e09",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "5225b19b2303390-1054e603e578b92",
@@ -8,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -24,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_creation.spec.ts",
-        "line": 27,
-        "column": 14
+        "line": 21,
+        "column": 7
       }
     },
     {
@@ -40,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_creation.spec.ts",
-        "line": 53,
-        "column": 14
+        "line": 38,
+        "column": 15
       }
     },
     {
@@ -56,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_creation.spec.ts",
-        "line": 64,
-        "column": 14
+        "line": 47,
+        "column": 15
       }
     },
     {
@@ -72,8 +76,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_creation.spec.ts",
-        "line": 85,
-        "column": 14
+        "line": 65,
+        "column": 13
       }
     },
     {
@@ -88,8 +92,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_read_only.spec.ts",
-        "line": 25,
-        "column": 14
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2028bd2bf19523-38774a366c8fd55",
+      "title": "Super Timeline — Timelines list entry point opens the Super Timeline modal in read-only mode and does not create new saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_super.spec.ts",
+        "line": 35,
+        "column": 9
       }
     }
   ]
