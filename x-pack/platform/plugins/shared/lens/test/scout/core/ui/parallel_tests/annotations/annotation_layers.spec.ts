@@ -40,16 +40,21 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
       await spaceTest.step(
         'adds a manual annotation layer with a static date and shows its text label',
         async () => {
-          await lens.removeLayer();
+          await lens.layers.removeLayer();
           await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
 
-          await lens.createLayer('annotations');
-          expect(await lens.getLayerCount()).toBe(2);
+          await lens.layers.createLayer('annotations');
+          expect(await lens.layers.getLayerCount()).toBe(2);
 
-          await lens.ensureLayerTabIsActive(1);
-          await expect(lens.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText('Event');
+          await lens.layers.ensureLayerTabIsActive(1);
+          await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText(
+            'Event'
+          );
 
-          await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
+          await lens.dimensions.openDimensionEditor(
+            `${ANNOTATIONS_PANEL} > lns-dimensionTrigger`,
+            1
+          );
           await lens.setAnnotationTextVisibility('name');
           await lens.closeDimensionEditor();
 
@@ -66,7 +71,11 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
             to: `${ANNOTATIONS_PANEL} > lns-empty-dimension`,
           });
 
-          await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1, 1);
+          await lens.dimensions.openDimensionEditor(
+            `${ANNOTATIONS_PANEL} > lns-dimensionTrigger`,
+            1,
+            1
+          );
           await expect(page.testSubj.locator('lnsXY_textVisibility_name')).toHaveAttribute(
             'aria-pressed',
             'true'
@@ -80,16 +89,18 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
       );
 
       await spaceTest.step('adds a query-based annotation layer and configures it', async () => {
-        await lens.removeLayer(1);
-        expect(await lens.getLayerCount()).toBe(1);
+        await lens.layers.removeLayer(1);
+        expect(await lens.layers.getLayerCount()).toBe(1);
 
-        await lens.createLayer('annotations');
-        expect(await lens.getLayerCount()).toBe(2);
+        await lens.layers.createLayer('annotations');
+        expect(await lens.layers.getLayerCount()).toBe(2);
 
-        await lens.ensureLayerTabIsActive(1);
-        await expect(lens.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText('Event');
+        await lens.layers.ensureLayerTabIsActive(1);
+        await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText(
+          'Event'
+        );
 
-        await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
+        await lens.dimensions.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
         await page.testSubj.click('lnsXY_annotation_query');
         await lens.configureQueryAnnotation({
           queryString: '*',
