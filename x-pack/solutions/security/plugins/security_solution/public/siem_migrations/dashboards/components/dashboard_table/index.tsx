@@ -94,6 +94,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
     const {
       data: { migrationDashboards, total } = { migrationDashboards: [], total: 0 },
       isLoading: isDataLoading,
+      isFetching: isDataFetching,
     } = useGetMigrationDashboards({
       migrationId,
       page: pageIndex,
@@ -186,7 +187,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
 
     const [isTableLoading, setTableLoading] = useState(false);
 
-    const isDashboardsLoading = isDataLoading || isTableLoading || isRetryLoading;
+    const isDashboardsLoading = isDataLoading || isDataFetching || isTableLoading || isRetryLoading;
 
     const installSelectedDashboards = useCallback(async () => {
       setTableLoading(true);
@@ -322,7 +323,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                 <EuiSpacer size="m" />
                 <EuiBasicTable<DashboardMigrationDashboard>
                   tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
-                  loading={false}
+                  loading={isDashboardsLoading}
                   items={migrationDashboards}
                   pagination={pagination}
                   sorting={sorting}

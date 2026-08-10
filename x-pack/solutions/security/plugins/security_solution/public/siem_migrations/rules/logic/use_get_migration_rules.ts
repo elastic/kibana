@@ -39,6 +39,7 @@ export const useGetMigrationRules = (params: {
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
+      keepPreviousData: true,
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_RULES_FAILURE });
       },

@@ -182,11 +182,37 @@ jest.spyOn(useInstallMigrationDashboardModule, 'useInstallMigrationDashboard').m
 } as unknown as ReturnType<typeof useInstallMigrationDashboardModule.useInstallMigrationDashboard>);
 
 describe('MigrationDashboardsTable', () => {
-  it('should render table and dashboards', () => {
+  it('should show table and dashboards', () => {
     renderTestComponent();
     expect(screen.getByTestId('siemMigrationsDashboardsTable')).toBeInTheDocument();
     expect(screen.getByText('Elastic Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Original Dashboard 2')).toBeInTheDocument();
+  });
+
+  it('should keep showing the previous rows with a loading indicator while re-fetching after a search or filter change', () => {
+    jest.spyOn(useGetMigrationDashboardsModule, 'useGetMigrationDashboards').mockReturnValueOnce({
+      data: { migrationDashboards: mockDashboards, total: 2 },
+      isLoading: false,
+      isFetching: true,
+    } as unknown as ReturnType<typeof useGetMigrationDashboardsModule.useGetMigrationDashboards>);
+
+    renderTestComponent();
+
+    const table = screen.getByTestId('dashboards-translation-table');
+    expect(table).toHaveClass('euiBasicTable-loading');
+    expect(screen.getByText('Elastic Dashboard')).toBeInTheDocument();
+  });
+
+  it('should disable the install action while re-fetching after a search or filter change', () => {
+    jest.spyOn(useGetMigrationDashboardsModule, 'useGetMigrationDashboards').mockReturnValueOnce({
+      data: { migrationDashboards: mockDashboards, total: 2 },
+      isLoading: false,
+      isFetching: true,
+    } as unknown as ReturnType<typeof useGetMigrationDashboardsModule.useGetMigrationDashboards>);
+
+    renderTestComponent();
+
+    expect(screen.getByTestId('installDashboard')).toBeDisabled();
   });
 
   describe('Actions', () => {

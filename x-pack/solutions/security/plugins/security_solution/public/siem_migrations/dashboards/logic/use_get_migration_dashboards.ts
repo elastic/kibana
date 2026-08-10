@@ -39,6 +39,7 @@ export const useGetMigrationDashboards = (params: {
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
+      keepPreviousData: true,
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_DASHBOARDS_FAILURE });
       },
