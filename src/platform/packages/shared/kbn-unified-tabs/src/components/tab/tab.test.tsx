@@ -12,6 +12,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
+import { TabMenuItemName } from '../../types';
 import { servicesMock } from '../../../__mocks__/services';
 import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 
@@ -152,6 +153,64 @@ describe('Tab', () => {
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('can enter rename mode with Shift+F10 and Enter', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const onLabelEdited = jest.fn();
+    const getTabMenuItems = jest.fn(() => [
+      {
+        'data-test-subj': 'unifiedTabs_tabMenuItem_enterRenamingMode',
+        name: TabMenuItemName.enterRenamingMode,
+        label: 'Rename',
+        onClick: null,
+      },
+    ]);
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected
+        services={servicesMock}
+        getTabMenuItems={getTabMenuItems}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    const tabButton = screen.getByTestId(tabButtonTestSubj);
+    tabButton.focus();
+    await user.keyboard('{Shift>}{F10}{/Shift}');
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    const renameItem = await screen.findByTestId('unifiedTabs_tabMenuItem_enterRenamingMode');
+    // jsdom does not reliably run EUI's popover→menuitem focus transfer; place focus
+    // on Rename (as initialFocusedItemIndex={0} does in the browser) then activate it.
+    renameItem.focus();
+    expect(renameItem).toHaveFocus();
+    await user.keyboard('{Enter}');
+
+    // TabMenu defers onEnterRenaming with setTimeout(100); onEnterRenaming uses setTimeout(0)
+    act(() => {
+      jest.advanceTimersByTime(150);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
+    });
+
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, 'keyboard-label');
+    await user.keyboard('{Enter}');
+    expect(onLabelEdited).toHaveBeenCalledWith(tabItem, 'keyboard-label');
   });
 
   it('can cancel editing of tab label', async () => {

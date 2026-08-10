@@ -22,8 +22,20 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const openTabContextMenuWithKeyboard = async () => {
+    // createNewTab() focuses the "new tab" button via mouse click, so keyboard
+    // focus may sit on that button rather than the newly-created tab. Shift+F10
+    // only opens the menu when the selected tab has focus.
+    const selectedTab = await unifiedTabs.getSelectedTab();
+    if (selectedTab) {
+      const tabButton = await selectedTab.element.findByCssSelector(
+        '[data-test-subj^="unifiedTabs_selectTabBtn_"]'
+      );
+      await tabButton.click();
+    }
+
     await browser
       .getActions()
       .keyDown(Key.SHIFT)
@@ -31,8 +43,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       .keyUp(Key.SHIFT)
       .perform();
 
-    await retry.waitFor('open tab context menu', async () => {
-      return await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode');
+    // Wait until Rename is focused — EUI moves focus into the menu asynchronously
+    // after the popover is stable. DOM presence alone is not enough.
+    await retry.waitFor('Rename menu item to be focused', async () => {
+      if (!(await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode'))) {
+        return false;
+      }
+      const activeElement = await find.activeElement();
+      return (
+        (await activeElement.getAttribute('data-test-subj')) ===
+        'unifiedTabs_tabMenuItem_enterRenamingMode'
+      );
     });
   };
 
@@ -112,7 +133,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       await unifiedTabs.createNewTab();
       await openTabContextMenuWithKeyboard();
-      await browser.pressKeys(browser.keys.ARROW_DOWN);
+      // Rename is the first item and is focused when the menu opens via keyboard;
+      // pressing ENTER activates it directly (ARROW_DOWN would move to Duplicate).
       await browser.pressKeys(browser.keys.ENTER);
       await unifiedTabs.enterNewTabLabel('Test label');
       expect(await unifiedTabs.getTabLabels()).to.eql([

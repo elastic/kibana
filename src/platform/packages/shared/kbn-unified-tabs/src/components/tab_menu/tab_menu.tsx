@@ -107,7 +107,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({
         </EuiToolTip>
       }
     >
-      <EuiContextMenuPanel items={panelItems} />
+      <EuiContextMenuPanel initialFocusedItemIndex={0} items={panelItems} />
     </EuiPopover>
   );
 };
