@@ -30,6 +30,7 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
             params: {
               mapType: 'Scaled Circle Markers',
               colorSchema: 'Yellow to Red',
+              isDesaturated: false,
             },
             data: {
               searchSource: { index: 'data-view-1' },
@@ -60,7 +61,8 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     expect(result.config.attributes.layers).toHaveLength(2);
     expect(result.config.attributes.layers[0].type).toBe('EMS_VECTOR_TILE');
     expect(result.config.attributes.layers[0].sourceDescriptor.type).toBe('EMS_TMS');
-    expect(result.config.attributes.layers[0].sourceDescriptor.id).toBe('road_map');
+    expect(result.config.attributes.layers[0].sourceDescriptor.isAutoSelect).toBe(true);
+    expect(result.config.attributes.layers[0].sourceDescriptor.lightModeDefault).toBe('road_map');
 
     expect(result.config.attributes.layers[1].sourceDescriptor.indexPatternId).toBe('data-view-1');
     expect(result.config.attributes.layers[1].sourceDescriptor.geoField).toBe('geo.coordinates');
@@ -80,6 +82,7 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
               colorSchema: 'Yellow to Red',
               selectedLayer: { isEMS: true, id: 'world_countries' },
               selectedJoinField: { name: 'iso2' },
+              wms: { selectedTmsLayer: { id: 'road_map' } },
             },
             data: {
               searchSource: { index: 'data-view-1' },
@@ -104,6 +107,8 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     expect(result.config.attributes.layers).toHaveLength(2);
     expect(result.config.attributes.layers[0].type).toBe('EMS_VECTOR_TILE');
     expect(result.config.attributes.layers[0].sourceDescriptor.type).toBe('EMS_TMS');
+    expect(result.config.attributes.layers[0].sourceDescriptor.isAutoSelect).toBe(true);
+    expect(result.config.attributes.layers[0].sourceDescriptor.lightModeDefault).toBe('road_map');
 
     expect(result.config.attributes.layers[1].joins).toHaveLength(1);
     expect(result.config.attributes.layers[1].joins[0].leftField).toBe('iso2');
@@ -121,7 +126,12 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
             visState: JSON.stringify({
               title: 'Ref tile map',
               type: 'tile_map',
-              params: { mapType: 'Heatmap', colorSchema: 'Yellow to Red' },
+              params: {
+                mapType: 'Heatmap',
+                colorSchema: 'Yellow to Red',
+                isDesaturated: true,
+                wms: { selectedTmsLayer: { id: 'road_map_desaturated' } },
+              },
               aggs: [
                 { schema: 'metric', type: 'count', params: {} },
                 { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates' } },
@@ -161,6 +171,10 @@ describe('migrateLegacyTileAndRegionMapPanels', () => {
     expect(result.config.attributes.layers).toHaveLength(2);
     expect(result.config.attributes.layers[0].type).toBe('EMS_VECTOR_TILE');
     expect(result.config.attributes.layers[0].sourceDescriptor.type).toBe('EMS_TMS');
+    expect(result.config.attributes.layers[0].sourceDescriptor.isAutoSelect).toBe(true);
+    expect(result.config.attributes.layers[0].sourceDescriptor.lightModeDefault).toBe(
+      'road_map_desaturated_v9'
+    );
     expect(result.config.attributes.layers[1].type).toBe('HEATMAP');
     expect(result.config.attributes.layers[1].style.type).toBe('HEATMAP');
   });

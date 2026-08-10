@@ -361,9 +361,13 @@ function createBasemapLayersFromLegacyParams(params: {
       ? (legacyParams as any).isDesaturated
       : undefined;
 
-  const emsBasemapId =
+  const lightModeDefault =
     selectedTmsLayerId ??
-    (isDesaturated === true ? DEFAULT_EMS_ROADMAP_DESATURATED_ID : DEFAULT_EMS_ROADMAP_ID);
+    (isDesaturated === true
+      ? DEFAULT_EMS_ROADMAP_DESATURATED_ID
+      : isDesaturated === false
+      ? DEFAULT_EMS_ROADMAP_ID
+      : undefined);
 
   const emsBasemapLayer = {
     id: uuidv4(),
@@ -375,8 +379,8 @@ function createBasemapLayersFromLegacyParams(params: {
     includeInFitToBounds: true,
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_TMS,
-      isAutoSelect: false,
-      id: emsBasemapId,
+      isAutoSelect: true,
+      ...(lightModeDefault ? { lightModeDefault } : {}),
     },
     style: { type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE, color: '' },
     locale: 'autoselect',
