@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -221,22 +221,6 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe('Configuration');
   });
 
-  it('should cancel editing when the header close button is clicked', async () => {
-    const closeFlyoutSpy = jest.fn();
-    const onCancelSpy = jest.fn();
-
-    await renderConfigFlyout({
-      closeFlyout: closeFlyoutSpy,
-      onCancel: onCancelSpy,
-      displayFlyoutHeader: true,
-    });
-    expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-
-    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
-    expect(onCancelSpy).toHaveBeenCalledTimes(1);
-  });
-
   it('should cancel editing when Escape dismisses the flyout', async () => {
     const closeFlyoutSpy = jest.fn();
     const onCancelSpy = jest.fn();
@@ -250,6 +234,41 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.queryByTestId('cancelFlyoutButton')).not.toBeInTheDocument();
     expect(onCancelSpy).toHaveBeenCalledTimes(1);
     expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should register overlay dismiss cleanup that cancels editing', async () => {
+    const onCancelSpy = jest.fn();
+    const registerOnDismiss = jest.fn();
+
+    await renderConfigFlyout({
+      onCancel: onCancelSpy,
+      registerOnDismiss,
+    });
+
+    const dismissHandler = registerOnDismiss.mock.calls
+      .map((call) => call[0])
+      .find((handler): handler is () => void => typeof handler === 'function');
+    expect(dismissHandler).toBeDefined();
+    act(() => {
+      dismissHandler?.();
+    });
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should clear overlay dismiss cleanup after Apply', async () => {
+    const closeFlyoutSpy = jest.fn();
+    const registerOnDismiss = jest.fn();
+
+    await renderConfigFlyout({
+      closeFlyout: closeFlyoutSpy,
+      registerOnDismiss,
+    });
+
+    await userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    await waitFor(() => expect(closeFlyoutSpy).toHaveBeenCalled());
+
+    expect(registerOnDismiss).toHaveBeenCalledWith(undefined);
   });
 
   it('should call the updatePanelState callback if cancel button is clicked', async () => {

@@ -248,7 +248,13 @@ export function initializeEditApi(
   };
 
   const getEditPanel = async (
-    { closeFlyout }: { closeFlyout?: () => void } = {
+    {
+      closeFlyout,
+      registerOnDismiss,
+    }: {
+      closeFlyout?: () => void;
+      registerOnDismiss?: (handler?: () => void) => void;
+    } = {
       closeFlyout: noop,
     }
   ) => {
@@ -284,6 +290,7 @@ export function initializeEditApi(
         internalApi.updateEditingState(false);
         closeFlyout?.();
       },
+      registerOnDismiss,
     });
     return ConfigPanel ?? undefined;
   };
@@ -367,9 +374,10 @@ export function initializeEditApi(
         mountInlinePanel({
           core: startDependencies.coreStart,
           api: parentApi,
-          loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
+          loadContent: async ({ closeFlyout, registerOnDismiss } = { closeFlyout: noop }) => {
             return getEditPanel({
               closeFlyout,
+              registerOnDismiss,
             });
           },
           options: { uuid },

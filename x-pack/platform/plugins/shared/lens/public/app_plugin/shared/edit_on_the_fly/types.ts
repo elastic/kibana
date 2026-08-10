@@ -59,6 +59,11 @@ export interface EditConfigPanelProps {
   updateByRefInput?: (soId: string, attrs: TypedLensSerializedState['attributes']) => void;
   /** Callback for closing the edit flyout */
   closeFlyout?: () => void;
+  /**
+   * Register cleanup for overlay dismissals (header X, outside click).
+   * Cleared after Apply so close does not revert saved changes.
+   */
+  registerOnDismiss?: (handler?: () => void) => void;
   /** Boolean used for adding a flyout wrapper */
   wrapInFlyout?: boolean;
   /** Optional parameter for panel identification

@@ -28,8 +28,10 @@ export const mountInlinePanel = async ({
   api?: unknown;
   loadContent: ({
     closeFlyout,
+    registerOnDismiss,
   }?: {
     closeFlyout: () => void;
+    registerOnDismiss: (handler?: () => void) => void;
   }) => Promise<JSX.Element | null | void>;
   uuid?: string;
   options?: {
@@ -80,8 +82,5 @@ export const lensFlyoutProps: OverlayFlyoutOpenOptions = {
   css: inlineFlyoutStyles,
   'data-test-subj': 'customizeLens',
   isResizable: true,
-  // Close is owned by Lens FlyoutWrapper so it can run the same cancel path as Cancel.
-  hideCloseButton: true,
-  // Outside clicks would otherwise dismiss without cancel cleanup (orphan provisional panels).
-  outsideClickCloses: false,
+  outsideClickCloses: true,
 };

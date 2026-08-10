@@ -21,6 +21,11 @@ const htmlId = htmlIdGenerator('modalTitleId');
 interface LoadContentArgs {
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  /**
+   * Register cleanup to run when the overlay closes (header X, outside click, Escape, or closeFlyout()).
+   * Pass `undefined` to clear (e.g. after a successful Apply).
+   */
+  registerOnDismiss: (handler?: () => void) => void;
 }
 
 interface OpenLazyFlyoutParams {
@@ -99,7 +104,15 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     });
   };
 
+  let onDismiss: (() => void) | undefined;
+  const registerOnDismiss = (handler?: () => void) => {
+    onDismiss = handler;
+  };
+
   const onClose = () => {
+    const dismiss = onDismiss;
+    onDismiss = undefined;
+    dismiss?.();
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
     // Resolve lazily: closing can re-render the panel, so the trigger is looked up after
@@ -111,6 +124,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     toMountPoint(
       <LazyFlyout
         closeFlyout={onClose}
+        registerOnDismiss={registerOnDismiss}
         loadContent={loadContent}
         core={core}
         ariaLabelledBy={ariaLabelledBy}
@@ -139,11 +153,16 @@ function LazyFlyout({
   core,
   loadContent,
   closeFlyout,
+  registerOnDismiss,
   ariaLabelledBy,
 }: LoadContentArgs & Pick<OpenLazyFlyoutParams, 'core' | 'loadContent'>) {
   const [LoadedFlyout, setLoadedFlyout] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
-    const editFlyoutContent = await loadContent?.({ closeFlyout, ariaLabelledBy });
+    const editFlyoutContent = await loadContent?.({
+      closeFlyout,
+      registerOnDismiss,
+      ariaLabelledBy,
+    });
     if (editFlyoutContent) {
       setLoadedFlyout(editFlyoutContent);
     } else {

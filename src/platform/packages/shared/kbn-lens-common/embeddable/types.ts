@@ -356,7 +356,10 @@ export type LensRuntimeState = Simplify<
 >;
 
 export interface LensHasEditPanel {
-  getEditPanel?: (options?: { closeFlyout?: () => void }) => Promise<JSX.Element | undefined>;
+  getEditPanel?: (options?: {
+    closeFlyout?: () => void;
+    registerOnDismiss?: (handler?: () => void) => void;
+  }) => Promise<JSX.Element | undefined>;
 }
 
 export interface LensInspectorAdapters {
