@@ -19,27 +19,48 @@ describe('ScheduledActionsBadge', () => {
   }
 
   it('renders nothing when scheduledActionsCount is 0', () => {
-    const { queryByTestId } = render({ scheduledActionsCount: 0, onClick: jest.fn() });
+    const { queryByTestId } = render({
+      scheduledActionsCount: 0,
+      isCapped: false,
+      onClick: jest.fn(),
+    });
     expect(queryByTestId('scheduledActionsBadge')).toBeNull();
   });
 
   it('renders the badge when scheduledActionsCount > 0', () => {
-    const { getByTestId } = render({ scheduledActionsCount: 3, onClick: jest.fn() });
+    const { getByTestId } = render({
+      scheduledActionsCount: 3,
+      isCapped: false,
+      onClick: jest.fn(),
+    });
     expect(getByTestId('scheduledActionsBadge')).toBeInTheDocument();
   });
 
   it('calls onClick when the badge is clicked', () => {
     const onClick = jest.fn();
-    const { getByTestId } = render({ scheduledActionsCount: 1, onClick });
+    const { getByTestId } = render({ scheduledActionsCount: 1, isCapped: false, onClick });
     fireEvent.click(getByTestId('scheduledActionsBadge'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('has an accessible aria label', () => {
-    const { getByTestId } = render({ scheduledActionsCount: 2, onClick: jest.fn() });
+    const { getByTestId } = render({
+      scheduledActionsCount: 2,
+      isCapped: false,
+      onClick: jest.fn(),
+    });
     expect(getByTestId('scheduledActionsBadge')).toHaveAttribute(
       'aria-label',
       expect.stringContaining('unenrollment')
     );
+  });
+
+  it('renders the badge when isCapped is true', () => {
+    const { getByTestId } = render({
+      scheduledActionsCount: 100,
+      isCapped: true,
+      onClick: jest.fn(),
+    });
+    expect(getByTestId('scheduledActionsBadge')).toBeInTheDocument();
   });
 });
