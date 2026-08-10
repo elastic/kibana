@@ -93,9 +93,9 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
         operation: 'average',
         field: 'bytes',
       });
-      await lens.createLayer('referenceLine');
-      expect(await lens.getLayerCount()).toBe(2);
-      await lens.ensureLayerTabIsActive(1);
+      await lens.layers.createLayer('referenceLine');
+      expect(await lens.layers.getLayerCount()).toBe(2);
+      await lens.layers.ensureLayerTabIsActive(1);
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_yReferenceLineLeftPanel > lns-dimensionTrigger',

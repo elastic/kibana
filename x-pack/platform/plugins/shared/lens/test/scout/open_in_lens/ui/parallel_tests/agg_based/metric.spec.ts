@@ -55,7 +55,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
 
     await convertToLensByTitle({ dashboard }, 'Metric - Agg with params');
     await lens.waitForVisualization('mtrVis');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(1);
     const dimensions = await lens.getDimensionTriggers();
@@ -83,7 +83,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
 
     await convertToLensByTitle({ dashboard }, 'Metric - Sibling pipeline agg');
     await lens.waitForVisualization('mtrVis');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(2);
     const dimensions = await lens.getDimensionTriggers();
@@ -122,7 +122,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
 
     await convertToLensByTitle({ dashboard }, 'Metric - Color ranges');
     await lens.waitForVisualization('mtrVis');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(2);
     const dimensions = await lens.getDimensionTriggers();
