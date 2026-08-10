@@ -19,7 +19,6 @@ import {
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { AlertingServerSetupDependencies } from '../types';
 import type { PluginConfig } from '../config';
-import { getTaskTimeout } from '../lib/get_task_timeout';
 
 export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   // Register task with Task Manager when the binding is activated
@@ -39,7 +38,10 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
       requiresFakeRequest: definition.requiresFakeRequest,
     });
 
-    const timeout = getTaskTimeout(config, definition);
+    let timeout = definition.timeout;
+    if (definition.resolveTimeout) {
+      timeout = definition.resolveTimeout(config);
+    }
 
     taskManager.registerTaskDefinitions({
       [definition.taskType]: {

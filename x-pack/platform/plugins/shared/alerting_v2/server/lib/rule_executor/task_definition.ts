@@ -22,6 +22,8 @@ export const RuleExecutorTaskDefinition: AlertingTaskDefinition<RuleExecutorTask
   taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
   title: 'Alerting v2 rule executor (ES|QL)',
   timeout: DEFAULT_ALERTING_RULE_EXECUTOR_TASK_TIMEOUT,
+  resolveTimeout: (config) =>
+    config.rules.run.timeout ?? DEFAULT_ALERTING_RULE_EXECUTOR_TASK_TIMEOUT,
   paramsSchema: schema.object({
     ruleId: schema.string(),
     spaceId: schema.string(),
