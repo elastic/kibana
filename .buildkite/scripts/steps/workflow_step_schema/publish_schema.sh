@@ -25,7 +25,7 @@ CHANNEL="${1:-}"
 BUCKET="elastic-workflows-library-prod"
 CDN_HOST="https://workflows.elastic.co"
 GENERATED_DIR="src/platform/packages/private/kbn-workflow-step-schema-cli/generated"
-VAULT_SECRET_PATH="kv/ci-shared/workflows-library/gcs-publish"
+VAULT_SECRET_PATH="kv/ci-shared/workflows-cdn/gcs-publish"
 VAULT_FIELD="credentials"
 
 BASE_VERSION="${BASE_VERSION:-$(jq -r '.version' package.json)}"
