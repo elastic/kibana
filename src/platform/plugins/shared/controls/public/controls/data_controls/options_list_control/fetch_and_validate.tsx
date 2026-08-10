@@ -46,11 +46,14 @@ export function fetchAndValidate$({
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
   searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
   sort$: PublishingSubject<OptionsListSortingType | undefined>;
-}): Observable<OptionsListSuccessResponse | { error: Error }> {
+}): {
+  suggestions$: Observable<OptionsListSuccessResponse | { error: Error }>;
+  cancelRequests: () => void;
+} {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
 
-  return combineLatest({
+  const suggestions$ = combineLatest({
     dataViews: api.dataViews$,
     field: api.field$,
     esqlQuery: api.esqlQuery$,
@@ -145,4 +148,14 @@ export function fetchAndValidate$({
       api.loadingSuggestions$.next(false);
     })
   );
+
+  return {
+    suggestions$,
+    cancelRequests: () => {
+      if (abortController) {
+        abortController.abort();
+        abortController = undefined;
+      }
+    },
+  };
 }
