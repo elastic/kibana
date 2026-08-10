@@ -19,6 +19,7 @@ export {
   SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
+  NIGHTSHIFT_APP_ID,
 } from './constants';
 export type { AppId, DeepLinkId, SignificantEventsLinkId, StreamsLinkId } from './deep_links';
 export * from './locators';
