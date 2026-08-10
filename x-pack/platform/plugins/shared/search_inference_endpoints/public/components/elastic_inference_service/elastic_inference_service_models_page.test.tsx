@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
 import type { EisInferenceEndpoint } from '../../../common/types';
@@ -44,7 +46,14 @@ const SEARCH_BOX = 'contentListToolbar-searchBox';
 const countCards = (container: HTMLElement) =>
   container.querySelectorAll('[data-test-subj^="eisModelCard-"]').length;
 
-const renderPage = () => render(<ElasticInferenceServiceModelsPage />);
+// The page mounts under the app's `Router`, which is what enables the Content
+// List's URL sync — omitting it here hid a filtering regression from jest.
+const renderPage = () =>
+  render(
+    <Router history={createMemoryHistory()}>
+      <ElasticInferenceServiceModelsPage />
+    </Router>
+  );
 
 const renderPopulatedPage = async () => {
   mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
