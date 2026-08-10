@@ -21,7 +21,11 @@ describe('serviceAgentRoute params', () => {
   it('accepts a valid path and range query', () => {
     const result = serviceAgentRoute.params!.safeParse({
       path: { serviceName: 'opbeans-java' },
-      query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+      query: {
+        environment: 'production',
+        start: '2021-01-01T00:00:00.000Z',
+        end: '2021-01-02T00:00:00.000Z',
+      },
     });
 
     expectParseSuccess(result);
@@ -31,7 +35,11 @@ describe('serviceAgentRoute params', () => {
     expectParseError(
       serviceAgentRoute.params!.safeParse({
         path: {},
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+        query: {
+          environment: 'production',
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+        },
       })
     );
   });
