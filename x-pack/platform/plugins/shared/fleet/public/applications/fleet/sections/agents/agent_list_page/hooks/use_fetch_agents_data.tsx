@@ -268,8 +268,8 @@ export function useFetchAgentsData() {
       );
       return {
         count: matching.reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0),
-        // True when we received a full page: the real total may be higher.
-        isCapped: items.length >= MAX_AGENT_ACTIONS,
+        // True when matching actions filled the page: there may be more UNENROLL actions beyond it.
+        isCapped: matching.length >= MAX_AGENT_ACTIONS,
       };
     },
   });
