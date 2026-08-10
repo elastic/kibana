@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -89,10 +89,17 @@ export class RuleExecutorWorkflowSubscriber {
 
       await this.workflows.emitEvent(context.request, trigger.triggerId, payload);
     } catch (err) {
+      // The succeeded and failed payloads name the rule id differently.
+      const { rule } = event.payload;
+
       this.logger.error({
         error: err,
-        code: ALERTING_V2_LOG_CODES.RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE,
-        type: `RuleExecutorWorkflowSubscriber:${trigger.triggerId}`,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED,
+        labels: {
+          event_type: trigger.eventType,
+          rule_id: 'ruleId' in rule ? rule.ruleId : rule.id,
+          space_id: rule.spaceId,
+        },
       });
     }
   }

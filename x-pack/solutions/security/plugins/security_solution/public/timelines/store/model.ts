@@ -137,6 +137,32 @@ export interface TimelineModel {
   rowHeight?: number;
   /* sample size, total record number stored in in memory EuiDataGrid */
   sampleSize: number;
+  /**
+   * When true, this timeline is a transient, read-only Super Timeline aggregated from multiple
+   * source timelines. Runtime-only — not persisted to the saved object.
+   */
+  isSuperTimeline?: boolean;
+  /**
+   * The savedObjectIds of the source timelines that were aggregated to build this Super Timeline.
+   * Used to fetch notes across all source timelines. Runtime-only — not persisted.
+   */
+  superTimelineSourceIds?: string[];
+  /**
+   * Display titles for each source timeline, parallel to superTimelineSourceIds.
+   * Runtime-only — not persisted.
+   */
+  superTimelineSourceTitles?: string[];
+  /**
+   * Descriptions from each source timeline that had one, shown as attributed comments in the
+   * Notes tab. Runtime-only — not persisted.
+   */
+  superTimelineDescriptions?: Array<{
+    savedObjectId: string;
+    title: string;
+    description: string;
+    updatedBy: string | null | undefined;
+    updated: number | null | undefined;
+  }>;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -190,6 +216,10 @@ export type SubsetTimelineModel = Readonly<
     | 'savedSearch'
     | 'isDataProviderVisible'
     | 'changed'
+    | 'isSuperTimeline'
+    | 'superTimelineSourceIds'
+    | 'superTimelineSourceTitles'
+    | 'superTimelineDescriptions'
   >
 >;
 
