@@ -87,6 +87,8 @@ import {
   BulkNamespaceCustomizationRequestSchema,
   BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
+  NamespacePreflightCheckRequestSchema,
+  NamespacePreflightCheckResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -117,6 +119,7 @@ import {
   rollbackAvailableCheckHandler,
   bulkRollbackAvailableCheckHandler,
   reviewUpgradeHandler,
+  namespacePreflightCheckHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -1193,6 +1196,37 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       postBulkNamespaceCustomizationHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.NAMESPACE_PREFLIGHT_CHECK_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      access: 'internal',
+      summary: `Check for pre-existing index template conflicts before namespace opt-in`,
+      description:
+        `Runs a non-mutating pre-flight check to detect index templates that would ` +
+        `conflict with the Fleet-managed namespace index templates for the given namespaces. ` +
+        `Does not modify any saved objects or ES resources.`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: NamespacePreflightCheckRequestSchema,
+          response: {
+            200: {
+              body: () => NamespacePreflightCheckResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      namespacePreflightCheckHandler
     );
 
   router.versioned

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/streams-ui @elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
+  - '@kbn/deeplinks-observability'
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
   - '@kbn/core'

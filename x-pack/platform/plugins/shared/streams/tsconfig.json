@@ -15,6 +15,7 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/deeplinks-observability",
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
     "@kbn/core",
