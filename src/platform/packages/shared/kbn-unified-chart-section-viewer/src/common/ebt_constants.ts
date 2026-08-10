@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const METRICS_TOOLBAR_EBT_CLICK_ACTIONS = {
-  SORT_METRICS: 'sortMetrics',
-} as const;
-
-export const METRICS_TOOLBAR_EBT_ELEMENTS = {
-  SORT_FIELD_OPTION: 'metricsSortFieldOption',
-  SORT_DIRECTION_OPTION: 'metricsSortDirectionOption',
-} as const;
+export const METRICS_TOOLBAR_EBT_ELEMENT = 'chartsToolbar';

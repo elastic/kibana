@@ -9,15 +9,12 @@
 
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constants';
 import { SORT_BY_LABELS } from '../sort_selector_helpers';
 import type { MetricsSort, MetricsSortBy, MetricsSortDirection } from '../../../types';
-import {
-  METRICS_TOOLBAR_EBT_CLICK_ACTIONS,
-  METRICS_TOOLBAR_EBT_ELEMENTS,
-} from '../../../common/ebt_constants';
+import { METRICS_TOOLBAR_EBT_ELEMENT } from '../../../common/ebt_constants';
 
 interface UseSortSelectorParams {
   sort: MetricsSort;
@@ -46,8 +43,8 @@ export const useSortSelector = ({
         checked: value === sortBy ? 'on' : undefined,
         'data-test-subj': `metricsExperienceSortOption-${value}`,
         ...getEbtProps({
-          action: METRICS_TOOLBAR_EBT_CLICK_ACTIONS.SORT_METRICS,
-          element: METRICS_TOOLBAR_EBT_ELEMENTS.SORT_FIELD_OPTION,
+          action: EBT_CLICK_ACTIONS.SET_SORT_OPTION,
+          element: METRICS_TOOLBAR_EBT_ELEMENT,
           detail: value,
         }),
       })),

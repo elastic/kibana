@@ -10,13 +10,10 @@
 import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../common/constants';
 import type { MetricsSortBy, MetricsSortDirection } from '../../types';
-import {
-  METRICS_TOOLBAR_EBT_CLICK_ACTIONS,
-  METRICS_TOOLBAR_EBT_ELEMENTS,
-} from '../../common/ebt_constants';
+import { METRICS_TOOLBAR_EBT_ELEMENT } from '../../common/ebt_constants';
 
 // User-facing label per sort field. Extend as new fields are added.
 export const SORT_BY_LABELS: Record<MetricsSortBy, string> = {
@@ -44,8 +41,8 @@ const directionOptions = [
       defaultMessage: 'Ascending',
     }),
     ...getEbtProps({
-      action: METRICS_TOOLBAR_EBT_CLICK_ACTIONS.SORT_METRICS,
-      element: METRICS_TOOLBAR_EBT_ELEMENTS.SORT_DIRECTION_OPTION,
+      action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
+      element: METRICS_TOOLBAR_EBT_ELEMENT,
       detail: METRICS_SORT_DIRECTION.asc,
     }),
   },
@@ -57,8 +54,8 @@ const directionOptions = [
       defaultMessage: 'Descending',
     }),
     ...getEbtProps({
-      action: METRICS_TOOLBAR_EBT_CLICK_ACTIONS.SORT_METRICS,
-      element: METRICS_TOOLBAR_EBT_ELEMENTS.SORT_DIRECTION_OPTION,
+      action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
+      element: METRICS_TOOLBAR_EBT_ELEMENT,
       detail: METRICS_SORT_DIRECTION.desc,
     }),
   },
