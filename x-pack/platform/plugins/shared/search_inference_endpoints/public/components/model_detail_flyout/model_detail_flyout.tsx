@@ -33,6 +33,7 @@ import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isReasoningEffortLevel,
 } from '../../../common/type_guards';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
@@ -145,6 +146,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
+
+  const initialReasoningEffort = useMemo(() => {
+    const effort = editingEndpoint?.task_settings?.reasoning?.effort;
+    return isReasoningEffortLevel(effort) ? effort : undefined;
+  }, [editingEndpoint]);
 
   const descriptionListItems = [
     {
@@ -346,6 +352,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
           initialTaskType={editingEndpoint?.task_type}
+          initialReasoningEffort={initialReasoningEffort}
           onSave={onSaveEndpoint}
           onCancel={handleCloseModal}
         />
