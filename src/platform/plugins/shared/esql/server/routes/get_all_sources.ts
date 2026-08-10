@@ -9,6 +9,7 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 
@@ -44,7 +45,8 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
         const service = new EsqlService({
           client: core.elasticsearch.client.asCurrentUser,
         });
-        const result = await service.getAllIndices(scope, projectRouting);
+        const signal = getRequestAbortedSignal(request.events.aborted$);
+        const result = await service.getAllIndices(scope, projectRouting, signal);
 
         return response.ok({
           body: result,

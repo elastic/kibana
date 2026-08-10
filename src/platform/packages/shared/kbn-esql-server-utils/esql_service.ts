@@ -36,11 +36,13 @@ export class EsqlService {
    * Get indices by their mode (lookup or time_series).
    * @param mode The mode to filter indices by.
    * @param remoteClusters Optional comma-separated list of remote clusters to include.
+   * @param signal Optional signal used to abort the Elasticsearch request.
    * @returns A promise that resolves to the indices autocomplete result.
    */
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series',
-    remoteClusters?: string
+    remoteClusters?: string,
+    signal?: AbortSignal
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
@@ -56,11 +58,16 @@ export class EsqlService {
     }
 
     // It doesn't return hidden indices
-    const sources = (await client.indices.resolveIndex({
+    const resolveIndexParams = {
       name: sourcesToQuery,
       expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
-    })) as ResolveIndexResponse;
+    } as Parameters<typeof client.indices.resolveIndex>[0];
+    const sources = (
+      signal
+        ? await client.indices.resolveIndex(resolveIndexParams, { signal })
+        : await client.indices.resolveIndex(resolveIndexParams)
+    ) as ResolveIndexResponse;
 
     const mappedMode = this.getIndexSourceType(mode);
 
@@ -94,11 +101,13 @@ export class EsqlService {
    * @param projectRouting Optional CPS project routing value. When provided it is forwarded
    *   directly to Elasticsearch as `project_routing` so that index resolution reflects the
    *   project picker selection or an explicit `SET project_routing` pre-statement.
+   * @param signal Optional signal used to abort the Elasticsearch requests.
    * @returns A promise that resolves to an array of ESQL source results.
    */
   public async getAllIndices(
     scope: 'local' | 'all' | 'remote' = 'local',
-    projectRouting?: string
+    projectRouting?: string,
+    signal?: AbortSignal
   ): Promise<ESQLSourceResult[]> {
     const { client } = this.options;
 
@@ -113,14 +122,18 @@ export class EsqlService {
     // mode is not returned for time_series datastreams, we need to find it from the indices
     // which are usually hidden
     const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
+    const resolveIndex = (params: Parameters<typeof client.indices.resolveIndex>[0]) =>
+      signal
+        ? client.indices.resolveIndex(params, { signal })
+        : client.indices.resolveIndex(params);
     const [allSources, availableSources] = (await Promise.all([
-      client.indices.resolveIndex({
+      resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'all', // this returns hidden indices too
         filter_path: ['indices.name', 'indices.mode'], // only needed to build the mode map
         ...cpsParams,
       } as Parameters<typeof client.indices.resolveIndex>[0]),
-      client.indices.resolveIndex({
+      resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'open',
         filter_path: [
