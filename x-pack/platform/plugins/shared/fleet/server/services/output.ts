@@ -52,6 +52,7 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
   MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../constants';
 import {
@@ -1687,8 +1688,20 @@ class OutputService {
     if (!('hosts' in output)) {
       return;
     }
-    const defaultHosts = this.getDefaultESHosts();
-    if (deepEqual(output.hosts, defaultHosts)) {
+    let defaultOutput: Output;
+    try {
+      defaultOutput = await this.get(SERVERLESS_DEFAULT_OUTPUT_ID);
+    } catch (e) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw e;
+      }
+      appContextService.getLogger().debug(`Default ES output SO not found: ${e?.message ?? e}`);
+      return;
+    }
+    if (defaultOutput.type !== outputType.Elasticsearch) {
+      return;
+    }
+    if (deepEqual(output.hosts, defaultOutput.hosts)) {
       return;
     }
     try {
@@ -1706,7 +1719,7 @@ class OutputService {
       appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
     }
     throw new OutputInvalidError(
-      `Elasticsearch output host must have default URL in serverless: ${defaultHosts}`
+      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
     );
   }
 }
