@@ -1,7 +1,6 @@
-@babel/helper-plugin-utils@7.28.6
-@babel/plugin-syntax-numeric-separator@7.10.4
-@babel/plugin-transform-numeric-separator@7.24.7
-@babel/runtime@7.28.4
+@babel/helper-plugin-utils@7.29.7
+@babel/plugin-transform-numeric-separator@7.29.7
+@babel/runtime@7.29.7
 @jridgewell/gen-mapping@0.3.13
 @jridgewell/resolve-uri@3.1.2
 @jridgewell/source-map@0.3.5
