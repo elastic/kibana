@@ -77,7 +77,9 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
       formula: `asdf`,
     });
 
-    await expect(lens.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText('asdf');
+    await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText(
+      'asdf'
+    );
     await lens.openMessageList();
     await expect(lens.getMessageListItems('error')).toContainText('Field asdf was not found.');
     await lens.closeMessageList();
