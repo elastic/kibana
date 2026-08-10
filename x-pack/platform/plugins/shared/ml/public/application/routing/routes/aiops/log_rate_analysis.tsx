@@ -34,7 +34,6 @@ export const logRateAnalysisRouteFactory = (
   render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.aiopsBreadcrumbs.logRateAnalysisLabel', {
         defaultMessage: 'Log rate analysis',

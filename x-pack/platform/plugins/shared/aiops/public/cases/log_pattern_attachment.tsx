@@ -14,29 +14,40 @@ import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import {
+  normalizePatternAnalysisLegacyFields,
+  toUiMinimumTimeRange,
+  type RawPatternAnalysisState,
+} from '../../common/embeddables/pattern_analysis/normalize_legacy_state';
 import type { PatternAnalysisAttachmentData } from '../../common/utils';
 import type {
   PatternAnalysisProps,
   PatternAnalysisSharedComponent,
 } from '../shared_components/pattern_analysis';
 
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawPatternAnalysisState & { timeRange?: TimeRange };
 type PatternAnalysisViewProps = UnifiedValueAttachmentViewProps<PatternAnalysisAttachmentData>;
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, PatternAnalysisComponent: PatternAnalysisSharedComponent) => {
     return React.memo(
       (props: PatternAnalysisViewProps) => {
-        const rawState = props.data.state;
+        const rawState = props.data.state as RawAttachmentState;
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+        const normalized = normalizePatternAnalysisLegacyFields(rawState);
         const inputProps = {
-          ...(rawState as unknown as PatternAnalysisProps),
-          timeRange,
-        };
+          dataViewId: normalized.data_view_id ?? '',
+          fieldName: normalized.field_name,
+          minimumTimeRangeOption: toUiMinimumTimeRange(normalized.minimum_time_range),
+          randomSamplerMode: normalized.random_sampler_mode,
+          randomSamplerProbability: normalized.random_sampler_probability,
+          timeRange: rawState.time_range ?? rawState.timeRange,
+        } as PatternAnalysisProps;
 
         const listItems = [
           {

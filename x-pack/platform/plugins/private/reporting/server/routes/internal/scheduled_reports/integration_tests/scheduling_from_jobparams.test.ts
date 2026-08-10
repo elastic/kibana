@@ -387,7 +387,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
           },

@@ -27,7 +27,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule' },
+  metadata: { name: 'Test Signal Rule', version: 1 },
   createdBy: ALICE_UID,
   createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: BOB_UID,
@@ -37,11 +37,7 @@ const baseRule: RuleApiResponse = {
     every: '',
     lookback: 'now-1h',
   },
-  evaluation: {
-    query: {
-      base: '',
-    },
-  },
+  query: { format: 'standalone', breach: { query: '' } },
 };
 
 const createQueryClient = () =>

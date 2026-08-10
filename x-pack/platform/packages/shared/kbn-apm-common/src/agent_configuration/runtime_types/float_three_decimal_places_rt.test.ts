@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { floatThreeDecimalPlacesRt } from './float_three_decimal_places_rt';
-import { isRight } from 'fp-ts/Either';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { floatThreeDecimalPlacesSchema } from './float_three_decimal_places_rt';
 
-describe('floatThreeDecimalPlacesRt', () => {
+describe('floatThreeDecimalPlacesSchema', () => {
   it('does not accept empty values', () => {
-    expect(isRight(floatThreeDecimalPlacesRt.decode(undefined))).toBe(false);
-    expect(isRight(floatThreeDecimalPlacesRt.decode(null))).toBe(false);
-    expect(isRight(floatThreeDecimalPlacesRt.decode(''))).toBe(false);
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse(undefined));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse(null));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse(''));
   });
 
   it('should only accept stringified numbers', () => {
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0.5'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode(0.5))).toBe(false);
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('0.5'));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse(0.5));
   });
 
   it('checks if the number falls within 0, 1', () => {
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0.5'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('-0.1'))).toBe(false);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('1.1'))).toBe(false);
-    expect(isRight(floatThreeDecimalPlacesRt.decode(NaN))).toBe(false);
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('0'));
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('0.5'));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse('-0.1'));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse('1.1'));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse(NaN));
   });
 
   it('checks whether the number of decimals is 3', () => {
-    expect(isRight(floatThreeDecimalPlacesRt.decode('1'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0.9'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0.99'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0.999'))).toBe(true);
-    expect(isRight(floatThreeDecimalPlacesRt.decode('0.9999'))).toBe(false);
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('1'));
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('0.9'));
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('0.99'));
+    expectParseSuccess(floatThreeDecimalPlacesSchema.safeParse('0.999'));
+    expectParseError(floatThreeDecimalPlacesSchema.safeParse('0.9999'));
   });
 });

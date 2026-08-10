@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
-import { setConnectorActionErrorMeta } from '@kbn/connector-specs';
+import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
@@ -361,6 +361,89 @@ describe('generateExecutorFunction', () => {
       await expect(
         executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }))
       ).resolves.toMatchObject({ status: 'error' });
+    });
+
+    it('returns status error with the allowedHosts message and no retry when ctx.client rejects with a policy error', async () => {
+      const policyMessage =
+        'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
+      const policyError = new Error(policyMessage);
+
+      const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
+      mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
+
+      mockHandler.mockImplementation(async (ctx: { client: typeof denyingClient }) => {
+        return ctx.client.get('https://denied.example.com/api');
+      });
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: policyMessage,
+        actionId: connectorId,
+      });
+      expect(result).not.toHaveProperty('retry');
+    });
+  });
+
+  describe('_test subAction', () => {
+    it('returns status ok when the test handler resolves', async () => {
+      const testHandler = jest.fn().mockResolvedValue({ message: 'connected' });
+      const actions: ConnectorSpec['actions'] = {
+        [TEST_CONNECTOR_SUB_ACTION]: {
+          isTool: false,
+          input: {} as never,
+          handler: testHandler,
+        },
+      };
+
+      const executor = generateExecutorFunction({
+        actions,
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'ok',
+        data: { message: 'connected' },
+        actionId: connectorId,
+      });
+    });
+
+    it('returns status error when the test handler throws', async () => {
+      const testHandler = jest.fn().mockRejectedValue(new Error('connection failed'));
+      const actions: ConnectorSpec['actions'] = {
+        [TEST_CONNECTOR_SUB_ACTION]: {
+          isTool: false,
+          input: {} as never,
+          handler: testHandler,
+        },
+      };
+
+      const executor = generateExecutorFunction({
+        actions,
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: TEST_CONNECTOR_SUB_ACTION, subActionParams: {} })
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'connection failed',
+        actionId: connectorId,
+      });
     });
   });
 

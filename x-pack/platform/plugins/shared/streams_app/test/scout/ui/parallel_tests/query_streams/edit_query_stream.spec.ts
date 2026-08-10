@@ -17,7 +17,7 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
-const QUERY_STREAM_NAME = 'logs.ecs.test';
+const QUERY_STREAM_NAME = 'logs.ecs.edit-test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
@@ -44,7 +44,7 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     await disableQueryStreams(kbnClient);
   });
 
-  test("should support editing an existing query stream's ES|QL query from the partitioning tab", async ({
+  test("should support editing an existing query stream's ES|QL query from the overview tab", async ({
     pageObjects,
     esClient,
   }) => {
@@ -52,7 +52,7 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     await pageObjects.streams.gotoPartitioningTab('logs.ecs');
     await pageObjects.streams.selectChildStreamType('Query');
     await pageObjects.streams.clickQueryStreamLink(QUERY_STREAM_NAME);
-    await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
+    await pageObjects.streams.clickQueryStreamDetailsTab('overview');
     await pageObjects.streams.clickQueryStreamDetailsEditQueryButton();
     await expect(pageObjects.streams.queryStreamFlyout).toBeVisible();
     await expect(

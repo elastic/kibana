@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import { PromptTemplate } from '@langchain/core/prompts';
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { Run, Example } from 'langsmith/schemas';
@@ -31,7 +31,7 @@ export interface GetCustomEvaluatorOptions {
   /**
    * LLm to use for evaluation
    */
-  llm: ActionsClientLlm;
+  llm: BaseLLM;
   /**
    * A prompt template that uses the {input}, {submission}, and {reference} variables
    */

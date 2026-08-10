@@ -38,7 +38,7 @@ export interface RouteHandlerScopedClients {
   rulesClient: RulesClientApi;
   racClient: AlertsClient;
   repository: SLODefinitionRepository;
-  compositeSloRepository: CompositeSLORepository;
+  compositeRepository: CompositeSLORepository;
   settingsRepository: SLOSettingsRepository;
   templateRepository: SLOTemplateRepository;
   transformManager: TransformManager;
@@ -59,6 +59,7 @@ export interface SLORoutesDependencies {
   getScopedClients: GetScopedClients;
   config: {
     isServerless: boolean;
+    isCpsEnabled: boolean;
     compositeSloSummaryTaskEnabled: boolean;
   };
 }

@@ -13,15 +13,18 @@ interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
   filterField?: 'experiment_id' | 'metadata.execution_id';
+  spaceId?: string;
 }
 
 interface ExperimentsListingFilterOptions {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  search?: string;
   datasetId?: string;
   datasetName?: string;
   buildId?: string;
+  spaceId?: string;
 }
 
 interface ExperimentsListingPaginationOptions {
@@ -81,6 +84,26 @@ export interface ExperimentsListingResult {
 }
 
 // ---------------------------------------------------------------------------
+// Space filtering
+// ---------------------------------------------------------------------------
+const DEFAULT_SPACE_ID = 'default';
+const ALL_SPACES_ID = '*';
+
+/**
+ * Builds a filter that matches score documents visible in the given space: those
+ * assigned to the space (or to all spaces via `*`)
+ */
+export const buildSpaceFilter = (spaceId: string): Record<string, unknown> => {
+  const should: Array<Record<string, unknown>> = [
+    { terms: { space_ids: [spaceId, ALL_SPACES_ID] } },
+  ];
+  if (spaceId === DEFAULT_SPACE_ID) {
+    should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
+  }
+  return { bool: { should, minimum_should_match: 1 } };
+};
+
+// ---------------------------------------------------------------------------
 // Single-experiment filter query
 // ---------------------------------------------------------------------------
 
@@ -100,6 +123,9 @@ export const buildExperimentFilterQuery = (
   if (options?.modelId) {
     must.push({ term: { 'task.model.id': options.modelId } });
   }
+  if (options?.spaceId) {
+    must.push(buildSpaceFilter(options.spaceId));
+  }
   return { bool: { must } };
 };
 
@@ -107,12 +133,15 @@ export const buildExperimentFilterQuery = (
  * Builds a bool/must query that filters evaluation score documents by example ID.
  */
 export const buildExampleScoresQuery = (
-  exampleId: string
-): { bool: { must: Array<Record<string, unknown>> } } => ({
-  bool: {
-    must: [{ term: { 'example.id': exampleId } }],
-  },
-});
+  exampleId: string,
+  options?: { spaceId?: string }
+): { bool: { must: Array<Record<string, unknown>> } } => {
+  const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
+  if (options?.spaceId) {
+    must.push(buildSpaceFilter(options.spaceId));
+  }
+  return { bool: { must } };
+};
 
 /**
  * Builds a bool/must query that filters evaluation score documents by
@@ -121,14 +150,17 @@ export const buildExampleScoresQuery = (
 export const buildDatasetExampleScoresQuery = (
   datasetId: string,
   experimentId: string,
-  options?: { filterField?: 'experiment_id' | 'metadata.execution_id' }
+  options?: { filterField?: 'experiment_id' | 'metadata.execution_id'; spaceId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const field = options?.filterField ?? 'experiment_id';
-  return {
-    bool: {
-      must: [{ term: { 'example.dataset.id': datasetId } }, { term: { [field]: experimentId } }],
-    },
-  };
+  const must: Array<Record<string, unknown>> = [
+    { term: { 'example.dataset.id': datasetId } },
+    { term: { [field]: experimentId } },
+  ];
+  if (options?.spaceId) {
+    must.push(buildSpaceFilter(options.spaceId));
+  }
+  return { bool: { must } };
 };
 
 // ---------------------------------------------------------------------------
@@ -144,6 +176,7 @@ export const buildStatsAggregation = () => ({
     terms: { field: 'example.dataset.id', size: 10000 },
     aggs: {
       dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
+      example_count: { cardinality: { field: 'example.id' } },
       by_evaluator: {
         terms: { field: 'evaluator.name', size: 1000 },
         aggs: {
@@ -175,6 +208,13 @@ export const SCORES_SORT_ORDER: SortField[] = [
 const PREFLIGHT_EXPERIMENT_ID = 'kbn-evals-preflight';
 
 /**
+ * Escapes Elasticsearch wildcard metacharacters (`\`, `*`, `?`) in user input so the literal
+ * characters are matched rather than interpreted as wildcards.
+ */
+export const escapeWildcard = (input: string): string =>
+  input.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+
+/**
  * Builds the filter query for the experiments listing endpoint.
  * Supports optional suite, model, and branch filters.
  * Always excludes preflight check experiments.
@@ -194,9 +234,21 @@ export const buildExperimentsListingFilterQuery = (
     filters.push({
       wildcard: {
         'metadata.git.branch': {
-          value: `*${options.branch}*`,
+          value: `*${escapeWildcard(options.branch)}*`,
           case_insensitive: true,
         },
+      },
+    });
+  }
+  if (options?.search) {
+    const pattern = `*${escapeWildcard(options.search)}*`;
+    filters.push({
+      bool: {
+        should: [
+          { wildcard: { experiment_name: { value: pattern, case_insensitive: true } } },
+          { wildcard: { 'metadata.git.branch': { value: pattern, case_insensitive: true } } },
+        ],
+        minimum_should_match: 1,
       },
     });
   }
@@ -208,6 +260,9 @@ export const buildExperimentsListingFilterQuery = (
   }
   if (options?.buildId) {
     filters.push({ term: { 'metadata.ci.build_id': options.buildId } });
+  }
+  if (options?.spaceId) {
+    filters.push(buildSpaceFilter(options.spaceId));
   }
   return {
     bool: {
@@ -327,6 +382,7 @@ interface StatsAggregations {
     buckets?: Array<{
       key: string;
       dataset_name?: TermsBucket;
+      example_count?: { value?: number | null };
       by_evaluator?: {
         buckets?: Array<{
           key: string;
@@ -348,6 +404,7 @@ export interface ExperimentDetailEvaluatorStat {
   dataset_id: string;
   dataset_name: string;
   evaluator_name: string;
+  example_count: number;
   stats: {
     mean: number;
     median: number;
@@ -371,6 +428,7 @@ export const parseStatsAggregationResponse = (
   return datasetBuckets.flatMap((datasetBucket) => {
     const datasetId = datasetBucket.key;
     const datasetName = firstBucket(datasetBucket.dataset_name) ?? datasetId;
+    const exampleCount = datasetBucket.example_count?.value ?? 0;
     const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
 
     return evaluatorBuckets.map((evaluatorBucket) => {
@@ -381,6 +439,7 @@ export const parseStatsAggregationResponse = (
         dataset_id: datasetId,
         dataset_name: datasetName,
         evaluator_name: evaluatorBucket.key,
+        example_count: exampleCount,
         stats: {
           mean: scoreStats?.avg ?? 0,
           median: median ?? 0,

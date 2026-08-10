@@ -5,28 +5,13 @@
  * 2.0.
  */
 
-import type { ConstructorOptions, RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { unsnoozeRule } from './unsnooze_rule';
-import {
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { IScopedChangeTrackingService } from '../../../../rules_client/lib/change_tracking';
 
@@ -54,7 +39,7 @@ savedObjectsMock.get = jest.fn().mockReturnValue({
 });
 
 const context = {
-  logger: { error: loggerErrorMock },
+  logger: { error: loggerErrorMock, debug: jest.fn() },
   getActionsClient: () => {
     return {
       getBulk: getBulkMock,
@@ -104,46 +89,8 @@ describe('validate unsnooze params', () => {
 setGlobalDate();
 
 describe('unsnoozeRule change tracking', () => {
-  const taskManager = taskManagerMock.createStart();
-  const ruleTypeRegistry = ruleTypeRegistryMock.create();
-  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-  const authorization = alertingAuthorizationMock.create();
-  const actionsAuthorization = actionsAuthorizationMock.create();
-  const auditLogger = auditLoggerMock.create();
-  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
-  const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-    taskManager,
-    ruleTypeRegistry,
-    unsecuredSavedObjectsClient,
-    authorization: authorization as unknown as AlertingAuthorization,
-    actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-    spaceId: 'default',
-    namespace: 'default',
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
-    getUserName: jest.fn(),
-    createAPIKey: jest.fn(),
-    cloneAPIKey: jest.fn(),
-    logger: loggingSystemMock.create().get(),
-    internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: encryptedSavedObjects,
-    getActionsClient: jest.fn(),
-    getEventLogClient: jest.fn(),
-    kibanaVersion: 'v9.0.0',
-    auditLogger,
-    isAuthenticationTypeAPIKey: jest.fn(),
-    getAuthenticationAPIKey: jest.fn(),
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-    getAlertIndicesAlias: jest.fn(),
-    alertsService: null,
-    backfillClient: backfillClientMock.create(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    isSystemAction: jest.fn(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
-    isServerless: false,
-  };
+  const { rulesClientParams, taskManager, ruleTypeRegistry, unsecuredSavedObjectsClient } =
+    getRulesClientMockParams({ kibanaVersion: 'v9.0.0' });
 
   const existingRuleSO = {
     id: 'rule-1',
@@ -224,6 +171,7 @@ describe('unsnoozeRule change tracking', () => {
     unsecuredSavedObjectsClient.update.mockResolvedValue({
       id: 'rule-1',
       type: 'alert',
+      updated_at: '2023-03-05T10:30:00.000Z',
       attributes: { snoozeSchedule: updatedRuleSO.attributes.snoozeSchedule },
       references: [],
     });
@@ -247,7 +195,7 @@ describe('unsnoozeRule change tracking', () => {
     );
   });
 
-  test('captures the full post-unsnooze attributes and references of the rule', async () => {
+  test('captures the full post-unsnooze attributes of the rule', async () => {
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 
@@ -255,38 +203,48 @@ describe('unsnoozeRule change tracking', () => {
 
     expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
       [
-        {
-          // setGlobalDate pins Date.now() to mockedDateString.
-          timestamp: '2019-02-12T21:01:22.479Z',
-          objectId: 'rule-1',
-          objectType: RULE_SAVED_OBJECT_TYPE,
-          module: 'stack',
-          snapshot: {
-            attributes: updatedRuleSO.attributes,
-            references: updatedRuleSO.references,
-          },
-        },
+        expect.objectContaining({
+          snapshot: expect.objectContaining({
+            id: 'rule-1',
+            name: 'rule one',
+            alertTypeId: 'myType',
+            consumer: 'myApp',
+            createdAt: '2019-02-12T21:01:22.479Z',
+            updatedAt: '2019-02-12T21:01:22.479Z',
+          }),
+        }),
       ],
       expect.any(Object)
     );
   });
 
-  test('stamps the change with the time captured immediately before the SO update', async () => {
+  test('captures the context of the rule', async () => {
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 
-    const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+    await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
-    try {
-      await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          objectId: 'rule-1',
+          objectType: RULE_SAVED_OBJECT_TYPE,
+          module: 'stack',
+        }),
+      ],
+      expect.any(Object)
+    );
+  });
 
-      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-      const [changes] = changeTrackingService.logBulk.mock.calls[0];
-      expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
-    } finally {
-      dateNowSpy.mockRestore();
-    }
+  test('stamps the change with updated_at from the saved object', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    const [changes] = changeTrackingService.logBulk.mock.calls[0];
+    expect(changes[0].timestamp).toBe('2023-03-05T10:30:00.000Z');
   });
 
   test('logs the change only after the OCC retry succeeds', async () => {
@@ -330,5 +288,21 @@ describe('unsnoozeRule change tracking', () => {
     await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
 
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+  });
+
+  test('captures rule.revision in object.sequence', async () => {
+    const changeTrackingService = createChangeTrackingService();
+    const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+
+    await trackingClient.unsnooze({ id: 'rule-1', scheduleIds: ['snooze-1'] });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          sequence: 0,
+        }),
+      ],
+      expect.any(Object)
+    );
   });
 });

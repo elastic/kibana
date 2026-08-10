@@ -14,6 +14,7 @@ import {
   getAllowedOutputTypesForAgentPolicy,
   getAllowedOutputTypesForPackagePolicy,
   outputYmlIncludesReservedPerformanceKey,
+  canUseManagedBulk,
 } from './output_helpers';
 
 describe('getAllowedOutputTypesForAgentPolicy', () => {
@@ -118,6 +119,65 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     } as any);
 
     expect(res).toEqual([outputType.Elasticsearch]);
+  });
+});
+
+describe('canUseManagedBulk', () => {
+  it('should return true for a policy without connectors or OTel inputs', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'nginx' },
+          inputs: [{ type: 'log', enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(true);
+  });
+
+  it('should return false for a policy using the connectors package', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'elastic_connectors' },
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(false);
+  });
+
+  it('should return false for a policy with an enabled OTel input', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(false);
+  });
+
+  it('should return true when an OTel input exists but is disabled', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: false }],
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(true);
+  });
+
+  it('should return true for an agent policy with no package policies', () => {
+    const res = canUseManagedBulk({} as any);
+
+    expect(res).toBe(true);
   });
 });
 

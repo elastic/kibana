@@ -27,8 +27,8 @@ import { PageScope } from '../../../data_view_manager/constants';
 jest.mock('../../lib/kibana');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
@@ -132,5 +132,28 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
     expect(queryByTestId('right-option')).not.toBeInTheDocument();
+  });
+
+  test('uses dataTableId for Redux-backed table state when provided', () => {
+    const dataTableId = 'rule-preview-attachment-preview-1';
+
+    render(
+      <TestProviders>
+        <StatefulEventsViewer
+          {...testProps}
+          dataTableId={dataTableId}
+          tableId={TableId.rulePreview}
+        />
+      </TestProviders>
+    );
+
+    expect(useTimelineEvents).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: dataTableId })
+    );
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({ id: dataTableId }),
+      })
+    );
   });
 });

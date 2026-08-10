@@ -27,6 +27,10 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -187,8 +191,14 @@ export class DashboardPlugin
         perPage: number
       ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
-        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) =>
-          (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body,
+        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) => {
+          const useGASchemas = await core.featureFlags.getBooleanValue(
+            AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+            AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+          );
+          return (await read(savedObjectsClient, getCachedDashboardStateSchema(), id, useGASchemas))
+            .body;
+        },
       },
     };
   }

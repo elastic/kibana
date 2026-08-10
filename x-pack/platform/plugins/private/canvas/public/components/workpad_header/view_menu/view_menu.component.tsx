@@ -19,6 +19,7 @@ import {
 } from '../../../../common/lib/constants';
 
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { useCanvasContextMenuTopBorderStyles } from '../../../lib/use_canvas_context_menu_top_border_styles';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
 
@@ -166,6 +167,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
   autoplayInterval,
   setAutoplayInterval,
 }) => {
+  const contextMenuTopBorderStyles = useCanvasContextMenuTopBorderStyles();
   const setRefresh = (val: number) => setRefreshInterval(val);
 
   const disableInterval = () => {
@@ -291,6 +293,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
           initialPanelId={0}
           panels={flattenPanelTree(getPanelTree(closePopover))}
           className="canvasViewMenu"
+          css={contextMenuTopBorderStyles}
         />
       )}
     </Popover>

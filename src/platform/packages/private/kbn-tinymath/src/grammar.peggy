@@ -116,19 +116,14 @@ Comparison
     };
   }
 
-MathOperation 
-  = AddSubtract
-  / MultiplyDivide
-  / Factor
-
-AddSubtract
-  = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)+ _ {
-    return parseSymbol(left, rest, {'+': 'add', '-': 'subtract'});
+MathOperation
+  = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)* _ {
+    return parseSymbol(left, rest);
   }
 
 MultiplyDivide
   = _ left:Factor rest:(('*' / '/') Factor)* _ {
-    return parseSymbol(left, rest, {'*': 'multiply', '/': 'divide'});
+    return parseSymbol(left, rest);
   }
 
 Factor

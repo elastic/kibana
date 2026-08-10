@@ -24,7 +24,7 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { EventAnnotationListingPageServices } from './components/annotation_listing_page';
-import { ANNOTATION_GROUPS_TAB_TITLE } from './components/use_navigate_to_lens';
+import { ANNOTATION_GROUPS_TAB_TITLE, CREATE_ANNOTATION_GROUP_ERROR_TITLE } from './constants';
 
 export interface EventAnnotationListingStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
@@ -99,7 +99,27 @@ export class EventAnnotationListingPlugin
       },
     };
     dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);
-    dependencies.dashboard.registerListingPageTab(annotationGroupsTabConfig);
+    dependencies.dashboard.registerListingPageTab({
+      ...annotationGroupsTabConfig,
+      createAction: async () => {
+        let coreStart: CoreStart | undefined;
+        try {
+          const [resolvedCoreStart, pluginsStart] = await core.getStartServices();
+          coreStart = resolvedCoreStart;
+          const { navigateToLensForAnnotationGroup } = await import(
+            './components/use_navigate_to_lens'
+          );
+          await navigateToLensForAnnotationGroup({
+            core: coreStart,
+            embeddable: pluginsStart.embeddable,
+          });
+        } catch (error) {
+          coreStart?.notifications.toasts.addError(error, {
+            title: CREATE_ANNOTATION_GROUP_ERROR_TITLE,
+          });
+        }
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: object): void {

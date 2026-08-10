@@ -224,7 +224,7 @@ export function getInsertRangeAndTextForTriggers(
       }
       return handleInsertAfterComment(model, insertAtLineNumber, insertText, false);
     } else {
-      return handleInsertAfterItem(model, insertAtLineNumber, insertText, false);
+      return handleInsertAfterItem(model, insertAtLineNumber, insertText, true);
     }
   }
 

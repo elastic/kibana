@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/278665
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.6.0
+areas:
+- AI and machine Learning
+title: Fix traces settings not updating for serverless projects

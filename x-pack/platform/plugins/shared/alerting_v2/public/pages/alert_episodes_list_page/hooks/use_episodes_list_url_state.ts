@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -77,13 +77,15 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
           typeof update === 'function'
             ? (update as (p: EpisodesFilterState) => EpisodesFilterState)(prev)
             : update;
-        const tr = timefilter.getTime() ?? DEFAULT_EPISODES_LIST_TIME_RANGE;
-        void writeEpisodesListAppStateToUrlStorage(
-          urlStateStorage,
-          next,
-          tr,
-          histogramBreakdownRef.current
-        );
+        if (!deepEqual(next, prev)) {
+          const tr = timefilter.getTime() ?? DEFAULT_EPISODES_LIST_TIME_RANGE;
+          void writeEpisodesListAppStateToUrlStorage(
+            urlStateStorage,
+            next,
+            tr,
+            histogramBreakdownRef.current
+          );
+        }
         return next;
       });
     },

@@ -8,7 +8,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
+import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
 const mockRules = [
@@ -18,7 +19,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -26,7 +27,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM metrics-*' } },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
 
@@ -40,7 +41,7 @@ const mockRulesWithManyTags = [
       tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -54,7 +55,7 @@ const mockRulesWithLongTags = [
       tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
 ];
 
@@ -68,6 +69,7 @@ const defaultProps: RulesListTableProps = {
   sortField: undefined,
   sortDirection: undefined,
   isLoading: false,
+  canWrite: true,
   selectedCount: 0,
   isAllSelected: false,
   isPageSelected: false,
@@ -86,6 +88,7 @@ const defaultProps: RulesListTableProps = {
   onClone: jest.fn(),
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
+  onRun: jest.fn(),
   onTableChange: jest.fn(),
 };
 
@@ -150,11 +153,17 @@ describe('RulesListTable', () => {
       expect(screen.getByText('metrics-*')).toBeInTheDocument();
     });
 
-    it('renders Status column with Enabled and Disabled badges', () => {
+    it('renders Enabled column with switches reflecting each rule state', () => {
       renderTable();
 
-      expect(screen.getByTestId('ruleStatusEnabled')).toHaveTextContent('Enabled');
-      expect(screen.getByTestId('ruleStatusDisabled')).toHaveTextContent('Disabled');
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
 
     it('renders Mode column with Alert and Signal', () => {
@@ -162,6 +171,25 @@ describe('RulesListTable', () => {
 
       expect(screen.getByText('Alert')).toBeInTheDocument();
       expect(screen.getByText('Signal')).toBeInTheDocument();
+    });
+
+    it('renders kind-specific tooltip for Alert mode badge', async () => {
+      renderTable();
+
+      fireEvent.mouseOver(screen.getByText('Alert'));
+
+      expect(await screen.findByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
+      expect(
+        screen.queryByText('Mode can be changed in the rule edit form')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders kind-specific tooltip for Signal mode badge', async () => {
+      renderTable();
+
+      fireEvent.mouseOver(screen.getByText('Signal'));
+
+      expect(await screen.findByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
     });
 
     it('renders tag badges for rules with tags', () => {
@@ -266,34 +294,40 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('selectAllRulesButton')).toHaveTextContent('Select all 5 rules');
     });
 
-    it('shows "Select first {max} rules" without disclosure until select-all is active', () => {
+    it('disables Select all and shows a help tip when total exceeds the bulk cap', () => {
       renderTable({
         selectedCount: 1,
         isAllSelected: false,
-        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 2000,
       });
 
-      const btn = screen.getByTestId('selectAllRulesButton');
-      expect(btn).toHaveTextContent('Select first');
-      expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
-
-      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+      expect(screen.getByTestId('selectAllRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('bulkSelectAllLimitTooltip')).toBeInTheDocument();
     });
 
-    it('shows disclosure only after select-all when total exceeds bulk cap', () => {
+    it('explains the cap in the Select all help tip', async () => {
       renderTable({
-        selectedCount: BULK_FILTER_MAX_RULES,
-        isAllSelected: true,
-        totalItemCount: BULK_FILTER_MAX_RULES + 2000,
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES + 2000,
       });
 
-      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('Selected');
-      expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
-        /10,?000/
-      );
-      const disc = screen.getByTestId('bulkSelectAllLimitDisclosure');
-      expect(disc).toHaveTextContent('Only the first');
-      expect(disc.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+      fireEvent.mouseOver(screen.getByTestId('bulkSelectAllLimitTooltip'));
+
+      const disc = await screen.findByTestId('bulkSelectAllLimitDisclosure');
+      expect(disc).toHaveTextContent('Select all is available only when');
+      expect(disc).toHaveTextContent('Narrow your filter');
+    });
+
+    it('enables Select all with no help tip when total is within the bulk cap', () => {
+      renderTable({
+        selectedCount: 1,
+        isAllSelected: false,
+        totalItemCount: BULK_FILTER_MAX_RESOURCES,
+      });
+
+      expect(screen.getByTestId('selectAllRulesButton')).toBeEnabled();
+      expect(screen.queryByTestId('bulkSelectAllLimitTooltip')).not.toBeInTheDocument();
     });
 
     it('hides "Select all" button when all selected', () => {
@@ -326,9 +360,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkEnableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
@@ -341,9 +373,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkDisableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkDisableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkDisableRules'));
 
@@ -356,9 +386,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkDeleteRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkDeleteRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkDeleteRules'));
 
@@ -370,9 +398,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('bulkActionsButton'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('bulkEnableRules')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
@@ -389,9 +415,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('editRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('editRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
@@ -404,9 +428,7 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('cloneRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cloneRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
@@ -419,47 +441,86 @@ describe('RulesListTable', () => {
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('deleteRule-rule-1')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
 
       expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('calls onToggleEnabled when toggle action is clicked', async () => {
-      const onToggleEnabled = jest.fn();
-      renderTable({ onToggleEnabled });
+    it('does not render a toggle enabled action, since that is handled by the Enabled switch', () => {
+      renderTable();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toBeInTheDocument();
-      });
+      expect(screen.queryByTestId('toggleEnabledRule-rule-1')).not.toBeInTheDocument();
+    });
 
-      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+    it('calls onRun when run action is clicked for an enabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('disables the run action for a disabled rule', async () => {
+      const onRun = jest.fn();
+      renderTable({ onRun });
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
+
+      expect(await screen.findByTestId('runRule-rule-2')).toBeInTheDocument();
+
+      expect(screen.getByTestId('runRule-rule-2')).toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-2'));
+
+      expect(onRun).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('enabled switch', () => {
+    it('calls onToggleEnabled when the switch is clicked', () => {
+      const onToggleEnabled = jest.fn();
+      renderTable({ onToggleEnabled });
+
+      fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
       expect(onToggleEnabled).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('shows "Disable" for enabled rules and "Enable" for disabled rules', async () => {
+    it('shows a spinner instead of the switch for the rule identified by togglingRuleId', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSpinner-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
+    });
+
+    it('disables the other switches while a toggle is in flight, so a second toggle cannot be dispatched', () => {
+      renderTable({ togglingRuleId: 'rule-1' });
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('does not disable switches when no toggle is in flight', () => {
       renderTable();
 
-      // Enabled rule
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
-      });
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeEnabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeEnabled();
+    });
 
-      // Close popover by clicking the button again
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+    it('disables all switches while a bulk enable/disable mutation is in flight', () => {
+      renderTable({ isBulkTogglingEnabled: true });
 
-      // Disabled rule
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-2')).toHaveTextContent('Enable');
-      });
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
     });
   });
 
@@ -477,6 +538,45 @@ describe('RulesListTable', () => {
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
       expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+  });
+
+  describe('when the user only has read privilege (canWrite=false)', () => {
+    it('hides the selection checkboxes', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('hides the quick edit and actions menu affordances', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('does not show the bulk action toolbar even when selectedCount > 0', () => {
+      renderTable({ canWrite: false, selectedCount: 1 });
+
+      expect(screen.queryByTestId('bulkActionsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the enabled switch and shows a read-only status badge instead', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
+      expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
+    });
+
+    it('keeps read-only affordances (name link, expand) available', () => {
+      renderTable({ canWrite: false });
+
+      expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
     });
   });
 

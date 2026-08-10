@@ -33,6 +33,7 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./privilege_level_change'));
     loadTestFile(require.resolve('./last_known_status'));
     loadTestFile(require.resolve('./rollback'));
+    loadTestFile(require.resolve('./bulk_dry_run'));
     loadTestFile(require.resolve('./reporting_generate'));
     loadTestFile(require.resolve('./pipeline_config'));
   });

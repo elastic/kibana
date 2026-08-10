@@ -16,8 +16,10 @@ import type {
   GetLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { getActionResponses } from './utils';
 
 import type {
@@ -30,6 +32,7 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 
 export const getLiveQueryDetailsRoute = (
@@ -75,7 +78,36 @@ export const getLiveQueryDetailsRoute = (
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          const search = await context.search;
+          let integrationNamespaces: Record<string, string[]> = {};
+
+          const logger = osqueryContext.logFactory.get('get_live_query_details');
+
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
+
+            logger.debug(
+              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+            );
+          }
+
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
@@ -83,7 +115,7 @@ export const getLiveQueryDetailsRoute = (
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -95,7 +127,13 @@ export const getLiveQueryDetailsRoute = (
           const responseData = await lastValueFrom(
             zip(
               ...map(queries, (query) =>
-                getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+                getActionResponses(
+                  search,
+                  query.action_id,
+                  query.agents?.length ?? 0,
+                  namespacesOrUndefined,
+                  spaceId
+                )
               )
             )
           );

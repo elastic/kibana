@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
+            hasFrozenOrDeletePhase: false,
           });
         });
       });
@@ -165,6 +166,38 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           acknowledged: true,
         });
+      });
+
+      it('should create a component template with a frozen_after lifecycle', async () => {
+        const FROZEN_COMPONENT_NAME = 'test_create_frozen_component_template';
+
+        const { status, body } = await createComponentTemplate(FROZEN_COMPONENT_NAME, {
+          template: {
+            lifecycle: {
+              enabled: true,
+              data_retention: '90d',
+              frozen_after: '30d',
+            },
+          },
+          _kbnMeta: {
+            usedBy: [],
+            isManaged: false,
+          },
+        });
+        expect(status).to.eql(200);
+        expect(body).to.eql({ acknowledged: true });
+
+        const { status: getStatus, body: getBody } = await getOneComponentTemplate(
+          FROZEN_COMPONENT_NAME
+        );
+        expect(getStatus).to.eql(200);
+        expect(getBody.template.lifecycle).to.eql({
+          enabled: true,
+          data_retention: '90d',
+          frozen_after: '30d',
+        });
+
+        await removeComponentTemplate(FROZEN_COMPONENT_NAME);
       });
 
       it('should create a component template with only required fields', async () => {

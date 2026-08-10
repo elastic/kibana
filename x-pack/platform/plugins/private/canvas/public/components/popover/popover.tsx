@@ -16,6 +16,7 @@ interface Props {
   ownFocus?: boolean;
   tooltip?: string;
   panelClassName?: string;
+  panelProps?: React.ComponentProps<typeof EuiPopover>['panelProps'];
   anchorPosition?: string;
   panelPaddingSize?: 'none' | 's' | 'm' | 'l';
   id?: string;

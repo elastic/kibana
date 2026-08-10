@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { ComposerQuery } from '@elastic/esql';
 
 /**
  * Options for the saved objects ES|QL query operation.
@@ -17,18 +18,18 @@ import type { estypes } from '@elastic/elasticsearch';
  * options. The `FROM` clause is auto-generated from the `type` parameter via index resolution,
  * and security filters (namespace + type) are injected via the `filter` parameter.
  *
- * Consumers write only the ES|QL processing pipeline (everything after `FROM`).
+ * Consumers write only the ES|QL processing pipeline (everything after `FROM`), using the
+ * `esql` tagged template from `@elastic/esql`.
  *
  * @remarks
- * **Security Warning:** The ES|QL query method provides low-level access to saved object data.
- * While the method injects namespace and type filters to enforce space-level security,
- * care must be taken when constructing pipelines with user input:
+ * **Security:** Template holes (`${{ name: value }}`) in the `esql` tag are automatically
+ * promoted to ES|QL named parameters — values are forwarded to Elasticsearch at the protocol
+ * level and never appear in the query string. Never pass user input via `esql.exp(userInput)`,
+ * which injects a raw expression and bypasses parameterization entirely.
  *
- * - Use ES|QL named params (`?paramName`) with the `params` array to prevent injection attacks.
- *   Never interpolate user input directly into the pipeline string.
- * - Standalone encrypted scalar columns are always replaced with `null`.
- *   When `_source` is present (via `metadata: ['_id', '_source']`), encrypted attributes
- *   within `_source` are decrypted using the same path as `find` and `search`.
+ * Standalone encrypted scalar columns are always replaced with `null`. When `_source` is
+ * present (via `metadata: ['_id', '_source']`), encrypted attributes within `_source` are
+ * decrypted using the same path as `find` and `search`.
  *
  * @public
  */
@@ -41,15 +42,24 @@ export interface SavedObjectsEsqlOptions
   namespaces: string[];
 
   /**
-   * The ES|QL processing pipeline (everything after the `FROM` clause).
-   * The `FROM` clause is auto-generated from the `type` parameter.
+   * The ES|QL processing pipeline (everything after the `FROM` clause), built with the
+   * `esql` tagged template from `@elastic/esql`. The `FROM` clause is auto-generated from
+   * the `type` parameter.
+   *
+   * Template holes (`${{ name: value }}`) are promoted to named parameters — values are
+   * sent to Elasticsearch at the protocol level, never interpolated into the query string.
    *
    * @example
-   * ```
-   * pipeline: '| KEEP dashboard.title | SORT dashboard.title | LIMIT 100'
+   * ```ts
+   * import { esql } from '@elastic/esql';
+   *
+   * pipeline: esql`
+   *   WHERE dashboard.title LIKE ${{ title: searchTerm }}
+   *   | LIMIT 100
+   * `,
    * ```
    */
-  pipeline: string;
+  pipeline: ComposerQuery;
 
   /**
    * Optional METADATA fields to include on the auto-generated `FROM` clause.

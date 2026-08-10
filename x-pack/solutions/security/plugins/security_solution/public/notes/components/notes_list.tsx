@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
@@ -43,6 +43,10 @@ export interface NotesListProps {
      * If true, the flyout icon will be hidden (this is useful for the flyout Notes tab)
      */
     hideFlyoutIcon?: boolean;
+    /**
+     * If true, the delete button will be hidden (used in read-only contexts such as Super Timeline)
+     */
+    hideDeleteIcon?: boolean;
   };
 }
 
@@ -76,7 +80,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                 {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (
                   <OpenTimelineButtonIcon note={note} index={index} />
                 )}
-                <DeleteNoteButtonIcon note={note} index={index} />
+                {!options?.hideDeleteIcon && <DeleteNoteButtonIcon note={note} index={index} />}
               </>
             }
             timelineAvatar={

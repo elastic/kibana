@@ -36,7 +36,8 @@ export const storeStatsRoute = createServerRoute({
         index: name,
         metric: ['store'],
       });
-      return { store_size_bytes: stats._all?.primaries?.store?.size_in_bytes ?? 0 };
+      // Use `total` (primaries + replicas) and `total_data_set_size_in_bytes` so DLM frozen (searchable-snapshot) data is counted.
+      return { store_size_bytes: stats._all?.total?.store?.total_data_set_size_in_bytes ?? 0 };
     } catch (error) {
       // Return 0 only when the index doesn't exist yet; re-throw everything else
       // (e.g. 403 authorization errors) so the caller gets a proper HTTP response.

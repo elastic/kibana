@@ -66,6 +66,7 @@ export {
   OSQUERY_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
@@ -74,6 +75,7 @@ export {
   AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
   AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
   AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+  CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
@@ -94,7 +96,6 @@ export {
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
-  assertValidIndexMetadata,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,
@@ -105,3 +106,6 @@ export {
 } from './utils/attachments';
 
 export { AttachmentActionType } from './utils/attachment_actions';
+
+export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
+export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';

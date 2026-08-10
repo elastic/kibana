@@ -6,7 +6,6 @@
  */
 
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import type { InsightImpactLevel, InsightUserEvaluation } from '@kbn/streams-schema';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
@@ -102,23 +101,6 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
-interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
-  duration_ms: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  count: number;
-  features_selected: number;
-  features_total: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsSignificantEventsCreatedProps {
-  count: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
   stream_name: string;
@@ -142,13 +124,6 @@ interface StreamsPartitioningSamplesFetchLatencyProps {
   stream_name: string;
   stream_type: StreamType;
   duration_ms: number;
-}
-
-interface StreamsInsightFeedbackProps {
-  feedback: InsightUserEvaluation;
-  insight_id: string;
-  insight_title: string;
-  insight_impact: InsightImpactLevel;
 }
 
 interface StreamsTabVisitedProps {
@@ -184,13 +159,10 @@ export {
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,
   type StreamsSchemaUpdatedProps,
-  type StreamsSignificantEventsSuggestionsGeneratedEventProps,
-  type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
   type StreamsFeatureIdentificationDeletedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
   type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
-  type StreamsInsightFeedbackProps,
 };

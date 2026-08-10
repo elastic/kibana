@@ -282,16 +282,27 @@ export const ERROR_CHANGING_TEMPLATE = i18n.translate(
   }
 );
 
-export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
-  'xpack.cases.caseView.attachments.noSearchResults.title',
+export const TEMPLATE_UPDATED_TITLE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToastTitle',
   {
-    defaultMessage: 'No results match your search criteria',
+    defaultMessage: 'Template updated',
   }
 );
 
-export const NO_SEARCH_RESULTS_BODY = i18n.translate(
-  'xpack.cases.caseView.attachments.noSearchResults.body',
+export const TEMPLATE_UPDATED_TEXT = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToastText',
   {
-    defaultMessage: 'Try modifying your search.',
+    defaultMessage: 'Reload the page to see your changes.',
   }
 );
+
+export const RELOAD_PAGE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.reloadPageButton',
+  {
+    defaultMessage: 'Reload page',
+  }
+);
+
+export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.caseView.extendedFieldsTitle', {
+  defaultMessage: 'Extended fields',
+});

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { OAuthClient, OAuthConnection } from '../service/application_connections_api_client';
+import type {
+  OAuthClient,
+  OAuthConnection,
+  OAuthConnectionUser,
+} from '../service/application_connections_api_client';
 
 export interface ApplicationConnections {
   client: OAuthClient;
@@ -17,7 +21,7 @@ export interface ApplicationConnection {
   connection: OAuthConnection;
 }
 
-export type ApplicationConnectionStatusFilter = 'connected' | 'revoked';
+export type ApplicationConnectionStatusFilter = 'connected' | 'expired' | 'revoked';
 
 export type ApplicationConnectionsViewMode = 'grouped' | 'list';
 
@@ -27,6 +31,7 @@ export interface RevokeApplicationConnectionsModalConnection {
   connectionId: string;
   connectionName?: string;
   userId?: string;
+  user?: OAuthConnectionUser;
   client: OAuthClient;
 }
 

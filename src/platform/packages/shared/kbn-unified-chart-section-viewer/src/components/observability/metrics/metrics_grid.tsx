@@ -16,6 +16,8 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
@@ -33,6 +35,33 @@ import {
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
+
+const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
+
+const useStableApplicableDimensions = (
+  dimensions: Dimension[],
+  dimensionFields: readonly Dimension[]
+): Dimension[] => {
+  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
+    key: null,
+    value: EMPTY_APPLICABLE_DIMENSIONS,
+  });
+
+  return useMemo(() => {
+    const applicable = dimensions.filter((dimension) =>
+      dimensionFields.some((field) => field.name === dimension.name)
+    );
+    const key = applicable.length === 0 ? null : stableStringify(applicable);
+
+    if (stabilizedRef.current.key === key) {
+      return stabilizedRef.current.value;
+    }
+
+    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
+    stabilizedRef.current = { key, value };
+    return value;
+  }, [dimensions, dimensionFields]);
+};
 
 const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -198,6 +227,8 @@ export const MetricsGrid = ({
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+            const isSelected =
+              isTabSelected && flyoutState?.metricUniqueKey === getMetricUniqueKey(metricItem);
 
             return (
               <EuiFlexItem key={id}>
@@ -216,6 +247,7 @@ export const MetricsGrid = ({
                   rowIndex={rowIndex}
                   colIndex={colIndex}
                   isFocused={isFocused}
+                  isSelected={isSelected}
                   onFocusCell={handleFocusCell}
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
@@ -254,6 +286,7 @@ interface ChartItemProps
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
+  isSelected: boolean;
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
@@ -279,6 +312,7 @@ const ChartItem = React.memo(
     rowIndex,
     colIndex,
     isFocused,
+    isSelected,
     searchTerm,
     whereStatements,
     userSource,
@@ -287,17 +321,31 @@ const ChartItem = React.memo(
     onViewDetails,
     userMessages,
   }: ChartItemProps) => {
-    const { profileId } = useMetricsExperienceState();
+    const { profileId, gridSettings, onMetricExplored } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
     );
 
-    const applicableDimensions = useMemo(
-      () =>
-        dimensions.filter((dim) => metricItem.dimensionFields.some((df) => df.name === dim.name)),
-      [dimensions, metricItem.dimensionFields]
+    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+      (event) => {
+        // Only count clicks on panel action controls (Inspect, View details, Explore in
+        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
+        // on the chart body, legend, or time series selection.
+        const isActionClick = (event.target as HTMLElement).closest(
+          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
+        );
+        if (isActionClick) {
+          onMetricExplored?.(getMetricUniqueKey(metricItem));
+        }
+      },
+      [onMetricExplored, metricItem]
+    );
+
+    const applicableDimensions = useStableApplicableDimensions(
+      dimensions,
+      metricItem.dimensionFields
     );
 
     const esqlQuery = useMemo(() => {
@@ -309,16 +357,29 @@ const ChartItem = React.memo(
             splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
             originalSource: userSource,
+            gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource]);
+    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({ dimensions: applicableDimensions, metricItem, color });
+    const chartLayers = useChartLayers({
+      dimensions: applicableDimensions,
+      metricItem,
+      color,
+      gridSettings,
+    });
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
     );
+
+    const titleHighlight = useMemo(() => {
+      if (!searchTerm?.trim()) {
+        return undefined;
+      }
+      return getFieldSearchMatchingHighlight(metricItem.metricName, searchTerm.trim());
+    }, [metricItem.metricName, searchTerm]);
 
     return (
       <A11yGridCell
@@ -327,10 +388,13 @@ const ChartItem = React.memo(
         colIndex={colIndex}
         index={index}
         isFocused={isFocused}
+        isSelected={isSelected}
         onFocus={onFocusCell}
+        onClickCapture={recordExploredMetric}
       >
         <Chart
           id={metricItem.metricName}
+          isSelected={isSelected}
           esqlQuery={esqlQuery}
           size={size}
           discoverFetch$={discoverFetch$}
@@ -345,7 +409,7 @@ const ChartItem = React.memo(
           chartLayers={chartLayers}
           syncCursor
           syncTooltips={false}
-          titleHighlight={searchTerm}
+          titleHighlight={titleHighlight}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           quickActionIds={METRICS_QUICK_ACTION_IDS}
           userMessages={userMessages}
@@ -404,14 +468,18 @@ const A11yGridCell = React.forwardRef(
       colIndex,
       index,
       isFocused,
+      isSelected,
       onFocus,
+      onClickCapture,
     }: React.PropsWithChildren<{
       id: string;
       rowIndex: number;
       colIndex: number;
       index: number;
       isFocused: boolean;
+      isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
+      onClickCapture?: React.MouseEventHandler<HTMLDivElement>;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
@@ -429,10 +497,12 @@ const A11yGridCell = React.forwardRef(
         role="gridcell"
         aria-rowindex={rowIndex + 1}
         aria-colindex={colIndex + 1}
+        aria-selected={isSelected}
         data-grid-cell={`${rowIndex}-${colIndex}`}
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
+        onClickCapture={onClickCapture}
         css={css`
           outline: none;
           cursor: pointer;

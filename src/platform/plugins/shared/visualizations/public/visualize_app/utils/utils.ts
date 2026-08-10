@@ -94,7 +94,7 @@ export const redirectToSavedObjectPage = (
   })(error);
 };
 
-export function getVizEditorOriginatingAppUrl(history: History) {
+export function getVisEditorOriginatingAppUrl(history: History) {
   return `#/${history.location.pathname}${history.location.search}`;
 }
 

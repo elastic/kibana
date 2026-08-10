@@ -41,13 +41,15 @@ export const computeScoreDocumentId = (document: EvaluationScoreDocument): strin
 
 const toEvaluationScoreDocuments = (
   request: IngestScoresRequestBody,
-  timestamp: string
+  timestamp: string,
+  spaceIds: string[]
 ): Array<{ _id: string } & EvaluationScoreDocument> => {
   return request.scores.map((score) => {
     const payload: EvaluationScoreDocument = {
       '@timestamp': timestamp,
       experiment_id: request.experiment_id,
       experiment_name: request.experiment_name,
+      space_ids: spaceIds,
       example: {
         id: score.example.id,
         index: score.example.index,
@@ -106,13 +108,13 @@ export class EvaluationScoreService {
     return client.search(request);
   }
 
-  async write(request: IngestScoresRequestBody): Promise<WriteResult> {
+  async write(request: IngestScoresRequestBody, spaceIds: string[]): Promise<WriteResult> {
     if (request.scores.length === 0) {
       return { ingested: 0, conflicted: 0, failed: [] };
     }
 
     const timestamp = new Date().toISOString();
-    const documents = toEvaluationScoreDocuments(request, timestamp);
+    const documents = toEvaluationScoreDocuments(request, timestamp, spaceIds);
     const client = await this.getClient();
     const response = await client.create({
       documents,
