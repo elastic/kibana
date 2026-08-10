@@ -127,9 +127,10 @@ function InternalTraceWaterfall({
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
+  const traceIdWhereClause = useMemo(() => esqlEquals(TRACE_ID_FIELD, traceId), [traceId]);
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
-    whereClause: esqlEquals(TRACE_ID_FIELD, traceId),
+    whereClause: traceIdWhereClause,
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

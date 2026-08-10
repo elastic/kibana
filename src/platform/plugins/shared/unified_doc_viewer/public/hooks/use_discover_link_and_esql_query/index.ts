@@ -9,6 +9,7 @@
 
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { useMemo } from 'react';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 import { appendWhereCommand } from '../../utils/esql_expressions';
 import {
@@ -32,18 +33,21 @@ export function useDiscoverLinkAndEsqlQuery({
     unmappedFieldsPolicy,
   });
 
-  if (!indexPattern || !whereClause) {
-    return { discoverUrl: undefined, esqlQueryString: undefined };
-  }
-
   // Build a fresh query per call because `appendWhereCommand` mutates in place.
-  const query = esql.from(indexPattern);
-  if (unmappedFieldsPolicy) {
-    applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
-  }
-  appendWhereCommand(query, whereClause);
-  const esqlQueryString = query.print('pipe-multiline');
-  const discoverUrl = generateDiscoverLink(whereClause);
+  const esqlQueryString = useMemo(() => {
+    if (!indexPattern || !whereClause) return undefined;
+
+    const query = esql.from(indexPattern);
+    if (unmappedFieldsPolicy) {
+      applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
+    }
+    appendWhereCommand(query, whereClause);
+    return query.print('pipe-multiline');
+  }, [indexPattern, unmappedFieldsPolicy, whereClause]);
+
+  // `generateDiscoverLink` is recreated every render (it closes over the live
+  // time range from the service), so calling it directly is intentional.
+  const discoverUrl = indexPattern && whereClause ? generateDiscoverLink(whereClause) : undefined;
 
   return { discoverUrl, esqlQueryString };
 }
