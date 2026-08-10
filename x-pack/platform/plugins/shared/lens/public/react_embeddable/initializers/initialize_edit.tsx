@@ -248,13 +248,7 @@ export function initializeEditApi(
   };
 
   const getEditPanel = async (
-    {
-      closeFlyout,
-      registerOnDismiss,
-    }: {
-      closeFlyout?: (options?: { skipCancel?: boolean }) => void;
-      registerOnDismiss?: (handler?: () => void) => void;
-    } = {
+    { closeFlyout }: { closeFlyout?: () => void } = {
       closeFlyout: noop,
     }
   ) => {
@@ -286,11 +280,10 @@ export function initializeEditApi(
             updateState({ ...getState(), attributes: appliedAttributes });
             return appliedAttributes;
           },
-      closeFlyout: (options) => {
+      closeFlyout: () => {
         internalApi.updateEditingState(false);
-        closeFlyout?.(options);
+        closeFlyout?.();
       },
-      registerOnDismiss,
     });
     return ConfigPanel ?? undefined;
   };
@@ -374,10 +367,9 @@ export function initializeEditApi(
         mountInlinePanel({
           core: startDependencies.coreStart,
           api: parentApi,
-          loadContent: async ({ closeFlyout, registerOnDismiss } = { closeFlyout: noop }) => {
+          loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
             return getEditPanel({
               closeFlyout,
-              registerOnDismiss,
             });
           },
           options: { uuid },

@@ -57,16 +57,8 @@ export interface EditConfigPanelProps {
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   /** Optional callback called when updating the by reference embeddable */
   updateByRefInput?: (soId: string, attrs: TypedLensSerializedState['attributes']) => void;
-  /**
-   * Close the edit flyout.
-   * Pass `{ skipCancel: true }` after Apply (or after cancel cleanup already ran).
-   */
-  closeFlyout?: (options?: { skipCancel?: boolean }) => void;
-  /**
-   * Register cleanup for overlay dismissals that call `closeFlyout()` without skipCancel
-   * (header X, outside click, Escape).
-   */
-  registerOnDismiss?: (handler?: () => void) => void;
+  /** Callback for closing the edit flyout */
+  closeFlyout?: () => void;
   /** Boolean used for adding a flyout wrapper */
   wrapInFlyout?: boolean;
   /** Optional parameter for panel identification
@@ -123,7 +115,7 @@ export interface LayerConfigurationProps {
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
   parentApi?: unknown;
   panelId?: string;
-  closeFlyout?: (options?: { skipCancel?: boolean }) => void;
+  closeFlyout?: () => void;
   editorContainer?: HTMLElement;
   /** Callback to report text-based query state changes */
   onTextBasedQueryStateChange?: (state: TextBasedQueryState) => void;

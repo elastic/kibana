@@ -18,21 +18,9 @@ import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
-export interface CloseFlyoutOptions {
-  /** When true, skip registered dismiss/cancel cleanup (e.g. after Apply). */
-  skipCancel?: boolean;
-}
-
-export type CloseFlyoutFn = (options?: CloseFlyoutOptions) => void;
-
 interface LoadContentArgs {
-  closeFlyout: CloseFlyoutFn;
+  closeFlyout: () => void;
   ariaLabelledBy: string;
-  /**
-   * Register cleanup to run when the overlay closes without `skipCancel`
-   * (header X, outside click, Escape, or `closeFlyout()`).
-   */
-  registerOnDismiss: (handler?: () => void) => void;
 }
 
 interface OpenLazyFlyoutParams {
@@ -111,19 +99,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     });
   };
 
-  let onDismiss: (() => void) | undefined;
-  const registerOnDismiss = (handler?: () => void) => {
-    onDismiss = handler;
-  };
-
-  const closeFlyout: CloseFlyoutFn = (options) => {
-    if (!options?.skipCancel) {
-      const dismiss = onDismiss;
-      onDismiss = undefined;
-      dismiss?.();
-    } else {
-      onDismiss = undefined;
-    }
+  const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
     // Resolve lazily: closing can re-render the panel, so the trigger is looked up after
@@ -131,14 +107,10 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     restoreFocus();
   };
 
-  // EUI close paths (header X, outside click, Escape) have no options → cancel by default.
-  const onClose = () => closeFlyout();
-
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <LazyFlyout
-        closeFlyout={closeFlyout}
-        registerOnDismiss={registerOnDismiss}
+        closeFlyout={onClose}
         loadContent={loadContent}
         core={core}
         ariaLabelledBy={ariaLabelledBy}
@@ -167,16 +139,11 @@ function LazyFlyout({
   core,
   loadContent,
   closeFlyout,
-  registerOnDismiss,
   ariaLabelledBy,
 }: LoadContentArgs & Pick<OpenLazyFlyoutParams, 'core' | 'loadContent'>) {
   const [LoadedFlyout, setLoadedFlyout] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
-    const editFlyoutContent = await loadContent?.({
-      closeFlyout,
-      registerOnDismiss,
-      ariaLabelledBy,
-    });
+    const editFlyoutContent = await loadContent?.({ closeFlyout, ariaLabelledBy });
     if (editFlyoutContent) {
       setLoadedFlyout(editFlyoutContent);
     } else {

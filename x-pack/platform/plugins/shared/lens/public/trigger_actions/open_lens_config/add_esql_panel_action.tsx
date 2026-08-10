@@ -59,12 +59,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
     mountInlinePanel({
       core: this.core,
       api,
-      loadContent: async (
-        { closeFlyout, registerOnDismiss } = {
-          closeFlyout: () => {},
-          registerOnDismiss: () => {},
-        }
-      ) => {
+      loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
         const embeddable = await api.addNewPanel<object, LensApi>({
           maybePanelId: uuid,
           panelType: LENS_EMBEDDABLE_TYPE,
@@ -79,7 +74,6 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
         }
         return embeddable.getEditPanel?.({
           closeFlyout,
-          registerOnDismiss,
         });
       },
       options: { uuid, returnFocus },

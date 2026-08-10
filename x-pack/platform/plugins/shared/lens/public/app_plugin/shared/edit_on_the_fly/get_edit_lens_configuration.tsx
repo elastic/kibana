@@ -116,7 +116,7 @@ const MaybeWrapper = ({
 }: {
   wrapInFlyout?: boolean;
   children: JSX.Element;
-  closeFlyout?: (options?: { skipCancel?: boolean }) => void;
+  closeFlyout?: () => void;
 }) => {
   if (!wrapInFlyout) {
     return children;
@@ -163,7 +163,6 @@ const EditLensConfiguration: FC<
   updatePanelState,
   updateSuggestion,
   closeFlyout,
-  registerOnDismiss,
   wrapInFlyout,
   panelId,
   savedObjectId,
@@ -256,7 +255,6 @@ const EditLensConfiguration: FC<
     updatePanelState,
     updateSuggestion,
     closeFlyout,
-    registerOnDismiss,
     coreStart,
     startDependencies,
     dataLoading$,

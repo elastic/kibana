@@ -57,15 +57,11 @@ export function prepareInlineEditPanel(
 ) {
   return async function getConfigPanel({
     closeFlyout,
-    registerOnDismiss,
     onApply,
     onCancel,
     applyButtonLabel,
   }: Partial<
-    Pick<
-      EditConfigPanelProps,
-      'closeFlyout' | 'registerOnDismiss' | 'onApply' | 'onCancel' | 'applyButtonLabel'
-    >
+    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'applyButtonLabel'>
   > = {}) {
     const currentState = getState();
     const isNewPanel = initialState.isNewPanel;
@@ -119,7 +115,6 @@ export function prepareInlineEditPanel(
     return (
       <Component
         closeFlyout={closeFlyout}
-        registerOnDismiss={registerOnDismiss}
         attributes={attributes}
         updateByRefInput={updateByRefInput}
         updatePanelState={updatePanelState}

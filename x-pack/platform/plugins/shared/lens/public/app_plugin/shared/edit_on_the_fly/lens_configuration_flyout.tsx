@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -62,7 +62,6 @@ export function LensEditConfigurationFlyout({
   updateSuggestion,
   setCurrentAttributes,
   closeFlyout,
-  registerOnDismiss,
   saveByRef,
   savedObjectId,
   updateByRefInput,
@@ -173,8 +172,8 @@ export function LensEditConfigurationFlyout({
     annotationGroups,
   ]);
 
-  // Shared cancel cleanup used by footer Cancel, Escape, and overlay dismiss (X / outside click).
-  const cancelEditing = useCallback(() => {
+  const onCancel = useCallback(() => {
+    setIsInlineFlyoutVisible(false);
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
@@ -203,8 +202,10 @@ export function LensEditConfigurationFlyout({
     // Remove the user's preferred chart type from localStorage
     deleteUserChartTypeFromSessionStorage();
     onCancelCallback?.();
+    closeFlyout?.();
   }, [
     attributesChanged,
+    closeFlyout,
     visualization.activeId,
     savedObjectId,
     datasourceMap,
@@ -213,26 +214,6 @@ export function LensEditConfigurationFlyout({
     updateByRefInput,
     onCancelCallback,
   ]);
-
-  const cancelEditingRef = useRef(cancelEditing);
-  cancelEditingRef.current = cancelEditing;
-
-  useEffect(() => {
-    registerOnDismiss?.(() => {
-      setIsInlineFlyoutVisible(false);
-      cancelEditingRef.current();
-    });
-    return () => {
-      registerOnDismiss?.(undefined);
-    };
-  }, [registerOnDismiss]);
-
-  const onCancel = useCallback(() => {
-    setIsInlineFlyoutVisible(false);
-    cancelEditing();
-    // skipCancel: cancel cleanup already ran above.
-    closeFlyout?.({ skipCancel: true });
-  }, [cancelEditing, closeFlyout]);
 
   const textBasedMode = isOfAggregateQueryType(attributes.state.query);
 
@@ -286,7 +267,7 @@ export function LensEditConfigurationFlyout({
     }
 
     deleteUserChartTypeFromSessionStorage();
-    closeFlyout?.({ skipCancel: true });
+    closeFlyout?.();
   }, [
     visualization.activeId,
     savedObjectId,
