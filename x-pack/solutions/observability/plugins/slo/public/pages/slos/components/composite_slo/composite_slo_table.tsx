@@ -181,7 +181,7 @@ export function CompositeSloTable({
                       values: { name: item.name },
                     })
               }
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
           </EuiToolTip>
         );

@@ -11,14 +11,14 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { deletePackagePolicy } from '../../state/monitor_management/api';
-import { MonitorNotFoundPage } from '../monitor_details/monitor_not_found_page';
+import { MonitorNotFoundPrompt } from '../monitor_details/monitor_not_found_page';
 
 export const EditMonitorNotFound: React.FC = () => {
   return (
     <>
       <LeftoverIntegrationFound />
       <EuiSpacer size="m" />
-      <MonitorNotFoundPage />
+      <MonitorNotFoundPrompt />
     </>
   );
 };

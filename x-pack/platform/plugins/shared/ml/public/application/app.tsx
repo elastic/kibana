@@ -33,7 +33,7 @@ import type { ManagementSectionId } from './management';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
-  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions'
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions' | 'cps'
 > &
   MlStartDependencies;
 
@@ -42,6 +42,7 @@ interface AppProps {
   deps: MlDependencies;
   appMountParams: ManagementAppMountParams | AppMountParameters;
   isServerless: boolean;
+  isCPSEnabled: boolean;
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
   nlpSettings: NLPSettings;
@@ -61,6 +62,7 @@ export const App: FC<AppProps> = ({
   deps,
   appMountParams,
   isServerless,
+  isCPSEnabled,
   mlFeatures,
   experimentalFeatures,
   nlpSettings,
@@ -157,6 +159,7 @@ export const App: FC<AppProps> = ({
             <DatePickerContextProvider {...datePickerDeps}>
               <EnabledFeaturesContextProvider
                 isServerless={isServerless}
+                isCPSEnabled={isCPSEnabled}
                 mlFeatures={mlFeatures}
                 showMLNavMenu={chromeStyle === 'classic'}
                 experimentalFeatures={experimentalFeatures}
@@ -180,6 +183,7 @@ export const renderApp = (
   deps: MlDependencies,
   appMountParams: AppMountParameters,
   isServerless: boolean,
+  isCPSEnabled: boolean,
   mlFeatures: MlFeatures,
   experimentalFeatures: ExperimentalFeatures,
   nlpSettings: NLPSettings
@@ -192,6 +196,7 @@ export const renderApp = (
       deps={deps}
       appMountParams={appMountParams}
       isServerless={isServerless}
+      isCPSEnabled={isCPSEnabled}
       mlFeatures={mlFeatures}
       experimentalFeatures={experimentalFeatures}
       nlpSettings={nlpSettings}
