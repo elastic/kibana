@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { type EuiThemeColorModeStandard, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
@@ -268,11 +268,13 @@ export function useDynamicTypeIcons(
       // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
       const editorContainer = editorContainerRef?.current ?? undefined;
       const allTypes = getAllTypes();
-      await injectDynamicConnectorIcons(allTypes, editorContainer);
+      const { colorMode } = euiThemeContext;
+      await injectDynamicConnectorIcons(allTypes, editorContainer, colorMode);
       injectSuggestBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(
         allTypes,
         editorContainer,
+        colorMode,
         () => myRunId !== injectionRunIdRef.current,
         (css) => onShadowIconsCssReadyRef.current?.(css),
         lastInjectedShadowCssRef
@@ -325,7 +327,8 @@ export const isMonochromeActionType = (actionTypeId: string): boolean =>
  */
 async function injectDynamicConnectorIcons(
   connectorTypes: ConnectorTypeInfoMinimal[],
-  editorContainer: HTMLElement | undefined
+  editorContainer: HTMLElement | undefined,
+  colorMode: EuiThemeColorModeStandard
 ) {
   const styleId = 'dynamic-connector-icons';
   const targetDoc = editorContainer?.ownerDocument ?? document;
@@ -347,6 +350,7 @@ async function injectDynamicConnectorIcons(
       iconBase64 = await getIconBase64({
         ...connector,
         kind: isTrigger ? 'trigger' : 'step',
+        colorMode,
       });
     } catch {
       if (isTrigger) {
@@ -430,6 +434,7 @@ function injectSuggestBadges(
 async function injectDynamicShadowIcons(
   connectorTypes: ConnectorTypeInfoMinimal[],
   editorContainer: HTMLElement | undefined,
+  colorMode: EuiThemeColorModeStandard,
   isStale?: () => boolean,
   onCssReady?: (css: string) => void,
   lastInjectedCssRef?: React.MutableRefObject<string | null>
@@ -438,6 +443,9 @@ async function injectDynamicShadowIcons(
   const targetDoc = editorContainer?.ownerDocument ?? document;
   const boltUrl = getTriggerBoltFallbackDataUrl() || FALLBACK_BOLT_DATA_URL;
 
+  // `background-position`/`mask-position` are explicit because non-square marks (box is
+  // 41x22, monday_com 77.8x46.9) only fill part of the 12px box under `contain`, and the
+  // CSS default of top-left leaves them riding high next to the square ones.
   const baseRule = `
     content: "" !important;
     display: inline-block !important;
@@ -450,6 +458,8 @@ async function injectDynamicShadowIcons(
     color: inherit !important;
     background-size: contain !important;
     background-repeat: no-repeat !important;
+    background-position: center !important;
+    mask-position: center !important;
   `;
   const inlineScope = '.monaco-editor .view-line span';
   const glyphBaseRule = `
@@ -459,6 +469,8 @@ async function injectDynamicShadowIcons(
     height: 14px !important;
     background-size: contain !important;
     background-repeat: no-repeat !important;
+    background-position: center !important;
+    mask-position: center !important;
   `;
   const glyphDefault =
     boltUrl !== ''
@@ -478,6 +490,7 @@ async function injectDynamicShadowIcons(
   [class^="trigger-inline-icon-"]::before {
     content: '' !important; display: inline-block !important; width: 12px !important; height: 12px !important;
     margin-left: 4px !important; vertical-align: middle !important; background-size: contain !important; background-repeat: no-repeat !important;
+    background-position: center !important; mask-position: center !important;
     mask-image: url("${boltUrl}");
     mask-size: contain;
     background-color: currentColor;
@@ -533,6 +546,7 @@ async function injectDynamicShadowIcons(
       iconBase64 = await getIconBase64({
         ...connector,
         kind: isTriggerConnector ? 'trigger' : 'step',
+        colorMode,
       });
     } catch {
       if (isTriggerConnector && boltUrl) {
