@@ -16,6 +16,12 @@ import { QueryStream as nQueryStream } from './query';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+// Type-only namespace aliases for Streams; runtime values are assigned below.
+// Kept separate from the runtime member (`all`) because
+// `@babel/plugin-transform-typescript` >= 7.25 mis-compiles `export import X = Y`
+// inside a namespace with a runtime member, emitting an invalid nested
+// `export var X` that is a SyntaxError in the built CJS.
+// See: https://github.com/babel/babel/pull/16566
 export namespace Streams {
   export import ingest = IngestStream;
 
@@ -30,7 +36,9 @@ export namespace Streams {
     export type GetResponse = ingest.all.GetResponse | QueryStream.GetResponse;
     export type UpsertRequest = ingest.all.UpsertRequest | QueryStream.UpsertRequest;
   }
+}
 
+export namespace Streams {
   const allDefinitionSchema = z.union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
