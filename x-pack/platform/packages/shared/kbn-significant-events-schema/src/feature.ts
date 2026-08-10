@@ -65,8 +65,6 @@ export const identifiedFeatureSchema = baseFeatureSchema
     })
   );
 
-export type IdentifiedFeature = z.infer<typeof identifiedFeatureSchema>;
-
 export const ignoredFeatureSchema = z.object({
   feature_id: z.string().max(MAX_ID_LENGTH),
   feature_title: z.string().max(MAX_TITLE_LENGTH),
@@ -152,10 +150,6 @@ export function normalizeFeatureSlugForMatching(id: string): string {
 export function computeFeatureUuid(feature: Pick<BaseFeature, 'id' | 'stream_name'>): string {
   const slug = normalizeFeatureSlug(feature.id);
   return v5(objectHash([feature.stream_name, slug]), v5.DNS);
-}
-
-export function isFeature(feature: unknown): feature is Feature {
-  return featureSchema.safeParse(feature).success;
 }
 
 export function isFeatureWithFilter(feature: unknown): feature is FeatureWithFilter {

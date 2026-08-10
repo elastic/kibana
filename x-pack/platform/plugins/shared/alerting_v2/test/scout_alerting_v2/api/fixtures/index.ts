@@ -6,13 +6,20 @@
  */
 
 import { apiTest as baseApiTest } from '@kbn/scout';
-import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/scout';
+import type {
+  ApiServicesFixture,
+  EsClient,
+  KbnClient,
+  ScoutLogger,
+  ScoutTestConfig,
+} from '@kbn/scout';
 import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
   getAlertActionsEventsService,
   getDispatcherApiService,
   getMaintenanceWindowsApiService,
+  getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
   getTaskManagerService,
@@ -23,6 +30,7 @@ import {
   type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
+  type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
   type RuleEventsApiService,
@@ -36,6 +44,7 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 
 export interface AlertingApiServices {
   rules: RulesApiService;
+  ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
@@ -62,14 +71,17 @@ export const buildAlertingApiServices = ({
   esClient,
   kbnClient,
   log,
+  config,
 }: {
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
+  config: ScoutTestConfig;
 }): AlertingApiServices => {
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
+    ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
@@ -87,12 +99,12 @@ export const buildAlertingApiServices = ({
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log },
+      { apiServices, esClient, kbnClient, log, config },
       use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log }),
+        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
       };
       await use(extendedApiServices);
     },
@@ -132,6 +144,8 @@ export {
   getUnsnoozeAlertActionUrl,
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
+  CREATE_ALERT_EVENT_URL,
+  getCreateAlertEventBySourceUrl,
   getRuleUrl,
   getRunRuleUrl,
   getEnableRuleUrl,
@@ -151,8 +165,7 @@ export {
   getUnsnoozeActionPolicyUrl,
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
-  getCountNewExecutionHistoryEventsUrl,
-  getRuleExecutionsUrl,
+  listRuleExecutionsUrl,
 } from '../../common/urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,

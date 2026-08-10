@@ -10,6 +10,8 @@ import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
   createRuleDataSchema,
+  isSignalQueryBreachOnly,
+  isSignalUsingStandaloneFormat,
   isStateTransitionAllowed,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -28,7 +30,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
   getRuleAlreadyExistsMessage,
@@ -90,12 +92,12 @@ const DEFAULT_PER_PAGE = 20;
  */
 const bulkErrorCodeForStatus = (statusCode: number): string => {
   if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND;
+    return ALERTING_ERROR_CODES.RULE_NOT_FOUND;
   }
   if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT;
+    return ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT;
   }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+  return ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR;
 };
 
 const toBulkError = (
@@ -114,7 +116,7 @@ const toBulkError = (
  */
 const toTaskManagerDriftError = (id: string, message: string): BulkOperationError => ({
   id,
-  error: { code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT, message },
+  error: { code: ALERTING_ERROR_CODES.TASK_MANAGER_DRIFT, message },
 });
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
@@ -160,6 +162,16 @@ export class RulesClient {
   }
 
   /**
+   * The version counter incremented on every successful mutation. Persisted on
+   * the rule SO (`version`) and used as `object.sequence` in the change history
+   * index / `rule.version` on rule events. Always advances, independently of
+   * whether change-history logging is enabled.
+   */
+  private getNextVersion(current?: number): number {
+    return (current ?? 0) + 1;
+  }
+
+  /**
    * Validates a rule's schedule against the configured guardrails: the interval
    * may not be shorter than `minimumScheduleInterval`, and (when `checkLimit`)
    * scheduling it may not push the cluster past `maxScheduledPerMinute`. The
@@ -194,7 +206,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
         {
-          code: ALERTING_V2_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
+          code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
           details: { interval: every, minimumScheduleInterval },
         }
       );
@@ -237,7 +249,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Rule schedule of "${updatedEvery}" would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
         {
-          code: ALERTING_V2_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: { interval: updatedEvery, maxScheduledPerMinute },
         }
       );
@@ -252,7 +264,7 @@ export class RulesClient {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
-        code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+        code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
         details: { context, errors: treeifyError(parsed.error) },
       });
     }
@@ -268,7 +280,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getRuleNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
           details: { rule_id: id },
         });
       }
@@ -310,7 +322,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getRuleVersionConflictMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+          code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
           details: { rule_id: id },
         });
       }
@@ -326,6 +338,7 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
+    const ruleVersion = this.getNextVersion();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
@@ -333,6 +346,7 @@ export class RulesClient {
       createdAt: nowIso,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
+      version: ruleVersion,
     });
 
     // A freshly created rule is always enabled, so it always counts towards the limit.
@@ -348,7 +362,7 @@ export class RulesClient {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getRuleAlreadyExistsMessage(conflictId), {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_EXISTS,
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
           details: { rule_id: conflictId },
         });
       }
@@ -369,7 +383,9 @@ export class RulesClient {
     }
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
-    this.ruleEventPublisher.emitRuleCreated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
+    this.ruleEventPublisher.emitRuleCreated(this.request, [
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
+    ]);
     return rule;
   }
 
@@ -390,15 +406,30 @@ export class RulesClient {
       })
     ) {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".', {
-        code: ALERTING_V2_ERROR_CODES.INVALID_STATE_TRANSITION,
+        code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION,
         details: { rule_id: id, rule_kind: existingAttrs.kind },
       });
     }
 
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
+      version: ruleVersion,
     });
+
+    if (!isSignalUsingStandaloneFormat(nextAttrs)) {
+      throw Boom.badRequest('kind "signal" requires query.format "standalone".', {
+        code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
+    }
+    if (!isSignalQueryBreachOnly(nextAttrs)) {
+      throw Boom.badRequest('Signal rules cannot set recovery_strategy or no_data_strategy.', {
+        code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+        details: { rule_id: id, rule_kind: existingAttrs.kind },
+      });
+    }
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,
@@ -427,14 +458,9 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
-    // The update path always emits `ruleUpdated` and never distinguishes
-    // enable/disable — lifecycle transitions are owned by the dedicated
-    // enableRule/disableRule endpoints.
-    if (Object.keys(parsed).length > 0) {
-      this.ruleEventPublisher.emitRuleUpdated(this.request, [
-        { id: rule.id, spaceId: this.spaceId },
-      ]);
-    }
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
+    ]);
 
     return rule;
   }
@@ -479,15 +505,27 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
 
     // Assert the rule exists (surfaces an enriched RULE_NOT_FOUND 404) before
-    // touching the task or emitting. Only the id is needed for the event payload.
-    await this.getExistingRule(id);
+    // touching the task or emitting. The attributes are captured so the deleted
+    // rule can be emitted as the change-history snapshot for the deletion.
+    const { attrs: existingAttrs } = await this.getExistingRule(id);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
 
-    this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
+    // Nothing is persisted on delete, so stamp the bumped counter onto the
+    // emitted rule so the deletion orders after the last change.
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, {
+      ...existingAttrs,
+      metadata: {
+        ...existingAttrs.metadata,
+        version: this.getNextVersion(existingAttrs.metadata.version),
+      },
+    });
+    this.ruleEventPublisher.emitRuleDeleted(this.request, [
+      { ruleId: id, spaceId: this.spaceId, rule },
+    ]);
   }
 
   @withApm
@@ -498,7 +536,7 @@ export class RulesClient {
 
     if (!attrs.enabled) {
       throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+        code: ALERTING_ERROR_CODES.RULE_DISABLED,
         details: { rule_id: id },
       });
     }
@@ -511,7 +549,7 @@ export class RulesClient {
     } catch (e) {
       if (e instanceof TaskAlreadyRunningError) {
         throw Boom.conflict(`Rule with id "${id}" is already running`, {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_RUNNING,
           details: { rule_id: id },
         });
       }
@@ -524,7 +562,7 @@ export class RulesClient {
         : undefined;
 
       throw Boom.internal(`Failed to run rule with id "${id}"`, {
-        code: existingCode ?? ALERTING_V2_ERROR_CODES.RULE_RUN_ERROR,
+        code: existingCode ?? ALERTING_ERROR_CODES.RULE_RUN_ERROR,
         details: { rule_id: id },
       });
     }
@@ -534,7 +572,7 @@ export class RulesClient {
       // rejected with a 409 — the task was not actually rescheduled. Surface
       // as a soft conflict so the caller can retry.
       throw Boom.conflict(`Running rule with id "${id}" conflicted, please retry`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_RUN_CONFLICT,
+        code: ALERTING_ERROR_CODES.RULE_RUN_CONFLICT,
         details: { rule_id: id },
       });
     }
@@ -544,22 +582,23 @@ export class RulesClient {
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
-
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
+      metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
     // Re-enabling an already-enabled rule is intentionally not short-circuited:
     // it re-writes the SO and re-ensures the executor task (self-heal), and still
-    // emits `ruleEnabled`. Only count new scheduled load on an actual transition —
-    // an already-enabled rule already contributes to the total.
+    // emits `ruleEnabled`.
     if (!existingAttrs.enabled) {
       await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
     }
@@ -577,7 +616,9 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleEnabled(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
+    this.ruleEventPublisher.emitRuleEnabled(this.request, [
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
+    ]);
     return rule;
   }
 
@@ -585,19 +626,21 @@ export class RulesClient {
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
-
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     // Disabling an already-disabled rule is intentionally not short-circuited: it
     // re-writes the SO and removes the executor task (self-heal), and still emits
     // `ruleDisabled`.
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
+      metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
@@ -611,7 +654,7 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
     this.ruleEventPublisher.emitRuleDisabled(this.request, [
-      { id: rule.id, spaceId: this.spaceId },
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
   }
@@ -723,7 +766,7 @@ export class RulesClient {
 
     this.logger.error({
       error: new Error(message),
-      code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+      code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
     });
 
     errors?.push(...driftedRuleIds.map((id) => toTaskManagerDriftError(id, message)));
@@ -744,6 +787,15 @@ export class RulesClient {
       return { affected_count: 0, errors: [] };
     }
 
+    // Capture pre-delete state so the deleted rule can be emitted as the
+    // change-history snapshot per deleted rule.
+    const attrsById = new Map<string, RuleSavedObjectAttributes>();
+    for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
+      if (!('error' in doc)) {
+        attrsById.set(doc.id, doc.attributes);
+      }
+    }
+
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
     const deletedRules: EventRule[] = [];
     for (const result of deleteResults) {
@@ -751,12 +803,28 @@ export class RulesClient {
         errors.push(toBulkError(result.id, result.error));
         continue;
       }
+
       affectedCount += 1;
-      deletedRules.push({ id: result.id, spaceId });
+      const attrs = attrsById.get(result.id);
+      deletedRules.push(
+        attrs
+          ? {
+              ruleId: result.id,
+              spaceId,
+              rule: transformRuleSoAttributesToRuleApiResponse(result.id, {
+                ...attrs,
+                metadata: {
+                  ...attrs.metadata,
+                  version: this.getNextVersion(attrs.metadata.version),
+                },
+              }),
+            }
+          : { ruleId: result.id, spaceId }
+      );
     }
 
     await this.removeExecutorTasks({
-      ruleIds: deletedRules.map((rule) => rule.id),
+      ruleIds: deletedRules.map((rule) => rule.ruleId),
       spaceId,
       errors,
     });
@@ -796,11 +864,13 @@ export class RulesClient {
         continue;
       }
 
+      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
+        metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
@@ -838,7 +908,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
         });
 
         for (const id of driftedRuleIds) {
@@ -871,7 +941,8 @@ export class RulesClient {
         }
 
         affectedCount += 1;
-        enabledRules.push({ id: item.id, spaceId });
+        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+        enabledRules.push({ ruleId: rule.id, spaceId, rule });
       }
 
       await this.removeExecutorTasks({
@@ -915,11 +986,13 @@ export class RulesClient {
         continue;
       }
 
+      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
+        metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
@@ -939,13 +1012,14 @@ export class RulesClient {
           continue;
         }
 
+        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         affectedCount += 1;
-        disabledRules.push({ id: item.id, spaceId });
+        disabledRules.push({ ruleId: rule.id, spaceId, rule });
       }
     }
 
     await this.removeExecutorTasks({
-      ruleIds: disabledRules.map((rule) => rule.id),
+      ruleIds: disabledRules.map((rule) => rule.ruleId),
       spaceId,
       errors,
     });
@@ -996,7 +1070,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Filter matches ${total} rules, exceeding the maximum of ${BULK_FILTER_MAX_RESOURCES} per request. Narrow the filter or split the operation into multiple requests.`,
         {
-          code: ALERTING_V2_ERROR_CODES.BULK_QUERY_MATCH_LIMIT_EXCEEDED,
+          code: ALERTING_ERROR_CODES.BULK_QUERY_MATCH_LIMIT_EXCEEDED,
           details: { match_count: total, limit: BULK_FILTER_MAX_RESOURCES },
         }
       );
@@ -1069,12 +1143,14 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
+    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
+      version: ruleVersion,
     });
 
     await this.validateSchedule({
@@ -1096,7 +1172,9 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleUpdated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [
+      { ruleId: rule.id, spaceId: this.spaceId, rule },
+    ]);
     return { rule, created: false };
   }
 }
