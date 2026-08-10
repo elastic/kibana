@@ -33,14 +33,17 @@ export class RollupDataViewPage {
     await this.page.testSubj.locator('rollupType').click();
 
     await this.typeIndexPattern(indexPattern);
-    await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout: 30_000 });
+    await this.form
+      .and(this.page.locator('[data-validation-error="0"]'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
 
     // The editor disables the timestamp combo box until its options resolve, which happens after
     // title validation clears — open it only once it is enabled, or the dropdown renders empty.
     const timestampField = this.page.testSubj.locator('timestampField');
-    await expect(timestampField.getByTestId('comboBoxSearchInput')).toBeEnabled({
-      timeout: 30_000,
-    });
+    await timestampField
+      .getByTestId('comboBoxSearchInput')
+      .and(this.page.locator(':not([disabled])'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
     await this.page.components
       .comboBox('timestampField')
       .setSelectedOptions([timeField], { timeout: 15_000 });
@@ -55,12 +58,13 @@ export class RollupDataViewPage {
     await this.titleInput.click();
     // First two chars together, to skip the field's one-character wildcard auto-append.
     await this.titleInput.fill(indexPattern.slice(0, 2));
+    const settled = this.titleInput.and(this.page.locator('[data-is-validating="0"]'));
     for (const char of indexPattern.slice(2)) {
       await this.titleInput.pressSequentially(char);
-      await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout: 15_000 });
+      await settled.waitFor({ state: 'visible', timeout: 15_000 });
     }
     await expect(this.titleInput).toHaveValue(indexPattern);
-    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout: 15_000 });
+    await settled.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   // A data-view list row matched by its exact name, so assertions target this suite's data view.
