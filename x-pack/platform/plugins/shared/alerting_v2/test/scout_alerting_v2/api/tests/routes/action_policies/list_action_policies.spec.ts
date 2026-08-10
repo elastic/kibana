@@ -373,6 +373,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
@@ -380,6 +381,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects perPage over the maximum', async ({ apiClient }) => {
@@ -390,6 +392,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       }
     );
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects empty search', async ({ apiClient }) => {
@@ -397,6 +400,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects search over the maximum length', async ({ apiClient }) => {
@@ -407,6 +411,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       }
     );
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects unknown enabled value', async ({ apiClient }) => {
@@ -414,6 +419,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects unknown sortField', async ({ apiClient }) => {
@@ -421,6 +427,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects unknown sortOrder', async ({ apiClient }) => {
@@ -428,6 +435,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects more than the maximum number of tags', async ({ apiClient }) => {
@@ -439,6 +447,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects tag over the maximum length', async ({ apiClient }) => {
@@ -449,6 +458,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       }
     );
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('authorization: 200 with read-only alerting_v2 privileges', async ({ apiClient }) => {

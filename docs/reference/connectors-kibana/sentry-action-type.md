@@ -28,7 +28,7 @@ API base URL
 :   Optional. Leave empty to use Sentry SaaS (`https://sentry.io/api/0`). If your organization uses a region-specific data storage location, use its regional domain instead, for example `https://us.sentry.io/api/0` or `https://de.sentry.io/api/0`. Set this for a self-hosted Sentry instance, for example `https://sentry.example.com/api/0`.
 
 Authentication
-:   Bearer token. Use a Sentry auth token with `org:read`, `project:read`, `event:read`, and `event:write` scopes (add `event:admin` too if you plan to use `deleteIssue`).
+:   Bearer token. Use a Sentry auth token with `org:read`, `project:read`, `event:read`, and `event:write` scopes (add `alerts:write` if you plan to provision issue alert rules, and `event:admin` if you plan to use `deleteIssue`).
 
 ## Available actions [sentry-available-actions]
 
@@ -46,8 +46,8 @@ Authentication
 | `deleteIssue` | Permanently delete an issue. Requires the `event:admin` scope. Parameters: `issueId` (required). |
 | `listProjects` | List the organization's projects. Parameters: `cursor`. |
 | `listIssueAlertRules` | List issue alert rules configured on a project. Parameters: `project` (required), `cursor`. |
-| `createIssueAlertRule` | Create a new issue alert rule. Parameters: `project` (required), `name` (required), `conditions` (required), `actions` (required), `actionMatch`, `frequency`. |
-| `updateIssueAlertRule` | Update an existing issue alert rule. Parameters: `project` (required), `ruleId` (required), `name`, `actionMatch`, `conditions`, `actions`, `frequency`. |
+| `createIssueAlertRule` | Create a new issue alert rule. Requires the `alerts:write` scope. Parameters: `project` (required), `name` (required), `conditions` (required), `actions` (required), `actionMatch`, `frequency`. |
+| `updateIssueAlertRule` | Update an existing issue alert rule. Requires the `alerts:write` scope. Parameters: `project` (required), `ruleId` (required), `name`, `actionMatch`, `conditions`, `actions`, `frequency`. |
 
 ## Connector networking configuration [sentry-connector-networking-configuration]
 

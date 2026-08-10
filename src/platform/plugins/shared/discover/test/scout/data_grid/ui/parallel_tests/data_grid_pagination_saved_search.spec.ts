@@ -20,7 +20,8 @@ const SAMPLE_SIZE = 12;
 const SAVED_ROWS_PER_PAGE = 10;
 const SETTINGS_ROWS_PER_PAGE = 6;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/282360
+spaceTest.describe.skip(
   'Discover data grid pagination - saved search',
   { tag: '@local-stateful-classic' },
   () => {

@@ -8,15 +8,21 @@
 /*
  * End-to-end contract for the alerting v2 error envelope.
  *
- * Every alerting v2 route funnels its errors through
- * `BaseAlertingRoute.onError`, which serializes them to the flat
- * `{ code, error, message, details? }` shape declared by `errorResponseSchema`
- * and sets `bypassErrorFormat: true` so Kibana core sends that body verbatim.
+ * Alerting v2 emits its error envelope through two centralized paths, both of
+ * which serialize to the flat `{ code, error, message, details? }` shape
+ * declared by `errorResponseSchema` and set `bypassErrorFormat: true` so Kibana
+ * core sends that body verbatim:
  *
- * Because the serialization is centralized, one representative route is enough
- * to prove the wire shape for all of them: we drive a `RULE_NOT_FOUND` 404
- * (it carries both a stable `code` and structured `details`) and assert the
- * envelope survives to the client.
+ *  - Domain errors thrown by handlers funnel through `BaseAlertingRoute.onError`.
+ *  - Request schema-validation failures — which Kibana core owns and raises
+ *    before the handler runs — funnel through
+ *    `BaseAlertingRoute.onRequestValidationError`, wired via the route's
+ *    `validate.onRequestValidationError` hook.
+ *
+ * Because both serializations are centralized, one representative route per path
+ * is enough to prove the wire shape for all of them:
+ *  - a `RULE_NOT_FOUND` 404 (carries a stable `code` and structured `details`),
+ *  - a create-rule 400 with a missing required field (schema validation).
  *
  * Per `errorResponseSchema`, only `code` is a stable/contractual value (changing
  * it is a breaking change) and `details` is structured context clients consume
@@ -26,15 +32,26 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALERTING_V2_RULES_READ_ROLE, apiTest, getRuleUrl } from '../fixtures';
+import {
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
+  apiTest,
+  buildCreateRuleData,
+  getRuleUrl,
+  testData,
+} from '../fixtures';
 
 apiTest.describe('Alerting v2 error response contract', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
     readerHeaders = { ...readerCredentials.apiKeyHeader };
+
+    const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
+    writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
   apiTest(
@@ -61,6 +78,24 @@ apiTest.describe('Alerting v2 error response contract', { tag: '@local-stateful-
 
       // `statusCode` is not part of the contract. It is added by Kibana core's
       // `HapiResponseAdapter.toError` method. If there is a bug in our code, it will be present.
+      expect(response.body.statusCode).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'maps request schema-validation failures to the same flat error envelope',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData();
+      const invalidBody = { ...body, metadata: { description: 'no name here' } };
+
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: invalidBody,
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response.body.details).toMatchObject({ source: 'body' });
       expect(response.body.statusCode).toBeUndefined();
     }
   );

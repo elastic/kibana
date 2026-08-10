@@ -116,6 +116,7 @@ describe('WorkflowTaskManager', () => {
         },
         {
           request: fakeRequest,
+          cloneApiKey: true,
         }
       );
     });
@@ -215,7 +216,7 @@ describe('WorkflowTaskManager', () => {
           runAt: resumeAt,
           scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
         },
-        { request: fakeRequest }
+        { request: fakeRequest, cloneApiKey: true }
       );
     });
 
@@ -338,7 +339,7 @@ describe('WorkflowTaskManager', () => {
           state: {},
           scope: [`workflow:execution:${executionId}`],
         },
-        { request: fakeRequest }
+        { request: fakeRequest, cloneApiKey: true }
       );
       // runAt must not be set — task runs at the next available slot
       const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
@@ -487,6 +488,45 @@ describe('WorkflowTaskManager', () => {
           fakeRequest,
         })
       ).rejects.toThrow('runSoon failed');
+    });
+  });
+
+  describe('hasActiveTaskForExecution', () => {
+    const workflowExecutionId = 'test-execution-id';
+
+    it('should return true when an idle, claiming, or running task exists for the execution scope', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 't1' }] } as any);
+
+      const hasActive = await workflowTaskManager.hasActiveTaskForExecution(workflowExecutionId);
+
+      expect(hasActive).toBe(true);
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith({
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
+                },
+              },
+              {
+                term: {
+                  'task.scope': `workflow:execution:${workflowExecutionId}`,
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should return false when no matching tasks are found', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+
+      const hasActive = await workflowTaskManager.hasActiveTaskForExecution(workflowExecutionId);
+
+      expect(hasActive).toBe(false);
     });
   });
 
@@ -683,7 +723,7 @@ describe('WorkflowTaskManager', () => {
           taskType: 'workflow:run',
           runAt: new Date('2025-08-06T20:00:00.000Z'),
         }),
-        { request: fakeRequest }
+        { request: fakeRequest, cloneApiKey: true }
       );
       jest.useRealTimers();
     });

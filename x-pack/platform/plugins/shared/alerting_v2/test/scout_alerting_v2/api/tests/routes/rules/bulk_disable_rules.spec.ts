@@ -138,6 +138,7 @@ apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classi
       body: { ids: [] },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject a body with no ids field', async ({ apiClient }) => {
@@ -146,6 +147,7 @@ apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classi
       body: {},
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject unknown fields (strict schema)', async ({ apiClient }) => {
@@ -154,6 +156,7 @@ apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classi
       body: { ids: ['some-id'], unknown: 'value' },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject ids longer than ID_MAX_LENGTH', async ({ apiClient }) => {
@@ -163,6 +166,7 @@ apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classi
       body: { ids: [tooLongId] },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -174,6 +178,7 @@ apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classi
         body: { ids },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 

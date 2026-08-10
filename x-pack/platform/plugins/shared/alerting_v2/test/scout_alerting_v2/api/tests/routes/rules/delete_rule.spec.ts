@@ -64,6 +64,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
