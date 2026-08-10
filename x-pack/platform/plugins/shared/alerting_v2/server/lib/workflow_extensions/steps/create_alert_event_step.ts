@@ -10,7 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { createAlertEventDataSchema } from '@kbn/alerting-v2-schemas';
 import { createAlertEventStepCommonDefinition } from '../../../../common/workflows/steps/create_alert_event_step_common';
-import type { AlertEventsClientApi } from '../../../../types';
+import type { AlertEventsClientApi } from '../../../types';
 
 export function getCreateAlertEventStepDefinition(
   getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>
