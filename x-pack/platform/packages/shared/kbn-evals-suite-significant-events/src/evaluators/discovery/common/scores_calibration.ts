@@ -24,7 +24,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: '"80-critical" severity applies to a site-wide/global outage affecting all or most customers, a confirmed failure that fully blocks a customer-facing operation for everyone who reaches it (no successful completions on the affected path), or confirmed active exposure of PII, PCI, CVV, SSN, credentials, secrets, tokens. One mandatory service, dependency, or endpoint can qualify when its failure blocks the operation end-to-end; unrelated services need not also fail. When the operation still completes for some (degraded, intermittent, or partial), impact is confined to a limited cohort, or impact is not yet confirmed, the correct tier is "60-high" or lower.',
+    text: 'Apply the `severity` field contract: `80-critical` requires confirmed impact meeting its critical definition, including a single critical operation fully blocked end-to-end. Grade the direct signal evidence over a generic "degraded" phrase in the summary. Use `60-high` or lower when the direct evidence shows completion for some users, intermittent or partial impact, a limited cohort, or unconfirmed impact.',
   },
   {
     id: 'weak_signals_low_severity',
