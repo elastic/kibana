@@ -403,7 +403,7 @@ describe('MigrationRulesTable', () => {
       renderTable();
       openFlyoutForRule('First Rule');
 
-      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
 
       expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Second Rule');
     });
@@ -412,7 +412,7 @@ describe('MigrationRulesTable', () => {
       renderTable();
       openFlyoutForRule('Second Rule');
 
-      fireEvent.click(screen.getByTestId('migrationFlyoutPreviousButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavPreviousButton'));
 
       expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
     });
@@ -421,15 +421,15 @@ describe('MigrationRulesTable', () => {
       renderTable();
       openFlyoutForRule('First Rule');
 
-      expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
-      expect(screen.getByTestId('migrationFlyoutNextButton')).toBeEnabled();
+      expect(screen.getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeEnabled();
 
-      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
-      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
 
       expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
-      expect(screen.getByTestId('migrationFlyoutNextButton')).toBeDisabled();
-      expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
+      expect(screen.getByTestId('flyoutPrevNextNavPreviousButton')).toBeEnabled();
     });
 
     it('should reset to the first enabled tab when navigating to a rule that cannot show the selected tab', () => {
@@ -439,7 +439,7 @@ describe('MigrationRulesTable', () => {
       fireEvent.click(screen.getByTestId('tabOverview'));
       expect(screen.getByTestId('tabOverview')).toHaveAttribute('aria-selected', 'true');
 
-      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
 
       expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Second Rule');
       expect(screen.getByTestId('tabOverview')).toBeDisabled();
@@ -451,8 +451,8 @@ describe('MigrationRulesTable', () => {
       renderTable();
       openFlyoutForRule('First Rule');
 
-      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
-      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
+      fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
       expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
 
       fireEvent.click(screen.getByTestId('installMigrationRuleFromFlyoutButton'));
@@ -512,11 +512,11 @@ describe('MigrationRulesTable', () => {
         openFlyoutForRule('First Rule');
         expect(getHighlightedRuleId()).toBe('rule-1');
 
-        fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+        fireEvent.click(screen.getByTestId('flyoutPrevNextNavNextButton'));
         expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
         expect(getHighlightedRuleId()).toBe('rule-3');
 
-        fireEvent.click(screen.getByTestId('migrationFlyoutPreviousButton'));
+        fireEvent.click(screen.getByTestId('flyoutPrevNextNavPreviousButton'));
         expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
         expect(getHighlightedRuleId()).toBe('rule-1');
       });
@@ -533,8 +533,8 @@ describe('MigrationRulesTable', () => {
         renderTable();
         openFlyoutForRule('Middle Rule');
 
-        expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
-        expect(screen.getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+        expect(screen.getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+        expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
         expect(getHighlightedRuleId()).toBe('rule-2');
       });
     });

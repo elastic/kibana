@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { MigrationFlyoutNavigation } from '../../common/components/flyout_nav';
-import { useMigrationFlyoutNav } from '../../common/components/flyout_nav';
+import type { FlyoutPrevNextNavigation } from '../../../common/flyout_prev_next_nav';
+import { useFlyoutPrevNextNav } from '../../../common/flyout_prev_next_nav';
 import { isMigrationItemNavigableWithFlyout } from '../../common/utils';
 import { DashboardMigrationDetailsFlyout } from '../components/dashboard_details_flyout';
 
@@ -36,7 +36,7 @@ interface UseMigrationDashboardDetailsFlyoutResult {
   openMigrationDashboardDetails: (dashboard: DashboardMigrationDashboard) => void;
   closeMigrationDashboardDetails: () => void;
   openedMigrationDashboardId?: string;
-  navigation: MigrationFlyoutNavigation;
+  navigation: FlyoutPrevNextNavigation;
 }
 
 export function useMigrationDashboardDetailsFlyout({
@@ -58,7 +58,7 @@ export function useMigrationDashboardDetailsFlyout({
   }, []);
   const closeMigrationDashboardDetails = useCallback(() => setMigrationDashboardId(undefined), []);
 
-  const navigation = useMigrationFlyoutNav({
+  const navigation = useFlyoutPrevNextNav({
     items: migrationDashboards,
     openedItemId: migrationDashboardId,
     isNavigable: isMigrationItemNavigableWithFlyout,

@@ -28,14 +28,14 @@ import {
   CLOSE_BUTTON_LABEL,
   SUMMARY_TAB_LABEL,
 } from '../../../common/components/details_flyout/translation';
-import type { MigrationFlyoutNavigation } from '../../../common/components/flyout_nav';
+import type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
 import {
   ScrollableFlyoutTabbedContent,
   TabContentPadding,
 } from '../../../common/components/details_flyout/utils';
 import { SummaryTab } from './tabs/summary';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
-import { MigrationFlyoutNav } from '../../../common/components/flyout_nav';
+import { FlyoutPrevNextNav } from '../../../../common/flyout_prev_next_nav';
 
 export interface DashboardMigrationDashboardDetailsFlyoutProps {
   migrationDashboard: DashboardMigrationDashboard;
@@ -43,7 +43,7 @@ export interface DashboardMigrationDashboardDetailsFlyoutProps {
   size?: EuiFlyoutProps['size'];
   isLoading?: boolean;
   dashboardActions?: React.ReactNode;
-  navigation: MigrationFlyoutNavigation;
+  navigation: FlyoutPrevNextNavigation;
 }
 
 export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigrationDetailsFlyout({
@@ -108,7 +108,7 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
           <EuiFlexItem grow={false}>
-            <MigrationFlyoutNav navigation={navigation} isDisabled={isLoading} />
+            <FlyoutPrevNextNav navigation={navigation} isDisabled={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">

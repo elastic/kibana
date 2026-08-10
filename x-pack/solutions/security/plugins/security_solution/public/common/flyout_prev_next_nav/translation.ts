@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const PREVIOUS_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.translationDetails.previousButtonLabel',
+  'xpack.securitySolution.common.flyoutPrevNextNav.previousButtonLabel',
   { defaultMessage: 'Previous' }
 );
 
 export const NEXT_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.translationDetails.nextButtonLabel',
+  'xpack.securitySolution.common.flyoutPrevNextNav.nextButtonLabel',
   { defaultMessage: 'Next' }
 );

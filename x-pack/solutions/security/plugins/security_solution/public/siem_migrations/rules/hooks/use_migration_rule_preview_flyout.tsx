@@ -11,8 +11,8 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
-import type { MigrationFlyoutNavigation } from '../../common/components/flyout_nav';
-import { useMigrationFlyoutNav } from '../../common/components/flyout_nav';
+import type { FlyoutPrevNextNavigation } from '../../../common/flyout_prev_next_nav';
+import { useFlyoutPrevNextNav } from '../../../common/flyout_prev_next_nav';
 import { isMigrationItemNavigableWithFlyout } from '../../common/utils';
 
 interface UseMigrationRuleDetailsFlyoutParams {
@@ -44,7 +44,7 @@ interface UseMigrationRuleDetailsFlyoutResult {
    * Navigation state for the opened rule within the loaded page. Boundary flags are
    * computed ONLY here. The same object is passed to the flyout.
    */
-  navigation: MigrationFlyoutNavigation;
+  navigation: FlyoutPrevNextNavigation;
 }
 
 export function useMigrationRuleDetailsFlyout({
@@ -67,7 +67,7 @@ export function useMigrationRuleDetailsFlyout({
   }, []);
   const closeMigrationRuleDetails = useCallback(() => setMigrationRuleId(undefined), []);
 
-  const navigation = useMigrationFlyoutNav({
+  const navigation = useFlyoutPrevNextNav({
     items: migrationRules,
     openedItemId: migrationRuleId,
     isNavigable: isMigrationItemNavigableWithFlyout,

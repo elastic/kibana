@@ -54,10 +54,10 @@ import {
   SUMMARY_TAB_LABEL,
 } from '../../../common/components/details_flyout/translation';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
-import { MigrationFlyoutNav } from '../../../common/components/flyout_nav';
+import { FlyoutPrevNextNav } from '../../../../common/flyout_prev_next_nav';
 
-import type { MigrationFlyoutNavigation } from '../../../common/components/flyout_nav';
-export type { MigrationFlyoutNavigation } from '../../../common/components/flyout_nav';
+import type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
+export type { FlyoutPrevNextNavigation } from '../../../../common/flyout_prev_next_nav';
 
 interface MigrationRuleDetailsFlyoutContentProps {
   migrationRule: RuleMigrationRule;
@@ -185,7 +185,7 @@ interface MigrationRuleDetailsFlyoutProps {
   extraTabs?: EuiTabbedContentTab[];
   isDataLoading?: boolean;
   closeFlyout: () => void;
-  navigation: MigrationFlyoutNavigation;
+  navigation: FlyoutPrevNextNavigation;
 }
 
 export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProps> = React.memo(
@@ -261,7 +261,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
             <EuiFlexItem grow={false}>
-              <MigrationFlyoutNav navigation={navigation} isDisabled={!!isLoading} />
+              <FlyoutPrevNextNav navigation={navigation} isDisabled={!!isLoading} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">

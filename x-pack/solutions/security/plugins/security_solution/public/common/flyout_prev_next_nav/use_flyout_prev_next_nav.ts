@@ -7,8 +7,8 @@
 
 import { useCallback, useMemo } from 'react';
 
-export interface UseMigrationFlyoutNavArgs<T extends { id: string }> {
-  /** Ordered items of the currently loaded table page, including non-navigable ones. */
+export interface UseFlyoutPrevNextNavArgs<T extends { id: string }> {
+  /** Ordered items of the currently loaded page, including non-navigable ones. */
   items: T[];
   /** Id of the item currently opened in the flyout, if any. */
   openedItemId?: string;
@@ -18,19 +18,19 @@ export interface UseMigrationFlyoutNavArgs<T extends { id: string }> {
   onNavigate: (item: T) => void;
 }
 
-export interface UseMigrationFlyoutNavResult {
+export interface UseFlyoutPrevNextNavResult {
   hasNext: boolean;
   hasPrevious: boolean;
   goToNext: () => void;
   goToPrevious: () => void;
 }
 
-export const useMigrationFlyoutNav = <T extends { id: string }>({
+export const useFlyoutPrevNextNav = <T extends { id: string }>({
   items,
   openedItemId,
   isNavigable,
   onNavigate,
-}: UseMigrationFlyoutNavArgs<T>): UseMigrationFlyoutNavResult => {
+}: UseFlyoutPrevNextNavArgs<T>): UseFlyoutPrevNextNavResult => {
   const navigableItems = useMemo(() => items.filter(isNavigable), [items, isNavigable]);
 
   // -1 when nothing is open or the opened item is not navigable / not in the loaded page.

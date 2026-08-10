@@ -262,7 +262,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationFlyoutPreviousButton'));
+      fireEvent.click(getByTestId('flyoutPrevNextNavPreviousButton'));
       expect(navigation.goToPrevious).toHaveBeenCalled();
     });
 
@@ -277,7 +277,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationFlyoutNextButton'));
+      fireEvent.click(getByTestId('flyoutPrevNextNavNextButton'));
       expect(navigation.goToNext).toHaveBeenCalled();
     });
 
@@ -292,7 +292,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
+      expect(getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
     });
 
     it('should prevent moving forward from the last rule of the page', () => {
@@ -306,7 +306,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+      expect(getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
     });
 
     it('should disable both arrows when the page has a single rule', () => {
@@ -320,8 +320,8 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
-      expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+      expect(getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
+      expect(getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
     });
   });
 

@@ -102,7 +102,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationFlyoutPreviousButton'));
+      fireEvent.click(getByTestId('flyoutPrevNextNavPreviousButton'));
       expect(navigation.goToPrevious).toHaveBeenCalled();
     });
 
@@ -117,7 +117,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationFlyoutNextButton'));
+      fireEvent.click(getByTestId('flyoutPrevNextNavNextButton'));
       expect(navigation.goToNext).toHaveBeenCalled();
     });
 
@@ -132,7 +132,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
+      expect(getByTestId('flyoutPrevNextNavPreviousButton')).toBeDisabled();
     });
 
     it('should prevent moving forward from the last dashboard of the page', () => {
@@ -146,7 +146,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+      expect(getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
     });
   });
 });

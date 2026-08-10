@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useMigrationFlyoutNav } from './use_migration_flyout_nav';
+import { useFlyoutPrevNextNav } from './use_flyout_prev_next_nav';
 
 interface TestItem {
   id: string;
@@ -25,7 +25,7 @@ interface NavProps {
 const renderNav = (items: TestItem[], openedItemId?: string, onNavigate = jest.fn()) => {
   const utils = renderHook(
     ({ items: currentItems, openedId }: NavProps) =>
-      useMigrationFlyoutNav({
+      useFlyoutPrevNextNav({
         items: currentItems,
         openedItemId: openedId,
         isNavigable,
@@ -36,7 +36,7 @@ const renderNav = (items: TestItem[], openedItemId?: string, onNavigate = jest.f
   return { ...utils, onNavigate };
 };
 
-describe('useMigrationFlyoutNav', () => {
+describe('useFlyoutPrevNextNav', () => {
   describe('boundaries with all items navigable', () => {
     const items = [makeItem('1'), makeItem('2'), makeItem('3')];
 

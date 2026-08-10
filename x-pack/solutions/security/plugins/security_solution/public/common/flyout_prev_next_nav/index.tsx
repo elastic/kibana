@@ -9,24 +9,24 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { PREVIOUS_BUTTON_LABEL, NEXT_BUTTON_LABEL } from './translation';
 
-export * from './use_migration_flyout_nav';
+export * from './use_flyout_prev_next_nav';
 
-export interface MigrationFlyoutNavigation {
+export interface FlyoutPrevNextNavigation {
   hasPrevious: boolean;
   hasNext: boolean;
   goToPrevious: () => void;
   goToNext: () => void;
 }
 
-export interface MigrationFlyoutNavProps {
-  navigation: MigrationFlyoutNavigation;
+export interface FlyoutPrevNextNavProps {
+  navigation: FlyoutPrevNextNavigation;
   isDisabled: boolean;
 }
 
-export const MigrationFlyoutNav = React.memo(function MigrationFlyoutNav({
+export const FlyoutPrevNextNav = React.memo(function FlyoutPrevNextNav({
   navigation,
   isDisabled,
-}: MigrationFlyoutNavProps) {
+}: FlyoutPrevNextNavProps) {
   const { hasPrevious, hasNext, goToPrevious, goToNext } = navigation;
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
@@ -39,7 +39,7 @@ export const MigrationFlyoutNav = React.memo(function MigrationFlyoutNav({
             size="s"
             isDisabled={!hasPrevious || isDisabled}
             onClick={goToPrevious}
-            data-test-subj="migrationFlyoutPreviousButton"
+            data-test-subj="flyoutPrevNextNavPreviousButton"
             aria-label={PREVIOUS_BUTTON_LABEL}
           />
         </EuiToolTip>
@@ -53,7 +53,7 @@ export const MigrationFlyoutNav = React.memo(function MigrationFlyoutNav({
             size="s"
             isDisabled={!hasNext || isDisabled}
             onClick={goToNext}
-            data-test-subj="migrationFlyoutNextButton"
+            data-test-subj="flyoutPrevNextNavNextButton"
             aria-label={NEXT_BUTTON_LABEL}
           />
         </EuiToolTip>
