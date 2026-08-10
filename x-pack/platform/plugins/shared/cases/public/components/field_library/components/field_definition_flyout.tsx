@@ -246,7 +246,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
             helpText={
               isEditing
                 ? i18n.FIELD_DEFINITION_YAML_HELP_TEXT
-                : `${i18n.FIELD_DEFINITION_YAML_HELP_TEXT} ${i18n.FIELD_IDENTITY_CREATE_NOTE}`
+                : i18n.FIELD_DEFINITION_YAML_HELP_TEXT_CREATE
             }
             isInvalid={identityChanged}
             error={
