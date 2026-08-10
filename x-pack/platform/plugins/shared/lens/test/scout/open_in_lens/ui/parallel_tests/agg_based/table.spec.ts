@@ -46,7 +46,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Agg with params');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(1);
     const dimensions = await lens.getDimensionTriggers();
@@ -58,7 +58,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Summary row');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(1);
     const dimensions = await lens.getDimensionTriggers();
@@ -75,7 +75,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Sibling pipeline agg');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
@@ -90,7 +90,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Parent pipeline agg');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
@@ -107,7 +107,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
       await convertToLensByTitle({ dashboard }, 'Table - Split rows and tables');
       await lens.waitForVisualization('lnsDataTable');
-      expect(await lens.getLayerCount()).toBe(1);
+      expect(await lens.layers.getLayerCount()).toBe(1);
 
       await expect(lens.dimensionTriggerLocator).toHaveCount(3);
 
@@ -125,7 +125,7 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Percentage Column');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
     await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
