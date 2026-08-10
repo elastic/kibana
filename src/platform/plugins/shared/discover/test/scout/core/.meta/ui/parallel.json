@@ -1,5 +1,5 @@
 {
-  "sha1": "87c202ab01312963f04dc5299195269b7a1da502",
+  "sha1": "7f7c88c543f781067ada4683cb40dd8777ce5017",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -88,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 50,
-        "column": 28
+        "line": 66,
+        "column": 11
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 99,
-        "column": 43
+        "line": 107,
+        "column": 19
       }
     },
     {
@@ -351,6 +351,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
         "line": 45,
         "column": 84
+      }
+    },
+    {
+      "id": "2a14d7cd35c2249-224a066230d1aa6",
+      "title": "Discover session embedded in dashboard - request cancellation cancels async search when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embedded_search_cancellation.spec.ts",
+        "line": 27,
+        "column": 35
       }
     },
     {
@@ -837,7 +850,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 20
       }
     },
@@ -857,7 +870,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 22
       }
     },
@@ -877,8 +890,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 61,
-        "column": 19
+        "line": 60,
+        "column": 17
       }
     },
     {
@@ -897,7 +910,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 75,
+        "line": 72,
         "column": 7
       }
     },
@@ -917,7 +930,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 90,
+        "line": 83,
         "column": 7
       }
     },
@@ -937,8 +950,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 97,
-        "column": 31
+        "line": 88,
+        "column": 29
       }
     },
     {
@@ -957,8 +970,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 115,
-        "column": 31
+        "line": 102,
+        "column": 29
       }
     },
     {
@@ -977,7 +990,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 162,
+        "line": 139,
         "column": 27
       }
     },
@@ -997,8 +1010,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 174,
-        "column": 31
+        "line": 149,
+        "column": 29
       }
     },
     {
@@ -1017,7 +1030,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 192,
+        "line": 161,
         "column": 16
       }
     },
@@ -1037,8 +1050,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 207,
-        "column": 31
+        "line": 173,
+        "column": 29
       }
     },
     {
@@ -1057,7 +1070,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 218,
+        "line": 182,
         "column": 29
       }
     },
@@ -1077,8 +1090,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 226,
-        "column": 15
+        "line": 188,
+        "column": 13
       }
     },
     {
@@ -1090,7 +1103,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 27
       }
     },
@@ -1103,7 +1116,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 51
       }
     },
@@ -1116,7 +1129,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 33
       }
     },
@@ -1129,7 +1142,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 78,
+        "line": 75,
         "column": 33
       }
     },
@@ -1142,7 +1155,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 95,
+        "line": 88,
         "column": 9
       }
     },
@@ -1155,8 +1168,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 106,
-        "column": 19
+        "line": 97,
+        "column": 17
       }
     },
     {
@@ -1430,6 +1443,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/source_filters.spec.ts",
         "line": 31,
         "column": 62
+      }
+    },
+    {
+      "id": "97b11d54520b89e-dac22b5f8fd6bca",
+      "title": "Discover time field column should handle the time field column changes correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/time_field_column.spec.ts",
+        "line": 20,
+        "column": 23
       }
     },
     {
