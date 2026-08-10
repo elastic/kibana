@@ -11,10 +11,11 @@ import { buildDataTableRecord, getShouldShowFieldHandler } from '@kbn/discover-u
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { flattenedToNestedDocument } from './build_document_tree';
+import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
+import { flattenedToNestedDocument, MAX_TREE_VALUES } from './build_document_tree';
 
 const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
-  const tree = flattenedToNestedDocument({
+  const { tree } = flattenedToNestedDocument({
     row: buildDataTableRecord(hit, dataViewMock),
     dataView: dataViewMock,
     columnsMeta: undefined,
@@ -26,7 +27,7 @@ const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
   return tree;
 };
 
-describe('buildDocumentTree', () => {
+describe('flattenedToNestedDocument', () => {
   it('un-flattens dotted keys, unwraps single-value arrays, and keeps genuine multi-value arrays', () => {
     const tree = buildTree({
       _id: '1',
@@ -115,7 +116,7 @@ describe('buildDocumentTree', () => {
       nestedDataView
     );
 
-    const tree = flattenedToNestedDocument({
+    const { tree } = flattenedToNestedDocument({
       row,
       dataView: nestedDataView,
       columnsMeta: undefined,
@@ -176,7 +177,7 @@ describe('buildDocumentTree', () => {
       },
     };
 
-    const tree = flattenedToNestedDocument({
+    const { tree } = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
       columnsMeta: {
@@ -201,7 +202,7 @@ describe('buildDocumentTree', () => {
       flattened: { note: '{"looks":"like json"}' },
     };
 
-    const tree = flattenedToNestedDocument({
+    const { tree } = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
       columnsMeta: { note: { type: 'string', esType: 'keyword' } },
@@ -238,7 +239,7 @@ describe('buildDocumentTree', () => {
       dataView
     );
 
-    const tree = flattenedToNestedDocument({
+    const { tree } = flattenedToNestedDocument({
       row,
       dataView,
       columnsMeta: undefined,
@@ -250,5 +251,66 @@ describe('buildDocumentTree', () => {
     });
 
     expect(tree).toEqual({ agent: 'Mozilla/5.0' });
+  });
+
+  describe('value budget (MAX_TREE_VALUES)', () => {
+    const buildFromFields = (fields: Record<string, unknown>) =>
+      flattenedToNestedDocument({
+        row: buildDataTableRecord(
+          { _id: '1', _index: 'test', _source: undefined, fields },
+          dataViewMock
+        ),
+        dataView: dataViewMock,
+        columnsMeta: undefined,
+        shouldShowFieldHandler: () => true,
+      });
+
+    const asRecord = (tree: JsonValue): Record<string, unknown> => {
+      if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
+        throw new Error('expected an object document tree');
+      }
+      return tree;
+    };
+
+    it('does not truncate a document within the budget', () => {
+      const { tree, truncated } = buildFromFields({ a: ['x'], b: ['y'] });
+
+      expect(truncated).toBe(false);
+      expect(tree).toEqual({ a: 'x', b: 'y' });
+    });
+
+    it('caps a document with more fields than the budget and reports truncation', () => {
+      const fields = Object.fromEntries(
+        Array.from({ length: MAX_TREE_VALUES + 1 }, (_, i) => [`field_${i}`, [i]])
+      );
+
+      const { tree, truncated } = buildFromFields(fields);
+
+      expect(truncated).toBe(true);
+      expect(Object.keys(asRecord(tree))).toHaveLength(MAX_TREE_VALUES);
+    });
+
+    it('stops walking once the budget is spent, so fields past the cap are absent', () => {
+      // `zzz_last` is inserted after the filler fields, so it sits beyond the budget and is never built.
+      const fields = {
+        ...Object.fromEntries(
+          Array.from({ length: MAX_TREE_VALUES }, (_, i) => [`field_${i}`, [i]])
+        ),
+        zzz_last: ['sentinel'],
+      };
+
+      const { tree } = buildFromFields(fields);
+
+      expect(asRecord(tree).zzz_last).toBeUndefined();
+    });
+
+    it('slices a single oversized array down to the budget', () => {
+      const { tree, truncated } = buildFromFields({
+        many: Array.from({ length: MAX_TREE_VALUES + 1 }, (_, i) => i),
+      });
+
+      expect(truncated).toBe(true);
+      expect(asRecord(tree).many).toHaveLength(MAX_TREE_VALUES);
+    });
   });
 });

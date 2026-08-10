@@ -24,13 +24,27 @@ const ESQL_JSON_STRUCTURED_ES_TYPES = new Set([
   ES_FIELD_TYPES.HISTOGRAM,
 ]);
 
+// Max number of values the document will show. The rest will be truncated.
+// Applies before search, so truncated values do not participate in it.
+// Prevents blocking the main thread on massive documents.
+export const MAX_TREE_VALUES = 3;
+interface ValueBudget {
+  remaining: number;
+  truncated: boolean;
+}
+
 interface FormatContext {
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
-const documentTreeCache = new WeakMap<EsHitRecord, JsonValue>();
+export interface NestedDocument {
+  tree: JsonValue;
+  truncated: boolean;
+}
+
+const documentTreeCache = new WeakMap<EsHitRecord, NestedDocument>();
 
 /**
  * Receives flattened fields (in ES|QL or DSL format) and builds a raw nested JSON document.
@@ -45,7 +59,7 @@ export const flattenedToNestedDocument = ({
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
-}): JsonValue => {
+}): NestedDocument => {
   const cached = documentTreeCache.get(row.raw);
   if (cached) return cached;
 
@@ -54,6 +68,7 @@ export const flattenedToNestedDocument = ({
     columnsMeta,
     shouldShowFieldHandler,
   };
+  const budget: ValueBudget = { remaining: MAX_TREE_VALUES, truncated: false };
   const metaFields = new Set(dataView.metaFields);
   const documentFlat: Record<string, unknown> = {};
 
@@ -62,24 +77,40 @@ export const flattenedToNestedDocument = ({
   for (const fieldName of Object.keys(row.flattened)) {
     // Discard meta fields (_id, _index, etc.)
     if (metaFields.has(fieldName)) continue;
+
     // Discard multifields (i.e: field.keyword)
     if (!shouldShowFieldHandler(fieldName)) continue;
 
-    documentFlat[fieldName] = processFieldValue(row.flattened[fieldName], fieldName, ctx);
+    // Stop once the budget is spent, leaving the remaining fields out of the document.
+    if (budget.remaining <= 0) {
+      budget.truncated = true;
+      break;
+    }
+
+    documentFlat[fieldName] = processFieldValue(row.flattened[fieldName], fieldName, ctx, budget);
   }
 
   // Step 2. Unflatten the object based on the dotted-key map.
   const documentTree = unflattenKeys(documentFlat);
 
-  documentTreeCache.set(row.raw, documentTree);
-  return documentTree;
+  const result: NestedDocument = { tree: documentTree, truncated: budget.truncated };
+  documentTreeCache.set(row.raw, result);
+  return result;
 };
 
-const processFieldValue = (rawValue: unknown, fieldName: string, ctx: FormatContext): unknown => {
+const processFieldValue = (
+  rawValue: unknown,
+  fieldName: string,
+  ctx: FormatContext,
+  budget: ValueBudget
+): unknown => {
   // CASE 1: a ES|QL complex column (histogram, aggregate_metric_double) arrives as a JSON string.
   // We parse it back into an object so it can be explored.
   const structured = parseEsqlStructuredValue(rawValue, ctx.columnsMeta?.[fieldName]?.esType);
-  if (structured !== undefined) return structured;
+  if (structured !== undefined) {
+    budget.remaining -= 1;
+    return structured;
+  }
 
   // Normalise the value, in Classic we get every value wrapped in an array, in ES|QL we get the value directly.
   const values: unknown[] = Array.isArray(rawValue) ? rawValue : [rawValue];
@@ -90,25 +121,45 @@ const processFieldValue = (rawValue: unknown, fieldName: string, ctx: FormatCont
   const isNestedContainer = !field || field.type === 'nested';
   const objects = values.filter(isPlainObject);
   if (isNestedContainer && objects.length > 0 && objects.length === values.length) {
-    return objects.map((object) => {
+    const nested: Array<Record<string, unknown>> = [];
+    for (const object of objects) {
+      // Stop before a new sub-object once the budget is spent.
+      if (budget.remaining <= 0) {
+        budget.truncated = true;
+        break;
+      }
       const inner: Record<string, unknown> = {};
       for (const key of Object.keys(object)) {
         const qualifiedName = `${fieldName}.${key}`;
         if (!ctx.shouldShowFieldHandler(qualifiedName)) continue;
-        inner[key] = processFieldValue(object[key], qualifiedName, ctx);
+        // Stop before a new sub-field once the budget is spent; the recursion accounts for its value.
+        if (budget.remaining <= 0) {
+          budget.truncated = true;
+          break;
+        }
+        inner[key] = processFieldValue(object[key], qualifiedName, ctx, budget);
       }
-      return unflattenKeys(inner);
-    });
+      nested.push(unflattenKeys(inner));
+    }
+    return nested;
   }
 
-  // CASE 3: a scalar value. We unwrap the array and return the value.
-  const leaves = values.map((value) => value ?? null);
+  // CASE 3: a scalar value (or a genuine multi-value array). Each element is one value, so a single
+  // huge field is sliced down to the remaining budget rather than materialised in full.
+  const take = Math.min(values.length, budget.remaining);
+  if (take < values.length) budget.truncated = true;
+  budget.remaining -= take;
+  const leaves = values.slice(0, take).map((value) => value ?? null);
   return leaves.length === 1 ? leaves[0] : leaves;
 };
 
 // Decode a complex ES|QL column that arrived as a JSON string back into its object/array value.
 const parseEsqlStructuredValue = (value: unknown, esType: string | undefined): unknown => {
-  if (typeof value !== 'string' || !esType || !ESQL_JSON_STRUCTURED_ES_TYPES.has(esType)) {
+  if (
+    typeof value !== 'string' ||
+    !esType ||
+    !ESQL_JSON_STRUCTURED_ES_TYPES.has(esType as ES_FIELD_TYPES)
+  ) {
     return undefined;
   }
   try {

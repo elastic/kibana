@@ -8,6 +8,8 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
+import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
@@ -19,7 +21,7 @@ import type {
 } from '@kbn/discover-utils/types';
 import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
-import { flattenedToNestedDocument } from '../utils/build_document_tree';
+import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
 import type { FormatValue } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
@@ -54,7 +56,7 @@ export const SourceDocumentJsonMode = ({
   );
 
   // Unflatten the row and process some fields for better rendering.
-  const documentTree = flattenedToNestedDocument({
+  const { tree: documentTree, truncated } = flattenedToNestedDocument({
     row,
     dataView,
     columnsMeta,
@@ -79,6 +81,28 @@ export const SourceDocumentJsonMode = ({
     [row, dataView, fieldFormats]
   );
 
+  // The tree only shows a capped slice of a very large document; warn that some fields are hidden.
+  const truncatedWarning = useMemo(
+    () =>
+      truncated ? (
+        <EuiIconTip
+          type="warning"
+          color="warning"
+          size="s"
+          anchorProps={{ css: { display: 'flex' } }}
+          iconProps={{ 'data-test-subj': 'sourceDocumentTruncatedWarning' }}
+          content={i18n.translate('unifiedDataTable.sourceDocumentJsonMode.truncatedWarning', {
+            defaultMessage:
+              'This document is too large to display in full. Only the first {maxValues} values are displayed.',
+            values: {
+              maxValues: MAX_TREE_VALUES,
+            },
+          })}
+        />
+      ) : undefined,
+    [truncated]
+  );
+
   // in-table search renders the cells for all given rows for counting matches, this is expensive for the JSONTreeViewer,
   // If we detect this case, we render a light version of the document tree (just text).
   if (isInTableSearchCounting) {
@@ -97,6 +121,7 @@ export const SourceDocumentJsonMode = ({
     >
       <JsonTreeViewer
         json={documentTree}
+        extraHeaderContent={truncatedWarning}
         initialState={initialTreeState}
         onStateChange={onTreeStateChange}
         expandNodesContainingTerm={inTableSearchTerm}

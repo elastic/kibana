@@ -277,4 +277,31 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId('fmt')).toHaveTextContent('Berlin');
     });
   });
+
+  describe('extraHeaderContent', () => {
+    it('renders custom header content next to the controls', () => {
+      render(
+        <JsonTreeViewer
+          json={{ user: { name: 'Alice' } }}
+          extraHeaderContent={<span data-test-subj="custom-header">custom</span>}
+        />
+      );
+
+      expect(screen.getByTestId('jsonTreeViewerExpandAll')).toBeVisible();
+      expect(screen.getByTestId('custom-header')).toBeVisible();
+    });
+
+    it('renders header content even when there are no expandable collections', () => {
+      // A flat document has no Expand/Collapse-all control; the header row exists only for the slot.
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          extraHeaderContent={<span data-test-subj="custom-header">custom</span>}
+        />
+      );
+
+      expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
+      expect(screen.getByTestId('custom-header')).toBeVisible();
+    });
+  });
 });
