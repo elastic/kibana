@@ -214,25 +214,21 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
-    const agentCreatedBy: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
+    const agentCreatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
       width: '12%',
       field: 'created_by',
       name: columnNames.createdBy,
-      render: (
-        createdBy: AgentDefinitionWithPermissions['created_by'],
-        agent: AgentDefinitionWithPermissions
-      ) => renderOwnerCell(createdBy, agent.created_at, profileMap, dateFormat),
+      render: (createdBy: ListAgentResponseItem['created_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(createdBy, agent.created_at, profileMap, dateFormat),
       'data-test-subj': 'agentBuilderAgentsListCreatedBy',
     };
 
-    const agentLastUpdatedBy: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
+    const agentLastUpdatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
       width: '12%',
       field: 'updated_by',
       name: columnNames.lastUpdatedBy,
-      render: (
-        updatedBy: AgentDefinitionWithPermissions['updated_by'],
-        agent: AgentDefinitionWithPermissions
-      ) => renderOwnerCell(updatedBy, agent.updated_at, profileMap, dateFormat),
+      render: (updatedBy: ListAgentResponseItem['updated_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(updatedBy, agent.updated_at, profileMap, dateFormat),
       'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
     };
 
