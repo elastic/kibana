@@ -419,8 +419,7 @@ export const ALERTING_LOG_CODES = {
    * close. The windows were still read; the PIT expires on its own.
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
-  
-  
+
   // ──────────────── Rule templates (graceful degradation) ────────────────
   /**
    * A stored rule template failed schema validation. Find omits it from the
