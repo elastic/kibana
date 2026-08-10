@@ -4234,7 +4234,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/agent-builder-visualizations-common@link:x-pack/platform/packages/shared/agent-builder-visualizations/agent-builder-visualizations-common":
+"@kbn/agent-builder-visualizations-common@link:x-pack/platform/packages/shared/agent_builder_visualizations/agent-builder-visualizations-common":
   version "0.0.0"
   uid ""
 
@@ -4242,11 +4242,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/agent-builder-visualizations-server@link:x-pack/platform/packages/shared/agent-builder-visualizations/agent-builder-visualizations-server":
+"@kbn/agent-builder-visualizations-server@link:x-pack/platform/packages/shared/agent_builder_visualizations/agent-builder-visualizations-server":
   version "0.0.0"
   uid ""
 
-"@kbn/agent-builder-visualizations@link:x-pack/platform/packages/shared/agent-builder-visualizations/agent-builder-visualizations":
+"@kbn/agent-builder-visualizations@link:x-pack/platform/packages/shared/agent_builder_visualizations/agent-builder-visualizations":
   version "0.0.0"
   uid ""
 
@@ -6726,7 +6726,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-agent-builder-visualizations@link:x-pack/platform/packages/shared/agent-builder-visualizations/kbn-evals-suite-agent-builder-visualizations":
+"@kbn/evals-suite-agent-builder-visualizations@link:x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations":
   version "0.0.0"
   uid ""
 

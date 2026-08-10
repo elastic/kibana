@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/evals-suite-agent-builder-visualizations
   channel: ''
   owner: '@elastic/kibana-presentation'
-  sourceRoot: x-pack/platform/packages/shared/agent-builder-visualizations/kbn-evals-suite-agent-builder-visualizations
+  sourceRoot: x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/core'
