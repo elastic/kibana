@@ -29,11 +29,10 @@
  *   - `reason`: why this override exists (required)
  */
 module.exports = {
-  // Cross-imports within kbn-ui only. Core chrome and owning plugins are
-  // per-package overrides — do not grant all of src/core/ access to every
-  // restricted package (e.g. feedback).
+  // Cross-imports within kbn-ui only.
   alwaysAllowed: ['src/platform/kbn-ui/'],
-
+  // List of restricted packages and their import policies.
+  // Each package must have an `alternative` and may have `overrides`.
   packages: {
     '@kbn/ui-feedback': {
       alternative: 'Use the feedback plugin API instead.',
