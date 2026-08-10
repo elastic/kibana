@@ -6,6 +6,7 @@
  */
 
 import { initializeDataViews } from '../../tasks/login';
+import { ServerlessRoleName } from '../../support/roles';
 import {
   cleanupCase,
   cleanupPack,
@@ -90,7 +91,7 @@ describe(
       });
 
       it('runs a live query from the alert flyout and adds the action to Timeline', () => {
-        const TIMELINE_NAME = 'Untitled timeline';
+        const TIMELINE_NAME = 'Untitled Timeline';
         cy.getBySel('expand-event').first().click();
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
@@ -168,6 +169,7 @@ describe(
       };
 
       it('persists pack response actions across save/reopen and handles pack swap', () => {
+        cy.login(ServerlessRoleName.SOC_MANAGER, false);
         cy.visit('/app/security/rules');
         clickRuleName(ruleName);
         openRuleActionsTab();
@@ -351,6 +353,7 @@ describe(
 
       it('runs a take-action query against all enrolled agents', () => {
         cy.getBySel('expand-event').first().click();
+        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should('not.contain', 'Loading...');
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
