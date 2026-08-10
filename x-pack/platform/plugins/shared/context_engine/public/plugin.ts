@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
@@ -18,7 +17,6 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
@@ -48,19 +46,11 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
-  private readonly logger: Logger;
-
-  constructor(context: PluginInitializerContext) {
-    this.logger = context.logger.get();
-  }
+  constructor(_context: PluginInitializerContext) {}
 
   setup(
     core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
   ): ContextEnginePluginSetup {
-    this.setupAgentBuilderStart(core);
-
-    const agentBuilderPromise = this.agentBuilderPromise;
     const startServices = core.getStartServices();
 
     core.application.register({
@@ -91,12 +81,11 @@ export class ContextEnginePlugin
       async mount(params: AppMountParameters) {
         const { mountApp } = await import('./application');
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const agentBuilder = await agentBuilderPromise;
         coreStart.chrome.docTitle.change(APP_TITLE);
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
-          additionalServices: { agentBuilder },
+          coreSetup: core,
           element: params.element,
           history: params.history,
         });
@@ -104,31 +93,6 @@ export class ContextEnginePlugin
     });
 
     return {};
-  }
-
-  private setupAgentBuilderStart(
-    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
-  ): void {
-    try {
-      this.agentBuilderPromise = core.plugins
-        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
-        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
-        .catch((error) => {
-          this.logger.warn(
-            `Failed to resolve Agent Builder start contract: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          return undefined;
-        });
-    } catch (error) {
-      this.logger.warn(
-        `Failed to subscribe to Agent Builder start: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      this.agentBuilderPromise = Promise.resolve(undefined);
-    }
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {

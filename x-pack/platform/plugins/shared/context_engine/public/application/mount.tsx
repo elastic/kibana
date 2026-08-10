@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type {
-  ContextEngineAdditionalStartServices,
-  ContextEngineStartDependencies,
-} from '../types';
+import type { ContextEnginePluginStart, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
+import { resolveAgentBuilderStart } from './resolve_agent_builder';
 import { ContextEngineRoutes } from './routes';
 
 const queryClient = new QueryClient();
 
-export const mountApp = ({
+export const mountApp = async ({
   core,
   plugins,
-  additionalServices,
+  coreSetup,
   element,
   history,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
-  additionalServices: ContextEngineAdditionalStartServices;
+  coreSetup: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>;
   element: HTMLElement;
   history: ScopedHistory;
 }) => {
+  const agentBuilder = await resolveAgentBuilderStart(coreSetup);
+
   const services: ContextEngineServices = {
     ...core,
-    ...additionalServices,
+    agentBuilder,
     share: plugins.share,
     triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,

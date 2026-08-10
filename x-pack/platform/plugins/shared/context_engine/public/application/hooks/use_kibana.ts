@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  ContextEngineAdditionalStartServices,
-  ContextEngineStartDependencies,
-} from '../../types';
+import type { ContextEngineStartDependencies } from '../../types';
 
-export interface ContextEngineServices extends CoreStart, ContextEngineAdditionalStartServices {
+export interface ContextEngineServices extends CoreStart {
+  agentBuilder?: AgentBuilderPluginStart;
   share: ContextEngineStartDependencies['share'];
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
   console?: ContextEngineStartDependencies['console'];
