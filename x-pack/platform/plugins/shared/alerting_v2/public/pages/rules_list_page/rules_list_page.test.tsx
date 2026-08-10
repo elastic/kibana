@@ -278,12 +278,12 @@ describe('RulesListPage', () => {
     expect(screen.getByText('metrics-*')).toBeInTheDocument();
   });
 
-  it('surfaces fetch failures on the table instead of the empty create state', async () => {
+  it('does not show the empty create state when fetch fails', async () => {
     mockFindItems.mockRejectedValue(new Error('Network error'));
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Network error')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Search rules')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('ruleCreateOptionsPanel')).not.toBeInTheDocument();
   });

@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
-import { useContentListItems } from '@kbn/content-list-provider';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,29 +35,6 @@ import {
 import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
-
-const RulesListErrorCallout = () => {
-  const { error } = useContentListItems();
-  if (!error) {
-    return null;
-  }
-
-  return (
-    <EuiCallOut
-      announceOnMount
-      title={
-        <FormattedMessage
-          id="xpack.alertingV2.rulesList.loadErrorTitle"
-          defaultMessage="Failed to load rules"
-        />
-      }
-      color="danger"
-      iconType="error"
-    >
-      {error instanceof Error ? error.message : String(error)}
-    </EuiCallOut>
-  );
-};
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
@@ -181,7 +157,6 @@ export const RulesListPage = () => {
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
-          <RulesListErrorCallout />
           <ContentListToolbar>
             <ContentListToolbar.Filters>
               <StatusFilter />

@@ -78,8 +78,9 @@ export const useRulesDataSource = (): DataSourceConfig => {
           total: response.total,
         };
       } catch (error) {
-        // Re-throw so Content List surfaces the error on the table instead of
-        // treating the failure as an empty list (which would show the create CTA).
+        // Toast is the user-facing surface. Re-throw so Content List keeps the
+        // query in an error state instead of settling as an empty list (which
+        // would show the create CTA).
         toasts.addError(error, {
           title: i18n.translate('xpack.alertingV2.rulesList.fetchError', {
             defaultMessage: 'Failed to load rules',
