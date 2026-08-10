@@ -14,11 +14,15 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
 
 // ES types that ES|QL delivers as a JSON string instead of a structured value.
-const ESQL_JSON_STRUCTURED_ES_TYPES = new Set(['aggregate_metric_double', 'histogram']);
+const ESQL_JSON_STRUCTURED_ES_TYPES = new Set([
+  ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE,
+  ES_FIELD_TYPES.HISTOGRAM,
+]);
 
 interface FormatContext {
   dataView: DataView;
@@ -29,11 +33,9 @@ interface FormatContext {
 const documentTreeCache = new WeakMap<EsHitRecord, JsonValue>();
 
 /**
- * Builds a raw nested JSON document from a row's flattened fields for the document tree viewer.
- * Un-flattens dotted keys, unwraps single-value arrays, recurses into `nested` fields,
- * and decodes ES|QL JSON complex types (`histogram`, `aggregate_metric_double`).
+ * Receives flattened fields (in ES|QL or DSL format) and builds a raw nested JSON document.
  */
-export const buildDocumentTree = ({
+export const flattenedToNestedDocument = ({
   row,
   dataView,
   columnsMeta,
@@ -58,9 +60,9 @@ export const buildDocumentTree = ({
   // Step 1. Process field values. Histograms / Nested fields / unwrapp scalar values.
   // The result is still a flat object.
   for (const fieldName of Object.keys(row.flattened)) {
-    // Discard meta fields.
+    // Discard meta fields (_id, _index, etc.)
     if (metaFields.has(fieldName)) continue;
-    // Discard multifields (field.keyword).
+    // Discard multifields (i.e: field.keyword)
     if (!shouldShowFieldHandler(fieldName)) continue;
 
     documentFlat[fieldName] = processFieldValue(row.flattened[fieldName], fieldName, ctx);

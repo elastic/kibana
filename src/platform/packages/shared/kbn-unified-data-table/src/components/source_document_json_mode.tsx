@@ -19,7 +19,7 @@ import type {
 } from '@kbn/discover-utils/types';
 import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
-import { buildDocumentTree } from '../utils/build_document_tree';
+import { flattenedToNestedDocument } from '../utils/build_document_tree';
 import type { FormatValue } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
@@ -53,8 +53,8 @@ export const SourceDocumentJsonMode = ({
     [row]
   );
 
-  // Unflatten the row and preprocess the values.
-  const documentTree = buildDocumentTree({
+  // Unflatten the row and process some fields for better rendering.
+  const documentTree = flattenedToNestedDocument({
     row,
     dataView,
     columnsMeta,

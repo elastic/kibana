@@ -11,10 +11,10 @@ import { buildDataTableRecord, getShouldShowFieldHandler } from '@kbn/discover-u
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { buildDocumentTree } from './build_document_tree';
+import { flattenedToNestedDocument } from './build_document_tree';
 
 const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
-  const tree = buildDocumentTree({
+  const tree = flattenedToNestedDocument({
     row: buildDataTableRecord(hit, dataViewMock),
     dataView: dataViewMock,
     columnsMeta: undefined,
@@ -115,7 +115,7 @@ describe('buildDocumentTree', () => {
       nestedDataView
     );
 
-    const tree = buildDocumentTree({
+    const tree = flattenedToNestedDocument({
       row,
       dataView: nestedDataView,
       columnsMeta: undefined,
@@ -176,7 +176,7 @@ describe('buildDocumentTree', () => {
       },
     };
 
-    const tree = buildDocumentTree({
+    const tree = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
       columnsMeta: {
@@ -201,7 +201,7 @@ describe('buildDocumentTree', () => {
       flattened: { note: '{"looks":"like json"}' },
     };
 
-    const tree = buildDocumentTree({
+    const tree = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
       columnsMeta: { note: { type: 'string', esType: 'keyword' } },
@@ -238,7 +238,7 @@ describe('buildDocumentTree', () => {
       dataView
     );
 
-    const tree = buildDocumentTree({
+    const tree = flattenedToNestedDocument({
       row,
       dataView,
       columnsMeta: undefined,
