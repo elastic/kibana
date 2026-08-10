@@ -13,13 +13,8 @@ import {
   type Replacements,
 } from '@kbn/elastic-assistant-common';
 import { i18n as i18nTranslate } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  type EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { AddToCaseActionPanel, ADD_TO_CASE, CASE_TYPE } from '@kbn/response-ops-alerts-table';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
@@ -32,6 +27,8 @@ import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { UpdateAlertsModal } from './update_alerts_modal';
+import { AttackDiscoveryActionMenu } from './attack_discovery_action_menu';
+
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
@@ -39,6 +36,20 @@ import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use
 import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useAttackRunWorkflowContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
+
+const ATTACK_DISCOVERY_ACTION_IDS = {
+  addToCase: 'addToCase',
+  addToChat: 'viewInAgentBuilder',
+  addToDataset: 'addToDataset',
+  addToExistingCase: 'addToExistingCase',
+  addToNewCase: 'addToNewCase',
+  markAsAcknowledged: 'markAsAcknowledged',
+  markAsClosed: 'markAsClosed',
+  markAsOpen: 'markAsOpen',
+  viewInAiAssistant: 'viewInAiAssistant',
+} as const;
+
+const ATTACK_DISCOVERY_CASE_PANEL_ID = 'attack-discovery-add-to-case-panel';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
@@ -308,7 +319,7 @@ const TakeActionComponent: React.FC<Props> = ({
     [buttonSize, buttonText, onButtonClick]
   );
 
-  const allItems = useMemo(() => {
+  const actionMenuItems = useMemo(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
 
     const isOpen = attackDiscoveries.every(
@@ -328,7 +339,8 @@ const TakeActionComponent: React.FC<Props> = ({
         ? [
             {
               'data-test-subj': 'markAsOpen',
-              key: 'markAsOpen',
+              key: ATTACK_DISCOVERY_ACTION_IDS.markAsOpen,
+              icon: <EuiIcon type="dot" color="danger" aria-hidden />,
               name: i18n.MARK_AS_OPEN,
               onClick: () => onUpdateWorkflowStatus('open'),
             },
@@ -340,7 +352,8 @@ const TakeActionComponent: React.FC<Props> = ({
         ? [
             {
               'data-test-subj': 'markAsAcknowledged',
-              key: 'markAsAcknowledged',
+              key: ATTACK_DISCOVERY_ACTION_IDS.markAsAcknowledged,
+              icon: <EuiIcon type="dot" color="primary" aria-hidden />,
               name: i18n.MARK_AS_ACKNOWLEDGED,
               onClick: () => onUpdateWorkflowStatus('acknowledged'),
             },
@@ -352,7 +365,8 @@ const TakeActionComponent: React.FC<Props> = ({
         ? [
             {
               'data-test-subj': 'markAsClosed',
-              key: 'markAsClosed',
+              key: ATTACK_DISCOVERY_ACTION_IDS.markAsClosed,
+              icon: <EuiIcon type="dot" color="subdued" aria-hidden />,
               name: i18n.MARK_AS_CLOSED,
               onClick: () => onUpdateWorkflowStatus('closed'),
             },
@@ -363,15 +377,10 @@ const TakeActionComponent: React.FC<Props> = ({
       ? [
           {
             'data-test-subj': 'addToCase',
-            key: 'addToCase',
-            name: i18n.ADD_TO_NEW_CASE,
-            onClick: onClickAddToNewCase,
-          },
-          {
-            'data-test-subj': 'addToExistingCase',
-            key: 'addToExistingCase',
-            name: i18n.ADD_TO_EXISTING_CASE,
-            onClick: onClickAddToExistingCase,
+            key: ATTACK_DISCOVERY_ACTION_IDS.addToCase,
+            icon: 'briefcase',
+            name: ADD_TO_CASE,
+            panel: ATTACK_DISCOVERY_CASE_PANEL_ID,
           },
         ]
       : [];
@@ -383,7 +392,8 @@ const TakeActionComponent: React.FC<Props> = ({
               {
                 'data-test-subj': 'viewInAgentBuilder',
                 disabled: isAddToChatDisabled,
-                key: 'viewInAgentBuilder',
+                key: ATTACK_DISCOVERY_ACTION_IDS.addToChat,
+                icon: 'comment',
                 name: i18n.ADD_TO_CHAT,
                 onClick: onViewInAgentBuilder,
                 toolTipContent: isAddToChatDisabled
@@ -397,7 +407,8 @@ const TakeActionComponent: React.FC<Props> = ({
             {
               'data-test-subj': 'viewInAiAssistant',
               disabled: viewInAiAssistantDisabled,
-              key: 'viewInAiAssistant',
+              key: ATTACK_DISCOVERY_ACTION_IDS.viewInAiAssistant,
+              icon: 'sparkles',
               name: i18n.VIEW_IN_AI_ASSISTANT,
               onClick: onViewInAiAssistant,
             },
@@ -410,28 +421,24 @@ const TakeActionComponent: React.FC<Props> = ({
         ? [
             {
               'data-test-subj': 'addToDataset',
-              key: 'addToDataset',
+              key: ATTACK_DISCOVERY_ACTION_IDS.addToDataset,
+              icon: 'database',
               name: addToDatasetAction.label,
               onClick: addToDatasetAction.onClick,
             },
           ]
         : [];
 
-    return [
-      ...markAsOpenItem,
-      ...markAsAcknowledgedItem,
-      ...markAsClosedItem,
-      ...runWorkflowItems,
-      ...caseItems,
-      ...aiItems,
-      ...datasetItems,
-    ];
+    return {
+      aiItems,
+      caseItems,
+      datasetItems,
+      statusItems: [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem],
+    };
   }, [
     attackDiscoveries,
     hasAlertsUpdate,
     addToCaseDisabled,
-    onClickAddToNewCase,
-    onClickAddToExistingCase,
     isAgentChatExperienceEnabled,
     hasAgentBuilderPrivilege,
     isAddToChatDisabled,
@@ -440,13 +447,38 @@ const TakeActionComponent: React.FC<Props> = ({
     viewInAiAssistantDisabled,
     onViewInAiAssistant,
     onUpdateWorkflowStatus,
-    runWorkflowItems,
     addToDatasetAction,
   ]);
 
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [{ id: 0, items: allItems }, ...runWorkflowPanels],
-    [allItems, runWorkflowPanels]
+  const casePanels = useMemo(
+    () =>
+      !addToCaseDisabled
+        ? [
+            {
+              id: ATTACK_DISCOVERY_CASE_PANEL_ID,
+              title: CASE_TYPE,
+              content: (
+                <AddToCaseActionPanel
+                  actions={[
+                    {
+                      id: ATTACK_DISCOVERY_ACTION_IDS.addToNewCase,
+                      label: i18n.ADD_TO_NEW_CASE,
+                      dataTestSubj: ATTACK_DISCOVERY_ACTION_IDS.addToNewCase,
+                      onClick: onClickAddToNewCase,
+                    },
+                    {
+                      id: ATTACK_DISCOVERY_ACTION_IDS.addToExistingCase,
+                      label: i18n.ADD_TO_EXISTING_CASE,
+                      dataTestSubj: 'addToExistingCase',
+                      onClick: onClickAddToExistingCase,
+                    },
+                  ]}
+                />
+              ),
+            },
+          ]
+        : [],
+    [addToCaseDisabled, onClickAddToExistingCase, onClickAddToNewCase]
   );
 
   const onCloseOrCancel = useCallback(() => {
@@ -465,7 +497,14 @@ const TakeActionComponent: React.FC<Props> = ({
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <AttackDiscoveryActionMenu
+          aiItems={actionMenuItems.aiItems}
+          caseItems={actionMenuItems.caseItems}
+          datasetItems={actionMenuItems.datasetItems}
+          panels={[...casePanels, ...runWorkflowPanels]}
+          statusItems={actionMenuItems.statusItems}
+          workflowItems={runWorkflowItems}
+        />
       </EuiPopover>
 
       {pendingAction != null && !hasSearchAILakeConfigurations && (

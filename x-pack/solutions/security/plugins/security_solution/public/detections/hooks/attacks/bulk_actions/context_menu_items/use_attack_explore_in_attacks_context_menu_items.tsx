@@ -16,6 +16,7 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { buildExploreInAttacksUrl } from '../../../../../flyout_v2/attack/main/utils/get_explore_in_attacks_url';
 
 export const EXPLORE_IN_ATTACKS_TEST_ID = 'exploreInAttacksContextMenuItem';
+export const EXPLORE_IN_ATTACKS_ACTION_ID = 'exploreInAttacks';
 export const EXPLORE_IN_ATTACKS_LABEL = i18n.translate(
   'xpack.securitySolution.attacks.exploreInAttacks',
   { defaultMessage: 'Explore in Attacks' }
@@ -64,7 +65,7 @@ export const useAttackExploreInAttacksContextMenuItems = ({
     () => [
       {
         'data-test-subj': EXPLORE_IN_ATTACKS_TEST_ID,
-        key: 'exploreInAttacks',
+        key: EXPLORE_IN_ATTACKS_ACTION_ID,
         name: (
           <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexStart">
             <EuiFlexItem grow={false}>{EXPLORE_IN_ATTACKS_LABEL}</EuiFlexItem>

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { useBulkAttackCaseItems } from './use_bulk_attack_case_items';
@@ -14,6 +16,27 @@ import {
   ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT,
 } from '../constants';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+
+const submitCaseAction = async ({
+  panel,
+  alertItems,
+  actionTestSubj = 'attack-add-to-new-case',
+}: {
+  panel: NonNullable<ReturnType<typeof useBulkAttackCaseItems>['panels'][number]>;
+  alertItems: TimelineItem[];
+  actionTestSubj?: string;
+}) => {
+  render(
+    panel.renderContent({
+      alertItems,
+      setIsBulkActionsLoading: jest.fn(),
+      closePopoverMenu: jest.fn(),
+    })
+  );
+  expect(screen.getByTestId('add-to-case-submit')).toBeDisabled();
+  await userEvent.click(screen.getByTestId(actionTestSubj));
+  await userEvent.click(screen.getByTestId('add-to-case-submit'));
+};
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -81,12 +104,13 @@ describe('useBulkAttackCaseItems', () => {
     });
   });
 
-  it('should return two case items when user has permissions', () => {
+  it('should return an add-to-case item and case type panel when user has permissions', () => {
     const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
       wrapper,
     });
 
-    expect(result.current.items).toHaveLength(2);
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.panels).toHaveLength(1);
   });
 
   it('should return empty items when user lacks cases permissions', () => {
@@ -122,8 +146,9 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[1]?.onClick?.(
-      [
+    await submitCaseAction({
+      panel: result.current.panels[0],
+      alertItems: [
         {
           _id: 'attack-1',
           data: [
@@ -141,11 +166,7 @@ describe('useBulkAttackCaseItems', () => {
           ecs: { _id: 'attack-2' },
         },
       ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
+    });
 
     expect(onAddToNewCase).toHaveBeenCalledWith({
       alertIds: ['alert-1', 'alert-2', 'alert-3'],
@@ -166,19 +187,16 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[1]?.onClick?.(
-      [
+    await submitCaseAction({
+      panel: result.current.panels[0],
+      alertItems: [
         {
           _id: 'attack-1',
           data: [],
           ecs: { _id: 'attack-1' },
         },
       ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
+    });
 
     expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
       source: 'attacks_page_group_take_action',
@@ -195,8 +213,10 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[0]?.onClick?.(
-      [
+    await submitCaseAction({
+      panel: result.current.panels[0],
+      actionTestSubj: 'attack-add-to-existing-case',
+      alertItems: [
         {
           _id: 'attack-1',
           data: [
@@ -214,11 +234,7 @@ describe('useBulkAttackCaseItems', () => {
           ecs: { _id: 'attack-2' },
         },
       ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
+    });
 
     expect(onAddToExistingCase).toHaveBeenCalledWith({
       alertIds: ['alert-1', 'alert-2'],
@@ -239,19 +255,17 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await result.current.items[0]?.onClick?.(
-      [
+    await submitCaseAction({
+      panel: result.current.panels[0],
+      actionTestSubj: 'attack-add-to-existing-case',
+      alertItems: [
         {
           _id: 'attack-1',
           data: [],
           ecs: { _id: 'attack-1' },
         },
       ],
-      false,
-      jest.fn(),
-      jest.fn(),
-      jest.fn()
-    );
+    });
 
     expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
       source: 'attacks_page_group_take_action',
@@ -259,11 +273,11 @@ describe('useBulkAttackCaseItems', () => {
     });
   });
 
-  it('should return empty panels', () => {
+  it('should return the case type panel', () => {
     const { result } = renderHook(() => useBulkAttackCaseItems({ title: 'attack title' }), {
       wrapper,
     });
 
-    expect(result.current.panels).toEqual([]);
+    expect(result.current.panels).toHaveLength(1);
   });
 });
