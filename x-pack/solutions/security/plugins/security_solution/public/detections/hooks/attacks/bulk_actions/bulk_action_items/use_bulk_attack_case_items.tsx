@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { AddToCaseActionPanel, ADD_TO_CASE, CASE_TYPE } from '@kbn/response-ops-alerts-table';
+import React, { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 
 import { useAddToExistingCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case';
@@ -18,6 +19,14 @@ import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
+
+export const ATTACK_CASE_ACTION_IDS = {
+  addToCase: 'attack-add-to-case',
+  addToExistingCase: 'attack-add-to-existing-case',
+  addToNewCase: 'attack-add-to-new-case',
+} as const;
+
+const ATTACK_CASE_PANEL_ID = 'attack-add-to-case-panel';
 
 export interface UseBulkAttackCaseItemsProps {
   /** Title used to initialize "create case" flyout */
@@ -121,22 +130,68 @@ export const useBulkAttackCaseItems = ({
       canCreateAndReadCases
         ? [
             {
-              name: ADD_TO_EXISTING_CASE,
-              label: ADD_TO_EXISTING_CASE,
-              key: 'attack-add-to-existing-case',
-              'data-test-subj': 'attack-add-to-existing-case',
+              name: ADD_TO_CASE,
+              label: ADD_TO_CASE,
+              key: ATTACK_CASE_ACTION_IDS.addToCase,
+              'data-test-subj': ATTACK_CASE_ACTION_IDS.addToCase,
               disableOnQuery: true,
-              disable: isAddToExistingCaseDisabled,
-              onClick: onAddToExistingCaseClick,
+              disable: isAddToExistingCaseDisabled && isAddToNewCaseDisabled,
+              groupId: 'cases',
+              icon: 'briefcase',
+              panel: ATTACK_CASE_PANEL_ID,
             },
+          ]
+        : [],
+    [canCreateAndReadCases, isAddToExistingCaseDisabled, isAddToNewCaseDisabled]
+  );
+
+  const panels = useMemo<BulkAttackActionItems['panels']>(
+    () =>
+      canCreateAndReadCases
+        ? [
             {
-              name: ADD_TO_NEW_CASE,
-              label: ADD_TO_NEW_CASE,
-              key: 'attack-add-to-new-case',
-              'data-test-subj': 'attack-add-to-new-case',
-              disableOnQuery: true,
-              disable: isAddToNewCaseDisabled,
-              onClick: onAddToNewCaseClick,
+              id: ATTACK_CASE_PANEL_ID,
+              title: CASE_TYPE,
+              renderContent: ({
+                alertItems,
+                isAllSelected = false,
+                setIsBulkActionsLoading,
+                clearSelection = () => undefined,
+                refresh = () => undefined,
+              }) => (
+                <AddToCaseActionPanel
+                  actions={[
+                    {
+                      id: ATTACK_CASE_ACTION_IDS.addToNewCase,
+                      label: ADD_TO_NEW_CASE,
+                      dataTestSubj: ATTACK_CASE_ACTION_IDS.addToNewCase,
+                      disabled: isAddToNewCaseDisabled,
+                      onClick: () =>
+                        onAddToNewCaseClick(
+                          alertItems,
+                          isAllSelected,
+                          setIsBulkActionsLoading,
+                          clearSelection,
+                          refresh
+                        ),
+                    },
+                    {
+                      id: ATTACK_CASE_ACTION_IDS.addToExistingCase,
+                      label: ADD_TO_EXISTING_CASE,
+                      dataTestSubj: ATTACK_CASE_ACTION_IDS.addToExistingCase,
+                      disabled: isAddToExistingCaseDisabled,
+                      onClick: () =>
+                        onAddToExistingCaseClick(
+                          alertItems,
+                          isAllSelected,
+                          setIsBulkActionsLoading,
+                          clearSelection,
+                          refresh
+                        ),
+                    },
+                  ]}
+                />
+              ),
             },
           ]
         : [],
@@ -149,11 +204,5 @@ export const useBulkAttackCaseItems = ({
     ]
   );
 
-  return useMemo(
-    () => ({
-      items,
-      panels: [],
-    }),
-    [items]
-  );
+  return useMemo(() => ({ items, panels }), [items, panels]);
 };

@@ -20,6 +20,8 @@ import { useApplyAttackTags } from '../apply_actions/use_apply_attack_tags';
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
+export const ATTACK_TAG_ACTION_ID = 'manage-attack-tags';
+
 export interface UseBulkAttackTagsItemsProps {
   /** Optional callback when tags are updated */
   onTagsUpdate?: () => void;
@@ -47,7 +49,7 @@ export const useBulkAttackTagsItems = ({
 
     return [
       {
-        key: 'manage-attack-tags',
+        key: ATTACK_TAG_ACTION_ID,
         'data-test-subj': 'attack-tags-context-menu-item',
         name: i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE,
         panel: 1,
