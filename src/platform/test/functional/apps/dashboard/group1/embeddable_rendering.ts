@@ -98,8 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/158529
-  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     const from = 'Jan 1, 2018 @ 00:00:00.000';
     const to = 'Apr 13, 2018 @ 00:00:00.000';
     before(async () => {

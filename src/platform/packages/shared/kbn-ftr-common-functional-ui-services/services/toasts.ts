@@ -73,6 +73,27 @@ export class ToastsService extends FtrService {
     return title;
   }
 
+  /**
+   * Like `getTitleAndDismiss`, but tolerant of the toast auto-dismissing before the title
+   * can be read: the title is looked up as a descendant of the already-located `.euiToast`
+   * (not via a second global find that races the fade-out), and a missing title yields
+   * `undefined` instead of throwing. Use after an action whose success is already confirmed
+   * by another signal, where the toast is transient and its text is not load-bearing.
+   */
+  public async getTitleAndDismissIfExists(): Promise<string | undefined> {
+    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
+    await toast.moveMouseTo();
+    let title: string | undefined;
+    try {
+      const titleElement = await this.testSubjects.findDescendant('euiToastHeader__title', toast);
+      title = await titleElement.getVisibleText();
+    } catch {
+      // Success toasts auto-dismiss, so the title may already be gone by now — that is fine.
+    }
+    await this.dismissIfExists();
+    return title;
+  }
+
   public async dismiss(): Promise<void> {
     await this.testSubjects.click('toastCloseButton', 6 * this.defaultFindTimeout);
   }

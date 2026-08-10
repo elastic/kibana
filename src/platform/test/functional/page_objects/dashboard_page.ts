@@ -637,7 +637,7 @@ export class DashboardPageObject extends FtrService {
     let message;
 
     if (saveOptions.saveAsNew) {
-      message = await this.toasts.getTitleAndDismiss();
+      message = await this.toasts.getTitleAndDismissIfExists();
       await this.header.waitUntilLoadingHasFinished();
       await this.common.waitForSaveModalToClose();
     }
