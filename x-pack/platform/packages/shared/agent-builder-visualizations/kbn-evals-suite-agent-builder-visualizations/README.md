@@ -8,8 +8,7 @@ It drives the full `/api/agent_builder/converse` flow, extracts the ES|QL backin
 
 Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" for visualization ES|QL is not the same as for analytical ES|QL. This first increment covers:
 
-- **Visualization skill activated** (`CODE`) — the request loaded the visualization skill and called `platform.core.create_visualization` (guards against the agent answering with raw ES|QL / a table instead of a rendered visualization).
-- **ES|QL Execution Validity** (`CODE`, from `@kbn/evals`) — AST parse + execute against real sample data and (per example) return rows. This is the tier that surfaces the fast-model regressions that motivated the suite.
+- **ES|QL Execution Validity** (`CODE`, from `@kbn/evals`) — AST parse + execute against real sample data and return rows. This is the tier that surfaces the fast-model regressions that motivated the suite.
 - **ES|QL Functional Equivalence** (`LLM` calibrated judge, from `@kbn/evals`) — three-point rubric (`equivalent` / `equivalent_with_caveats` / `not_equivalent`) with cosmetic allow-lists for aliases, bucketing, and `?_tstart`/`?_tend` bounds.
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.

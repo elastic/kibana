@@ -13,6 +13,8 @@ import {
   type LoadResult,
 } from '../../src/fixtures/replay';
 
+const GOLDEN_TOOL_PATH = ['load_skill', 'platform.core.create_visualization'];
+
 evaluate.describe(
   'Agent Builder Visualizations - Standalone Visualization Creation',
   { tag: tags.serverless.search },
@@ -44,16 +46,13 @@ evaluate.describe(
                   'Create a bar chart of the number of requests by response code in kibana_sample_data_logs.',
               },
               output: {
-                expected:
-                  'A bar chart backed by ES|QL that counts documents grouped by the response code field.',
                 query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Request Count\` = COUNT(*) BY response.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
-                goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
+                goldenToolPath: GOLDEN_TOOL_PATH,
               },
-              metadata: { includeHitDetection: true },
             },
             {
               input: {
@@ -61,14 +60,11 @@ evaluate.describe(
                   'Create a single metric visualization showing the total number of requests in kibana_sample_data_logs.',
               },
               output: {
-                expected:
-                  'A single metric visualization backed by ES|QL that counts all documents.',
                 query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Total Requests\` = COUNT(*)`,
-                goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
+                goldenToolPath: GOLDEN_TOOL_PATH,
               },
-              metadata: { includeHitDetection: true },
             },
             {
               input: {
@@ -76,13 +72,10 @@ evaluate.describe(
                   'Create a line chart of total bytes over time in kibana_sample_data_logs.',
               },
               output: {
-                expected:
-                  'A time-series visualization backed by ES|QL that sums the bytes field bucketed by time.',
                 query: `FROM kibana_sample_data_logs
 | STATS \`Total Bytes\` = SUM(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
-                goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
+                goldenToolPath: GOLDEN_TOOL_PATH,
               },
-              metadata: { includeHitDetection: true },
             },
             // Host metrics from the GCS otel-demo snapshot: Beats system load data stream
             // (`metrics-system.load-default` / `system.load.{1,5,15}`), not OTel hostmetrics
@@ -93,13 +86,10 @@ evaluate.describe(
                   'Show CPU load average metrics over time as a line chart. Include system.load.1 (1-minute), system.load.5 (5-minute), and system.load.15 (15-minute) as separate lines, bucketed by auto time interval.',
               },
               output: {
-                expected:
-                  'A time-series line chart backed by ES|QL that averages system.load.1, system.load.5, and system.load.15 from metrics-system.load-default over auto time buckets.',
                 query: `FROM metrics-system.load-default
 | STATS \`1-Minute Load\` = AVG(\`system.load.1\`), \`5-Minute Load\` = AVG(\`system.load.5\`), \`15-Minute Load\` = AVG(\`system.load.15\`) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
-                goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
+                goldenToolPath: GOLDEN_TOOL_PATH,
               },
-              metadata: { includeHitDetection: true },
             },
           ],
         },

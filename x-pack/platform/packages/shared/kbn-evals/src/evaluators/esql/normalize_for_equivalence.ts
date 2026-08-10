@@ -6,36 +6,14 @@
  */
 
 /**
- * Normalize ES|QL before functional equivalence so cosmetic time-bound
- * differences do not move scores.
- *
- * Agent-authored visualization queries often encode the dashboard time
- * window only via `BUCKET(@timestamp, …, ?_tstart, ?_tend)` /
- * `TBUCKET(…, ?_tstart, ?_tend)`, while gold examples also include an
- * explicit `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`.
- * For `@timestamp`-bounded viz queries those forms are equivalent for
- * evaluation purposes — strip the redundant WHERE so the LLM judge
- * compares the same logical query.
+ * Strip redundant `@timestamp` `?_tstart`/`?_tend` WHERE bounds before FuncEq
+ * so cosmetic presence/absence of that filter does not move scores. Handles a
+ * standalone WHERE pipe and leading/middle/trailing conjuncts.
  */
 
-/** Match `@timestamp` (optionally backticked). */
 const TIMESTAMP_FIELD = '`?@timestamp`?';
-
-/**
- * A conjunct that only constrains `@timestamp` to the eval bind params
- * (`?_tstart` / `?_tend`), in either order / inequality flavour the gold
- * and agents commonly emit.
- */
 const TIMESTAMP_BOUND_CONJUNCT = String.raw`(?:${TIMESTAMP_FIELD}\s*(?:>=|>)\s*\?_tstart\s+AND\s+${TIMESTAMP_FIELD}\s*(?:<=|<)\s*\?_tend|${TIMESTAMP_FIELD}\s*(?:<=|<)\s*\?_tend\s+AND\s+${TIMESTAMP_FIELD}\s*(?:>=|>)\s*\?_tstart)`;
 
-/**
- * Strip `@timestamp` range filters that only restate `?_tstart` / `?_tend`.
- *
- * Handles:
- * - a standalone `| WHERE <bounds>` pipe (removed entirely)
- * - a leading / trailing / middle conjunct inside a broader `WHERE`
- *   (the bounds conjunct is removed; other predicates stay)
- */
 export function stripRedundantTimestampBindBounds(query: string): string {
   if (!query || typeof query !== 'string') {
     return query;
@@ -43,28 +21,22 @@ export function stripRedundantTimestampBindBounds(query: string): string {
 
   let normalized = query;
 
-  // Standalone pipe: `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`
-  // Leave the preceding newline intact so the next pipe stays on its own line.
   normalized = normalized.replace(
     new RegExp(String.raw`\|\s*WHERE\s+${TIMESTAMP_BOUND_CONJUNCT}\s*(?=\||$)`, 'gi'),
     ''
   );
 
-  // Leading conjunct: `WHERE <bounds> AND <rest>` → `WHERE <rest>`
   normalized = normalized.replace(
     new RegExp(String.raw`(\|\s*WHERE\s+)${TIMESTAMP_BOUND_CONJUNCT}\s+AND\s+`, 'gi'),
     '$1'
   );
 
-  // Middle conjunct: `WHERE <a> AND <bounds> AND <b>` → `WHERE <a> AND <b>`
-  // Must run before the trailing pattern so nested AND chains are reduced correctly.
+  // Middle before trailing so nested AND chains reduce correctly.
   normalized = normalized.replace(
     new RegExp(String.raw`(\|\s*WHERE\s+.+?)\s+AND\s+${TIMESTAMP_BOUND_CONJUNCT}\s+AND\s+`, 'gis'),
     '$1 AND '
   );
 
-  // Trailing conjunct: `WHERE <rest> AND <bounds>` → `WHERE <rest>`
-  // The `s` flag allows `.` to match newlines in case WHERE spans multiple lines.
   normalized = normalized.replace(
     new RegExp(
       String.raw`(\|\s*WHERE\s+.+?)\s+AND\s+${TIMESTAMP_BOUND_CONJUNCT}(?=\s*(?:\||$))`,
@@ -76,9 +48,6 @@ export function stripRedundantTimestampBindBounds(query: string): string {
   return normalized;
 }
 
-/**
- * Normalize a gold or candidate ES|QL string before equivalence scoring.
- */
 export function normalizeEsqlForEquivalence(query: string): string {
   return stripRedundantTimestampBindBounds(query).trim();
 }

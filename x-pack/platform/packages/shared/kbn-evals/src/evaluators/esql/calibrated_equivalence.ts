@@ -54,7 +54,6 @@ TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
 - Equivalent function forms: \`DATE_EXTRACT("hour", @timestamp)\` vs \`HOUR(@timestamp)\`; \`SUBSTRING(x, 1, 3)\` vs \`LEFT(x, 3)\`.
 - Equivalent comparison forms: \`x >= 5 AND x <= 10\` vs \`x BETWEEN 5 AND 10\`; \`a == "x" AND b == "y"\` vs \`a == "x" | WHERE b == "y"\`.
 - Output column ordering or extra cosmetic \`KEEP\`/\`DROP\` clauses that don't change the answer.
-- Time-range bind parameters on \`@timestamp\`: presence vs absence of \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\` is cosmetic for visualization evals (dashboard time picker / \`BUCKET\`/\`TBUCKET\` bind params) — do NOT penalise either form. The same applies when comparing that WHERE to a hardcoded literal of the same window.
 - Presence vs absence of \`SORT <time bucket> ASC\` on a time-series query — charts order the time axis; do NOT penalise either form.
 - Different but compatible bucketing where the granularity is interchangeable for the question (e.g. \`BUCKET(@timestamp, 1h)\` vs \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\` over the same window when the question is "by hour").
 - Broader index patterns that still cover the same logical dataset: \`logs-*\` vs \`logs-endpoint.*\` when the gold uses the broader pattern.
@@ -183,9 +182,6 @@ export function createCalibratedEsqlEquivalenceEvaluator<
         };
       }
 
-      // Strip optional `@timestamp` bind-param WHERE bounds before judging so
-      // presence/absence of that conjunct cannot swing the score when the
-      // dashboard window is already expressed via BUCKET/TBUCKET params.
       const normalizedPrediction = normalizeEsqlForEquivalence(prediction);
       const normalizedGroundTruth = normalizeEsqlForEquivalence(groundTruth);
 
@@ -226,7 +222,6 @@ export function createCalibratedEsqlEquivalenceEvaluator<
         });
 
         if (!captured) {
-          // executeUntilValid resolved but the callback never ran — bare-text refusal from the judge.
           throw new Error('Judge returned no structured tool call');
         }
         return captured;

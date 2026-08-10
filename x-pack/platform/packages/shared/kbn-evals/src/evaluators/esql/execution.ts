@@ -63,13 +63,8 @@ async function evaluateSingleQuery(
     return detail;
   }
 
-  // AST validation runs against the original query so the validator sees
-  // exactly what the agent emitted (including bind-param placeholders,
-  // which `@kbn/esql-language` accepts as syntactically valid). ES
-  // execution, on the other hand, rejects `?_tstart` / `?_tend` with
-  // `parsing_exception: Unknown query parameter` unless the placeholder
-  // is substituted at the API layer — which production code does and
-  // this evaluator must mirror.
+  // Validate the original query (bind placeholders are syntactically valid);
+  // substitute only for ES execution, which rejects `?_tstart` / `?_tend`.
   const executableQuery = substituteEsqlBindParams(query);
   const [astResult, execResult] = await Promise.allSettled([
     validateQuery(query),

@@ -22,7 +22,6 @@ import {
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
-import { visualizationSkillActivatedEvaluator } from './skill_selection_evaluators';
 
 export type VisualizationDatasetExample = Example<
   {
@@ -31,14 +30,10 @@ export type VisualizationDatasetExample = Example<
   {
     /** Ground-truth ES|QL the generated visualization should be equivalent to. */
     query?: string;
-    /** Natural-language description of the expected outcome. */
-    expected?: string;
     /** Golden ordered tool path (e.g. `['load_skill', 'platform.core.create_visualization']`). */
     goldenToolPath?: string[];
   },
   {
-    /** When `true`, the execution evaluator also scores hit-rate against real data. */
-    includeHitDetection?: boolean;
     agentId?: string;
     [key: string]: unknown;
   }
@@ -61,18 +56,12 @@ export type VisualizationAgentEvaluator = Evaluator<
 
 export type EvaluateDataset = ({
   dataset,
-  evaluators,
-  additionalEvaluators,
 }: {
   dataset: {
     name: string;
     description: string;
     examples: VisualizationDatasetExample[];
   };
-  /** Replaces the default evaluator set when provided. */
-  evaluators?: VisualizationAgentEvaluator[];
-  /** Appended alongside the default (or custom) evaluator set. */
-  additionalEvaluators?: VisualizationAgentEvaluator[];
 }) => Promise<void>;
 
 // The converse turn surfaces the agent trace under `agentTraceId`; the
@@ -108,16 +97,13 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
-  // Execution already AST-validates via `@kbn/esql-language`, so a separate
-  // validity evaluator is omitted from the default set.
   const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({
     esClient,
     queryExtractor: extractVisualizationEsql,
-    // Per-example opt-in so future examples with legitimately empty results aren't penalised.
-    includeHitDetection: ({ metadata }) => Boolean(metadata?.includeHitDetection),
+    includeHitDetection: true,
   });
 
   const esqlEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator<
@@ -130,19 +116,17 @@ export function createEvaluateDataset({
     groundTruthExtractor: (expected) => expected?.query ?? '',
   });
 
-  const trajectoryEvaluator = createTrajectoryEvaluator({
-    extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
-    goldenPathExtractor: (expected) =>
-      (expected as { goldenToolPath?: string[] }).goldenToolPath ?? [],
+  const trajectoryEvaluator = createTrajectoryEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    extractToolCalls: getToolIds,
+    goldenPathExtractor: (expected) => expected?.goldenToolPath ?? [],
     orderWeight: 0.4,
     coverageWeight: 0.6,
   });
 
-  return async function evaluateDataset({
-    dataset: { name, description, examples },
-    evaluators: customEvaluators,
-    additionalEvaluators,
-  }) {
+  return async function evaluateDataset({ dataset: { name, description, examples } }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
     const task: ExperimentTask<VisualizationDatasetExample, VisualizationAgentTaskOutput> = async ({
@@ -165,13 +149,9 @@ export function createEvaluateDataset({
     };
 
     await executorClient.runExperiment({ datasets: [dataset], task }, [
-      ...(customEvaluators ?? [
-        visualizationSkillActivatedEvaluator,
-        esqlExecutionEvaluator,
-        esqlEquivalenceEvaluator,
-        trajectoryEvaluator,
-      ]),
-      ...(additionalEvaluators ?? []),
+      esqlExecutionEvaluator,
+      esqlEquivalenceEvaluator,
+      trajectoryEvaluator,
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
     ]);
   };
