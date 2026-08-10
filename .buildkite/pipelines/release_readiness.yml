@@ -1,11 +1,9 @@
 # Pipeline for https://github.com/elastic/kibana/issues/282202
 #
 # Evaluates release readiness signals for serverless (MKI) releases and posts a
-# summary to #kibana-mission-control ahead of the release.
-#
-# Planned signals:
+# summary to #kibana-mission-control ahead of the release:
 #   - FTR tests pass on MKI on the latest `dev` commit (appex-qa-serverless-kibana-ftr-tests)
-#   - The commit in `dev` has been promoted less than 6h ago
+#   - The commit in `dev` has been promoted less than 6h ago (elastic/serverless-gitops)
 #
 # https://buildkite.com/elastic/kibana-serverless-release-readiness
 
@@ -15,12 +13,11 @@ agents:
   provider: gcp
   machineType: n2-standard-2
 
-env:
-  TEAM_CHANNEL: '#kibana-mission-control'
-
 steps:
   - label: ':mag: Evaluate release readiness signals'
-    command: .buildkite/scripts/pipelines/release_readiness/notify_release_readiness.sh
+    command: ts-node .buildkite/scripts/pipelines/release_readiness/notify_release_readiness.ts
+    env:
+      DRY_RUN: ${DRY_RUN:-false}
 
 notify:
   - slack: '#kibana-mission-control'
