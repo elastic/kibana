@@ -10,19 +10,19 @@
 import type { ReactNode } from 'react';
 
 /**
- * Declarative shape hint for a skeleton cell, selected from the common
- * loading-state primitives offered by EUI
- * (`EuiSkeletonText` / `EuiSkeletonRectangle` / `EuiSkeletonCircle`).
- *
- * Renderers map the discriminator (`shape`) to the matching EUI component.
- */
-/**
  * Permitted `lines` values for a text-shape skeleton. Mirrors EUI's
  * `EuiSkeletonText`'s `LineRange` so descriptors compose with the
  * renderer without a cast.
  */
 export type SkeletonTextLines = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
+/**
+ * Declarative shape hint for a skeleton cell, selected from the common
+ * loading-state primitives offered by EUI
+ * (`EuiSkeletonText` / `EuiSkeletonRectangle` / `EuiSkeletonCircle`).
+ *
+ * Renderers map the discriminator (`shape`) to the matching EUI component.
+ */
 export type SkeletonDescriptor =
   | {
       /** Multi-line text-like skeleton. */

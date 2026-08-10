@@ -14,6 +14,12 @@ import { getPartKey, getPresetKey, createDeclarativeComponent } from './factory'
 /** Helper type for accessing symbol-keyed static properties on components. */
 type ComponentWithStatics = Record<symbol, unknown> & { displayName?: string };
 
+/** Minimal skeleton descriptor used by tests that register skeleton callbacks. */
+type TestSkeleton =
+  | { shape: 'text'; width?: string | number }
+  | { shape: 'rectangle'; width?: string | number; height?: number }
+  | { node: unknown };
+
 describe('defineAssembly', () => {
   it('should expose the assembly name.', () => {
     const asm = defineAssembly({ name: 'TestAssembly' });
@@ -503,7 +509,9 @@ describe('createComponent — per-instance resolver isolation', () => {
 
   it('resolves two custom skeleton resolvers independently', () => {
     const asm = defineAssembly({ name: 'SkeletonIsolationTest' });
-    const part = asm.definePart<Record<never, never>, FilterOutput, void>({ name: 'filter' });
+    const part = asm.definePart<Record<never, never>, FilterOutput, void, TestSkeleton>({
+      name: 'filter',
+    });
 
     const CompA = part.createComponent<Record<never, never>>({
       resolve: () => ({ label: 'A' }),
@@ -676,7 +684,7 @@ describe('resolveSkeleton', () => {
     theme: 'light' | 'dark';
   }
 
-  const column = asm.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
+  const column = asm.definePart<ColumnPresets, ColumnOutput, ColumnContext, TestSkeleton>({
     name: 'column',
   });
 
@@ -807,7 +815,7 @@ describe('resolveSkeleton', () => {
 
   it('supports the `{ node }` escape-hatch output shape', () => {
     const asm2 = defineAssembly({ name: 'SkeletonNode' });
-    const part = asm2.definePart<ColumnPresets, ColumnOutput, ColumnContext>({
+    const part = asm2.definePart<ColumnPresets, ColumnOutput, ColumnContext, TestSkeleton>({
       name: 'column',
     });
     part.createPreset({

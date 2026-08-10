@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/content-list-assembly",
+  "id": "@kbn/react-component-assembly",
   "owner": [
     "@elastic/appex-sharedux"
   ],

@@ -1,4 +1,4 @@
-# Getting started with `@kbn/content-list-assembly`
+# Getting started with `@kbn/react-component-assembly`
 
 ## Table of contents
 
@@ -198,7 +198,7 @@ This walkthrough builds a minimal `ActionBar` assembly.
 
 ```typescript
 // action_bar/assembly.ts
-import { defineAssembly } from '@kbn/content-list-assembly';
+import { defineAssembly } from '@kbn/react-component-assembly';
 
 export const actionBar = defineAssembly({ name: 'ActionBar' });
 ```

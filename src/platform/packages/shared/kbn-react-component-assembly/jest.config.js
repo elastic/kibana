@@ -9,14 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly',
-  ],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-react-component-assembly'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/packages/shared/kbn-react-component-assembly',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/packages/shared/kbn-react-component-assembly/**/*.{js,ts,tsx}',
   ],
 };

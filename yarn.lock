@@ -4834,10 +4834,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-list-assembly@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly":
-  version "0.0.0"
-  uid ""
-
 "@kbn/content-list-common@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-common":
   version "0.0.0"
   uid ""
@@ -8155,6 +8151,10 @@
   uid ""
 
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-component-assembly@link:src/platform/packages/shared/kbn-react-component-assembly":
   version "0.0.0"
   uid ""
 
