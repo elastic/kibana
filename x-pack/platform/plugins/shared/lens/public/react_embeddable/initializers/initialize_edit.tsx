@@ -252,7 +252,7 @@ export function initializeEditApi(
       closeFlyout,
       registerOnDismiss,
     }: {
-      closeFlyout?: () => void;
+      closeFlyout?: (options?: { skipCancel?: boolean }) => void;
       registerOnDismiss?: (handler?: () => void) => void;
     } = {
       closeFlyout: noop,
@@ -286,9 +286,9 @@ export function initializeEditApi(
             updateState({ ...getState(), attributes: appliedAttributes });
             return appliedAttributes;
           },
-      closeFlyout: () => {
+      closeFlyout: (options) => {
         internalApi.updateEditingState(false);
-        closeFlyout?.();
+        closeFlyout?.(options);
       },
       registerOnDismiss,
     });

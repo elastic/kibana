@@ -116,7 +116,7 @@ const MaybeWrapper = ({
 }: {
   wrapInFlyout?: boolean;
   children: JSX.Element;
-  closeFlyout?: () => void;
+  closeFlyout?: (options?: { skipCancel?: boolean }) => void;
 }) => {
   if (!wrapInFlyout) {
     return children;

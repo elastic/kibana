@@ -233,7 +233,7 @@ describe('LensEditConfigurationFlyout', () => {
 
     expect(screen.queryByTestId('cancelFlyoutButton')).not.toBeInTheDocument();
     expect(onCancelSpy).toHaveBeenCalledTimes(1);
-    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
+    expect(closeFlyoutSpy).toHaveBeenCalledWith({ skipCancel: true });
   });
 
   it('should register overlay dismiss cleanup that cancels editing', async () => {
@@ -256,19 +256,15 @@ describe('LensEditConfigurationFlyout', () => {
     expect(onCancelSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should clear overlay dismiss cleanup after Apply', async () => {
+  it('should close with skipCancel after Apply', async () => {
     const closeFlyoutSpy = jest.fn();
-    const registerOnDismiss = jest.fn();
 
     await renderConfigFlyout({
       closeFlyout: closeFlyoutSpy,
-      registerOnDismiss,
     });
 
     await userEvent.click(screen.getByTestId('applyFlyoutButton'));
-    await waitFor(() => expect(closeFlyoutSpy).toHaveBeenCalled());
-
-    expect(registerOnDismiss).toHaveBeenCalledWith(undefined);
+    await waitFor(() => expect(closeFlyoutSpy).toHaveBeenCalledWith({ skipCancel: true }));
   });
 
   it('should call the updatePanelState callback if cancel button is clicked', async () => {

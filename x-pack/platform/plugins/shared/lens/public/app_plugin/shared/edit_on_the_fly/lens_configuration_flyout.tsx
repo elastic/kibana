@@ -229,11 +229,10 @@ export function LensEditConfigurationFlyout({
 
   const onCancel = useCallback(() => {
     setIsInlineFlyoutVisible(false);
-    // Clear dismiss first so closeFlyout → overlay onClose does not cancel twice.
-    registerOnDismiss?.(undefined);
     cancelEditing();
-    closeFlyout?.();
-  }, [cancelEditing, closeFlyout, registerOnDismiss]);
+    // skipCancel: cancel cleanup already ran above.
+    closeFlyout?.({ skipCancel: true });
+  }, [cancelEditing, closeFlyout]);
 
   const textBasedMode = isOfAggregateQueryType(attributes.state.query);
 
@@ -287,14 +286,11 @@ export function LensEditConfigurationFlyout({
     }
 
     deleteUserChartTypeFromSessionStorage();
-    // Clear dismiss so overlay close after Apply does not revert applied changes.
-    registerOnDismiss?.(undefined);
-    closeFlyout?.();
+    closeFlyout?.({ skipCancel: true });
   }, [
     visualization.activeId,
     savedObjectId,
     closeFlyout,
-    registerOnDismiss,
     onApplyCallback,
     visualization.state,
     activeVisualization,

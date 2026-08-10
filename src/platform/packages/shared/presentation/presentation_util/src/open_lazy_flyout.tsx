@@ -18,12 +18,19 @@ import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
+export interface CloseFlyoutOptions {
+  /** When true, skip registered dismiss/cancel cleanup (e.g. after Apply). */
+  skipCancel?: boolean;
+}
+
+export type CloseFlyoutFn = (options?: CloseFlyoutOptions) => void;
+
 interface LoadContentArgs {
-  closeFlyout: () => void;
+  closeFlyout: CloseFlyoutFn;
   ariaLabelledBy: string;
   /**
-   * Register cleanup to run when the overlay closes (header X, outside click, Escape, or closeFlyout()).
-   * Pass `undefined` to clear (e.g. after a successful Apply).
+   * Register cleanup to run when the overlay closes without `skipCancel`
+   * (header X, outside click, Escape, or `closeFlyout()`).
    */
   registerOnDismiss: (handler?: () => void) => void;
 }
@@ -109,10 +116,14 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     onDismiss = handler;
   };
 
-  const onClose = () => {
-    const dismiss = onDismiss;
-    onDismiss = undefined;
-    dismiss?.();
+  const closeFlyout: CloseFlyoutFn = (options) => {
+    if (!options?.skipCancel) {
+      const dismiss = onDismiss;
+      onDismiss = undefined;
+      dismiss?.();
+    } else {
+      onDismiss = undefined;
+    }
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
     // Resolve lazily: closing can re-render the panel, so the trigger is looked up after
@@ -120,10 +131,13 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     restoreFocus();
   };
 
+  // EUI close paths (header X, outside click, Escape) have no options → cancel by default.
+  const onClose = () => closeFlyout();
+
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <LazyFlyout
-        closeFlyout={onClose}
+        closeFlyout={closeFlyout}
         registerOnDismiss={registerOnDismiss}
         loadContent={loadContent}
         core={core}

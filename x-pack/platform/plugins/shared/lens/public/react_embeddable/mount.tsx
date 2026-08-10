@@ -30,7 +30,7 @@ export const mountInlinePanel = async ({
     closeFlyout,
     registerOnDismiss,
   }?: {
-    closeFlyout: () => void;
+    closeFlyout: (options?: { skipCancel?: boolean }) => void;
     registerOnDismiss: (handler?: () => void) => void;
   }) => Promise<JSX.Element | null | void>;
   uuid?: string;
