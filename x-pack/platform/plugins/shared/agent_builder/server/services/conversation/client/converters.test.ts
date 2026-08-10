@@ -503,7 +503,7 @@ describe('conversation model converters', () => {
         entries: [
           {
             type: 'user',
-            name: 'alice',
+            id: 'alice-profile-id',
             role: ConversationAccessControlRole.Member,
             added_at: '2026-06-29T00:00:00.000Z',
           },
@@ -517,7 +517,7 @@ describe('conversation model converters', () => {
         entries: [
           {
             type: 'user',
-            name: 'alice',
+            id: 'alice-profile-id',
             role: ConversationAccessControlRole.Member,
             added_at: '2026-06-29T00:00:00.000Z',
           },
@@ -769,7 +769,7 @@ describe('conversation model converters', () => {
         entries: [
           {
             type: 'user',
-            name: 'alice',
+            id: 'alice-profile-id',
             role: ConversationAccessControlRole.Member,
             added_at: '2026-06-29T00:00:00.000Z',
           },
@@ -783,7 +783,7 @@ describe('conversation model converters', () => {
         entries: [
           {
             type: 'user',
-            name: 'alice',
+            id: 'alice-profile-id',
             role: ConversationAccessControlRole.Member,
             added_at: '2026-06-29T00:00:00.000Z',
           },
@@ -843,7 +843,7 @@ describe('conversation model converters', () => {
           entries: [
             {
               type: 'user',
-              name: 'alice',
+              id: 'alice-profile-id',
               role: ConversationAccessControlRole.Member,
               added_at: '2026-06-29T00:00:00.000Z',
             },
@@ -864,7 +864,7 @@ describe('conversation model converters', () => {
         entries: [
           {
             type: 'user',
-            name: 'alice',
+            id: 'alice-profile-id',
             role: ConversationAccessControlRole.Member,
             added_at: '2026-06-29T00:00:00.000Z',
           },

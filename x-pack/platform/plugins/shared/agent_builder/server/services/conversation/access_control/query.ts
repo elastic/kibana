@@ -42,22 +42,9 @@ const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
 };
 
 /**
- * Matches conversations shared with the current user.
+ * Matches conversations shared with the current user. Mirrors `isConversationMember`.
  */
-const buildSharedConversationFilter = ({ user }: { user: UserIdAndName }) => {
-  const shouldClauses: Array<Record<string, unknown>> = [];
-
-  if (user.id !== undefined) {
-    shouldClauses.push({ term: { 'access_control.entries.id': user.id } });
-  }
-
-  shouldClauses.push({
-    bool: {
-      must_not: { exists: { field: 'access_control.entries.id' } },
-      filter: { term: { 'access_control.entries.name': user.username } },
-    },
-  });
-
+const buildSharedConversationFilter = ({ userId }: { userId: string }) => {
   return {
     nested: {
       path: 'access_control.entries',
@@ -66,7 +53,7 @@ const buildSharedConversationFilter = ({ user }: { user: UserIdAndName }) => {
         bool: {
           filter: [
             { term: { 'access_control.entries.type': 'user' } },
-            { bool: { should: shouldClauses, minimum_should_match: 1 } },
+            { term: { 'access_control.entries.id': userId } },
           ],
         },
       },
@@ -87,16 +74,21 @@ export const buildReadAccessFilter = ({
   user: UserIdAndName;
   agentIds: string[];
 }) => {
+  const shouldClauses: Array<Record<string, unknown>> = [
+    buildPublicConversationFilter(),
+    buildOwnedConversationFilter({ user }),
+  ];
+
+  if (user.id !== undefined) {
+    shouldClauses.push(buildSharedConversationFilter({ userId: user.id }));
+  }
+
   return {
     bool: {
       filter: [
         {
           bool: {
-            should: [
-              buildPublicConversationFilter(),
-              buildOwnedConversationFilter({ user }),
-              buildSharedConversationFilter({ user }),
-            ],
+            should: shouldClauses,
             minimum_should_match: 1,
           },
         },

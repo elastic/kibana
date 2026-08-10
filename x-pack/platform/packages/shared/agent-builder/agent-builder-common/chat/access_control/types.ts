@@ -18,8 +18,7 @@ export type ConversationAccessControlPrincipalType = 'user';
 
 export interface ConversationAccessControlEntry {
   type: ConversationAccessControlPrincipalType;
-  id?: string;
-  name: string;
+  id: string;
   role: ConversationAccessControlRole;
   added_at: string;
 }

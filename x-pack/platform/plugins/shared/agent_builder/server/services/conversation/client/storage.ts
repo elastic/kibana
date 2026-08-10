@@ -46,7 +46,6 @@ const storageSettings = {
             properties: {
               type: types.keyword({}),
               id: types.keyword({}),
-              name: types.keyword({}),
               role: types.keyword({}),
               added_at: types.date({}),
             },

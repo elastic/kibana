@@ -205,28 +205,7 @@ describe('ConversationClient', () => {
                                   bool: {
                                     filter: [
                                       { term: { 'access_control.entries.type': 'user' } },
-                                      {
-                                        bool: {
-                                          should: [
-                                            { term: { 'access_control.entries.id': 'user-1' } },
-                                            {
-                                              bool: {
-                                                must_not: {
-                                                  exists: {
-                                                    field: 'access_control.entries.id',
-                                                  },
-                                                },
-                                                filter: {
-                                                  term: {
-                                                    'access_control.entries.name': 'test-user',
-                                                  },
-                                                },
-                                              },
-                                            },
-                                          ],
-                                          minimum_should_match: 1,
-                                        },
-                                      },
+                                      { term: { 'access_control.entries.id': 'user-1' } },
                                     ],
                                   },
                                 },

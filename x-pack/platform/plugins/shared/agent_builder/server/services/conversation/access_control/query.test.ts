@@ -47,26 +47,7 @@ describe('conversation access control query', () => {
                         bool: {
                           filter: [
                             { term: { 'access_control.entries.type': 'user' } },
-                            {
-                              bool: {
-                                should: [
-                                  { term: { 'access_control.entries.id': user.id } },
-                                  {
-                                    bool: {
-                                      must_not: {
-                                        exists: { field: 'access_control.entries.id' },
-                                      },
-                                      filter: {
-                                        term: {
-                                          'access_control.entries.name': user.username,
-                                        },
-                                      },
-                                    },
-                                  },
-                                ],
-                                minimum_should_match: 1,
-                              },
-                            },
+                            { term: { 'access_control.entries.id': user.id } },
                           ],
                         },
                       },
@@ -82,7 +63,7 @@ describe('conversation access control query', () => {
       });
     });
 
-    it('omits the id clauses when the caller has no id but still matches id-less documents', () => {
+    it('omits the shared clause entirely when the caller has no id', () => {
       expect(
         buildReadAccessFilter({ user: { username: user.username }, agentIds: ['agent-1'] })
       ).toEqual({
@@ -105,38 +86,6 @@ describe('conversation access control query', () => {
                         },
                       ],
                       minimum_should_match: 1,
-                    },
-                  },
-                  {
-                    nested: {
-                      path: 'access_control.entries',
-                      ignore_unmapped: true,
-                      query: {
-                        bool: {
-                          filter: [
-                            { term: { 'access_control.entries.type': 'user' } },
-                            {
-                              bool: {
-                                should: [
-                                  {
-                                    bool: {
-                                      must_not: {
-                                        exists: { field: 'access_control.entries.id' },
-                                      },
-                                      filter: {
-                                        term: {
-                                          'access_control.entries.name': user.username,
-                                        },
-                                      },
-                                    },
-                                  },
-                                ],
-                                minimum_should_match: 1,
-                              },
-                            },
-                          ],
-                        },
-                      },
                     },
                   },
                 ],

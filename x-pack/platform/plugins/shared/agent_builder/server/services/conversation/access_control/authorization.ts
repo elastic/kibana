@@ -44,18 +44,15 @@ export const isConversationMember = ({
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
-}): boolean =>
-  conversation.access_control?.entries?.some((entry) => {
-    if (entry.type !== 'user') {
-      return false;
-    }
+}): boolean => {
+  if (user.id === undefined || conversation.access_control?.entries === undefined) {
+    return false;
+  }
 
-    if (entry.id !== undefined && user.id !== undefined) {
-      return entry.id === user.id;
-    }
-
-    return entry.id === undefined && !!user.username && entry.name === user.username;
-  }) ?? false;
+  return conversation.access_control.entries.some(
+    (entry) => entry.type === 'user' && entry.id === user.id
+  );
+};
 
 export const hasConversationConverseAccess = ({
   conversation,

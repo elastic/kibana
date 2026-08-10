@@ -20,8 +20,10 @@ import {
   isConversationOwner,
 } from './authorization';
 
+const userId = 'user-profile-id';
+
 const user: UserIdAndName = {
-  id: 'user-profile-id',
+  id: userId,
   username: 'alice',
 };
 
@@ -87,7 +89,7 @@ describe('conversation access control', () => {
       overrides: Partial<ConversationAccessControlEntry> = {}
     ): ConversationAccessControlEntry => ({
       type: 'user',
-      name: user.username,
+      id: userId,
       role: ConversationAccessControlRole.Member,
       added_at: '2026-06-29T00:00:00.000Z',
       ...overrides,
@@ -98,32 +100,23 @@ describe('conversation access control', () => {
         access_control: { access_mode: ConversationAccessControlMode.Private, entries },
       });
 
-    it('matches members by profile id when the entry stored one', () => {
-      expect(
-        isConversationMember({
-          conversation: sharedWith(entry({ id: user.id, name: 'old-alice' })),
-          user,
-        })
-      ).toBe(true);
-    });
-
-    it('falls back to username for entries that never stored an id', () => {
+    it('matches members on the stable id', () => {
       expect(isConversationMember({ conversation: sharedWith(entry()), user })).toBe(true);
     });
 
-    it('does not fall back to username when the entry stored an id', () => {
+    it('does not match a different id', () => {
+      expect(
+        isConversationMember({ conversation: sharedWith(entry({ id: 'bob-profile-id' })), user })
+      ).toBe(false);
+    });
+
+    it('does not match the same username from another realm', () => {
       expect(
         isConversationMember({
           conversation: sharedWith(entry({ id: 'realm:["file","file1","alice"]' })),
           user: { id: 'realm:["native","native1","alice"]', username: user.username },
         })
       ).toBe(false);
-    });
-
-    it('does not match a different username', () => {
-      expect(isConversationMember({ conversation: sharedWith(entry({ name: 'bob' })), user })).toBe(
-        false
-      );
     });
 
     it('ignores entries that are not user principals', () => {
@@ -148,11 +141,11 @@ describe('conversation access control', () => {
       ).toBe(false);
     });
 
-    it('does not match an id-less entry against a caller with an empty username', () => {
+    it('returns false for a caller without a profile id, whatever the entries hold', () => {
       expect(
         isConversationMember({
-          conversation: sharedWith(entry({ name: '' })),
-          user: { username: '' },
+          conversation: sharedWith(entry()),
+          user: { username: user.username },
         })
       ).toBe(false);
     });
@@ -191,7 +184,7 @@ describe('conversation access control', () => {
               entries: [
                 {
                   type: 'user',
-                  name: user.username,
+                  id: userId,
                   role: ConversationAccessControlRole.Member,
                   added_at: '2026-06-29T00:00:00.000Z',
                 },
@@ -212,7 +205,7 @@ describe('conversation access control', () => {
               entries: [
                 {
                   type: 'user',
-                  name: user.username,
+                  id: userId,
                   role: ConversationAccessControlRole.Member,
                   added_at: '2026-06-29T00:00:00.000Z',
                 },
@@ -277,7 +270,7 @@ describe('conversation access control', () => {
               entries: [
                 {
                   type: 'user',
-                  name: user.username,
+                  id: userId,
                   role: ConversationAccessControlRole.Member,
                   added_at: '2026-06-29T00:00:00.000Z',
                 },
