@@ -96,7 +96,6 @@ enabled:
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
   - src/platform/test/functional/apps/management/group4/config.ts
-  - src/platform/test/functional/apps/status_page/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
