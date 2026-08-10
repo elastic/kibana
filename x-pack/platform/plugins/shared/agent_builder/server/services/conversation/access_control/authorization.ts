@@ -7,10 +7,17 @@
 
 import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import type { ConversationPermissions } from '../../../../common/http_api/conversations';
 import type { ConversationProperties } from '../client/storage';
 
-export type ConversationAccess = 'converse' | 'owner';
+export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete';
 
+/**
+ * Checks whether the current user owns the conversation.
+ *
+ * Username matching is limited to documents that never stored a `user_id`, so those owners are not
+ * orphaned. It cannot distinguish same-username principals across authentication realms.
+ */
 export const isConversationOwner = ({
   conversation,
   user,
@@ -22,7 +29,11 @@ export const isConversationOwner = ({
     return conversation.user_id === user.id;
   }
 
-  return conversation.user_name === user.username;
+  if (conversation.user_id === undefined && user.username !== undefined) {
+    return conversation.user_name === user.username;
+  }
+
+  return false;
 };
 
 const isPublicConversation = ({
@@ -54,3 +65,30 @@ export const hasConversationOwnerAccess = ({
   conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
   user: UserIdAndName;
 }): boolean => isConversationOwner({ conversation, user });
+
+export const hasConversationRenameAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
+  user: UserIdAndName;
+}): boolean => hasConversationOwnerAccess({ conversation, user });
+
+export const hasConversationDeleteAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
+  user: UserIdAndName;
+}): boolean => hasConversationOwnerAccess({ conversation, user });
+
+export const getConversationPermissions = ({
+  conversation,
+  user,
+}: {
+  conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
+  user: UserIdAndName;
+}): ConversationPermissions => ({
+  rename: hasConversationRenameAccess({ conversation, user }),
+  delete: hasConversationDeleteAccess({ conversation, user }),
+});

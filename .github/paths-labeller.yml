@@ -24,13 +24,14 @@
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
-- 'Team:obs-presentation':
+- 'Team:obs-signals-logs':
+    - 'x-pack/solutions/observability/plugins/ux/**/*.*'
+- 'Team:obs-signals-traces':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'src/platform/packages/shared/kbn-synthtrace/**/*.*'
     - 'src/platform/packages/shared/kbn-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
-    - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
@@ -50,7 +51,6 @@
     - 'x-pack/platform/packages/shared/kbn-evals/**/*.*'
     - 'x-pack/platform/packages/shared/kbn-evals-common/**/*.*'
     - 'x-pack/platform/packages/shared/kbn-evals-extensions/**/*.*'
-    - 'x-pack/platform/packages/shared/kbn-evals-phoenix-executor/**/*.*'
     - 'x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/**/*.*'
     - 'x-pack/platform/plugins/shared/evals/**/*.*'
     - 'x-pack/platform/packages/shared/llm-trace-waterfall/**/*.*'
