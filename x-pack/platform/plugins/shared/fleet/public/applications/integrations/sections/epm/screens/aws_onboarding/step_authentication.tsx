@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -99,15 +99,27 @@ const REGION_OPTIONS = [
   { value: 'ap-southeast-1', text: 'AP-Southeast-1' },
 ];
 
-// Elastic Cloud Forwarder widget — default (editable) state, then a
-// post-launch state with disabled fields + deploying status copy.
-const CloudFormationWidget: React.FunctionComponent<{ servicesCount: number }> = ({
+// Elastic Cloud Forwarder widget — the ONE place CloudFormation is launched
+// (state is lifted to the parent flow so step 4 "Deploy" can pick up the
+// resulting deploy/detect state without asking the user to launch again).
+const CloudFormationWidget: React.FunctionComponent<{
+  servicesCount: number;
+  identityName: string;
+  onIdentityNameChange: (value: string) => void;
+  region: string;
+  onRegionChange: (value: string) => void;
+  isLaunched: boolean;
+  onLaunch: () => void;
+}> = ({
   servicesCount,
+  identityName,
+  onIdentityNameChange,
+  region,
+  onRegionChange,
+  isLaunched,
+  onLaunch,
 }) => {
-  const [identityName, setIdentityName] = useState('');
   const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
-  const [region, setRegion] = useState('us-east');
-  const [isLaunched, setIsLaunched] = useState(false);
 
   const isIdentityNameInvalid = isIdentityNameTouched && identityName.trim().length === 0;
 
@@ -143,7 +155,7 @@ const CloudFormationWidget: React.FunctionComponent<{ servicesCount: number }> =
           fullWidth
           placeholder="e.g.: elastic-forwarder-prod"
           value={identityName}
-          onChange={(e) => setIdentityName(e.target.value)}
+          onChange={(e) => onIdentityNameChange(e.target.value)}
           onBlur={() => setIsIdentityNameTouched(true)}
           isInvalid={isIdentityNameInvalid}
           disabled={isLaunched}
@@ -167,7 +179,7 @@ const CloudFormationWidget: React.FunctionComponent<{ servicesCount: number }> =
           fullWidth
           options={REGION_OPTIONS}
           value={region}
-          onChange={(e) => setRegion(e.target.value)}
+          onChange={(e) => onRegionChange(e.target.value)}
           disabled={isLaunched}
           aria-label="Select region"
         />
@@ -179,7 +191,7 @@ const CloudFormationWidget: React.FunctionComponent<{ servicesCount: number }> =
           iconType="popout"
           iconSide="right"
           isDisabled={identityName.trim().length === 0}
-          onClick={() => setIsLaunched(true)}
+          onClick={onLaunch}
           data-test-subj="awsOnboardingStep3LaunchCloudFormation"
         >
           Launch CloudFormation
@@ -219,17 +231,39 @@ const PolicySecretsLink: React.FunctionComponent = () => (
 // dropdown (Identity Federation vs Direct Access Keys, defaults to Direct
 // Access Keys) drives which credential form renders below. Within Identity
 // Federation, New vs Existing identity is a radio choice, not tabs.
-const SetupAccessWidget: React.FunctionComponent<{ servicesCount: number }> = ({
-  servicesCount,
-}) => {
+const SetupAccessWidget: React.FunctionComponent<{
+  servicesCount: number;
+  onValidityChange: (isValid: boolean) => void;
+}> = ({ servicesCount, onValidityChange }) => {
   const [preferredMethod, setPreferredMethod] = useState<PreferredAccessMethod>(
     'direct_access_keys'
   );
   const [identityMode, setIdentityMode] = useState<IdentityMode>('new_identity');
   const [federatedIdentityName, setFederatedIdentityName] = useState('');
   const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
+  const [existingRoleArn, setExistingRoleArn] = useState('');
+  const [accessKeyId, setAccessKeyId] = useState('');
+  const [secretAccessKey, setSecretAccessKey] = useState('');
 
   const isIdentityNameInvalid = isIdentityNameTouched && federatedIdentityName.trim().length === 0;
+
+  useEffect(() => {
+    const isValid =
+      preferredMethod === 'direct_access_keys'
+        ? accessKeyId.trim().length > 0 && secretAccessKey.trim().length > 0
+        : identityMode === 'new_identity'
+        ? federatedIdentityName.trim().length > 0
+        : existingRoleArn.trim().length > 0;
+    onValidityChange(isValid);
+  }, [
+    preferredMethod,
+    identityMode,
+    federatedIdentityName,
+    existingRoleArn,
+    accessKeyId,
+    secretAccessKey,
+    onValidityChange,
+  ]);
 
   return (
     <EuiPanel
@@ -320,7 +354,10 @@ const SetupAccessWidget: React.FunctionComponent<{ servicesCount: number }> = ({
               <EuiFieldText
                 fullWidth
                 placeholder="arn:aws:iam::123456789012:role/elastic-forwarder"
+                value={existingRoleArn}
+                onChange={(e) => setExistingRoleArn(e.target.value)}
                 aria-label="Role ARN"
+                data-test-subj="awsOnboardingExistingRoleArn"
               />
             </EuiFormRow>
           )}
@@ -371,7 +408,14 @@ const SetupAccessWidget: React.FunctionComponent<{ servicesCount: number }> = ({
               }
               fullWidth
             >
-              <EuiFieldPassword type="dual" fullWidth aria-label="Access Key ID" />
+              <EuiFieldPassword
+                type="dual"
+                fullWidth
+                value={accessKeyId}
+                onChange={(e) => setAccessKeyId(e.target.value)}
+                aria-label="Access Key ID"
+                data-test-subj="awsOnboardingAccessKeyId"
+              />
             </EuiFormRow>
             <EuiSpacer size="s" />
             <PolicySecretsLink />
@@ -391,7 +435,14 @@ const SetupAccessWidget: React.FunctionComponent<{ servicesCount: number }> = ({
               }
               fullWidth
             >
-              <EuiFieldPassword type="dual" fullWidth aria-label="Secret Access Key" />
+              <EuiFieldPassword
+                type="dual"
+                fullWidth
+                value={secretAccessKey}
+                onChange={(e) => setSecretAccessKey(e.target.value)}
+                aria-label="Secret Access Key"
+                data-test-subj="awsOnboardingSecretAccessKey"
+              />
             </EuiFormRow>
             <EuiSpacer size="s" />
             <PolicySecretsLink />
@@ -406,9 +457,30 @@ export const StepAuthentication: React.FunctionComponent<{
   servicesCount: number;
   deploymentMethod: DeploymentMethod;
   onDeploymentMethodChange: (method: DeploymentMethod) => void;
-}> = ({ servicesCount, deploymentMethod, onDeploymentMethodChange }) => {
+  onCredentialsValidChange: (isValid: boolean) => void;
+  deployIdentityName: string;
+  onDeployIdentityNameChange: (value: string) => void;
+  deployRegion: string;
+  onDeployRegionChange: (value: string) => void;
+  isDeployed: boolean;
+  onLaunchCloudFormation: () => void;
+}> = ({
+  servicesCount,
+  deploymentMethod,
+  onDeploymentMethodChange,
+  onCredentialsValidChange,
+  deployIdentityName,
+  onDeployIdentityNameChange,
+  deployRegion,
+  onDeployRegionChange,
+  isDeployed,
+  onLaunchCloudFormation,
+}) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [pendingMethod, setPendingMethod] = useState<DeploymentMethod>(deploymentMethod);
+  const [agentAccessKeyId, setAgentAccessKeyId] = useState('');
+  const [agentSecretAccessKey, setAgentSecretAccessKey] = useState('');
+  const [managedCredsValid, setManagedCredsValid] = useState(false);
 
   const openModal = () => {
     setPendingMethod(deploymentMethod);
@@ -417,6 +489,14 @@ export const StepAuthentication: React.FunctionComponent<{
 
   const meta = DEPLOYMENT_METHOD_META[deploymentMethod];
   const { euiTheme } = useEuiTheme();
+
+  useEffect(() => {
+    const isValid =
+      deploymentMethod === 'agent'
+        ? agentAccessKeyId.trim().length > 0 && agentSecretAccessKey.trim().length > 0
+        : managedCredsValid;
+    onCredentialsValidChange(isValid);
+  }, [deploymentMethod, agentAccessKeyId, agentSecretAccessKey, managedCredsValid, onCredentialsValidChange]);
 
   return (
     <>
@@ -501,17 +581,39 @@ export const StepAuthentication: React.FunctionComponent<{
             />
           </EuiFormRow>
           <EuiFormRow label="Access Key ID" style={HALF_WIDTH} fullWidth>
-            <EuiFieldPassword type="dual" fullWidth aria-label="Access Key ID" />
+            <EuiFieldPassword
+              type="dual"
+              fullWidth
+              value={agentAccessKeyId}
+              onChange={(e) => setAgentAccessKeyId(e.target.value)}
+              aria-label="Access Key ID"
+              data-test-subj="awsOnboardingAgentAccessKeyId"
+            />
           </EuiFormRow>
           <EuiFormRow label="Secret Access Key" style={HALF_WIDTH} fullWidth>
-            <EuiFieldPassword type="dual" fullWidth aria-label="Secret Access Key" />
+            <EuiFieldPassword
+              type="dual"
+              fullWidth
+              value={agentSecretAccessKey}
+              onChange={(e) => setAgentSecretAccessKey(e.target.value)}
+              aria-label="Secret Access Key"
+              data-test-subj="awsOnboardingAgentSecretAccessKey"
+            />
           </EuiFormRow>
         </EuiPanel>
       ) : (
         <>
-          <SetupAccessWidget servicesCount={servicesCount} />
+          <SetupAccessWidget servicesCount={servicesCount} onValidityChange={setManagedCredsValid} />
           <EuiSpacer size="m" />
-          <CloudFormationWidget servicesCount={servicesCount} />
+          <CloudFormationWidget
+            servicesCount={servicesCount}
+            identityName={deployIdentityName}
+            onIdentityNameChange={onDeployIdentityNameChange}
+            region={deployRegion}
+            onRegionChange={onDeployRegionChange}
+            isLaunched={isDeployed}
+            onLaunch={onLaunchCloudFormation}
+          />
         </>
       )}
 
