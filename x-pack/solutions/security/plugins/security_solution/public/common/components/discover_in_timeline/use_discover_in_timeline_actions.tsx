@@ -22,7 +22,10 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
+import {
+  savedSearchComparator,
+  hasNonEmptyEsqlQuery,
+} from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -231,6 +234,23 @@ export const useDiscoverInTimelineActions = (
 
       // If there is already a saved search, only update the local state
       if (savedSearchId) {
+        // If an ES|QL query was explicitly cleared (query has `esql` key but value is blank),
+        // drop the savedSearchId link immediately so the next explicit timeline save sends
+        // savedSearchId: null to the server and the timeline appears compatible in the list
+        // without requiring a second save. Non-ES|QL queries (kuery/lucene) must not trigger
+        // this path — they have no `esql` key and are not related to the saved-search lifecycle.
+        const currentQuery = savedSearch.searchSource.getField('query');
+        const esqlQueryWasCleared =
+          currentQuery != null &&
+          typeof currentQuery === 'object' &&
+          'esql' in currentQuery &&
+          !hasNonEmptyEsqlQuery(currentQuery);
+        if (esqlQueryWasCleared) {
+          dispatch(
+            timelineActions.updateSavedSearchId({ id: TimelineId.active, savedSearchId: null })
+          );
+          return;
+        }
         savedSearch.id = savedSearchId;
         if (!timelineRef.current.savedSearch) {
           dispatch(
