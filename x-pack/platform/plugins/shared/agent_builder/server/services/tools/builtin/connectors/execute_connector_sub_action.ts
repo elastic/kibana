@@ -7,11 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import {
-  AuthorizationStatus,
-  ConfirmationStatus,
-  isAuthorizationMethod,
-} from '@kbn/agent-builder-common/agents';
+import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
@@ -131,41 +127,6 @@ export const createExecuteConnectorSubActionTool = ({
           }),
         ],
       };
-    }
-
-    // If the action is annotated as destructive, require explicit user confirmation before executing.
-    const actionDef = spec.actions[subAction];
-    if (actionDef?.annotations?.destructiveHint) {
-      const confirmId = `tools.${context.callContext.toolId}.confirmation.destructive.${connectorId}.${subAction}`;
-      const { status } = context.prompts.checkConfirmationStatus(confirmId);
-
-      if (status === ConfirmationStatus.unprompted) {
-        return context.prompts.askForConfirmation({
-          id: confirmId,
-          title: `Confirm: ${subAction}`,
-          message: `The '${subAction}' action may have irreversible side effects.\n\n**Parameters:**\n\`\`\`json\n${JSON.stringify(
-            params ?? {},
-            null,
-            2
-          )}\n\`\`\`\n\nDo you want to proceed?`,
-          confirm_text: 'Proceed',
-          cancel_text: 'Cancel',
-        });
-      }
-
-      if (status === ConfirmationStatus.rejected) {
-        return {
-          results: [
-            createErrorResult({
-              message:
-                `The user cancelled the '${subAction}' sub-action. Do not retry this action. ` +
-                'Let the user know it was not completed.',
-              metadata: { connectorId, connectorType, subAction },
-            }),
-          ],
-        };
-      }
-      // ConfirmationStatus.accepted: fall through to execution
     }
 
     const resolveAuthorizationResult = ({
