@@ -54,6 +54,7 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/control-group-renderer",
-    "@kbn/palettes"
+    "@kbn/palettes",
+    "@kbn/data-source"
   ]
 }

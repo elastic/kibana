@@ -17,12 +17,12 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { EsqlSource } from '@kbn/data-source';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { flatten, isEqual } from 'lodash';
@@ -836,20 +836,19 @@ export function getTextBasedDatasource({
           ...persistableState2,
         }
       ),
-    getDatasourceInfo: async (state, references, dataViewsService) => {
-      if (!dataViewsService) {
-        return [];
-      }
-      const indexPatterns: DataView[] = [];
+    getDatasourceInfo: async (state) => {
+      const dataSourcesByLayer = new Map<string, EsqlSource>();
 
-      for (const { query } of Object.values(state.layers)) {
-        if (query) {
-          const esqlAdhocDataview = await getESQLAdHocDataview({
-            dataViewsService,
-            query: query.esql,
-            options: { skipFetchFields: true },
-          });
-          indexPatterns.push(esqlAdhocDataview);
+      for (const [key, layer] of Object.entries(state.layers)) {
+        if (layer.query) {
+          dataSourcesByLayer.set(
+            key,
+            await EsqlSource.create({
+              query: layer.query.esql,
+              resultColumns: layer.table?.columns ?? [],
+              timeFieldName: layer.timeField,
+            })
+          );
         }
       }
 
@@ -874,7 +873,7 @@ export function getTextBasedDatasource({
         acc.push({
           layerId: key,
           columns,
-          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+          dataSource: dataSourcesByLayer.get(key),
         });
 
         return acc;

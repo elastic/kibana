@@ -44,6 +44,8 @@ import type {
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -4352,6 +4354,61 @@ describe('IndexPattern Data Source', () => {
       expect(
         FormBasedDatasource.isEqual(persistableState, references1, persistableState, references1)
       ).toBe(true);
+    });
+  });
+
+  describe('#getDatasourceInfo', () => {
+    // Uses a `static_value` column (no `sourceField`) so `getDatasourceInfo` doesn't
+    // hit `getCurrentFieldsForOperation`, which isn't populated by the `./operations`
+    // automock used throughout this file.
+    const infoState: FormBasedPrivateState = {
+      currentIndexPatternId: '1',
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Static value: 0',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'static_value',
+              params: { value: '0' },
+              references: [],
+            } as unknown as GenericIndexPatternColumn,
+          },
+        },
+      },
+    };
+
+    it('wraps the resolved DataView in an IndexPatternSource', async () => {
+      const dataViewsService = dataViewPluginMocks.createStartContract();
+      const mockDataView = {
+        id: '1',
+        timeFieldName: 'timestamp',
+        getName: () => 'my-fake-index-pattern',
+        getIndexPattern: () => 'my-fake-index-pattern',
+      } as unknown as DataView;
+      (dataViewsService.get as jest.Mock).mockResolvedValue(mockDataView);
+
+      const info = await FormBasedDatasource.getDatasourceInfo(
+        infoState,
+        undefined,
+        dataViewsService
+      );
+
+      expect(info).toHaveLength(1);
+      expect(info[0].layerId).toBe('first');
+      expect(info[0].dataSource).toBeInstanceOf(IndexPatternSource);
+      expect(info[0].dataSource?.id).toBe('1');
+      expect(info[0].columns.map((c) => c.id)).toEqual(['col1']);
+    });
+
+    it('leaves dataSource undefined when no dataViewsService is provided', async () => {
+      const info = await FormBasedDatasource.getDatasourceInfo(infoState, undefined, undefined);
+
+      expect(info).toHaveLength(1);
+      expect(info[0].dataSource).toBeUndefined();
     });
   });
 });

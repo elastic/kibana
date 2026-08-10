@@ -188,7 +188,7 @@ export async function isCompatibleVisualizationType(chartInfo: ChartInfo) {
     chartInfo.visualizationType === COMPATIBLE_VISUALIZATION &&
     // @ts-expect-error esql is missing in the type
     chartInfo.query.esql === undefined &&
-    chartInfo.layers.some((l) => l.layerType === layerTypes.DATA && l.dataView !== undefined)
+    chartInfo.layers.some((l) => l.layerType === layerTypes.DATA && l.dataSource !== undefined)
   );
 }
 

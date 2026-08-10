@@ -10,6 +10,7 @@
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { Query, AggregateQuery, ProjectRouting } from '@kbn/es-query';
 import { type DataView } from '@kbn/data-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type {
   DataPublicPluginStart,
   IndexPatternAggRestrictions,
@@ -296,7 +297,7 @@ export interface OperationDescriptor extends Operation {
 
 export interface DataSourceInfo {
   layerId: string;
-  dataView?: DataView;
+  dataSource?: DataSource;
   columns: Array<{
     id: string;
     role: 'split' | 'metric';
@@ -519,7 +520,7 @@ export interface TableSuggestionColumn {
 
 export interface DataSourceInfo {
   layerId: string;
-  dataView?: DataView;
+  dataSource?: DataSource;
   columns: Array<{
     id: string;
     role: 'split' | 'metric';

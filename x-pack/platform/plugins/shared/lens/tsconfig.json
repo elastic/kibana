@@ -20,6 +20,7 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/data-view-field-editor-plugin",
+    "@kbn/data-source",
     "@kbn/charts-plugin",
     "@kbn/expressions-plugin",
     "@kbn/navigation-plugin",

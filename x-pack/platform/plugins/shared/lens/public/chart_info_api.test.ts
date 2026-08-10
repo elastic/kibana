@@ -23,6 +23,7 @@ const mockGetVisualizationInfo = jest.fn().mockReturnValue({
     },
   ],
 });
+const mockDataSource = { kind: 'esql', id: 'esql-test' };
 const mockGetDatasourceInfo = jest.fn().mockResolvedValue([
   {
     layerId: 'test',
@@ -32,6 +33,7 @@ const mockGetDatasourceInfo = jest.fn().mockResolvedValue([
         role: 'metric',
       },
     ],
+    dataSource: mockDataSource,
   },
 ]);
 
@@ -82,7 +84,7 @@ describe('createChartInfoApi', () => {
       filters: [],
       layers: [
         {
-          dataView: undefined,
+          dataSource: mockDataSource,
           dimensions: [
             {
               id: '1',

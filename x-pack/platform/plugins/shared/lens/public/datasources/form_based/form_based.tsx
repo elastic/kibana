@@ -16,6 +16,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -947,7 +948,7 @@ export function getFormBasedDatasource({
         acc.push({
           layerId: key,
           columns,
-          dataView,
+          dataSource: dataView ? new IndexPatternSource(dataView) : undefined,
         });
 
         return acc;
