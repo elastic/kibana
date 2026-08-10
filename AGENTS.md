@@ -81,7 +81,7 @@ Follow existing patterns in the target area first; below are common defaults.
 ### React / UI Conventions
 - Reach for components in this order, configuring supported props and composition before building anything new: existing components in the owning platform or solution area, then `@kbn/ui-*` under `src/platform/kbn-ui`, then `@elastic/eui`.
 - New UI belongs in its owning area by default. `@kbn/ui-*` is only for low-dependency UI shared across areas.
-- Put complex UI shared across areas in a static package with tests and Storybook when available.
+- For complex UI shared across areas, prefer a static package with tests and Storybook when available over expanding a plugin.
 - When a requirement cannot be met through the supported props or composition of existing `@kbn/ui-*` or EUI components, flag the gap to the user and recommend discussing it with product and design before implementing a workaround.
 - Style with Emotion (`@emotion/react`) and EUI design tokens. CSS overrides are a last resort; inline styles are only for dynamic runtime values such as animation or positioning.
 
