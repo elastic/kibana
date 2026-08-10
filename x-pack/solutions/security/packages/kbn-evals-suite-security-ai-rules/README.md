@@ -169,11 +169,11 @@ Scores tool-call coverage and order against a golden sequence using LCS for orde
 - `category: 'negative'` → `[]` (no tools expected; agent should refuse)
 - otherwise → `['security.create_detection_rule']` (the canonical creation flow per `detection-rule-edit/SKILL.md`)
 
-Override the default by setting `tool_sequence: string[]` on a `ReferenceRule`. `filestore.read` is filtered from observed tool calls because those are SKILL.md loads covered by the Skill Invocation evaluator.
+Override the default by setting `tool_sequence: string[]` on a `ReferenceRule`. Skill-routing calls (`load_skill`, `read_file`, and the legacy `filestore.read`) are filtered from observed tool calls because those are SKILL.md loads covered by the Skill Invocation evaluator.
 
 ### Skill Invocation (TRACE-BASED — binary: 0 or 1)
 
-Verifies the agent loaded `detection-rule-edit/SKILL.md` via the `filestore.read` tool, matching the rule attachment's `getAgentDescription()` instruction ("ALWAYS read the detection-rule-edit skill"). Reads OTel spans from `traces-*` via ES|QL; zero per-example LLM cost.
+Verifies the agent loaded the `detection-rule-edit` skill — via the `load_skill` tool (current mechanism) or, on older builds, a `filestore.read` of `detection-rule-edit/SKILL.md` — matching the rule attachment's `getAgentDescription()` instruction ("ALWAYS read the detection-rule-edit skill"). Reads OTel spans from `traces-*` via ES|QL; zero per-example LLM cost.
 
 ### Trace-Based Observability (TRACE-BASED — zero LLM cost)
 

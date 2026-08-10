@@ -8,9 +8,8 @@
 import pRetry, { AbortError } from 'p-retry';
 import type { ReferenceRule } from '../datasets/sample_rules';
 
-// These string literals mirror the constants defined in security_solution/common/constants.
-// They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'security.agent';
+// This string literal mirrors the constant defined in security_solution/common/constants.
+// It is inlined here to avoid a package→plugin import boundary violation.
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
@@ -69,13 +68,16 @@ export class SecurityRuleGenerationClient {
     traceId?: string;
     /**
      * Tool IDs invoked during the conversation, in order. Powers the trajectory
-     * evaluator. `filestore.read` is filtered out because those are SKILL.md
-     * loads that the skill-invocation evaluator already covers.
+     * evaluator. Skill-routing calls (`load_skill`, `read_file`, and the legacy
+     * `filestore.read`) are filtered out because those are SKILL.md loads that
+     * the skill-invocation evaluator already covers.
      */
     toolCalls?: string[];
   }> {
     const payload = {
-      agent_id: THREAT_HUNTING_AGENT_ID,
+      // `agent_id` intentionally omitted: the converse API defaults to the
+      // default Elastic AI agent. Hardcoding the legacy 'security.agent' id
+      // broke the evals once that agent was removed from the product.
       input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${prompt}`,
       connector_id: this.connectorId,
       capabilities: { visualizations: true },
@@ -150,16 +152,19 @@ export class SecurityRuleGenerationClient {
 
 /**
  * Extracts tool IDs in invocation order from a ConverseResponse, dropping
- * `filestore.read` calls — those are SKILL.md loads, already covered by
- * the skill-invocation evaluator, and would otherwise dominate the
- * trajectory evaluator's "extra tools" list.
+ * skill-routing calls (`load_skill`, `read_file`, and the legacy
+ * `filestore.read`) — those are SKILL.md loads, already covered by the
+ * skill-invocation evaluator, and would otherwise dominate the trajectory
+ * evaluator's "extra tools" list.
  */
+const SKILL_ROUTING_TOOL_IDS = new Set(['load_skill', 'read_file', 'filestore.read']);
+
 const extractInvokedToolIds = (response: ConverseResponse): string[] => {
   return (
     response.steps
       ?.filter((step) => step.type === 'tool_call' && !!step.tool_id)
       .map((step) => step.tool_id as string)
-      .filter((id) => id !== 'filestore.read') ?? []
+      .filter((id) => !SKILL_ROUTING_TOOL_IDS.has(id)) ?? []
   );
 };
 
