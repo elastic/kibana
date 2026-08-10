@@ -17,7 +17,7 @@ import { getTrackedBranch } from '../../utils';
 import { CiStatsClient } from '../client';
 
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS, WORKFLOW_SCHEMA_CONFIG_PATH } from './const';
 import { loadRunOrderConfig } from './env_config';
 import { ftrManifest } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
@@ -29,7 +29,12 @@ import {
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
 } from './selective_testing';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps';
+import {
+  buildFunctionalStepGroup,
+  buildJestStep,
+  buildWorkflowSchemaCommitStep,
+  registerCancelKeys,
+} from './steps';
 import type { FtrRunOrder, FunctionalGroup } from './types';
 
 /**
@@ -219,6 +224,15 @@ export async function pickTestGroupRunOrder() {
         dependsOn: config.jestConfigsDeps,
         retryCount: config.jestConfigsRetryCount,
       }),
+    // Emit the commit step only when the workflow schema generation config
+    // actually ran in the integration lane (i.e. it was not filtered out by
+    // selective testing). This guards `depends_on: [jest-integration]` — that
+    // key does not exist when integration.count is 0, and Buildkite would error.
+    integration.count > 0 &&
+      jestIntegrationConfigs.includes(WORKFLOW_SCHEMA_CONFIG_PATH) &&
+      buildWorkflowSchemaCommitStep(
+        '.buildkite/scripts/steps/workflow_step_schema/commit_generated.sh'
+      ),
     functionalGroups.length > 0 &&
       buildFunctionalStepGroup({
         command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),

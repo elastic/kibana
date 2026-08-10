@@ -12,6 +12,9 @@ import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from '.
 import type { FunctionalGroup } from './types';
 import { expandAgentQueue } from '#pipeline-utils';
 
+/** Disk size (GiB) for the schema commit step — no bootstrap, no ES. */
+const WORKFLOW_SCHEMA_COMMIT_DISK_GIB = 50;
+
 interface JestStepOptions {
   command: string;
   label: string;
@@ -44,6 +47,29 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
         { exit_status: '-1', limit: RETRIES.INFRA },
         ...(opts.retryCount > 0 ? [{ exit_status: '*', limit: opts.retryCount }] : []),
       ],
+    },
+  };
+}
+
+/**
+ * Build the lightweight step that downloads any drifted workflow step-schema
+ * artifact from the integration lane and auto-commits it back to the PR.
+ *
+ * `allow_dependency_failure: true` so a failing (but unrelated) integration
+ * shard does not block the drift commit from landing. The commit step exits
+ * cleanly when no artifact was uploaded (schema is already up to date).
+ */
+export function buildWorkflowSchemaCommitStep(command: string): BuildkiteStep {
+  return {
+    label: 'Commit workflow step schema artifact',
+    command,
+    key: STEP_KEYS.WORKFLOW_SCHEMA_COMMIT,
+    timeout_in_minutes: 10,
+    agents: expandAgentQueue('n2-2-spot', WORKFLOW_SCHEMA_COMMIT_DISK_GIB),
+    depends_on: [STEP_KEYS.JEST_INTEGRATION],
+    allow_dependency_failure: true,
+    retry: {
+      automatic: [{ exit_status: '-1', limit: RETRIES.INFRA }],
     },
   };
 }

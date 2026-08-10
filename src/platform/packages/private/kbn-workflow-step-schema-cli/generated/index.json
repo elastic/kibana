@@ -1,6 +1,5 @@
 {
   "buildHash": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  "channel": "serverless",
   "connectorTypes": [
     ".1password",
     ".abuseipdb",

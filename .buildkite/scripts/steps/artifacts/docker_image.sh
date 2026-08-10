@@ -160,16 +160,19 @@ if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
   buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
 fi
 
+# Publish the workflow step-schema artifact to the rolling serverless CDN path
+# on every main-branch image promotion. This runs before the image-tag-update
+# trigger so that a Vault or GCS failure does not block the trigger upload.
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  echo "--- Publish workflow step schema to CDN"
+  .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless
+fi
+
 # This part is related with updating the configuration of kibana-controller,
 # so that new stack instances contain the latest and greatest image of kibana,
 # and the respective stack components of course.
 echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-  # A main-branch serverless image build is promoted/deployed; publish the
-  # workflow step-schema artifact to the rolling serverless CDN path.
-  echo "--- Publish workflow step schema to CDN"
-  .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless
-
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: "Trigger cve-slo-status pipeline for $KIBANA_IMAGE"
