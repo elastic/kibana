@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, lazy, type ComponentType } from 'react';
+import React, { type ComponentType, lazy, Suspense } from 'react';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import type {
   CommonAttachmentTabViewProps,
@@ -13,13 +13,14 @@ import type {
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import {
+  type AlertAttachmentMetadata,
   AttachmentActionType,
   CASE_VIEW_PAGE_TABS,
-  SECURITY_ALERT_ATTACHMENT_TYPE,
   getNonEmptyField,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
   toStringArray,
-  type AlertAttachmentMetadata,
 } from '@kbn/cases-plugin/common';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { SecurityAlertAttachmentPayloadSchema } from '../../../../common/cases/attachments/alert';
 import * as i18n from './translations';
 
@@ -58,6 +59,7 @@ const getAttachmentViewObject = (props: SecurityAlertViewProps) => {
   const isSingleAlert = totalAlerts === 1;
   const index = getNonEmptyField(metadata?.index);
   const alertId = getNonEmptyField(alertIds[0]);
+  const isRemoteAlert = isNonLocalIndexName(index ?? '');
   return {
     event: (
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
@@ -66,6 +68,7 @@ const getAttachmentViewObject = (props: SecurityAlertViewProps) => {
           totalAlerts={totalAlerts}
           savedObjectId={savedObjectId}
           rule={metadata?.rule}
+          isRemoteAlert={isRemoteAlert}
         />
       </Suspense>
     ),
