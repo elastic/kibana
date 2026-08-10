@@ -13,9 +13,6 @@ import {
   resolveProfileEnvOverrides,
 } from '../run_helpers';
 
-const EXECUTORS = ['phoenix', 'kibana'] as const;
-type Executor = (typeof EXECUTORS)[number];
-
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
     .map(([key, value]) => {
@@ -44,7 +41,6 @@ export const runSuiteCmd: Command<void> = {
       'suite',
       'config',
       'project',
-      'executor',
       'evaluation-connector-id',
       'repetitions',
       'grep',
@@ -55,8 +51,6 @@ export const runSuiteCmd: Command<void> = {
       'trace-es-api-key',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
-      'phoenix-base-url',
-      'phoenix-api-key',
     ],
     boolean: ['dry-run'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
@@ -64,14 +58,13 @@ export const runSuiteCmd: Command<void> = {
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    const executor = flagsReader.enum('executor', EXECUTORS) as Executor | undefined;
 
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
     const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
 
     const envOverrides: Record<string, string> = {
-      EVALUATION_CONNECTOR_ID: evaluationConnectorId,
+      EVAL_CONNECTOR_ID: evaluationConnectorId,
     };
 
     if (suite) {
@@ -89,13 +82,9 @@ export const runSuiteCmd: Command<void> = {
 
     log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 
-    if (executor === 'phoenix') {
-      envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';
-    }
-
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
-      envOverrides.EVALUATION_REPETITIONS = repetitions;
+      envOverrides.EVAL_REPETITIONS = repetitions;
     }
 
     const traceEsUrl = flagsReader.string('trace-es-url');
@@ -110,22 +99,12 @@ export const runSuiteCmd: Command<void> = {
 
     const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
     if (evaluationsKbnUrl) {
-      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+      envOverrides.EVAL_KBN_URL = evaluationsKbnUrl;
     }
 
     const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
     if (evaluationsKbnApiKey) {
-      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
-    }
-
-    const phoenixBaseUrl = flagsReader.string('phoenix-base-url');
-    if (phoenixBaseUrl) {
-      envOverrides.PHOENIX_BASE_URL = phoenixBaseUrl;
-    }
-
-    const phoenixApiKey = flagsReader.string('phoenix-api-key');
-    if (phoenixApiKey) {
-      envOverrides.PHOENIX_API_KEY = phoenixApiKey;
+      envOverrides.EVAL_KBN_API_KEY = evaluationsKbnApiKey;
     }
 
     const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];

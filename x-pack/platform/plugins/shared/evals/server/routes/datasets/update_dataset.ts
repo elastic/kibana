@@ -80,11 +80,13 @@ export const registerUpdateDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
-          const { description } = request.body;
+          const { description, tags, maturity } = request.body;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient();
           const updatedDataset = await datasetClient.update(datasetId, {
             description,
+            tags,
+            maturity,
           });
 
           if (!updatedDataset) {
@@ -98,6 +100,8 @@ export const registerUpdateDatasetRoute = ({
               id: updatedDataset.id,
               name: updatedDataset.name,
               description: updatedDataset.description,
+              tags: updatedDataset.tags,
+              maturity: updatedDataset.maturity,
               created_at: updatedDataset.created_at,
               updated_at: updatedDataset.updated_at,
             },
