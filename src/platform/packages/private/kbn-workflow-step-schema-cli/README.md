@@ -115,10 +115,11 @@ determinable `type` literal, or two branches would map to the same tag, the
 
 Each `schema.json` is written minified with sorted keys — exactly the bytes a CDN
 serves. `index.json` is the pretty, sorted entry point: `kibanaVersion`,
-`buildHash`, `profile: "superset"`, `channel`, `connectorTypes[]`, `stepTypes[]`,
+`buildHash`, `profile: "superset"`, `connectorTypes[]`, `stepTypes[]`,
 `triggerTypes[]`, and per variant `{ path, sha256 }`, where `sha256` is over the
 **exact served bytes** of that variant's `schema.json`. There is no timestamp, so
-an identical schema yields a byte-identical `index.json` across runs.
+an identical schema yields a byte-identical `index.json` across runs. The
+`channel` field is absent from the committed copy and stamped at CDN publish time.
 
 ## Loading
 
@@ -132,32 +133,29 @@ CDN from the release/serverless build pipelines.
 
 ### Generation (committed to the repo)
 
-The generation is a task masked as a Jest integration test
+The generation is a Jest integration test
 (`integration_tests/generate_schema.test.ts`), following the same convention as
-other "generation/check" integration tests (e.g. the encrypted-saved-objects
-`ci_checks`). It boots a real, all-solutions Kibana
-(`createRootWithCorePlugins({}, { oss: false })` over a trial-license ES),
-generates the artifact in-process using this package's own modules (the same
-steps the CLI runs), and writes the committed artifact directly to:
+the encrypted-saved-objects `ci_checks` integration test. It boots a real,
+all-solutions Kibana (`createRootWithCorePlugins({}, { oss: false })` over a
+trial-license ES), generates the artifact in-process using this package's own
+modules (the same steps the CLI runs), and writes the committed artifact directly
+to a single channel-agnostic bundle:
 
 ```
-generated/release/{index.json,strict/schema.json,template/schema.json}
-generated/serverless/{index.json,strict/schema.json,template/schema.json}
+generated/{index.json,strict/schema.json,template/schema.json}
 ```
 
-The two channels share identical schema bytes; only `index.json.channel`
-differs. The output is deterministic (placeholder `buildHash` on a source
-Kibana, key-sorted and timestamp-free), so re-generation is a no-op unless the
-schema actually changed.
+The `channel` field is omitted from the committed `index.json` and stamped at CDN
+publish time by `publish_schema.sh`. The output is otherwise deterministic
+(placeholder `buildHash` on a source Kibana, key-sorted and timestamp-free), so
+re-generation is a no-op unless the schema actually changed.
 
-Because it is a generation task rather than a suite test, the config is excluded
-from the general jest_integration lane
-(`.buildkite/disabled_jest_configs.json`). It runs only via
-`.buildkite/scripts/steps/code_generation/workflow_step_schema.sh`, which invokes
-the config and then calls `check_for_changed_files`, so any drift is
-auto-committed back to the PR (the moon.yml pattern). Set
-`WORKFLOW_SCHEMA_OUTPUT_DIR` to write elsewhere (e.g. under the gitignored
-`target/`) when experimenting locally.
+The config runs as part of the regular Jest integration lane. Any drift is
+auto-committed back to the PR via a lightweight downstream step:
+`.buildkite/scripts/steps/workflow_step_schema/commit_generated.sh`, which
+`buildkite-agent artifact download`s the drifted tree uploaded by the integration
+shard and calls `check_for_changed_files`. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to
+write elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
 
 ### CDN layout
 
@@ -178,10 +176,10 @@ schema/v1/serverless/{index.json,strict/schema.json,template/schema.json}
 
 Both call the shared `.buildkite/scripts/steps/workflow_step_schema/publish_schema.sh`,
 which reads the GCS service-account key from Vault
-(`kv/ci-shared/workflows-library/gcs-publish`, field `credentials`), stamps the
-real `kibanaVersion`/`buildHash` onto the published `index.json` (the committed
-copy keeps the placeholder), and `gcloud storage rsync`s the bytes with
-`cache-control: public, max-age=300`.
+(`kv/ci-shared/workflows-cdn/gcs-publish`, field `credentials`), stamps the real
+`kibanaVersion`, `buildHash`, and `channel` onto the published `index.json` (the
+committed copy omits `channel` and uses a placeholder `buildHash`), and
+`gcloud storage rsync`s the bytes with `cache-control: public, max-age=300`.
 
 ## Limitations (accepted)
 

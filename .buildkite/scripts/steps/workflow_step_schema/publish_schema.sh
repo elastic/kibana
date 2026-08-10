@@ -12,6 +12,11 @@
 #   release    -> schema/v1/<BASE_VERSION>/release   (RCs + GA overwrite in place)
 #   serverless -> schema/v1/serverless               (rolling)
 #
+# The committed artifact is channel-agnostic (no `channel` key in index.json).
+# This script stamps `kibanaVersion`, `buildHash`, and `channel` onto the
+# published copy; the schema.json bytes are untouched, so the sha256 entries
+# in index.json remain valid.
+#
 # Version/build context is read from the environment (exported by the artifacts
 # env.sh) with package.json fallbacks, so the script is safe to call from either
 # the release (DRA) or serverless (image promotion) pipeline.
@@ -47,7 +52,7 @@ case "$CHANNEL" in
     ;;
 esac
 
-SRC="${GENERATED_DIR}/${CHANNEL}"
+SRC="$GENERATED_DIR"
 if [[ ! -f "$SRC/index.json" ]]; then
   echo "Missing committed schema artifact at ${SRC}/index.json" >&2
   exit 1
@@ -61,16 +66,12 @@ if [[ -z "$GCS_SA_KEY" ]]; then
   exit 1
 fi
 
-echo "--- Stage artifact (stamp kibanaVersion + buildHash)"
-# The committed copy carries a deterministic placeholder buildHash; stamp the
-# real build context onto the published copy only. The schema.json bytes are
-# untouched, so the variant sha256 entries in index.json stay valid.
+echo "--- Stage artifact (stamp kibanaVersion, buildHash, channel)"
 STAGE="$(mktemp -d)"
-set +x  # defensive: never trace the service-account key
 trap 'rm -rf "$STAGE"; gcloud auth revoke --all 2>/dev/null || true' EXIT
 cp -r "$SRC/." "$STAGE/"
-jq --arg v "$STAMP_VERSION" --arg h "$BUILD_HASH" \
-  '.kibanaVersion = $v | .buildHash = $h' "$SRC/index.json" > "$STAGE/index.json"
+jq --arg v "$STAMP_VERSION" --arg h "$BUILD_HASH" --arg c "$CHANNEL" \
+  '.kibanaVersion = $v | .buildHash = $h | .channel = $c' "$SRC/index.json" > "$STAGE/index.json"
 
 echo "--- Authenticate to GCP"
 gcloud auth activate-service-account --key-file <(echo "$GCS_SA_KEY")

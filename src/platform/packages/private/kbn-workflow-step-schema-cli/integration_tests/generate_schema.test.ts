@@ -34,15 +34,15 @@ import type { IndexManifest } from '../src/types';
 const USERNAME = 'elastic';
 const PASSWORD = 'changeme';
 
-// The channels differ only by `index.json.channel`; the schema bytes are shared
-// (the "one schema, both paths" decision). Both are written so the committed
-// tree mirrors what the release and serverless CDN prefixes publish.
-const CHANNELS = ['release', 'serverless'] as const;
-
 // This test is a generation task, not an assertion of fixed output: it (re)writes
 // the committed artifact directly, and CI auto-commits any drift. The committed
 // tree is the source of truth published to the CDN, so it must live outside the
 // gitignored `target/`. An override is honored for local experimentation.
+//
+// A single channel-agnostic bundle is committed here. The `channel` field is
+// omitted from the committed `index.json` and stamped at CDN publish time by
+// `publish_schema.sh` (which uses `jq` to add `.channel` for release vs
+// serverless paths).
 const OUTPUT_DIR = Path.resolve(
   process.env.WORKFLOW_SCHEMA_OUTPUT_DIR ??
     Path.join(REPO_ROOT, 'src/platform/packages/private/kbn-workflow-step-schema-cli/generated')
@@ -119,7 +119,7 @@ describe('workflow step schema generation', () => {
     await esServer?.stop();
   });
 
-  it('writes the release and serverless artifacts from a live Kibana', async () => {
+  it('writes the workflow step schema artifact from a live Kibana', async () => {
     const connection: KibanaConnection = { kibanaUrl: baseUrl, username: USERNAME, password: PASSWORD };
 
     // Mirrors the CLI orchestration (`scripts/generate_workflow_step_schemas.js`)
@@ -134,38 +134,38 @@ describe('workflow step schema generation', () => {
     expect(stepTypes.length).toBeGreaterThan(0);
     expect(connectorTypes.length).toBeGreaterThan(0);
 
-    for (const channel of CHANNELS) {
-      const bundleDir = Path.join(OUTPUT_DIR, channel);
-      Fs.rmSync(bundleDir, { recursive: true, force: true });
+    // A single channel-agnostic bundle. The `channel` field is stamped at CDN
+    // publish time by `publish_schema.sh` so the committed tree is not
+    // duplicated for release vs serverless.
+    const bundleDir = OUTPUT_DIR;
+    Fs.rmSync(bundleDir, { recursive: true, force: true });
 
-      const strict = writeVariant({
-        bundleDir,
-        variant: 'strict',
-        doc: transformToStrict(composedSchema),
-      });
-      const template = writeVariant({
-        bundleDir,
-        variant: 'template',
-        doc: transformToTemplate(composedSchema),
-      });
+    const strict = writeVariant({
+      bundleDir,
+      variant: 'strict',
+      doc: transformToStrict(composedSchema),
+    });
+    const template = writeVariant({
+      bundleDir,
+      variant: 'template',
+      doc: transformToTemplate(composedSchema),
+    });
 
-      const manifest: IndexManifest = {
-        kibanaVersion: version,
-        buildHash,
-        profile: 'superset',
-        channel,
-        connectorTypes,
-        stepTypes,
-        triggerTypes,
-        variants: { strict, template },
-      };
-      writeIndex(bundleDir, manifest);
+    const manifest: IndexManifest = {
+      kibanaVersion: version,
+      buildHash,
+      profile: 'superset',
+      connectorTypes,
+      stepTypes,
+      triggerTypes,
+      variants: { strict, template },
+    };
+    writeIndex(bundleDir, manifest);
 
-      log.success(`Wrote ${channel} workflow step schema artifact to ${bundleDir}`);
+    log.success(`Wrote workflow step schema artifact to ${bundleDir}`);
 
-      expect(Fs.existsSync(Path.join(bundleDir, 'index.json'))).toBe(true);
-      expect(Fs.existsSync(Path.join(bundleDir, 'strict', 'schema.json'))).toBe(true);
-      expect(Fs.existsSync(Path.join(bundleDir, 'template', 'schema.json'))).toBe(true);
-    }
+    expect(Fs.existsSync(Path.join(bundleDir, 'index.json'))).toBe(true);
+    expect(Fs.existsSync(Path.join(bundleDir, 'strict', 'schema.json'))).toBe(true);
+    expect(Fs.existsSync(Path.join(bundleDir, 'template', 'schema.json'))).toBe(true);
   });
 });

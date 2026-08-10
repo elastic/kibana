@@ -55,4 +55,9 @@ export const ALWAYS_RUN_JEST_INTEGRATION_CONFIGS = [
   'x-pack/platform/plugins/shared/alerting/jest.integration.config.js',
   'x-pack/platform/plugins/shared/actions/jest.integration.config.js',
   'x-pack/platform/plugins/shared/task_manager/jest.integration.config.js',
+  // Regenerates the committed workflow step-schema artifact from a live Kibana. The schema
+  // is composed from connector types, step types, and triggers registered by ALL loaded plugins,
+  // most of which sit upstream of this package in the dependency graph. Any plugin addition can
+  // alter the artifact, so selective testing cannot reliably filter this out.
+  'src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests/jest.integration.config.js',
 ];
