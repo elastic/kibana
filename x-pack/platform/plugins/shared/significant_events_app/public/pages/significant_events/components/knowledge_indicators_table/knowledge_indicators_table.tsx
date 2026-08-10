@@ -238,8 +238,13 @@ export function KnowledgeIndicatorsTable() {
     return (
       <EuiEmptyPrompt
         aria-live="polite"
-        titleSize="xs"
-        icon={<AssetImage type="knowledgeIndicatorsEmptyState" />}
+        color="plain"
+        css={css`
+          && {
+            max-width: 400px;
+          }
+        `}
+        icon={<AssetImage type="knowledgeIndicatorsEmptyState" size={140} />}
         title={<h2>{EMPTY_STATE_TITLE}</h2>}
         body={<p>{EMPTY_STATE_DESCRIPTION}</p>}
         actions={generationRow}
