@@ -27,14 +27,18 @@ import {
 
 const NEW_PICKER_CONTROL = '[data-test-subj="dateRangePickerControlButton"]';
 
-// Mirrors EUI's useFormatTimeString: converts a raw date-math expression to the
-// humanized label rendered by the legacy EuiSuperDatePicker button.
+// Converts a date-math expression (now-X style) to the humanized label that the
+// legacy EuiSuperDatePicker button renders.  Absolute formatted strings like
+// 'Aug 1, 2019 @ 20:03:29.186' are returned unchanged — the legacy picker
+// button already shows them in that exact format.
 const toLegacyPickerLabel = (raw: string): string => {
   if (raw === 'now') return 'now';
+  if (/^now(\b|[-+])/.test(raw)) {
+    const parsed = dateMath.parse(raw);
+    if (parsed && parsed.isValid()) return `~ ${parsed.fromNow()}`;
+  }
   const isoMoment = moment(raw, moment.ISO_8601, true);
   if (isoMoment.isValid()) return isoMoment.format('MMM D, YYYY @ HH:mm:ss.SSS');
-  const parsed = dateMath.parse(raw);
-  if (parsed && parsed.isValid()) return `~ ${parsed.fromNow()}`;
   return raw;
 };
 

@@ -11,6 +11,7 @@ import {
   updateDateRangeInLocalDatePickers,
   updateDates,
 } from '../../../../tasks/date_picker';
+import { GLOBAL_FILTERS_CONTAINER } from '../../../../screens/date_picker';
 import {
   DISCOVER_CONTAINER,
   DISCOVER_RESULT_HITS,
@@ -93,7 +94,7 @@ describe(
       updateDates(DISCOVER_CONTAINER);
 
       cy.go('back');
-      expectDateRangeToBe(DISCOVER_CONTAINER, { start: 'now-15m', end: 'now' });
+      expectDateRangeToBe(GLOBAL_FILTERS_CONTAINER, { start: 'now-15m', end: 'now' });
     });
   }
 );
