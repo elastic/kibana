@@ -116,24 +116,7 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 - Every suite must have [deployment tags](../testing/deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
-- Run your tests against a real Elastic Cloud deployment before merging — especially when fixing a flake that CI reported on a `@cloud-*` target:
-
-  ```bash
-  node scripts/scout run-tests --location cloud --arch stateful --domain classic \
-    --config <module-root>/test/scout/ui/playwright.config.ts
-  ```
-
-A Cloud deployment differs from your local stack in ways that routinely break otherwise-correct tests:
-
-| On Cloud…                                                                                           | What breaks                                                                                                                                        |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| the deployment ships preinstalled managed content (Fleet integration dashboards, rules, connectors) | assertions that assume only your fixtures exist — see [Don't assume your fixtures are the only data](#dont-assume-your-fixtures-are-the-only-data) |
-| requests cross a real network and the stack is shared                                               | timeouts and polling budgets tuned against a local stack                                                                                           |
-| serverless project types render different chrome and navigation                                     | direct clicks on controls that collapse into an overflow menu                                                                                      |
-
-:::::{warning}
-**The Flaky Test Runner does not cover Cloud.** It fans out over `--arch` / `--domain` only, so every iteration runs against a locally provisioned stack — a green 50-iteration run tells you nothing about whether your test passes on `@cloud-*` targets. If the failure you're fixing was reported on a `cloud-*` target, reproduce it with `--location cloud` before trusting the fix.
-:::::
+- Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
 
 ## Don't assume your fixtures are the only data [dont-assume-your-fixtures-are-the-only-data]
 
@@ -188,9 +171,7 @@ For the full guide (including when a custom server config is unavoidable), see [
 
 When you add new tests, fix flakes, or make significant changes, run the same tests multiple times to catch flakiness early. A good starting point is **20–50 runs**.
 
-Prefer doing this locally first (faster feedback) with `scout run-tests --repeatEach <n>`, and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
-
-Iteration count alone isn't enough: both paths only exercise **local** targets. If the flake was reported on a `@cloud-*` target, also reproduce it on Cloud — see [Design tests with a cloud-first mindset](#design-tests-with-a-cloud-first-mindset).
+Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
 
 ## Keep test suites independent [keep-test-suites-independent]
 

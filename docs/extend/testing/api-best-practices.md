@@ -95,45 +95,6 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
 
 :::::
 
-## Wait for async backend work instead of raising the test timeout [wait-for-async-backend-work]
-
-When an endpoint kicks off asynchronous work (a rollup, a task-manager run, an index refresh), resist raising `apiTest.setTimeout` until the slowest run you happened to observe fits. A multi-minute timeout hides how long the operation really takes, turns every failure into an uninformative timeout, and is calibrated to whichever environment you measured — a budget tuned against a local stack will still blow on Cloud, where the same poll crosses a real network.
-
-Use `expect.poll` instead. It re-runs the callback until the assertion passes or its own deadline expires, so the test finishes as soon as the work completes and reports the last observed value when it doesn't.
-
-:::::{dropdown} Examples
-❌ **Don't:** stretch the whole test's timeout to cover a slow poll:
-
-```ts
-apiTest('creates an SLO and rolls up data', async ({ apiClient }) => {
-  apiTest.setTimeout(330_000);
-  // ...
-});
-```
-
-✔️ **Do:** poll for the condition you're waiting on, with a bounded deadline:
-
-```ts
-await expect
-  .poll(
-    async () => {
-      const response = await apiClient.get(sloPath, { headers });
-      return response.body.summary.status;
-    },
-    { timeout: 60_000, intervals: [2_000] }
-  )
-  .toBe('HEALTHY');
-```
-
-:::::
-
-Two constraints worth knowing:
-
-- Return the value you want to assert on from the callback. Inside `expect.poll`, only the generic matchers are available (`toBe`, `toMatchObject`, and so on) — not response matchers like `toHaveStatusCode`.
-- `expect(...).toPass()` is **not** available in Scout API tests; `expect.poll` is the supported equivalent.
-
-If an operation genuinely needs minutes, add a comment next to the override explaining why, and consider whether the scenario belongs in a Jest integration test where the backend can be driven directly.
-
 ## Related guides
 
 - [General best practices](./scout-best-practices.md) — apply to both UI and API tests
