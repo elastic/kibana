@@ -12,7 +12,7 @@ import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from './constants';
 import { toDetail, toListItem } from './map_rule_change';
@@ -97,7 +97,7 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
     const document = items[0];
     if (!document) {
       throw Boom.notFound(`Rule change with event id "${eventId}" not found for rule "${ruleId}"`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
+        code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
         details: { rule_id: ruleId, event_id: eventId },
       });
     }
@@ -148,7 +148,7 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
   private assertInitialized(): void {
     if (!this.changeHistory.isInitialized()) {
       throw Boom.serverUnavailable('Rule change history is unavailable', {
-        code: ALERTING_V2_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE,
+        code: ALERTING_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE,
       });
     }
   }

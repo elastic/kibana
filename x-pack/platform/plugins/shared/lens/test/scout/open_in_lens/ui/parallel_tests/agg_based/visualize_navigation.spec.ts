@@ -51,7 +51,7 @@ spaceTest.describe(
         const openInLens = async () => {
           await visualize.clickEditInLensButton();
           await lens.waitForVisualization('xyVisChart');
-          expect(await lens.getLayerCount()).toBe(1);
+          expect(await lens.layers.getLayerCount()).toBe(1);
         };
 
         await spaceTest.step('return with no changes and no modal', async () => {

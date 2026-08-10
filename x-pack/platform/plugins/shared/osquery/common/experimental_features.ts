@@ -47,6 +47,14 @@ export const allowedExperimentalValues = Object.freeze({
    * fleet-wide-capable and gated behind the osquery integration being installed.
    */
   agentBuilderTools: false,
+  /**
+   * Enables osquery cross-project search (CPS) read support on serverless. When enabled
+   * (and the platform `cps.cpsEnabled` flag is on), osquery result and action-response
+   * reads fan out across linked projects as the current user, and the read-only CPS
+   * project picker is registered on osquery pages. Has no effect on stateful Kibana or
+   * when CPS is disabled.
+   */
+  crossProjectSearch: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

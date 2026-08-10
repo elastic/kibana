@@ -12,6 +12,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   AI_INDEX_API_VERSION,
+  AI_INDEX_INTERNAL_API_VERSION,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -21,11 +22,13 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
   aiIndexByIdPath,
+  aiIndexKiSummaryPath,
   aiIndexPath,
 } from '../../common/constants';
 import type {
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
+  GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
@@ -41,6 +44,7 @@ import {
   InvalidConnectorSourceError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { getKiSummary } from '../ai_indices/ki_summary';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 
@@ -320,6 +324,48 @@ export const registerAiIndexRoutes = ({
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
+  // Get Knowledge Indicator summary for an AI index
+  router.versioned
+    .get({
+      path: aiIndexKiSummaryPath,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'Get Knowledge Indicator summary',
+      description:
+        'Returns the number of Knowledge Indicators stored in the AI index destination backing store.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const kiSummary = await getKiSummary(esClient, aiIndex.dest.value);
+          const body: GetAiIndexKiSummaryResponse = {
+            count: kiSummary.count,
+            dest: aiIndex.dest,
+            counts_by_type: kiSummary.countsByType,
+          };
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })
