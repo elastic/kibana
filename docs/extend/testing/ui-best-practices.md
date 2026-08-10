@@ -277,9 +277,9 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 :::::
 
-## Use EUI Component Objects as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
+## Use the EUI test helpers in page objects [use-eui-test-helpers-in-page-objects]
 
-If you must drive an EUI component, use the [EUI test helpers](./eui-test-helpers.md) exposed through `page.components` to keep that complexity out of tests. Assign the Component Object to a `readonly` class field, like any other stable locator.
+When a page object has to drive an EUI component, use the [EUI test helpers](./eui-test-helpers.md) exposed through `page.components` instead of hand-rolling selectors against EUI's DOM. Each helper is a *Component Object*: a wrapper around one component that encapsulates its interactions. Assign it to a `readonly` class field, like any other stable locator.
 
 :::::{dropdown} Example
 
@@ -301,7 +301,7 @@ export class StreamsAppPage {
 
 :::::
 
-When a Component Object doesn't do what you need, don't work around it locally — neither by subclassing it, nor by writing your own helper that drives the EUI component's internals directly. Both leave the gap in place for everyone else, and local code that depends on EUI's DOM is what Component Objects exist to avoid. [Contribute the missing capability upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) instead, so every suite gets it.
+When a Component Object doesn't do what you need, don't work around it locally — neither by subclassing it, nor by writing your own helper that drives the component directly. Both leave the gap in place for every other suite, and put you back on the selectors these helpers exist to replace. [Contribute the missing capability upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) instead, so every suite gets it.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
