@@ -138,16 +138,20 @@ export const useDocumentSummary = ({
               replacements: fetchedSummary.data[0].replacements,
             })
       );
-      if (fetchedSummary.data[0].recommendedActions) {
-        setRecommendedActions(
-          showAnonymizedValues
+      setRecommendedActions(
+        fetchedSummary.data[0].recommendedActions
+          ? showAnonymizedValues
             ? fetchedSummary.data[0].recommendedActions
             : replaceAnonymizedValuesWithOriginalValues({
                 messageContent: fetchedSummary.data[0].recommendedActions,
                 replacements: fetchedSummary.data[0].replacements,
               })
-        );
-      }
+          : undefined
+      );
+    } else {
+      setHasSummary(false);
+      setSummary(NO_SUMMARY_AVAILABLE);
+      setRecommendedActions(undefined);
     }
   }, [fetchedSummary, showAnonymizedValues]);
 
