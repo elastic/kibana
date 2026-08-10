@@ -51,20 +51,19 @@ export const storybookAliases = {
   index_management: 'x-pack/platform/plugins/shared/index_management/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
-  kbn_split_button: 'src/platform/packages/private/kbn-split-button/.storybook',
   kbn_ui: 'src/platform/kbn-ui/storybook-config',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
   metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
-  nightshift: 'x-pack/solutions/observability/packages/kbn-nightshift/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
+  nightshift: 'x-pack/solutions/observability/plugins/nightshift/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',

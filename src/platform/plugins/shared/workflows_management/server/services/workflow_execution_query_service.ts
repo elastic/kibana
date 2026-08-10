@@ -35,9 +35,8 @@ import {
 } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
-  buildWorkflowExecutionsSearchQuery,
+  buildManagedWorkflowExecutionsFilter,
   buildWorkflowExecutionsSpaceFilter,
-  emptyWorkflowExecutionsSearchResponse,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
@@ -240,25 +239,79 @@ export class WorkflowExecutionQueryService {
   async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<estypes.SearchResponse<unknown>> {
-    try {
-      return await this.deps.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        query: buildWorkflowExecutionsSearchQuery(params.query, spaceId, {
-          includeManagedExecutions: params.includeManagedExecutions,
-        }),
-        sort: params.sort,
-        from: params.from,
-        size: params.size,
-        track_total_hits: params.trackTotalHits ?? true,
-      });
-    } catch (error) {
-      if (isIndexNotFoundError(error)) {
-        return emptyWorkflowExecutionsSearchResponse();
-      }
-      this.deps.logger.error(`Failed to search workflow executions view: ${error}`);
-      throw error;
+  ): Promise<WorkflowExecutionListDto> {
+    const must: estypes.QueryDslQueryContainer[] = [buildWorkflowExecutionsSpaceFilter(spaceId)];
+
+    if (params.query) {
+      must.push(params.query);
     }
+    if (params.statuses?.length) {
+      must.push({ terms: { status: params.statuses } });
+    }
+    if (params.executionTypes?.length === 1) {
+      const isTestRun = params.executionTypes[0] === ExecutionType.TEST;
+      if (isTestRun) {
+        must.push({ term: { isTestRun } });
+      } else {
+        must.push({
+          bool: {
+            should: [
+              { term: { isTestRun: false } },
+              { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      }
+    }
+    if (params.executedBy?.length) {
+      must.push({ terms: { executedBy: params.executedBy } });
+    }
+    if (params.concurrencyGroupKey !== undefined) {
+      must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
+    }
+
+    const startedAtRange = buildTimeRangeFilter(
+      'startedAt',
+      params.startedAfter,
+      params.startedBefore
+    );
+    if (startedAtRange) must.push(startedAtRange);
+
+    const finishedAtRange = buildTimeRangeFilter(
+      'finishedAt',
+      params.finishedAfter,
+      params.finishedBefore
+    );
+    if (finishedAtRange) must.push(finishedAtRange);
+
+    const managedMustNot = params.includeManagedExecutions
+      ? []
+      : [buildManagedWorkflowExecutionsFilter()];
+
+    const page = params.page ?? 1;
+    const size = params.size ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * size;
+    const sort = params.sortField
+      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      : undefined;
+
+    return searchWorkflowExecutions({
+      esClient: this.deps.esClient,
+      logger: this.deps.logger,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      query: {
+        bool: {
+          must,
+          must_not: [{ exists: { field: 'stepId' } }, ...managedMustNot],
+        },
+      },
+      sort,
+      from,
+      size,
+      page,
+      collapse: params.collapse ? { field: params.collapse } : undefined,
+    });
   }
 
   async getWorkflowExecutionHistory(
