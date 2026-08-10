@@ -797,14 +797,8 @@ export async function identifyInferredFeatures({
     };
   }
 
-  const {
-    docsCount,
-    docIds,
-    totalFilters,
-    filtersCapped,
-    hasFilteredDocuments,
-    outcome,
-  } = iterationResult;
+  const { docsCount, docIds, totalFilters, filtersCapped, hasFilteredDocuments, outcome } =
+    iterationResult;
 
   const durationMs = Date.now() - startedAt;
 
