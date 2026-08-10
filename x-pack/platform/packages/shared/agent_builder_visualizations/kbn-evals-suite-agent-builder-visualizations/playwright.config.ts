@@ -12,10 +12,10 @@ const config = createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   repetitions: 1,
   // Each example drives a full Agent Builder `converse` round-trip (skill
-  // load + create_visualization tool loop) plus 6 evaluators (2 are LLM
-  // judges). The whole dataset runs in a single test, so the per-test
+  // load + create_visualization tool loop) plus several CODE evaluators and
+  // LLM judges. The whole dataset runs in a single test, so the per-test
   // timeout must cover every example serially — the default 5 min is not
-  // enough (a 5-example run exceeded it). Mirrors the security ES|QL suite.
+  // enough. Mirrors the security ES|QL suite.
   timeout: 20 * 60_000,
 });
 

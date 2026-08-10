@@ -6,16 +6,19 @@ It drives the full `/api/agent_builder/converse` flow, extracts the ES|QL backin
 
 ## What it evaluates
 
-Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" for visualization ES|QL is not the same as for analytical ES|QL. This first increment covers:
+Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" for visualization ES|QL is not the same as for analytical ES|QL. The suite covers:
 
 - **ES|QL Execution Validity** (`CODE`) — AST parse + execute against real sample data and return rows. This is the tier that surfaces the fast-model regressions that motivated the suite.
-- **ES|QL Functional Equivalence** (`LLM` calibrated judge) — three-point rubric (`equivalent` / `equivalent_with_caveats` / `not_equivalent`) with cosmetic allow-lists for aliases, bucketing, and `?_tstart`/`?_tend` bounds.
+- **ES|QL Functional Equivalence** (`LLM` calibrated judge) — three-point rubric (`equivalent` / `equivalent_with_caveats` / `not_equivalent`) for *logical* equivalence. Column alias wording is never scored (including `1-minute` vs `1-Minute Load`).
+- **Chart Type vs Intent** (`CODE`) — `create_visualization`'s `chart_type` matches the example's expected type (bar/line → `xy`, KPI → `metric`, …).
+- **Visualization Config Validity** (`CODE`) — Lens configs parse against the chart-type ESQL schema; Vega-Lite specs parse as JSON with a visual root.
+- **Chart Compatible Result** (`CODE`) — executed ES|QL column shape fits the chart type (e.g. `xy` needs a dimension + numeric measure).
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.
 
 A standalone ES|QL Validity evaluator also exists in this suite (`createEsqlValidityEvaluator`) but is not in the default set — execution already covers AST validation.
 
-Not yet covered (tracked as follow-up increments in the issue): chart-compatible-result (does the ES|QL result shape fit the requested chart type), chart-type-vs-intent, Lens/Vega-Lite config validity, and an MLLM visual-fidelity judge.
+Not yet covered (tracked as follow-up increments in the issue): renderer-vs-intent examples, negative/recovery cases, iterative edits, and an MLLM visual-fidelity judge.
 
 ## Running
 
@@ -27,7 +30,7 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example targets host load metrics from the GCS snapshot replay (`metrics-system.load-default`, `system.load.{1,5,15}`). Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
+Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example targets host load metrics from the GCS snapshot replay (`metrics-system.load-default`, `system.load.{1,5,15}`). Each example carries ground-truth ES|QL plus an expected `chartType`. Grow this to 20–30 real prompts.
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 

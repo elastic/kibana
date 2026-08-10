@@ -17,13 +17,20 @@ interface ConverseLikeOutput {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+export interface ExtractedVisualization {
+  esql: string;
+  chartType?: string;
+  renderer?: 'lens' | 'vega';
+  visualization?: Record<string, unknown> & { spec?: string };
+  attachmentId?: string;
+}
+
 /**
- * Extract the ES|QL strings backing every generated visualization. Returns an
- * empty array when the agent produced no renderable visualization.
+ * Extract every generated visualization payload from create_visualization tool results.
  */
-export function extractVisualizationEsql(output: ConverseLikeOutput): string[] {
+export function extractVisualizations(output: ConverseLikeOutput): ExtractedVisualization[] {
   const steps = output?.steps ?? [];
-  const queries: string[] = [];
+  const visualizations: ExtractedVisualization[] = [];
 
   for (const step of steps) {
     if (
@@ -43,14 +50,46 @@ export function extractVisualizationEsql(output: ConverseLikeOutput): string[] {
         continue;
       }
 
-      const { esql } = candidate.data;
-      if (typeof esql === 'string' && esql.trim().length > 0) {
-        queries.push(esql);
+      const {
+        esql,
+        chart_type: chartType,
+        renderer,
+        visualization,
+        attachment_id: attachmentId,
+      } = candidate.data;
+
+      if (typeof esql !== 'string' || esql.trim().length === 0) {
+        continue;
       }
+
+      const extracted: ExtractedVisualization = { esql };
+
+      if (typeof chartType === 'string' && chartType.trim().length > 0) {
+        extracted.chartType = chartType;
+      }
+      if (renderer === 'lens' || renderer === 'vega') {
+        extracted.renderer = renderer;
+      }
+      if (isRecord(visualization)) {
+        extracted.visualization = visualization as Record<string, unknown> & { spec?: string };
+      }
+      if (typeof attachmentId === 'string' && attachmentId.trim().length > 0) {
+        extracted.attachmentId = attachmentId;
+      }
+
+      visualizations.push(extracted);
     }
   }
 
-  return queries;
+  return visualizations;
+}
+
+/**
+ * Extract the ES|QL strings backing every generated visualization. Returns an
+ * empty array when the agent produced no renderable visualization.
+ */
+export function extractVisualizationEsql(output: ConverseLikeOutput): string[] {
+  return extractVisualizations(output).map((visualization) => visualization.esql);
 }
 
 /**

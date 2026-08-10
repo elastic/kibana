@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/inference-common'
   - '@kbn/inference-prompt-utils'
+  - '@kbn/lens-embeddable-utils'
   - '@kbn/tooling-log'
   - '@kbn/zod'
 tags:

@@ -51,6 +51,7 @@ evaluate.describe(
 | STATS \`Request Count\` = COUNT(*) BY response.keyword
 | SORT \`Request Count\` DESC
 | LIMIT 10`,
+                chartType: 'xy',
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -63,6 +64,7 @@ evaluate.describe(
                 query: `FROM kibana_sample_data_logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
 | STATS \`Total Requests\` = COUNT(*)`,
+                chartType: 'metric',
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -74,6 +76,7 @@ evaluate.describe(
               output: {
                 query: `FROM kibana_sample_data_logs
 | STATS \`Total Bytes\` = SUM(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+                chartType: 'xy',
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
@@ -88,6 +91,7 @@ evaluate.describe(
               output: {
                 query: `FROM metrics-system.load-default
 | STATS \`1-Minute Load\` = AVG(\`system.load.1\`), \`5-Minute Load\` = AVG(\`system.load.5\`), \`15-Minute Load\` = AVG(\`system.load.15\`) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+                chartType: 'xy',
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },

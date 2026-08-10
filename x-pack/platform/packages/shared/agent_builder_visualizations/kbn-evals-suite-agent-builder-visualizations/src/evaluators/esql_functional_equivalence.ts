@@ -17,7 +17,7 @@ import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 export const ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
 // Stamp results with judgeVersion so future rubric changes can be filtered in the golden cluster.
-export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v1';
+export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v2';
 
 /**
  * Three-point judgement returned by the LLM judge. Mapped to a numeric
@@ -49,7 +49,7 @@ Two queries are FUNCTIONALLY EQUIVALENT when they would produce the same answer 
   The candidate answers a different question, queries the wrong data source, applies the wrong aggregation, omits a critical filter that changes the result substantially, or is entirely off-topic.
 
 TREAT THE FOLLOWING AS EQUIVALENT (do NOT penalise):
-- Column alias differences: \`STATS count = COUNT(*)\` vs \`STATS total = COUNT(*)\`.
+- Column alias differences of ANY kind — wording, capitalization, punctuation, or length (e.g. \`STATS count = COUNT(*)\` vs \`STATS total = COUNT(*)\`; \`1-minute\` vs \`1-Minute Load\`; \`avg_load_1\` vs \`1-Minute Load\`). Aliases are cosmetic labels only; never return "equivalent_with_caveats" or "not_equivalent" because of them.
 - BY grouping aliases: \`BY response.keyword\` vs \`BY \`Response Code\` = response.keyword\` (and \`BY bucket = BUCKET(...)\` vs \`BY BUCKET(...)\`) — the left-hand name is only a label; the grouped field/expression is what matters. Do NOT treat BY alias assignment as invalid or non-equivalent.
 - Equivalent function forms: \`DATE_EXTRACT("hour", @timestamp)\` vs \`HOUR(@timestamp)\`; \`SUBSTRING(x, 1, 3)\` vs \`LEFT(x, 3)\`.
 - Equivalent comparison forms: \`x >= 5 AND x <= 10\` vs \`x BETWEEN 5 AND 10\`; \`a == "x" AND b == "y"\` vs \`a == "x" | WHERE b == "y"\`.
@@ -68,7 +68,8 @@ TREAT THE FOLLOWING AS NOT EQUIVALENT (DO penalise):
 - Different question being answered (gold counts authentication failures, candidate lists all processes).
 
 TIE-BREAKER:
-When you're genuinely uncertain whether a difference matters, return "equivalent_with_caveats". Reserve "equivalent" for cases where any reasonable analyst would treat the two queries as interchangeable.
+When the only difference is naming/aliases, always return "equivalent".
+When you're genuinely uncertain whether a *logical* difference matters, return "equivalent_with_caveats". Reserve "equivalent" for cases where any reasonable analyst would treat the two queries as interchangeable.
 
 CALL THE \`evaluate\` TOOL with your judgement and a 1-2 sentence reason. Do not respond in prose.`;
 

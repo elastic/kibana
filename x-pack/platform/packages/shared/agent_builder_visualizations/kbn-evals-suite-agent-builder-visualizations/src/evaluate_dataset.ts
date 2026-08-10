@@ -19,9 +19,17 @@ import {
 } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { extractVisualizationEsql, getToolIds } from './extract_visualization';
+import {
+  extractVisualizationEsql,
+  extractVisualizations,
+  getToolIds,
+  type ExtractedVisualization,
+} from './extract_visualization';
+import { createChartCompatibleResultEvaluator } from './evaluators/chart_compatible_result';
+import { createChartTypeVsIntentEvaluator } from './evaluators/chart_type_vs_intent';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
+import { createVisualizationConfigValidityEvaluator } from './evaluators/visualization_config_validity';
 
 export type VisualizationDatasetExample = Example<
   {
@@ -32,6 +40,13 @@ export type VisualizationDatasetExample = Example<
     query?: string;
     /** Golden ordered tool path (e.g. `['load_skill', 'platform.core.create_visualization']`). */
     goldenToolPath?: string[];
+    /**
+     * Expected Lens `chart_type` (or acceptable alternatives). Bar/line/area
+     * requests map to `xy`. Omit for Vega-only examples without a Lens type.
+     */
+    chartType?: string | string[];
+    /** Expected renderer when the example intentionally forces Lens or Vega. */
+    renderer?: 'lens' | 'vega';
   },
   {
     agentId?: string;
@@ -45,6 +60,8 @@ export interface VisualizationAgentTaskOutput {
   steps?: Array<Record<string, unknown>>;
   /** Newline-joined ES|QL from every generated visualization (equivalence prediction). */
   esql: string;
+  /** Structured visualization payloads for chart-type / config evaluators. */
+  visualizations: ExtractedVisualization[];
   agentTraceId?: string;
   traceId?: string;
 }
@@ -97,6 +114,9 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
+  const visualizationExtractor = (output: VisualizationAgentTaskOutput) =>
+    output.visualizations ?? extractVisualizations(output);
+
   const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
@@ -114,6 +134,30 @@ export function createEvaluateDataset({
     log,
     predictionExtractor: (output) => output.esql ?? '',
     groundTruthExtractor: (expected) => expected?.query ?? '',
+  });
+
+  const chartTypeVsIntentEvaluator = createChartTypeVsIntentEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    visualizationExtractor,
+    expectedChartTypeExtractor: (expected) => expected?.chartType,
+  });
+
+  const visualizationConfigValidityEvaluator = createVisualizationConfigValidityEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    visualizationExtractor,
+  });
+
+  const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    esClient,
+    visualizationExtractor,
+    expectedChartTypeExtractor: (expected) => expected?.chartType,
   });
 
   const trajectoryEvaluator = createTrajectoryEvaluator({
@@ -137,11 +181,14 @@ export function createEvaluateDataset({
         input: input?.question ?? '',
       });
 
+      const visualizations = extractVisualizations(response);
+
       return {
         errors: [],
         messages: [{ message: response.message }],
         steps: response.steps,
-        esql: extractVisualizationEsql(response).join('\n'),
+        visualizations,
+        esql: visualizations.map((visualization) => visualization.esql).join('\n'),
         agentTraceId: response.traceId,
       };
     };
@@ -149,6 +196,9 @@ export function createEvaluateDataset({
     await executorClient.runExperiment({ datasets: [dataset], task }, [
       esqlExecutionEvaluator,
       esqlEquivalenceEvaluator,
+      chartTypeVsIntentEvaluator,
+      visualizationConfigValidityEvaluator,
+      chartCompatibleResultEvaluator,
       trajectoryEvaluator,
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
     ]);
