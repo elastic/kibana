@@ -14,6 +14,7 @@ import { internalApiPath } from '../../../common/constants';
 
 const MARK_READ_PATH = `${internalApiPath}/conversations/{conversation_id}/_mark_read`;
 const SET_PINNED_PATH = `${internalApiPath}/conversations/{conversation_id}/_set_pinned`;
+const SET_READ_ONLY_PATH = `${internalApiPath}/conversations/{conversation_id}/_set_read_only`;
 
 describe('registerInternalConversationRoutes - _mark_read', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
@@ -148,5 +149,107 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
     );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', pinned: true });
+  });
+});
+
+describe('registerInternalConversationRoutes - _set_read_only', () => {
+  let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
+  let update: jest.Mock;
+
+  const createMockContext = () => ({
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+  });
+
+  const createRequest = (overrides: { params?: object; body?: object } = {}) =>
+    httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: SET_READ_ONLY_PATH,
+      params: { conversation_id: 'conv-1' },
+      body: { read_only: true },
+      ...overrides,
+    });
+
+  const registerRoutes = () => {
+    const getInternalServices = jest.fn().mockReturnValue({
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({ update }),
+      },
+    });
+
+    const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
+
+    const router = {
+      post: jest
+        .fn()
+        .mockImplementation(
+          (config: { path: string }, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
+            routeHandlers[config.path] = handler;
+          }
+        ),
+    } as unknown as IRouter;
+
+    registerInternalConversationRoutes({
+      router,
+      getInternalServices,
+      logger: loggingSystemMock.createLogger(),
+    } as unknown as RouteDependencies);
+
+    return routeHandlers[SET_READ_ONLY_PATH];
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    update = jest.fn().mockResolvedValue({ id: 'conv-1', read_only: true });
+
+    routeHandler = registerRoutes();
+  });
+
+  it('updates read_only state using conversation accessor permissions', async () => {
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      { id: 'conv-1', read_only: true },
+      { access: 'converse', retryOnConflict: true }
+    );
+    expect(response.status).toBe(200);
+    expect(response.payload).toMatchObject({ id: 'conv-1', read_only: true });
+  });
+
+  it('clears read_only state', async () => {
+    update = jest.fn().mockResolvedValue({ id: 'conv-1', read_only: false });
+    routeHandler = registerRoutes();
+
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest({ body: { read_only: false } }),
+      kibanaResponseFactory
+    );
+
+    expect(update).toHaveBeenCalledWith(
+      { id: 'conv-1', read_only: false },
+      { access: 'converse', retryOnConflict: true }
+    );
+    expect(response.payload).toMatchObject({ id: 'conv-1', read_only: false });
+  });
+
+  it('defaults a missing read_only on the updated conversation to false', async () => {
+    update = jest.fn().mockResolvedValue({ id: 'conv-1' });
+    routeHandler = registerRoutes();
+
+    const response = await routeHandler(
+      createMockContext() as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.payload).toMatchObject({ id: 'conv-1', read_only: false });
   });
 });

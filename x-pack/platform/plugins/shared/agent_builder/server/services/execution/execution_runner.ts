@@ -152,6 +152,7 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     accessControl,
+    readOnly,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -173,6 +174,7 @@ const handleConversationExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
+    readOnly,
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 

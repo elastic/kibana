@@ -14,6 +14,7 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SetReadOnlyConversationResponse,
 } from '../../../common/http_api/conversations';
 import type { ReadWorkspaceFileResponse } from '../../../common/http_api/workspace_files';
 import type {
@@ -86,6 +87,19 @@ export class ConversationsService {
     return await this.http.post<MarkPinnedConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_set_pinned`,
       { body: JSON.stringify({ pinned }) }
+    );
+  }
+
+  async updateReadOnlyStatus({
+    conversationId,
+    readOnly,
+  }: {
+    conversationId: string;
+    readOnly: boolean;
+  }): Promise<SetReadOnlyConversationResponse> {
+    return await this.http.post<SetReadOnlyConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_set_read_only`,
+      { body: JSON.stringify({ read_only: readOnly }) }
     );
   }
 

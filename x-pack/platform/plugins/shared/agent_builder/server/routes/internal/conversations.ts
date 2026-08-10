@@ -12,6 +12,7 @@ import type {
   MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
+  SetReadOnlyConversationResponse,
 } from '../../../common/http_api/conversations';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
@@ -130,6 +131,42 @@ export function registerInternalConversationRoutes({
         body: {
           id: updatedConversation.id,
           pinned: updatedConversation.pinned ?? false,
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_set_read_only`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          read_only: schema.boolean(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { read_only: readOnly } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.update(
+        { id: conversationId, read_only: readOnly },
+        { access: 'converse', retryOnConflict: true }
+      );
+
+      return response.ok<SetReadOnlyConversationResponse>({
+        body: {
+          id: updatedConversation.id,
+          read_only: updatedConversation.read_only ?? false,
         },
       });
     })
