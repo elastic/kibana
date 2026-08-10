@@ -233,6 +233,116 @@ describe('connector attachment type', () => {
           'Always resolve channel ID before sending a message.'
         );
       });
+
+      describe('annotation hints', () => {
+        const inputSchema = z.object({ channel: z.string().describe('Channel name') });
+
+        beforeEach(() => {
+          formatSchemaForLlmMock.mockReturnValue('channel (string, required): Channel name');
+        });
+
+        it('shows [DESTRUCTIVE] for a destructive action', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              sendMessage: {
+                isTool: true,
+                annotations: { destructiveHint: true },
+                description: 'Send a message to a channel',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+              searchMessages: {
+                isTool: true,
+                description: 'Search messages',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toContain(
+            'sendMessage [DESTRUCTIVE]: Send a message to a channel'
+          );
+          expect(representation.value).toMatch(/- searchMessages: Search messages/);
+          expect(representation.value).not.toContain('searchMessages [');
+        });
+
+        it('shows [DESTRUCTIVE, IDEMPOTENT] for a destructive idempotent action', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              inviteToConversation: {
+                isTool: true,
+                annotations: { destructiveHint: true, idempotentHint: true },
+                description: 'Invite a user to a conversation',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toContain(
+            'inviteToConversation [DESTRUCTIVE, IDEMPOTENT]: Invite a user to a conversation'
+          );
+        });
+
+        it('shows no hint tag for a read-only action with no annotations', () => {
+          getConnectorSpecMock.mockReturnValue({
+            metadata: {
+              id: '.slack2',
+              displayName: 'Slack',
+              description: 'Slack connector',
+              minimumLicense: 'enterprise',
+              supportedFeatureIds: [],
+            },
+            actions: {
+              searchMessages: {
+                isTool: true,
+                description: 'Search messages',
+                input: inputSchema,
+                handler: jest.fn(),
+              },
+            },
+          });
+
+          const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
+          const formatted = connectorType.format(
+            attachment,
+            formatContext
+          ) as AgentFormattedAttachment;
+          const representation = formatted.getRepresentation!() as { value: string };
+
+          expect(representation.value).toMatch(/- searchMessages: Search messages/);
+          expect(representation.value).not.toContain('searchMessages [');
+        });
+      });
     });
 
     describe('getBoundedTools', () => {
