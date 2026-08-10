@@ -27,7 +27,7 @@ export interface RuleCreationExample {
     evidence: string;
     confidence: number;
   };
-  expected: {
+  output: {
     mitreIds: string[];
     language: 'esql';
     esqlQuery?: string;
@@ -51,7 +51,7 @@ export const goldenDataset: RuleCreationExample[] = [
         '"administrator" across 3 Linux endpoints over 7 days.',
       confidence: 0.85,
     },
-    expected: {
+    output: {
       mitreIds: ['T1078', 'T1078.001'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
@@ -79,7 +79,7 @@ export const goldenDataset: RuleCreationExample[] = [
         'when launched with WF.msc argument on Windows hosts.',
       confidence: 0.9,
     },
-    expected: {
+    output: {
       mitreIds: ['T1548', 'T1548.002', 'T1218'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
@@ -106,7 +106,7 @@ export const goldenDataset: RuleCreationExample[] = [
         '>50% numeric character ratio that bypassed existing signature rules.',
       confidence: 0.75,
     },
-    expected: {
+    output: {
       mitreIds: ['T1027', 'T1140', 'T1059.001'],
       language: 'esql',
       esqlQuery: `FROM logs-windows.powershell_operational*
@@ -128,7 +128,7 @@ export const goldenDataset: RuleCreationExample[] = [
       evidence: '',
       confidence: 0.1,
     },
-    expected: {
+    output: {
       mitreIds: ['T1059'],
       language: 'esql',
       esqlQuery: 'FROM * | LIMIT 1000', // catch-all — must fail Query Syntax Validity

@@ -6,5 +6,4 @@
  */
 
 export const RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
-export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 export const WORKFLOWS_API_VERSION = '2023-10-31';

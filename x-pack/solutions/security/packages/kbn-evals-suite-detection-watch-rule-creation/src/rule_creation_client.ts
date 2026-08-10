@@ -36,6 +36,12 @@ const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | un
   return parsed.success ? parsed.data.structured_output : undefined;
 };
 
+export interface RuleCreationResult {
+  rule: DraftRule | undefined;
+  pendingApproval: boolean;
+  traceId: string | undefined;
+}
+
 export class RuleCreationClient {
   private readonly pendingExecutionIds: string[] = [];
 
@@ -54,7 +60,7 @@ export class RuleCreationClient {
     };
     maxWaitMs?: number;
     pollIntervalMs?: number;
-  }) {
+  }): Promise<RuleCreationResult> {
     const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
       `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}/run`,
       {
@@ -104,11 +110,12 @@ export class RuleCreationClient {
       );
     }
 
-    return {
+    const result: RuleCreationResult = {
       rule,
       pendingApproval: execution.status === ExecutionStatus.WAITING_FOR_INPUT,
       traceId: execution.traceId,
     };
+    return result;
   }
 
   async cancelPending(): Promise<void> {
