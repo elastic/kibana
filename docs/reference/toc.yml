@@ -133,6 +133,7 @@ toc:
           - file: connectors-kibana/snowflake-action-type.md
           - file: connectors-kibana/sublime-security-action-type.md
           - file: connectors-kibana/tavily-action-type.md
+          - file: connectors-kibana/unifi-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
           - file: connectors-kibana/workday-action-type.md
