@@ -33,7 +33,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
         field: 'ip',
         keepOpen: true,
       });
-      await lens.setTermsNumberOfValues(5);
+      await lens.dimensions.setTermsNumberOfValues(5);
       await lens.closeDimensionEditor();
 
       await lens.configureDimension({
@@ -63,7 +63,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       });
 
       await spaceTest.step('reflect stop color changes on the chart', async () => {
-        await lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
+        await lens.dimensions.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
         await lens.openPalettePanelFlyout();
         const { violations } = await page.checkA11y({
           include: ['[data-test-subj="lns-palettePanelFlyout"]'],

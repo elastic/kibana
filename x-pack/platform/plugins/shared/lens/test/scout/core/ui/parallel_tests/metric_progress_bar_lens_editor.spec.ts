@@ -38,7 +38,7 @@ async function configureStaticMaxValueForProgressBar(
   await staticValueInput.fill(STATIC_MAX_VALUE);
   await page.keyboard.press('Tab');
 
-  await lens.closeDimensionEditorPanel();
+  await lens.dimensions.closeDimensionEditorPanel();
 }
 
 async function openPrimaryMetricDimensionEditor(page: ScoutPage): Promise<void> {
