@@ -35,16 +35,6 @@ const internalStateContext = createContext<ReactReduxContextValue<DiscoverIntern
 
 const useInternalStateStore = createStoreHook(internalStateContext).withTypes<InternalStateStore>();
 
-export const useInternalStateGetState = (): InternalStateStore['getState'] => {
-  const store = useInternalStateStore();
-  return store.getState;
-};
-
-export const useInternalStateSubscribe = (): InternalStateStore['subscribe'] => {
-  const store = useInternalStateStore();
-  return store.subscribe;
-};
-
 export const InternalStateProvider = ({
   store,
   children,
@@ -56,6 +46,16 @@ export const InternalStateProvider = ({
 
 export const useInternalStateDispatch =
   createDispatchHook(internalStateContext).withTypes<InternalStateDispatch>();
+
+export const useInternalStateGetState = (): InternalStateStore['getState'] => {
+  const store = useInternalStateStore();
+  return store.getState;
+};
+
+export const useInternalStateSubscribe = (): InternalStateStore['subscribe'] => {
+  const store = useInternalStateStore();
+  return store.subscribe;
+};
 
 export const useInternalStateSelector =
   createSelectorHook(internalStateContext).withTypes<DiscoverInternalState>();
