@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -15,6 +15,7 @@ import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import { AddToCaseContextMenuItem } from '@kbn/response-ops-alerts-table';
 import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
@@ -96,24 +97,27 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
   const actionsMenuItems = [
     ...(casesPrivileges && casesPrivileges?.create && casesPrivileges.read
       ? [
-          <EuiContextMenuItem
-            data-test-subj="add-to-existing-case-action"
-            key="addToExistingCase"
-            onClick={handleAddToExistingCaseClick}
-          >
-            {i18n.translate('xpack.ml.alerts.actions.addToCase', {
-              defaultMessage: 'Add to existing case',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            data-test-subj="add-to-new-case-action"
-            key="addToNewCase"
-            onClick={handleAddToNewCaseClick}
-          >
-            {i18n.translate('xpack.ml.alerts.actions.addToNewCase', {
-              defaultMessage: 'Add to new case',
-            })}
-          </EuiContextMenuItem>,
+          <AddToCaseContextMenuItem
+            key="addToCase"
+            actions={[
+              {
+                id: 'addToNewCase',
+                label: i18n.translate('xpack.ml.alerts.actions.addToNewCase', {
+                  defaultMessage: 'Add to new case',
+                }),
+                dataTestSubj: 'add-to-new-case-action',
+                onClick: handleAddToNewCaseClick,
+              },
+              {
+                id: 'addToExistingCase',
+                label: i18n.translate('xpack.ml.alerts.actions.addToCase', {
+                  defaultMessage: 'Add to existing case',
+                }),
+                dataTestSubj: 'add-to-existing-case-action',
+                onClick: handleAddToExistingCaseClick,
+              },
+            ]}
+          />,
         ]
       : []),
   ];
