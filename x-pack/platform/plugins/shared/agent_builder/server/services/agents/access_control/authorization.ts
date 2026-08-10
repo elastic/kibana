@@ -28,8 +28,10 @@ export interface AgentAuthzArgs {
 /**
  * Checks whether the current user owns the agent.
  *
- * Profile ids are preferred when both sides have one because usernames can change. Username
- * matching is kept as a fallback for legacy agent documents that only stored the creator name.
+ * Stable ids are preferred when the agent document stored a `created_by_id` (profile uid or
+ * realm-qualified id). Username matching is kept only for legacy documents that never stored an
+ * id, so those owners are not orphaned after upgrade. That legacy path cannot distinguish
+ * same-username principals across realms.
  */
 export const isAgentOwner = ({
   owner,
@@ -44,7 +46,12 @@ export const isAgentOwner = ({
   if (owner.id !== undefined && currentUser.id !== undefined) {
     return owner.id === currentUser.id;
   }
-  if (owner.username !== undefined && currentUser.username !== undefined) {
+  // Legacy docs without created_by_id: fall back to username so the original owner keeps access.
+  if (
+    owner.id === undefined &&
+    owner.username !== undefined &&
+    currentUser.username !== undefined
+  ) {
     return owner.username === currentUser.username;
   }
   return false;

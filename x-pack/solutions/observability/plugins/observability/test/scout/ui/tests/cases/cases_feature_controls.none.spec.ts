@@ -18,7 +18,7 @@ test.describe('Observability cases - no privileges', { tag: [...tags.stateful.cl
     await browserAuth.loginWithCustomRole(NO_CASES_ROLE);
   });
 
-  test('returns Application not found when the Observability app is inaccessible', async ({
+  test('returns Application unavailable when the Observability app is inaccessible', async ({
     page,
     pageObjects,
   }) => {
@@ -26,6 +26,6 @@ test.describe('Observability cases - no privileges', { tag: [...tags.stateful.cl
     await casesPage.gotoCasesList();
     const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
     await expect(notFoundContent).toBeVisible();
-    await expect(notFoundContent).toContainText('Application not found');
+    await expect(notFoundContent).toContainText('Application unavailable');
   });
 });
