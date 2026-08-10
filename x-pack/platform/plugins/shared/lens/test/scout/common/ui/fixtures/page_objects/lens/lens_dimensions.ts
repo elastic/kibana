@@ -6,11 +6,10 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import {
-  FORMAT_PARAM_DEBOUNCE_FLUSH_MS,
-  WAIT_FOR_FUNCTION_TIMEOUT_MS,
-} from './lens_editor_helpers';
+import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
+/** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
+const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 /** Dependencies from `LensApp` / `LensEditorApp` that dimensions helpers need. */
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;

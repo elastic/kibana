@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
-export const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
-
 /** Default timeout for `page.waitForFunction` readiness waits. */
 export const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 
