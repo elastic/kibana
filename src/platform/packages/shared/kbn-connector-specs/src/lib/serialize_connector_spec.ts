@@ -14,6 +14,7 @@ import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_sp
 export interface SerializeConnectorSpecOptions {
   isPfxEnabled: boolean;
   isEarsEnabled: boolean;
+  isEarsExperimentalEnabled: boolean;
 }
 
 export function serializeConnectorSpec(

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import moment from 'moment';
 import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
@@ -28,7 +28,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
 
     let result: OverviewStatusMetaData[] = [];
 
-    const { downConfigs, pendingConfigs, upConfigs } = status;
+    const { downConfigs, pendingConfigs, staleConfigs, upConfigs } = status;
 
     if (statusFilter) {
       switch (statusFilter) {
@@ -44,6 +44,9 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         case 'pending':
           result = Object.values(pendingConfigs) as OverviewStatusMetaData[];
           break;
+        case 'stale':
+          result = Object.values(staleConfigs ?? {}) as OverviewStatusMetaData[];
+          break;
         default:
           break;
       }
@@ -57,6 +60,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         ...upAndDownMonitors,
         ...Object.values(disabledConfigs ?? {}),
         ...Object.values(pendingConfigs),
+        ...Object.values(staleConfigs ?? {}),
       ] as OverviewStatusMetaData[];
     }
 

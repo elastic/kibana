@@ -201,6 +201,69 @@ export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
 export const ArrayQueries = lazySchema(() => z.array(ArrayQueriesItem));
 export type ArrayQueries = z.infer<typeof ArrayQueries>;
 
+/**
+  * Discriminator for the pack's schedule mode. `interval` uses native
+osqueryd interval scheduling (seconds). `rrule` uses osquerybeat's
+RRULE-based recurrence scheduling. Per-query overrides MUST use the
+same mode as the pack — cross-mode overrides are rejected with 400.
+
+  */
+export const ScheduleType = lazySchema(() => z.enum(['interval', 'rrule']));
+export type ScheduleType = z.infer<typeof ScheduleType>;
+export type ScheduleTypeEnum = typeof ScheduleType.enum;
+export const ScheduleTypeEnum = ScheduleType.enum;
+
+export const ScheduleTypeOrUndefined = lazySchema(() => ScheduleType.nullable());
+export type ScheduleTypeOrUndefined = z.infer<typeof ScheduleTypeOrUndefined>;
+
+/**
+  * RRULE schedule configuration consumed by osquerybeat. Loose date
+forms like `"2024-01-01"` are rejected with 400. DTSTART is NOT
+embedded in `rrule`; the separate `start_date` field is the
+schedule anchor.
+
+  */
+export const RRuleScheduleConfig = lazySchema(() =>
+  z.object({
+    /**
+      * Fully serialized RFC 5545 RRULE string (e.g.
+`"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a
+subset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,
+`BYMONTH` — but the server accepts and round-trips any
+well-formed parts (other recognized parts like `BYHOUR`,
+`BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved
+verbatim).
+
+      */
+    rrule: z.string().max(2048),
+    /**
+     * RFC 3339 datetime string for the schedule's start.
+     */
+    start_date: z.string().max(64).datetime(),
+    /**
+     * Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`.
+     */
+    end_date: z.string().max(64).datetime().optional(),
+    /**
+      * Optional Go duration string for splay (random execution delay),
+e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
+values only; compound durations (`"1h30m"`) are tolerated on
+read for round-trip safety with osquerybeat's writer. Maximum
+12 hours (43200 seconds).
+
+      */
+    splay: z.string().max(64).optional(),
+    /**
+     * Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.
+     */
+    timeout: z.number().optional(),
+  })
+);
+export type RRuleScheduleConfig = z.infer<typeof RRuleScheduleConfig>;
+
+export const RRuleScheduleConfigOrUndefined = lazySchema(() => RRuleScheduleConfig.nullable());
+export type RRuleScheduleConfigOrUndefined = z.infer<typeof RRuleScheduleConfigOrUndefined>;
+
 export const ObjectQueriesItem = lazySchema(() =>
   z.object({
     query: Query.optional(),
@@ -211,6 +274,8 @@ export const ObjectQueriesItem = lazySchema(() =>
     saved_query_id: SavedQueryIdOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    schedule_type: ScheduleTypeOrUndefined.optional(),
+    rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
   })
 );
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
@@ -267,3 +332,12 @@ export type Shards = z.infer<typeof Shards>;
 
 export const DefaultSuccessResponse = lazySchema(() => z.object({}));
 export type DefaultSuccessResponse = z.infer<typeof DefaultSuccessResponse>;
+
+/**
+ * Pack-level interval, in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.
+ */
+export const PackInterval = lazySchema(() => z.number().int().min(1));
+export type PackInterval = z.infer<typeof PackInterval>;
+
+export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
+export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;

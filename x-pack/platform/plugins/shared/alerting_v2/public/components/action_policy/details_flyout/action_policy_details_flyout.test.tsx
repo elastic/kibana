@@ -64,8 +64,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
-  type: 'global',
-  ruleId: null,
   enabled: true,
   destinations: [
     { type: 'workflow', id: 'wf-1' },
@@ -94,6 +92,7 @@ const createQueryClient = () =>
 
 interface RenderProps {
   policy?: ActionPolicyResponse;
+  canWrite?: boolean;
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -122,7 +121,11 @@ const renderFlyout = (props: RenderProps = {}) => {
   render(
     <QueryClientProvider client={createQueryClient()}>
       <I18nProvider>
-        <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
+        <ActionPolicyDetailsFlyout
+          policy={policy}
+          canWrite={props.canWrite ?? true}
+          {...handlers}
+        />
       </I18nProvider>
     </QueryClientProvider>
   );
@@ -163,23 +166,6 @@ describe('ActionPolicyDetailsFlyout', () => {
       renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
     });
-
-    it('renders a "Global" badge for global policies', () => {
-      renderFlyout({ policy: createPolicy({ type: 'global', ruleId: null }) });
-
-      expect(screen.getByText('Global')).toBeInTheDocument();
-      expect(screen.queryByText('Single rule')).not.toBeInTheDocument();
-    });
-
-    it('renders a "Single rule" badge and a link to the rule details for single_rule policies', () => {
-      renderFlyout({
-        policy: createPolicy({ type: 'single_rule', ruleId: 'rule-42' }),
-      });
-
-      expect(screen.getByText('Single rule')).toBeInTheDocument();
-      const link = screen.getByTestId('actionPolicyDefinitionLinkedRuleLink');
-      expect(link).toHaveAttribute('href', expect.stringContaining('rule-42'));
-    });
   });
 
   describe('body sections', () => {
@@ -188,6 +174,21 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
       expect(screen.getByText('production')).toBeInTheDocument();
+    });
+
+    it('renders a expandable list of tags when there are more than one', () => {
+      renderFlyout();
+
+      expect(screen.getByText('production')).toBeInTheDocument();
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('opens the tags popover when the "+N" button is clicked', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      await user.click(screen.getByText('+1'));
+
       expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 
@@ -339,6 +340,23 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
       expect(handlers.onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    it('hides the actions menu and the Edit footer button but keeps Close', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId(TEST_SUBJ.actionsMenuButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ.editButton)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
+    });
+
+    it('still renders the policy details', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
+      expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
   });
 });

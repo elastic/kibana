@@ -43,6 +43,7 @@ import type {
   BulkRollbackPackagesRequest,
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
+  GetIlmPoliciesResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -317,6 +318,20 @@ export const useGetEpmDatastreams = () => {
       version: API_VERSIONS.public.v1,
     })
   );
+};
+
+export const useGetIlmPoliciesQuery = (options?: { enabled?: boolean }) => {
+  return useQuery<GetIlmPoliciesResponse, RequestError>({
+    queryKey: ['get-ilm-policies'],
+    queryFn: () =>
+      sendRequestForRq<GetIlmPoliciesResponse>({
+        path: epmRouteService.getIlmPoliciesPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+    refetchOnWindowFocus: false,
+  });
 };
 
 export const sendGetFileByPath = (filePath: string) => {

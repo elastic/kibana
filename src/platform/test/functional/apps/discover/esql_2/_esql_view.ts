@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/esql/_esql_view.ts
+
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
 import { NULL_LABEL } from '@kbn/field-formats-common';
@@ -283,9 +285,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.getFilterCount()).to.be(0);
         // chart and time picker updated
         await elasticChart.waitForRenderingCount(renderingCount + 1);
-        const updatedTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(updatedTimeConfig.start).to.be('Sep 20, 2015 @ 08:23:44.196');
-        expect(updatedTimeConfig.end).to.be('Sep 21, 2015 @ 02:32:51.702');
+        const newDurationHours = await timePicker.getTimeDurationInHours();
+        expect(Math.round(newDurationHours)).to.be(17);
       });
     });
 
@@ -344,7 +345,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('switch modal', () => {
+    describe('switching to a data view', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
@@ -352,40 +353,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      it('should show switch modal when switching to a data view', async () => {
+      it('should switch to a data view immediately', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
+        await discover.waitUntilTabIsLoaded();
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
-      it('should not show switch modal when switching to a data view while a saved search is open', async () => {
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
-        const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
-        await monacoEditor.setCodeEditorValue(testQuery);
-        await testSubjects.click('querySubmitButton');
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
-        await find.clickByCssSelector(
-          '[data-test-subj="discover-esql-to-dataview-modal"] .euiModal__closeIcon'
-        );
-        await retry.try(async () => {
-          await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
-        });
-        await discover.saveSearch('esql_test');
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
-        await discover.waitUntilTabIsLoaded();
-        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
-      });
-
-      it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
+      it('should switch to a data view immediately while a saved search with unsaved changes is open', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await discover.saveSearch('esql_test2');
@@ -395,9 +371,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
         await discover.selectDataViewMode();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
-        });
+        await discover.waitUntilTabIsLoaded();
+        expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
       it('should show available data views and search results after switching to classic mode', async () => {
@@ -577,7 +552,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains an initial value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '1,623';
         });
@@ -591,7 +566,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the highest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -605,7 +580,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -615,7 +590,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -631,7 +606,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same highest value after reopening',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === '17,966';
           }
@@ -642,7 +617,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the lowest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -658,7 +633,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
 
         await retry.waitFor('first cell contains the lowest value for extension', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
           const text = await cell.getVisibleText();
           return text === 'css';
         });
@@ -672,7 +647,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same lowest value after reload', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '0';
         });
@@ -680,7 +655,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value for extension after reload',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
             const text = await cell.getVisibleText();
             return text === 'css';
           }
@@ -699,7 +674,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the same lowest value as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             const text = await cell.getVisibleText();
             return text === '0';
           }
@@ -708,7 +683,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'first cell contains the lowest value for extension as dashboard panel',
           async () => {
-            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 2);
             const text = await cell.getVisibleText();
             return text === 'css';
           }

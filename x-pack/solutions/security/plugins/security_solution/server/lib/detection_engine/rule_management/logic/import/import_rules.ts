@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
 import type { IRuleSourceImporter } from './rule_source_importer';
@@ -22,12 +23,14 @@ import { isRuleConflictError, isRuleImportError } from './errors';
  */
 export const importRules = async ({
   ruleChunks,
+  changeTracking,
   overwriteRules,
   detectionRulesClient,
   ruleSourceImporter,
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: RuleToImport[][];
+  changeTracking?: SecurityRuleChangeTracking<never>;
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;
@@ -45,6 +48,7 @@ export const importRules = async ({
       overwriteRules,
       ruleSourceImporter,
       rules,
+      changeTracking,
     });
 
     const importResponses = importedRulesResponse.map((rule) => {

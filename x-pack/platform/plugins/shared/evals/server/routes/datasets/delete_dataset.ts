@@ -77,10 +77,8 @@ export const registerDeleteDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const wasDeleted = await datasetClient.delete(datasetId);
 
           if (!wasDeleted) {
@@ -103,7 +101,8 @@ export const registerDeleteDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to delete evaluation dataset: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to delete evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to delete evaluation dataset' },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { RouteComponentProps } from 'react-router-dom';
 
 import { SECTIONS } from '../../constants';

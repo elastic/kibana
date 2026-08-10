@@ -20,13 +20,8 @@ import * as UseCurrentUserImports from '../components/use_current_user';
 import { UserAPIClient } from '../management';
 
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
-const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
 useUserProfileMock.mockReturnValue({
-  loading: true,
-});
-
-useCurrentUserMock.mockReturnValue({
   loading: true,
 });
 
@@ -149,6 +144,41 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart, authc });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(2);
+  });
+
+  it('should register Chrome Next user menu when next.isEnabled is true', () => {
+    const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
+    Object.defineProperty(coreStart.chrome.next, 'isEnabled', { value: true });
+    const navControlService = new SecurityNavControlService();
+
+    navControlService.setup({
+      securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
+    });
+    navControlService.start({ core: coreStart, authc });
+
+    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.next.userMenu.set).toHaveBeenCalledTimes(1);
+    const content = coreStart.chrome.next.userMenu.set.mock.calls[0][0];
+    expect(React.isValidElement(content)).toBe(true);
+  });
+
+  it('should not register Chrome Next user menu when next.isEnabled is false', () => {
+    const license$ = new BehaviorSubject<ILicense>(validLicense);
+    const coreStart = coreMock.createStart();
+    const navControlService = new SecurityNavControlService();
+
+    navControlService.setup({
+      securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+      logoutUrl: '/some/logout/url',
+      securityApiClients: mockApiClients(coreStart.http),
+    });
+    navControlService.start({ core: coreStart, authc });
+
+    expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
+    expect(coreStart.chrome.next.userMenu.set).not.toHaveBeenCalled();
   });
 
   describe(`#start`, () => {

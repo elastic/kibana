@@ -18,20 +18,16 @@ project:
   sourceRoot: x-pack/solutions/search/packages/shared-ui
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/cloud-plugin'
 tags:
   - shared-browser
   - package
   - prod
   - group-search
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

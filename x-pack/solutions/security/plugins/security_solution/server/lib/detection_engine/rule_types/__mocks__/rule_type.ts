@@ -63,6 +63,7 @@ export const createRuleTypeMocks = (
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
     getActionsConfigurationUtilities: jest.fn(),
+    getRelayClient: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: () => true,
     registerConnectorLifecycleListener: jest.fn(),

@@ -16,6 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
+import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID =
@@ -25,12 +26,14 @@ const getTraceChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
       'KQL filter for traces. Examples: \'service.name: "my-service"\', \'host.name: "web-*"\'.'
     ),
   groupBy: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .default('service.name')
     .describe(
       dedent(`Field to group results by. Use low-cardinality fields. 

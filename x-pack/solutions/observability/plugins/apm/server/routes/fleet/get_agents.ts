@@ -9,6 +9,7 @@ import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { keyBy } from 'lodash';
+import type { FleetAgentResponse } from '@kbn/apm-api-shared';
 import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { getApmPackagePolicies } from './get_apm_package_policies';
@@ -28,19 +29,6 @@ async function getFleetAgentByIds({
   );
 
   return await fleetPluginStart.agentPolicyService.getByIds(savedObjectsClient, policyIds);
-}
-
-export interface FleetAgentResponse {
-  cloudStandaloneSetup:
-    | { apmServerUrl: string | undefined; secretToken: string | undefined }
-    | undefined;
-  isFleetEnabled: boolean;
-  fleetAgents: Array<{
-    id: string;
-    name: string;
-    apmServerUrl: any;
-    secretToken: any;
-  }>;
 }
 
 export async function getFleetAgents({

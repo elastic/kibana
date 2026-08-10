@@ -197,8 +197,6 @@ describe('RowKebabMenu — export branch', () => {
       fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
       fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
 
-      fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('csv', {
@@ -226,6 +224,46 @@ describe('RowKebabMenu — export branch', () => {
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('json', undefined);
+    });
+
+    it('disables the Export results menu item when total is 0', () => {
+      useExportFiltersMock.mockReturnValue({ total: 0 });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+
+      const item = screen.getByTestId('osqueryExportResultsMenuItem');
+      expect(item).toBeDisabled();
+    });
+
+    it('does not open the modal when Export results is clicked with total=0', () => {
+      useExportFiltersMock.mockReturnValue({ total: 0 });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+      fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
+
+      expect(screen.queryByTestId('osqueryExportResultsModal')).not.toBeInTheDocument();
+    });
+
+    it('leaves the menu item enabled when total is undefined (loading or error)', () => {
+      useExportFiltersMock.mockReturnValue({ total: undefined });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+
+      const item = screen.getByTestId('osqueryExportResultsMenuItem');
+      expect(item).not.toBeDisabled();
+    });
+
+    it('leaves the menu item enabled when total is greater than zero (boundary: 1)', () => {
+      useExportFiltersMock.mockReturnValue({ total: 1 });
+      renderKebab();
+
+      fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
+
+      const item = screen.getByTestId('osqueryExportResultsMenuItem');
+      expect(item).not.toBeDisabled();
     });
 
     it('forwards total to the modal so the button reflects unfiltered count when unchecked', () => {

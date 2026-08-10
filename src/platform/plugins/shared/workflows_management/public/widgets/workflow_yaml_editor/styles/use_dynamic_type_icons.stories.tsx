@@ -12,16 +12,15 @@ import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { CoreStart } from '@kbn/core/public';
-import { CommonGlobalAppStyles } from '@kbn/core-chrome-layout/layouts/common/global_app_styles';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { HardcodedIcons } from '@kbn/workflows-ui';
 import { GlobalWorkflowEditorStyles } from './global_workflow_editor_styles';
 import { predefinedStepTypes, useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { mockUiSettingsService } from '../../../shared/mocks/mock_ui_settings_service';
-import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 
 type MockConnectorTypeInfo = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
 
@@ -155,7 +154,6 @@ const decorator: Decorator = (story: Function) => {
           } as unknown as CoreStart
         }
       >
-        <CommonGlobalAppStyles />
         {story()}
       </KibanaContextProvider>
     </I18nProvider>

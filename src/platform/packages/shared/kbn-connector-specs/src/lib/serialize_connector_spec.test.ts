@@ -29,6 +29,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -52,6 +53,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -77,6 +79,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -105,6 +108,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -133,6 +137,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -162,6 +167,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -190,6 +196,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -226,6 +233,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -263,15 +271,21 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const spy = jest.spyOn(generateSecretsModule, 'generateSecretsSchemaFromSpec');
 
-      serializeConnectorSpec(spec, { isPfxEnabled: false, isEarsEnabled: false });
+      serializeConnectorSpec(spec, {
+        isPfxEnabled: false,
+        isEarsEnabled: false,
+        isEarsExperimentalEnabled: false,
+      });
 
       expect(spy).toHaveBeenCalledWith(spec.auth, {
         isPfxEnabled: false,
         isEarsEnabled: false,
+        isEarsExperimentalEnabled: false,
       });
 
       spy.mockRestore();
@@ -295,10 +309,15 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const defaultEars = serializeConnectorSpec(spec);
-      const earsOn = serializeConnectorSpec(spec, { isPfxEnabled: true, isEarsEnabled: true });
+      const earsOn = serializeConnectorSpec(spec, {
+        isPfxEnabled: true,
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: false,
+      });
       interface SecretBranch {
         properties?: { authType?: { const?: string } };
       }
@@ -390,6 +409,56 @@ describe('serializeConnectorSpec', () => {
         const spec = connectorsSpecs[specName as keyof typeof connectorsSpecs];
         expect(() => serializeConnectorSpec(spec)).not.toThrow();
       }
+    });
+  });
+
+  describe('experimental EARS filtering', () => {
+    test('excludes experimental EARS auth when isEarsExperimentalEnabled is false', () => {
+      const testSpec = {
+        metadata: {
+          id: '.test-experimental-ears',
+          displayName: 'Test',
+          description: 'Test connector',
+          minimumLicense: 'basic' as const,
+          supportedFeatureIds: ['alerting' as const],
+        },
+        auth: {
+          types: [
+            'bearer',
+            {
+              type: 'ears',
+              isExperimental: true,
+              defaults: { provider: 'google', scope: 'test-scope' },
+            },
+          ],
+        },
+        actions: {
+          test: {
+            input: z.object({}),
+            handler: async () => ({ success: true }),
+          },
+        },
+        test: { handler: async () => ({}), enabled: false },
+      };
+
+      const result = serializeConnectorSpec(testSpec, {
+        isPfxEnabled: true,
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: false,
+      });
+
+      const schemaJson = result.schema as {
+        properties?: {
+          secrets?: { oneOf?: Array<{ properties?: { authType?: { const?: string } } }> };
+        };
+      };
+      const secretsOneOf = schemaJson.properties?.secrets?.oneOf || [];
+      const authTypes = secretsOneOf
+        .map((opt) => opt.properties?.authType?.const)
+        .filter(Boolean) as string[];
+
+      expect(authTypes).toContain('bearer');
+      expect(authTypes).not.toContain('ears');
     });
   });
 });

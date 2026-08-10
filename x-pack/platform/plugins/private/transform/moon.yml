@@ -54,7 +54,6 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/saved-objects-management-plugin'
-  - '@kbn/saved-objects-finder-plugin'
   - '@kbn/ml-route-utils'
   - '@kbn/core-lifecycle-server'
   - '@kbn/security-plugin'
@@ -67,7 +66,6 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/unified-field-list'
   - '@kbn/ebt-tools'
-  - '@kbn/content-management-plugin'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-plugins-server'
   - '@kbn/data-view-editor-plugin'
@@ -94,6 +92,10 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/cps-utils'
+  - '@kbn/core-notifications-browser'
 tags:
   - plugin
   - prod

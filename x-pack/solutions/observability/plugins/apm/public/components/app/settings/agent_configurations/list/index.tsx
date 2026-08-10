@@ -20,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
@@ -194,33 +194,47 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             width: euiTheme.size.xl,
             name: '',
             render: (config: Config) => (
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
                   defaultMessage: 'Edit',
                 })}
-                iconType="pencil"
-                href={apmRouter.link('/settings/agent-configuration/edit', {
-                  query: {
-                    name: config.service.name,
-                    environment: config.service.environment,
-                  },
-                })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+                    defaultMessage: 'Edit',
+                  })}
+                  iconType="pencil"
+                  href={apmRouter.link('/settings/agent-configuration/edit', {
+                    query: {
+                      name: config.service.name,
+                      environment: config.service.environment,
+                    },
+                  })}
+                />
+              </EuiToolTip>
             ),
           },
           {
             width: euiTheme.size.xl,
             name: '',
             render: (config: Config) => (
-              <EuiButtonIcon
-                data-test-subj="apmColumnsButton"
-                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
                   defaultMessage: 'Delete',
                 })}
-                iconType="trash"
-                onClick={() => setConfigToBeDeleted(config)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="apmColumnsButton"
+                  aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+                    defaultMessage: 'Delete',
+                  })}
+                  iconType="trash"
+                  onClick={() => setConfigToBeDeleted(config)}
+                />
+              </EuiToolTip>
             ),
           },
         ]

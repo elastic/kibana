@@ -159,6 +159,7 @@ const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShar
   return (
     <EuiFilterGroup>
       <EuiPopover
+        aria-label={i18n.VISIBILITY}
         button={button}
         closePopover={closePopover}
         id={filterGroupPopoverId}

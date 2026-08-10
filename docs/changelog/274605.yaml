@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/274605
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Add rule restore from changes history in Elastic Security
+description: "Adds an API and UI to restore a detection rule to a previous state from its changes history."

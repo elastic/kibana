@@ -20,12 +20,18 @@ export type PersistableStateAttachmentState = Pick<
 >;
 
 export interface PersistableStateAttachmentType
-  extends Omit<PersistableState<PersistableStateAttachmentState>, 'migrations'> {
+  extends Omit<
+    PersistableState<PersistableStateAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
   id: string;
 }
 
 export interface PersistableStateAttachmentTypeSetup
-  extends Omit<PersistableStateDefinition<PersistableStateAttachmentState>, 'migrations'> {
+  extends Omit<
+    PersistableStateDefinition<PersistableStateAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
   id: string;
 }
 
@@ -33,8 +39,7 @@ export interface ExternalReferenceAttachmentType {
   id: string;
   /**
    * A function to validate data stored with the attachment type. This function should throw an error
-   * if the data is not in the form it expects. For **unified reference** types registered on the
-   * unified registry, the full `UnifiedReferenceAttachmentPayload` is passed (not metadata alone).
+   * if the data is not in the form it expects.
    */
   schemaValidator?: (data: unknown) => void;
 }
@@ -50,17 +55,26 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
   );
 
 export interface UnifiedAttachmentType
-  extends ExternalReferenceAttachmentType,
-    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {
-  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
-  schema?: z.ZodType;
+  extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
+  /**
+   * Schema exposed to workflow authors. When unset, workflow steps fall back to
+   * `schema` if it is a Zod object; when `false`, the type is excluded.
+   */
+  workflowSchema?: z.ZodObject | false;
 }
 
 export interface UnifiedAttachmentTypeSetup
-  extends ExternalReferenceAttachmentType,
-    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {
-  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
-  schema?: z.ZodType;
+  extends Omit<
+    PersistableStateDefinition<UnifiedAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
+  workflowSchema?: z.ZodObject | false;
 }
 
 export interface AttachmentFramework {

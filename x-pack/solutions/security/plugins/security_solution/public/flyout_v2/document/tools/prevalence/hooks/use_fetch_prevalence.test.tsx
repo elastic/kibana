@@ -9,19 +9,17 @@ import { renderHook } from '@testing-library/react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
 import { useQuery } from '@kbn/react-query';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useFetchPrevalence } from './use_fetch_prevalence';
 import { createFetchData } from '../../../main/utils/fetch_data';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('@kbn/es-query');
 jest.mock('@kbn/react-query');
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 jest.mock('../../../main/utils/fetch_data');
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');
 
 const highlightedFieldsFilters: Record<string, QueryDslQueryContainer> = {
@@ -55,7 +53,6 @@ describe('useFetchPrevalence', () => {
       isError: false,
     });
     (useSelector as jest.Mock).mockReturnValue({ patternList: ['alerts-*', 'logs-*'] });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['security-*'] });
     (buildEsQuery as jest.Mock).mockReturnValue({ bool: { filter: [] } });
     (createFetchData as jest.Mock).mockResolvedValue({});
@@ -78,7 +75,7 @@ describe('useFetchPrevalence', () => {
     });
   });
 
-  it('uses old default patterns and excludes cold/frozen tiers when ui setting is enabled', async () => {
+  it('uses security default patterns and excludes cold/frozen tiers when ui setting is enabled', async () => {
     renderHook(() => useFetchPrevalence({ highlightedFieldsFilters, interval }));
 
     const [, , filters] = (buildEsQuery as jest.Mock).mock.calls[0];
@@ -103,15 +100,14 @@ describe('useFetchPrevalence', () => {
       searchServiceMock,
       expect.objectContaining({
         params: expect.objectContaining({
-          index: ['alerts-*', 'logs-*'],
+          index: ['security-*'],
         }),
       })
     );
   });
 
-  it('uses experimental patterns and does not exclude cold/frozen tiers when ui setting is disabled', () => {
+  it('does not exclude cold/frozen tiers when ui setting is disabled', () => {
     uiSettingsGetMock.mockReturnValue(false);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
 
     renderHook(() => useFetchPrevalence({ highlightedFieldsFilters, interval }));
 

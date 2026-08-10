@@ -26,6 +26,7 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
+import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -36,6 +37,7 @@ import {
   type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
+import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
@@ -77,13 +79,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    if (providedExecutionId) {
-      const existing = await executionClient.peek(providedExecutionId);
-      if (existing) {
-        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
-      }
-    }
-
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments,
       request
@@ -92,15 +87,45 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const execution = await executionClient.create({
-      executionMode: mode,
-      executionId,
-      agentId,
-      spaceId,
-      agentParams: validatedParams,
-      parentExecutionId: params.parentExecutionId,
-      metadata,
-    });
+    let execution: AgentExecution;
+    try {
+      execution = await executionClient.create({
+        executionMode: mode,
+        executionId,
+        agentId,
+        spaceId,
+        agentParams: validatedParams,
+        parentExecutionId: params.parentExecutionId,
+        metadata,
+      });
+    } catch (err) {
+      if (isVersionConflictError(err)) {
+        if (metadata?.execution_idempotency_key) {
+          this.logger.debug(
+            `Duplicate idempotency key detected, returning existing execution ${executionId}`
+          );
+
+          // Repairs executions left in `scheduled` when the original delivery
+          // failed before scheduling the task.
+          const existing = await executionClient.peek(executionId);
+
+          if (existing?.status === ExecutionStatus.scheduled) {
+            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+              request,
+            });
+          }
+
+          return {
+            executionId,
+            events$: this.followExecution(executionId),
+          };
+        }
+
+        throw createBadRequestError(`Execution with id ${executionId} already exists`);
+      }
+
+      throw err;
+    }
 
     // Wire up external abort signal to execution abort
     if (abortSignal) {
@@ -132,14 +157,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const execution = await executionClient.get(executionId);
 
     if (!execution) {
-      throw new Error(`Execution ${executionId} not found`);
+      this.logger.warn(`Ignoring abort for unknown execution ${executionId}`);
+      return;
     }
 
     if (
       execution.status !== ExecutionStatus.scheduled &&
       execution.status !== ExecutionStatus.running
     ) {
-      throw new Error(`Cannot abort execution ${executionId} with status ${execution.status}`);
+      this.logger.debug(
+        `Ignoring abort for execution ${executionId} with terminal status ${execution.status}`
+      );
+      return;
     }
 
     await executionClient.updateStatus(executionId, ExecutionStatus.aborted);
@@ -157,6 +186,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
+  private buildRunAgentTask(executionId: string) {
+    return {
+      id: `agent-${executionId}`,
+      taskType: taskTypes.runAgent,
+      params: { executionId },
+      scope: ['agent-builder'],
+      enabled: true,
+      state: {},
+    };
+  }
+
   private async executeWithScheduledTask({
     executionId,
     agentId,
@@ -166,17 +206,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     agentId: string;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    await this.deps.taskManager.schedule(
-      {
-        id: `agent-${executionId}`,
-        taskType: taskTypes.runAgent,
-        params: { executionId },
-        scope: ['agent-builder'],
-        enabled: true,
-        state: {},
-      },
-      { request }
-    );
+    // ensureScheduled tolerates the task already existing: a concurrent idempotent
+    // replay may have re-issued this schedule while repairing a stuck execution.
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
@@ -203,13 +235,20 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // Update status to running
     await executionClient.updateStatus(executionId, ExecutionStatus.running);
 
-    // Set up abort monitoring (same mechanism as TM path)
+    // Set up abort monitoring and heartbeat reporting (same mechanism as TM path)
     const abortMonitor = new AbortMonitor({
       executionId,
       executionClient,
       logger: this.logger.get('abort-monitor'),
     });
     abortMonitor.start();
+
+    const heartbeatReporter = new HeartbeatReporter({
+      executionId,
+      executionClient,
+      logger: this.logger.get('heartbeat-reporter'),
+    });
+    heartbeatReporter.start();
 
     try {
       // Build the live event stream
@@ -224,12 +263,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       const events$ = rawEvents$.pipe(shareReplay());
 
       // Side-effect subscription: write events to ES and update execution status.
-      // The abortMonitor is stopped in the .finally() of this subscription.
+      // The abortMonitor and heartbeatReporter are stopped in the .finally() of this subscription.
       this.subscribeForPersistence({
         events$,
         execution,
         executionClient,
         abortMonitor,
+        heartbeatReporter,
       });
 
       this.logger.debug(
@@ -242,6 +282,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       };
     } catch (e) {
       abortMonitor.stop();
+      heartbeatReporter.stop();
       throw e;
     }
   }
@@ -255,11 +296,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     execution,
     executionClient,
     abortMonitor,
+    heartbeatReporter,
   }: {
     events$: Observable<ChatEvent>;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
     abortMonitor: AbortMonitor;
+    heartbeatReporter: HeartbeatReporter;
   }): void {
     const { executionId } = execution;
 
@@ -290,6 +333,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       })
       .finally(() => {
         abortMonitor.stop();
+        heartbeatReporter.stop();
       });
   }
 
@@ -339,18 +383,27 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async validateAttachmentsIfProvided(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
-  ): Promise<Attachment[] | undefined> {
+  ): Promise<AttachmentInput[] | undefined> {
     if (!attachments || attachments.length === 0) {
       return undefined;
     }
 
-    const validated: Attachment[] = [];
+    const validated: AttachmentInput[] = [];
     for (const attachment of attachments) {
       const result = await this.deps.attachmentsService.validate(attachment, request);
       if (!result.valid) {
         throw createBadRequestError(`Attachment validation failed: ${result.error}`);
       }
-      validated.push(result.attachment as Attachment);
+      const a = result.attachment as Attachment;
+      validated.push({
+        id: a.id,
+        type: a.type,
+        data: a.data,
+        ...(a.description !== undefined ? { description: a.description } : {}),
+        ...(a.hidden !== undefined ? { hidden: a.hidden } : {}),
+        ...(a.origin !== undefined ? { origin: a.origin } : {}),
+        ...(a.groupId !== undefined ? { group_id: a.groupId } : {}),
+      });
     }
 
     return validated;

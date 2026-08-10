@@ -20,7 +20,6 @@ export const BackToExternalAppLink = memo<BackToExternalAppLinkProps>(
     const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo);
 
     return (
-      // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiLink
         {...commonProps}
         data-test-subj="backToOrigin"

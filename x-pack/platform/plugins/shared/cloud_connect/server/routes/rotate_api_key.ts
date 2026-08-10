@@ -12,6 +12,7 @@ import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { getApiKeyData, ApiKeyNotFoundError } from '../lib/create_storage_service';
 import { enableInferenceCCM } from '../services/inference_ccm';
+import { CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -33,13 +34,7 @@ export const registerRotateApiKeyRoute = ({
   router.post(
     {
       path: '/internal/cloud_connect/cluster/rotate_api_key',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -112,13 +107,7 @@ export const registerRotateApiKeyRoute = ({
   router.post(
     {
       path: '/internal/cloud_connect/cluster/{service_key}/rotate_api_key',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: {
         params: schema.object({
           // Only EIS is currently supported

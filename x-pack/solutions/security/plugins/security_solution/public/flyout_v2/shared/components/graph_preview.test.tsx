@@ -28,7 +28,8 @@ const renderGraphPreview = (contextValue: DocumentDetailsContext, props: GraphPr
     </TestProviders>
   );
 
-const ERROR_MESSAGE = 'An error is preventing this alert from being visualized.';
+const ERROR_MESSAGE = 'An error is preventing this graph from being visualized.';
+const EMPTY_MESSAGE = 'No graph nodes found.';
 
 describe('<GraphPreview />', () => {
   beforeEach(() => {
@@ -79,7 +80,7 @@ describe('<GraphPreview />', () => {
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });
 
-  it('shows error message when data is empty', () => {
+  it('shows empty message when data has no nodes', () => {
     const graphProps = {
       isLoading: false,
       isError: false,
@@ -87,6 +88,6 @@ describe('<GraphPreview />', () => {
 
     const { getByText } = renderGraphPreview(mockContextValue, graphProps);
 
-    expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
+    expect(getByText(EMPTY_MESSAGE)).toBeInTheDocument();
   });
 });

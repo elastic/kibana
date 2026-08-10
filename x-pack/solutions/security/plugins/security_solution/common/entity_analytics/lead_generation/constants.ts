@@ -19,7 +19,21 @@ const LEADS_INDEX_PREFIX = '.entity_analytics.entity-leads' as const;
 
 export const LEADS_INDEX_PATTERN = `${LEADS_INDEX_PREFIX}-*` as const;
 
-export type LeadGenerationMode = 'adhoc' | 'scheduled';
+export const LEAD_SOURCE_TYPES = ['adhoc', 'scheduled'] as const;
+
+export type LeadGenerationMode = (typeof LEAD_SOURCE_TYPES)[number];
 
 export const getLeadsIndexName = (spaceId: string, mode: LeadGenerationMode = 'adhoc'): string =>
   `${LEADS_INDEX_PREFIX}-${mode}.entity-${spaceId}`;
+
+/** Max leads produced by a single generation run (engine cap; see `DEFAULT_ENGINE_CONFIG.maxLeads`). */
+export const MAX_LEADS_PER_RUN = 10;
+
+/**
+ * Upper bound on recent leads that can exist at once (and thus be fetched/shown
+ * anywhere in the UI — main panel count, "See recent leads" label, and the
+ * flyout list). Persistence replaces prior leads per source type via a
+ * `deleteByQuery` keyed on the new `execution_uuid`, so at most
+ * `MAX_LEADS_PER_RUN` leads survive per source type at a time.
+ */
+export const MAX_RECENT_LEADS = MAX_LEADS_PER_RUN * LEAD_SOURCE_TYPES.length;

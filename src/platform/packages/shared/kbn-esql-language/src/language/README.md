@@ -94,12 +94,12 @@ Note that the autocomplete service will work as best effort with invalid queries
 
 #### Code actions
 
-Code actions are **quick fixes** tied to validation messages. Given the current query text and a message, we return a quick fix for it if exists that contains a fixed version of the query.
+Code actions are **quick fixes** tied to validation messages. Given the current query text and a message, we return quick fixes that contain fixed versions of the query.
 
 ##### Usage
 
 ```js
-import { getQuickFixForMessage } from '@kbn/esql-language';
+import { getQuickFixesForMessage } from '@kbn/esql-language';
 
 const myCallbacks = {
   getSources: async () => [
@@ -108,13 +108,13 @@ const myCallbacks = {
   // ...other callbacks as needed; some fixes’ displayCondition requires getSources, etc.
 };
 
-const action = await getQuickFixForMessage({
+const actions = await getQuickFixesForMessage({
   queryString: 'FROM my.wired.stream | WHERE no_such_field > 0',
   message: { code: 'unknownColumn' },
   callbacks: myCallbacks,
 });
 
-if (action) {
+for (const action of actions) {
   console.log(action.title, action.fixedText);
 }
 ```
@@ -125,7 +125,7 @@ if (action) {
 - `fixQuery: (query: string) => string` — rewrites the full query (typically via `@elastic/esql` mutate helpers)
 - `displayCondition?` — `async (queryString, ESQLCallbacks) => boolean`. If omitted, the fix is shown whenever that message code is present. If the condition returns `false` or throws, no action is returned.
 
-`getQuickFixForMessage` resolves to `undefined` when there is no entry for the code, the display condition fails, or `fixQuery` throws (for example the query could not be rewritten safely).
+`getQuickFixesForMessage` resolves to an empty list when there is no entry for the code, the display condition fails, or `fixQuery` throws (for example the query could not be rewritten safely).
 
 ### getAstContext
 
@@ -171,7 +171,7 @@ While AST requires the grammar to be compiled to be updated, definitions are sta
 Validation takes an AST as input and generates a list of messages to show to the user.
 The validation function leverages the definition files to check if the current AST is respecting the defined behaviour.
 Most of the logic rely purely on the definitions, but in some specific cases some ad-hoc conditions are defined within the code for specific commands/options.
-The validation test suite generates a set of fixtures at the end of its execution, which are then re-used for other test suites (i.e. some FTR integration tests) as `esql_validation_meta_tests.json`.
+The validation suites run as Jest unit tests and are also reused by Jest integration tests that compare client-side validation with a real Elasticsearch cluster.
 
 #### Autocomplete
 
@@ -201,21 +201,21 @@ The older pattern is
 
 - a single test file for each engine, one for validation, one for autocomplete. These were always large files and have only grown.
 - custom test methods: `testSuggestions` / `testErrorsAndWarnings`
-- validation cases are recorded in a JSON file which is then used to check our results against a live Elasticsearch instance in a functional test
+- validation cases were recorded in a JSON file and checked against Elasticsearch from FTR
 
 The newer pattern is
 
 - splitting the tests into multiple smaller files, all found in `__tests__` directories
 - standard test methods (`it`, `test`) with custom _assertion_ helpers
-- validation cases are checked against Elasticsearch by injecting assertion helpers run API integration tests. This does not require a JSON file.
+- validation suites are reused by Jest integration tests in the package. This does not require a JSON file.
 
 #### Validation
 
 ##### The new way
 
-Validation test logic is found in `src/platform/packages/shared/kbn-esql-language/src/validation/__tests__`.
+Validation test logic is found in `src/platform/packages/shared/kbn-esql-language/src/language/validation/__tests__`.
 
-Tests are found in files named with the following convention: `validation.some-description.test.ts`.
+Unit test wrappers live in `*.test.ts` files. Reusable suite logic lives in matching `*_suite.ts` files so the same tests can also run as Jest integration tests.
 
 Here is an example of a block in the new test format.
 
@@ -236,6 +236,10 @@ describe('TS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
 
 `expectErrors` is created in the `setup()` factory. It has a very similar API to `testErrorsAndWarnings` however it is not itself a Jest test case. It is simply an assertion that is wrapped in a test case defined with the standard `test` or `it` function.
 
+The integration wrapper lives in `src/platform/packages/shared/kbn-esql-language/src/language/validation/integration_tests/validation_suites.test.ts`. It reuses the shared validation suites and checks client-side false positives against Elasticsearch. Run it with:
+
+`node scripts/jest_integration --config src/platform/packages/shared/kbn-esql-language/jest.integration.config.js`
+
 ##### The old way
 
 The old validation tests look like this
@@ -246,7 +250,7 @@ testErrorsAndWarnings(`ROW var = NOT 5 LIKE "?a"`, [
 ]);
 ```
 
-and are found in `src/platform/packages/shared/kbn-esql-language/src/validation/validation.test.ts`.
+and are found in `src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.test.ts`.
 
 `testErrorsAndWarnings` supports `skip` and `only` modifiers e.g. `testErrorsAndWarnings.only('...')`.
 
@@ -255,8 +259,6 @@ It accepts
 1. a query
 2. a list of expected errors (can be empty)
 3. a list of expected warnings (can be empty or omitted)
-
-Running the tests in `validation.test.ts` populates `src/platform/packages/shared/kbn-esql-language/src/validation/esql_validation_meta_tests.json` which is then used in `src/platform/test/api_integration/apis/esql/errors.ts` to make sure our validator isn't giving users false positives. Therefore, the validation test suite should always be run after any changes have been made to it so that the JSON file stays in sync.
 
 #### Autocomplete
 

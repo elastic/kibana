@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 jest.mock('../../remote_kibana/forward_to_remote_kibana', () => {
   const actual = jest.requireActual('../../remote_kibana/forward_to_remote_kibana');
@@ -31,6 +32,7 @@ import {
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
   EVALS_DATASET_UPSERT_URL,
+  GetEvaluationDatasetsRequestQuery,
 } from '@kbn/evals-common';
 import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
@@ -89,14 +91,13 @@ const buildRouteSetup = ({
   };
 
   const mockCoreContext = coreMock.createRequestHandlerContext();
-  const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
   datasetService.getClient.mockReturnValue(datasetClient);
   const context = coreMock.createCustomRequestHandlerContext({
     core: mockCoreContext,
     evals: { datasetService } as any,
   });
 
-  return { handler, context, logger, datasetClient, datasetService, esClient };
+  return { handler, context, logger, datasetClient, datasetService };
 };
 
 describe('dataset routes', () => {
@@ -125,7 +126,7 @@ describe('dataset routes', () => {
 
   describe('GET /internal/evals/datasets', () => {
     it('returns dataset listings with pagination', async () => {
-      const { handler, context, datasetClient, datasetService, esClient } = buildRouteSetup({
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
         registerRoute: registerListDatasetsRoute,
         method: 'get',
         path: EVALS_DATASETS_URL,
@@ -143,13 +144,133 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetService.getClient).toHaveBeenCalledWith(esClient);
-      expect(datasetClient.list).toHaveBeenCalledWith({ page: 2, perPage: 5 });
+      expect(datasetService.getClient).toHaveBeenCalledWith();
+      expect(datasetClient.list).toHaveBeenCalledWith({
+        page: 2,
+        perPage: 5,
+        search: undefined,
+        tags: undefined,
+        maturity: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         datasets: [{ ...dataset, examples_count: 3 }],
         total: 1,
       });
+    });
+
+    it('passes search and sort params to the client', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerListDatasetsRoute,
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+      });
+      datasetClient.list.mockResolvedValueOnce({ datasets: [], total: 0 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: {
+          page: 1,
+          per_page: 25,
+          search: 'kibana',
+          sort_field: 'name',
+          sort_order: 'asc',
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.list).toHaveBeenCalledWith({
+        page: 1,
+        perPage: 25,
+        search: 'kibana',
+        tags: undefined,
+        maturity: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+      expect(response.status).toBe(200);
+    });
+
+    it('passes tag and maturity filters to the client', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerListDatasetsRoute,
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+      });
+      datasetClient.list.mockResolvedValueOnce({ datasets: [], total: 0 });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: { tags: ['golden', 'esql'], maturity: ['raw', 'golden'] },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetClient.list).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: ['golden', 'esql'],
+          maturity: ['raw', 'golden'],
+        })
+      );
+      expect(response.status).toBe(200);
+    });
+
+    it('accepts tag and maturity filters as repeated or comma-separated values', () => {
+      expect(
+        GetEvaluationDatasetsRequestQuery.parse({ tags: ['golden', 'esql'], maturity: ['raw'] })
+      ).toMatchObject({ tags: ['golden', 'esql'], maturity: ['raw'] });
+
+      expect(
+        GetEvaluationDatasetsRequestQuery.parse({ tags: 'golden,esql', maturity: 'raw,golden' })
+      ).toMatchObject({ tags: ['golden', 'esql'], maturity: ['raw', 'golden'] });
+
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ maturity: 'pristine' }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects filter tags the write path would also reject', () => {
+      // A blank tag normalizes away to nothing server-side, so accepting it here
+      // would silently return the unfiltered list instead of failing.
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ' ' }).success).toBe(false);
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ['has space'] }).success).toBe(
+        false
+      );
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ['-leading'] }).success).toBe(
+        false
+      );
+      expect(GetEvaluationDatasetsRequestQuery.safeParse({ tags: ['team:obs-ai'] }).success).toBe(
+        true
+      );
+    });
+
+    it('returns the facet counts supplied by the client', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerListDatasetsRoute,
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+      });
+      const facets = {
+        tags: [{ value: 'golden', count: 2 }],
+        maturity: [{ value: 'golden', count: 2 }],
+      };
+      datasetClient.list.mockResolvedValueOnce({ datasets: [], total: 0, facets });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASETS_URL,
+        query: { page: 1, per_page: 25 },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ datasets: [], total: 0, facets });
     });
 
     it('returns 500 when listing fails', async () => {
@@ -194,7 +315,12 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.create).toHaveBeenCalledWith(dataset.name, dataset.description);
+      expect(datasetClient.create).toHaveBeenCalledWith({
+        name: dataset.name,
+        description: dataset.description,
+        tags: undefined,
+        maturity: undefined,
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         dataset_id: datasetId,
@@ -329,6 +455,8 @@ describe('dataset routes', () => {
 
       expect(datasetClient.update).toHaveBeenCalledWith(datasetId, {
         description: dataset.description,
+        tags: undefined,
+        maturity: undefined,
       });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -809,9 +937,13 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.upsert).toHaveBeenCalledWith(dataset.name, dataset.description, [
-        { input: datasetExample.input, output: datasetExample.output, metadata: {} },
-      ]);
+      expect(datasetClient.upsert).toHaveBeenCalledWith({
+        name: dataset.name,
+        description: dataset.description,
+        tags: undefined,
+        maturity: undefined,
+        examples: [{ input: datasetExample.input, output: datasetExample.output, metadata: {} }],
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         dataset_id: datasetId,
@@ -849,10 +981,16 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.upsert).toHaveBeenCalledWith(dataset.name, dataset.description, [
-        { input: { searchTerm: 'query 1' } },
-        { input: { searchTerm: 'query 2' }, metadata: { minDocs: 1 } },
-      ]);
+      expect(datasetClient.upsert).toHaveBeenCalledWith({
+        name: dataset.name,
+        description: dataset.description,
+        tags: undefined,
+        maturity: undefined,
+        examples: [
+          { input: { searchTerm: 'query 1' } },
+          { input: { searchTerm: 'query 2' }, metadata: { minDocs: 1 } },
+        ],
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         dataset_id: datasetId,
@@ -887,7 +1025,13 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.upsert).toHaveBeenCalledWith(dataset.name, dataset.description, [{}]);
+      expect(datasetClient.upsert).toHaveBeenCalledWith({
+        name: dataset.name,
+        description: dataset.description,
+        tags: undefined,
+        maturity: undefined,
+        examples: [{}],
+      });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         dataset_id: datasetId,
@@ -927,6 +1071,9 @@ describe('dataset routes', () => {
         router,
         logger,
         canEncrypt,
+        evaluatorRegistry: { list: () => [], get: () => undefined },
+        getInferenceStart: async () =>
+          ({ getClient: jest.fn() } as unknown as InferenceServerStart),
         getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
         getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       });
@@ -937,7 +1084,6 @@ describe('dataset routes', () => {
       ];
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
-      const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
       const datasetClient = { list: jest.fn() };
       const datasetService = { getClient: jest.fn().mockReturnValue(datasetClient) };
       const context = coreMock.createCustomRequestHandlerContext({
@@ -945,7 +1091,7 @@ describe('dataset routes', () => {
         evals: { datasetService } as any,
       });
 
-      return { handler, context, logger, datasetClient, esClient };
+      return { handler, context, logger, datasetClient };
     };
 
     it('returns 501 when destination is remote but encryption is not configured', async () => {

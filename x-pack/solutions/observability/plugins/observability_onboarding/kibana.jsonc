@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/observability-onboarding-plugin",
   "owner": [
-    "@elastic/obs-onboarding-team"
+    "@elastic/streams-ui"
   ],
   "group": "observability",
   "visibility": "private",
@@ -31,7 +31,8 @@
       "ingestHub",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "ingestHub"
     ],
     "extraPublicDirs": [
       "common"

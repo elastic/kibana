@@ -12,14 +12,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { testChannels } from '@kbn/scout-info';
 import { computeTestID } from '../../../helpers/test_id_generator';
 import { getGitSHA1ForPath } from '../../../registry/manifest';
 import type { ScoutTestConfig } from '../../../registry';
 import { testConfig } from '../../../registry';
 
-/**
- * Scout Playwright reporter
- */
 export class ScoutManifestUpdater implements Reporter {
   readonly log: ToolingLog;
   scoutConfig!: ScoutTestConfig;
@@ -34,6 +32,16 @@ export class ScoutManifestUpdater implements Reporter {
   onBegin(config: FullConfig, suite: Suite) {
     this.scoutConfig = testConfig.fromPath(config.configFile!);
 
+    const testChannelsFromConfig = config.metadata?.scout?.testChannels;
+
+    if (testChannelsFromConfig instanceof Array && testChannelsFromConfig.length === 0) {
+      throw new Error(
+        'Invalid test channels definition in test config;' +
+          ' if test channels are provided in metadata, at least one test channel must be specified'
+      );
+    }
+
+    this.scoutConfig.manifest.testChannels = testChannelsFromConfig ?? testChannels.default;
     this.scoutConfig.manifest.tests = suite.allTests().map((test) => {
       // Title path
       //  [0] Root suite
@@ -66,6 +74,7 @@ export class ScoutManifestUpdater implements Reporter {
       JSON.stringify(
         {
           sha1: await getGitSHA1ForPath(path.dirname(this.scoutConfig.path)),
+          testChannels: this.scoutConfig.manifest.testChannels,
           tests: this.scoutConfig.manifest.tests,
         },
         null,

@@ -51,13 +51,13 @@ function buildTableConfig(columnCount: number): {
 }
 
 export function formatPairedTTestReport({
-  runIdA,
-  runIdB,
+  experimentIdA,
+  experimentIdB,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
 }: {
-  runIdA: string;
-  runIdB: string;
+  experimentIdA: string;
+  experimentIdB: string;
   results: PairedTTestResult[];
   significanceThreshold?: number;
 }): {
@@ -102,8 +102,8 @@ export function formatPairedTTestReport({
   });
 
   const header = [
-    `Run A: ${runIdA}`,
-    `Run B: ${runIdB}`,
+    `Experiment A: ${experimentIdA}`,
+    `Experiment B: ${experimentIdB}`,
     `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 interface MockQuery {
   query: string;
@@ -66,6 +67,18 @@ export const createMockSearchBar = () => {
             }
           }}
         />
+        <button
+          type="button"
+          data-test-subj="mock-search-bar-submit"
+          onClick={() =>
+            onQuerySubmit?.({
+              query: { query: query?.query ?? '', language: 'kuery' },
+              dateRange,
+            })
+          }
+        >
+          {'Submit search'}
+        </button>
       </div>
     );
   };
@@ -89,6 +102,27 @@ export const MockDataViewPicker = ({ onChangeDataView }: MockDataViewPickerProps
   </div>
 );
 
+const createMockDataQueryServices = () => {
+  const { query } = dataPluginMock.createStartContract();
+  return { query };
+};
+
+const createMockSearchHitsResponse = (
+  hits: Array<{ _id: string; _index: string; _source: Record<string, unknown> }>
+) => ({
+  rawResponse: {
+    hits: {
+      total: { value: hits.length, relation: 'eq' as const },
+      hits,
+    },
+  },
+});
+
+export const mockFieldFormatter = {
+  convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
+  convertToReact: jest.fn((value: unknown) => String(value ?? '')),
+};
+
 /**
  * Creates mock Kibana services for event form tests
  */
@@ -97,41 +131,55 @@ export const createEventFormKibanaMocks = () => {
     getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
   };
 
+  const mockFormatter = mockFieldFormatter;
+
   const mockDataView = {
     id: 'test-data-view',
     title: '.alerts-*-default',
     timeFieldName: '@timestamp',
     refreshFields: jest.fn().mockResolvedValue(undefined),
-    getFieldByName: jest.fn().mockReturnValue(null),
+    getFormatterForField: jest.fn().mockReturnValue(mockFormatter),
+    getFieldByName: jest.fn((name: string) => ({
+      name,
+      type: name === '@timestamp' ? 'date' : 'string',
+      esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+    })),
+    fields: {
+      replaceAll: jest.fn(),
+      getByName: jest.fn().mockReturnValue(null),
+      getAll: jest.fn().mockReturnValue([]),
+      create: jest.fn(),
+      add: jest.fn(),
+      remove: jest.fn(),
+      update: jest.fn(),
+      filter: jest.fn().mockReturnValue([]),
+    },
   };
+
+  const mockAlertHits = [
+    {
+      _id: '1',
+      _index: '.alerts-default',
+      _source: {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        'kibana.alert.rule.name': 'Test Rule',
+        'kibana.alert.reason': 'test event created',
+        message: 'Test message',
+      },
+    },
+  ];
 
   const mockSearchSource = {
     setField: jest.fn(),
     fetch$: jest.fn().mockReturnValue({
       pipe: jest.fn().mockReturnValue({
-        toPromise: jest.fn().mockResolvedValue({
-          rawResponse: {
-            hits: {
-              hits: [
-                {
-                  _id: '1',
-                  _index: '.alerts-default',
-                  _source: {
-                    '@timestamp': '2024-01-01T00:00:00Z',
-                    'kibana.alert.rule.name': 'Test Rule',
-                    'kibana.alert.reason': 'test event created',
-                    message: 'Test message',
-                  },
-                },
-              ],
-            },
-          },
-        }),
+        toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockAlertHits)),
       }),
     }),
   };
 
   const mockData = {
+    ...createMockDataQueryServices(),
     dataViews: {
       find: jest.fn().mockResolvedValue([]),
       create: jest.fn().mockResolvedValue(mockDataView),
@@ -143,30 +191,13 @@ export const createEventFormKibanaMocks = () => {
       },
       search: jest.fn().mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          toPromise: jest.fn().mockResolvedValue({
-            rawResponse: {
-              hits: {
-                hits: [
-                  {
-                    _id: '1',
-                    _index: '.alerts-default',
-                    _source: {
-                      '@timestamp': '2024-01-01T00:00:00Z',
-                      'kibana.alert.rule.name': 'Test Rule',
-                      'kibana.alert.reason': 'test event created',
-                      message: 'Test message',
-                    },
-                  },
-                ],
-              },
-            },
-          }),
+          toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockAlertHits)),
         }),
       }),
     },
     fieldFormats: {
       getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((date) => date.toISOString()),
+        convertToText: jest.fn((date) => date.toISOString()),
       }),
     },
   };
@@ -183,16 +214,29 @@ export const createEventFormKibanaMocks = () => {
  * Creates mock Kibana services for index form tests
  */
 export const createIndexFormKibanaMocks = () => {
+  const mockFormatter = mockFieldFormatter;
+
   const createMockDataView = () => ({
     id: 'test-data-view-id',
     title: 'logs-*',
     name: 'logs-*',
+    timeFieldName: '@timestamp',
     getIndexPattern: jest.fn().mockReturnValue('logs-*'),
     refreshFields: jest.fn().mockResolvedValue(undefined),
-    getFieldByName: jest.fn().mockReturnValue(null),
+    getFormatterForField: jest.fn().mockReturnValue(mockFormatter),
+    getFieldByName: jest.fn((name: string) => ({
+      name,
+      type: name === '@timestamp' ? 'date' : 'string',
+      esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+    })),
     fields: {
+      replaceAll: jest.fn(),
       getByName: jest.fn().mockReturnValue(null),
       getAll: jest.fn().mockReturnValue([]),
+      create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+      add: jest.fn(),
+      remove: jest.fn(),
+      update: jest.fn(),
       length: 0,
       filter: jest.fn().mockReturnValue([]),
     },
@@ -205,36 +249,29 @@ export const createIndexFormKibanaMocks = () => {
     clearInstanceCache: jest.fn(),
   };
 
+  const mockDocumentHits = [
+    {
+      _id: '1',
+      _index: 'logs-*',
+      _source: {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        message: 'Test log message',
+      },
+    },
+  ];
+
   const mockData = {
+    ...createMockDataQueryServices(),
     search: {
       search: jest.fn().mockReturnValue({
         pipe: jest.fn().mockReturnValue({
-          subscribe: jest.fn(({ next, complete }) => {
-            next({
-              rawResponse: {
-                hits: {
-                  hits: [
-                    {
-                      _id: '1',
-                      _index: 'logs-*',
-                      _source: {
-                        '@timestamp': '2024-01-01T00:00:00Z',
-                        message: 'Test log message',
-                      },
-                    },
-                  ],
-                },
-              },
-            });
-            complete();
-            return { unsubscribe: jest.fn() };
-          }),
+          toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockDocumentHits)),
         }),
       }),
     },
     fieldFormats: {
       getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((value: unknown) => {
+        convertToText: jest.fn((value: unknown) => {
           if (value instanceof Date) {
             return value.toISOString();
           }

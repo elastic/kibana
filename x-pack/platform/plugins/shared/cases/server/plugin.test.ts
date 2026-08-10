@@ -21,19 +21,33 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
-import { CASE_ATTACHMENT_SAVED_OBJECT } from '../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+} from '../common/constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
     enabled: true,
+    assigneeIdentity: { enabled: true },
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
     analytics: { index: { enabled: true } },
+    analyticsV2: {
+      enabled: false,
+      reconciliationIntervalMinutes: 30,
+      enableAdminRoutes: false,
+      resetTaskTimeoutMinutes: 60,
+      resetPageDelayMs: 0,
+    },
     templates: { enabled: true },
+    casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
+    chat: { enabled: true },
     ...overrides,
   };
 }
@@ -81,6 +95,13 @@ describe('Cases Plugin', () => {
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
+      // Cases-analyticsV2 needs the dataViews plugin at start to manage the
+      // Cases data view + runtime fields. The flag is off in the test
+      // fixture so this mock is never actually called.
+      dataViews: {
+        dataViewsServiceFactory: jest.fn(),
+        getScriptedFieldsEnabled: jest.fn().mockReturnValue(false),
+      } as unknown as CasesServerStartDependencies['dataViews'],
     };
   });
 
@@ -112,13 +133,8 @@ describe('Cases Plugin', () => {
       expect(pluginsSetup.features.registerKibanaFeature).not.toHaveBeenCalled();
     });
 
-    it('should register cases-attachments SO when attachments.enabled is true', async () => {
-      context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ attachments: { enabled: true } })
-      );
-      const pluginWithAttachmentsEnabled = new CasePlugin(context);
-
-      pluginWithAttachmentsEnabled.setup(coreSetup, pluginsSetup);
+    it('should always register cases-attachments SO', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
 
       const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
       const attachmentSOCall = registerTypeCalls.find(
@@ -127,34 +143,23 @@ describe('Cases Plugin', () => {
       expect(attachmentSOCall).toBeDefined();
     });
 
-    it('should not register cases-attachments SO when attachments.enabled is false', async () => {
+    // Registration must be unconditional so a serverless release has the
+    // mappings in place before a later release enables the templates feature
+    // and runs the v1->v2 backfill task (only the feature — routes/UI/task —
+    // stays gated by `xpack.cases.templates.enabled`).
+    it('should always register the template SO types even when templates is disabled', async () => {
       context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ attachments: { enabled: false } })
+        getConfig({ templates: { enabled: false } })
       );
-      const pluginWithAttachmentsDisabled = new CasePlugin(context);
+      const pluginWithTemplatesDisabled = new CasePlugin(context);
 
-      pluginWithAttachmentsDisabled.setup(coreSetup, pluginsSetup);
+      pluginWithTemplatesDisabled.setup(coreSetup, pluginsSetup);
 
-      const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
-      const attachmentSOCall = registerTypeCalls.find(
-        (call) => call[0]?.name === 'cases-attachments'
+      const registeredTypeNames = coreSetup.savedObjects.registerType.mock.calls.map(
+        (call) => call[0]?.name
       );
-      expect(attachmentSOCall).toBeUndefined();
-    });
-
-    it('should not register cases-attachments SO when attachments is undefined', async () => {
-      context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ attachments: undefined } as Partial<ConfigType>)
-      );
-      const pluginWithAttachmentsUndefined = new CasePlugin(context);
-
-      pluginWithAttachmentsUndefined.setup(coreSetup, pluginsSetup);
-
-      const registerTypeCalls = coreSetup.savedObjects.registerType.mock.calls;
-      const attachmentSOCall = registerTypeCalls.find(
-        (call) => call[0]?.name === 'cases-attachments'
-      );
-      expect(attachmentSOCall).toBeUndefined();
+      expect(registeredTypeNames).toContain(CASE_TEMPLATE_SAVED_OBJECT);
+      expect(registeredTypeNames).toContain(CASE_FIELD_DEFINITION_SAVED_OBJECT);
     });
   });
 
@@ -172,7 +177,25 @@ describe('Cases Plugin', () => {
                 "enabled": true,
               },
             },
+            "analyticsV2": Object {
+              "enableAdminRoutes": false,
+              "enabled": false,
+              "reconciliationIntervalMinutes": 30,
+              "resetPageDelayMs": 0,
+              "resetTaskTimeoutMinutes": 60,
+            },
+            "assigneeIdentity": Object {
+              "enabled": true,
+            },
             "attachments": Object {
+              "enabled": true,
+            },
+            "casesRedesign": Object {
+              "details": false,
+              "list": false,
+              "settings": false,
+            },
+            "chat": Object {
               "enabled": true,
             },
             "enabled": true,

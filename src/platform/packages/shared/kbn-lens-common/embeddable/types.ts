@@ -235,6 +235,7 @@ export interface LensSharedProps {
   viewMode?: ViewMode;
   forceDSL?: boolean;
   esqlVariables?: ESQLControlVariable[];
+  isApproximate?: boolean;
 }
 
 export interface LensRequestHandlersProps {
@@ -389,8 +390,8 @@ export type LensInternalApi = Simplify<
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
       expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
       updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
-      expressionAbortController$: PublishingSubject<AbortController | undefined>;
-      updateAbortController: (newAbortController: AbortController | undefined) => void;
+      expressionAbortController$: PublishingSubject<AbortController>;
+      updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
       updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
@@ -415,10 +416,7 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  onData$: ReactExpressionRendererProps['onData$'];
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;

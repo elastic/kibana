@@ -131,6 +131,7 @@ export const servers: ScoutServerConfig = {
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
+      '--xpack.evals.enabled=true',
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [

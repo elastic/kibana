@@ -14,7 +14,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
-  ReactContextTypeSingleConvert,
+  ReactConvertFunction,
   TextContextTypeConvert,
   FieldFormatMetaParams,
   FieldFormatParams,
@@ -135,7 +135,7 @@ export class UrlFormat extends FieldFormat {
     return this.formatLabel(value);
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (rawValue, options = {}) => {
+  reactConvert: ReactConvertFunction = (rawValue, options = {}) => {
     const missing = this.checkForMissingValueReact(rawValue);
     if (missing) return missing;
 
@@ -216,10 +216,7 @@ export class UrlFormat extends FieldFormat {
 
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
         const fieldName = field?.name;
-        const linkContent =
-          fieldName && hit?.highlight?.[fieldName]
-            ? getHighlightReact(label, hit.highlight[fieldName])
-            : label;
+        const linkContent = getHighlightReact(label, fieldName, hit);
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

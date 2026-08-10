@@ -13,11 +13,12 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { getLastNotifiedTimestampsQuery } from '../queries';
+import { getLastNotifiedTimestampsQueries } from '../queries';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicy,
+  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -35,7 +36,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { groups = [], policies = new Map(), input } = state;
+    const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
 
     if (groups.length === 0) {
       return { type: 'continue', data: { dispatch: [], throttled: [] } };
@@ -61,9 +62,13 @@ export class ApplyThrottlingStep implements DispatcherStep {
   private async fetchLastNotifiedTimestamps(
     actionGroupIds: ActionGroupId[]
   ): Promise<Map<ActionGroupId, LastNotifiedInfo>> {
-    const records = await this.queryService.executeQueryRows<LastNotifiedRecord>({
-      query: getLastNotifiedTimestampsQuery(actionGroupIds).query,
-    });
+    const queries = getLastNotifiedTimestampsQueries(actionGroupIds);
+    const responses = await Promise.all(
+      queries.map((request) =>
+        this.queryService.executeQueryRows<LastNotifiedRecord>({ query: request.query })
+      )
+    );
+    const records = responses.flat();
 
     return new Map<ActionGroupId, LastNotifiedInfo>(
       records.map((record) => [

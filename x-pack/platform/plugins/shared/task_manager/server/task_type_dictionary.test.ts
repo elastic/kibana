@@ -10,7 +10,7 @@ import type { RunContext, TaskDefinition } from './task';
 import { TaskCost, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
-import { sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
+import { REMOVED_TYPES, sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -57,6 +57,10 @@ describe('taskTypeDictionary', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     definitions = new TaskTypeDictionary(logger);
+  });
+
+  it('recognizes the retired Significant Events v1 rule task type', () => {
+    expect(REMOVED_TYPES).toContain('alerting:streams.rules.esql');
   });
 
   describe('sanitizeTaskDefinitions', () => {
@@ -284,7 +288,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,ExtraLarge => 10`
+        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,Large => 4,ExtraLarge => 10`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

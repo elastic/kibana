@@ -11,6 +11,7 @@ import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_lo
 import type { Ping } from '../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useGetUrlParams } from '../../../hooks';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { getTestRunDetailLink, getTestRunDetailRelativeLink } from './test_run_urls';
 
@@ -29,6 +30,7 @@ export const TestDetailsLink = ({
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
   const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   const formatter = useDateFormat();
   const timestampText = (
@@ -46,6 +48,7 @@ export const TestDetailsLink = ({
         monitorId: ping?.config_id ?? '',
         locationId: selectedLocation?.id,
         spaceId,
+        remoteName,
       })}
     >
       {timestampText}

@@ -58,11 +58,11 @@ const OPTIONS = [
 ];
 
 export function FirehosePanel() {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
       defaultMessage: 'AWS Firehose',
-    }),
-  });
+    })
+  );
 
   const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
     CreateStackOption.AWS_CONSOLE_UI

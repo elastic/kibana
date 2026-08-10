@@ -6,9 +6,9 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiMarkdownEditor } from '@elastic/eui';
 import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
@@ -23,23 +23,36 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type TextareaProps = z.infer<typeof TextareaFieldSchema> & ConditionRenderProps;
+type TextareaProps = z.infer<typeof TextareaFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const Textarea = ({
   label,
   name,
   type,
+  metadata,
   isRequired,
+  isRequiredOnClose,
   patternValidation,
   minLength,
   maxLength,
   onConfirm,
+  isSaving,
+  isSaveDisabled,
+  onEditCancel,
 }: TextareaProps) => {
   const { control, resetField } = useFormContext();
-  const [isFocused, setIsFocused] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+  const isMarkdown = metadata?.markdown === true;
+
+  const handleCancel = useCallback(() => {
+    resetField(path);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};
@@ -74,8 +87,6 @@ export const Textarea = ({
     return { validate };
   }, [isRequired, patternValidation, minLength, maxLength]);
 
-  const showInlineActions = isFocused && onConfirm != null;
-
   return (
     <Controller
       key={name}
@@ -83,44 +94,51 @@ export const Textarea = ({
       control={control}
       rules={rules}
       defaultValue=""
-      render={({ field, fieldState }) => (
-        <>
-          <EuiFormRow
-            label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-            isInvalid={!!fieldState.error}
-            error={fieldState.error?.message}
-            fullWidth
-          >
-            <EuiTextArea
-              inputRef={field.ref}
-              name={field.name}
-              value={(field.value as string) ?? ''}
-              onChange={(e) => field.onChange(e.target.value)}
-              onBlur={() => {
-                field.onBlur();
-                setIsFocused(false);
-              }}
-              onFocus={() => setIsFocused(true)}
-              isInvalid={!!fieldState.error}
+      render={({ field, fieldState }) => {
+        const showInlineActions = fieldState.isDirty && onConfirm != null;
+        return (
+          <>
+            <EuiFormRow
+              label={label}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
+              isInvalid={Boolean(fieldState.error)}
+              error={fieldState.error?.message}
               fullWidth
-            />
-          </EuiFormRow>
-          {showInlineActions && (
-            <InlineFieldActions
-              name={name}
-              onConfirm={() => {
-                setIsFocused(false);
-                onConfirm();
-              }}
-              onCancel={() => {
-                setIsFocused(false);
-                resetField(path);
-              }}
-            />
-          )}
-        </>
-      )}
+            >
+              {isMarkdown ? (
+                <EuiMarkdownEditor
+                  value={(field.value as string) ?? ''}
+                  onChange={field.onChange}
+                  aria-label={typeof label === 'string' ? label : name}
+                  editorId={path}
+                  data-test-subj="template-field-markdown-editor"
+                  readOnly={isSaving}
+                />
+              ) : (
+                <EuiTextArea
+                  inputRef={field.ref}
+                  name={field.name}
+                  value={(field.value as string) ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  isInvalid={Boolean(fieldState.error)}
+                  disabled={isSaving}
+                  fullWidth
+                />
+              )}
+            </EuiFormRow>
+            {showInlineActions && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
     />
   );
 };

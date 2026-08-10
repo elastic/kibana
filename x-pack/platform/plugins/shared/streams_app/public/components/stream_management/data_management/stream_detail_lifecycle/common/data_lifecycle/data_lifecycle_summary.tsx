@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -17,15 +17,9 @@ import {
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import type { PhaseName } from '@kbn/streams-schema';
 import { DataLifecycleTimeline } from './data_lifecycle_timeline';
-import {
-  buildDslSegments,
-  buildPhaseTimelineSegments,
-  getGridTemplateColumns,
-  getPhaseColumnSpans,
-  buildDownsamplingSegments,
-} from './data_lifecycle_segments';
 import { LifecycleBar } from './lifecycle_bar';
 import { DownsamplingBar } from './downsampling_bar';
+import { resolveLifecycleGridLayout } from './lifecycle_grid_layout';
 import { type LifecyclePhase } from './lifecycle_types';
 
 export interface DataLifecycleSummaryModel {
@@ -39,10 +33,30 @@ export interface DataLifecycleSummaryCapabilities {
   canManageLifecycle: boolean;
 }
 
+export interface FrozenPhaseCallouts {
+  showEnterpriseCallout?: boolean;
+  onUpgradeEnterprise?: () => void;
+  showDefaultRepositoryCallout?: boolean;
+  /** Navigate directly to the create-repository page instead of opening a modal. */
+  createDefaultRepositoryHref?: string;
+  /**
+   * URL to the Snapshot and Restore repositories list. When the user already has repositories
+   * configured (see `hasExistingRepositories`) the callout directs them here to pick one as the
+   * default instead of creating a new repository.
+   */
+  manageRepositoriesUrl?: string;
+  /** Whether the user already has at least one snapshot repository configured. */
+  hasExistingRepositories?: boolean;
+  onRefreshDefaultRepository?: () => void;
+  isRefreshingDefaultRepository?: boolean;
+}
+
 export interface DataLifecycleSummaryPhaseActions {
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   onRemovePhase?: (phaseName: string) => void;
   onEditPhase?: (phaseName: string) => void;
+  shouldShowEditPhaseAction?: (phaseName: string) => boolean;
+  shouldShowRemovePhaseAction?: (phaseName: string) => boolean;
   showPhaseActions?: boolean;
 }
 
@@ -55,8 +69,15 @@ export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
   editedDownsampleStepIndex?: number;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
+  /**
+   * Whether a preview is currently active. Grid widths only animate while it stays active (live
+   * edits); entering/leaving the preview (open flyout, post-save refresh) snaps instead.
+   */
+  isPreviewActive?: boolean;
 }
 
 interface DataLifecycleSummaryProps {
@@ -69,6 +90,7 @@ interface DataLifecycleSummaryProps {
   phaseActions?: DataLifecycleSummaryPhaseActions;
   downsamplingActions?: DataLifecycleSummaryDownsamplingActions;
   uiState?: DataLifecycleSummaryUiState;
+  frozenPhaseCallouts?: FrozenPhaseCallouts;
 }
 
 export const DataLifecycleSummary = ({
@@ -81,15 +103,19 @@ export const DataLifecycleSummary = ({
   phaseActions,
   downsamplingActions,
   uiState,
+  frozenPhaseCallouts,
 }: DataLifecycleSummaryProps) => {
   const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
   const { canManageLifecycle } = capabilities;
+
   const {
     editedPhaseName,
     editedDownsampleStepIndex,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
     invalidPhases,
     invalidStepIndices,
+    isPreviewActive = false,
   } = uiState ?? {};
 
   const showPhaseActions =
@@ -99,15 +125,29 @@ export const DataLifecycleSummary = ({
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
 
-  const hasDslDownsampling = showDownsampling && Boolean(downsampleSteps?.length);
-  const dslSegments =
-    hasDslDownsampling && downsampleSteps ? buildDslSegments(phases, downsampleSteps) : null;
-  const timelineSegments = dslSegments?.timelineSegments ?? buildPhaseTimelineSegments(phases);
-  const downsamplingSegments = showDownsampling
-    ? buildDownsamplingSegments(phases, dslSegments)
-    : null;
-  const gridTemplateColumns = getGridTemplateColumns(timelineSegments);
-  const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
+  // Readiness signal for tests: flips on every stats (re)fetch, not just the initial load.
+  const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  const statsReadinessTestSubj = `${prefix}dataLifecycleSummary-stats-${
+    loading ? 'loading' : 'loaded'
+  }`;
+
+  // Only animate grid changes while the preview stays active between renders. Entering or leaving the
+  // preview swaps between separately-computed models, so that render snaps instead of animating.
+  const prevPreviewActiveRef = useRef(isPreviewActive);
+  const animateGridChanges = isPreviewActive && prevPreviewActiveRef.current;
+  useEffect(() => {
+    prevPreviewActiveRef.current = isPreviewActive;
+  }, [isPreviewActive]);
+
+  const {
+    phaseGridTemplateColumns,
+    stableSlots,
+    phaseColumnSpans,
+    stepsGridTemplateColumns,
+    downsamplingColumnStarts,
+    timelineSegments: effectiveTimelineSegments,
+    downsamplingSegments,
+  } = resolveLifecycleGridLayout(phases, downsampleSteps, showDownsampling);
 
   return (
     <EuiPanel
@@ -116,6 +156,7 @@ export const DataLifecycleSummary = ({
       grow={false}
       paddingSize="s"
       css={{ height: '100%', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' }}
+      data-test-subj={statsReadinessTestSubj}
     >
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>
@@ -153,37 +194,47 @@ export const DataLifecycleSummary = ({
               <EuiFlexItem grow={false}>
                 <LifecycleBar
                   phases={phases}
-                  gridTemplateColumns={gridTemplateColumns}
+                  gridTemplateColumns={phaseGridTemplateColumns}
                   phaseColumnSpans={phaseColumnSpans}
+                  stableSlots={stableSlots}
+                  animateGridChanges={animateGridChanges}
                   onPhaseClick={phaseActions?.onPhaseClick}
                   showPhaseActions={showPhaseActions}
                   onRemovePhase={phaseActions?.onRemovePhase}
                   onEditPhase={phaseActions?.onEditPhase}
+                  shouldShowEditPhaseAction={phaseActions?.shouldShowEditPhaseAction}
+                  shouldShowRemovePhaseAction={phaseActions?.shouldShowRemovePhaseAction}
                   editedPhaseName={editedPhaseName}
                   testSubjPrefix={testSubjPrefix}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  disableInteractions={disableInteractions}
+                  frozenPhaseCallouts={frozenPhaseCallouts}
                 />
                 {showDownsampling && downsamplingSegments && (
                   <DownsamplingBar
                     segments={downsamplingSegments}
-                    gridTemplateColumns={gridTemplateColumns}
+                    gridTemplateColumns={stepsGridTemplateColumns}
+                    columnStarts={downsamplingColumnStarts}
+                    animateGridChanges={animateGridChanges}
                     onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
                     onEditStep={downsamplingActions?.onEditDownsampleStep}
                     editedPhaseName={editedPhaseName}
                     editedDownsampleStepIndex={editedDownsampleStepIndex}
                     canManageLifecycle={canManageLifecycle}
                     isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                    disableInteractions={disableInteractions}
                   />
                 )}
                 <EuiSpacer size="xs" />
                 <DataLifecycleTimeline
                   phases={phases}
                   isRetentionInfinite={isRetentionInfinite}
-                  timelineSegments={timelineSegments}
-                  gridTemplateColumns={gridTemplateColumns}
+                  timelineSegments={effectiveTimelineSegments}
+                  gridTemplateColumns={stepsGridTemplateColumns}
                   invalidPhases={invalidPhases}
                   invalidStepIndices={invalidStepIndices}
+                  animateGridChanges={animateGridChanges}
                 />
               </EuiFlexItem>
             )}

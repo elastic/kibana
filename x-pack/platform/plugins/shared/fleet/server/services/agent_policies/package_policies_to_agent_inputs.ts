@@ -45,7 +45,7 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
 };
 
-const combineConditions = (conditions: Array<string | undefined>): string | undefined => {
+const combineConditions = (conditions: Array<string | null | undefined>): string | undefined => {
   const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
   if (filtered.length === 0) return undefined;
   if (filtered.length === 1) return filtered[0];
@@ -81,7 +81,6 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
   const isAgentless = packagePolicy.supports_agentless === true;
 
   packagePolicy.inputs.forEach((input) => {
@@ -90,7 +89,7 @@ export const storedPackagePolicyToAgentInputs = (
     }
 
     const integrationLevelCondition =
-      enableIntegrationConditions && !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
+      !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
         ? packagePolicy.condition
         : undefined;
 
@@ -187,7 +186,7 @@ export interface GetFullInputStreamsOptions {
   /** Map of stream ids <destinationId, originalId>. */
   streamsOriginalIdsMap?: Map<string, string>;
   /** Pre-gated by the caller; layered onto the input-level condition. */
-  userIntegrationCondition?: string;
+  userIntegrationCondition?: string | null;
 }
 
 export const getFullInputStreams = (
@@ -198,14 +197,11 @@ export const getFullInputStreams = (
     userIntegrationCondition,
   }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
-
   const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
-  const userInputCondition = enableIntegrationConditions ? input.condition : undefined;
   const inputCondition = combineConditions([
     userIntegrationCondition,
     compiledInputCondition,
-    userInputCondition,
+    input.condition,
   ]);
 
   return {
@@ -222,12 +218,9 @@ export const getFullInputStreams = (
                 condition: compiledStreamCondition,
                 ...compiledStream
               } = stream.compiled_stream ?? {};
-              const userStreamCondition = enableIntegrationConditions
-                ? stream.condition
-                : undefined;
               const streamCondition = combineConditions([
                 compiledStreamCondition,
-                userStreamCondition,
+                stream.condition,
               ]);
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,

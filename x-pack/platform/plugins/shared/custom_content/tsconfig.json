@@ -1,0 +1,39 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/ui-theme",
+    "@kbn/logging",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-server",
+    "@kbn/sse-utils-client",
+    "@kbn/data-plugin",
+    "@kbn/esql-utils",
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/datemath",
+    "@kbn/search-types",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/code-editor",
+    "@kbn/esql",
+    "@kbn/zod",
+    "@kbn/code-editor-mock",
+    "@kbn/core-http-server",
+    "@kbn/ui-callout",
+    "@kbn/shared-ux-ai-components"
+  ],
+  "exclude": ["target/**/*"]
+}

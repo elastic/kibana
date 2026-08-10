@@ -86,8 +86,9 @@ describe('SpanLinks', () => {
       error: new Error('BOOM'),
       value: { incomingSpanLinks: [], outgoingSpanLinks: [] },
     });
-    const { getByText } = render(<SpanLinks {...defaultProps} />);
-    expect(getByText(/An error happened when trying to fetch data/i)).toBeInTheDocument();
+    const { getByTestId, getByText } = render(<SpanLinks {...defaultProps} />);
+    expect(getByTestId('unifiedDocViewerSpanLinksFetchErrorCallout')).toBeInTheDocument();
+    expect(getByText(/Couldn't load span links for this span/i)).toBeInTheDocument();
   });
 
   it('renders incoming links and table', () => {

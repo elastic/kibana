@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { deriveQueryType, QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import { deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { KIQueryGenerationEvaluationExample, KIQueryGenerationOutput, Query } from '../types';
@@ -13,8 +14,8 @@ import { getQueriesFromOutput } from '../types';
 
 const STATS_QUALITY_CRITERIA: EvaluationCriterion[] = [
   {
-    id: 'threshold_reasoning',
-    text: 'STATS query descriptions should explain threshold choices relative to baseline data and mention when adjustment may be needed.',
+    id: 'baseline_calibration',
+    text: 'STATS query descriptions should ground the metric in dataset_analysis baselines (typical rates, volumes, or latencies) so responders know what "normal" looks like. Do not require breach thresholds; change-point detection replaces them.',
     score: 1,
   },
   {
@@ -24,7 +25,7 @@ const STATS_QUALITY_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'detection_evidence_pairing',
-    text: 'Important signals should have both a STATS query (aggregate detection) and a complementary match query (evidence retrieval).',
+    text: 'Important signals should have both a STATS metric-series query (continuous bucket + metric_value for change-point) and a complementary match query (evidence retrieval).',
     score: 1,
   },
 ];
@@ -35,8 +36,8 @@ const getStatsQueries = (output: KIQueryGenerationOutput): Query[] => {
 };
 
 /**
- * LLM-judge evaluator that checks the quality of STATS queries:
- * threshold reasoning, signal diversity, and detection+evidence pairing.
+ * LLM-judge evaluator that checks the quality of STATS metric-series queries:
+ * baseline calibration, signal diversity, and detection+evidence pairing.
  *
  * Short-circuits with `score: null` when no STATS queries are present.
  * Analogous to `confidence_calibration` in feature extraction.

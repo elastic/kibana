@@ -42,6 +42,16 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+        # Create-side schedule fields are non-nullable: the request validator
+        # (io-ts) rejects `null` because create has no explicit-clear semantic.
+        # The update path uses the *OrUndefined variants because clearing a
+        # mode field there requires an explicit null sentinel.
+        schedule_type:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleType'
+        interval:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackInterval'
+        rrule_schedule:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfig'
 
     CreatePacksResponse:
       description: 'The response for creating a pack.'
@@ -103,6 +113,15 @@ components:
                     type: string
                   value:
                     type: number
+            # Response surfaces only the active-mode field, never null. The
+            # discriminated builder returns either the active field or omits
+            # the slice entirely (flag-off / legacy pack).
+            schedule_type:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleType'
+            interval:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackInterval'
+            rrule_schedule:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfig'
       example:
         data:
           saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"

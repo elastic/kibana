@@ -30,6 +30,7 @@ import type {
 import type {
   AwsCloudConnectorVars,
   CloudConnector,
+  CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
@@ -1037,7 +1038,8 @@ describe('CloudConnectorService', () => {
       expect(result.id).toEqual('cloud-connector-123');
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-      expect(awsVars.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
+      const externalId1 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId1.id).toEqual('ORIGINALEXTERNALID12');
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -1082,7 +1084,8 @@ describe('CloudConnectorService', () => {
 
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-      expect(awsVars.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
+      const externalId2 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId2.id).toEqual('UPDATEDEXTERNALID123');
     });
 
     it('should update both name and vars successfully', async () => {

@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
+import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -22,6 +23,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -46,6 +48,7 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
+import { ProfileStateRegistry } from '../../common/context_awareness';
 import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
@@ -200,6 +203,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     chrome: corePluginMock.chrome,
     history,
     getScopedHistory: () => scopedHistoryMock.create(),
+    initialTabStateService: new InitialTabStateService(),
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
@@ -222,7 +226,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
       management: {
         insightsAndAlerting: {
-          triggersActions: true,
+          triggersActionsRules: true,
         },
       },
       indexPatterns: {
@@ -236,6 +240,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: uiSettingsMock,
+    settings: corePluginMock.settings,
     http: {
       basePath: '/',
       post: jest.fn((path: string) => {
@@ -306,6 +311,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
+    profileStateRegistry: new ProfileStateRegistry(),
     ebtManager: new DiscoverEBTManager(),
     cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
@@ -321,12 +327,15 @@ export function createDiscoverServicesMock(): DiscoverServices {
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueTab: jest.fn(),
+      getEmbeddableId: jest.fn(() => undefined),
+      getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {
-      DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateRuleOptionsFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
+    logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
 }
 
