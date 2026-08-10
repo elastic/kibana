@@ -29,6 +29,15 @@ import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_c
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 
+export type BulkActionMenuItem = AlertTableContextMenuItem & {
+  onActionClick?: () => void;
+};
+
+export const ALERT_STATUS_ACTION_IDS = {
+  markAsAcknowledged: 'acknowledge',
+  markAsOpen: 'open',
+} as const;
+
 export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertWorkflowStatus;
@@ -194,12 +203,12 @@ export const useBulkActionItems = ({
     closePopover: closePopover ?? noop,
   });
 
-  const items = useMemo(() => {
-    const actionItems: AlertTableContextMenuItem[] = [];
+  const items = useMemo<BulkActionMenuItem[]>(() => {
+    const actionItems: BulkActionMenuItem[] = [];
     if (showAlertStatusActions && hasAlertsUpdate) {
       if (currentStatus !== FILTER_OPEN) {
         actionItems.push({
-          key: 'open',
+          key: ALERT_STATUS_ACTION_IDS.markAsOpen,
           'data-test-subj': 'open-alert-status',
           onClick: () => {
             closePopover?.();
@@ -210,7 +219,7 @@ export const useBulkActionItems = ({
       }
       if (currentStatus !== FILTER_ACKNOWLEDGED) {
         actionItems.push({
-          key: 'acknowledge',
+          key: ALERT_STATUS_ACTION_IDS.markAsAcknowledged,
           'data-test-subj': 'acknowledged-alert-status',
           onClick: () => {
             closePopover?.();
@@ -230,17 +239,20 @@ export const useBulkActionItems = ({
     }
 
     const additionalItems = customBulkActions
-      ? customBulkActions.reduce<AlertTableContextMenuItem[]>((acc, action) => {
+      ? customBulkActions.reduce<BulkActionMenuItem[]>((acc, action) => {
           const isDisabled = !!(query && action.disableOnQuery);
+          const onActionClick = () => {
+            closePopover?.();
+            action.onClick(eventIds);
+          };
           acc.push({
             key: action.key,
             disabled: isDisabled,
             'data-test-subj': action['data-test-subj'],
+            icon: action.icon,
             toolTipContent: isDisabled ? action.disabledLabel : null,
-            onClick: () => {
-              closePopover?.();
-              action.onClick(eventIds);
-            },
+            onClick: onActionClick,
+            onActionClick,
             name: action.label,
           });
           return acc;
