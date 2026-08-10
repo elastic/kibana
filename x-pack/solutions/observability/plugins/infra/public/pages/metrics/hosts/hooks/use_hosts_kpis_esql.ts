@@ -21,6 +21,7 @@ import { HOST_NAME_FIELD, TIMESTAMP_FIELD } from '../../../../../common/constant
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
 // String literal (not the package constant) to avoid a new public-bundle
@@ -169,6 +170,36 @@ export const buildSemconvQuery = (
   return assembleQuery(indexPattern, limit, preFilter, clauses);
 };
 
+// Picks the schema's query variant. When the data view exposes none of the
+// schema's fields the full query is used as a fallback ONLY if the metadata
+// says the schema has data in the current scope (`schemaHasData`) — i.e. the
+// field list is stale. Without data in scope, a fallback query would reference
+// unmapped columns and fail ES|QL analysis ("Unknown column"), so the KPIs
+// render "N/A" instead, matching the table's empty state.
+export const buildHostsKpisQuery = ({
+  schema,
+  indexPattern,
+  limit,
+  availableFields,
+  schemaHasData,
+}: {
+  schema: DataSchemaFormat | undefined;
+  indexPattern: string | undefined;
+  limit: number;
+  availableFields: Set<string>;
+  schemaHasData: boolean;
+}): string | undefined => {
+  if (!limit || !indexPattern) return undefined;
+  const build =
+    schema === 'semconv' ? buildSemconvQuery : schema === 'ecs' ? buildEcsQuery : undefined;
+  if (!build) return undefined;
+
+  return (
+    build(indexPattern, limit, (field) => availableFields.has(field)) ??
+    (schemaHasData ? build(indexPattern, limit, () => true) : undefined)
+  );
+};
+
 export const buildEcsQuery = (
   indexPattern: string,
   limit: number,
@@ -240,7 +271,9 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const {
     services: { data, uiSettings },
   } = useKibanaContextForPlugin();
-  const { metricsView } = useMetricsDataViewContext();
+  const { metricsView, loading: metricsViewLoading } = useMetricsDataViewContext();
+  const { data: timeRangeMetadata, status: timeRangeMetadataStatus } =
+    useTimeRangeMetadataContext();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const isReady = useHostsPageReady();
 
@@ -292,19 +325,18 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
     return { bool: { filter: clauses } };
   }, [buildQuery, parsedDateRange.from, parsedDateRange.to, schema, excludedDataTiers]);
 
-  const esqlQuery = useMemo(() => {
-    if (!limit || !indexPattern) return undefined;
-    const build =
-      schema === 'semconv' ? buildSemconvQuery : schema === 'ecs' ? buildEcsQuery : undefined;
-    if (!build) return undefined;
-    // Fall back to the full query when a stale data view exposes none of the
-    // schema's fields, so it returns values (or a real error) rather than
-    // leaving the tiles stuck loading.
-    return (
-      build(indexPattern, limit, (field) => availableFields.has(field)) ??
-      build(indexPattern, limit, () => true)
-    );
-  }, [schema, indexPattern, limit, availableFields]);
+  const schemaHasData = schema ? (timeRangeMetadata?.schemas ?? []).includes(schema) : false;
+
+  const esqlQuery = useMemo(
+    () => buildHostsKpisQuery({ schema, indexPattern, limit, availableFields, schemaHasData }),
+    [schema, indexPattern, limit, availableFields, schemaHasData]
+  );
+
+  // While the schema metadata or the data view fields re-resolve (e.g. after a
+  // CPS project-routing change), `esqlQuery` may still reference columns from
+  // the previous scope; hold the fetch until both settle — the status flip in
+  // the deps re-fires it (and aborts any stale in-flight request).
+  const isScopeResolving = isPending(timeRangeMetadataStatus) || Boolean(metricsViewLoading);
 
   const {
     data: result,
@@ -313,12 +345,12 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   } = useFetcher(() => {
     // Returning `undefined` (not a Promise) until ready skips useFetcher's
     // initial double-fire.
-    if (!isReady || !esqlQuery) return;
+    if (!isReady || !esqlQuery || isScopeResolving) return;
     return (async () => {
       const { rawResponse } = await data.search.esql({ query: esqlQuery, filter });
       return parseKpiRow(rawResponse);
     })();
-  }, [isReady, esqlQuery, filter, data.search]);
+  }, [isReady, esqlQuery, filter, data.search, isScopeResolving]);
 
   // With no query to run we're only "loading" while the data view resolves;
   // otherwise the fetcher never fires and status would stay pending forever.

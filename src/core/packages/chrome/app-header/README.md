@@ -5,8 +5,8 @@ React APIs for Kibana app headers during the Chrome Next migration.
 Chrome Next uses one shared header view with two placement models:
 
 - App-owned inline rendering, where the page renders `AppHeader` in its own React tree.
-- Chrome-owned rendering, where the app registers `AppHeaderConfig` and Chrome renders the layout
-  top-bar slot.
+- Chrome-owned rendering, where the app registers `ChromeAppHeaderConfig` and Chrome renders the
+  layout top-bar slot.
 
 Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
 the page cannot safely own the header placement yet.
@@ -44,6 +44,31 @@ Pass the destination as `back`. Kibana handles same-origin `href` values as SPA 
 
 Use the object form when the back button needs a destination label or click behavior that differs
 from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
+
+If a page already owns an in-page back (for example `EuiPageHeader` breadcrumbs or a custom back
+control) and would also get a Chrome Next compatibility back from breadcrumbs, mount:
+
+```tsx
+<>
+  <SuppressChromeBackButton />
+  <EuiPageHeader breadcrumbs={[...]} ... />
+</>
+```
+
+`SuppressChromeBackButton` is inert outside Chrome Next project style. Prefer a full `AppHeader`
+migration over long-lived suppression.
+
+Tri-state `back` lives only on chrome registration (`ChromeAppHeaderConfig` via
+`ChromeAppHeaderRegistration` / `chrome.next.appHeader.set`). The rendered `AppHeader` component
+does not accept `false`:
+
+- value — explicit chrome back (no breadcrumb fallback)
+- `false` — intentional no chrome back; suppresses the breadcrumb-derived fallback
+- omitted — allow the compatibility fallback to derive back from project breadcrumbs
+
+Do not register `{ back: false }` separately from another app-header config on the same route —
+`set` replaces the whole config. Prefer combining fields on one registration, or use
+`SuppressChromeBackButton` when suppression is the only registration.
 
 ## Discover tabs
 
