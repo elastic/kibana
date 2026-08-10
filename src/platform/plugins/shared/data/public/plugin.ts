@@ -11,6 +11,7 @@ import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kb
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DataSourceService } from '@kbn/data-source';
 import {
   EVENT_PROPERTY_EXECUTION_CONTEXT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -206,6 +207,7 @@ export class DataPublicPlugin
     );
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
+    const dataSources = new DataSourceService(dataViews);
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction: async (context: ValueClickDataContext) => {
@@ -222,6 +224,7 @@ export class DataPublicPlugin
         },
       },
       datatableUtilities,
+      dataSources,
       fieldFormats,
       dataViews,
       query,

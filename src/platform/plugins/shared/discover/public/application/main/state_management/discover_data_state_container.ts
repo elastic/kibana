@@ -27,8 +27,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataSource } from '@kbn/data-source';
-import { DataSourceService } from '@kbn/data-source';
+import type { DataSource, DataSourceService } from '@kbn/data-source';
 import {
   DEFAULT_COLUMNS_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -190,7 +189,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const dataSourceService = new DataSourceService(services.dataViews);
+  const dataSourceService = data.dataSources;
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
   let numberOfFetches = 0;

@@ -26,13 +26,12 @@ import {
   mapAndFlattenFilters,
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, DataViewBase } from '@kbn/es-query';
 import { FilterContent } from '../../filter_badge';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: DataView[];
+  indexPatterns: DataViewBase[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }

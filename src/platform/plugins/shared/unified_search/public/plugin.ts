@@ -91,7 +91,12 @@ export class UnifiedSearchPublicPlugin
 
     uiActions.addTriggerActionAsync(ON_APPLY_FILTER, ACTION_GLOBAL_APPLY_FILTER, async () => {
       const { createFilterAction } = await import('./actions/actions_module');
-      return createFilterAction(data.query.filterManager, data.query.timefilter.timefilter, core);
+      return createFilterAction(
+        data.query.filterManager,
+        data.query.timefilter.timefilter,
+        core,
+        data.dataSources
+      );
     });
 
     uiActions.addTriggerActionAsync(

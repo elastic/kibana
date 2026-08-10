@@ -23,6 +23,7 @@ import type { Filter } from '@kbn/es-query';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DateRangePickerPresetsService } from '@kbn/date-range-picker-presets-common';
+import type { DataSourceService } from '@kbn/data-source';
 import type { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
 import type { QuerySetup, QueryStart } from './query';
@@ -90,6 +91,14 @@ export interface DataPublicPluginStart {
    * Datatable type utility functions.
    */
   datatableUtilities: DatatableUtilitiesService;
+
+  /**
+   * Polymorphic registry over `DataSource` instances (DataView-backed or ES|QL).
+   * Cross-cutting consumers (filter resolution, etc.) use this to look up a
+   * source by id without branching on query kind.
+   * {@link DataSourceService}
+   */
+  dataSources: DataSourceService;
 
   /**
    * search service
