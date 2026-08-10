@@ -14,16 +14,17 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import { NightshiftPage } from './nightshift_page';
 import { useKibana } from './hooks/use_kibana';
+import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
 jest.mock('./app/app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('./hooks/use_significant_events_availability');
 
 const mockUseKibana = useKibana as jest.Mock;
-
-const getBooleanValue = jest.fn();
+const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
 /** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
 const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
   const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
@@ -46,12 +47,11 @@ describe('NightshiftPage', () => {
   beforeEach(() => {
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
-    getBooleanValue.mockReturnValue(true);
+    mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseKibana.mockReturnValue({
       services: {
         application: { getUrlForApp, navigateToUrl, navigateToApp },
         http: { basePath: { prepend: (path: string) => path } },
-        featureFlags: { getBooleanValue },
         serverless: undefined,
         observabilityShared: {
           navigation: {
@@ -62,14 +62,21 @@ describe('NightshiftPage', () => {
     });
   });
 
-  it('redirects to the overview when the availability flag is disabled', () => {
-    getBooleanValue.mockReturnValue(false);
+  it('redirects to the overview when significant events are unavailable', () => {
+    mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: false, isLoading: false });
     renderPage();
     expect(navigateToApp).toHaveBeenCalledWith(OBSERVABILITY_OVERVIEW_APP_ID);
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
-  it('renders the app when the availability flag is enabled', async () => {
+  it('waits for the availability response before redirecting', () => {
+    mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: false, isLoading: true });
+    renderPage();
+    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+  });
+
+  it('renders the app when significant events are available', async () => {
     renderPage();
     expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
