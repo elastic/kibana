@@ -422,6 +422,7 @@ const EnabledFilterComponent = ({
       <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
     )}
     singleSelection
+    hideSearch
     data-test-subj="actionPoliciesEnabledFilter"
   />
 );
