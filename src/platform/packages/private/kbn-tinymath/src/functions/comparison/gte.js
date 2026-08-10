@@ -11,13 +11,14 @@
  * Performs a greater than or equal comparison between two values.
  * @param {number|number[]} a a number or an array of numbers
  * @param {number|number[]} b a number or an array of numbers
- * @return {boolean} Returns true if `a` is greater than or equal to `b`, false otherwise.  Returns an array with the greater than or equal comparison of each element if `a` is an array.
+ * @return {boolean} Returns true if `a` is greater than or equal to `b`, false otherwise. When either argument is an array the comparison is applied element-wise and true is returned only if every element satisfies it.
  * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
  * @example
  * gte(1, 1) // returns true
  * gte(1, 2) // returns false
- * gte([1, 2], 2) // returns [false, true]
- * gte([1, 2], [1, 1]) // returns [true, true]
+ * gte([1, 2], 2) // returns false
+ * gte([1, 2], [1, 1]) // returns true
+ * gte(2, [1, 2]) // returns true
  */
 
 function gte(a, b) {
@@ -32,6 +33,9 @@ function gte(a, b) {
       throw new Error('Array length mismatch');
     }
     return a.every((v, i) => v >= b[i]);
+  }
+  if (Array.isArray(b)) {
+    return b.every((v) => a >= v);
   }
   return a >= b;
 }

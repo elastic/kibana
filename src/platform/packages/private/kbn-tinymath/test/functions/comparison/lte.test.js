@@ -69,4 +69,13 @@ describe('Lte', () => {
       expect(lte([5, 10, 40], [5, 30, 30])).toBeFalsy();
     });
   });
+
+  describe('number lower than or equal to array', () => {
+    it('passes only when the number is <= every element', () => {
+      expect(lte(1, [1, 2])).toBeTruthy();
+      expect(lte(5, [5, 5])).toBeTruthy();
+      expect(lte(3, [1, 2])).toBeFalsy();
+      expect(lte(2, [1, 3])).toBeFalsy();
+    });
+  });
 });

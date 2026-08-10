@@ -69,4 +69,13 @@ describe('Gte', () => {
       expect(gte([5, 10, 4], [5, 3, 5])).toBeFalsy();
     });
   });
+
+  describe('number greater than or equal to array', () => {
+    it('passes only when the number is >= every element', () => {
+      expect(gte(2, [1, 2])).toBeTruthy();
+      expect(gte(5, [5, 5])).toBeTruthy();
+      expect(gte(0, [1, 2])).toBeFalsy();
+      expect(gte(2, [1, 3])).toBeFalsy();
+    });
+  });
 });
