@@ -58,7 +58,9 @@ const standalonePolicyWith = (overrides: Partial<FullAgentPolicy> = {}): FullAge
       default: {
         _elastic_agent_checks: { cluster: ['monitor'] },
         'mock-package-default': {
-          indices: [{ names: ['logs-mock.*-default'], privileges: ['auto_configure', 'create_doc'] }],
+          indices: [
+            { names: ['logs-mock.*-default'], privileges: ['auto_configure', 'create_doc'] },
+          ],
         },
       },
     },

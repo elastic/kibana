@@ -109,7 +109,10 @@ export const collectSecretValuesById = ({
 
 const rewriteSecretRefs = (value: unknown, onSecretId: (secretId: string) => string): unknown => {
   if (typeof value === 'string') {
-    return value.replace(COMPILED_SECRET_REF_REGEX, (_match, secretId) => `\${${onSecretId(secretId)}}`);
+    return value.replace(
+      COMPILED_SECRET_REF_REGEX,
+      (_match, secretId) => `\${${onSecretId(secretId)}}`
+    );
   }
   if (Array.isArray(value)) {
     return value.map((entry) => rewriteSecretRefs(entry, onSecretId));

@@ -182,7 +182,10 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         `[Agentless API] Creating agentless agent in standalone config mode for policy ${agentlessAgentPolicy.id} (no fleet-server enrollment)`
       );
     } else {
-      const result = await this.getFleetUrlAndTokenForAgentlessAgent(esClient, agentlessAgentPolicy);
+      const result = await this.getFleetUrlAndTokenForAgentlessAgent(
+        esClient,
+        agentlessAgentPolicy
+      );
       fleetUrl = result.fleetUrl;
       fleetToken = result.fleetToken;
       logger.debug(
