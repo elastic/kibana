@@ -122,7 +122,7 @@ const FlyoutTabs = ({ tabs, onClick, selectedTabId }: FlyoutTabsProps) => {
 const NotFoundPrompt = () => (
   <EuiEmptyPrompt
     data-test-subj="unifiedDocViewerWaterfallFlyoutNotFound"
-    iconType="search"
+    iconType="magnify"
     titleSize="s"
     title={
       <h2>
