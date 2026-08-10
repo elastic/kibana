@@ -274,6 +274,11 @@ export const ObjectQueriesItem = lazySchema(() =>
     saved_query_id: SavedQueryIdOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    /**
+      * Per-query interval override in seconds. Only persisted and applied when `schedule_type: "interval"` is also set on this query; a bare `interval` without the marker is converged away on write and the agent runs the pack-level default instead. Ignored in rrule-mode packs.
+
+      */
+    interval: z.number().int().nullable().optional(),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
   })
