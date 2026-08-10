@@ -7,8 +7,14 @@
 
 import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Evaluator, EvaluationResult, EvaluatorParams, Example, TaskOutput } from '@kbn/evals';
-import { substituteEsqlBindParams } from './esql_bind_params';
+import type {
+  Evaluator,
+  EvaluationResult,
+  EvaluatorParams,
+  Example,
+  TaskOutput,
+} from '../../types';
+import { substituteEsqlBindParams } from './bind_params';
 
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 

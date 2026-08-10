@@ -29,6 +29,7 @@
     "@kbn/test",
     "@kbn/es-errors",
     "@kbn/es",
-    "@kbn/dot-text"
+    "@kbn/dot-text",
+    "@kbn/esql-language"
   ]
 }

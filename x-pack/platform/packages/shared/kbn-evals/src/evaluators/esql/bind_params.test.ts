@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDefaultTimeBounds, substituteEsqlBindParams } from './esql_bind_params';
+import { getDefaultTimeBounds, substituteEsqlBindParams } from './bind_params';
 
 describe('getDefaultTimeBounds', () => {
   it('returns ISO bounds relative to the provided now', () => {

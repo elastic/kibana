@@ -6,7 +6,7 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
-import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
+import type { Evaluator, EvaluationResult, Example, TaskOutput } from '../../types';
 
 export const ESQL_VALIDITY_EVALUATOR_NAME = 'ES|QL Validity';
 

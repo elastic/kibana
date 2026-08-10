@@ -8,16 +8,16 @@
 import { createPrompt } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator, Example, TaskOutput } from '@kbn/evals';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import pRetry from 'p-retry';
 import { z } from '@kbn/zod/v4';
-import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
+import type { Evaluator, Example, TaskOutput } from '../../types';
+import { normalizeEsqlForEquivalence } from './normalize_for_equivalence';
 
-export const ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
+export const ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
 
 // Stamp results with judgeVersion so future rubric changes can be filtered in the golden cluster.
-export const ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION = 'v1';
+export const ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION = 'calibrated-v1';
 
 /**
  * Three-point judgement returned by the LLM judge. Mapped to a numeric
@@ -88,7 +88,7 @@ Candidate ES|QL query (under evaluation):
 Score the candidate's functional equivalence to the gold.`;
 
 const CalibratedEsqlEquivalencePrompt = createPrompt({
-  name: 'agent_builder_visualizations_esql_equivalence',
+  name: 'calibrated_esql_equivalence',
   description:
     'Three-point calibrated rubric judging ES|QL functional equivalence with explicit allow/deny lists for common transformations.',
   input: z.object({
@@ -163,7 +163,7 @@ export function createCalibratedEsqlEquivalenceEvaluator<
   groundTruthExtractor: (expected: TExample['output']) => string;
 }): Evaluator<TExample, TTaskOutput> {
   return {
-    name: ESQL_FUNCTIONAL_EQUIVALENCE_EVALUATOR_NAME,
+    name: ESQL_CALIBRATED_EQUIVALENCE_EVALUATOR_NAME,
     kind: 'LLM',
     evaluate: async ({ output, expected }) => {
       const prediction = predictionExtractor(output);
@@ -177,7 +177,7 @@ export function createCalibratedEsqlEquivalenceEvaluator<
           metadata: {
             equivalent: false,
             equivalence: 'not_equivalent',
-            judgeVersion: ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION,
+            judgeVersion: ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION,
             reason: 'Missing prediction or ground truth query for comparison',
           },
         };
@@ -263,19 +263,13 @@ export function createCalibratedEsqlEquivalenceEvaluator<
           metadata: {
             equivalence,
             equivalent: equivalence === 'equivalent',
-            judgeVersion: ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION,
+            judgeVersion: ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION,
             reason,
           },
         };
       } catch (error) {
-        // Judge could not produce a valid structured judgement after all
-        // `pRetry` attempts. Scoring conservatively as `not_equivalent` (0)
-        // means one problematic example no longer kills the connector's
-        // entire suite run — the rest of the dataset still produces signal.
-        // `metadata.fallback = 'judge_no_tool_call'` lets dashboards filter
-        // these out of the FuncEq distribution so they don't drag the
-        // trendline down for reasons unrelated to the candidate's actual
-        // correctness.
+        // Conservatively score as not_equivalent so one bad judge response
+        // does not fail the whole suite; filter via metadata.fallback.
         log.warning(
           new Error(
             `Calibrated ES|QL FuncEq judge could not produce a structured judgement after retries; scoring as not_equivalent for this example.`,
@@ -291,7 +285,7 @@ export function createCalibratedEsqlEquivalenceEvaluator<
           metadata: {
             equivalence: 'not_equivalent',
             equivalent: false,
-            judgeVersion: ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION,
+            judgeVersion: ESQL_CALIBRATED_EQUIVALENCE_JUDGE_VERSION,
             fallback: 'judge_no_tool_call',
             reason: error instanceof Error ? error.message : String(error),
           },

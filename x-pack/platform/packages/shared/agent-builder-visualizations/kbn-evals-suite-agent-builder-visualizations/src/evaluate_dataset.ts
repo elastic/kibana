@@ -7,9 +7,10 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
+  createCalibratedEsqlEquivalenceEvaluator,
+  createEsqlExecutionEvaluator,
   createTrajectoryEvaluator,
   getStringMeta,
-  withEvaluatorSpan,
   type AgentBuilderClient,
   type DefaultEvaluators,
   type EvalsExecutorClient,
@@ -21,9 +22,6 @@ import {
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
-import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
-import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
-import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { visualizationSkillActivatedEvaluator } from './skill_selection_evaluators';
 
 export type VisualizationDatasetExample = Example<
@@ -110,20 +108,9 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
-  // Evaluators are wrapped in withEvaluatorSpan for per-evaluator trace observability.
-  // scoreOnEmptyQueries: 0 — every example expects a viz query, so no output = failure.
-  const baseValidityEvaluator = createEsqlValidityEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({ queryExtractor: extractVisualizationEsql, scoreOnEmptyQueries: 0 });
-
-  const esqlValidityEvaluator: VisualizationAgentEvaluator = {
-    ...baseValidityEvaluator,
-    evaluate: (args) =>
-      withEvaluatorSpan('EsqlValidity', {}, () => baseValidityEvaluator.evaluate(args)),
-  };
-
-  const baseExecutionEvaluator = createEsqlExecutionEvaluator<
+  // Execution already AST-validates via `@kbn/esql-language`, so a separate
+  // validity evaluator is omitted from the default set.
+  const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({
@@ -133,13 +120,7 @@ export function createEvaluateDataset({
     includeHitDetection: ({ metadata }) => Boolean(metadata?.includeHitDetection),
   });
 
-  const esqlExecutionEvaluator: VisualizationAgentEvaluator = {
-    ...baseExecutionEvaluator,
-    evaluate: (args) =>
-      withEvaluatorSpan('EsqlExecution', {}, () => baseExecutionEvaluator.evaluate(args)),
-  };
-
-  const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator<
+  const esqlEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({
@@ -148,14 +129,6 @@ export function createEvaluateDataset({
     predictionExtractor: (output) => output.esql ?? '',
     groundTruthExtractor: (expected) => expected?.query ?? '',
   });
-
-  const esqlEquivalenceEvaluator: VisualizationAgentEvaluator = {
-    ...baseEquivalenceEvaluator,
-    evaluate: (args) =>
-      withEvaluatorSpan('EsqlFunctionalEquivalence', {}, () =>
-        baseEquivalenceEvaluator.evaluate(args)
-      ),
-  };
 
   const trajectoryEvaluator = createTrajectoryEvaluator({
     extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
@@ -194,7 +167,6 @@ export function createEvaluateDataset({
     await executorClient.runExperiment({ datasets: [dataset], task }, [
       ...(customEvaluators ?? [
         visualizationSkillActivatedEvaluator,
-        esqlValidityEvaluator,
         esqlExecutionEvaluator,
         esqlEquivalenceEvaluator,
         trajectoryEvaluator,

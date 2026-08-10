@@ -10,11 +10,8 @@
     "@kbn/agent-builder-common",
     "@kbn/core",
     "@kbn/es-snapshot-loader",
-    "@kbn/esql-language",
     "@kbn/evals",
     "@kbn/inference-common",
-    "@kbn/inference-prompt-utils",
-    "@kbn/tooling-log",
-    "@kbn/zod"
+    "@kbn/tooling-log"
   ]
 }
