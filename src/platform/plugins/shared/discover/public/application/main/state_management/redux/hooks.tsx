@@ -8,11 +8,12 @@
  */
 
 import {
-  type EqualityFn,
+  type TypedUseSelectorHook,
   type ReactReduxContextValue,
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
+  createStoreHook,
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext, useContext } from 'react';
@@ -32,14 +33,16 @@ const internalStateContext = createContext<ReactReduxContextValue<DiscoverIntern
   null
 );
 
-const useInternalStateContext = () => {
-  const context = useContext(internalStateContext);
+const useInternalStateStore = createStoreHook(internalStateContext).withTypes<InternalStateStore>();
 
-  if (!context) {
-    throw new Error('Internal state hooks must be used within an InternalStateProvider');
-  }
+export const useInternalStateGetState = (): InternalStateStore['getState'] => {
+  const store = useInternalStateStore();
+  return store.getState;
+};
 
-  return context;
+export const useInternalStateSubscribe = (): InternalStateStore['subscribe'] => {
+  const store = useInternalStateStore();
+  return store.subscribe;
 };
 
 export const InternalStateProvider = ({
@@ -53,16 +56,6 @@ export const InternalStateProvider = ({
 
 export const useInternalStateDispatch =
   createDispatchHook(internalStateContext).withTypes<InternalStateDispatch>();
-
-export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
-  const { store } = useInternalStateContext();
-  return store.getState;
-};
-
-export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
-  const { store } = useInternalStateContext();
-  return store.subscribe;
-};
 
 export const useInternalStateSelector =
   createSelectorHook(internalStateContext).withTypes<DiscoverInternalState>();
@@ -93,7 +86,7 @@ export const CurrentTabProvider = ({
 };
 
 export const useCurrentTabContext = () => {
-  const context = React.useContext(currentTabContext);
+  const context = useContext(currentTabContext);
 
   if (!context) {
     throw new Error('useCurrentTabContext must be used within a CurrentTabProvider');
@@ -102,10 +95,7 @@ export const useCurrentTabContext = () => {
   return context;
 };
 
-export const useCurrentTabSelector = <TSelected,>(
-  selector: (state: TabState) => TSelected,
-  equalityFn?: EqualityFn<TSelected>
-): TSelected => {
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, equalityFn) => {
   const { currentTabId } = useCurrentTabContext();
   return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)), equalityFn);
 };
