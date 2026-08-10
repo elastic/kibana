@@ -91,17 +91,29 @@ describe('useSortSelector', () => {
     expect(selected?.checked).toBe('on');
   });
 
-  it('emits stable telemetry detail values for sort options', () => {
+  it('emits stable telemetry attributes for sort options', () => {
     const { result } = renderSortSelector([
       METRICS_SORT_BY.alphabetically,
       METRICS_SORT_DIRECTION.asc,
     ]);
 
-    const details = result.current.options.map(
-      (option) => (option as { 'data-ebt-detail'?: string })['data-ebt-detail']
-    );
+    const ebtProps = result.current.options.map((option) => {
+      const attrs = option as {
+        'data-ebt-action'?: string;
+        'data-ebt-element'?: string;
+        'data-ebt-detail'?: string;
+      };
+      return {
+        action: attrs['data-ebt-action'],
+        element: attrs['data-ebt-element'],
+        detail: attrs['data-ebt-detail'],
+      };
+    });
 
     // These are telemetry values - changing them breaks historical analysis.
-    expect(details).toEqual(['alphabetically', 'recency']);
+    expect(ebtProps).toEqual([
+      { action: 'setSortOption', element: 'chartsToolbar', detail: 'alphabetically' },
+      { action: 'setSortOption', element: 'chartsToolbar', detail: 'recency' },
+    ]);
   });
 });
