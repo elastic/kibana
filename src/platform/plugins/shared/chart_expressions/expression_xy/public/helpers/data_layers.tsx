@@ -446,6 +446,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     (isStacked || !splitColumnIds.length) &&
     (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
 
+  const hasBreakdown = Boolean(layer.splitAccessors && layer.splitAccessors.length > 0);
+
   const formatter = table?.columns.find(
     (column) => column.id === (Array.isArray(accessor) ? accessor[0] : accessor)
   )?.meta?.params;
@@ -534,18 +536,25 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     if (fillOpacity !== undefined) {
       style.opacity = fillOpacity;
     }
-
     if (
       areaFill === AreaFillOptions.GRADIENT &&
       (style.opacity === undefined || style.opacity > 0)
     ) {
-      const startOpacity = 0.15;
-      const stopCount = 10;
+      // here we divide by default fill opacity so that the stops we set here are the resulting opacity values,
+      // so it's more intuitive and matches the default case where it's used. It's still
+      // reactive to changes in the fill opacity, as it should.
+      const defaultOpacityCorrection = 0.3;
+
+      const startOpacity = (isStacked && hasBreakdown ? 0.1 : 0.05) / defaultOpacityCorrection;
+      const endOpacity = 0.4 / defaultOpacityCorrection;
+      const stopCount = 12;
+
       const gradient: LinearGradient = {
         type: 'linear',
         stops: Array.from({ length: stopCount }, (_, i) => ({
           offset: i / (stopCount - 1),
-          opacity: startOpacity + (1 - startOpacity) * easing.inOutCubic(i / (stopCount - 1)),
+          opacity:
+            startOpacity + (endOpacity - startOpacity) * easing.inOutSine(i / (stopCount - 1)),
           color: ColorVariant.Series,
         })),
       };

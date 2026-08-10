@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
@@ -40,25 +40,14 @@ const areaFillOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export const AreaFillOption: React.FC<AreaFillOptionProps> = ({
-  isStacked,
   selectedAreaFillOption = AreaFillOptions.SOLID,
   onChange,
 }) => {
   const selectedOption =
     areaFillOptions.find(({ value }) => value === selectedAreaFillOption) ?? areaFillOptions[0];
 
-  const validation = useMemo(() => {
-    if (isStacked && selectedAreaFillOption === AreaFillOptions.GRADIENT) {
-      return {
-        help: i18n.translate('xpack.lens.axisExtent.areaFill.gradientErrorMsg', {
-          defaultMessage: 'Gradient fill can make bands in stacked area charts harder to read',
-        }),
-      };
-    }
-  }, [isStacked, selectedAreaFillOption]);
-
   return (
-    <EuiFormRow display="columnCompressed" label={fillLabel} fullWidth helpText={validation?.help}>
+    <EuiFormRow display="columnCompressed" label={fillLabel} fullWidth>
       <EuiButtonGroup
         isFullWidth
         legend={fillLabel}
