@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Minimatch } from 'minimatch';
+import { compileMatchers, matchesAny } from '../../affected-packages';
 import { SCOUT_TESTS_ONLY_IGNORE_PATTERNS, SCOUT_TESTS_ONLY_SCOPE_GLOBS } from './selective_scout';
 
 /**
@@ -60,12 +60,6 @@ const CYPRESS_RELEVANT_EXCLUDE_GLOBS: readonly string[] = [
   'x-pack/platform/test/serverless/shared/**',
   'x-pack/solutions/*/test/fixtures/**',
 ];
-
-const compileMatchers = (patterns: readonly string[]) =>
-  patterns.map((pattern) => new Minimatch(pattern, { dot: true }));
-
-const matchesAny = (path: string, matchers: ReturnType<typeof compileMatchers>): boolean =>
-  matchers.some((matcher) => matcher.match(path));
 
 const ignoreMatchers = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
 const excludeMatchers = compileMatchers(CYPRESS_RELEVANT_EXCLUDE_GLOBS);

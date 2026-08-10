@@ -98,6 +98,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         } of ${prChanges.length} changed file(s) (Scout/FTR test trees or docs)`
       );
     }
+    const doAnyCypressRelevantChangesMatch = (matchers: RegExp[]) =>
+      doAnyChangesMatch(matchers, cypressRelevantChanges);
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
@@ -148,18 +150,15 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^src\/platform\/plugins\/shared\/data/,
-          /^x-pack\/platform\/plugins\/shared\/actions/,
-          /^x-pack\/platform\/plugins\/shared\/alerting/,
-          /^x-pack\/platform\/plugins\/shared\/event_log/,
-          /^x-pack\/platform\/plugins\/shared\/rule_registry/,
-          /^x-pack\/platform\/plugins\/shared\/task_manager/,
-          /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^src\/platform\/plugins\/shared\/data/,
+        /^x-pack\/platform\/plugins\/shared\/actions/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/event_log/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -167,13 +166,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^x-pack\/platform\/plugins\/shared\/cases/,
-          /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/cases/,
+        /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -183,14 +179,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^x-pack\/platform\/plugins\/shared\/fleet/,
-          /^x-pack\/test\/fleet_cypress/,
-          /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/fleet/,
+        /^x-pack\/test\/fleet_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -336,10 +329,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [/^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
@@ -353,18 +345,15 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution/,
-          /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
-          /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-          /^fleet_packages\.json/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^fleet_packages\.json/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -377,39 +366,36 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^package.json/,
-          /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
-          /^x-pack\/platform\/plugins\/shared\/alerting/,
-          /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
-          /^x-pack\/solutions\/security\/plugins\/lists/,
-          /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-          /^x-pack\/platform\/plugins\/shared\/task_manager/,
-          /^x-pack\/solutions\/security\/plugins\/timelines/,
-          /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
-          /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
-          /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
-          /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/bedrock/,
-          /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
-          /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
-          /^x-pack\/solutions\/security\/packages/,
-          /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
-          /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
-          /^x-pack\/test\/functional\/es_archives\/security_solution/,
-          /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^package.json/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/bedrock/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
+        /^x-pack\/solutions\/security\/packages/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -443,70 +429,67 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^package.json/,
-          /^src\/platform\/packages\/shared\/kbn-discover-utils/,
-          /^src\/platform\/packages\/shared\/kbn-doc-links/,
-          /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
-          /^src\/platform\/packages\/shared\/kbn-es-query/,
-          /^src\/platform\/packages\/shared\/kbn-i18n/,
-          /^src\/platform\/packages\/shared\/kbn-i18n-react/,
-          /^src\/platform\/packages\/shared\/kbn-grouping/,
-          /^src\/platform\/packages\/shared\/kbn-resizable-layout/,
-          /^src\/platform\/packages\/shared\/kbn-rison/,
-          /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
-          /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
-          /^src\/platform\/packages\/shared\/kbn-search-types/,
-          /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
-          /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
-          /^src\/platform\/packages\/shared\/kbn-ui-theme/,
-          /^src\/platform\/packages\/shared\/kbn-utility-types/,
-          /^src\/platform\/packages\/shared\/react/,
-          /^src\/platform\/packages\/shared\/shared-ux/,
-          /^src\/core/,
-          /^src\/platform\/plugins\/shared\/charts/,
-          /^src\/platform\/plugins\/shared\/controls/,
-          /^src\/platform\/plugins\/shared\/dashboard/,
-          /^src\/platform\/plugins\/shared\/data/,
-          /^src\/platform\/plugins\/shared\/data_views/,
-          /^src\/platform\/plugins\/shared\/discover/,
-          /^src\/platform\/plugins\/shared\/field_formats/,
-          /^src\/platform\/plugins\/shared\/inspector/,
-          /^src\/platform\/plugins\/shared\/kibana_react/,
-          /^src\/platform\/plugins\/shared\/kibana_utils/,
-          /^src\/platform\/plugins\/shared\/saved_search/,
-          /^src\/platform\/plugins\/shared\/ui_actions/,
-          /^src\/platform\/plugins\/shared\/unified_histogram/,
-          /^src\/platform\/plugins\/shared\/unified_search/,
-          /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
-          /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
-          /^x-pack\/solutions\/security\/packages/,
-          /^x-pack\/platform\/plugins\/shared\/alerting/,
-          /^x-pack\/platform\/plugins\/shared\/cases/,
-          /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
-          /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
-          /^x-pack\/solutions\/security\/plugins\/lists/,
-          /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-          /^x-pack\/platform\/plugins\/shared\/task_manager/,
-          /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
-          /^x-pack\/solutions\/security\/plugins\/timelines/,
-          /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
-          /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
-          /^x-pack\/test\/functional\/es_archives\/security_solution/,
-          /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^package.json/,
+        /^src\/platform\/packages\/shared\/kbn-discover-utils/,
+        /^src\/platform\/packages\/shared\/kbn-doc-links/,
+        /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
+        /^src\/platform\/packages\/shared\/kbn-es-query/,
+        /^src\/platform\/packages\/shared\/kbn-i18n/,
+        /^src\/platform\/packages\/shared\/kbn-i18n-react/,
+        /^src\/platform\/packages\/shared\/kbn-grouping/,
+        /^src\/platform\/packages\/shared\/kbn-resizable-layout/,
+        /^src\/platform\/packages\/shared\/kbn-rison/,
+        /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
+        /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
+        /^src\/platform\/packages\/shared\/kbn-search-types/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
+        /^src\/platform\/packages\/shared\/kbn-ui-theme/,
+        /^src\/platform\/packages\/shared\/kbn-utility-types/,
+        /^src\/platform\/packages\/shared\/react/,
+        /^src\/platform\/packages\/shared\/shared-ux/,
+        /^src\/core/,
+        /^src\/platform\/plugins\/shared\/charts/,
+        /^src\/platform\/plugins\/shared\/controls/,
+        /^src\/platform\/plugins\/shared\/dashboard/,
+        /^src\/platform\/plugins\/shared\/data/,
+        /^src\/platform\/plugins\/shared\/data_views/,
+        /^src\/platform\/plugins\/shared\/discover/,
+        /^src\/platform\/plugins\/shared\/field_formats/,
+        /^src\/platform\/plugins\/shared\/inspector/,
+        /^src\/platform\/plugins\/shared\/kibana_react/,
+        /^src\/platform\/plugins\/shared\/kibana_utils/,
+        /^src\/platform\/plugins\/shared\/saved_search/,
+        /^src\/platform\/plugins\/shared\/ui_actions/,
+        /^src\/platform\/plugins\/shared\/unified_histogram/,
+        /^src\/platform\/plugins\/shared\/unified_search/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
+        /^x-pack\/solutions\/security\/packages/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/cases/,
+        /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -516,67 +499,64 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^package.json/,
-          /^src\/platform\/packages\/shared\/kbn-discover-utils/,
-          /^src\/platform\/packages\/shared\/kbn-doc-links/,
-          /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
-          /^src\/platform\/packages\/shared\/kbn-es-query/,
-          /^src\/platform\/packages\/shared\/kbn-i18n/,
-          /^src\/platform\/packages\/shared\/kbn-i18n-react/,
-          /^src\/platform\/packages\/shared\/kbn-grouping/,
-          /^src\/platform\/packages\/shared\/kbn-resizable-layout/,
-          /^src\/platform\/packages\/shared\/kbn-rison/,
-          /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
-          /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
-          /^src\/platform\/packages\/shared\/kbn-search-types/,
-          /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
-          /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
-          /^src\/platform\/packages\/shared\/kbn-ui-theme/,
-          /^src\/platform\/packages\/shared\/kbn-utility-types/,
-          /^src\/platform\/packages\/shared\/react/,
-          /^src\/platform\/packages\/shared\/shared-ux/,
-          /^src\/core/,
-          /^src\/platform\/plugins\/shared\/charts/,
-          /^src\/platform\/plugins\/shared\/controls/,
-          /^src\/platform\/plugins\/shared\/data/,
-          /^src\/platform\/plugins\/shared\/data_views/,
-          /^src\/platform\/plugins\/shared\/discover/,
-          /^src\/platform\/plugins\/shared\/field_formats/,
-          /^src\/platform\/plugins\/shared\/inspector/,
-          /^src\/platform\/plugins\/shared\/kibana_react/,
-          /^src\/platform\/plugins\/shared\/kibana_utils/,
-          /^src\/platform\/plugins\/shared\/saved_search/,
-          /^src\/platform\/plugins\/shared\/ui_actions/,
-          /^src\/platform\/plugins\/shared\/unified_histogram/,
-          /^src\/platform\/plugins\/shared\/unified_search/,
-          /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
-          /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
-          /^x-pack\/solutions\/security\/packages/,
-          /^x-pack\/platform\/plugins\/shared\/alerting/,
-          /^x-pack\/platform\/plugins\/shared\/cases/,
-          /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
-          /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
-          /^x-pack\/solutions\/security\/plugins\/lists/,
-          /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
-          /^x-pack\/platform\/plugins\/shared\/task_manager/,
-          /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
-          /^x-pack\/solutions\/security\/plugins\/timelines/,
-          /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
-          /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
-          /^x-pack\/test\/functional\/es_archives\/security_solution/,
-          /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^package.json/,
+        /^src\/platform\/packages\/shared\/kbn-discover-utils/,
+        /^src\/platform\/packages\/shared\/kbn-doc-links/,
+        /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
+        /^src\/platform\/packages\/shared\/kbn-es-query/,
+        /^src\/platform\/packages\/shared\/kbn-i18n/,
+        /^src\/platform\/packages\/shared\/kbn-i18n-react/,
+        /^src\/platform\/packages\/shared\/kbn-grouping/,
+        /^src\/platform\/packages\/shared\/kbn-resizable-layout/,
+        /^src\/platform\/packages\/shared\/kbn-rison/,
+        /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
+        /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
+        /^src\/platform\/packages\/shared\/kbn-search-types/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
+        /^src\/platform\/packages\/shared\/kbn-ui-theme/,
+        /^src\/platform\/packages\/shared\/kbn-utility-types/,
+        /^src\/platform\/packages\/shared\/react/,
+        /^src\/platform\/packages\/shared\/shared-ux/,
+        /^src\/core/,
+        /^src\/platform\/plugins\/shared\/charts/,
+        /^src\/platform\/plugins\/shared\/controls/,
+        /^src\/platform\/plugins\/shared\/data/,
+        /^src\/platform\/plugins\/shared\/data_views/,
+        /^src\/platform\/plugins\/shared\/discover/,
+        /^src\/platform\/plugins\/shared\/field_formats/,
+        /^src\/platform\/plugins\/shared\/inspector/,
+        /^src\/platform\/plugins\/shared\/kibana_react/,
+        /^src\/platform\/plugins\/shared\/kibana_utils/,
+        /^src\/platform\/plugins\/shared\/saved_search/,
+        /^src\/platform\/plugins\/shared\/ui_actions/,
+        /^src\/platform\/plugins\/shared\/unified_histogram/,
+        /^src\/platform\/plugins\/shared\/unified_search/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
+        /^x-pack\/solutions\/security\/packages/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/cases/,
+        /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -589,15 +569,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      ((await doAnyChangesMatch(
-        [
-          /^x-pack\/platform\/plugins\/shared\/osquery/,
-          /^x-pack\/solutions\/security\/test\/osquery_cypress/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      ((await doAnyCypressRelevantChangesMatch([
+        /^x-pack\/platform\/plugins\/shared\/osquery/,
+        /^x-pack\/solutions\/security\/test\/osquery_cypress/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,
+      ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
         ALL_UI_TEST_SUITES) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
@@ -611,16 +588,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^x-pack\/packages\/kbn-cloud-security-posture/,
-          /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
-          /^x-pack\/solutions\/security\/plugins\/security_solution/,
-          /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^x-pack\/packages\/kbn-cloud-security-posture/,
+        /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -679,14 +653,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch(
-        [
-          /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
-          /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-          /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
-        ],
-        cypressRelevantChanges
-      )) ||
+      (await doAnyCypressRelevantChangesMatch([
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
