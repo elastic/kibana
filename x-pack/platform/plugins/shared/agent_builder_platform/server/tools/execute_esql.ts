@@ -15,8 +15,9 @@ import {
 } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
+import { resolveEsqlScopeFilter } from './esql_scope_filter';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -68,7 +69,7 @@ Note that this option can't be used to increase the number of results if the que
     schema: executeEsqlToolSchema,
     handler: async (
       { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
-      { esClient, attachments }
+      { esClient, attachments, spaceId, logger }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
@@ -79,9 +80,24 @@ Note that this option can't be used to increase the number of results if the que
         ...(buildTimeRangeParams(timeRange) ?? []),
       ];
 
+      // Server-imposed scope, not visible to the model. `params` placeholders are not substituted
+      // into the filter, so it has to be built as Query DSL here.
+      const scope = await resolveEsqlScopeFilter({
+        query: esqlQuery,
+        spaceId,
+        esClient: esClient.asCurrentUser,
+        logger,
+      });
+
+      // The query cannot be scoped safely, so it is not run at all.
+      if (!scope.ok) {
+        return { results: [createErrorResult(scope.error)] };
+      }
+
       const result = await executeEsql({
         query: esqlQuery,
         params,
+        filter: scope.filter,
         esClient: esClient.asCurrentUser,
         limit,
       });

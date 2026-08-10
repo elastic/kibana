@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlEsqlColumnInfo,
+  FieldValue,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
@@ -25,16 +29,25 @@ export interface EsqlResponse {
  * When `limit` is provided, the query is rewritten so the ES|QL engine enforces the cap. If the
  * query already ends with a `LIMIT N`, the trailing limit becomes `min(N, limit)`; otherwise a
  * new `| LIMIT <limit>` pipe is appended. See `applyLimit` for full semantics.
+ *
+ * `filter` is a Query DSL container applied by Elasticsearch before any ES|QL pipeline operator
+ * runs, across every `FORK` branch. It is not equivalent to a `WHERE` clause: Elasticsearch also
+ * uses it as the `index_filter` during field resolution, so an index that cannot match is skipped
+ * entirely and its exclusive columns disappear from the response with no error. Build the clause so
+ * every targeted index can still match it. `params` placeholders are not substituted into `filter`,
+ * and the filter does not reach `LOOKUP JOIN` or `ENRICH` sources.
  */
 export const executeEsql = async ({
   query,
   params,
   limit,
+  filter,
   esClient,
 }: {
   query: string;
   params?: Array<Record<string, FieldValue>>;
   limit?: number;
+  filter?: QueryDslQueryContainer;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
@@ -46,6 +59,7 @@ export const executeEsql = async ({
         drop_null_columns: true,
         allow_partial_results: true,
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
+        ...(filter ? { filter } : {}),
       },
       { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
     );
