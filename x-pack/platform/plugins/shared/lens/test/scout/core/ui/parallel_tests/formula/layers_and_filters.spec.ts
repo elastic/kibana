@@ -159,9 +159,7 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
       await lens.workspace.setFilterBy('bytes > 4000');
       await lens.waitForVisualization();
       await expect(lens.datatable.getCellLocator(0, 0)).not.toContainText(baselineDisplay);
-      const filteredCount = Number(
-        (await lens.datatable.getCellText(0, 0)).replace(/,/g, '')
-      );
+      const filteredCount = Number((await lens.datatable.getCellText(0, 0)).replace(/,/g, ''));
       expect(filteredCount).toBeGreaterThan(0);
       expect(filteredCount).toBeLessThan(baselineCount);
     });
