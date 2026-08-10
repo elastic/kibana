@@ -10,7 +10,6 @@ import { waitFor } from '@testing-library/react';
 import { sendGetAgents, useGetPackageInfoByKeyQuery } from '../../hooks';
 import { usePollingIncomingData } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
 import { createIntegrationsTestRendererMock } from '../../mock';
-import { KibanaSavedObjectType } from '../../../common/types/models';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AGENTS_PREFIX } from '../../constants';
