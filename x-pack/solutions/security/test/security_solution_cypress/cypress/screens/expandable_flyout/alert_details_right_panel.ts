@@ -76,6 +76,10 @@ export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE =
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE = getDataTestSubjectSelector(
   'add-to-existing-case-action'
 );
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_CASE =
+  getDataTestSubjectSelector('add-to-case-action');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_CASE_SUBMIT =
+  getDataTestSubjectSelector('add-to-case-submit');
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED = getDataTestSubjectSelector(
   'acknowledged-alert-status'
 );
