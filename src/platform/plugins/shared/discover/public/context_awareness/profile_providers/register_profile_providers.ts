@@ -123,11 +123,11 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createExampleDataSourceProfileProvider(),
   createPatternsDataSourceProfileProvider(providerServices),
   createChangePointDataSourceProfileProvider(),
-  createDeprecationLogsDataSourceProfileProvider(),
   createMetricsDataSourceProfileProvider(),
+  createDeprecationLogsDataSourceProfileProvider(),
   createSparklineDataSourceProfileProvider(providerServices),
-  ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
+  ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];
 
 /**
