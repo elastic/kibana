@@ -6,9 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type {
-  FeedbackChipId,
-} from '@kbn/agent-builder-common';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponseItem,
   GetConversationResponse,
