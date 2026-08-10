@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/cps-utils",
   "owner": [
-    "@elastic/kibana-presentation"
+    "@elastic/appex-sharedux"
   ],
   "group": "platform",
   "visibility": "shared"
