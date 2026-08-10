@@ -40,6 +40,7 @@ import {
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { computeCompareDiff, isHigherIsBetterFromName, isImproved } from './compare_diff';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -86,14 +87,6 @@ const formatDiff = (value: number): string => {
   return `${prefix}${value.toFixed(3)}`;
 };
 
-const LOWER_IS_BETTER_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
-
-const isLowerBetter = (evaluatorName: string): boolean =>
-  LOWER_IS_BETTER_PATTERN.test(evaluatorName);
-
-const isImproved = (diff: number, evaluatorName: string): boolean =>
-  isLowerBetter(evaluatorName) ? diff < 0 : diff > 0;
-
 const SignificanceBadge: React.FC<{
   pValue: number | null;
   diff: number;
@@ -105,7 +98,8 @@ const SignificanceBadge: React.FC<{
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
     return <EuiBadge color="hollow">{i18n.BADGE_NOT_SIGNIFICANT}</EuiBadge>;
   }
-  const color = isImproved(diff, evaluatorName) ? 'success' : 'danger';
+  const higherIsBetter = isHigherIsBetterFromName(evaluatorName);
+  const color = isImproved(diff, higherIsBetter) ? 'success' : 'danger';
   return <EuiBadge color={color}>{i18n.BADGE_SIGNIFICANT}</EuiBadge>;
 };
 
@@ -113,14 +107,14 @@ const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, ev
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
-  const lowerBetter = isLowerBetter(evaluatorName);
-  const improved = isImproved(diff, evaluatorName);
+  const higherIsBetter = isHigherIsBetterFromName(evaluatorName);
+  const improved = isImproved(diff, higherIsBetter);
   let color: string | undefined;
   if (diff !== 0) {
     color = improved ? euiTheme.colors.textSuccess : euiTheme.colors.textDanger;
   }
 
-  const directionHint = lowerBetter ? i18n.DIFF_LOWER_IS_BETTER : i18n.DIFF_HIGHER_IS_BETTER;
+  const directionHint = higherIsBetter ? i18n.DIFF_HIGHER_IS_BETTER : i18n.DIFF_LOWER_IS_BETTER;
   const verdictHint = diff === 0 ? null : improved ? i18n.DIFF_IMPROVED : i18n.DIFF_REGRESSED;
   const tooltip = verdictHint ? `${verdictHint} · ${directionHint}` : directionHint;
 
@@ -414,7 +408,7 @@ const ExampleDrilldownFlyout: React.FC<{
           ) {
             return '-';
           }
-          const diff = item.scoreA - item.scoreB;
+          const diff = computeCompareDiff(item.scoreA, item.scoreB);
           return <DiffValue diff={diff} evaluatorName={item.evaluatorName} />;
         },
       },
@@ -499,9 +493,9 @@ const ExampleDrilldownFlyout: React.FC<{
                   return { style: { opacity: 0.55 } };
                 }
 
-                const diff = item.scoreA! - item.scoreB!;
+                const diff = computeCompareDiff(item.scoreA!, item.scoreB!);
                 if (diff === 0) return {};
-                if (isImproved(diff, item.evaluatorName)) {
+                if (isImproved(diff, isHigherIsBetterFromName(item.evaluatorName))) {
                   return {
                     style: {
                       backgroundColor: hexToRgba(
@@ -658,7 +652,7 @@ export const CompareExperimentsPage: React.FC = () => {
       'Significant',
     ];
     const rows = sortedResults.map((r) => {
-      const diff = r.meanA - r.meanB;
+      const diff = computeCompareDiff(r.meanA, r.meanB);
       return [
         `"${r.datasetName.replace(/"/g, '""')}"`,
         `"${r.evaluatorName.replace(/"/g, '""')}"`,
@@ -737,7 +731,10 @@ export const CompareExperimentsPage: React.FC = () => {
       {
         name: i18n.COLUMN_DIFF,
         render: (item: PairedTTestResult) => (
-          <DiffValue diff={item.meanA - item.meanB} evaluatorName={item.evaluatorName} />
+          <DiffValue
+            diff={computeCompareDiff(item.meanA, item.meanB)}
+            evaluatorName={item.evaluatorName}
+          />
         ),
         align: 'right' as const,
       },
@@ -753,7 +750,7 @@ export const CompareExperimentsPage: React.FC = () => {
         render: (item: PairedTTestResult) => (
           <SignificanceBadge
             pValue={item.pValue}
-            diff={item.meanA - item.meanB}
+            diff={computeCompareDiff(item.meanA, item.meanB)}
             evaluatorName={item.evaluatorName}
           />
         ),

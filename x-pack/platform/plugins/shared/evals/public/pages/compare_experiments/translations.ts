@@ -216,11 +216,11 @@ export const CLICK_ROW_HINT = i18n.translate('xpack.evals.compareExperiments.cli
 });
 
 export const DIFF_IMPROVED = i18n.translate('xpack.evals.compareExperiments.diffImproved', {
-  defaultMessage: 'Improvement (Experiment A is better)',
+  defaultMessage: 'Improvement (Target is better than Baseline)',
 });
 
 export const DIFF_REGRESSED = i18n.translate('xpack.evals.compareExperiments.diffRegressed', {
-  defaultMessage: 'Regression (Experiment A is worse)',
+  defaultMessage: 'Regression (Target is worse than Baseline)',
 });
 
 export const DIFF_LOWER_IS_BETTER = i18n.translate(
