@@ -28,7 +28,7 @@ import {
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
-import { stripNullDimensionWhere } from '../../../../common/utils/esql/strip_null_dimension_where';
+import { stripSelectedDimensionWherePredicates } from '../../../../common/utils/esql/strip_selected_dimension_where_predicates';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -83,7 +83,10 @@ export function useFetchMetricsData({
       appliedDimensionNames,
       (dimension) => `MV_CONTAINS(dimension_fields, ${escapeStringValue(dimension)})`
     );
-    const metricsInfoSourceQuery = stripNullDimensionWhere(esql, appliedDimensionNames);
+    const metricsInfoSourceQuery = stripSelectedDimensionWherePredicates(
+      esql,
+      appliedDimensionNames
+    );
     return buildMetricsInfoQuery(
       metricsInfoSourceQuery,
       appliedDimensionNames,
