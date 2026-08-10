@@ -10,8 +10,6 @@ import { createAiIndexAttachmentType } from './ai_index';
 
 export const registerAttachmentTypes = (agentBuilder: AgentBuilderPluginSetup) => {
   agentBuilder.attachments.registerType(
-    createAiIndexAttachmentType() as Parameters<
-      typeof agentBuilder.attachments.registerType
-    >[0]
+    createAiIndexAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
   );
 };

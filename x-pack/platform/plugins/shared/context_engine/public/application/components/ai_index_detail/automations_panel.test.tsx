@@ -179,7 +179,9 @@ describe('AutomationsPanel', () => {
 
   it('shows the suggest automation control when agent builder is available', () => {
     const suggestAutomation = jest.fn();
-    mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true, suggestAutomation }));
+    mockUseSuggestAutomation.mockReturnValue(
+      suggestResult({ canSuggest: true, suggestAutomation })
+    );
 
     renderPanel();
 
