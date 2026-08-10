@@ -84,7 +84,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Component preference: owning platform or solution module, then `@kbn/ui-*` (`src/platform/kbn-ui`), then `@elastic/eui`. Compose existing components before building new ones.
 - Put new UI in its owning area. Reserve `@kbn/ui-*` for low-dependency, shared UI.
 - For complex reusable UI, prefer a static package with tests and Storybook when available over growing a plugin.
-- If existing components fall short, flag the gap and recommend alignment with product and design before building or composing a workaround.
+- If an existing component from the owning platform or solution module, `@kbn/ui-*`, or EUI falls short, flag the gap and recommend discussing the requirement with product or design before building or composing a workaround.
 - Style with Emotion (`@emotion/react`) and EUI design tokens. Use inline styles only for rapidly changing values such as animation or positioning.
 
 ### Schema validation
