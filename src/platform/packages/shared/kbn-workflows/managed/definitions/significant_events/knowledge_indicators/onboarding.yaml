@@ -54,7 +54,7 @@ triggers:
       - name: featuresConvergencePatience
         type: number
         default: 2
-        description: "Stop features identification after this many consecutive healthy iterations that discover no new features."
+        description: "Stop features identification after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: featuresSampleSize
         type: number
         description: "Number of documents sampled per features identification iteration."

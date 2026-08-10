@@ -50,7 +50,7 @@ triggers:
       - name: convergencePatience
         type: number
         default: 2
-        description: "Stop the loop after this many consecutive healthy iterations that discover no new features."
+        description: "Stop the loop after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: sampleSize
         type: number
         description: "Number of documents sampled per iteration."
@@ -87,7 +87,8 @@ steps:
       discoveredFeatures: []
       iterationResults: []
       connectorId: ""
-      consecutiveNoNew: 0
+      barrenCount: 0
+      effectivePatience: "${{ inputs.convergencePatience | at_least: 1 }}"
 
   # -----------------------------------------------------------------------
   # Step 2: Main loop — each pass runs identify_inferred_features.
@@ -160,7 +161,7 @@ steps:
               - name: reset_counter
                 type: data.set
                 with:
-                  consecutiveNoNew: 0
+                  barrenCount: 0
           - name: increment_convergence
             type: if
             condition: "${{ steps.identify_inferred.output.iterationResult.newFeatures.size == 0 }}"
@@ -168,10 +169,10 @@ steps:
               - name: bump_counter
                 type: data.set
                 with:
-                  consecutiveNoNew: "${{ variables.consecutiveNoNew | plus: 1 }}"
+                  barrenCount: "${{ variables.barrenCount | plus: 1 }}"
           - name: maybe_stop
             type: if
-            condition: "${{ variables.consecutiveNoNew >= inputs.convergencePatience }}"
+            condition: "${{ variables.barrenCount >= variables.effectivePatience }}"
             steps:
               - name: stop_converged
                 type: loop.break
