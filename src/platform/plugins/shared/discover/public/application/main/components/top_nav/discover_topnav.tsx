@@ -20,7 +20,6 @@ import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
   useDiscoverCustomization,
   useDiscoverCustomizationContext,
@@ -42,7 +41,6 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
-import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { DiscoverSessionSaveModalContainer } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
@@ -90,9 +88,6 @@ export const DiscoverTopNav = ({
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
-  const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
-    (state) => state.isESQLToDataViewTransitionModalVisible
-  );
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -213,31 +208,6 @@ export const DiscoverTopNav = ({
   const esqlQueryStats = useESQLQueryStats(
     isEsqlMode,
     dataStateContainer.inspectorAdapters.requests
-  );
-
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
-  const onESQLToDataViewTransitionModalClose = useCallback(
-    (shouldDismissModal?: boolean, needsSave?: boolean) => {
-      if (shouldDismissModal) {
-        services.storage.set(ESQL_TRANSITION_MODAL_KEY, true);
-      }
-      dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(false));
-      if (needsSave == null) {
-        return;
-      }
-      if (needsSave) {
-        setInitialCopyOnSave(false);
-        onSaveCbRef.current = () => {
-          dispatch(transitionFromESQLToDataView({ dataView }));
-        };
-        setIsSaveModalVisible(true);
-        return;
-      }
-      dispatch(transitionFromESQLToDataView({ dataView }));
-    },
-    [dataView, dispatch, services, transitionFromESQLToDataView]
   );
 
   const onOpenSaveModal = useCallback(() => {
@@ -457,9 +427,6 @@ export const DiscoverTopNav = ({
             : undefined
         }
       />
-      {isESQLToDataViewTransitionModalVisible && (
-        <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
-      )}
       {isSaveModalVisible && (
         <DiscoverSessionSaveModalContainer
           initialCopyOnSave={initialCopyOnSave}

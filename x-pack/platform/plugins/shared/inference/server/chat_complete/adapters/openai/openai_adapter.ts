@@ -114,7 +114,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       return connectorResult$.pipe(
         handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
         processOpenAIStream(),
-        emitTokenCountEstimateIfMissing({ request, logger }),
+        emitTokenCountEstimateIfMissing({ request }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     } else {
@@ -123,7 +123,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           parseData: (data) => data as OpenAI.ChatCompletion,
         }),
         processOpenAIResponse(),
-        emitTokenCountEstimateIfMissing({ request, logger }),
+        emitTokenCountEstimateIfMissing({ request }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     }
