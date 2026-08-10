@@ -623,6 +623,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Whether to include tool call arguments and results in traces.',
     },
   },
+  'agentBuilder:tracing:includeUserData': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real user IDs and usernames in traces.',
+    },
+  },
   'agentBuilder:tracing:includeUserPrompts': {
     type: 'boolean',
     _meta: {
@@ -911,6 +917,27 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: {
       description: 'Non-default value of the scheduled Significant Events maximum review passes.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule detection threshold.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule probe interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule severity exemption.',
     },
   },
   'observability:enableDiagnosticMode': {
