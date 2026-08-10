@@ -163,7 +163,10 @@ export const createLookbackGapEvaluator = (): RuleEvaluator =>
       if (fromSec === null || intervalSec === null) {
         return { score: 0, metadata: { error: 'Cannot parse from/interval', from, interval } };
       }
-      const hasGap = fromSec < intervalSec;
+      // fromSec and intervalSec are both seconds-since-epoch. fromSec is further in the
+      // past (smaller) when from reaches back far enough; intervalSec = now - interval.
+      // A gap exists when from is more recent than now-interval, i.e. fromSec > intervalSec.
+      const hasGap = fromSec > intervalSec;
       return { score: hasGap ? 0 : 1, metadata: { from, interval, fromSec, intervalSec, hasGap } };
     },
   });
