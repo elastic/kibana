@@ -12,11 +12,10 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-
-const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { convertEveryToSchedulesPerMinute } from '../../duration';
+import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { RuleSavedObjectsClientToken } from './tokens';
 
@@ -462,7 +461,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
             field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
             size: resolvedSize,
             order: { _count: 'desc' },
-            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
+            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
           },
         },
       },

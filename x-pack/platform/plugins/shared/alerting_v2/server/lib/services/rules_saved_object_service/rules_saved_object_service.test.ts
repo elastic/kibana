@@ -282,6 +282,15 @@ describe('RulesSavedObjectService', () => {
       expect((call.aggs as any).tags.terms.include).toBe('a\\.b\\+c.*');
     });
 
+    it('escapes Elasticsearch-only regexp operators in the search prefix', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ search: 'a<b&c' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('a\\<b\\&c.*');
+    });
+
     it('forwards the SO filter when provided', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'tag' }]));
 
