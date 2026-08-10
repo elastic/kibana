@@ -1881,15 +1881,6 @@
       "enabled": true
     },
     {
-      "groupName": "@kayahr/text-encoding",
-      "matchDepNames": ["@kayahr/text-encoding"],
-      "reviewers": ["team:kibana-security"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "uuid",
       "matchDepNames": ["uuid"],
       "reviewers": ["team:kibana-security"],

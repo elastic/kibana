@@ -4558,11 +4558,6 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@kayahr/text-encoding@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@kayahr/text-encoding/-/text-encoding-2.1.0.tgz#4a5b6e7c684d2f07f5a100d77ee34ac28cb676a2"
-  integrity sha512-U/2bmZyKG0TvhIws4+tfA8AWtl0RHOaFENQG8DAe7UyEhIYuhpSgijOh4WDFHLIDO6+WyFRM9nZtKm5Pe6iquw==
-
 "@kbn/aad-fixtures-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/aad":
   version "0.0.0"
   uid ""
