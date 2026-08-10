@@ -749,6 +749,15 @@ export class DiscoverApp {
 
   async waitUntilSearchingHasFinished() {
     await this.dataGrid.waitForLoad();
+    await this.waitUntilHitCountHasSettled();
+  }
+
+  private async waitUntilHitCountHasSettled() {
+    const loadingCounter = this.page.testSubj
+      .locator('discoverQueryTotalHits')
+      .and(this.page.locator('[data-fetch-status="loading"]'));
+
+    await loadingCounter.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 
   async getDocTableIndex(index: number): Promise<string> {
