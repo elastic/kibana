@@ -8,7 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: [
-    '<rootDir>/x-pack/platform/packages/shared/custom-content/custom-content-common',
-  ],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/custom-content/custom-content-common'],
 };
