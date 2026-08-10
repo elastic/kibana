@@ -17,7 +17,7 @@ export {
   useLayoutConfig,
 } from './src/layout_config_context';
 
-export type { ChromeStyle } from './src/layout.types';
+export type { LayoutAppearance } from './src/layout.types';
 
 export { LayoutDebugOverlay } from './src/debug/layout_debug_overlay';
 
