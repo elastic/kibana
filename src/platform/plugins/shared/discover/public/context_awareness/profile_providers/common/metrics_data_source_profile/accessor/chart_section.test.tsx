@@ -184,7 +184,7 @@ describe('MetricsExperienceGridWrapper', () => {
     (useAppStateSelector as jest.Mock).mockImplementation((selector) =>
       selector({ breakdownField: 'host.name' })
     );
-    (useInternalStateDispatch as unknown as jest.Mock).mockReturnValue(mockDispatch);
+    jest.mocked(useInternalStateDispatch).mockReturnValue(mockDispatch);
     (useCurrentTabAction as jest.Mock).mockReturnValue(mockUpdateAppStateAction);
     mockDispatch.mockClear();
     mockUpdateAppStateAction.mockClear();
