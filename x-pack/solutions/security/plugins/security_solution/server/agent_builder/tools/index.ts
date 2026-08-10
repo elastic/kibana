@@ -14,6 +14,8 @@ export {
   SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
   listWatchlistsTool,
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  getWatchlistIdTool,
+  SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   searchEntitiesTool,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
   setAssetCriticalityTool,
@@ -29,6 +31,10 @@ export {
   removeEntitiesFromWatchlistTool,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
 } from './entity_analytics';
+export {
+  buildRedirectUrlTool,
+  SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
+} from './build_redirect_url_tool';
 export {
   attackDiscoverySearchTool,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
