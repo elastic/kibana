@@ -100,7 +100,7 @@ export const EpisodeActionsBar = ({
             button={
               <EuiToolTip content={EPISODE_ACTIONS_BAR_MORE_ACTIONS} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   color="text"
                   aria-label={EPISODE_ACTIONS_BAR_MORE_ACTIONS}
                   data-test-subj="episodeActionsBar-overflow-trigger"
