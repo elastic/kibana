@@ -16,9 +16,9 @@ if (!Object.hasOwn(global.URL, 'createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!Object.hasOwn(global, 'TextEncoder')) {
-  const customTextEncoding = require('@kayahr/text-encoding');
-  global.TextEncoder = customTextEncoding.TextEncoder;
-  global.TextDecoder = customTextEncoding.TextDecoder;
+  const { TextEncoder, TextDecoder } = require('node:util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
 }
 
 // JSDOM 20's Blob lacks .arrayBuffer() and .text() (jsdom#2555).
