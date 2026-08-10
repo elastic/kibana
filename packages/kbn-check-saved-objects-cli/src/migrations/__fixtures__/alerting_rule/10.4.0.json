@@ -128,6 +128,7 @@
         {
           "id": "runbook-1",
           "type": "runbook",
+          "value": "## Runbook\n\n1. Check the service health",
           "data": {
             "content": "## Runbook\n\n1. Check the service health"
           }
@@ -135,6 +136,7 @@
         {
           "id": "dashboard-1",
           "type": "dashboard",
+          "value": "dashboard-id-1",
           "data": {
             "dashboardId": "dashboard-id-1"
           }
@@ -142,6 +144,7 @@
         {
           "id": "host-1",
           "type": "host",
+          "value": "host-a",
           "data": {
             "value": "host-a"
           }

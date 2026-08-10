@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import {
@@ -39,114 +40,85 @@ const createDocument = (artifacts?: Array<Record<string, unknown>>) => ({
   references: [],
 });
 
-type TransformArgs = Parameters<typeof migrateRuleArtifactsToData>;
+type BackfillArgs = Parameters<typeof migrateRuleArtifactsToData>;
 
+/**
+ * Mirrors how core applies a backfill: the result is deep-merged into the
+ * document's attributes, which is what preserves the legacy `value`.
+ */
 const migrate = (artifacts?: Array<Record<string, unknown>>) => {
-  const { document } = migrateRuleArtifactsToData(
-    createDocument(artifacts) as TransformArgs[0],
-    {} as TransformArgs[1]
+  const document = createDocument(artifacts);
+  const { attributes } = migrateRuleArtifactsToData(
+    document as BackfillArgs[0],
+    {} as BackfillArgs[1]
   );
 
-  return document.attributes;
+  return merge({}, document.attributes, attributes);
 };
 
 describe('migrateRuleArtifactsToData', () => {
-  it('migrates a runbook value into data.content', () => {
+  it('backfills a runbook value into data.content', () => {
     const { artifacts } = migrate([
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: '# Runbook' },
     ]);
 
     expect(artifacts).toEqual([
-      { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '# Runbook' } },
+      {
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        value: '# Runbook',
+        data: { content: '# Runbook' },
+      },
     ]);
   });
 
-  it('migrates a dashboard value into data.dashboardId', () => {
+  it('backfills a dashboard value into data.dashboardId', () => {
     const { artifacts } = migrate([
       { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-123' },
     ]);
 
     expect(artifacts).toEqual([
-      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-123' } },
+      {
+        id: 'dashboard-1',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dash-123',
+        data: { dashboardId: 'dash-123' },
+      },
     ]);
   });
 
   it('falls back to a lossless data.value for unknown artifact types', () => {
     const { artifacts } = migrate([{ id: 'host-1', type: 'host', value: 'host-a' }]);
 
-    expect(artifacts).toEqual([{ id: 'host-1', type: 'host', data: { value: 'host-a' } }]);
-  });
-
-  it.each([
-    [RUNBOOK_ARTIFACT_TYPE, ''],
-    [RUNBOOK_ARTIFACT_TYPE, '   '],
-    [DASHBOARD_ARTIFACT_TYPE, ' '],
-  ])('drops a %s artifact whose legacy value is %j', (type, value) => {
-    const { artifacts } = migrate([
-      { id: 'blank-1', type, value },
-      { id: 'kept-1', type: RUNBOOK_ARTIFACT_TYPE, value: '# Kept' },
-    ]);
-
     expect(artifacts).toEqual([
-      { id: 'kept-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '# Kept' } },
+      { id: 'host-1', type: 'host', value: 'host-a', data: { value: 'host-a' } },
     ]);
   });
 
-  it('keeps a blank value for an unknown type, which has no required fields', () => {
-    const { artifacts } = migrate([{ id: 'host-1', type: 'host', value: '' }]);
-
-    expect(artifacts).toEqual([{ id: 'host-1', type: 'host', data: { value: '' } }]);
-  });
-
-  it('removes the legacy value from the document', () => {
+  it('keeps the legacy value on the document so a rollback can read it', () => {
     const { artifacts } = migrate([
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },
     ]);
 
-    expect(artifacts?.[0]).not.toHaveProperty('value');
-  });
-
-  it('produces attributes that satisfy the model version 4 schema', () => {
-    const attributes = migrate([{ id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' }]);
-
-    expect(() => ruleSavedObjectAttributesSchemaV3.validate(attributes)).not.toThrow();
-  });
-
-  it('produces attributes that satisfy the schema for an unknown type carrying a blank value', () => {
-    const attributes = migrate([{ id: 'host-1', type: 'host', value: '' }]);
-
-    expect(() => ruleSavedObjectAttributesSchemaV3.validate(attributes)).not.toThrow();
+    expect(artifacts?.[0]).toHaveProperty('value', 'steps');
   });
 
   /**
-   * Documents the accepted trade-off of dropping `value`: model version 3 is no
-   * longer able to read a migrated rule that has artifacts. Its
-   * forwardCompatibility schema ignores the unknown `data` and then fails on the
-   * `value` its artifact schema still requires. A rule without artifacts is
-   * unaffected.
+   * The legacy saved object schema allowed a blank `value`. A backfill cannot
+   * drop such an artifact — core merges the result into the document, so an
+   * omitted array element is restored from disk — and it carries over as a
+   * blank field.
    */
-  describe('rollback to model version 3 (knowingly unsupported)', () => {
-    const modelVersion3Schema = ruleSavedObjectAttributesSchemaV2.extends(
-      {},
-      { unknowns: 'ignore' }
-    );
+  it.each([
+    [RUNBOOK_ARTIFACT_TYPE, '', 'content'],
+    [DASHBOARD_ARTIFACT_TYPE, '   ', 'dashboardId'],
+  ])('carries a blank %s value over as %j', (type, value, dataKey) => {
+    const { artifacts } = migrate([{ id: 'blank-1', type, value }]);
 
-    it('cannot read a migrated rule that has artifacts', () => {
-      const attributes = migrate([
-        { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },
-      ]);
-
-      expect(() => modelVersion3Schema.validate(attributes)).toThrow(
-        /\[artifacts\.0\.value\]: expected value of type \[string\]/
-      );
-    });
-
-    it('can still read a migrated rule that has no artifacts', () => {
-      expect(() => modelVersion3Schema.validate(migrate())).not.toThrow();
-    });
+    expect(artifacts).toEqual([{ id: 'blank-1', type, value, data: { [dataKey]: value } }]);
   });
 
-  it('migrates every artifact of a mixed array, aligned by index', () => {
+  it('backfills every artifact of a mixed array, aligned by index', () => {
     const { artifacts } = migrate([
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },
       { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' },
@@ -154,9 +126,19 @@ describe('migrateRuleArtifactsToData', () => {
     ]);
 
     expect(artifacts).toEqual([
-      { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'steps' } },
-      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
-      { id: 'host-1', type: 'host', data: { value: 'host-a' } },
+      {
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        value: 'steps',
+        data: { content: 'steps' },
+      },
+      {
+        id: 'dashboard-1',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dash-1',
+        data: { dashboardId: 'dash-1' },
+      },
+      { id: 'host-1', type: 'host', value: 'host-a', data: { value: 'host-a' } },
     ]);
   });
 
@@ -175,5 +157,43 @@ describe('migrateRuleArtifactsToData', () => {
     expect(
       migrate([{ id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' }])
     ).toMatchObject(baseAttributes);
+  });
+
+  it('model version 4 reads the migrated artifacts as id, type and data', () => {
+    const attributes = migrate([{ id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' }]);
+    const modelVersion4ReadSchema = ruleSavedObjectAttributesSchemaV3.extends(
+      {},
+      { unknowns: 'ignore' }
+    );
+
+    expect(modelVersion4ReadSchema.validate(attributes).artifacts).toEqual([
+      { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'steps' } },
+    ]);
+  });
+
+  /**
+   * `value` is deliberately absent from the model version 4 schema: nothing
+   * writes it anymore and reads go through `data`. The copy the backfill leaves
+   * behind exists only so an older node can still read the document.
+   */
+  describe('rollback to model version 3', () => {
+    const modelVersion3Schema = ruleSavedObjectAttributesSchemaV2.extends(
+      {},
+      { unknowns: 'ignore' }
+    );
+
+    it('reads a migrated rule with artifacts, ignoring the unknown data', () => {
+      const attributes = migrate([
+        { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },
+      ]);
+
+      expect(modelVersion3Schema.validate(attributes).artifacts).toEqual([
+        { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },
+      ]);
+    });
+
+    it('reads a migrated rule that has no artifacts', () => {
+      expect(() => modelVersion3Schema.validate(migrate())).not.toThrow();
+    });
   });
 });

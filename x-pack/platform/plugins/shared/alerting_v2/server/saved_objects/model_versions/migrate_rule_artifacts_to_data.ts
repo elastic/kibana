@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
+import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-server';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type {
   RuleSavedObjectAttributes,
@@ -24,34 +24,29 @@ const DATA_KEY_BY_ARTIFACT_TYPE: Readonly<Record<string, string>> = {
 };
 
 /**
- * Replaces the legacy `artifacts[].value` with the structured `artifacts[].data`.
+ * Backfills the structured `artifacts[].data` from the legacy `artifacts[].value`.
  *
- * Dropping `value` on purpose even if it breaks rolling back to model version 3.
+ * Core deep-merges a backfill result into the document and aligns arrays by
+ * position, so emitting each artifact without `value` leaves the existing one
+ * untouched on disk. Model version 4 drops `value` from its schema and never
+ * writes it again, but leaving it there is what lets a rolled-back model
+ * version 3 node — whose artifact schema still requires it — read migrated rules.
  */
-export const migrateRuleArtifactsToData: SavedObjectModelUnsafeTransformFn<
+export const migrateRuleArtifactsToData: SavedObjectModelDataBackfillFn<
   RuleSavedObjectAttributesV2,
   RuleSavedObjectAttributes
-> = (document) => {
-  const { artifacts, ...rest } = document.attributes;
+> = ({ attributes: { artifacts } }) => {
+  if (!artifacts) {
+    return { attributes: {} };
+  }
 
-  const attributes: RuleSavedObjectAttributes = artifacts
-    ? {
-        ...rest,
-        artifacts: artifacts.flatMap(({ id, type, value }) => {
-          const dataKey = DATA_KEY_BY_ARTIFACT_TYPE[type];
-
-          // The legacy saved object schema allowed a blank `value`, but the API
-          // now requires these fields to be populated, so migrating one would
-          // produce a rule the API refuses to serve. Unknown types have no
-          // required fields, so they migrate whatever they carry.
-          if (dataKey && !value.trim()) {
-            return [];
-          }
-
-          return [{ id, type, data: { [dataKey ?? 'value']: value } }];
-        }),
-      }
-    : rest;
-
-  return { document: { ...document, attributes } };
+  return {
+    attributes: {
+      artifacts: artifacts.map(({ id, type, value }) => ({
+        id,
+        type,
+        data: { [DATA_KEY_BY_ARTIFACT_TYPE[type] ?? 'value']: value },
+      })),
+    },
+  };
 };

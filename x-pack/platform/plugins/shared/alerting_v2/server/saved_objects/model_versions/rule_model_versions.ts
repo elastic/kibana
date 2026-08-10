@@ -60,14 +60,15 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '4': {
-    // Replace `artifacts[].value: string` with a structured `artifacts[].data`
-    // record, removing `value` from the document. This is knowingly not
-    // rollback-safe: model version 3's schema requires `value`, so a rolled-back
-    // node cannot read a rule that has artifacts.
+    // Introduce the structured `artifacts[].data` record, backfilled from the
+    // legacy `artifacts[].value`. `value` is gone from the schema and is never
+    // written again, but the backfill leaves the existing one on disk so a
+    // rollback to model version 3 — whose schema still requires it — can read
+    // migrated rules.
     changes: [
       {
-        type: 'unsafe_transform',
-        transformFn: (typeSafeGuard) => typeSafeGuard(migrateRuleArtifactsToData),
+        type: 'data_backfill',
+        backfillFn: migrateRuleArtifactsToData,
       },
     ],
     schemas: {
