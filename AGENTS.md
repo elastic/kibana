@@ -79,13 +79,11 @@ Follow existing patterns in the target area first; below are common defaults.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
 ### React / UI Conventions
-- Use functional components; type props explicitly.
-- Keep hooks at the top level; avoid conditional hooks.
-- Prefer existing components in this order: the owning platform or solution area, `@kbn/ui-*` under `src/platform/kbn-ui`, then `@elastic/eui`. Use supported props and composition before creating a component.
-- Keep new UI in its owning area by default. Use `@kbn/ui-*` only for low-dependency UI shared across areas.
-- For new complex UI shared across areas, prefer a static package with tests and Storybook when available instead of expanding a plugin.
-- If existing `@kbn/ui-*` and EUI components cannot meet a requirement through supported props or composition, flag the gap and recommend discussing it with product and design before implementing a workaround.
-- Style with Emotion (`@emotion/react`) and EUI design tokens. Use CSS overrides only as a last resort, and inline styles only for dynamic runtime values such as animation or positioning.
+- Reach for components in this order, configuring supported props and composition before building anything new: existing components in the owning platform or solution area, then `@kbn/ui-*` under `src/platform/kbn-ui`, then `@elastic/eui`.
+- New UI belongs in its owning area by default. `@kbn/ui-*` is only for low-dependency UI shared across areas.
+- Put complex UI shared across areas in a static package with tests and Storybook when available.
+- When a requirement cannot be met through the supported props or composition of existing `@kbn/ui-*` or EUI components, flag the gap to the user and recommend discussing it with product and design before implementing a workaround.
+- Style with Emotion (`@emotion/react`) and EUI design tokens. CSS overrides are a last resort; inline styles are only for dynamic runtime values such as animation or positioning.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
