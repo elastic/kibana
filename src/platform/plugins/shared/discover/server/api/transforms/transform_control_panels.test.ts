@@ -247,6 +247,41 @@ describe('control panel transforms', () => {
 
       expect(panels).toEqual(controlPanels);
     });
+
+    it('round-trips legacy stored controlGroupJson through API control_panels', () => {
+      const legacyStored = JSON.stringify({
+        b: {
+          order: 1,
+          type: 'esqlControl',
+          width: 'small',
+          grow: false,
+          control_type: 'STATIC_VALUES',
+          variable_name: 'bar',
+          variable_type: 'values',
+          available_options: ['a', 'b'],
+          selected_options: ['b'],
+          single_select: true,
+        },
+        a: {
+          order: 0,
+          type: ESQL_CONTROL,
+          width: 'medium',
+          grow: true,
+          control_type: 'STATIC_VALUES',
+          variable_name: 'foo',
+          variable_type: 'values',
+          available_options: ['x', 'y'],
+          selected_options: ['x'],
+          single_select: true,
+        },
+      });
+
+      const { panels: apiPanels } = transformControlPanelsOut(legacyStored, 'tab-1');
+      const storedAgain = transformControlPanelsIn(apiPanels);
+      const { panels } = transformControlPanelsOut(storedAgain, 'tab-1');
+
+      expect(panels).toEqual(apiPanels);
+    });
   });
 
   describe('transformControlPanelsIn', () => {
