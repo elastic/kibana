@@ -19,6 +19,7 @@ import {
   standaloneQuerySchema,
   scheduleSchema,
   metadataSchema,
+  ruleResponseMetadataSchema,
   groupingSchema,
 } from './rule_data_schema';
 import {
@@ -94,6 +95,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [standaloneQuerySchema, 'alerting_standalone_rule_query'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
+  [ruleResponseMetadataSchema, 'alerting_rule_response_metadata'],
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],

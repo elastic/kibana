@@ -578,6 +578,19 @@ export const updateRuleBodySchema = updateRuleDataSchema
 
 export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
+/** Rule response metadata — write-path fields plus server-managed `version`. */
+export const ruleResponseMetadataSchema = metadataSchema
+  .extend({
+    version: z
+      .number()
+      .int()
+      .min(1)
+      .describe(
+        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
+      ),
+  })
+  .meta({ id: 'alerting_rule_response_metadata' });
+
 /**
  * Schema for rule response data returned from the API.
  * Extends the base rule schema with server-generated fields.
@@ -585,15 +598,7 @@ export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
     id: z.string().describe('Unique rule identifier.'),
-    metadata: metadataSchema.extend({
-      version: z
-        .number()
-        .int()
-        .min(1)
-        .describe(
-          'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
-        ),
-    }),
+    metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),
     createdBy: z.string().nullable().describe('User who created the rule.'),
     createdAt: z.string().describe('ISO timestamp when the rule was created.'),
