@@ -78,7 +78,7 @@ export const RunbookArtifactField: React.FC = () => {
       <EuiSpacer size="xs" />
       {!hasRunbook ? (
         <EuiButton
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={openRunbookModal}
           size="s"
           data-test-subj="addRunbookButton"
