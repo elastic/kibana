@@ -88,9 +88,9 @@ const table = defineAssembly({ name: 'ContentListTable' });
 
 Returns an `AssemblyFactory<TName>` with the following methods:
 
-#### `assembly.definePart<TPresetMap, TOutput, TContext>(partDefinition)`
+#### `assembly.definePart<TPresetMap, TOutput, TContext, TSkeleton>(partDefinition)`
 
-Defines a part type within the assembly. `TPresetMap` is a mapping of preset names to their props types. `TOutput` is the return type of `resolve` (defaults to `ReactNode`). `TContext` is an optional context type passed to `resolve` (defaults to `void`). Returns a `PartFactory<TPresetMap, TOutput, TContext>`.
+Defines a part type within the assembly. `TPresetMap` is a mapping of preset names to their props types. `TOutput` is the return type of `resolve` (defaults to `ReactNode`). `TContext` is an optional context type passed to `resolve` and `resolveSkeleton` (defaults to `void`). `TSkeleton` is the return type of `resolveSkeleton` — the loading-placeholder vocabulary for this part (defaults to `never`, meaning no skeleton resolver is registered). Returns a `PartFactory<TPresetMap, TOutput, TContext, TSkeleton>`.
 
 ```typescript
 interface ColumnPresets {

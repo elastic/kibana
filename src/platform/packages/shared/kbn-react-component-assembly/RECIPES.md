@@ -478,7 +478,7 @@ export interface ColumnContext {
 
 ### Wire it into `definePart`
 
-Specify all three generics: preset map, output type, and context type.
+Specify the generics: preset map, output type, and context type. A fourth generic, `TSkeleton`, is available for consumers that also want typed `resolveSkeleton` support — pass your placeholder descriptor type as `TSkeleton` so the `skeleton` callback and `resolveSkeleton` return type are both constrained to it rather than defaulting to `never`.
 
 ```typescript
 // column/part.ts
