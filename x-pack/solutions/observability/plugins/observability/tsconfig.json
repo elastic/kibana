@@ -161,7 +161,8 @@
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
     "@kbn/core-spaces-common",
-    "@kbn/nightshift"
+    "@kbn/nightshift",
+    "@kbn/nightshift-investigations-plugin"
   ],
   "exclude": ["target/**/*"]
 }

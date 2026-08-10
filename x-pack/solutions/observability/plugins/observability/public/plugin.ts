@@ -83,19 +83,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-// TODO: replace with `import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public'`
-// once nightshift_investigations plugin has a package.json and is in kbn_references
-interface NightshiftInvestigationsPublicStart {
-  investigationsClient: {
-    fetch(
-      endpoint: 'POST /internal/nightshift/investigations',
-      options: {
-        params: { body: { subject: { type: string; id: string }; concurrency_key?: string; context?: Record<string, unknown> } };
-        signal: AbortSignal | null;
-      }
-    ): Promise<{ investigation_id: string }>;
-  };
-}
+import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
