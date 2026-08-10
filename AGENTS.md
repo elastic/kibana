@@ -81,11 +81,11 @@ Follow existing patterns in the target area first; below are common defaults.
 ### React / UI Conventions
 - Use functional components; type props explicitly.
 - Keep hooks at the top level; avoid conditional hooks.
-- Component preference: owning platform or solution module → `@kbn/ui-*` (`src/platform/kbn-ui`) → `@elastic/eui`. Compose existing components before building new ones.
-- Put new UI in its owning area. Reserve `@kbn/ui-*` for low-dependency UI shared across areas.
-- For complex reusable UI, prefer a static package with tests and, where available, Storybook over adding it to a plugin.
-- When no component in this order meets a requirement, flag the gap and recommend discussing it with product and design before implementing a workaround. Treat CSS overrides as a last resort.
-- Style with Emotion (`@emotion/react`) and EUI design tokens. Reserve inline styles for dynamic values such as animation or positioning.
+- Prefer existing components in this order: the owning platform or solution area, `@kbn/ui-*` under `src/platform/kbn-ui`, then `@elastic/eui`. Use supported props and composition before creating a component.
+- Keep new UI in its owning area by default. Use `@kbn/ui-*` only for low-dependency UI shared across areas.
+- For new complex UI shared across areas, prefer a static package with tests and Storybook when available instead of expanding a plugin.
+- If existing local, `@kbn/ui-*`, and EUI components cannot meet a requirement through supported props or composition, flag the gap and recommend discussing it with product and design before implementing a workaround.
+- Style with Emotion (`@emotion/react`) and EUI design tokens. Use CSS overrides only as a last resort, and inline styles only for dynamic runtime values such as animation or positioning.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
