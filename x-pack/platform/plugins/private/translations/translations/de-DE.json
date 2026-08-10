@@ -55068,7 +55068,6 @@
     "xpack.streams.fromBuilderItem.removeLabel": "Entfernen",
     "xpack.streams.getAvailableProcessors.strong.arithmeticOrLogicalExpressionsLabel": "arithmetische oder logische Ausdrücke",
     "xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel": "Ziehgriff",
-    "xpack.streams.ilmPhaseSelect.buttonAriaLabel": "Schaltfläche ILM-Phase hinzufügen",
     "xpack.streams.ilmPhaseSelect.popoverAriaLabel": "ILM-Phasen-Popover hinzufügen",
     "xpack.streams.importContentPackFlyout.cancel": "Abbrechen",
     "xpack.streams.importContentPackFlyout.closeIcon": "Schließen",

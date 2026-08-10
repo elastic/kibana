@@ -55246,7 +55246,6 @@
     "xpack.streams.fromBuilderItem.removeLabel": "削除",
     "xpack.streams.getAvailableProcessors.strong.arithmeticOrLogicalExpressionsLabel": "算術的または論理的な式",
     "xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel": "ハンドルをドラッグ",
-    "xpack.streams.ilmPhaseSelect.buttonAriaLabel": "ILMフェーズボタンを追加",
     "xpack.streams.ilmPhaseSelect.popoverAriaLabel": "ILMフェーズポップオーバーを追加",
     "xpack.streams.importContentPackFlyout.cancel": "キャンセル",
     "xpack.streams.importContentPackFlyout.closeIcon": "閉じる",
