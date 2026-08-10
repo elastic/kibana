@@ -94,6 +94,11 @@ const entityStoreDsl = (entityIndex: string) =>
  * Intercepts the entity store v2 entities list API so that host/user risk score
  * tables render with stub data in environments where the entity store index is
  * not populated (e.g. CI inspect-button tests).
+ *
+ * Coverage note: `inspect.dsl` always echoes the hardcoded `entityIndex`, so
+ * the table-case assertions on `INSPECT_MODAL_INDEX_PATTERN` are circular and
+ * cannot detect a wrong-index regression. The KPI lens-visualization cases
+ * (which use the search strategy, not this intercept) are unaffected.
  */
 export const mockEntityStoreRiskScores = () => {
   const entityIndex = '.entities.v2.latest.security_default-00001';
