@@ -8,8 +8,8 @@
  */
 
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
-import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 import { KibanaActionStepImpl } from './kibana_action_step';
+import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -58,7 +58,14 @@ describe('KibanaActionStepImpl', () => {
   });
 
   it('preserves JSON strings and caller content type', async () => {
-    step = createStep({ request: { method: 'POST', path: '/api/test', body: '{"x":1}', headers: { 'Content-Type': 'text/plain' } } });
+    step = createStep({
+      request: {
+        method: 'POST',
+        path: '/api/test',
+        body: '{"x":1}',
+        headers: { 'Content-Type': 'text/plain' },
+      },
+    });
     await (step as any)._run();
     expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
       expect.objectContaining({ body: '{"x":1}', headers: { 'Content-Type': 'text/plain' } })
@@ -74,9 +81,7 @@ describe('KibanaActionStepImpl', () => {
   });
 
   it('converts adapter response-size failures to the step error', async () => {
-    contextManager.callKibanaApi.mockRejectedValue(
-      new CallKibanaApiResponseTooLargeError(1000)
-    );
+    contextManager.callKibanaApi.mockRejectedValue(new CallKibanaApiResponseTooLargeError(1000));
     step = createStep({ request: { method: 'GET', path: '/api/test' } });
     const result = await (step as any)._run();
     expect(result.error).toBeDefined();

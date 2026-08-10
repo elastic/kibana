@@ -55,7 +55,12 @@ export class CallKibanaApiResponseTooLargeError extends Error {
  * Public input for `callKibanaApi`. Kept intentionally minimal: the transport (Core's HTTP
  * self client) is an implementation detail the caller-visible API does not expose.
  */
-export type BufferedRawBody = FormData | Blob | URLSearchParams | ArrayBuffer | ArrayBufferView;
+export type BufferedRawBody =
+  | FormData
+  | Blob
+  | URLSearchParams
+  | ArrayBuffer
+  | ArrayBufferView<ArrayBuffer>;
 
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -130,8 +135,10 @@ const stripReservedHeaders = (
   if (!headers) return {};
   const out: Record<string, string> = {};
   for (const [name, value] of Object.entries(headers)) {
-    if (name.toLowerCase() === 'content-type' && isFormData) continue;
-    if (!RESERVED_HEADER_NAMES.has(name.toLowerCase())) {
+    const reserved =
+      RESERVED_HEADER_NAMES.has(name.toLowerCase()) ||
+      (isFormData && name.toLowerCase() === 'content-type');
+    if (!reserved) {
       out[name] = value;
     }
   }

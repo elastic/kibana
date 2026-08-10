@@ -11,14 +11,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
-import {
-  CallKibanaApiResponseTooLargeError,
-  type BufferedRawBody,
-} from '../lib/call_kibana_api';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { type BufferedRawBody, CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -69,7 +66,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       ...httpParams
     } = stepWith;
     if (use_server_info && use_localhost) {
-      throw new Error('Cannot set both use_server_info and use_localhost — they are mutually exclusive.');
+      throw new Error(
+        'Cannot set both use_server_info and use_localhost — they are mutually exclusive.'
+      );
     }
 
     try {
@@ -153,13 +152,18 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       const { form_data, method = 'POST', path, query, headers } = cleanParams;
       requestConfig = { method, path, query, headers, rawBody: this.buildFormData(form_data) };
     } else {
-      const { method, path, body, query, headers } = buildKibanaRequest(stepType, cleanParams, spaceId);
+      const { method, path, body, query, headers } = buildKibanaRequest(
+        stepType,
+        cleanParams,
+        spaceId
+      );
       const generatedSpacePrefix = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
       requestConfig = {
         method,
-        path: generatedSpacePrefix && path.startsWith(`${generatedSpacePrefix}/`)
-          ? path.slice(generatedSpacePrefix.length)
-          : path,
+        path:
+          generatedSpacePrefix && path.startsWith(`${generatedSpacePrefix}/`)
+            ? path.slice(generatedSpacePrefix.length)
+            : path,
         body,
         query,
         headers,
@@ -168,7 +172,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
     const normalizedMethod = requestConfig.method?.toUpperCase();
     if (!normalizedMethod || !(KibanaHttpMethods as readonly string[]).includes(normalizedMethod)) {
-      throw new Error(`Invalid HTTP method "${requestConfig.method}". Valid values: ${KibanaHttpMethods.join(', ')}`);
+      throw new Error(
+        `Invalid HTTP method "${requestConfig.method}". Valid values: ${KibanaHttpMethods.join(
+          ', '
+        )}`
+      );
     }
 
     const contextManager = this.stepExecutionRuntime.contextManager;
@@ -191,7 +199,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       throw error;
     }
 
-    if (debug && result.body && typeof result.body === 'object' && !Buffer.isBuffer(result.body) && !Array.isArray(result.body)) {
+    if (
+      debug &&
+      result.body &&
+      typeof result.body === 'object' &&
+      !Buffer.isBuffer(result.body) &&
+      !Array.isArray(result.body)
+    ) {
       return { ...result.body, _debug: { method: normalizedMethod } };
     }
     return result.body;
@@ -201,7 +215,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     const fd = new FormData();
     for (const [fieldName, spec] of Object.entries(formData)) {
       if (spec.filename !== undefined) {
-        fd.append(fieldName, new Blob([spec.content], { type: spec.content_type ?? 'application/octet-stream' }), spec.filename);
+        fd.append(
+          fieldName,
+          new Blob([spec.content], { type: spec.content_type ?? 'application/octet-stream' }),
+          spec.filename
+        );
       } else if (spec.content_type !== undefined) {
         fd.append(fieldName, new Blob([spec.content], { type: spec.content_type }));
       } else {
@@ -210,6 +228,4 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     }
     return fd;
   }
-
-
 }

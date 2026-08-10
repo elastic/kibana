@@ -107,7 +107,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const fetchInit: SelfFetchInit = {
         signal,
         redirect: 'error',
-        dispatcher: this.dispatcherProvider.get(new URL(request.url), this.getEffectiveTarget(options.target)),
+        dispatcher: this.dispatcherProvider.get(
+          new URL(request.url),
+          this.getEffectiveTarget(options.target)
+        ),
       };
       const response = await fetch(request, fetchInit);
 
@@ -177,7 +180,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     ) {
       throw new Error('Invalid self HTTP rawBody, only buffered body types are supported.');
     }
-    const body = options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
+    const body =
+      options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
 
     return new Request(url, {
       method,

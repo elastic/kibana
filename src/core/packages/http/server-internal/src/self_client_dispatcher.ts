@@ -19,7 +19,10 @@ interface SelfHttpDispatcherProviderParams {
 }
 
 export class SelfHttpDispatcherProvider {
-  private readonly dispatchers = new Map<'local' | 'public', { agent?: Agent; trustKey?: string }>();
+  private readonly dispatchers = new Map<
+    'local' | 'public',
+    { agent?: Agent; trustKey?: string }
+  >();
 
   constructor(private readonly params: SelfHttpDispatcherProviderParams) {}
 

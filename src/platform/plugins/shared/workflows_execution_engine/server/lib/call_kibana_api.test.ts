@@ -224,7 +224,12 @@ describe('callKibanaApi', () => {
         { method: 'GET', path: '/s/current/../victim' }
       )
     ).rejects.toThrow('Invalid Kibana API path');
-    for (const path of ['/api/.%2e/victim', '/api/%2e./victim', '/api/%2e%2e/victim', '/api/../victim']) {
+    for (const path of [
+      '/api/.%2e/victim',
+      '/api/%2e./victim',
+      '/api/%2e%2e/victim',
+      '/api/../victim',
+    ]) {
       await expect(
         callKibanaApi(
           { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
@@ -493,7 +498,12 @@ describe('callKibanaApi', () => {
 
     await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
-      { method: 'POST', path: '/api/foo', body: '{"a":1}', headers: { 'Content-Type': 'text/plain' } }
+      {
+        method: 'POST',
+        path: '/api/foo',
+        body: '{"a":1}',
+        headers: { 'Content-Type': 'text/plain' },
+      }
     );
     expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
   });

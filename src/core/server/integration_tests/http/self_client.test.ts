@@ -13,7 +13,10 @@
 
 import { restoreSelfClientTestEnvironment } from './self_client_test_environment';
 import { readFileSync } from 'node:fs';
-import { ReadableStream as NodeReadableStream, TransformStream as NodeTransformStream } from 'node:stream/web';
+import {
+  ReadableStream as NodeReadableStream,
+  TransformStream as NodeTransformStream,
+} from 'node:stream/web';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
@@ -168,10 +171,12 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
       const form = new FormData();
       form.append('message', 'hello');
       try {
-        const response = await started.httpStart!.selfClient.asScoped(req).fetch<{ body: string; contentType: string }>(
-          '/self/form_target',
-          { method: 'POST', rawBody: form }
-        );
+        const response = await started
+          .httpStart!.selfClient.asScoped(req)
+          .fetch<{ body: string; contentType: string }>('/self/form_target', {
+            method: 'POST',
+            rawBody: form,
+          });
         return res.ok({ body: response });
       } catch (error) {
         const cause = (error as Error & { cause?: Error }).cause;
@@ -188,7 +193,7 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
       validate: { body: schema.any() },
     },
     (_context, req, res) =>
-      res.ok({ body: { received: req.body, contentType: req.headers['content-type'] } }),
+      res.ok({ body: { received: req.body, contentType: req.headers['content-type'] } })
   );
 
   router.get(
