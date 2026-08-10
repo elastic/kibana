@@ -2299,7 +2299,7 @@ describe('generateOtelcolConfig', () => {
     it('should handle malformed YAML without throwing', () => {
       const outputWithBadYaml: Output = {
         ...defaultOutput,
-        otel_exporter_config_yaml: ': invalid yaml',
+        otel_exporter_config_yaml: '{ unclosed',
       };
 
       expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).not.toThrow();
@@ -2423,7 +2423,7 @@ describe('generateOtelcolConfig', () => {
     it('should throw when config_yaml contains malformed YAML', () => {
       const outputWithBadYaml: Output = {
         ...defaultOutput,
-        config_yaml: ': invalid yaml',
+        config_yaml: '{ unclosed',
       };
 
       expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).toThrow();

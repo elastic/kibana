@@ -49,8 +49,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/yaml_rule_form.test.tsx',
   'x-pack/platform/plugins/shared/agent_builder/server/services/plugins/utils/parsing/parse_skill_file.ts',
-  'x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_list_page/components/add_collector_flyout.tsx',
-  'x-pack/platform/plugins/shared/fleet/server/services/agent_policies/otel_collector.ts',
   'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
