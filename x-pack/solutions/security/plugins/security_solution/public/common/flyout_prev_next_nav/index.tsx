@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/e
 import { PREVIOUS_BUTTON_LABEL, NEXT_BUTTON_LABEL } from './translation';
 import type { FlyoutPrevNextNavigation } from './types';
 
-export * from './types';
+export type * from './types';
 export * from './use_flyout_prev_next_nav';
 
 export interface FlyoutPrevNextNavProps {
