@@ -122,6 +122,10 @@ describe('createWorkflowEvidenceEvaluator', () => {
     const result = await evaluator.evaluate(params);
 
     expect(result.metadata?.evidenceState).toBe('incomplete');
-    expect(result.score).toBeUndefined();
+    // `null`, not `undefined`: the aggregate drops it either way, but only
+    // `null` + a label distinguishes incomplete evidence from an evaluator
+    // that never ran.
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
   });
 });

@@ -11,7 +11,11 @@ import type {
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
 
-export const TRAJECTORY_EVALUATOR_NAME = 'trajectory';
+// Distinct from the framework's `trajectory` evaluator, which computes a
+// different metric (0.5 x LCS-order + 0.5 x set-coverage) under that name.
+// The matrix report reads score docs back by evaluator name, so the two must
+// not collide.
+export const TRAJECTORY_EVALUATOR_NAME = 'StrictTrajectory';
 
 export const createStrictTrajectoryEvaluator = ({
   extractToolCalls,

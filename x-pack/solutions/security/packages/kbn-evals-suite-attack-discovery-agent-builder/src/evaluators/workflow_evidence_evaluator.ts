@@ -44,7 +44,11 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
     const matchesExpectedWorkflow = stagesMatch && retrievedCountMatches && passedCountMatches;
 
     return {
-      score: hasCompleteWorkflowEvidence ? Number(matchesExpectedWorkflow) : undefined,
+      // `null` (not `undefined`) so the aggregate drops it, and a label so the
+      // report can tell incomplete evidence from an evaluator that never ran.
+      ...(hasCompleteWorkflowEvidence
+        ? { score: Number(matchesExpectedWorkflow) }
+        : { score: null, label: 'N/A' }),
       metadata: {
         evidenceState: hasCompleteWorkflowEvidence ? 'complete' : 'incomplete',
         stages,
