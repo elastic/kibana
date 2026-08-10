@@ -16,6 +16,8 @@ import { SecurityAgentBuilderAttachments } from '../../../../../common/constants
 import type { AlertTableContextMenuItem } from '../types';
 import * as i18n from '../../../../agent_builder/components/translations';
 
+export const ADD_TO_CHAT_ACTION_ID = 'add-to-chat-action';
+
 export interface UseAddToChatActionParams {
   /**
    * ECS row data as field/value pairs (already available in alert_context_menu).
@@ -70,6 +72,7 @@ export const useAddToChatAction = ({
 
     return [
       {
+        key: ADD_TO_CHAT_ACTION_ID,
         name: i18n.ADD_TO_CHAT,
         'data-test-subj': 'add-to-chat-action',
         disabled: !hasValidAgentBuilderLicense,

@@ -11,6 +11,7 @@ import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { LensProps } from '@kbn/cases-plugin/public/types';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
@@ -41,6 +42,15 @@ export const INSPECT_ACTION: VisualizationContextMenuActions[] = [
 export const VISUALIZATION_CONTEXT_MENU_TRIGGER: Trigger = {
   id: 'VISUALIZATION_CONTEXT_MENU_TRIGGER',
 };
+
+const ADD_TO_CASE_GROUP = [
+  {
+    id: 'addToCase',
+    getDisplayName: () => ADD_TO_CASE,
+    getIconType: () => 'casesApp' as const,
+    order: 3,
+  },
+];
 
 const ACTION_DEFINITION: Record<
   VisualizationContextMenuActions,
@@ -137,6 +147,9 @@ export const useActions = ({
   });
 
   const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({ attributes });
+  const groupCaseActions =
+    withActions.includes(VisualizationContextMenuActions.addToNewCase) &&
+    withActions.includes(VisualizationContextMenuActions.addToExistingCase);
 
   const allActions: Action[] = useMemo(
     () =>
@@ -151,6 +164,7 @@ export const useActions = ({
         }),
         createAction({
           ...ACTION_DEFINITION[VisualizationContextMenuActions.addToNewCase],
+          grouping: groupCaseActions ? ADD_TO_CASE_GROUP : undefined,
           execute: async () => {
             onAddToNewCaseClicked();
             topValuesPopover.closePopover();
@@ -161,6 +175,7 @@ export const useActions = ({
         }),
         createAction({
           ...ACTION_DEFINITION[VisualizationContextMenuActions.addToExistingCase],
+          grouping: groupCaseActions ? ADD_TO_CASE_GROUP : undefined,
           execute: async () => {
             onAddToExistingCaseClicked();
           },
@@ -200,6 +215,7 @@ export const useActions = ({
       canUseEditor,
       disableVisualizations,
       extraActions,
+      groupCaseActions,
       inspectActionProps,
       isAddToExistingCaseDisabled,
       isAddToNewCaseDisabled,
