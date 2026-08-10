@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+jest.mock('node:dns/promises', () => ({
+  resolveSrv: jest.fn(),
+}));
+
+import { resolveSrv } from 'node:dns/promises';
 import { createConnectorNetworkSettings } from './create_connector_network_settings';
 import { AllowlistDeniedError } from './connector_network_errors';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+
+const mockResolveSrv = resolveSrv as jest.Mock;
 
 describe('createConnectorNetworkSettings', () => {
   const mockConfigUtils = {
@@ -32,6 +39,7 @@ describe('createConnectorNetworkSettings', () => {
       'getProxySettings',
       'getResponseSettings',
       'getSslSettings',
+      'resolveSrvHosts',
     ]);
   });
 
@@ -77,6 +85,33 @@ describe('createConnectorNetworkSettings', () => {
     expect(() => network.ensureHostnameAllowed('denied.example.com')).toThrow(
       'hostname not allowed'
     );
+  });
+
+  it('resolves SRV records for the default (mongodb) service name', async () => {
+    const records = [{ name: 'shard1.example.com', port: 27017, priority: 0, weight: 0 }];
+    mockResolveSrv.mockResolvedValue(records);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
+
+    const result = await network.resolveSrvHosts('cluster0.example.com');
+
+    expect(mockResolveSrv).toHaveBeenCalledWith('_mongodb._tcp.cluster0.example.com');
+    expect(result).toBe(records);
+  });
+
+  it('resolves SRV records for a custom service name', async () => {
+    mockResolveSrv.mockResolvedValue([]);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
+
+    await network.resolveSrvHosts('cluster0.example.com', 'customname');
+
+    expect(mockResolveSrv).toHaveBeenCalledWith('_customname._tcp.cluster0.example.com');
+  });
+
+  it('propagates SRV resolution failures', async () => {
+    mockResolveSrv.mockRejectedValue(new Error('ENOTFOUND'));
+    const network = createConnectorNetworkSettings(mockConfigUtils);
+
+    await expect(network.resolveSrvHosts('cluster0.example.com')).rejects.toThrow('ENOTFOUND');
   });
 
   it('delegates getSslSettings and re-reads current settings', () => {

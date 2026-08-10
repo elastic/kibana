@@ -11,8 +11,9 @@
  * MongoDB Connector
  *
  * Provides read-only access to MongoDB collections using the native MongoDB
- * driver. Supports any MongoDB deployment reachable via a connection URI:
- * Atlas (mongodb+srv://...), self-hosted replica sets, or standalone instances.
+ * driver. Supports any MongoDB deployment reachable via a connection URI,
+ * using mongodb:// or mongodb+srv://: replica sets, sharded clusters, or
+ * standalone instances.
  *
  * Because MongoDB speaks a binary wire protocol (not HTTP), this connector uses
  * the pooled `mongodb` client type (RO-599, kibana#275613) via `ctx.getClient('mongodb')`
@@ -366,8 +367,9 @@ export const MongoDBConnector: ConnectorSpec = {
   skill: [
     '## MongoDB Connector',
     '',
-    'Provides access to MongoDB collections. Supports Atlas clusters',
-    '(mongodb+srv://), self-hosted replica sets, and standalone instances.',
+    'Provides access to MongoDB collections. Supports any deployment reachable',
+    'via a mongodb:// or mongodb+srv:// connection URI: replica sets, sharded',
+    'clusters, and standalone instances.',
     '',
     '### Discovery pattern',
     'Always start with discovery before querying:',

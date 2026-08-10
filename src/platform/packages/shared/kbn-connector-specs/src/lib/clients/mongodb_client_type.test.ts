@@ -40,6 +40,7 @@ const fakeLogger = {
 let mockConnect: jest.Mock;
 let mockClose: jest.Mock;
 let mockClientInstance: { connect: jest.Mock; close: jest.Mock };
+let mockResolveSrvHosts: jest.Mock;
 
 const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext => ({
   logger: fakeLogger,
@@ -47,6 +48,7 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
   networkSettings: {
     ensureUriAllowed: jest.fn(),
     ensureHostnameAllowed: jest.fn(),
+    resolveSrvHosts: mockResolveSrvHosts,
     getSslSettings: jest.fn(),
     getProxySettings: jest.fn(),
     getCustomHostSettings: jest.fn(),
@@ -77,6 +79,10 @@ describe('mongodbClientType', () => {
     mockClose = jest.fn().mockResolvedValue(undefined);
     mockClientInstance = { connect: mockConnect, close: mockClose };
     MockMongoClient.mockImplementation(() => mockClientInstance);
+    mockResolveSrvHosts = jest.fn().mockResolvedValue([
+      { name: 'shard1.example.com', port: 27017 },
+      { name: 'shard2.example.com', port: 27017 },
+    ]);
   });
 
   describe('build', () => {
@@ -105,6 +111,62 @@ describe('mongodbClientType', () => {
         'mongodb+srv://cluster0.example.com/mydb',
         expect.objectContaining({})
       );
+    });
+
+    it('resolves and validates the actual SRV target hosts, not just the seed name', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
+      await mongodbClientType.build(ctx);
+
+      expect(mockResolveSrvHosts).toHaveBeenCalledWith('cluster0.example.com', 'mongodb');
+      expect(ctx.networkSettings.ensureHostnameAllowed).toHaveBeenCalledWith(
+        'cluster0.example.com'
+      );
+      expect(ctx.networkSettings.ensureHostnameAllowed).toHaveBeenCalledWith('shard1.example.com');
+      expect(ctx.networkSettings.ensureHostnameAllowed).toHaveBeenCalledWith('shard2.example.com');
+      expect(ctx.networkSettings.ensureHostnameAllowed).toHaveBeenCalledTimes(3);
+    });
+
+    it('respects a custom srvServiceName when resolving SRV records', async () => {
+      const ctx = makeBuildContext({
+        config: { uri: 'mongodb+srv://cluster0.example.com/mydb?srvServiceName=customname' },
+      });
+      await mongodbClientType.build(ctx);
+
+      expect(mockResolveSrvHosts).toHaveBeenCalledWith('cluster0.example.com', 'customname');
+    });
+
+    it('rejects before creating a client when an SRV-resolved host is denied', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
+      (ctx.networkSettings.ensureHostnameAllowed as jest.Mock).mockImplementation(
+        (hostname: string) => {
+          if (hostname === 'shard2.example.com') {
+            throw new Error('host "shard2.example.com" is not in the allowedHosts list');
+          }
+        }
+      );
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow('is not in the allowedHosts list');
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
+    it('throws if SRV resolution fails', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
+      mockResolveSrvHosts.mockRejectedValue(new Error('ENOTFOUND'));
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'failed to resolve SRV records for "cluster0.example.com"'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
+    it('throws if SRV resolution returns no records', async () => {
+      const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
+      mockResolveSrvHosts.mockResolvedValue([]);
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'no SRV records found for "cluster0.example.com"'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
     it('validates every host in a multi-host (replica set) URI', async () => {

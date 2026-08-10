@@ -9,7 +9,7 @@
 
 import type { MongoClient } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
-import type { ClientTypeSpec } from './client_type_spec';
+import type { BuildContext, ClientTypeSpec } from './client_type_spec';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
 // Dynamic imports keep the mongodb driver and mongodb-connection-string-url (and its
@@ -26,6 +26,45 @@ const loadConnectionString = async (): Promise<typeof ConnectionStringType> => {
   return ConnectionString;
 };
 
+// mongodb:// URIs may list multiple hosts (replica sets, sharded clusters) and the driver
+// connects to all of them, so every one must clear the network guard. mongodb+srv:// URIs
+// list only a single DNS seed name — the driver itself resolves the real target hosts from
+// `_<srvServiceName>._tcp.<seed>` SRV records at connect() time. Validating the seed name
+// alone would let an SRV record repoint the connection at any host, bypassing the allowlist
+// entirely, so the SRV records are resolved here and every target they name is checked too.
+const ensureHostsAllowed = async (
+  ctx: BuildContext,
+  connectionString: ConnectionStringType
+): Promise<void> => {
+  if (!connectionString.isSRV) {
+    for (const hostPort of connectionString.hosts) {
+      const { hostname } = new URL(`http://${hostPort}`);
+      ctx.networkSettings.ensureHostnameAllowed(hostname);
+    }
+    return;
+  }
+
+  const [seedHost] = connectionString.hosts;
+  const { hostname: seedHostname } = new URL(`http://${seedHost}`);
+  ctx.networkSettings.ensureHostnameAllowed(seedHostname);
+
+  const srvServiceName = connectionString.searchParams.get('srvServiceName') ?? 'mongodb';
+  let records;
+  try {
+    records = await ctx.networkSettings.resolveSrvHosts(seedHostname, srvServiceName);
+  } catch (err) {
+    throw new Error(
+      `failed to resolve SRV records for "${seedHostname}": ${(err as Error).message}`
+    );
+  }
+  if (records.length === 0) {
+    throw new Error(`no SRV records found for "${seedHostname}"`);
+  }
+  for (const record of records) {
+    ctx.networkSettings.ensureHostnameAllowed(record.name);
+  }
+};
+
 export const mongodbClientType: ClientTypeSpec<MongoClient> = {
   id: 'mongodb',
 
@@ -38,12 +77,7 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
     const ConnectionString = await loadConnectionString();
     const connectionString = new ConnectionString(uri);
 
-    // mongodb:// URIs may list multiple hosts (replica sets, sharded clusters); the
-    // driver will connect to all of them, so every one must clear the network guard.
-    for (const hostPort of connectionString.hosts) {
-      const { hostname } = new URL(`http://${hostPort}`);
-      ctx.networkSettings.ensureHostnameAllowed(hostname);
-    }
+    await ensureHostsAllowed(ctx, connectionString);
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');

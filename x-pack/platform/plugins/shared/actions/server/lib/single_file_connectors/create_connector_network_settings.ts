@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { resolveSrv } from 'node:dns/promises';
 import type { ConnectorNetworkSettings } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { AllowlistDeniedError } from './connector_network_errors';
@@ -30,6 +31,7 @@ export const createConnectorNetworkSettings = (
       toAllowlistDeniedError(err);
     }
   },
+  resolveSrvHosts: (name, serviceName = 'mongodb') => resolveSrv(`_${serviceName}._tcp.${name}`),
   getSslSettings: () => configUtils.getSSLSettings(),
   getProxySettings: () => configUtils.getProxySettings(),
   getCustomHostSettings: (url) => configUtils.getCustomHostSettings(url),

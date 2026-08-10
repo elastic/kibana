@@ -20,15 +20,27 @@ export interface ConnectorResponseSettings {
  *
  * These are the same settings the axios path applies via `get_axios_instance`. The framework only
  * makes them reachable; each client type is responsible for applying them through its own
- * library's native options. The two `ensure*` methods are
- * the exception: they are checks rather than values, because the `allowedHosts` matching logic
- * lives in the Actions plugin and cannot be re-implemented in this package.
+ * library's native options. `ensure*` and `resolveSrvHosts` are the exception: they are checks
+ * (or, for `resolveSrvHosts`, a Node-builtin-backed lookup) rather than plain values, because the
+ * `allowedHosts` matching logic and DNS resolution live in the Actions plugin and cannot be
+ * re-implemented in this package — this package is isomorphic (`shared-common`) and may not
+ * import Node builtins, even dynamically.
  */
 export interface ConnectorNetworkSettings {
   /** Throws AllowlistDeniedError if the URL is not on xpack.actions.allowedHosts. */
   ensureUriAllowed(url: string): void;
   /** Throws AllowlistDeniedError if the hostname is not on xpack.actions.allowedHosts. */
   ensureHostnameAllowed(host: string): void;
+  /**
+   * Resolves `_<serviceName>._tcp.<name>` SRV records (serviceName defaults to `mongodb`, matching
+   * the MongoDB driver's default). Client types for DNS-seedlist schemes (e.g. `mongodb+srv://`)
+   * must resolve and validate the real target hosts through this — the seed name alone is not the
+   * host that gets connected to.
+   */
+  resolveSrvHosts(
+    name: string,
+    serviceName?: string
+  ): Promise<Array<{ name: string; port: number }>>;
   getSslSettings(): SSLSettings;
   getProxySettings(): ProxySettings | undefined;
   getCustomHostSettings(url: string): CustomHostSettings | undefined;

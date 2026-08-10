@@ -9,7 +9,7 @@ applies_to:
 
 # MongoDB connector [mongodb-action-type]
 
-The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. Use it to query documents, run aggregation pipelines, discover collection structure, and insert, update, or delete documents from workflows. AI agents can only use the read-only actions (find, aggregate, count, listCollections) — write actions (insertOne, updateOne, deleteOne) are workflow-only and never exposed to agents. It supports any MongoDB deployment reachable through a connection URI: Atlas clusters (`mongodb+srv://`), self-hosted replica sets, and standalone instances.
+The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. Use it to query documents, run aggregation pipelines, discover collection structure, and insert, update, or delete documents from workflows. AI agents can only use the read-only actions (find, aggregate, count, listCollections) — write actions (insertOne, updateOne, deleteOne) are workflow-only and never exposed to agents. It supports any MongoDB deployment reachable through a connection URI, using either the `mongodb://` or `mongodb+srv://` (DNS seedlist) scheme: replica sets, sharded clusters, and standalone instances.
 
 ## Create connectors in {{kib}} [define-mongodb-ui]
 
@@ -90,20 +90,15 @@ Delete one
 
 ## Connector networking configuration [mongodb-connector-networking-configuration]
 
-The MongoDB connector talks to MongoDB over its native wire protocol, not HTTP. Even so, every host in the configured connection URI (including every host in a multi-host replica-set or sharded-cluster URI) is checked against [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) before connecting, the same allowlist enforced for HTTP-based connectors.
+The MongoDB connector talks to MongoDB over its native wire protocol, not HTTP. Even so, every host is checked against [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) before connecting, the same allowlist enforced for HTTP-based connectors. For a `mongodb://` URI, that means every host listed (including every host in a multi-host replica-set or sharded-cluster URI). For a `mongodb+srv://` URI, the connector resolves the DNS SRV records itself and checks every resolved target host, not just the seed hostname in the URI.
 
 ## Get connection credentials [mongodb-api-credentials]
 
 The MongoDB connector authenticates with a separate connection URI (host, port, and optional database path — no credentials) plus a username and password.
 
-For **Atlas clusters**:
-
-1. In [MongoDB Atlas](https://cloud.mongodb.com/), go to your project's **Database → Connect** page.
-2. Select **Drivers** and copy the connection string. It starts with `mongodb+srv://`.
-3. Remove `<username>:<password>@` from the string — credentials go in the separate Username and Password fields, not the URI.
-4. In {{kib}}, create a MongoDB connector, and enter the connection URI, username, and password of a database user with the access your workflows and agents need.
-
-For **self-hosted deployments**, use a `mongodb://` connection URI with the host and port (and optionally the database path) for your replica set or standalone instance, and provide credentials through the Username and Password fields.
+1. Get the connection URI for your deployment from your MongoDB provider or admin. It uses either the `mongodb://` scheme (host and port, or a comma-separated host list for a replica set or sharded cluster) or the `mongodb+srv://` scheme (a single DNS seed name, for providers that publish SRV records — for example [MongoDB Atlas](https://cloud.mongodb.com/)'s **Database → Connect → Drivers** page).
+2. If the connection string includes `<username>:<password>@`, remove it — credentials go in the separate Username and Password fields, not the URI.
+3. In {{kib}}, create a MongoDB connector, and enter the connection URI, username, and password of a database user with the access your workflows and agents need.
 
 ::::{note}
 The username and password are stored as encrypted secrets and never exposed in Kibana UI or logs. Agent-facing tool actions (find, aggregate, count, listCollections) are read-only; insertOne, updateOne, and deleteOne are workflow-only and are never exposed to agents.
