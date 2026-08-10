@@ -17,6 +17,12 @@ AI generates valid ES|QL detection rules for coverage gaps, with a low enough fa
 | Kill: rejection rate | >50% | unratified |
 | Kill: auto-execution without approval | any instance | hard rule |
 
+## Threshold tradeoffs
+
+**Ratify early** — clear pass/fail line before Pilot, easier stakeholder buy-in. Risk: committing to a number before knowing if it's achievable creates pressure to massage the eval rather than improve the worker.
+
+**Leave unratified** — run honest evals first, negotiate the threshold against real data. Risk: without a pre-agreed number, goalposts can shift after results come in. The playbook allows unratified for MVP slice but requires sign-off before a Pilot promotion claim.
+
 ## Open questions before Pilot
 
 - **Counterfactual** — what's the approval rate for manually-created rules? Sets the bar for whether 70% is good or just acceptable.

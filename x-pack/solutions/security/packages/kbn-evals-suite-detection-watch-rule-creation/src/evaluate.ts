@@ -5,4 +5,21 @@
  * 2.0.
  */
 
-export { evaluate, tags, selectEvaluators } from '@kbn/evals';
+import { evaluate as base } from '@kbn/evals';
+import { RuleCreationClient } from './rule_creation_client';
+
+// Extend the base evaluate fixture with our client.
+// Playwright constructs RuleCreationClient once per worker and passes it
+// into the spec via `async ({ ruleCreationClient }) => { ... }`.
+export const evaluate = base.extend<{}, { ruleCreationClient: RuleCreationClient }>({
+  ruleCreationClient: [
+    async ({ fetch, log }, use) => {
+      const client = new RuleCreationClient(fetch, log);
+      await use(client);
+      await client.cancelPending();
+    },
+    { scope: 'worker' },
+  ],
+});
+
+export { tags } from '@kbn/evals';

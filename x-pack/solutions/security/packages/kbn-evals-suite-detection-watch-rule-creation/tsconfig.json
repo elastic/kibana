@@ -13,6 +13,7 @@
     "@kbn/agent-builder-common",
     "@kbn/workflows",
     "@kbn/core",
+    "@kbn/zod",
     "@kbn/gen-ai-functional-testing"
   ]
 }
