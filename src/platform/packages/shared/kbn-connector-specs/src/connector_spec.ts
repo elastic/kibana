@@ -26,6 +26,7 @@ import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -75,6 +76,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -136,6 +138,7 @@ export interface AuthTypeDefinition {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -232,6 +235,17 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
@@ -265,16 +279,10 @@ export interface Transformations {
 export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /**
- * Success = return data; failure = throw (mapped to error by the executor).
- *
- * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
- * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
- * return the legacy `{ ok, message }` shape. Once every handler follows the
- * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
  */
-export type ConnectorTestHandlerResult =
-  | Record<string, unknown>
-  | { ok: boolean; message?: string };
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
 
 export interface ConnectorTest {
   /**
@@ -283,8 +291,8 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Flag to opt-in for testing */
-  enabled?: boolean;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  enabled: boolean;
 }
 
 // ============================================================================
@@ -327,7 +335,7 @@ export interface ConnectorSpec {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
 
   transformations?: Transformations;
 

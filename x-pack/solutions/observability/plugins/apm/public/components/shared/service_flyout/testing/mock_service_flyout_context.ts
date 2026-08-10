@@ -29,6 +29,14 @@ export function createMockServiceFlyoutContext(
       name: 'opbeans-java',
       agentName: 'java',
     },
+    capabilities: {
+      loading: false,
+      error: undefined,
+      schema: 'ecs' as const,
+      header: { serviceNameLink: true, badges: true },
+      overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+      footer: { alerts: true, slos: true },
+    },
     filters: {
       environment: 'production' as const,
       setEnvironment: jest.fn(),
@@ -41,5 +49,5 @@ export function createMockServiceFlyoutContext(
       setTransactionType: jest.fn(),
     },
     ...overrides,
-  };
+  } as ServiceFlyoutContextValue;
 }
