@@ -20,8 +20,12 @@ export class GlobalSearchProvidersPlugin
     { getStartServices }: CoreSetup<{}, {}>,
     { globalSearch }: GlobalSearchProvidersPluginSetupDeps
   ) {
-    const applicationPromise = getStartServices().then(([core]) => core.application);
-    globalSearch.registerResultProvider(createApplicationResultProvider(applicationPromise));
+    const startServices = getStartServices();
+    const applicationPromise = startServices.then(([core]) => core.application);
+    const chromePromise = startServices.then(([core]) => core.chrome);
+    globalSearch.registerResultProvider(
+      createApplicationResultProvider(applicationPromise, chromePromise)
+    );
     return {};
   }
 

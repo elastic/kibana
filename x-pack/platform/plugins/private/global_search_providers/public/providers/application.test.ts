@@ -9,7 +9,7 @@ import { getAppResultsMock } from './application.test.mocks';
 
 import { EMPTY, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import type { ApplicationStart, ChromeStart, PublicAppInfo } from '@kbn/core/public';
 import { AppStatus } from '@kbn/core/public';
 import type {
   GlobalSearchProviderFindOptions,
@@ -51,8 +51,15 @@ const createAppMap = (apps: PublicAppInfo[]): Map<string, PublicAppInfo> => {
 const expectApp = (id: string) => expect.objectContaining({ id });
 const expectResult = expectApp;
 
+type ChromeForSearch = Pick<ChromeStart, 'getChromeStyle' | 'getDeepLinkNavPaths$'>;
+
 describe('applicationResultProvider', () => {
   let application: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let chrome: {
+    getChromeStyle: jest.Mock<'classic' | 'project', []>;
+    getDeepLinkNavPaths$: jest.Mock;
+  };
+  let chromePromise: Promise<ChromeForSearch>;
 
   const defaultOption: GlobalSearchProviderFindOptions = {
     preference: 'pref',
@@ -62,6 +69,11 @@ describe('applicationResultProvider', () => {
 
   beforeEach(() => {
     application = applicationServiceMock.createStartContract();
+    chrome = {
+      getChromeStyle: jest.fn().mockReturnValue('classic'),
+      getDeepLinkNavPaths$: jest.fn().mockReturnValue(of(null)),
+    };
+    chromePromise = Promise.resolve(chrome);
     getAppResultsMock.mockReturnValue([]);
   });
 
@@ -70,7 +82,7 @@ describe('applicationResultProvider', () => {
   });
 
   it('has the correct id', () => {
-    const provider = createApplicationResultProvider(Promise.resolve(application));
+    const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
     expect(provider.id).toBe('application');
   });
 
@@ -83,16 +95,36 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app3', title: 'App 3' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
 
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
       expect(getAppResultsMock).toHaveBeenCalledTimes(1);
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
-        expectApp('app1'),
-        expectApp('app2'),
-        expectApp('app3'),
+      expect(getAppResultsMock).toHaveBeenCalledWith(
+        'term',
+        [expectApp('app1'), expectApp('app2'), expectApp('app3')],
+        { chromeStyle: 'classic', deepLinkNavPaths: null }
+      );
+    });
+
+    it('passes project chrome style and deep link nav paths to `getAppResults`', async () => {
+      const deepLinkNavPaths = new Map([
+        [
+          'management:application_connections',
+          { titles: ['Admin and Settings', 'Access'] as const, order: 0 },
+        ],
       ]);
+      chrome.getChromeStyle.mockReturnValue('project');
+      chrome.getDeepLinkNavPaths$.mockReturnValue(of(deepLinkNavPaths));
+      application.applications$ = of(createAppMap([createApp({ id: 'app1', title: 'App 1' })]));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
+
+      await provider.find({ term: 'term' }, defaultOption).toPromise();
+
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')], {
+        chromeStyle: 'project',
+        deepLinkNavPaths,
+      });
     });
 
     it('calls `getAppResults` when filtering by type with `application` included', async () => {
@@ -102,17 +134,18 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app2', title: 'App 2' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
 
       await provider
         .find({ term: 'term', types: ['dashboard', 'application'] }, defaultOption)
         .toPromise();
 
       expect(getAppResultsMock).toHaveBeenCalledTimes(1);
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
-        expectApp('app1'),
-        expectApp('app2'),
-      ]);
+      expect(getAppResultsMock).toHaveBeenCalledWith(
+        'term',
+        [expectApp('app1'), expectApp('app2')],
+        { chromeStyle: 'classic', deepLinkNavPaths: null }
+      );
     });
 
     it('does not call `getAppResults` and return no results when filtering by type with `application` not included', async () => {
@@ -123,7 +156,7 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app3', title: 'App 3' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
 
       const results = await provider
         .find({ term: 'term', types: ['dashboard', 'map'] }, defaultOption)
@@ -141,7 +174,7 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app3', title: 'App 3' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
 
       const results = await provider
         .find({ term: 'term', tags: ['some-tag-id'] }, defaultOption)
@@ -158,10 +191,13 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'disabled', title: 'disabled', status: AppStatus.inaccessible }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')], {
+        chromeStyle: 'classic',
+        deepLinkNavPaths: null,
+      });
     });
 
     it('does not ignore apps with non-visible navlink', async () => {
@@ -176,14 +212,14 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'hidden', title: 'hidden', visibleIn: [] }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
-        expectApp('app1'),
-        expectApp('disabled'),
-        expectApp('hidden'),
-      ]);
+      expect(getAppResultsMock).toHaveBeenCalledWith(
+        'term',
+        [expectApp('app1'), expectApp('disabled'), expectApp('hidden')],
+        { chromeStyle: 'classic', deepLinkNavPaths: null }
+      );
     });
 
     it('ignores chromeless apps', async () => {
@@ -194,10 +230,13 @@ describe('applicationResultProvider', () => {
         ])
       );
 
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')], {
+        chromeStyle: 'classic',
+        deepLinkNavPaths: null,
+      });
     });
 
     it('sorts the results returned by `getAppResults`', async () => {
@@ -208,7 +247,7 @@ describe('applicationResultProvider', () => {
         createResult({ id: 'r75', score: 75 }),
       ]);
 
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
       const results = await provider.find({ term: 'term' }, defaultOption).toPromise();
 
       expect(results).toEqual([
@@ -227,7 +266,7 @@ describe('applicationResultProvider', () => {
         createResult({ id: 'r75', score: 75 }),
       ]);
 
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
 
       const options = {
         ...defaultOption,
@@ -239,7 +278,7 @@ describe('applicationResultProvider', () => {
     });
 
     it('only emits once, even if `application$` emits multiple times', () => {
-      getTestScheduler().run(({ hot, expectObservable }) => {
+      getTestScheduler().run(({ hot, cold, expectObservable }) => {
         const appMap = createAppMap([createApp({ id: 'app1', title: 'App 1' })]);
 
         application.applications$ = hot('--a---b', { a: appMap, b: appMap });
@@ -249,8 +288,19 @@ describe('applicationResultProvider', () => {
         const applicationPromise = hot('a', {
           a: application,
         }) as unknown as Promise<ApplicationStart>;
+        const chromeForSearch = {
+          getChromeStyle: () => 'classic' as const,
+          // cold so it emits when combineLatest subscribes (after chrome resolves)
+          getDeepLinkNavPaths$: () => cold('a', { a: null }),
+        };
+        const chromeForSearchPromise = hot('a', {
+          a: chromeForSearch,
+        }) as unknown as Promise<ChromeForSearch>;
 
-        const provider = createApplicationResultProvider(applicationPromise);
+        const provider = createApplicationResultProvider(
+          applicationPromise,
+          chromeForSearchPromise
+        );
 
         const options = {
           ...defaultOption,
@@ -264,7 +314,7 @@ describe('applicationResultProvider', () => {
     });
 
     it('only emits results until `aborted$` emits', () => {
-      getTestScheduler().run(({ hot, expectObservable }) => {
+      getTestScheduler().run(({ hot, cold, expectObservable }) => {
         const appMap = createAppMap([createApp({ id: 'app1', title: 'App 1' })]);
 
         application.applications$ = hot('---a', { a: appMap, b: appMap });
@@ -274,8 +324,18 @@ describe('applicationResultProvider', () => {
         const applicationPromise = hot('a', {
           a: application,
         }) as unknown as Promise<ApplicationStart>;
+        const chromeForSearch = {
+          getChromeStyle: () => 'classic' as const,
+          getDeepLinkNavPaths$: () => cold('a', { a: null }),
+        };
+        const chromeForSearchPromise = hot('a', {
+          a: chromeForSearch,
+        }) as unknown as Promise<ChromeForSearch>;
 
-        const provider = createApplicationResultProvider(applicationPromise);
+        const provider = createApplicationResultProvider(
+          applicationPromise,
+          chromeForSearchPromise
+        );
 
         const options = {
           ...defaultOption,
@@ -297,7 +357,7 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app2', title: 'App 2' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(Promise.resolve(application), chromePromise);
 
       expect(await provider.getSearchableTypes()).toEqual(['application']);
     });

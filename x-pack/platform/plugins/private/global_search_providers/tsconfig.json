@@ -10,7 +10,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/i18n"
   ],
   "exclude": [
     "target/**/*",

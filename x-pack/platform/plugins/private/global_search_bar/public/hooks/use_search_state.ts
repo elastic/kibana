@@ -176,9 +176,10 @@ export const useSearchState = ({
               return;
             }
 
-            // if searchbar is empty, filter to only applications and sort alphabetically
+            // Empty search: applications only. Score carries nav order in project chrome;
+            // title is the tie-breaker (classic chrome uses the same score for every app).
             results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byTitle);
+            aggregatedResults = [...results, ...aggregatedResults].sort(sort.byScoreThenTitle);
             setDecoratedOptions(aggregatedResults, suggestions, searchParams.tags);
           },
           error: (err) => {

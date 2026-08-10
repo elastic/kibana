@@ -134,6 +134,7 @@ const createStartContractMock = () => {
     setChromeStyle: jest.fn(),
     getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
     getActiveSolutionNavId: jest.fn().mockReturnValue(null),
+    getDeepLinkNavPaths$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
     project: lazyObject({
       setCloudUrls: jest.fn(),
       setKibanaName: jest.fn(),

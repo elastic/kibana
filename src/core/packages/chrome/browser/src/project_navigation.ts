@@ -195,6 +195,21 @@ export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon 
   isExternalLink?: boolean;
 }
 
+/**
+ * Nav-tree metadata for a deep link, used by Global Search in project chrome.
+ * Built from the parsed navigation tree (first DFS hit wins).
+ */
+export interface DeepLinkNavPath {
+  /** Ancestor titles including the leaf. */
+  titles: readonly string[];
+  /** DFS discovery order in the parsed tree (0-based). Used to rank empty search. */
+  order: number;
+  /** Nearest ancestor (including leaf) with an explicit string `icon`. */
+  icon?: string;
+  /** Nearest `panelOpener` ancestor title. */
+  categoryLabel?: string;
+}
+
 /** @public */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;

@@ -11,6 +11,7 @@ import type {
   CloudLinks,
   ChromeNavLink,
   ChromeProjectNavigationNode,
+  DeepLinkNavPath,
   NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
@@ -18,6 +19,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { replayMoves } from '@kbn/core-chrome-navigation-customization';
 import { i18n } from '@kbn/i18n';
+import { buildDeepLinkNavPaths } from './build_deep_link_nav_paths';
 import { flattenNav, getRenderableNodes, parseNavigationTree } from './utils';
 
 const HOME_TITLE = i18n.translate('core.ui.chrome.sideNavigation.homeItemTitle', {
@@ -38,6 +40,8 @@ export interface ParsedNavigation {
    * regular customizable item.
    */
   renderableNodes: ChromeProjectNavigationNode[];
+  /** deepLink id → nav-tree metadata for Global Search (titles, icon, panel category). */
+  deepLinkNavPaths: ReadonlyMap<string, DeepLinkNavPath>;
 }
 
 /**
@@ -107,5 +111,6 @@ export const applyCustomization = (
     overflowItemIds,
     defaultItemIds,
     renderableNodes: getRenderableNodes(bodyUI, isHomeCustomizable),
+    deepLinkNavPaths: buildDeepLinkNavPaths(navigationTree),
   };
 };
