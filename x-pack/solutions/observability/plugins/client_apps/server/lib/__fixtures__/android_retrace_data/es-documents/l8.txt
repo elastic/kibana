@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "l8",
+  "original_class": "co.elastic.otel.android.integration.Crasher",
+  "source_file": "Crasher.kt",
+  "methods": {
+    "a": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            7
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "crash"
+        }
+      ]
+    },
+    "b": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            6
+          ],
+          "orig_range": [
+            29,
+            29
+          ],
+          "method": "deepCrash"
+        },
+        {
+          "obf_range": [
+            7,
+            12
+          ],
+          "orig_range": [
+            31,
+            31
+          ],
+          "method": "deepCrash"
+        }
+      ]
+    },
+    "c": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            20
+          ],
+          "orig_range": [
+            36,
+            36
+          ],
+          "method": "rootCause"
+        }
+      ]
+    }
+  }
+}

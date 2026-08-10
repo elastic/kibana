@@ -167,6 +167,44 @@ describe('createInstallation', () => {
       });
     });
   });
+
+  describe('es_index_patterns', () => {
+    beforeEach(() => {
+      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        enableOtelIntegrations: true,
+      });
+      soClient.create.mockClear();
+    });
+
+    it('stores an .otel pattern for an OTel data stream', async () => {
+      const otelPackageInfo: InstallablePackage = {
+        ...packageInfo,
+        policy_templates: [{ name: 'test-package', inputs: [{ type: 'otelcol' }] } as any],
+        data_streams: [
+          {
+            type: 'metrics',
+            dataset: 'test-package.metrics',
+            path: 'metrics',
+            title: 'metrics',
+            release: 'ga',
+            streams: [{ input: 'otelcol' } as any],
+          } as any,
+        ],
+      };
+
+      await createInstallation({
+        savedObjectsClient: soClient,
+        packageInfo: otelPackageInfo,
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+      const [, savedObject] = soClient.create.mock.calls[0];
+      expect((savedObject as Installation).es_index_patterns).toEqual({
+        metrics: 'metrics-test-package.metrics.otel-*',
+      });
+    });
+  });
 });
 
 describe('install', () => {
@@ -211,6 +249,59 @@ describe('install', () => {
         status: 'failure',
         automaticInstall: false,
       });
+    });
+
+    it('should bypass out-of-date check when allow_outdated_version is true', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.1.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        allowOutdatedVersion: true,
+      });
+
+      // Should reach the state machine (i.e. not fail with out-of-date error)
+      expect(response.error).toBeUndefined();
+      expect(response.status).toEqual('installed');
+    });
+
+    it('should still reject out-of-date version without allow_outdated_version', async () => {
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.1.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error!.message).toEqual(
+        'apache-1.1.0 is out-of-date and cannot be installed or updated'
+      );
+    });
+
+    it('should not bypass agentless guard when allow_outdated_version is true but not force', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest.mocked(isAgentlessEnabled).mockReturnValueOnce(false);
+      jest.mocked(isOnlyAgentlessIntegration).mockReturnValueOnce(true);
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        // use the latest version so the out-of-date check is not the blocking issue
+        pkgkey: 'test_package',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        allowOutdatedVersion: true,
+      });
+
+      expect(response.error).toBeDefined();
+      expect(response.error!.message).toEqual(
+        'test_package contains agentless policy templates, agentless is not available on this deployment'
+      );
     });
 
     it('should send telemetry on install failure, license error', async () => {

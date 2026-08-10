@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useCasesConfig, useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { CasesPageBody } from '../../app/cases_page_body';
 import { Connectors } from '../../configure_cases/connectors';
 import * as configureCasesI18n from '../../configure_cases/translations';
@@ -61,7 +61,6 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { permissions } = useCasesContext();
   const { docLinks } = useKibana().services;
-  const { templatesEnabled } = useCasesConfig();
 
   const {
     hasMinimumLicensePermissions,
@@ -201,21 +200,25 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
-                {templatesEnabled && (
-                  <OldCustomFieldsAndTemplatesSection
-                    configurationId={configurationId}
-                    configurationVersion={configurationVersion}
-                    closureType={closureType}
-                    connector={connector}
-                    customFields={customFields}
-                    templates={templates}
-                    connectors={connectors ?? []}
-                    isLoadingCaseConfiguration={isLoadingCaseConfiguration}
-                    persistCaseConfigure={persistCaseConfigure}
-                    flyOutVisibility={flyOutVisibility}
-                    setFlyOutVisibility={setFlyOutVisibility}
-                  />
-                )}
+                {/* Rendered for both templates-flag states: with templates v2 ON it is the
+                    read-mostly "legacy" section behind a local-storage switch; with templates
+                    v2 OFF it is the only custom-fields / templates management UI (the v2
+                    templates and field-library routes are unregistered), so hiding it would
+                    leave existing custom fields undeletable while they still block case
+                    creation. The section adapts its copy and gating internally. */}
+                <OldCustomFieldsAndTemplatesSection
+                  configurationId={configurationId}
+                  configurationVersion={configurationVersion}
+                  closureType={closureType}
+                  connector={connector}
+                  customFields={customFields}
+                  templates={templates}
+                  connectors={connectors ?? []}
+                  isLoadingCaseConfiguration={isLoadingCaseConfiguration}
+                  persistCaseConfigure={persistCaseConfigure}
+                  flyOutVisibility={flyOutVisibility}
+                  setFlyOutVisibility={setFlyOutVisibility}
+                />
               </EuiPanel>
             </div>
 

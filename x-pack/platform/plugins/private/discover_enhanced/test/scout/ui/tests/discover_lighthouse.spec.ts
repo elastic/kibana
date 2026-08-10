@@ -29,6 +29,8 @@ lighthouseTest.describe(
     lighthouseTest(
       'runs audit on Discover Page',
       async ({ browserAuth, lighthouse, page, pageObjects }) => {
+        // A full Lighthouse audit is intrinsically slow; triple the default timeout for headroom.
+        lighthouseTest.slow();
         await browserAuth.loginAsAdmin();
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitForHistogramRendered();

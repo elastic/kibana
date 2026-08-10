@@ -6,7 +6,7 @@
  */
 
 import { parse as parseYaml } from 'yaml';
-import { buildFieldDefinitionYaml } from './build_field_definition_yaml';
+import { buildFieldDefinitionYaml } from '../../common/utils/field_definitions';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType, FieldSchema } from '../../../common/types/domain/template/fields';
 

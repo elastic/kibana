@@ -584,10 +584,10 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType || config?.authType;
+          const provider = secrets.provider;
 
           let tokenResult;
           if (authType === 'ears') {
-            const provider = secrets.provider;
             if (!provider) {
               throw new Error('Connector missing required OAuth configuration (provider)');
             }
@@ -650,12 +650,17 @@ export const oauthCallbackRoute = (
               includedHiddenTypes: ['user_connector_token'],
             }),
             logger: routeLogger,
+            configurationUtilities,
           });
 
+          // skipRevocation: we just minted a fresh token above; the new token
+          // shares the same provider grant, so revoking it here would
+          // invalidate the token we are about to store.
           await userConnectorTokenClient.deleteConnectorTokens({
             connectorId: stateConnectorId,
             tokenType: 'access_token',
             profileUid,
+            skipRevocation: true,
           });
           const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({
@@ -675,13 +680,14 @@ export const oauthCallbackRoute = (
             returnUrl: kibanaReturnUrl,
           });
         } catch (err) {
+          // Log the underlying cause for operators; return a generic message to the client.
           routeLogger.error(`OAuth callback failed: ${getErrorMessage(err)}`);
           if (err instanceof Error && err.stack) {
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }
 
           return respondWithError(res, {
-            details: err instanceof Error ? err.message : GENERIC_OAUTH_ERROR,
+            details: GENERIC_OAUTH_ERROR,
             statusCode: getErrorStatusCode(err),
             connectorId: stateConnectorId,
             returnUrl: kibanaReturnUrl,

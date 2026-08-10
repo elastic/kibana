@@ -30,6 +30,7 @@ steps:
     plugin-id: "significant_events_memory_synthesis"
     aggregate-by: "significant_events"
     create-conversation: true
+    public-conversation: true
     timeout: 1800s
     with:
       message: |

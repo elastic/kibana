@@ -6,31 +6,22 @@
  */
 
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { parse } from 'yaml';
 import { SlackChannelSelector } from './slack_channel_selector';
+import { type SlackChannel, useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
+import type { UseQueryResult } from '@kbn/react-query';
 
 jest.mock('../hooks/use_fetch_slack_channels', () => ({
-  useFetchSlackChannels: ({
-    connectorId,
-    enabled,
-  }: {
-    connectorId: string | null;
-    enabled?: boolean;
-  }) => ({
-    data:
-      enabled && connectorId === 'slack-1'
-        ? [
-            { id: 'C001', name: 'general' },
-            { id: 'C002', name: 'alerts' },
-          ]
-        : [],
-    isFetching: false,
-  }),
+  useFetchSlackChannels: jest.fn(),
 }));
+
+const mockUseFetchSlackChannels = useFetchSlackChannels as jest.MockedFunction<
+  typeof useFetchSlackChannels
+>;
 
 const renderSelector = (props: Partial<React.ComponentProps<typeof SlackChannelSelector>> = {}) => {
   const onParamsChange = jest.fn();
@@ -48,6 +39,22 @@ const renderSelector = (props: Partial<React.ComponentProps<typeof SlackChannelS
 };
 
 describe('SlackChannelSelector', () => {
+  beforeEach(() => {
+    mockUseFetchSlackChannels.mockImplementation(
+      ({ connectorId, enabled }) =>
+        ({
+          data:
+            enabled && connectorId === 'slack-1'
+              ? [
+                  { id: 'C001', name: 'general' },
+                  { id: 'C002', name: 'alerts' },
+                ]
+              : [],
+          isFetching: false,
+        } as UseQueryResult<SlackChannel[], Error>)
+    );
+  });
+
   it('renders the channel combobox', () => {
     renderSelector();
     expect(screen.getByTestId('slackChannelSelector')).toBeInTheDocument();
@@ -61,6 +68,48 @@ describe('SlackChannelSelector', () => {
 
     expect(screen.getByText('#general')).toBeInTheDocument();
     expect(screen.getByText('#alerts')).toBeInTheDocument();
+  });
+
+  it('does not fetch channels until the dropdown is opened', () => {
+    const { rerender } = renderSelector({ connectorId: null });
+    expect(mockUseFetchSlackChannels).toHaveBeenCalledWith({ connectorId: null, enabled: false });
+
+    rerender(
+      <I18nProvider>
+        <SlackChannelSelector connectorId="slack-1" params="" onParamsChange={jest.fn()} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('#general')).not.toBeInTheDocument();
+    expect(mockUseFetchSlackChannels).toHaveBeenCalledWith({
+      connectorId: 'slack-1',
+      enabled: false,
+    });
+  });
+
+  it('does not fetch channels if the dropdown has been closed', () => {
+    const { rerender } = renderSelector({ connectorId: 'slack-1' });
+
+    act(() => {
+      screen.getByRole('combobox').focus();
+      screen.getByRole('combobox').blur();
+    });
+
+    expect(mockUseFetchSlackChannels).toHaveBeenLastCalledWith({
+      connectorId: 'slack-1',
+      enabled: false,
+    });
+
+    rerender(
+      <I18nProvider>
+        <SlackChannelSelector connectorId="slack-2" params="" onParamsChange={jest.fn()} />
+      </I18nProvider>
+    );
+
+    expect(mockUseFetchSlackChannels).toHaveBeenLastCalledWith({
+      connectorId: 'slack-2',
+      enabled: false,
+    });
   });
 
   it('is disabled when connectorId is null', () => {

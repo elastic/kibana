@@ -157,6 +157,29 @@ describe('TemplateSettingsPopover', () => {
     expect(await openSelector()).toBeInTheDocument();
   });
 
+  it('explains what changing the template does to values already saved on the case', async () => {
+    renderWithTestingProviders(<TemplateSettingsPopover {...defaultProps} />);
+    await openSelector();
+
+    // The explanation lives in a tooltip on the title, so it is revealed rather than rendered
+    // inline: assert that hovering the glyph surfaces the copy.
+    await user.hover(screen.getByTestId('template-settings-change-hint'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      "The current template's fields will be hidden, but their saved values stay on the case. To remove the values, clear the fields before changing the template."
+    );
+  });
+
+  it('labels the template selector rather than relying on its placeholder', async () => {
+    renderWithTestingProviders(<TemplateSettingsPopover {...defaultProps} />);
+    await openSelector();
+
+    // A visible label tied to the input, so the placeholder is not the only thing naming the field.
+    const label = screen.getByText('Template', { selector: 'label' });
+    const input = screen.getByTestId('comboBoxSearchInput');
+    expect(label).toHaveAttribute('for', input.getAttribute('id'));
+  });
+
   it('supports a custom data-test-subj', () => {
     renderWithTestingProviders(
       <TemplateSettingsPopover {...defaultProps} data-test-subj="custom-template-settings" />
@@ -318,6 +341,59 @@ describe('TemplateSettingsPopover', () => {
         { caseData: caseWithTemplate, newTemplate: null },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
+    });
+  });
+
+  describe('when the applied template is not available', () => {
+    const caseWithMissingTemplate = {
+      ...basicCase,
+      template: { id: 'deleted-template', version: 1 },
+    };
+
+    beforeEach(() => {
+      // The available (enabled, non-deleted) list does not include the applied template.
+      mockUseGetTemplates.mockReturnValue({
+        data: { templates: [otherTemplate] },
+        isLoading: false,
+      });
+      // But it can still be resolved (with its stale name) via includeDeleted.
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          ...appliedParsedTemplate,
+          templateId: 'deleted-template',
+          name: 'Deleted Template',
+          deletedAt: '2024-01-01T00:00:00.000Z',
+        },
+        isFetching: false,
+      });
+    });
+
+    it('shows a non-selectable "not found" entry with the stale template name', async () => {
+      renderWithTestingProviders(
+        <TemplateSettingsPopover {...defaultProps} caseData={caseWithMissingTemplate} />
+      );
+
+      const combobox = await openSelector();
+
+      expect(
+        screen.getByTestId('sidebar-template-settings-template-not-found-icon')
+      ).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Deleted Template (not found)');
+    });
+
+    it('falls back to a generic label when the stale name cannot be resolved', async () => {
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });
+
+      renderWithTestingProviders(
+        <TemplateSettingsPopover {...defaultProps} caseData={caseWithMissingTemplate} />
+      );
+
+      const combobox = await openSelector();
+
+      expect(
+        screen.getByTestId('sidebar-template-settings-template-not-found-icon')
+      ).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Template not found');
     });
   });
 });

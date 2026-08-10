@@ -24,8 +24,7 @@ import { getMissingAlertsUpdatePrivilegesError } from '../../../unified_alerts/u
 export default ({ getService }: FtrProviderContext) => {
   const utils = getService('securitySolutionUtils');
 
-  // @skipInServerlessMKI publicAttacksApiEnabled experimental flag is not applied in MKI serverless
-  describe('@serverless @skipInServerlessMKI Set Attacks Tags - Serverless', () => {
+  describe('@serverless Set Attacks Tags - Serverless', () => {
     describe('Happy path for predefined users', () => {
       const roles = [
         'editor',

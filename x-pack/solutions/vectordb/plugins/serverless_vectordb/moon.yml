@@ -41,6 +41,8 @@ dependsOn:
   - '@kbn/alerting-v2-utils'
   - '@kbn/deeplinks-workflows'
   - '@kbn/data-views-plugin'
+  - '@kbn/navigation-plugin'
+  - '@kbn/announcement-banner'
 tags:
   - plugin
   - prod

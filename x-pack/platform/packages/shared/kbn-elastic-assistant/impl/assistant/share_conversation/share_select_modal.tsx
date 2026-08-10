@@ -216,6 +216,7 @@ const ShareSelectModalComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.SELECT_VISIBILITY_ARIA_LABEL}
         button={
           <ShareBadge
             conversationSharedState={conversationSharedState}

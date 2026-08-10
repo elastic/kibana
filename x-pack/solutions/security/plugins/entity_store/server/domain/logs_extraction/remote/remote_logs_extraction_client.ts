@@ -55,7 +55,7 @@ interface RemoteExtractToUpdatesParams {
   delay: string;
   frequency: string;
   entityDefinition: ManagedEntityDefinition;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   windowOverride?: { fromDateISO: string; toDateISO: string };
   maxTimeWindowSize: string;
   /** Total raw log documents allowed per run. 0 = disabled. */
@@ -127,7 +127,7 @@ export class RemoteLogsExtractionClient {
     delay,
     frequency,
     entityDefinition,
-    abortController,
+    signal,
     windowOverride,
     maxTimeWindowSize,
     maxLogsPerWindow,
@@ -191,7 +191,7 @@ export class RemoteLogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
-        abortController,
+        signal,
         effectiveFromDateISO,
         recoveryId,
         skipStateUpdates: true,
@@ -228,7 +228,7 @@ export class RemoteLogsExtractionClient {
 
     let hasNextPage = true;
     while (hasNextPage) {
-      if (abortController?.signal.aborted) {
+      if (signal?.aborted) {
         break;
       }
       if (currentFromDateISO >= effectiveWindowEnd) {
@@ -252,7 +252,7 @@ export class RemoteLogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
-        abortController,
+        signal,
         effectiveFromDateISO: currentFromDateISO,
         recoveryId: recoveryIdForFirstSubWindow,
         skipStateUpdates: false,
@@ -327,7 +327,7 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
-    abortController,
+    signal,
     effectiveFromDateISO: initialFromDateISO,
     recoveryId: initialRecoveryId,
     skipStateUpdates,
@@ -339,7 +339,7 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
-    abortController?: AbortController;
+    signal?: AbortSignal;
     effectiveFromDateISO: string;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
@@ -365,7 +365,7 @@ export class RemoteLogsExtractionClient {
         remote: true,
       });
     };
-    abortController?.signal.addEventListener('abort', onAbort);
+    signal?.addEventListener('abort', onAbort);
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
@@ -382,7 +382,7 @@ export class RemoteLogsExtractionClient {
         sliceStart,
         maxLogsPerPage: effectiveMaxLogsPerPage,
         sampleProbability: effectiveSampleProbability,
-        abortController,
+        signal,
       });
 
       if (!logPaginationCursor.hasLogsToProcess && effectiveSampleProbability >= 1) {
@@ -432,7 +432,7 @@ export class RemoteLogsExtractionClient {
           toDateISO,
           docsLimit: effectiveDocsLimit,
           entityDefinition,
-          abortController,
+          signal,
           sliceStart,
           sliceEnd,
           recoveryId: recoveryIdForThisSlice,
@@ -492,7 +492,7 @@ export class RemoteLogsExtractionClient {
     sliceStart,
     maxLogsPerPage,
     sampleProbability,
-    abortController,
+    signal,
   }: {
     remoteIndexPatterns: string[];
     type: EntityType;
@@ -501,7 +501,7 @@ export class RemoteLogsExtractionClient {
     sliceStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
     sampleProbability: number;
-    abortController?: AbortController;
+    signal?: AbortSignal;
   }): Promise<LogPaginationCursor> {
     const probeQuery = buildLogPaginationCursorProbeEsql({
       indexPatterns: remoteIndexPatterns,
@@ -523,7 +523,7 @@ export class RemoteLogsExtractionClient {
     const probeResponse = await executeEsqlQuery({
       esClient: this.strategy.client,
       query: probeQuery,
-      abortController,
+      signal,
       telemetry: {
         name: 'remote_probe_query',
         namespace: this.namespace,
@@ -562,7 +562,7 @@ export class RemoteLogsExtractionClient {
     toDateISO,
     docsLimit,
     entityDefinition,
-    abortController,
+    signal,
     sliceStart,
     sliceEnd,
     recoveryId: initialRecoveryId,
@@ -575,7 +575,7 @@ export class RemoteLogsExtractionClient {
     toDateISO: string;
     docsLimit: number;
     entityDefinition: ManagedEntityDefinition;
-    abortController?: AbortController;
+    signal?: AbortSignal;
     sliceStart: LogSlicePaginationParams | undefined;
     sliceEnd: LogSlicePaginationParams;
     recoveryId: string | undefined;
@@ -618,7 +618,7 @@ export class RemoteLogsExtractionClient {
       const esqlResponse = await executeEsqlQuery({
         esClient: this.strategy.client,
         query,
-        abortController,
+        signal,
         telemetry: {
           name: 'remote_extraction_query',
           namespace: this.namespace,
@@ -647,7 +647,7 @@ export class RemoteLogsExtractionClient {
           esqlResponse,
           targetIndex: getUpdatesEntitiesDataStreamName(this.namespace),
           logger: this.logger,
-          abortController,
+          signal,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
           transformDocument: this.buildTransformDocument(type, destToSourceMap),
           refresh: false,

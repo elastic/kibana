@@ -6,6 +6,7 @@
  */
 
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
 
 const createEsClient = (
@@ -48,7 +49,7 @@ describe('getSigEventsLogPatternsEsql', () => {
     jest.clearAllMocks();
   });
 
-  it('builds ES|QL count and single-pass categorize queries', async () => {
+  it('builds ES|QL count and two-pass categorize queries', async () => {
     const { esClient, esql, rawEsqlQuery } = createEsClient([{ name: 'body.text', type: 'text' }]);
     esql
       .mockResolvedValueOnce(countResponse(10))
@@ -70,12 +71,16 @@ describe('getSigEventsLogPatternsEsql', () => {
       }),
     ]);
     expect(esql.mock.calls[1]).toEqual([
-      'categorize_sigevents_log_patterns',
+      'categorize_noise_exclusion_head',
       expect.objectContaining({
         query:
-          'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
+          'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1 | SORT count ASC | LIMIT 1000',
+        filter: {
+          bool: { filter: [...kqlQuery('service.name:"checkout"'), ...dateRangeQuery(100, 200)] },
+        },
       }),
     ]);
+    expect(esql).toHaveBeenCalledTimes(2);
     expect(rawEsqlQuery).toHaveBeenCalledTimes(1);
     expect(rawEsqlQuery.mock.calls[0][0]).toEqual(
       expect.objectContaining({
@@ -102,40 +107,6 @@ describe('getSigEventsLogPatternsEsql', () => {
     expect(result).toEqual([]);
   });
 
-  it('short-circuits when the count query returns zero', async () => {
-    const { esClient, esql } = createEsClient();
-    esql.mockResolvedValueOnce(countResponse(0));
-
-    const result = await getSigEventsLogPatternsEsql({
-      esClient,
-      samplingSource: 'logs-*',
-      start: 100,
-      end: 200,
-      fields: ['message'],
-    });
-
-    expect(esql).toHaveBeenCalledTimes(1);
-    expect(result).toEqual([]);
-  });
-
-  it('scales sampled counts back to population counts', async () => {
-    const { esClient, esql } = createEsClient();
-    esql
-      .mockResolvedValueOnce(countResponse(1_000_000))
-      .mockResolvedValueOnce(categorizeResponse([[16, 'error one', 'error']]));
-
-    const result = await getSigEventsLogPatternsEsql({
-      esClient,
-      samplingSource: 'logs-*',
-      start: 100,
-      end: 200,
-      fields: ['message'],
-    });
-
-    expect(esql.mock.calls[1][1].query).toContain('| SAMPLE 0.1 |');
-    expect(result[0].count).toBe(160);
-  });
-
   it('sorts by count and deduplicates by sample', async () => {
     const { esClient, esql } = createEsClient([
       { name: 'message', type: 'text' },
@@ -144,7 +115,9 @@ describe('getSigEventsLogPatternsEsql', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse([[2, 'same', 'message low']]))
-      .mockResolvedValueOnce(categorizeResponse([[8, 'same', 'body high']]));
+      .mockResolvedValueOnce(categorizeResponse([[8, 'same', 'body high']]))
+      .mockResolvedValueOnce(categorizeResponse([]))
+      .mockResolvedValueOnce(categorizeResponse([]));
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -163,7 +136,8 @@ describe('getSigEventsLogPatternsEsql', () => {
     const { esClient, esql } = createEsClient();
     esql
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(categorizeResponse([[3, ['array sample'], 'error']]));
+      .mockResolvedValueOnce(categorizeResponse([[3, ['array sample'], 'error']]))
+      .mockResolvedValueOnce(categorizeResponse([]));
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,

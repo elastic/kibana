@@ -9,7 +9,14 @@ import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AiIndexService } from './service';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexManagedError,
+  AiIndexNotFoundError,
+  AiIndexIdConflictError,
+  AiIndexAlreadyExistsError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
@@ -51,11 +58,11 @@ const createConflictError = () =>
   });
 
 const aiIndexDocument: AiIndexDocument = {
-  name: 'customer_support',
   description: 'KIs representing previously answered, commonly asked questions',
-  dest: { type: 'data_stream', value: '.ai-index-ds-customer_support*' },
+  managed: false,
+  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
   automations: [{ type: 'workflow', value: 'nightly-refresh' }],
-  sources: [{ type: 'esql', value: 'FROM .ai-index-customer_support | LIMIT 10' }],
+  sources: [{ type: 'esql', value: 'FROM ai-index-customer_support | LIMIT 10' }],
   date_created: '2026-07-08T12:10:30.000Z',
   date_modified: '2026-07-08T12:10:30.000Z',
 };
@@ -73,7 +80,7 @@ describe('AiIndexService', () => {
       aliases: [],
       data_streams: [
         {
-          name: '.ai-index-ds-customer_support',
+          name: 'ai-index-ds-customer_support',
           backing_indices: [],
           timestamp_field: '@timestamp',
         },
@@ -94,15 +101,49 @@ describe('AiIndexService', () => {
     });
   });
 
-  describe('put', () => {
-    const properties = {
-      name: 'customer_support',
-      description: 'KIs representing previously answered, commonly asked questions',
-      dest: { type: 'data_stream' as const, value: '.ai-index-ds-customer_support*' },
-      automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
-      sources: [{ type: 'esql' as const, value: 'FROM .ai-index-customer_support | LIMIT 10' }],
-    };
+  const properties = {
+    description: 'KIs representing previously answered, commonly asked questions',
+    dest: { type: 'data_stream' as const, value: 'ai-index-ds-customer_support*' },
+    automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
+    sources: [{ type: 'esql' as const, value: 'FROM ai-index-customer_support | LIMIT 10' }],
+  };
 
+  describe('create', () => {
+    it('creates with op_type create, without looking up the existing document', async () => {
+      await expect(service.create('customer_support', properties)).resolves.toBeUndefined();
+
+      expect(storageClient.get).not.toHaveBeenCalled();
+      expect(storageClient.index).toHaveBeenCalledWith({
+        id: 'customer_support',
+        op_type: 'create',
+        document: expect.objectContaining({
+          ...properties,
+          date_created: expect.any(String),
+          date_modified: expect.any(String),
+        }),
+      });
+    });
+
+    it('throws AiIndexAlreadyExistsError when the id already exists (409)', async () => {
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(service.create('customer_support', properties)).rejects.toBeInstanceOf(
+        AiIndexAlreadyExistsError
+      );
+    });
+
+    it('rejects an invalid dest before writing', async () => {
+      await expect(
+        service.create('customer_support', {
+          ...properties,
+          dest: { type: 'data_stream', value: 'customer_support*' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('put', () => {
     it('creates an AI index with op_type create when none exists', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
 
@@ -113,6 +154,7 @@ describe('AiIndexService', () => {
         op_type: 'create',
         document: expect.objectContaining({
           ...properties,
+          managed: false,
           date_created: expect.any(String),
           date_modified: expect.any(String),
         }),
@@ -169,6 +211,22 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('throws AiIndexManagedError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.put('customer_support', properties)).rejects.toBeInstanceOf(
+        AiIndexManagedError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
     it('allows a data_stream dest with no matches yet (lazy creation)', async () => {
       esClient.indices.resolveIndex.mockResponse({ indices: [], aliases: [], data_streams: [] });
       storageClient.get.mockRejectedValue(createNotFoundError());
@@ -187,7 +245,7 @@ describe('AiIndexService', () => {
 
     it('rejects a data_stream dest when a plain index exists at that name', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-ds-customer_support', attributes: ['open'] }],
+        indices: [{ name: 'ai-index-ds-customer_support', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
@@ -198,7 +256,7 @@ describe('AiIndexService', () => {
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects a data_stream dest value not prefixed with .ai-index-ds- without resolving it', async () => {
+    it('rejects a data_stream dest value not prefixed with ai-index-ds- without resolving it', async () => {
       await expect(
         service.put('customer_support', {
           ...properties,
@@ -209,13 +267,13 @@ describe('AiIndexService', () => {
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects a data_stream dest not prefixed with .ai-index-ds-', async () => {
+    it('rejects a data_stream dest not prefixed with ai-index-ds-', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [],
         aliases: [],
         data_streams: [
           {
-            name: '.ai-index-idx-customer_support',
+            name: 'ai-index-idx-customer_support',
             backing_indices: [],
             timestamp_field: '@timestamp',
           },
@@ -230,12 +288,12 @@ describe('AiIndexService', () => {
 
     const indexProperties = {
       ...properties,
-      dest: { type: 'index' as const, value: '.ai-index-idx-logs-*' },
+      dest: { type: 'index' as const, value: 'ai-index-idx-logs-*' },
     };
 
     it('creates an index AI index when the value matches an index', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-logs-app', attributes: ['open'] }],
+        indices: [{ name: 'ai-index-idx-logs-app', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
@@ -262,7 +320,7 @@ describe('AiIndexService', () => {
         indices: [],
         aliases: [],
         data_streams: [
-          { name: '.ai-index-idx-logs', backing_indices: [], timestamp_field: '@timestamp' },
+          { name: 'ai-index-idx-logs', backing_indices: [], timestamp_field: '@timestamp' },
         ],
       });
 
@@ -274,7 +332,7 @@ describe('AiIndexService', () => {
 
     it('rejects a system index dest', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-security', attributes: ['open', 'hidden', 'system'] }],
+        indices: [{ name: 'ai-index-idx-security', attributes: ['open', 'hidden', 'system'] }],
         aliases: [],
         data_streams: [],
       });
@@ -287,7 +345,7 @@ describe('AiIndexService', () => {
 
     it('allows a hidden but non-system index dest', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-sml-data', attributes: ['open', 'hidden'] }],
+        indices: [{ name: 'ai-index-idx-sml-data', attributes: ['open', 'hidden'] }],
         aliases: [],
         data_streams: [],
       });
@@ -304,7 +362,7 @@ describe('AiIndexService', () => {
 
     it('allows a closed hidden but non-system index dest', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-idx-sml-data', attributes: ['closed', 'hidden'] }],
+        indices: [{ name: 'ai-index-idx-sml-data', attributes: ['closed', 'hidden'] }],
         aliases: [],
         data_streams: [],
       });
@@ -322,8 +380,8 @@ describe('AiIndexService', () => {
     it('rejects a mixed expression that includes a system index', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [
-          { name: '.ai-index-idx-logs-app', attributes: ['open'] },
-          { name: '.ai-index-idx-kibana', attributes: ['open', 'hidden', 'system'] },
+          { name: 'ai-index-idx-logs-app', attributes: ['open'] },
+          { name: 'ai-index-idx-kibana', attributes: ['open', 'hidden', 'system'] },
         ],
         aliases: [],
         data_streams: [],
@@ -332,13 +390,13 @@ describe('AiIndexService', () => {
       await expect(
         service.put('logs', {
           ...indexProperties,
-          dest: { type: 'index', value: '.ai-index-idx-logs-*,.ai-index-idx-kibana*' },
+          dest: { type: 'index', value: 'ai-index-idx-logs-*,ai-index-idx-kibana*' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects an index dest value not prefixed with .ai-index-idx- without resolving it', async () => {
+    it('rejects an index dest value not prefixed with ai-index-idx- without resolving it', async () => {
       await expect(
         service.put('logs', {
           ...indexProperties,
@@ -353,22 +411,85 @@ describe('AiIndexService', () => {
       await expect(
         service.put('logs', {
           ...indexProperties,
-          dest: { type: 'index', value: '.ai-index-idx-logs-*,.kibana*' },
+          dest: { type: 'index', value: 'ai-index-idx-logs-*,.kibana*' },
         })
       ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
       expect(storageClient.index).not.toHaveBeenCalled();
     });
 
-    it('rejects an index dest not prefixed with .ai-index-idx-', async () => {
+    it('rejects an index dest not prefixed with ai-index-idx-', async () => {
       esClient.indices.resolveIndex.mockResponse({
-        indices: [{ name: '.ai-index-logs-app', attributes: ['open'] }],
+        indices: [{ name: 'ai-index-logs-app', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
 
       await expect(service.put('logs', indexProperties)).rejects.toBeInstanceOf(
         InvalidAiIndexDestError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('putManaged', () => {
+    const managedProperties = {
+      description: 'Elastic managed AI index',
+      dest: { type: 'index' as const, value: 'ai-index-idx-sml-data' },
+      automations: [],
+      sources: [],
+    };
+
+    const mockValidIndexDest = () =>
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-idx-sml-data', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+    it('writes managed: true to the document', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.putManaged('elastic', managedProperties)).resolves.toBe('created');
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ managed: true }),
+        })
+      );
+    });
+
+    it('overwrites an existing managed entry (idempotent upsert)', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockResolvedValue({
+        _id: 'elastic',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.putManaged('elastic', managedProperties)).resolves.toBe('updated');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.if_seq_no).toBe(7);
+      expect(indexArgs.if_primary_term).toBe(2);
+      expect(indexArgs.document?.managed).toBe(true);
+    });
+
+    it('throws AiIndexIdConflictError when the id is taken by an unmanaged entry', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockResolvedValue({
+        _id: 'elastic',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, managed: false },
+      });
+
+      await expect(service.putManaged('elastic', managedProperties)).rejects.toBeInstanceOf(
+        AiIndexIdConflictError
       );
       expect(storageClient.index).not.toHaveBeenCalled();
     });
@@ -389,6 +510,21 @@ describe('AiIndexService', () => {
       });
     });
 
+    it('defaults managed to false for legacy documents without the field', async () => {
+      const legacyDocument = { ...aiIndexDocument };
+      delete (legacyDocument as { managed?: boolean }).managed;
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: legacyDocument,
+      });
+
+      await expect(service.get('customer_support')).resolves.toEqual(
+        expect.objectContaining({ id: 'customer_support', managed: false })
+      );
+    });
+
     it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
 
@@ -403,7 +539,7 @@ describe('AiIndexService', () => {
   });
 
   describe('list', () => {
-    it('returns AI indices mapped from search hits', async () => {
+    it('returns AI indices mapped from search hits, sorted by id', async () => {
       storageClient.search.mockResolvedValue({
         took: 1,
         timed_out: false,
@@ -415,22 +551,28 @@ describe('AiIndexService', () => {
               _index: '.contextengine-ai-indices',
               _source: aiIndexDocument,
             },
+            { _id: 'billing', _index: '.contextengine-ai-indices', _source: aiIndexDocument },
           ],
         },
       } as unknown as Awaited<ReturnType<AiIndexStorageClient['search']>>);
 
       await expect(service.list()).resolves.toEqual([
+        { id: 'billing', ...aiIndexDocument },
         { id: 'customer_support', ...aiIndexDocument },
       ]);
 
-      expect(storageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({ size: 100, sort: [{ name: 'asc' }] })
-      );
+      expect(storageClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
     });
   });
 
   describe('delete', () => {
     it('resolves when the AI index is deleted', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
       storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'deleted' });
 
       await expect(service.delete('customer_support')).resolves.toBeUndefined();
@@ -438,9 +580,34 @@ describe('AiIndexService', () => {
     });
 
     it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
-      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
+      storageClient.get.mockRejectedValue(createNotFoundError());
 
       await expect(service.delete('missing')).rejects.toBeInstanceOf(AiIndexNotFoundError);
+      expect(storageClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexManagedError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexManagedError);
+      expect(storageClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexNotFoundError when the entry is removed concurrently', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
+      storageClient.delete.mockResolvedValue({ acknowledged: true, result: 'not_found' });
+
+      await expect(service.delete('customer_support')).rejects.toBeInstanceOf(AiIndexNotFoundError);
     });
   });
 });

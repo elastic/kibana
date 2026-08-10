@@ -23,6 +23,23 @@ jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
 }));
 
+const mockShare = {
+  url: {
+    locators: {
+      get: jest.fn().mockReturnValue({
+        getRedirectUrl: jest
+          .fn()
+          .mockImplementation(
+            ({ serviceName, query }: any) =>
+              `/services/${serviceName}/overview?comparisonEnabled=${
+                query?.comparisonEnabled ?? true
+              }`
+          ),
+      }),
+    },
+  },
+};
+
 jest.mock('../../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
     link: (path: string, { path: pathParams, query }: any) =>
@@ -143,6 +160,7 @@ function setupMocks({
     plugins: {
       alerting: isAlertingAvailable ? {} : undefined,
     },
+    share: mockShare,
   });
 
   mockUseApmParams.mockReturnValue({

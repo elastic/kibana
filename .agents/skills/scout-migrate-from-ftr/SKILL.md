@@ -96,3 +96,4 @@ Address `blocker` and `major` findings before considering the migration done. Su
 - Step 3 (execution) workflow: file placement, FTR-to-Scout mapping, typecheck/run: [`references/execute-plan.md`](references/execute-plan.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`references/pick-correct-test-type.md`](references/pick-correct-test-type.md)
 - Step 4 run commands and iteration patterns: [`docs/extend/testing/run-scout-tests.md`](../../../docs/extend/testing/run-scout-tests.md)
+- Driving EUI components in the new Scout test: see the EUI-helper guidance in the `scout-ui-testing` skill (`page.components.*`; don't 1:1-map old wrappers; request additions from DevEx).

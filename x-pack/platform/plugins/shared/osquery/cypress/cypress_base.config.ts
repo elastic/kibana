@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import path from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 import { readFileSync } from 'fs';
 import { samlAuthentication } from '@kbn/cypress-test-helper/src/auth/saml_auth';
 import type { YamlRoleDefinitions } from './lib';

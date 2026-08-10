@@ -31,7 +31,7 @@ export const OnboardingLandingPage = () => {
   const { euiTheme } = useEuiTheme();
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
   const { services } = useKibana();
-  const vectorSearchDocsUrl = services.docLinks.links.enterpriseSearch.vectorSearch;
+  const vectorDatabaseDocsUrl = services.docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
 
   useEffect(() => {
     markOnboardingSeen();
@@ -77,7 +77,7 @@ export const OnboardingLandingPage = () => {
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLink
-                href={vectorSearchDocsUrl}
+                href={vectorDatabaseDocsUrl}
                 target="_blank"
                 external
                 data-test-subj="vectordbPathSelectionDocumentation"

@@ -579,20 +579,6 @@ groups:
           self: ga
           serverless: unavailable
 
-      - setting: "workflows:ui:enabled"
-        id: "workflows:ui:enabled"
-        description: |
-          Enables Elastic Workflows and related experiences.
-        datatype: bool
-        default: false
-        applies_to:
-          stack: preview 9.3
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: preview
-
       - setting: "fields:popularLimit"
         id: fields-popularlimit
         description: |
@@ -853,6 +839,20 @@ groups:
         datatype: string
         applies_to:
           stack: ga
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga
+
+      - setting: "discover:defaultEsqlQuery"
+        id: discover-default-esql-query
+        description: |
+          The ES|QL query that **Discover** starts with when opening in ES|QL mode. When set, it takes precedence over the query **Discover** would otherwise derive from your data sources. Leave empty to use the default behavior.
+        datatype: string
+        default: ""
+        applies_to:
+          stack: ga 9.6
           ech: ga
           ece: ga
           eck: ga
@@ -2005,6 +2005,20 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: "securitySolution:excludeColdAndFrozenTiersInPrevalence"
+        id: security-solution-exclude-cold-frozen-tiers-prevalence
+        description: |
+          Skips cold and frozen tiers in Prevalence queries when activated.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.2
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: "securitySolution:enableGraphVisualization"
         id: security-solution-enable-graph-visualization
         description: |
@@ -2248,6 +2262,20 @@ groups:
           stack: unavailable
           security: ga
 
+      - setting: "securitySolution:enableNewFlyout"
+        id: security-solution-enable-new-flyout
+        description: |
+          Enables the new flyout system for document details in Security Solution.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.5
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          security: ga
+
   - group: Timelion
     id: kibana-timelion-settings
     settings:
@@ -2385,3 +2413,38 @@ groups:
           eck: ga
           self: ga
           elasticsearch: ga
+
+  - group: Workflows
+    id: kibana-workflows-settings
+    settings:
+
+      - setting: "workflows:ui:enabled"
+        id: "workflows:ui:enabled"
+        description: |
+          Enables Elastic Workflows and related experiences.
+        note: |
+          :applies_to: stack: preview =9.3
+          In this version, the default is `false`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.4+, preview =9.3
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: preview
+
+      - setting: "workflows:ui:showManagedWorkflows"
+        id: "workflows:ui:showManagedWorkflows"
+        description: |
+          Shows managed workflows and their executions in workflow experiences.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.5
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: ga

@@ -25,7 +25,8 @@ import {
 import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
 import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { i18n } from '@kbn/i18n';
-import { formatBytes, formatNumber, useDeploymentStats } from '../hooks/use_deployment_stats';
+import { useDeploymentStats } from '../hooks/use_deployment_stats';
+import { formatBytes, formatNumber } from '../utils/format';
 import { useAgentsCount } from '../hooks/use_agents_count';
 import { HomePageBanner } from './home_page_banner';
 import { DocumentationQuickLinks } from './documentation_quick_links';
@@ -68,7 +69,7 @@ export const HomePage = () => {
   const { stats, isLoading } = useDeploymentStats();
   const { agentsCount, isLoading: isAgentsCountLoading } = useAgentsCount();
   const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
-  const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
+  const hasData = (stats.vectorCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
 
   const statTiles = [
     {
@@ -80,7 +81,7 @@ export const HomePage = () => {
     {
       key: 'vectors',
       label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorDocsCount),
+      value: formatNumber(stats.vectorCount),
       isLoading,
     },
     {

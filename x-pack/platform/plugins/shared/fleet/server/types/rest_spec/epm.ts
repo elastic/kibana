@@ -1009,6 +1009,13 @@ export const InstallPackageFromRegistryRequestSchema = {
       {
         force: schema.boolean({ defaultValue: false }),
         ignore_constraints: schema.boolean({ defaultValue: false }),
+        allow_outdated_version: schema.boolean({
+          defaultValue: false,
+          meta: {
+            description:
+              'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
+          },
+        }),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
@@ -1061,6 +1068,13 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
         { minSize: 1, maxSize: 1000 }
       ),
       force: schema.boolean({ defaultValue: false }),
+      allow_outdated_version: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
+        },
+      }),
     },
     { meta: { id: 'bulk_install_packages_from_registry_request' } }
   ),

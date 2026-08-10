@@ -7,12 +7,17 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { buildFlyoutContent, buildFlyoutTitleFromField } from './build_flyout_content';
+import {
+  buildFlyoutContent,
+  buildFlyoutTitleFromField,
+  buildFlyoutDescriptorFromField,
+} from './build_flyout_content';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
 jest.mock('../components/table_field_name_cell', () => ({
   getEcsField: (field: string) => {
@@ -151,5 +156,48 @@ describe('buildFlyoutTitleFromField', () => {
 
   it('should return null for an unknown field', () => {
     expect(buildFlyoutTitleFromField('unknown.field', 'value')).toBeNull();
+  });
+});
+
+describe('buildFlyoutDescriptorFromField', () => {
+  it('returns a network descriptor for a source IP field', () => {
+    expect(buildFlyoutDescriptorFromField('source.ip', '10.0.0.1')).toEqual({
+      kind: FLYOUT_DESCRIPTOR_KIND.network,
+      ip: '10.0.0.1',
+      flowTarget: FlowTargetSourceDest.source,
+    });
+  });
+
+  it('returns a network descriptor with destination flowTarget for a destination IP field', () => {
+    expect(buildFlyoutDescriptorFromField('destination.ip', '192.168.1.1')).toEqual({
+      kind: FLYOUT_DESCRIPTOR_KIND.network,
+      ip: '192.168.1.1',
+      flowTarget: FlowTargetSourceDest.destination,
+    });
+  });
+
+  it('returns a rule descriptor for the signal rule name field', () => {
+    expect(buildFlyoutDescriptorFromField(SIGNAL_RULE_NAME_FIELD_NAME, 'rule-uuid')).toEqual({
+      kind: FLYOUT_DESCRIPTOR_KIND.rule,
+      ruleId: 'rule-uuid',
+    });
+  });
+
+  it('returns a host descriptor for a host.name field', () => {
+    expect(buildFlyoutDescriptorFromField('host.name', 'my-host')).toEqual({
+      kind: FLYOUT_DESCRIPTOR_KIND.host,
+      hostName: 'my-host',
+    });
+  });
+
+  it('returns a user descriptor for a user.name field', () => {
+    expect(buildFlyoutDescriptorFromField(USER_NAME_FIELD_NAME, 'my-user')).toEqual({
+      kind: FLYOUT_DESCRIPTOR_KIND.user,
+      userName: 'my-user',
+    });
+  });
+
+  it('returns null for an unsupported field', () => {
+    expect(buildFlyoutDescriptorFromField('unknown.field', 'value')).toBeNull();
   });
 });

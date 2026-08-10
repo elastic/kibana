@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
-import { METRICS_SORT_BY } from '../../../common/constants';
+import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constants';
 import type { MetricsSort, MetricsSortBy, MetricsSortDirection } from '../../../types';
 import { SORT_BY_LABELS } from '../sort_selector_helpers';
 
@@ -39,6 +39,7 @@ export const useSortSelector = ({
         value,
         label: SORT_BY_LABELS[value],
         checked: value === sortBy ? 'on' : undefined,
+        'data-test-subj': `metricsExperienceSortOption-${value}`,
       })),
     [sortBy]
   );
@@ -55,7 +56,10 @@ export const useSortSelector = ({
   const handleSortByChange = useCallback(
     (chosenOption?: SelectableEntry) => {
       const nextSortBy = (chosenOption?.value as MetricsSortBy) ?? sortBy;
-      onChange([nextSortBy, direction]);
+      onChange([
+        nextSortBy,
+        nextSortBy === METRICS_SORT_BY.recency ? METRICS_SORT_DIRECTION.asc : direction,
+      ]);
     },
     [onChange, sortBy, direction]
   );

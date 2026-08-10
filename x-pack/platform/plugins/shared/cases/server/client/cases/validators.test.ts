@@ -19,6 +19,7 @@ import {
   validateSearchCasesCustomFields,
   validateExtendedFieldsInRequest,
   validateExtendedFieldsOnClose,
+  validateCaseExtendedFields,
   resolveTemplateFieldsForClose,
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -1076,6 +1077,140 @@ describe('validators', () => {
             { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
           ]),
         })
+      ).resolves.toBeUndefined();
+    });
+
+    it('does not throw when a template $refs a required global field and its value is sent (partial update)', async () => {
+      // The template resolves the $ref'd global field (required: true), but the value is
+      // stored under the GLOBAL key — the template pass must not re-check it as absent.
+      const requiredGlobalDef = {
+        fieldDefinitionId: 'fd-my_new_field',
+        name: 'my_new_field',
+        owner: 'cases',
+        definition: yamlStringify({
+          name: 'my_new_field',
+          label: 'My new Field',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          validation: { required: true },
+        }),
+      };
+      templatesService.getTemplate.mockResolvedValue(
+        makeTemplatesSO({ fields: [{ $ref: 'my_new_field' }] })
+      );
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [requiredGlobalDef],
+        total: 1,
+      });
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { my_new_field_as_keyword: 'a value' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalFields: makeGlobalFields([
+            {
+              name: 'my_new_field',
+              type: 'keyword',
+              label: 'My new Field',
+              validation: { required: true },
+            },
+          ]),
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('validateCaseExtendedFields', () => {
+    /**
+     * Covers the create path (partial: false), mirroring how `create.ts` calls it with
+     * `preResolvedTemplateFields` from server-side template expansion.
+     *
+     * Regression scenario: v1→v2 migration marks every field definition `isGlobal: true` and
+     * emits `$ref` template entries for each legacy template custom field, so a migrated
+     * template always references required global fields. The submitted value lives under the
+     * global key; the template validation pass must not treat it as a missing required value.
+     */
+    const requiredGlobalField = {
+      control: 'INPUT_TEXT',
+      name: 'my_new_field',
+      type: 'keyword',
+      label: 'My new Field',
+      validation: { required: true },
+    } as unknown as InlineField;
+
+    const templateOwnField = {
+      control: 'INPUT_TEXT',
+      name: 'summary',
+      type: 'keyword',
+      label: 'Summary',
+      validation: { required: true },
+    } as unknown as InlineField;
+
+    let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+
+    beforeEach(() => {
+      templatesService = { getTemplate: jest.fn() };
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [] }),
+      };
+    });
+
+    const validate = (
+      extendedFields: Record<string, string>,
+      preResolvedTemplateFields: InlineField[]
+    ) =>
+      validateCaseExtendedFields({
+        extendedFields,
+        templateId: 'tpl-1',
+        globalFields: [requiredGlobalField],
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        owner: 'securitySolution',
+        preResolvedTemplateFields,
+      });
+
+    it('does not throw when a template $refs a required global field and its value is sent under the global key', async () => {
+      // preResolvedTemplateFields contains the $ref-resolved global field, as produced by
+      // resolveTemplateForCreate for a migrated template.
+      await expect(
+        validate({ my_new_field_as_keyword: 'some required text' }, [requiredGlobalField])
+      ).resolves.toBeUndefined();
+    });
+
+    it('throws when a required global field $ref-ed by the template is empty', async () => {
+      await expect(
+        validate({ my_new_field_as_keyword: '' }, [requiredGlobalField])
+      ).rejects.toThrow('Invalid extended_fields: Field "My new Field" is required');
+    });
+
+    it('throws when a required global field is absent from a create request with a template', async () => {
+      // Non-partial mode: the global pass enforces required global fields even when the
+      // request carries no global keys at all.
+      await expect(validate({}, [requiredGlobalField])).rejects.toThrow(
+        'Invalid extended_fields: Field "My new Field" is required'
+      );
+    });
+
+    it('still enforces required template-specific fields alongside a filled global field', async () => {
+      await expect(
+        validate({ my_new_field_as_keyword: 'filled' }, [requiredGlobalField, templateOwnField])
+      ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
+    });
+
+    it('does not throw when both the $ref-ed global field and the template-specific field are filled', async () => {
+      await expect(
+        validate({ my_new_field_as_keyword: 'filled', summary_as_keyword: 'also filled' }, [
+          requiredGlobalField,
+          templateOwnField,
+        ])
       ).resolves.toBeUndefined();
     });
   });

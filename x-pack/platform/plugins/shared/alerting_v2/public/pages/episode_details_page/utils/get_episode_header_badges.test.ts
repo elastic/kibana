@@ -21,7 +21,6 @@ describe('getEpisodeHeaderBadges', () => {
       const badges = getEpisodeHeaderBadges({
         status,
         severity: undefined,
-        tags: [],
         episodeAction: undefined,
         groupAction: undefined,
       });
@@ -40,7 +39,6 @@ describe('getEpisodeHeaderBadges', () => {
     const badges = getEpisodeHeaderBadges({
       status: 'unsupported' as typeof ALERT_EPISODE_STATUS.ACTIVE,
       severity: undefined,
-      tags: [],
       episodeAction: undefined,
       groupAction: undefined,
     });
@@ -55,7 +53,6 @@ describe('getEpisodeHeaderBadges', () => {
     const badges = getEpisodeHeaderBadges({
       status: ALERT_EPISODE_STATUS.ACTIVE,
       severity: undefined,
-      tags: [],
       episodeAction: undefined,
       groupAction: {
         groupHash: 'group-1',
@@ -79,7 +76,6 @@ describe('getEpisodeHeaderBadges', () => {
     const badges = getEpisodeHeaderBadges({
       status: undefined,
       severity: 'high',
-      tags: [],
       episodeAction: undefined,
       groupAction: undefined,
     });
@@ -97,7 +93,6 @@ describe('getEpisodeHeaderBadges', () => {
     const badges = getEpisodeHeaderBadges({
       status: ALERT_EPISODE_STATUS.ACTIVE,
       severity: undefined,
-      tags: [],
       episodeAction: {
         episodeId: 'ep-1',
         ruleId: 'rule-1',
@@ -134,26 +129,60 @@ describe('getEpisodeHeaderBadges', () => {
     expect(badges.find((badge) => badge.label === 'Snoozed')?.tooltip).toContain('3035');
   });
 
-  it('adds one hollow badge per tag', () => {
+  it('does not render tags as header badges (tags live in the episode details section)', () => {
     const badges = getEpisodeHeaderBadges({
       status: undefined,
       severity: undefined,
-      tags: ['tag-a', 'tag-b'],
       episodeAction: undefined,
-      groupAction: undefined,
+      groupAction: {
+        groupHash: 'group-1',
+        ruleId: 'rule-1',
+        lastDeactivateAction: null,
+        lastSnoozeAction: null,
+        snoozeExpiry: null,
+        tags: ['tag-a', 'tag-b'],
+        lastSnoozeActor: null,
+        lastDeactivateActor: null,
+      },
     });
 
-    expect(badges).toEqual([
-      expect.objectContaining({
-        label: 'tag-a',
-        color: 'hollow',
-        'data-test-subj': 'alertingV2EpisodeDetailsHeaderTagBadge-tag-a',
-      }),
-      expect.objectContaining({
-        label: 'tag-b',
-        color: 'hollow',
-        'data-test-subj': 'alertingV2EpisodeDetailsHeaderTagBadge-tag-b',
-      }),
-    ]);
+    expect(badges).toEqual([]);
+  });
+
+  it('adds a flapping badge when isFlapping is true', () => {
+    const badges = getEpisodeHeaderBadges({
+      status: ALERT_EPISODE_STATUS.ACTIVE,
+      severity: undefined,
+      episodeAction: undefined,
+      groupAction: undefined,
+      isFlapping: true,
+    });
+
+    expect(badges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Flapping',
+          color: 'hollow',
+          'data-test-subj': 'alertingV2EpisodeDetailsHeaderFlappingBadge',
+          renderCustomBadge: expect.any(Function),
+        }),
+      ])
+    );
+  });
+
+  it('does not add a flapping badge when isFlapping is false', () => {
+    const badges = getEpisodeHeaderBadges({
+      status: ALERT_EPISODE_STATUS.ACTIVE,
+      severity: undefined,
+      episodeAction: undefined,
+      groupAction: undefined,
+      isFlapping: false,
+    });
+
+    expect(
+      badges.find(
+        (badge) => badge['data-test-subj'] === 'alertingV2EpisodeDetailsHeaderFlappingBadge'
+      )
+    ).toBeUndefined();
   });
 });
