@@ -54,6 +54,33 @@ describe('isChartCompatibleResult', () => {
       ).compatible
     ).toBe(true);
   });
+
+  it('accepts heatmap results when an axis is a numeric hour extract', () => {
+    expect(
+      isChartCompatibleResult(
+        'heatmap',
+        [
+          { name: 'Request Count', type: 'long' },
+          { name: 'Hour of Day', type: 'long' },
+          { name: 'Response Code', type: 'keyword' },
+        ],
+        58
+      ).compatible
+    ).toBe(true);
+  });
+
+  it('rejects heatmaps with fewer than three columns', () => {
+    expect(
+      isChartCompatibleResult(
+        'heatmap',
+        [
+          { name: 'count', type: 'long' },
+          { name: 'code', type: 'keyword' },
+        ],
+        5
+      ).compatible
+    ).toBe(false);
+  });
 });
 
 describe('createChartCompatibleResultEvaluator', () => {

@@ -33,6 +33,21 @@ describe('normalizeEsqlForEquivalence', () => {
     expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
   });
 
+  it('strips order_date (and other event-time) bind-param WHERE pipes', () => {
+    const withWhere = `FROM kibana_sample_data_ecommerce
+| WHERE order_date >= ?_tstart AND order_date < ?_tend
+| STATS \`Order Count\` = COUNT(*) BY category.keyword
+| SORT \`Order Count\` DESC
+| LIMIT 10`;
+
+    const withoutWhere = `FROM kibana_sample_data_ecommerce
+| STATS \`Order Count\` = COUNT(*) BY category.keyword
+| SORT \`Order Count\` DESC
+| LIMIT 10`;
+
+    expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
+  });
+
   it('keeps non-time predicates when removing the bind-param conjunct', () => {
     const input = `FROM logs
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND response.keyword == "200"
@@ -61,9 +76,9 @@ describe('normalizeEsqlForEquivalence', () => {
     expect(normalizeEsqlForEquivalence(input)).toBe(input);
   });
 
-  it('does not strip WHERE bounds on a non-@timestamp field', () => {
+  it('does not strip WHERE bounds that are not ?_tstart/?_tend bind params', () => {
     const input = `FROM logs
-| WHERE event.ingested >= ?_tstart AND event.ingested < ?_tend
+| WHERE @timestamp >= NOW() - 1 day AND @timestamp < NOW()
 | STATS c = COUNT(*)`;
 
     expect(normalizeEsqlForEquivalence(input)).toBe(input);

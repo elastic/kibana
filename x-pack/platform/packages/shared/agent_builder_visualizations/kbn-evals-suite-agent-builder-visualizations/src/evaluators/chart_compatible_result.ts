@@ -56,7 +56,7 @@ export function isChartCompatibleResult(
   }
 
   const numericCount = columns.filter(isNumericColumn).length;
-  const dimensionCount = columns.length - numericCount;
+  const nonNumericCount = columns.length - numericCount;
 
   switch (chartType) {
     case SupportedChartType.Metric:
@@ -79,7 +79,7 @@ export function isChartCompatibleResult(
     case SupportedChartType.Treemap:
     case SupportedChartType.Waffle:
     case SupportedChartType.Tagcloud:
-      if (numericCount < 1 || dimensionCount < 1) {
+      if (numericCount < 1 || nonNumericCount < 1) {
         return {
           compatible: false,
           reason: `${chartType} needs a category dimension and a numeric measure`,
@@ -88,14 +88,18 @@ export function isChartCompatibleResult(
       return { compatible: true };
 
     case SupportedChartType.Heatmap:
-    case SupportedChartType.Mosaic:
-      if (columns.length < 3 || numericCount < 1 || dimensionCount < 2) {
+    case SupportedChartType.Mosaic: {
+      // Heatmap axes are often numeric extracts (e.g. HOUR_OF_DAY → long). Count
+      // non-measure columns as dimensions even when ES|QL types them numeric:
+      // require ≥3 columns with ≥1 measure, leaving ≥2 columns for the axes.
+      if (columns.length < 3 || numericCount < 1) {
         return {
           compatible: false,
-          reason: `${chartType} needs at least two dimensions and one numeric measure`,
+          reason: `${chartType} needs at least two axis columns and one numeric measure`,
         };
       }
       return { compatible: true };
+    }
 
     case SupportedChartType.Datatable:
       return { compatible: true };

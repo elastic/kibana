@@ -193,9 +193,10 @@ evaluate.describe(
                   'Create a line chart of request count and average bytes over time in kibana_sample_data_logs as two series.',
               },
               output: {
+                // Multi-series over time is valid as Lens xy or Vega; score ES|QL
+                // equivalence rather than forcing a single renderer/chart_type.
                 query: `FROM kibana_sample_data_logs
 | STATS \`Request Count\` = COUNT(*), \`Average Bytes\` = AVG(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
-                chartType: 'xy',
                 goldenToolPath: GOLDEN_TOOL_PATH,
               },
             },
