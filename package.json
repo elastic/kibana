@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "24.18.0",
+    "node": "24.19.0",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -1420,7 +1420,7 @@
     "kea": "2.6.0",
     "langchain": "1.2.30",
     "langsmith": "0.7.1",
-    "launchdarkly-js-client-sdk": "3.9.0",
+    "launchdarkly-js-client-sdk": "3.9.4",
     "liquidjs": "10.27.2",
     "lodash": "4.18.1",
     "lru-cache": "11.3.5",
@@ -1531,13 +1531,13 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "7.28.0",
+    "undici": "7.29.0",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
     "usng.js": "0.4.5",
     "utility-types": "3.11.0",
-    "uuid": "11.1.1",
+    "uuid": "14.0.1",
     "vega": "6.2.0",
     "vega-interpreter": "2.2.1",
     "vega-lite": "6.4.1",
@@ -2137,7 +2137,7 @@
     "pixelmatch": "5.3.0",
     "playwright": "1.61.1",
     "pngjs": "7.0.0",
-    "postcss": "8.5.14",
+    "postcss": "8.5.26",
     "postcss-loader": "8.2.1",
     "postcss-scss": "4.0.9",
     "prettier": "2.8.8",
