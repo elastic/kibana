@@ -13,18 +13,6 @@ import { MAX_REQUEST_LINE_LOOKBACK_CHARS, MAX_REQUEST_LINE_LOOKBACK_LINES } from
 import { isRequestLineWithUrl } from './request_line';
 import { isInsideTripleQuotedJsonValue } from './triple_quote_scanner';
 
-const getRangeText = (
-  model: monaco.editor.ITextModel,
-  start: monaco.IPosition,
-  end: monaco.IPosition
-): string =>
-  model.getValueInRange({
-    startLineNumber: start.lineNumber,
-    startColumn: start.column,
-    endLineNumber: end.lineNumber,
-    endColumn: end.column,
-  });
-
 /** Index of the last request whose `startOffset` is at or before `offset` (requests are sorted). */
 const findLastRequestIndexAtOrBefore = (
   requests: ParsedRequest[],
@@ -115,16 +103,20 @@ export const getFallbackRequestStartPosition = (
     }
 
     const requestEndOffset = Math.min(request.endOffset + 1, positionOffset);
-    remainingChars -= requestEndOffset - request.startOffset;
+    // the request's first line was already charged above; charge only the remainder so the
+    // budget counts each source character once
+    remainingChars -= Math.max(0, requestEndOffset - request.startOffset - line.length - 1);
     if (remainingChars < 0) {
       break;
     }
     fallback ??= startPosition;
-    const requestContent = getRangeText(
-      model,
-      startPosition,
-      model.getPositionAt(requestEndOffset)
-    );
+    const requestEndPosition = model.getPositionAt(requestEndOffset);
+    const requestContent = model.getValueInRange({
+      startLineNumber: startPosition.lineNumber,
+      startColumn: startPosition.column,
+      endLineNumber: requestEndPosition.lineNumber,
+      endColumn: requestEndPosition.column,
+    });
     if (isInsideTripleQuotedJsonValue(requestContent)) {
       return startPosition;
     }

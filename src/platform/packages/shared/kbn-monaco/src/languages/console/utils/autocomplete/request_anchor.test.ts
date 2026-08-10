@@ -98,7 +98,24 @@ describe('getFallbackRequestStartPosition', () => {
     const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length);
 
     expect(result).toEqual({ lineNumber: 3, column: 1 });
-    expect(model.getValueInRange).toHaveBeenCalledTimes(1);
+    expect(model.getValueInRange).toHaveBeenCalledTimes(2);
+  });
+
+  it('charges each source character once against the budget', () => {
+    // The enclosing request ends within one request-line length of the cap: a budget that
+    // charged the request line twice bailed here and returned the recovery artifact instead.
+    const filler = 'x'.repeat(99_940);
+    const lines = ['POST _index/_doc', `{"script":"""`, filler, 'GET _search', ''];
+    const postEndOffset = lines.slice(0, 3).join('\n').length;
+    const parsedRequests = [
+      { startOffset: 0, endOffset: postEndOffset },
+      { startOffset: postEndOffset + 1, endOffset: postEndOffset + 1 + 'GET _search'.length },
+    ];
+    const model = createModel(lines);
+
+    const result = getFallbackRequestStartPosition(parsedRequests, model, lines.length, 1);
+
+    expect(result).toEqual({ lineNumber: 1, column: 1 });
   });
 
   it('does not return an oversized unterminated request as the fallback start', () => {
