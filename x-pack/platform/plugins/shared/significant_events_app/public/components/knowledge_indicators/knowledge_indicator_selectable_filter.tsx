@@ -16,8 +16,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useBoolean } from '@kbn/react-hooks';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   matchesKnowledgeIndicatorFilters,
   type KnowledgeIndicatorFilterCriteria,
@@ -51,7 +52,7 @@ export function KnowledgeIndicatorSelectableFilter({
   getLabel = identity,
   disableWhenEmpty = false,
 }: KnowledgeIndicatorSelectableFilterProps) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const popoverId = useGeneratedHtmlId({
     prefix: 'knowledgeIndicatorSelectableFilter',
   });
@@ -100,20 +101,20 @@ export function KnowledgeIndicatorSelectableFilter({
         aria-label={labels.popoverAriaLabel}
         button={
           <EuiFilterButton
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             isSelected={isPopoverOpen}
             hasActiveFilters={selected.length > 0}
             numFilters={availableValues.length}
             numActiveFilters={selected.length}
             isDisabled={isDisabled}
-            onClick={() => setIsPopoverOpen((open) => !open)}
+            onClick={togglePopover}
           >
             {labels.button}
           </EuiFilterButton>
         }
         isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
+        closePopover={closePopover}
         panelPaddingSize="s"
       >
         <EuiSelectable
