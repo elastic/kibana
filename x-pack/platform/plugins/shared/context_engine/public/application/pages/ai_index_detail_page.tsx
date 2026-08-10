@@ -9,15 +9,24 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiSkeletonTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
+import {
+  AutomationsPanel,
+  DescriptionPanel,
+  KnowledgeIndicatorsPanel,
+  SourcesPanel,
+} from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
@@ -34,6 +43,8 @@ export const AiIndexDetailPage = () => {
   const [isEditingSources, setIsEditingSources] = useState(false);
 
   const landingUrl = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+  const isManaged = aiIndex !== undefined && aiIndex.managed;
+  const hideEditControls = isLoading || isManaged;
 
   if (error) {
     return (
@@ -55,7 +66,7 @@ export const AiIndexDetailPage = () => {
             actions={[
               <EuiButton
                 key="back-to-list"
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 href={landingUrl}
                 data-test-subj="contextAiIndexBackToListButton"
               >
@@ -68,20 +79,38 @@ export const AiIndexDetailPage = () => {
     );
   }
 
+  const pageTitle = isLoading ? (
+    <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
+  ) : (
+    <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>{aiIndex?.id}</EuiFlexItem>
+      {isManaged && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            component="span"
+            size="s"
+            color="subdued"
+            data-test-subj="contextAiIndexDetailManagedBadge"
+          >
+            <EuiIcon type="lock" size="s" aria-hidden={true} />{' '}
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.managedBadge"
+              defaultMessage="Managed"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+
   return (
     <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
       <KibanaPageTemplate.Header
-        pageTitle={
-          isLoading ? (
-            <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
-          ) : (
-            aiIndex?.id
-          )
-        }
+        pageTitle={pageTitle}
         rightSideItems={[
           <EuiButtonEmpty
             key="back-to-list"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={landingUrl}
             data-test-subj="contextAiIndexBackToListButton"
           >
@@ -90,16 +119,29 @@ export const AiIndexDetailPage = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
-        <DescriptionPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
-        <EuiSpacer size="l" />
+        <DescriptionPanel
+          isLoading={isLoading}
+          aiIndex={aiIndex}
+          onSaved={refetch}
+          isManaged={isManaged}
+        />
+        <EuiSpacer size="m" />
         <SourcesPanel
           isLoading={isLoading}
           sources={aiIndex?.sources ?? []}
           canEdit={aiIndex !== undefined}
           onEditSources={() => setIsEditingSources(true)}
+          isManaged={hideEditControls}
         />
-        <EuiSpacer size="l" />
-        <AutomationsPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
+        <EuiSpacer size="m" />
+        <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
+        <EuiSpacer size="m" />
+        <AutomationsPanel
+          isLoading={isLoading}
+          aiIndex={aiIndex}
+          onSaved={refetch}
+          isManaged={isManaged}
+        />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

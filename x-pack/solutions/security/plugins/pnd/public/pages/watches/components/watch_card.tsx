@@ -81,7 +81,7 @@ export const WatchCard: React.FC<WatchCardProps> = ({ watch, onSelect }) => {
                   background: color-mix(in srgb, ${watch.color} 14%, transparent);
                 `}
               >
-                <EuiIcon type={iconType} size="m" />
+                <EuiIcon type={iconType} size="m" aria-hidden={true} />
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

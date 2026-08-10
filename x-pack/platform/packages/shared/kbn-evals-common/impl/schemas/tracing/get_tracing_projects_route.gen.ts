@@ -23,6 +23,9 @@ export const TracingProject = lazySchema(() =>
     error_rate: z.number().optional(),
     p50_latency_ms: z.number().optional(),
     p99_latency_ms: z.number().optional(),
+    /**
+     * Approximate token usage. Only a bounded number of traces per project contribute, so the value under-reports high-volume projects and varies with per_page.
+     */
     total_tokens: z.number().int().optional(),
     last_trace_time: z.string(),
   })
