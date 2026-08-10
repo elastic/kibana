@@ -97,7 +97,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`button#observability`);
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
-        await testSubjects.click('comboBoxToggleListButton');
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
@@ -128,7 +127,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
           await find.clickByCssSelector(`button#ruleTags`);
-          await testSubjects.click('comboBoxToggleListButton');
           const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
           expect(options.length).to.equal(1);
           expect(await options[0].getVisibleText()).to.equal(ruleName);
