@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type {
   ContextEngineAgentBuilderPluginSetup,
   ContextEngineAgentBuilderPluginStart,
@@ -34,10 +34,13 @@ export class ContextEngineAgentBuilderPlugin
       coreSetup,
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
+      logger: this.initializerContext.logger.get(),
     });
 
     return {};
   }
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   start(_coreStart: CoreStart): ContextEngineAgentBuilderPluginStart {
     return {};

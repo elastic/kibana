@@ -7,6 +7,7 @@
 
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AI_INDEX_ATTACHMENT_TYPE } from '@kbn/context-engine-plugin/common/agent_builder_attachments';
 import { MAX_AI_INDEX_AUTOMATIONS } from '@kbn/context-engine-plugin/common/constants';
 import {
@@ -23,6 +24,15 @@ import {
 jest.mock('../../assert_context_engine_write_access', () => ({
   assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
 }));
+
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
+  hasWorkflowCreatePrivilege: jest.fn().mockResolvedValue(true),
+  hasWorkflowUpdatePrivilege: jest.fn().mockResolvedValue(true),
+}));
+
+const { hasWorkflowReadPrivilege, hasWorkflowCreatePrivilege, hasWorkflowUpdatePrivilege } =
+  jest.requireMock('@kbn/agent-builder-tools-base/workflows');
 
 const WORKFLOW_ATTACHMENT_ID = 'workflow-attachment-1';
 const WORKFLOW_YAML = 'name: pilot\nsteps: []';
@@ -49,17 +59,6 @@ const createAttachmentStateManager = ({
   ]),
   updateOrigin: jest.fn().mockResolvedValue(true),
 });
-
-const baseAiIndex = {
-  id: 'my-ai-index',
-  description: 'Support tickets',
-  managed: false,
-  dest: { type: 'data_stream' as const, value: 'ai-index-ds-my-ai-index' },
-  sources: [{ type: 'esql' as const, value: 'FROM tickets' }],
-  automations: [{ type: 'workflow' as const, value: 'wf-existing' }],
-  date_created: '2026-01-01T00:00:00.000Z',
-  date_modified: '2026-01-01T00:00:00.000Z',
-};
 
 describe('resolveAiIndexIdFromAttachments', () => {
   it('returns an explicit aiIndexId when provided', () => {
@@ -114,9 +113,10 @@ describe('getSaveAutomationErrorMessage', () => {
 
 describe('saveAutomationHandler', () => {
   const request = httpServerMock.createKibanaRequest();
+  const logger = loggingSystemMock.createLogger();
   const getCoreStart = jest.fn();
   const getSecurityStart = jest.fn().mockResolvedValue(undefined);
-  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'get' | 'put'>>;
+  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation'>>;
   let workflowsManagement: {
     getWorkflow: jest.Mock;
     createWorkflow: jest.Mock;
@@ -124,9 +124,13 @@ describe('saveAutomationHandler', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    hasWorkflowReadPrivilege.mockResolvedValue(true);
+    hasWorkflowCreatePrivilege.mockResolvedValue(true);
+    hasWorkflowUpdatePrivilege.mockResolvedValue(true);
+
     aiIndexService = {
-      get: jest.fn(),
-      put: jest.fn(),
+      addAutomation: jest.fn(),
     };
     workflowsManagement = {
       getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new' }),
@@ -137,8 +141,7 @@ describe('saveAutomationHandler', () => {
   });
 
   it('creates the workflow and attaches it to the AI index', async () => {
-    aiIndexService.get.mockResolvedValue(baseAiIndex);
-    aiIndexService.put.mockResolvedValue('updated');
+    aiIndexService.addAutomation.mockResolvedValue('attached');
     workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
 
     const attachments = createAttachmentStateManager();
@@ -148,12 +151,14 @@ describe('saveAutomationHandler', () => {
       request,
       spaceId: 'default',
       attachments: attachments as never,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getCoreStart,
       getSecurityStart,
       getWorkflowsManagement: () => workflowsManagement as never,
     });
 
+    expect(hasWorkflowCreatePrivilege).toHaveBeenCalled();
     expect(workflowsManagement.createWorkflow).toHaveBeenCalledWith(
       { yaml: WORKFLOW_YAML, id: 'pilot-workflow' },
       'default',
@@ -164,6 +169,10 @@ describe('saveAutomationHandler', () => {
       'wf-new',
       ATTACHMENT_REF_ACTOR.agent
     );
+    expect(aiIndexService.addAutomation).toHaveBeenCalledWith('my-ai-index', {
+      type: 'workflow',
+      value: 'wf-new',
+    });
     expect(result).toEqual({
       aiIndexId: 'my-ai-index',
       workflowId: 'wf-new',
@@ -172,8 +181,7 @@ describe('saveAutomationHandler', () => {
   });
 
   it('updates an already persisted workflow before attaching', async () => {
-    aiIndexService.get.mockResolvedValue(baseAiIndex);
-    aiIndexService.put.mockResolvedValue('updated');
+    aiIndexService.addAutomation.mockResolvedValue('attached');
 
     const attachments = createAttachmentStateManager({ origin: 'wf-persisted' });
 
@@ -182,12 +190,14 @@ describe('saveAutomationHandler', () => {
       request,
       spaceId: 'default',
       attachments: attachments as never,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getCoreStart,
       getSecurityStart,
       getWorkflowsManagement: () => workflowsManagement as never,
     });
 
+    expect(hasWorkflowUpdatePrivilege).toHaveBeenCalled();
     expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
       'wf-persisted',
       { yaml: WORKFLOW_YAML },
@@ -199,8 +209,7 @@ describe('saveAutomationHandler', () => {
   });
 
   it('attaches an already saved workflow by id', async () => {
-    aiIndexService.get.mockResolvedValue(baseAiIndex);
-    aiIndexService.put.mockResolvedValue('updated');
+    aiIndexService.addAutomation.mockResolvedValue('attached');
 
     const attachments = createAttachmentStateManager();
 
@@ -209,12 +218,14 @@ describe('saveAutomationHandler', () => {
       request,
       spaceId: 'default',
       attachments: attachments as never,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getCoreStart,
       getSecurityStart,
       getWorkflowsManagement: () => workflowsManagement as never,
     });
 
+    expect(hasWorkflowReadPrivilege).toHaveBeenCalled();
     expect(result).toEqual({
       aiIndexId: 'my-ai-index',
       workflowId: 'wf-new',
@@ -225,7 +236,6 @@ describe('saveAutomationHandler', () => {
   });
 
   it('rejects attaching a workflow id that does not exist', async () => {
-    aiIndexService.get.mockResolvedValue(baseAiIndex);
     workflowsManagement.getWorkflow.mockResolvedValue(null);
 
     await expect(
@@ -234,6 +244,7 @@ describe('saveAutomationHandler', () => {
         request,
         spaceId: 'default',
         attachments: createAttachmentStateManager() as never,
+        logger,
         getAiIndexService: () => aiIndexService as unknown as AiIndexService,
         getCoreStart,
         getSecurityStart,
@@ -242,30 +253,91 @@ describe('saveAutomationHandler', () => {
     ).rejects.toThrow(/Workflow 'wf-missing' was not found/);
   });
 
-  it('rejects when updateOrigin fails after creating a workflow', async () => {
-    aiIndexService.get.mockResolvedValue(baseAiIndex);
-    aiIndexService.put.mockResolvedValue('updated');
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+  it('rejects when the caller lacks workflow read privilege', async () => {
+    hasWorkflowReadPrivilege.mockResolvedValue(false);
 
-    const attachments = createAttachmentStateManager();
-    attachments.updateOrigin.mockResolvedValue(false);
+    await expect(
+      saveAutomationHandler({
+        params: { workflowId: 'wf-new' },
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager() as never,
+        logger,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toThrow(/Unauthorized to reference workflow 'wf-new'/);
+  });
+
+  it('rejects when the caller lacks workflow create privilege', async () => {
+    hasWorkflowCreatePrivilege.mockResolvedValue(false);
 
     await expect(
       saveAutomationHandler({
         params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
         request,
         spaceId: 'default',
-        attachments: attachments as never,
+        attachments: createAttachmentStateManager() as never,
+        logger,
         getAiIndexService: () => aiIndexService as unknown as AiIndexService,
         getCoreStart,
         getSecurityStart,
         getWorkflowsManagement: () => workflowsManagement as never,
       })
-    ).rejects.toThrow(/Failed to record workflow origin/);
+    ).rejects.toThrow(/Unauthorized to create a workflow/);
+  });
+
+  it('rejects when the caller lacks workflow update privilege', async () => {
+    hasWorkflowUpdatePrivilege.mockResolvedValue(false);
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager({ origin: 'wf-persisted' }) as never,
+        logger,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toThrow(/Unauthorized to update workflow 'wf-persisted'/);
+  });
+
+  it('continues when updateOrigin fails after creating a workflow', async () => {
+    aiIndexService.addAutomation.mockResolvedValue('attached');
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+    attachments.updateOrigin.mockResolvedValue(false);
+
+    const result = await saveAutomationHandler({
+      params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+      request,
+      spaceId: 'default',
+      attachments: attachments as never,
+      logger,
+      getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getCoreStart,
+      getSecurityStart,
+      getWorkflowsManagement: () => workflowsManagement as never,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('attachment origin could not be recorded')
+    );
+    expect(result).toEqual({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-new',
+      status: 'saved_and_attached',
+    });
   });
 
   it('returns already_attached when the workflow is already linked', async () => {
-    aiIndexService.get.mockResolvedValue(baseAiIndex);
+    aiIndexService.addAutomation.mockResolvedValue('already_attached');
     workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-existing', name: 'pilot' });
 
     const attachments = createAttachmentStateManager();
@@ -275,6 +347,7 @@ describe('saveAutomationHandler', () => {
       request,
       spaceId: 'default',
       attachments: attachments as never,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getCoreStart,
       getSecurityStart,
@@ -282,11 +355,10 @@ describe('saveAutomationHandler', () => {
     });
 
     expect(result.status).toBe('already_attached');
-    expect(aiIndexService.put).not.toHaveBeenCalled();
   });
 
   it('rejects managed AI indices', async () => {
-    aiIndexService.get.mockResolvedValue({ ...baseAiIndex, managed: true });
+    aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
     workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
 
     await expect(
@@ -295,6 +367,7 @@ describe('saveAutomationHandler', () => {
         request,
         spaceId: 'default',
         attachments: createAttachmentStateManager() as never,
+        logger,
         getAiIndexService: () => aiIndexService as unknown as AiIndexService,
         getCoreStart,
         getSecurityStart,
@@ -304,13 +377,11 @@ describe('saveAutomationHandler', () => {
   });
 
   it('rejects when the automation limit is reached', async () => {
-    aiIndexService.get.mockResolvedValue({
-      ...baseAiIndex,
-      automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
-        type: 'workflow' as const,
-        value: `wf-${index}`,
-      })),
-    });
+    aiIndexService.addAutomation.mockRejectedValue(
+      new Error(
+        `AI index "my-ai-index" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
+      )
+    );
     workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
 
     await expect(
@@ -319,6 +390,7 @@ describe('saveAutomationHandler', () => {
         request,
         spaceId: 'default',
         attachments: createAttachmentStateManager() as never,
+        logger,
         getAiIndexService: () => aiIndexService as unknown as AiIndexService,
         getCoreStart,
         getSecurityStart,

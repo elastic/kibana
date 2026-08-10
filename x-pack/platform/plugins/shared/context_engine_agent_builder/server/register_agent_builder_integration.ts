@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -22,6 +22,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   coreSetup,
   agentBuilder,
   workflowsManagement,
+  logger,
 }: {
   coreSetup: CoreSetup<
     ContextEngineAgentBuilderStartDependencies,
@@ -29,12 +30,22 @@ export const registerContextEngineAgentBuilderIntegration = ({
   >;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsManagementApi;
+  logger: Logger;
 }): void => {
   let contextEngineStart: ContextEnginePluginStart | undefined;
 
-  void coreSetup.getStartServices().then(([, startDeps]) => {
-    contextEngineStart = startDeps.contextEngine;
-  });
+  void coreSetup.getStartServices().then(
+    ([, startDeps]) => {
+      contextEngineStart = startDeps.contextEngine;
+    },
+    (error) => {
+      logger.error(
+        `Failed to resolve Context Engine start services for Agent Builder integration: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  );
 
   registerAttachmentTypes(agentBuilder);
 

@@ -6,8 +6,13 @@
  */
 
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  hasWorkflowCreatePrivilege,
+  hasWorkflowReadPrivilege,
+  hasWorkflowUpdatePrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -15,7 +20,6 @@ import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '@kbn/context-engine-plugin/common/agent_builder_attachments';
-import { MAX_AI_INDEX_AUTOMATIONS } from '@kbn/context-engine-plugin/common/constants';
 import {
   AiIndexConflictError,
   AiIndexManagedError,
@@ -120,59 +124,69 @@ export const resolveWorkflowYamlFromAttachments = (
   };
 };
 
-const assertWorkflowExists = async ({
+const assertWorkflowReadAccess = async ({
   workflowId,
   spaceId,
+  request,
+  getSecurityStart,
   workflowsManagement,
 }: {
   workflowId: string;
   spaceId: string;
+  request: KibanaRequest;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   workflowsManagement: WorkflowsManagementApi;
 }): Promise<void> => {
+  const security = await getSecurityStart();
+  const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
+  if (!canRead) {
+    throw new Error(
+      `Unauthorized to reference workflow '${workflowId}'. The workflowsManagement read privilege is required.`
+    );
+  }
+
   const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
   if (!workflow) {
     throw new Error(`Workflow '${workflowId}' was not found in this space.`);
   }
 };
 
-const attachWorkflowToAiIndex = async ({
-  aiIndexId,
-  workflowId,
-  getAiIndexService,
+const assertWorkflowCreateAccess = async ({
+  spaceId,
+  request,
+  getSecurityStart,
 }: {
-  aiIndexId: string;
-  workflowId: string;
-  getAiIndexService: () => AiIndexService;
-}): Promise<'attached' | 'already_attached'> => {
-  const aiIndexService = getAiIndexService();
-  const aiIndex = await aiIndexService.get(aiIndexId);
-
-  if (aiIndex.managed) {
-    throw new AiIndexManagedError(aiIndexId);
-  }
-
-  const alreadyAttached = aiIndex.automations.some(
-    (automation) => automation.type === 'workflow' && automation.value === workflowId
-  );
-
-  if (alreadyAttached) {
-    return 'already_attached';
-  }
-
-  if (aiIndex.automations.length >= MAX_AI_INDEX_AUTOMATIONS) {
+  spaceId: string;
+  request: KibanaRequest;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+}): Promise<void> => {
+  const security = await getSecurityStart();
+  const canCreate = await hasWorkflowCreatePrivilege({ security, request, spaceId });
+  if (!canCreate) {
     throw new Error(
-      `AI index "${aiIndexId}" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
+      'Unauthorized to create a workflow. The workflowsManagement create privilege is required.'
     );
   }
+};
 
-  await aiIndexService.put(aiIndexId, {
-    description: aiIndex.description,
-    dest: aiIndex.dest,
-    sources: aiIndex.sources,
-    automations: [...aiIndex.automations, { type: 'workflow', value: workflowId }],
-  });
-
-  return 'attached';
+const assertWorkflowUpdateAccess = async ({
+  workflowId,
+  spaceId,
+  request,
+  getSecurityStart,
+}: {
+  workflowId: string;
+  spaceId: string;
+  request: KibanaRequest;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+}): Promise<void> => {
+  const security = await getSecurityStart();
+  const canUpdate = await hasWorkflowUpdatePrivilege({ security, request, spaceId });
+  if (!canUpdate) {
+    throw new Error(
+      `Unauthorized to update workflow '${workflowId}'. The workflowsManagement update privilege is required.`
+    );
+  }
 };
 
 export const saveAutomationHandler = async ({
@@ -180,6 +194,7 @@ export const saveAutomationHandler = async ({
   request,
   spaceId,
   attachments,
+  logger,
   getAiIndexService,
   getCoreStart,
   getSecurityStart,
@@ -189,6 +204,7 @@ export const saveAutomationHandler = async ({
   request: KibanaRequest;
   spaceId: string;
   attachments: AttachmentStateManager;
+  logger: Logger;
   getAiIndexService: () => AiIndexService;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
@@ -201,16 +217,17 @@ export const saveAutomationHandler = async ({
   const aiIndexId = resolveAiIndexIdFromAttachments(aiIndexAttachments, params.aiIndexId);
 
   if (params.workflowId) {
-    await assertWorkflowExists({
+    await assertWorkflowReadAccess({
       workflowId: params.workflowId,
       spaceId,
+      request,
+      getSecurityStart,
       workflowsManagement,
     });
 
-    const attachStatus = await attachWorkflowToAiIndex({
-      aiIndexId,
-      workflowId: params.workflowId,
-      getAiIndexService,
+    const attachStatus = await getAiIndexService().addAutomation(aiIndexId, {
+      type: 'workflow',
+      value: params.workflowId,
     });
 
     return {
@@ -233,9 +250,16 @@ export const saveAutomationHandler = async ({
   let savedWorkflowId: string;
 
   if (origin) {
+    await assertWorkflowUpdateAccess({
+      workflowId: origin,
+      spaceId,
+      request,
+      getSecurityStart,
+    });
     savedWorkflowId = origin;
     await workflowsManagement.updateWorkflow(origin, { yaml }, spaceId, request);
   } else {
+    await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
     const created = await workflowsManagement.createWorkflow(
       { yaml, ...(proposedWorkflowId ? { id: proposedWorkflowId } : {}) },
       spaceId,
@@ -248,16 +272,16 @@ export const saveAutomationHandler = async ({
       ATTACHMENT_REF_ACTOR.agent
     );
     if (!originUpdated) {
-      throw new Error(
-        `Failed to record workflow origin for attachment '${params.workflowAttachmentId}'.`
+      logger.warn(
+        `Workflow '${savedWorkflowId}' was created but its attachment origin could not be recorded; ` +
+          `a future save for attachment '${params.workflowAttachmentId}' may create a duplicate workflow.`
       );
     }
   }
 
-  const attachStatus = await attachWorkflowToAiIndex({
-    aiIndexId,
-    workflowId: savedWorkflowId,
-    getAiIndexService,
+  const attachStatus = await getAiIndexService().addAutomation(aiIndexId, {
+    type: 'workflow',
+    value: savedWorkflowId,
   });
 
   return {

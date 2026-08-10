@@ -106,6 +106,7 @@ export const createSaveAutomationTool = ({
         request,
         spaceId,
         attachments,
+        logger,
         getAiIndexService,
         getCoreStart,
         getSecurityStart,

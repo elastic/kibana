@@ -23,7 +23,7 @@ export const plugin: PluginInitializer<
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderSetupDependencies,
   ContextEngineAgentBuilderStartDependencies
-> = async (_pluginInitializerContext: PluginInitializerContext) => {
+> = async (pluginInitializerContext: PluginInitializerContext) => {
   const { ContextEngineAgentBuilderPlugin } = await import('./plugin');
-  return new ContextEngineAgentBuilderPlugin();
+  return new ContextEngineAgentBuilderPlugin(pluginInitializerContext);
 };
