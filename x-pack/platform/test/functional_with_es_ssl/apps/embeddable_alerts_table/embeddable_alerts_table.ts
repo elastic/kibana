@@ -97,6 +97,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`button#observability`);
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
+        // Switching solution re-runs the async rule tags query; the combo box stays disabled (and opens empty) until it resolves.
+        await retry.waitFor(
+          'rule tags filter to finish loading',
+          async () => !(await comboBox.isDisabled(await testSubjects.find(RULE_TAGS_FILTER_SUBJ)))
+        );
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
