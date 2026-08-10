@@ -107,7 +107,13 @@ export const ensurePrebuiltWatchlists = async ({
   for (const watchlist of getPrebuiltWatchlists(namespace)) {
     const { id, entitySources, ...attrs } = watchlist;
 
-    const watchlistId = await getOrCreateWatchlist({ soClient, watchlistClient, logger, id, attrs });
+    const watchlistId = await getOrCreateWatchlist({
+      soClient,
+      watchlistClient,
+      logger,
+      id,
+      attrs,
+    });
     if (!watchlistId) {
       return;
     }
@@ -160,7 +166,10 @@ const getOrCreateWatchlist = async ({
   // regardless of what ID it was stored under (e.g. after an ID format change).
   // Filtering by both fields uniquely identifies each prebuilt watchlist even when
   // multiple managed watchlists exist.
-  type WatchlistAttrs = { name: string; managed: boolean };
+  interface WatchlistAttrs {
+    name: string;
+    managed: boolean;
+  }
   const { saved_objects: matches } = await soClient.find<WatchlistAttrs>({
     type: watchlistConfigTypeName,
     filter: `watchlist-config.attributes.managed: true AND watchlist-config.attributes.name: "${attrs.name}"`,
@@ -168,7 +177,9 @@ const getOrCreateWatchlist = async ({
   });
 
   if (matches.length === 1) {
-    logger.debug(`Found prebuilt watchlist '${attrs.name}' under id '${matches[0].id}', reusing it`);
+    logger.debug(
+      `Found prebuilt watchlist '${attrs.name}' under id '${matches[0].id}', reusing it`
+    );
     return matches[0].id;
   }
 
@@ -196,7 +207,9 @@ const getOrCreateWatchlist = async ({
       }
     }
 
-    logger.debug(`Found prebuilt watchlist '${attrs.name}' under id '${watchlistToKeep.id}', reusing it`);
+    logger.debug(
+      `Found prebuilt watchlist '${attrs.name}' under id '${watchlistToKeep.id}', reusing it`
+    );
     return watchlistToKeep.id;
   }
 

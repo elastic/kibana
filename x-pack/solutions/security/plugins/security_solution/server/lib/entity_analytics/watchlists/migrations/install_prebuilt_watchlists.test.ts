@@ -325,11 +325,9 @@ describe('installPrebuiltWatchlists', function () {
 
       await callInstall();
 
-      expect(mockScopedSoClient.delete).toHaveBeenCalledWith(
-        WATCHLIST_CONFIG_TYPE_NAME,
-        DUPE_ID,
-        { refresh: 'wait_for' }
-      );
+      expect(mockScopedSoClient.delete).toHaveBeenCalledWith(WATCHLIST_CONFIG_TYPE_NAME, DUPE_ID, {
+        refresh: 'wait_for',
+      });
       expect(mockScopedSoClient.delete).not.toHaveBeenCalledWith(
         WATCHLIST_CONFIG_TYPE_NAME,
         REAL_ID,
@@ -337,7 +335,6 @@ describe('installPrebuiltWatchlists', function () {
       );
       expect(mockWatchlistCreate).not.toHaveBeenCalled();
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith(REAL_ID, expect.any(String));
-
     });
 
     it('creates with the canonical ID when no managed watchlist is found by attribute', async () => {
@@ -347,10 +344,9 @@ describe('installPrebuiltWatchlists', function () {
 
       await callInstall();
 
-      expect(mockWatchlistCreate).toHaveBeenCalledWith(
-        expect.anything(),
-        { id: getPrivilegedUserWatchlistSavedObjectId('default') }
-      );
+      expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
+        id: getPrivilegedUserWatchlistSavedObjectId('default'),
+      });
     });
 
     it('works independently per namespace with no cross-space interference', async () => {
@@ -362,10 +358,9 @@ describe('installPrebuiltWatchlists', function () {
       await callInstall();
 
       expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
-      expect(mockWatchlistCreate).toHaveBeenCalledWith(
-        expect.anything(),
-        { id: getPrivilegedUserWatchlistSavedObjectId('space-1') }
-      );
+      expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
+        id: getPrivilegedUserWatchlistSavedObjectId('space-1'),
+      });
     });
   });
 });
