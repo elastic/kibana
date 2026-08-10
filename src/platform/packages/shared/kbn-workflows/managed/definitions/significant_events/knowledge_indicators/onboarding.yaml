@@ -159,12 +159,8 @@ steps:
           featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 3: Conditional query generation — skip when identification ran this
-  #         cycle but surfaced no new/updated features (barren or recency
-  #         auto-skip), since query generation is grounded in features and
-  #         would only burn budget. An explicit caller feature-skip
-  #         (inputs.skipFeatures == true, e.g. a queries-only run) bypasses
-  #         this gate and always generates.
+  # Step 3: Skip queries when no features were discovered this cycle.
+  #         inputs.skipFeatures == true (queries-only run) bypasses this gate.
   # -----------------------------------------------------------------------
   - name: check_should_generate_queries
     type: if
