@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { AddToCaseActionPanel } from '@kbn/response-ops-alerts-table';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import { flattenObject } from '@kbn/object-utils';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
@@ -242,10 +243,13 @@ export const useBulkActionItems = ({
             disabled: isDisabled,
             'data-test-subj': action['data-test-subj'],
             toolTipContent: isDisabled ? action.disabledLabel : null,
-            onClick: () => {
-              closePopover?.();
-              action.onClick(eventIds);
-            },
+            panel: action.children?.length ? action.key : undefined,
+            onClick: action.children?.length
+              ? undefined
+              : () => {
+                  closePopover?.();
+                  action.onClick?.(eventIds);
+                },
             name: action.label,
           });
           return acc;
@@ -284,9 +288,39 @@ export const useBulkActionItems = ({
             }),
           };
         }),
+        ...(customBulkActions ?? [])
+          .filter(({ children }) => children?.length)
+          .map((action) => ({
+            id: action.key,
+            title: action.panelTitle ?? action.label,
+            content: (
+              <AddToCaseActionPanel
+                actions={
+                  action.children?.map((child) => ({
+                    id: child.key,
+                    label: child.label,
+                    dataTestSubj: child['data-test-subj'],
+                    disabled: !!(query && child.disableOnQuery),
+                    onClick: () => {
+                      closePopover?.();
+                      child.onClick?.(eventIds);
+                    },
+                  })) ?? []
+                }
+              />
+            ),
+          })),
         ...(showRunWorkflowActions ? runDocumentWorkflowPanel : []),
       ] as EuiContextMenuPanelDescriptor[],
-    [alertClosingReasonPanels, runDocumentWorkflowPanel, showRunWorkflowActions]
+    [
+      alertClosingReasonPanels,
+      closePopover,
+      customBulkActions,
+      eventIds,
+      query,
+      runDocumentWorkflowPanel,
+      showRunWorkflowActions,
+    ]
   );
 
   return useMemo(() => ({ items, panels }), [items, panels]);

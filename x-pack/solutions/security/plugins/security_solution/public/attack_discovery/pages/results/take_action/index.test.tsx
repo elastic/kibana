@@ -150,7 +150,7 @@ describe('TakeAction', () => {
     mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
-  it('renders the Add to new case action', () => {
+  it('renders the Add to case action', () => {
     render(
       <TestProviders>
         <TakeAction {...defaultProps} />
@@ -162,7 +162,7 @@ describe('TakeAction', () => {
     expect(screen.getByTestId('addToCase')).toBeInTheDocument();
   });
 
-  it('renders the Add to existing case action', () => {
+  it('renders the Add to existing case action', async () => {
     render(
       <TestProviders>
         <TakeAction {...defaultProps} />
@@ -171,7 +171,8 @@ describe('TakeAction', () => {
 
     openPopover();
 
-    expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('addToCase'));
+    expect(await screen.findByTestId('addToExistingCase')).toBeInTheDocument();
   });
 
   it('renders the View in AI Assistant action', () => {
@@ -201,7 +202,6 @@ describe('TakeAction', () => {
       'markAsAcknowledged',
       'markAsClosed',
       'addToCase',
-      'addToExistingCase',
       'viewInAiAssistant',
     ]);
     expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(2);
@@ -535,6 +535,9 @@ describe('TakeAction', () => {
 
       openPopover();
       fireEvent.click(screen.getByTestId('addToCase'));
+      expect(await screen.findByTestId('add-to-case-submit')).toBeDisabled();
+      fireEvent.click(await screen.findByTestId('addToNewCase'));
+      fireEvent.click(await screen.findByTestId('add-to-case-submit'));
 
       await waitFor(() => {
         expect(mockOnAddToNewCase).toHaveBeenCalledWith({
@@ -545,7 +548,7 @@ describe('TakeAction', () => {
       });
     });
 
-    it('calls onAddToExistingCase when clicking add to existing case', () => {
+    it('calls onAddToExistingCase when clicking add to existing case', async () => {
       render(
         <TestProviders>
           <TakeAction {...defaultProps} />
@@ -553,7 +556,9 @@ describe('TakeAction', () => {
       );
 
       openPopover();
-      fireEvent.click(screen.getByTestId('addToExistingCase'));
+      fireEvent.click(screen.getByTestId('addToCase'));
+      fireEvent.click(await screen.findByTestId('addToExistingCase'));
+      fireEvent.click(await screen.findByTestId('add-to-case-submit'));
 
       expect(mockOnAddToExistingCase).toHaveBeenCalledWith({
         alertIds: expect.any(Array),
@@ -621,7 +626,6 @@ describe('TakeAction', () => {
       openPopover();
 
       expect(screen.queryByTestId('addToCase')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('addToExistingCase')).not.toBeInTheDocument();
     });
   });
 

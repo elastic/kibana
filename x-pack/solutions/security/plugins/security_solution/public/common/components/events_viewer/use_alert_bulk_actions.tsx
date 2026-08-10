@@ -8,6 +8,7 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import React, { lazy, Suspense, useMemo } from 'react';
+import type { CustomBulkAction, CustomBulkActionProp } from '../../../../common/types';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
@@ -75,17 +76,22 @@ export const useAlertBulkActions = ({
 
   const additionalBulkActions = useMemo(() => {
     if (bulkActions && bulkActions !== true && bulkActions.customBulkActions !== undefined) {
-      return bulkActions.customBulkActions.map((action) => {
+      const transformAction = (action: CustomBulkAction): CustomBulkActionProp => {
         return {
           ...action,
-          onClick: (eventIds: string[]) => {
-            const items = data.filter((item) => {
-              return eventIds.find((event) => item._id === event);
-            });
-            action.onClick(items);
-          },
+          children: action.children?.map(transformAction),
+          onClick: action.onClick
+            ? (eventIds: string[]) => {
+                const items = data.filter((item) => {
+                  return eventIds.find((event) => item._id === event);
+                });
+                action.onClick?.(items);
+              }
+            : undefined,
         };
-      });
+      };
+
+      return bulkActions.customBulkActions.map(transformAction);
     }
   }, [bulkActions, data]);
   const alertBulkActions = useMemo(

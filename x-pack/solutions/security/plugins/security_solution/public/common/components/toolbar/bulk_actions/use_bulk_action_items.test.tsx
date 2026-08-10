@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
+import React from 'react';
 import type { BulkActionsProps } from './use_bulk_action_items';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -92,6 +93,40 @@ describe('useBulkActionItems', () => {
         (item) => item['data-test-subj'] === 'alert-close-context-menu-item'
       )
     ).toBeUndefined();
+  });
+
+  it('should convert nested custom actions into a submenu panel', () => {
+    const { result } = renderUseBulkActionItems({
+      customBulkActions: [
+        {
+          key: 'add-to-case',
+          label: 'Add to case',
+          panelTitle: 'Case type',
+          children: [
+            {
+              key: 'add-to-new-case',
+              label: 'Add to new case',
+              'data-test-subj': 'add-to-new-case',
+              onClick: jest.fn(),
+            },
+            {
+              key: 'add-to-existing-case',
+              label: 'Add to existing case',
+              'data-test-subj': 'add-to-existing-case',
+              onClick: jest.fn(),
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.current.items.find(({ key }) => key === 'add-to-case')?.panel).toBe(
+      'add-to-case'
+    );
+    const casePanel = result.current.panels.find(({ id }) => id === 'add-to-case');
+    const { getByTestId } = render(<>{casePanel?.content}</>);
+    expect(getByTestId('add-to-new-case')).toBeInTheDocument();
+    expect(getByTestId('add-to-existing-case')).toBeInTheDocument();
   });
 
   describe('workflow actions', () => {

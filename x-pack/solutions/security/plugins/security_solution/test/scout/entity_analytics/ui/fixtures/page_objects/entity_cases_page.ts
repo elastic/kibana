@@ -34,8 +34,10 @@ import {
 export class EntityCasesPage {
   // Entity flyout – Take Action popover
   public readonly takeActionButton: Locator;
+  public readonly addToCaseItem: Locator;
   public readonly addToNewCaseItem: Locator;
   public readonly addToExistingCaseItem: Locator;
+  public readonly addToCaseSubmitButton: Locator;
 
   // Case view – Attachments tab + Entities accordion
   public readonly attachmentsTab: Locator;
@@ -53,8 +55,10 @@ export class EntityCasesPage {
 
   constructor(private readonly page: ScoutPage) {
     this.takeActionButton = page.testSubj.locator('take-action-button');
+    this.addToCaseItem = page.testSubj.locator('add-to-case-action');
     this.addToNewCaseItem = page.testSubj.locator(ADD_TO_NEW_CASE_TEST_ID);
     this.addToExistingCaseItem = page.testSubj.locator(ADD_TO_EXISTING_CASE_TEST_ID);
+    this.addToCaseSubmitButton = page.testSubj.locator('add-to-case-submit');
 
     this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
     this.attachmentsContainer = page.testSubj.locator('case-view-attachments');
@@ -104,11 +108,15 @@ export class EntityCasesPage {
   }
 
   async clickAddToNewCase() {
+    await this.addToCaseItem.click();
     await this.addToNewCaseItem.click();
+    await this.addToCaseSubmitButton.click();
   }
 
   async clickAddToExistingCase() {
+    await this.addToCaseItem.click();
     await this.addToExistingCaseItem.click();
+    await this.addToCaseSubmitButton.click();
   }
 
   async fillCaseName(name: string) {

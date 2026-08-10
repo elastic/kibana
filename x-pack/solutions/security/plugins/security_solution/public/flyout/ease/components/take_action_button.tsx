@@ -69,7 +69,7 @@ export const TakeActionButton = memo(() => {
     }));
   }, [dataAsNestedObject]);
 
-  const { addToCaseActionItems } = useAddToCaseActions({
+  const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
     ecsData: dataAsNestedObject,
     nonEcsData,
     onMenuItemClick: closePopover,
@@ -92,7 +92,7 @@ export const TakeActionButton = memo(() => {
       <AlertSummaryActionMenu
         addToCaseItems={addToCaseActionItems}
         alertTagsItems={alertTagsItems}
-        panels={alertTagsPanels}
+        panels={[...addToCaseActionPanels, ...alertTagsPanels]}
       />
     </EuiPopover>
   );

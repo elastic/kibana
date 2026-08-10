@@ -253,6 +253,8 @@ export const ADD_TO_NEW_CASE_BUTTON = '[data-test-subj="attach-new-case"]';
 
 export const ADD_TO_EXISTING_CASE_BUTTON = '[data-test-subj="attach-existing-case"]';
 
+export const ADD_TO_CASE_BUTTON = '[data-test-subj="alerts-table-add-to-case"]';
+
 export const GROUP_ALERTS_BY_BTN = '[data-test-subj="alerts-table-group-selector"]';
 
 export const TAKE_ACTION_GROUPED_ALERTS_BTN = '[data-test-subj="take-action-button"]';

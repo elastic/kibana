@@ -25,8 +25,7 @@ interface AlertSummaryActionMenuProps {
 }
 
 const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToExistingCase]: 'briefcase',
-  [ADD_TO_CASE_ACTION_IDS.addToNewCase]: 'briefcase',
+  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
   [ALERT_TAG_ACTION_ID]: 'tag',
 } as const;
 

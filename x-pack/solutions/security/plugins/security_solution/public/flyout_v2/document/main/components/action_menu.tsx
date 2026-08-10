@@ -35,6 +35,7 @@ import { EXPLORE_ACTION_ID } from '../hooks/use_explore_actions';
 
 interface ActionMenuProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
+  addToCasePanels: EuiContextMenuPanelDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneePanels: EuiContextMenuPanelDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
@@ -60,8 +61,6 @@ interface ActionMenuProps {
 }
 
 const FOOTER_ACTIONS_BY_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
-  'add-to-existing-case-action': FLYOUT_ACTION.ADD_TO_CASE_EXISTING,
-  'add-to-new-case-action': FLYOUT_ACTION.ADD_TO_CASE_NEW,
   'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
   'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
   'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
@@ -87,8 +86,7 @@ const ALERT_STATUS_ICON_COLORS = {
 } as const;
 
 const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToExistingCase]: 'briefcase',
-  [ADD_TO_CASE_ACTION_IDS.addToNewCase]: 'briefcase',
+  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
   [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
   [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
   [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: 'bullseye',
@@ -105,6 +103,7 @@ const ACTION_ICONS_BY_ID = {
 
 export const ActionMenu = ({
   addToCaseItems,
+  addToCasePanels,
   alertAssigneeItems,
   alertAssigneePanels,
   alertTagItems,
@@ -180,6 +179,7 @@ export const ActionMenu = ({
 
   const panels = useMemo(
     () => [
+      ...(!isRemoteDocument ? addToCasePanels : []),
       ...(!isRemoteDocument && isAlert ? statusPanels : []),
       ...(!isRemoteDocument && isAlert ? alertAssigneePanels : []),
       ...(!isRemoteDocument && isAlert ? alertTagPanels : []),
@@ -189,6 +189,7 @@ export const ActionMenu = ({
     [
       alertAssigneePanels,
       alertTagPanels,
+      addToCasePanels,
       isAlert,
       isRemoteDocument,
       runAlertWorkflowPanels,

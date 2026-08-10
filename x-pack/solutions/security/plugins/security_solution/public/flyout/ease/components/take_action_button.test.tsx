@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { TAKE_ACTION_BUTTON_TEST_ID, TakeActionButton } from './take_action_button';
@@ -44,15 +44,16 @@ describe('TakeActionButton', () => {
       },
     });
 
-    const { getByTestId } = render(<TakeActionButton />);
+    const { findByTestId, getByTestId } = render(<TakeActionButton />);
 
     const button = getByTestId(TAKE_ACTION_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
     await userEvent.click(button);
 
-    expect(getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    expect(getByTestId('add-to-new-case-action')).toBeInTheDocument();
+    fireEvent.click(getByTestId('add-to-case-action'));
+    expect(await findByTestId('add-to-existing-case-action')).toBeInTheDocument();
+    expect(await findByTestId('add-to-new-case-action')).toBeInTheDocument();
     expect(getByTestId('alert-tags-context-menu-item')).toBeInTheDocument();
   });
 
@@ -88,8 +89,7 @@ describe('TakeActionButton', () => {
 
     await userEvent.click(button);
 
-    expect(queryByTestId('add-to-existing-case-action')).not.toBeInTheDocument();
-    expect(queryByTestId('add-to-new-case-action')).not.toBeInTheDocument();
+    expect(queryByTestId('add-to-case-action')).not.toBeInTheDocument();
   });
 
   it('should not show tags actions if user is not authorized', async () => {

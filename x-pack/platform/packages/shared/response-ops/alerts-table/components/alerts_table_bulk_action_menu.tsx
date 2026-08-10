@@ -16,6 +16,8 @@ import {
 import React, { useMemo } from 'react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { BulkActionsConfig, BulkActionsPanelConfig, TimelineItem } from '../types';
+import { ADD_TO_CASE, CASE_TYPE } from '../translations';
+import { AddToCaseActionPanel } from './add_to_case_action_panel';
 import {
   BULK_ADD_TO_CASE_ACTION_IDS,
   BULK_ADD_TO_CHAT_ACTION_ID,
@@ -65,14 +67,26 @@ const ACTION_ICONS_BY_ID: Readonly<Record<string, IconType>> = {
 };
 
 const GROUP_SEPARATOR_TEST_ID = 'alertsTableBulkActionMenuGroupSeparator';
+const ADD_TO_CASE_ACTION_ID = 'alerts-table-add-to-case';
+const ADD_TO_CASE_PANEL_ID = 'alerts-table-add-to-case-panel';
+
+const CASE_ACTION_IDS = new Set<string>([
+  BULK_ADD_TO_CASE_ACTION_IDS.addToExistingCase,
+  BULK_ADD_TO_CASE_ACTION_IDS.addToNewCase,
+]);
 
 const getGroupedItems = (
   items: BulkActionsConfig[],
-  toMenuItem: (item: BulkActionsConfig) => EuiContextMenuPanelItemDescriptor
+  toMenuItem: (item: BulkActionsConfig) => EuiContextMenuPanelItemDescriptor,
+  addToCaseItem?: EuiContextMenuPanelItemDescriptor
 ): EuiContextMenuPanelItemDescriptor[] => {
   const groups = new Map<string, EuiContextMenuPanelItemDescriptor[]>(
     ACTION_GROUP_ORDER.map((groupId) => [groupId, []])
   );
+
+  if (addToCaseItem) {
+    groups.get('cases')?.push(addToCaseItem);
+  }
 
   items.forEach((item) => {
     const groupId = item.groupId ?? ACTION_GROUP_BY_ID[item.key] ?? 'custom';
@@ -140,8 +154,31 @@ export const AlertsTableBulkActionMenu = ({
 
   const menuPanels = useMemo(() => {
     const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection.keys());
+    const runAction = (item: BulkActionsConfig) => {
+      closePopover();
+      item.onClick?.(
+        selectedAlertItems,
+        isAllSelected,
+        setIsBulkActionsLoading,
+        clearSelection,
+        refresh
+      );
+    };
+    const initialPanel = panels.find((panel) => panel.id === 0 && panel.items);
+    const caseActions = initialPanel?.items?.filter(({ key }) => CASE_ACTION_IDS.has(key)) ?? [];
+    const addToCaseItem: EuiContextMenuPanelItemDescriptor | undefined =
+      caseActions.length > 0
+        ? {
+            key: ADD_TO_CASE_ACTION_ID,
+            'data-test-subj': ADD_TO_CASE_ACTION_ID,
+            disabled: caseActions.every((item) => isAllSelected && item.disableOnQuery),
+            icon: 'briefcase',
+            name: ADD_TO_CASE,
+            panel: ADD_TO_CASE_PANEL_ID,
+          }
+        : undefined;
 
-    return panels.map((panel) => {
+    const mappedPanels = panels.map((panel) => {
       if (panel.items) {
         const toMenuItem = (item: BulkActionsConfig): EuiContextMenuPanelItemDescriptor => {
           const isDisabled = isAllSelected && item.disableOnQuery;
@@ -150,25 +187,17 @@ export const AlertsTableBulkActionMenu = ({
             key: item.key,
             'data-test-subj': item['data-test-subj'],
             disabled: isDisabled,
-            onClick: item.onClick
-              ? () => {
-                  closePopover();
-                  item.onClick?.(
-                    selectedAlertItems,
-                    isAllSelected,
-                    setIsBulkActionsLoading,
-                    clearSelection,
-                    refresh
-                  );
-                }
-              : undefined,
+            onClick: item.onClick ? () => runAction(item) : undefined,
             name: isDisabled && item.disabledLabel ? item.disabledLabel : item.label,
             panel: item.panel,
             icon: item.icon ?? ACTION_ICONS_BY_ID[item.key],
           };
         };
+        const nonCaseItems = panel.items.filter(({ key }) => !CASE_ACTION_IDS.has(key));
         const items =
-          panel.id === 0 ? getGroupedItems(panel.items, toMenuItem) : panel.items.map(toMenuItem);
+          panel.id === 0
+            ? getGroupedItems(nonCaseItems, toMenuItem, addToCaseItem)
+            : panel.items.map(toMenuItem);
 
         return { ...panel, items };
       }
@@ -185,6 +214,27 @@ export const AlertsTableBulkActionMenu = ({
         }),
       };
     });
+
+    return caseActions.length > 0
+      ? [
+          ...mappedPanels,
+          {
+            id: ADD_TO_CASE_PANEL_ID,
+            title: CASE_TYPE,
+            content: (
+              <AddToCaseActionPanel
+                actions={caseActions.map((action) => ({
+                  id: action.key,
+                  label: action.label,
+                  dataTestSubj: action['data-test-subj'],
+                  disabled: isAllSelected && action.disableOnQuery,
+                  onClick: () => runAction(action),
+                }))}
+              />
+            ),
+          },
+        ]
+      : mappedPanels;
   }, [
     alerts,
     clearSelection,

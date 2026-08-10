@@ -29,6 +29,7 @@ interface AttacksActionMenuProps {
   assigneeItems: EuiContextMenuPanelItemDescriptor[];
   assigneePanels: EuiContextMenuPanelDescriptor[];
   caseItems: EuiContextMenuPanelItemDescriptor[];
+  casePanels: EuiContextMenuPanelDescriptor[];
   datasetItems: EuiContextMenuPanelItemDescriptor[];
   isRemoteDocument: boolean;
   navigationItems: EuiContextMenuPanelItemDescriptor[];
@@ -52,8 +53,7 @@ const ACTION_ICONS_BY_ID = {
   [ATTACK_AI_ACTION_IDS.viewInAiAssistant]: 'sparkles',
   [ATTACK_ASSIGNEE_ACTION_IDS.assign]: 'users',
   [ATTACK_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
-  [ATTACK_CASE_ACTION_IDS.addToExistingCase]: 'briefcase',
-  [ATTACK_CASE_ACTION_IDS.addToNewCase]: 'briefcase',
+  [ATTACK_CASE_ACTION_IDS.addToCase]: 'briefcase',
   [ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
   [ATTACK_TAG_ACTION_ID]: 'tag',
   [EXPLORE_IN_ATTACKS_ACTION_ID]: 'external',
@@ -64,6 +64,7 @@ export const AttacksActionMenu = ({
   assigneeItems,
   assigneePanels,
   caseItems,
+  casePanels,
   datasetItems,
   isRemoteDocument,
   navigationItems,
@@ -120,8 +121,8 @@ export const AttacksActionMenu = ({
     () =>
       isRemoteDocument
         ? []
-        : [...runWorkflowPanels, ...statusPanels, ...assigneePanels, ...tagPanels],
-    [assigneePanels, isRemoteDocument, runWorkflowPanels, statusPanels, tagPanels]
+        : [...casePanels, ...runWorkflowPanels, ...statusPanels, ...assigneePanels, ...tagPanels],
+    [assigneePanels, casePanels, isRemoteDocument, runWorkflowPanels, statusPanels, tagPanels]
   );
 
   return <EuiContextMenu initialPanelId={0} panels={[{ id: 0, items }, ...panels]} />;

@@ -73,7 +73,7 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
     [alert]
   );
 
-  const { addToCaseActionItems } = useAddToCaseActions({
+  const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
     ecsData: ecsAlert,
     nonEcsData,
     onMenuItemClick: closePopover,
@@ -96,7 +96,7 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
       <AlertSummaryActionMenu
         addToCaseItems={addToCaseActionItems}
         alertTagsItems={alertTagsItems}
-        panels={alertTagsPanels}
+        panels={[...addToCaseActionPanels, ...alertTagsPanels]}
       />
     </EuiPopover>
   );

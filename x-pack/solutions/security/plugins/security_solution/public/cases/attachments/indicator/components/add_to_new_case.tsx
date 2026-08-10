@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCaseDisabled } from '../hooks/use_case_permission';
 import type { IndicatorAttachmentMetadata } from '..';
@@ -31,6 +31,37 @@ export interface AddToNewCaseProps {
   ['data-test-subj']?: string;
 }
 
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+interface IndicatorCaseAction {
+  onClick: () => void;
+  disabled: boolean;
+}
+
+export const useAddToNewCase = ({ indicator, onClick }: AddToNewCaseProps): IndicatorCaseAction => {
+  const { cases } = useKibana().services;
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
+  const id: string = indicator._id as string;
+  const attachmentMetadata: IndicatorAttachmentMetadata =
+    generateIndicatorAttachmentsMetadata(indicator);
+  const attachments: CaseAttachmentsWithoutOwner = generateIndicatorAttachmentsWithoutOwner(
+    id,
+    attachmentMetadata
+  );
+  const menuItemClicked = useCallback(() => {
+    onClick();
+    createCaseFlyout.open({ attachments });
+  }, [attachments, createCaseFlyout, onClick]);
+  const disabled = useCaseDisabled(attachmentMetadata.indicatorName);
+
+  return { onClick: menuItemClicked, disabled };
+};
+
 /**
  * Leverages the cases plugin api to display a flyout to create a new case.
  * Once a case is created, an attachment is added to it and a confirmation snackbar
@@ -45,33 +76,15 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
   onClick,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { cases } = useKibana().services;
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
-
-  const id: string = indicator._id as string;
-  const attachmentMetadata: IndicatorAttachmentMetadata =
-    generateIndicatorAttachmentsMetadata(indicator);
-  const attachments: CaseAttachmentsWithoutOwner = generateIndicatorAttachmentsWithoutOwner(
-    id,
-    attachmentMetadata
-  );
-  const menuItemClicked = useCallback(() => {
-    onClick();
-    createCaseFlyout.open({ attachments });
-  }, [attachments, createCaseFlyout, onClick]);
-
-  const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
+  const action = useAddToNewCase({ indicator, onClick });
 
   return (
     <EuiContextMenuItem
-      onClick={() => menuItemClicked()}
+      onClick={action.onClick}
       data-test-subj={dataTestSubj}
-      disabled={disabled}
+      disabled={action.disabled}
     >
-      <FormattedMessage
-        defaultMessage="Add to new case"
-        id="xpack.securitySolution.threatIntelligence.addToNewCase"
-      />
+      {ADD_TO_NEW_CASE}
     </EuiContextMenuItem>
   );
 };

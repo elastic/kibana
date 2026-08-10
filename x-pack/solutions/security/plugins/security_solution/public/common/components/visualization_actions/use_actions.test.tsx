@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { mockAttributes } from './mocks';
 import { DEFAULT_ACTIONS, useActions } from './use_actions';
+import { VisualizationContextMenuActions } from './types';
 import { TestProviders } from '../../mock';
 
 jest.mock('./use_add_to_existing_case', () => {
@@ -83,12 +84,29 @@ describe(`useActions`, () => {
     expect(result.current[0].order).toEqual(4);
     expect(result.current[1].id).toEqual('addToNewCase');
     expect(result.current[1].order).toEqual(3);
+    expect(result.current[1].grouping?.[0].id).toEqual('addToCase');
     expect(result.current[2].id).toEqual('addToExistingCase');
     expect(result.current[2].order).toEqual(2);
+    expect(result.current[2].grouping?.[0].id).toEqual('addToCase');
     expect(result.current[3].id).toEqual('saveToLibrary');
     expect(result.current[3].order).toEqual(1);
     expect(result.current[4].id).toEqual('openInLens');
     expect(result.current[4].order).toEqual(0);
+  });
+
+  it('does not group a single case action', () => {
+    const { result } = renderHook(
+      () =>
+        useActions({
+          ...props,
+          withActions: [VisualizationContextMenuActions.addToNewCase],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(result.current.find(({ id }) => id === 'addToNewCase')?.grouping).toBeUndefined();
   });
 
   it('should render extra actions if available', () => {

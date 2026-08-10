@@ -241,8 +241,7 @@ describe('AlertsDataGrid bulk actions', () => {
       const menu = screen.getByTestId('alertsTableBulkActionMenu');
       const menuItems = within(menu).getAllByRole('menuitem');
       expect(menuItems.map((item) => item.getAttribute('data-test-subj'))).toEqual([
-        'attach-new-case',
-        'attach-existing-case',
+        'alerts-table-add-to-case',
         'bulk-mute',
         'bulk-unmute',
       ]);
@@ -252,6 +251,13 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(within(menu).getAllByTestId('alertsTableBulkActionMenuGroupSeparator')).toHaveLength(
         1
       );
+
+      await userEvent.click(screen.getByTestId('alerts-table-add-to-case'));
+      expect(await screen.findByText('Case type')).toBeInTheDocument();
+      expect(screen.getByTestId('attach-new-case')).toBeInTheDocument();
+      expect(screen.getByTestId('attach-existing-case')).toBeInTheDocument();
+      expect(screen.getByTestId('add-to-case-submit')).toHaveTextContent('Add to case');
+      expect(screen.getByTestId('add-to-case-submit')).toBeDisabled();
     });
 
     it('should show only mute/unmute actions when user does not have case write access', async () => {
@@ -268,8 +274,7 @@ describe('AlertsDataGrid bulk actions', () => {
       // Verify mute/unmute actions are available but case actions are not
       expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
       expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
-      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-table-add-to-case')).not.toBeInTheDocument();
     });
 
     it('should show only mute/unmute actions when user does not have case read access', async () => {
@@ -286,8 +291,7 @@ describe('AlertsDataGrid bulk actions', () => {
       // Verify mute/unmute actions are available but case actions are not
       expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
       expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
-      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-table-add-to-case')).not.toBeInTheDocument();
     });
 
     it('should show only mute/unmute actions when the cases context is missing', async () => {
@@ -304,8 +308,7 @@ describe('AlertsDataGrid bulk actions', () => {
       // Verify mute/unmute actions are available but case actions are not
       expect(screen.getByTestId('bulk-mute')).toBeInTheDocument();
       expect(screen.getByTestId('bulk-unmute')).toBeInTheDocument();
-      expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alerts-table-add-to-case')).not.toBeInTheDocument();
     });
 
     it('should pass the case ids when selecting alerts', async () => {

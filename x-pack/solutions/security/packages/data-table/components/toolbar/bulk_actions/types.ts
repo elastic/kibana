@@ -12,9 +12,11 @@ export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export interface CustomBulkAction {
   key: string;
   label: string;
+  panelTitle?: string;
+  children?: CustomBulkAction[];
   disableOnQuery?: boolean;
   disabledLabel?: string;
-  onClick: (items?: TimelineItem[]) => void;
+  onClick?: (items?: TimelineItem[]) => void;
   ['data-test-subj']?: string;
 }
 

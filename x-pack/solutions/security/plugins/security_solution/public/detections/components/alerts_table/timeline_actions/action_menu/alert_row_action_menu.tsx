@@ -50,8 +50,7 @@ const ALERT_STATUS_ICON_COLORS = {
 } as const;
 
 const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToExistingCase]: 'briefcase',
-  [ADD_TO_CASE_ACTION_IDS.addToNewCase]: 'briefcase',
+  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
   [ADD_TO_CHAT_ACTION_ID]: 'comment',
   [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
   [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',

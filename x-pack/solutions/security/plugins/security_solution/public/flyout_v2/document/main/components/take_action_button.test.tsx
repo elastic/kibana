@@ -9,7 +9,10 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import {
+  ADD_TO_CASE_ACTION_IDS,
+  useAddToCaseActions,
+} from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
@@ -255,11 +258,12 @@ describe('<TakeActionButton />', () => {
     mockUseAddToCaseActions.mockReturnValue({
       addToCaseActionItems: [
         {
-          key: 'add-to-existing-case-action',
-          name: 'Add to existing case',
-          'data-test-subj': 'add-to-existing-case-action',
+          key: 'add-to-case-action',
+          name: 'Add to case',
+          'data-test-subj': 'add-to-case-action',
         },
       ],
+      addToCaseActionPanels: [],
     });
     mockUseAlertsActions.mockReturnValue({
       actionItems: [
@@ -300,16 +304,14 @@ describe('<TakeActionButton />', () => {
     expect(
       screen.getAllByRole('menuitem').map((item) => item.getAttribute('data-test-subj'))
     ).toEqual([
-      'add-to-existing-case-action',
+      'add-to-case-action',
       'open-alert-status',
       'alert-tags-context-menu-item',
       'investigate-in-timeline-action-item',
     ]);
     expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(3);
     expect(
-      screen
-        .getByTestId('add-to-existing-case-action')
-        .querySelector('[data-euiicon-type="briefcase"]')
+      screen.getByTestId('add-to-case-action').querySelector('[data-euiicon-type="briefcase"]')
     ).not.toBeNull();
     expect(
       screen.getByTestId('open-alert-status').querySelector('[data-euiicon-type="dot"]')
@@ -1026,6 +1028,20 @@ describe('<TakeActionButton />', () => {
       expect(mockReportActionClicked).toHaveBeenCalledWith({
         flyoutType: FLYOUT_TYPE.DOCUMENT,
         action: FLYOUT_ACTION.RUN_OSQUERY,
+      });
+    });
+
+    it.each([
+      [ADD_TO_CASE_ACTION_IDS.addToNewCase, FLYOUT_ACTION.ADD_TO_CASE_NEW],
+      [ADD_TO_CASE_ACTION_IDS.addToExistingCase, FLYOUT_ACTION.ADD_TO_CASE_EXISTING],
+    ])('reports the selected case action', (actionId, expectedAction) => {
+      renderTakeActionButton();
+
+      mockUseAddToCaseActions.mock.calls[0][0].onActionClick?.(actionId);
+
+      expect(mockReportActionClicked).toHaveBeenCalledWith({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        action: expectedAction,
       });
     });
 

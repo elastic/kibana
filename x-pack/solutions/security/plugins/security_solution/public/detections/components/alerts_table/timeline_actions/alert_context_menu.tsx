@@ -105,7 +105,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     }));
   }, [ecsRowData]);
 
-  const { addToCaseActionItems } = useAddToCaseActions({
+  const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
     ecsData: ecsRowData,
     nonEcsData: flattenedEcsData,
     onMenuItemClick,
@@ -286,6 +286,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const panels = useMemo(
     () => [
+      ...addToCaseActionPanels,
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
@@ -293,6 +294,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...runDocumentWorkflowPanels,
     ],
     [
+      addToCaseActionPanels,
       alertTagsPanels,
       alertAssigneesPanels,
       statusActionPanels,

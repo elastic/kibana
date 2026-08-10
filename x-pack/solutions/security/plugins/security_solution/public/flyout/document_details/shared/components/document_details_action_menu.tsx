@@ -30,6 +30,7 @@ import { RESPOND_ACTION_ID } from '../../../../common/components/endpoint/respon
 
 interface DocumentDetailsActionMenuProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
+  addToCasePanels: EuiContextMenuPanelDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneePanels: EuiContextMenuPanelDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
@@ -60,8 +61,7 @@ const ALERT_STATUS_ICON_COLORS = {
 } as const;
 
 const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToExistingCase]: 'briefcase',
-  [ADD_TO_CASE_ACTION_IDS.addToNewCase]: 'briefcase',
+  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
   [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
   [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
   [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: 'bullseye',
@@ -78,6 +78,7 @@ const ACTION_ICONS_BY_ID = {
 
 export const DocumentDetailsActionMenu = ({
   addToCaseItems,
+  addToCasePanels,
   alertAssigneeItems,
   alertAssigneePanels,
   alertTagItems,
@@ -158,6 +159,7 @@ export const DocumentDetailsActionMenu = ({
 
   const panels = useMemo(
     () => [
+      ...(!isRemoteDocument ? addToCasePanels : []),
       ...(!isRemoteDocument ? alertTagPanels : []),
       ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanels : runDocumentWorkflowPanels) : []),
       ...(!isRemoteDocument ? alertAssigneePanels : []),
@@ -166,6 +168,7 @@ export const DocumentDetailsActionMenu = ({
     [
       alertAssigneePanels,
       alertTagPanels,
+      addToCasePanels,
       isAlert,
       isRemoteDocument,
       runAlertWorkflowPanels,

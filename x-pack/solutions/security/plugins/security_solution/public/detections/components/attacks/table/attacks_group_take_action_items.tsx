@@ -157,7 +157,7 @@ export function AttacksGroupTakeActionItems({
     [attack, baseAttackProps]
   );
 
-  const { items: casesItems } = useAttackCaseContextMenuItems({
+  const { items: casesItems, panels: casePanels } = useAttackCaseContextMenuItems({
     closePopover,
     title: attack.title,
     attacksWithCase,
@@ -218,6 +218,7 @@ export function AttacksGroupTakeActionItems({
       assigneeItems={assignItems}
       assigneePanels={assignPanels}
       caseItems={casesItems}
+      casePanels={casePanels}
       datasetItems={datasetItems}
       isRemoteDocument={isRemoteDocument}
       navigationItems={navigationItems}
