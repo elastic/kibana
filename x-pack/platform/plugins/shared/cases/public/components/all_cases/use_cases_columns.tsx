@@ -351,7 +351,10 @@ export const useCasesColumns = ({
   // `extendedFields`; otherwise they come from the legacy customFields config.
   if (templatesEnabled) {
     globalInlineFields.forEach((field) => {
-      columnsDict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(field);
+      columnsDict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(
+        field,
+        userProfiles
+      );
     });
   } else {
     customFields.forEach(({ key, type, label }) => {
