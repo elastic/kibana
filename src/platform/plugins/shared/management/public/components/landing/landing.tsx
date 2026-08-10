@@ -60,9 +60,7 @@ export const ManagementLandingPage = ({
 
   // AutoOps enabled banner appears once the cluster has been connected and AutoOps is active
   const shouldShowAutoOpsEnabledBanner =
-    !isAirGapped &&
-    autoOpsStatus.isCloudConnectAutoopsEnabled &&
-    !hideAnnouncements;
+    !isAirGapped && autoOpsStatus.isCloudConnectAutoopsEnabled && !hideAnnouncements;
   const cloudConnectUrl = coreStart.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
     e.preventDefault();

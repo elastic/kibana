@@ -182,14 +182,12 @@ describe('Landing Page', () => {
       await renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
-        getAutoOpsStatusHook:
-          () =>
-          () => ({
-            isCloudConnectAutoopsEnabled: true,
-            autoOpsServiceUrl: TEST_AUTOOPS_URL,
-            autoOpsDocsUrl: 'https://www.elastic.co/docs/current/en/autoops',
-            isLoading: false,
-          }),
+        getAutoOpsStatusHook: () => () => ({
+          isCloudConnectAutoopsEnabled: true,
+          autoOpsServiceUrl: TEST_AUTOOPS_URL,
+          autoOpsDocsUrl: 'https://www.elastic.co/docs/current/en/autoops',
+          isLoading: false,
+        }),
       });
 
       expect(screen.getByTestId('autoOpsEnabledCallout')).toBeInTheDocument();
@@ -201,12 +199,10 @@ describe('Landing Page', () => {
       await renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
-        getAutoOpsStatusHook:
-          () =>
-          () => ({
-            isCloudConnectAutoopsEnabled: false,
-            isLoading: false,
-          }),
+        getAutoOpsStatusHook: () => () => ({
+          isCloudConnectAutoopsEnabled: false,
+          isLoading: false,
+        }),
       });
 
       expect(screen.queryByTestId('autoOpsEnabledCallout')).not.toBeInTheDocument();
@@ -217,13 +213,11 @@ describe('Landing Page', () => {
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         isAirGapped: true,
-        getAutoOpsStatusHook:
-          () =>
-          () => ({
-            isCloudConnectAutoopsEnabled: true,
-            autoOpsServiceUrl: TEST_AUTOOPS_URL,
-            isLoading: false,
-          }),
+        getAutoOpsStatusHook: () => () => ({
+          isCloudConnectAutoopsEnabled: true,
+          autoOpsServiceUrl: TEST_AUTOOPS_URL,
+          isLoading: false,
+        }),
       });
 
       expect(screen.queryByTestId('autoOpsEnabledCallout')).not.toBeInTheDocument();
@@ -237,13 +231,11 @@ describe('Landing Page', () => {
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         coreStart,
-        getAutoOpsStatusHook:
-          () =>
-          () => ({
-            isCloudConnectAutoopsEnabled: true,
-            autoOpsServiceUrl: TEST_AUTOOPS_URL,
-            isLoading: false,
-          }),
+        getAutoOpsStatusHook: () => () => ({
+          isCloudConnectAutoopsEnabled: true,
+          autoOpsServiceUrl: TEST_AUTOOPS_URL,
+          isLoading: false,
+        }),
       });
 
       expect(screen.queryByTestId('autoOpsEnabledCallout')).not.toBeInTheDocument();
@@ -255,13 +247,11 @@ describe('Landing Page', () => {
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: false },
-        getAutoOpsStatusHook:
-          () =>
-          () => ({
-            isCloudConnectAutoopsEnabled: true,
-            autoOpsServiceUrl: TEST_AUTOOPS_URL,
-            isLoading: false,
-          }),
+        getAutoOpsStatusHook: () => () => ({
+          isCloudConnectAutoopsEnabled: true,
+          autoOpsServiceUrl: TEST_AUTOOPS_URL,
+          isLoading: false,
+        }),
       });
 
       expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();

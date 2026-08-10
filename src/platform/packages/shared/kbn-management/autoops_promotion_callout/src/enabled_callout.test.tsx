@@ -11,10 +11,7 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  AutoOpsEnabledCallout,
-  AUTOOPS_ENABLED_CALLOUT_DISMISSED_KEY,
-} from './enabled_callout';
+import { AutoOpsEnabledCallout, AUTOOPS_ENABLED_CALLOUT_DISMISSED_KEY } from './enabled_callout';
 import { AUTOOPS_CALLOUT_DISMISSED_KEY } from './callout';
 
 jest.mock('@elastic/eui-illustrations', () => ({
@@ -49,9 +46,7 @@ describe('AutoOpsEnabledCallout', () => {
 
       expect(screen.getByTestId('autoOpsEnabledCallout')).toBeInTheDocument();
       expect(
-        screen.getByText(
-          'This cluster is connected to AutoOps, our advanced cluster monitoring'
-        )
+        screen.getByText('This cluster is connected to AutoOps, our advanced cluster monitoring')
       ).toBeInTheDocument();
     });
 
@@ -67,7 +62,9 @@ describe('AutoOpsEnabledCallout', () => {
     });
 
     test('renders the "Learn more" docs link when docsUrl is provided', () => {
-      renderWithI18n(<AutoOpsEnabledCallout autoOpsUrl={TEST_AUTOOPS_URL} docsUrl={TEST_DOCS_URL} />);
+      renderWithI18n(
+        <AutoOpsEnabledCallout autoOpsUrl={TEST_AUTOOPS_URL} docsUrl={TEST_DOCS_URL} />
+      );
 
       const link = screen.getByTestId('autoOpsEnabledCalloutLearnMoreLink');
       expect(link).toHaveAttribute('href', TEST_DOCS_URL);
