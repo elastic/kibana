@@ -90,4 +90,18 @@ describe('useSortSelector', () => {
 
     expect(selected?.checked).toBe('on');
   });
+
+  it('emits stable telemetry detail values for sort options', () => {
+    const { result } = renderSortSelector([
+      METRICS_SORT_BY.alphabetically,
+      METRICS_SORT_DIRECTION.asc,
+    ]);
+
+    const details = result.current.options.map(
+      (option) => (option as { 'data-ebt-detail'?: string })['data-ebt-detail']
+    );
+
+    // These are telemetry values - changing them breaks historical analysis.
+    expect(details).toEqual(['alphabetically', 'recency']);
+  });
 });
