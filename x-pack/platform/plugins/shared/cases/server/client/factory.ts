@@ -58,6 +58,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../attachment_frame
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { CasesServices } from './types';
+import type { CasesClientSource } from './telemetry';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
@@ -157,12 +158,12 @@ export class CasesClientFactory {
     request,
     scopedClusterClient,
     savedObjectsService,
-    requestSource = 'unknown',
+    clientSource = 'unknown',
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
-    requestSource?: string;
+    clientSource?: CasesClientSource;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -228,7 +229,7 @@ export class CasesClientFactory {
       casesEventBus: this.options.casesEventBus,
       request,
       closeReasonValidator: boundCloseReasonValidator,
-      requestSource,
+      clientSource,
     });
   }
 

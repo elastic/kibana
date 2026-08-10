@@ -55,7 +55,7 @@ import {
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
-import { wrapTelemetry } from '../telemetry';
+import { withUsageCounter } from '../telemetry';
 
 /**
  * API for interacting with the cases entities.
@@ -171,10 +171,10 @@ export const createCasesSubClient = (
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
-    create: wrapTelemetry('create_case', clientArgs, (data: CasePostRequest) =>
+    create: withUsageCounter('create_case', clientArgs, (data: CasePostRequest) =>
       create(data, clientArgs, casesClient)
     ),
-    bulkCreate: wrapTelemetry('bulk_create_cases', clientArgs, (data: BulkCreateCasesRequest) =>
+    bulkCreate: withUsageCounter('bulk_create_cases', clientArgs, (data: BulkCreateCasesRequest) =>
       bulkCreate(data, clientArgs, casesClient)
     ),
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
@@ -182,45 +182,45 @@ export const createCasesSubClient = (
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params: CasesBulkGetRequest) => bulkGet(params, clientArgs),
-    push: wrapTelemetry('push_case', clientArgs, (params: PushParams) =>
+    push: withUsageCounter('push_case', clientArgs, (params: PushParams) =>
       push(params, clientArgs, casesClient)
     ),
-    bulkUpdate: wrapTelemetry('bulk_update_cases', clientArgs, (cases: CasesPatchRequest) =>
+    bulkUpdate: withUsageCounter('bulk_update_cases', clientArgs, (cases: CasesPatchRequest) =>
       bulkUpdate(cases, clientArgs, casesClient)
     ),
-    delete: wrapTelemetry('delete_cases', clientArgs, (ids: string[]) =>
+    delete: withUsageCounter('delete_cases', clientArgs, (ids: string[]) =>
       deleteCases(ids, clientArgs)
     ),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
-    replaceCustomField: wrapTelemetry(
+    replaceCustomField: withUsageCounter(
       'replace_custom_field',
       clientArgs,
       (params: ReplaceCustomFieldArgs) => replaceCustomField(params, clientArgs, casesClient)
     ),
     similar: (caseId: string, params: SimilarCasesSearchRequest) =>
       similar(caseId, params, clientArgs, casesClient),
-    addObservable: wrapTelemetry(
+    addObservable: withUsageCounter(
       'add_observable',
       clientArgs,
       (caseId: string, params: AddObservableRequest) =>
         addObservable(caseId, params, clientArgs, casesClient)
     ),
-    updateObservable: wrapTelemetry(
+    updateObservable: withUsageCounter(
       'update_observable',
       clientArgs,
       (caseId: string, observableId: string, params: UpdateObservableRequest) =>
         updateObservable(caseId, observableId, params, clientArgs, casesClient)
     ),
-    deleteObservable: wrapTelemetry(
+    deleteObservable: withUsageCounter(
       'delete_observable',
       clientArgs,
       (caseId: string, observableId: string) =>
         deleteObservable(caseId, observableId, clientArgs, casesClient)
     ),
-    bulkAddObservables: wrapTelemetry(
+    bulkAddObservables: withUsageCounter(
       'bulk_add_observables',
       clientArgs,
       (params: BulkAddObservablesRequest) => bulkAddObservables(params, clientArgs, casesClient)

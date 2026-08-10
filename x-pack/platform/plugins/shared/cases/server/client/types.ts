@@ -15,6 +15,7 @@ import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { CasesClientSource } from './telemetry';
 import type { CasesSearchRequest } from '../../common/types/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
@@ -73,7 +74,7 @@ export interface CasesClientArgs {
   readonly casesEventBus?: CasesEventBus;
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
-  readonly requestSource?: string;
+  readonly clientSource?: CasesClientSource;
 }
 
 export type CasesSearchParams = Partial<

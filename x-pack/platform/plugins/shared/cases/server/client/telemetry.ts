@@ -7,16 +7,24 @@
 
 import type { CasesClientArgs } from './types';
 
-export function wrapTelemetry<TArgs extends unknown[], TReturn>(
-  counter: string,
+export type CasesClientSource =
+  | 'rest_api'
+  | 'connector'
+  | 'workflow'
+  | 'agent_builder'
+  | 'plugin_contract'
+  | 'unknown';
+
+export function withUsageCounter<TArgs extends unknown[], TReturn>(
+  counterName: string,
   clientArgs: CasesClientArgs,
   fn: (...args: TArgs) => TReturn
 ): (...args: TArgs) => TReturn {
-  const requestSource = clientArgs.requestSource ? clientArgs.requestSource : 'unknown';
+  const clientSource = clientArgs.clientSource ? clientArgs.clientSource : 'unknown';
   return (...args: TArgs) => {
     clientArgs.usageCounter?.incrementCounter({
-      counterName: counter,
-      counterType: `cases_client.${requestSource}`,
+      counterName,
+      counterType: `cases_client.${clientSource}`,
     });
     return fn(...args);
   };

@@ -37,7 +37,7 @@ import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
 import { addFile } from './add_file';
-import { wrapTelemetry } from '../telemetry';
+import { withUsageCounter } from '../telemetry';
 
 /**
  * API for interacting with the attachments to a case.
@@ -97,20 +97,20 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: wrapTelemetry('add_attachment', clientArgs, (params: AddArgs) =>
+    add: withUsageCounter('add_attachment', clientArgs, (params: AddArgs) =>
       addComment(params, clientArgs)
     ),
-    bulkCreate: wrapTelemetry('bulk_create_attachments', clientArgs, (params: BulkCreateArgs) =>
+    bulkCreate: withUsageCounter('bulk_create_attachments', clientArgs, (params: BulkCreateArgs) =>
       bulkCreate(params, clientArgs)
     ),
     bulkGet: (params: BulkGetArgs) => bulkGet(params, clientArgs, casesClient),
-    delete: wrapTelemetry('delete_attachment', clientArgs, (params: DeleteArgs) =>
+    delete: withUsageCounter('delete_attachment', clientArgs, (params: DeleteArgs) =>
       deleteComment(params, clientArgs)
     ),
-    deleteAll: wrapTelemetry('delete_all_attachments', clientArgs, (params: DeleteAllArgs) =>
+    deleteAll: withUsageCounter('delete_all_attachments', clientArgs, (params: DeleteAllArgs) =>
       deleteAll(params, clientArgs)
     ),
-    bulkDeleteFileAttachments: wrapTelemetry(
+    bulkDeleteFileAttachments: withUsageCounter(
       'bulk_delete_file_attachments',
       clientArgs,
       (params: BulkDeleteFileArgs) => bulkDeleteFileAttachments(params, clientArgs, casesClient)
@@ -120,10 +120,10 @@ export const createAttachmentsSubClient = (
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),
     get: (params: GetArgs) => get(params, clientArgs),
-    update: wrapTelemetry('update_attachment', clientArgs, (params: UpdateArgs) =>
+    update: withUsageCounter('update_attachment', clientArgs, (params: UpdateArgs) =>
       update(params, clientArgs)
     ),
-    addFile: wrapTelemetry('add_file_attachment', clientArgs, (params: AddFileArgs) =>
+    addFile: withUsageCounter('add_file_attachment', clientArgs, (params: AddFileArgs) =>
       addFile(params, clientArgs, casesClient)
     ),
   };

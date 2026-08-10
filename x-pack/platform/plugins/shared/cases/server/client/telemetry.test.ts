@@ -20,7 +20,7 @@ jest.mock('./cases/get', () => ({
   getCategories: jest.fn().mockResolvedValue([]),
 }));
 
-describe('wrapTelemetry', () => {
+describe('withUsageCounter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -29,7 +29,7 @@ describe('wrapTelemetry', () => {
 
   const clientArgs = {
     usageCounter: { incrementCounter: mockIncrementCounter },
-    requestSource: 'rest_api',
+    clientSource: 'rest_api',
   } as unknown as CasesClientArgs;
   const mockCasesClient = createCasesClientMock();
   const mockCasesClientInternal = createCasesClientInternalMock();
@@ -56,7 +56,7 @@ describe('wrapTelemetry', () => {
     });
   });
 
-  it('undefined requestSource should default to unknown', async () => {
+  it('undefined clientSource should default to unknown', async () => {
     const clientArgsWithoutRequestSource = {
       usageCounter: { incrementCounter: mockIncrementCounter },
     } as unknown as CasesClientArgs;
@@ -74,7 +74,7 @@ describe('wrapTelemetry', () => {
 
   it('should not throw if usageCounter is undefined', async () => {
     const clientArgsWithoutUsageCounter = {
-      requestSource: 'rest_api',
+      clientSource: 'rest_api',
     } as unknown as CasesClientArgs;
     const clientWithoutUsageCounter = createCasesSubClient(
       clientArgsWithoutUsageCounter,
