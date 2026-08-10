@@ -9,6 +9,10 @@
 
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
+import type {
+  PanelTypeMigrationContext,
+  PanelTypeMigrationPanel,
+} from '@kbn/embeddable-plugin/server';
 
 const mockGetTransforms = jest.fn();
 const mockGetPanelTypeMigrations = jest.fn();
@@ -484,13 +488,19 @@ describe('transformPanelsOut', () => {
         {
           from: 'source',
           to: 'target',
-          migrateOut: async (panels, context) => {
+          migrateOut: async (
+            panels: readonly PanelTypeMigrationPanel[],
+            context: PanelTypeMigrationContext
+          ) => {
             await context.savedObjectsClient.bulkGet(
-              panels.map((p) => ({ id: p.config.savedObjectId, type: 'visualization' }))
+              panels.map((p) => ({
+                id: (p.config as any).savedObjectId,
+                type: 'visualization',
+              }))
             );
             return panels.map((p) => ({
               panelId: p.id,
-              config: { spec: `from:${p.config.savedObjectId}` },
+              config: { spec: `from:${(p.config as any).savedObjectId}` },
             }));
           },
         },

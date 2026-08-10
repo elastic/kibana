@@ -31,6 +31,7 @@ interface WorkingPanel {
   readonly references: SavedObjectReference[];
   readonly sourceType: string;
   readonly sourceConfig: SavedDashboardPanel['embeddableConfig'];
+  readonly panelId: string;
   panel: DashboardPanel;
   migration?: { from: string; to: string };
   dropped?: boolean;
@@ -88,6 +89,7 @@ export async function transformPanelsOut(
         references: panelReferences,
         sourceType: panel.type,
         sourceConfig: panel.embeddableConfig,
+        panelId: panel.panelIndex,
         panel: panelOut,
       });
     } catch (err) {
@@ -115,6 +117,8 @@ export async function transformPanelsOut(
     const schemaErrorOrConfig = validatePanelConfig(panel, isDashboardAppRequest, {
       migratedFrom: migration?.from,
       migratedTo: migration?.to,
+      allowMissingTargetSchema:
+        Boolean(isDashboardAppRequest) && Boolean(migrationContext?.allowMissingTargetSchema),
     });
 
     if (schemaErrorOrConfig instanceof Error) {
@@ -210,7 +214,7 @@ function transformPanelWithoutValidation(
 function validatePanelConfig(
   panel: DashboardPanel,
   isDashboardAppRequest: boolean,
-  options: { migratedFrom?: string; migratedTo?: string }
+  options: { migratedFrom?: string; migratedTo?: string; allowMissingTargetSchema?: boolean }
 ): Record<string, unknown> | Error {
   const transforms = embeddableService?.getTransforms(
     getTransformLookupType(panel.type, isDashboardAppRequest)
@@ -219,6 +223,9 @@ function validatePanelConfig(
 
   if (!schema) {
     if (options.migratedFrom && options.migratedTo) {
+      if (options.allowMissingTargetSchema) {
+        return panel.config as Record<string, unknown>;
+      }
       return new Error(
         `Panel schema not available for migrated panel type: ${panel.type} (from: ${options.migratedFrom})`
       );
@@ -253,9 +260,9 @@ async function applyPanelTypeMigrations(
     const migrations = embeddableService?.getPanelTypeMigrations(sourceType) ?? [];
     if (migrations.length === 0) continue;
 
-    const panelIds = new Set(sourcePanels.map((p) => p.panel.id));
-    const inputPanels = sourcePanels.map(({ panel }) => ({
-      id: panel.id,
+    const panelIds = new Set(sourcePanels.map((p) => p.panelId));
+    const inputPanels = sourcePanels.map(({ panel, panelId }) => ({
+      id: panelId,
       config: panel.config,
     }));
 
@@ -290,7 +297,7 @@ async function applyPanelTypeMigrations(
     }
 
     for (const working of sourcePanels) {
-      const panelId = working.panel.id;
+      const panelId = working.panelId;
       const error = errorsByPanelId.get(panelId);
       if (error) {
         warnings.push({
@@ -321,6 +328,15 @@ async function applyPanelTypeMigrations(
 
       const success = successes[0];
       if (!success) continue;
+
+      if (!migrationContext.allowMissingTargetSchema) {
+        const targetTransforms = embeddableService?.getTransforms(
+          getTransformLookupType(success.to, false)
+        );
+        if (!targetTransforms?.schema) {
+          continue;
+        }
+      }
 
       working.migration = { from: sourceType, to: success.to };
       working.panel = { ...working.panel, type: success.to, config: success.config };

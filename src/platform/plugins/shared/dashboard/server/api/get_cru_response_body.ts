@@ -11,6 +11,7 @@ import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PanelTypeMigrationContext } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
@@ -35,8 +36,10 @@ export async function getDashboardCRUResponseBody(
   const warnings: Warnings = [];
   try {
     let dashboardStateWarnings;
-    const migrationContext =
-      operation === 'read' && savedObjectsClient ? { savedObjectsClient } : undefined;
+    const migrationContext: PanelTypeMigrationContext | undefined =
+      operation === 'read' && savedObjectsClient
+        ? { savedObjectsClient, allowMissingTargetSchema: isDashboardAppRequest }
+        : undefined;
 
     ({ dashboardState, warnings: dashboardStateWarnings } = await transformDashboardOut(
       savedObject.attributes,

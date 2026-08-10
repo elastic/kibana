@@ -11,6 +11,14 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 export interface PanelTypeMigrationContext {
   savedObjectsClient: SavedObjectsClientContract;
+  /**
+   * When true, allows keeping a migrated panel even if the target panel type has no registered
+   * server schema.
+   *
+   * Intended for internal, Kibana-application-only responses. Public REST responses still require
+   * a target schema to safely validate and document the returned config.
+   */
+  allowMissingTargetSchema?: boolean;
 }
 
 export interface PanelTypeMigrationPanel {
