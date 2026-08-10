@@ -27,7 +27,6 @@ import {
   updateConversation,
   type Document as ConversationDocument,
 } from './converters';
-import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 
@@ -501,14 +500,28 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.access_control = {
         access_mode: ConversationAccessControlMode.Public,
-        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+        entries: [
+          {
+            type: 'user',
+            name: 'alice',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
       };
 
       const deserialized = fromEs(serialized);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
-        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+        entries: [
+          {
+            type: 'user',
+            name: 'alice',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
       });
     });
 
@@ -753,14 +766,28 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.access_control = {
         access_mode: ConversationAccessControlMode.Private,
-        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+        entries: [
+          {
+            type: 'user',
+            name: 'alice',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
       };
 
       const serialized = toEs(conversation, 'space');
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
-        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+        entries: [
+          {
+            type: 'user',
+            name: 'alice',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
       });
     });
 
@@ -813,7 +840,14 @@ describe('conversation model converters', () => {
         rounds: [],
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
-          entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+          entries: [
+            {
+              type: 'user',
+              name: 'alice',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-06-29T00:00:00.000Z',
+            },
+          ],
         },
       };
 
@@ -827,7 +861,14 @@ describe('conversation model converters', () => {
       expect(updated.title).toEqual('new_title');
       expect(updated.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
-        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+        entries: [
+          {
+            type: 'user',
+            name: 'alice',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
       });
     });
   });

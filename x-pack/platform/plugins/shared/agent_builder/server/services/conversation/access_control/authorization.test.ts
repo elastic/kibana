@@ -89,6 +89,7 @@ describe('conversation access control', () => {
       type: 'user',
       name: user.username,
       role: ConversationAccessControlRole.Member,
+      added_at: '2026-06-29T00:00:00.000Z',
       ...overrides,
     });
 
@@ -188,7 +189,12 @@ describe('conversation access control', () => {
             access_control: {
               access_mode: ConversationAccessControlMode.Private,
               entries: [
-                { type: 'user', name: user.username, role: ConversationAccessControlRole.Member },
+                {
+                  type: 'user',
+                  name: user.username,
+                  role: ConversationAccessControlRole.Member,
+                  added_at: '2026-06-29T00:00:00.000Z',
+                },
               ],
             },
           }),
@@ -204,7 +210,12 @@ describe('conversation access control', () => {
             access_control: {
               access_mode: ConversationAccessControlMode.Private,
               entries: [
-                { type: 'user', name: user.username, role: ConversationAccessControlRole.Member },
+                {
+                  type: 'user',
+                  name: user.username,
+                  role: ConversationAccessControlRole.Member,
+                  added_at: '2026-06-29T00:00:00.000Z',
+                },
               ],
             },
           }),
@@ -264,7 +275,12 @@ describe('conversation access control', () => {
             access_control: {
               access_mode: ConversationAccessControlMode.Private,
               entries: [
-                { type: 'user', name: user.username, role: ConversationAccessControlRole.Member },
+                {
+                  type: 'user',
+                  name: user.username,
+                  role: ConversationAccessControlRole.Member,
+                  added_at: '2026-06-29T00:00:00.000Z',
+                },
               ],
             },
           }),

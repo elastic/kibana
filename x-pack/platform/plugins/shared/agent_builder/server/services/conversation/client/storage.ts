@@ -48,6 +48,7 @@ const storageSettings = {
               id: types.keyword({}),
               name: types.keyword({}),
               role: types.keyword({}),
+              added_at: types.date({}),
             },
           }),
         },

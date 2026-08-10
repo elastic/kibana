@@ -21,6 +21,7 @@ export interface ConversationAccessControlEntry {
   id?: string;
   name: string;
   role: ConversationAccessControlRole;
+  added_at: string;
 }
 
 export interface ConversationAccessControl {

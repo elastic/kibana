@@ -17,6 +17,7 @@ const entry: ConversationAccessControlEntry = {
   type: 'user',
   name: 'alice',
   role: ConversationAccessControlRole.Member,
+  added_at: '2026-06-29T00:00:00.000Z',
 };
 
 describe('getDefaultConversationAccessControl', () => {
