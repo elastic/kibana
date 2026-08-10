@@ -314,7 +314,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             width="full"
           />
         </EuiFlexItem>
-        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
@@ -334,6 +333,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             </EuiButton>
           </EuiToolTip>
         </EuiFlexItem>
+        {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
@@ -437,7 +437,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       {!isLoading && !hasRun && (
         <EuiEmptyPrompt
-          iconType="playFilled"
+          iconType="play"
           title={
             <h4>
               <FormattedMessage
@@ -484,7 +484,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       {hasRun && !isLoading && !isError && rows.length === 0 && query.trim() && (
         <EuiEmptyPrompt
-          iconType="search"
+          iconType="magnify"
           title={
             <h4>
               <FormattedMessage

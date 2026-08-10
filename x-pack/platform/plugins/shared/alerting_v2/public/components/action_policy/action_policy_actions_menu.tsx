@@ -228,7 +228,7 @@ export const ActionPolicyActionsMenu = ({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             color="text"
             aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
               defaultMessage: 'More actions',

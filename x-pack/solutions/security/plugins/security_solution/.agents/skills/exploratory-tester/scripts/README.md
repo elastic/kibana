@@ -96,6 +96,12 @@ and template documents, because the agent executes those code blocks verbatim:
 - Ownership is never downgraded silently: discarding a reservation this session
   made requires `--confirm-preexisting`, so a resource cannot vanish from both
   the pending list and the cleanup list.
+- `../phases/0-setup.md`'s environment/GitHub-input/CCS routes (Steps 0a/0b)
+  point to on-demand files — `0-managed-environment.md`,
+  `0-user-provided-environment.md`, `0-github-input.md`, `0-ccs.md` — instead
+  of inlining every route's content on every session. The untrusted-content
+  security rules in `0-github-input.md` are never dropped or weakened by that
+  move, and the hard-stop pointer to it is read before any `gh` command runs.
 
 ## `__tests__/` — the detector-injector JS harness
 
@@ -182,8 +188,23 @@ parity check against the bridge doc's own inline copy of the same logic, a
 malformed-encoding fixture, a hash-fragment case, the full credential-shaped
 param-name list, and the per-value hashed placeholder that keeps different
 secret values from collapsing into one signature), a duplicate-window check
-against total span rather than only adjacent gaps, and a CLI-vs-module
-classification round trip.
+against total span rather than only adjacent gaps, a CLI-vs-module
+classification round trip, and — parametrized over the real
+`__tests__/fixtures/live-drain-scenario*.json` captures — the six scenarios
+from `reports/task8-live-validation-report.md`'s live browser validation
+pass, including a documented false positive on rapid sequential polling
+(tracked, not silently expected to disappear on the next reducer change).
+
+Those `live-drain-scenario*.json` fixtures, and the browser-native-500
+regression fixture above them, were captured against `manual-tools/`'s local
+harness — `seeded-live-harness.html` (served by `serve-seeded-harness.py`,
+default port 8931) reproduces each scenario's real DOM/console/network
+signature via genuine `fetch()`/`AbortController`/`history` calls, driven
+through a live `browser_run_code_unsafe` bridge. It's a manual tool, not
+exercised by any automated test here — run it yourself (`python3
+manual-tools/serve-seeded-harness.py`) if you need to re-capture a scenario
+or add a new one; see `reports/task8-live-validation-report.md` for the full
+methodology and results.
 
 ```bash
 node __tests__/action-scoped-collector-bridge.test.mjs

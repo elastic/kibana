@@ -896,17 +896,10 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+  public async selectDataViewMode() {
     await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
-    if (options?.discardModal) {
-      await this.testSubjects.exists('discover-esql-to-dataview-modal');
-      await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-      await this.retry.waitFor('the modal to close', async () => {
-        return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-      });
-    }
   }
 
   public async removeHeaderColumn(name: string) {
