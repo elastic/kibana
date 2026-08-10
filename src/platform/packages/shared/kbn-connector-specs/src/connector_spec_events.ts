@@ -24,12 +24,6 @@ export interface ConnectorIngressContext {
   readonly headers: Record<string, string | string[] | undefined>;
 }
 
-export interface EventHttpResponse {
-  readonly status: number;
-  readonly body: unknown;
-  readonly headers?: Record<string, string>;
-}
-
 export interface EventPayload {
   readonly eventId: string;
   readonly correlationKey: string;
@@ -37,18 +31,27 @@ export interface EventPayload {
 }
 
 /**
- * Result of handleEvents:
- * - `http`: return status/body/headers; do not emit
- * - `emit`: publish each payload (prefer non-empty)
+ * Result of handleEvents: publish each payload.
+ *
+ * Before publish, the actions hub must run `validateEmittedEvents` so every
+ * emitted `eventId` exists in `definitions` and each `payload` matches the
+ * corresponding `eventSchema`.
  */
-export type HandleEventsResult =
-  | { type: 'http'; httpResponse: EventHttpResponse }
-  | { type: 'emit'; events: EventPayload[] };
+export interface HandleEventsResult {
+  type: 'emit';
+  events: EventPayload[];
+}
 
 /**
  * Declared event on a connector spec.
  */
 export interface EventDefinition {
+  /**
+   * Globally unique across all registered connector specs.
+   * Must equal `buildEventId(metadata.id, definitionKey)`.
+   * Uniqueness follows from unique connector `metadata.id` values plus unique
+   * keys within `definitions`.
+   */
   readonly eventId: string;
   readonly title: string;
   readonly description: string;

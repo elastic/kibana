@@ -27,12 +27,16 @@ export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export type {
   ConnectorIngressContext,
   EventDefinition,
-  EventHttpResponse,
   EventPayload,
   HandleEventsResult,
   ConnectorSpecEvents,
 } from './src/connector_spec_events';
 export { buildEventId, connectorTypeToEventNamespace } from './src/event_type_id';
+export {
+  validateEmittedEvents,
+  type ValidateEmittedEventsError,
+  type ValidateEmittedEventsResult,
+} from './src/validate_emitted_events';
 export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,

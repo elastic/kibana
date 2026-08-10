@@ -10,7 +10,6 @@
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from './connector_spec';
 import { buildEventId } from './event_type_id';
-import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
 
 const createFakeSpecWithEvents = (overrides?: {
   metadataId?: string;
@@ -41,20 +40,14 @@ const createFakeSpecWithEvents = (overrides?: {
         },
       },
       handleEvents: async () => ({
-        type: 'http',
-        httpResponse: { status: 200, body: {} },
+        type: 'emit',
+        events: [],
       }),
     },
   };
 };
 
 describe('connector spec events contract predicates', () => {
-  it('rejects events on a connector id that is not allowlisted', () => {
-    const spec = createFakeSpecWithEvents();
-    expect(spec.events).toBeDefined();
-    expect(SPECS_ALLOWED_EVENTS.has(spec.metadata.id)).toBe(false);
-  });
-
   it('rejects a hand-written eventId that does not match buildEventId', () => {
     const spec = createFakeSpecWithEvents({ eventId: 'wrong.namespace.received' });
     for (const [eventKey, def] of Object.entries(spec.events.definitions)) {

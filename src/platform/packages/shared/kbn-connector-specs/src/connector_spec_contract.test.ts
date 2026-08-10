@@ -100,4 +100,25 @@ describe('connector spec contracts', () => {
       expect(def.eventId).toBe(buildEventId(spec.metadata.id, eventKey));
     }
   });
+
+  it('uses unique eventIds across connector specs', () => {
+    const eventIdOwners = new Map<string, string>();
+    const duplicates: string[] = [];
+
+    for (const [exportName, spec] of allSpecs) {
+      if (spec.events !== undefined) {
+        for (const [eventKey, def] of Object.entries(spec.events.definitions)) {
+          const owner = `${exportName} (${spec.metadata.id}.${eventKey})`;
+          const existing = eventIdOwners.get(def.eventId);
+          if (existing !== undefined) {
+            duplicates.push(`${def.eventId}: ${existing} and ${owner}`);
+          } else {
+            eventIdOwners.set(def.eventId, owner);
+          }
+        }
+      }
+    }
+
+    expect(duplicates).toEqual([]);
+  });
 });
