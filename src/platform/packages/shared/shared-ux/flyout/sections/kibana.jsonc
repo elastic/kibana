@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/shared-ux-flyout-section",
+  "id": "@kbn/flyout-sections",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared"

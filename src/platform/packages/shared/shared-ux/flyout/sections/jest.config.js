@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/flyout/section'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/flyout/sections'],
 };

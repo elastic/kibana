@@ -7014,6 +7014,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-sections@link:src/platform/packages/shared/shared-ux/flyout/sections":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
@@ -9027,10 +9031,6 @@
   uid ""
 
 "@kbn/shared-ux-flyout-info-blocks@link:src/platform/packages/shared/shared-ux/flyout/info-blocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/shared-ux-flyout-section@link:src/platform/packages/shared/shared-ux/flyout/section":
   version "0.0.0"
   uid ""
 
