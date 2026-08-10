@@ -39,7 +39,7 @@ export class DataFederationPage {
 
   constructor(private readonly page: ScoutPage) {
     this.pageTitle = page.testSubj.locator('appHeaderTitle');
-    this.tabs = page.testSubj.locator('dataSetsTabs');
+    this.tabs = page.testSubj.locator('appHeaderTabs');
     this.dataSourcesTable = page.testSubj.locator('dataSetsTable');
     this.dataSetsTable = page.testSubj.locator('dataSetsSetsTable');
     this.connectDataSourceButton = page.testSubj.locator('dataSetsCreateButton');
