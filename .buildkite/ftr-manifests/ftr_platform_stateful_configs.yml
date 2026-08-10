@@ -52,6 +52,7 @@ enabled:
   - src/platform/test/analytics/config.ts
   - src/platform/test/api_integration/config.js
   - src/platform/test/api_integration/apis/unused_urls_task/config.ts
+  - src/platform/test/api_integration/apis/metrics_experience/authorization.config.ts
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/console/config.ts
