@@ -80,6 +80,15 @@ export {
   type PublishesApproximation,
 } from './interfaces/fetch/publishes_approximation';
 export {
+  type FetchSetting,
+  type PublishesFetchSetting,
+  type PublishesIsVisible,
+  apiPublishesIsVisible,
+  apiPublishesFetchSetting,
+  onVisibilityChange,
+  initializeVisibility,
+} from './interfaces/fetch/fetch_only_visible';
+export {
   apiHasAppContext,
   type EmbeddableAppContext,
   type HasAppContext,
