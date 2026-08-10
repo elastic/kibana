@@ -31,7 +31,7 @@ export async function getValidatedESClient(
   const { log, cli = false } = helperSettings;
   const es = new ESClient({
     Connection: HttpConnection,
-    requestTimeout: 30_000,
+    requestTimeout: 60_000,
     ...esClientOptions,
   });
 

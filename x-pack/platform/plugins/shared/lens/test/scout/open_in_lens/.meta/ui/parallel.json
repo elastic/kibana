@@ -1,0 +1,1753 @@
+{
+  "sha1": "6090113c0c085886dfc68ac90df27ac49bf0cf3e",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "761ef0657dc0f45-40130df17e097d2",
+      "title": "Setup environment for Lens open in Lens tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "055f5500d540764-89b32d8823fa1b7",
+      "title": "Lens open in Lens — agg-based Gauge should convert to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/gauge.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "055f5500d540764-e91bb5b85d1dae4",
+      "title": "Lens open in Lens — agg-based Gauge should convert aggregation with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/gauge.spec.ts",
+        "line": 39,
+        "column": 18
+      }
+    },
+    {
+      "id": "055f5500d540764-3be12a2f5d93010",
+      "title": "Lens open in Lens — agg-based Gauge should not convert aggregation with not supported field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/gauge.spec.ts",
+        "line": 56,
+        "column": 18
+      }
+    },
+    {
+      "id": "055f5500d540764-c64ed67da56168f",
+      "title": "Lens open in Lens — agg-based Gauge should convert color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/gauge.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "badd543deabc937-fa4ddd895cb7c67",
+      "title": "Lens open in Lens — agg-based Goal should convert to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/goal.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
+      "id": "badd543deabc937-af4726a9b3adde6",
+      "title": "Lens open in Lens — agg-based Goal should convert aggregation with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/goal.spec.ts",
+        "line": 44,
+        "column": 16
+      }
+    },
+    {
+      "id": "badd543deabc937-550ddd23abcb522",
+      "title": "Lens open in Lens — agg-based Goal should convert sibling pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/goal.spec.ts",
+        "line": 70,
+        "column": 28
+      }
+    },
+    {
+      "id": "badd543deabc937-cdc8a82c6e533be",
+      "title": "Lens open in Lens — agg-based Goal should convert color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/goal.spec.ts",
+        "line": 96,
+        "column": 18
+      }
+    },
+    {
+      "id": "913fd6165853939-8eb173c435abfba",
+      "title": "Lens open in Lens — agg-based Heatmap should convert to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/heatmap.spec.ts",
+        "line": 27,
+        "column": 15
+      }
+    },
+    {
+      "id": "913fd6165853939-3afbc1fda615121",
+      "title": "Lens open in Lens — agg-based Heatmap should convert to Lens if Y-axis is defined, but X-axis is not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/heatmap.spec.ts",
+        "line": 72,
+        "column": 26
+      }
+    },
+    {
+      "id": "913fd6165853939-cef48f52a18444a",
+      "title": "Lens open in Lens — agg-based Heatmap should respect heatmap colors number",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/heatmap.spec.ts",
+        "line": 93,
+        "column": 13
+      }
+    },
+    {
+      "id": "913fd6165853939-84d97d446223945",
+      "title": "Lens open in Lens — agg-based Heatmap should respect heatmap custom color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/heatmap.spec.ts",
+        "line": 110,
+        "column": 49
+      }
+    },
+    {
+      "id": "4430f5ace707830-f8e204c42a36f00",
+      "title": "Lens open in Lens — agg-based Metric should convert to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/metric.spec.ts",
+        "line": 24,
+        "column": 13
+      }
+    },
+    {
+      "id": "4430f5ace707830-b98f1145e9dc89f",
+      "title": "Lens open in Lens — agg-based Metric should convert aggregation with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/metric.spec.ts",
+        "line": 45,
+        "column": 16
+      }
+    },
+    {
+      "id": "4430f5ace707830-a73bc68fd2424d3",
+      "title": "Lens open in Lens — agg-based Metric should convert sibling pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/metric.spec.ts",
+        "line": 70,
+        "column": 28
+      }
+    },
+    {
+      "id": "4430f5ace707830-cb2e3484a2a2a69",
+      "title": "Lens open in Lens — agg-based Metric should not convert aggregation with not supported field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/metric.spec.ts",
+        "line": 95,
+        "column": 18
+      }
+    },
+    {
+      "id": "4430f5ace707830-6d5ffb95e184035",
+      "title": "Lens open in Lens — agg-based Metric should convert color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/metric.spec.ts",
+        "line": 102,
+        "column": 16
+      }
+    },
+    {
+      "id": "7640414f6741786-1335e9a5c9e4de7",
+      "title": "Lens open in Lens — agg-based Pie should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/pie.spec.ts",
+        "line": 47,
+        "column": 13
+      }
+    },
+    {
+      "id": "7640414f6741786-335db8f6353cdca",
+      "title": "Lens open in Lens — agg-based Pie should convert aggregation with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/pie.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "7640414f6741786-1e802e362efbfca",
+      "title": "Lens open in Lens — agg-based Pie should convert terms to slice by",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/pie.spec.ts",
+        "line": 66,
+        "column": 44
+      }
+    },
+    {
+      "id": "7640414f6741786-df077a4e655dbc9",
+      "title": "Lens open in Lens — agg-based Pie should convert pie with hole type correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/pie.spec.ts",
+        "line": 87,
+        "column": 18
+      }
+    },
+    {
+      "id": "7640414f6741786-f4a9cf6a0a8bcda",
+      "title": "Lens open in Lens — agg-based Pie should convert Pie types correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/pie.spec.ts",
+        "line": 103,
+        "column": 13
+      }
+    },
+    {
+      "id": "7a34df7d089045a-f879b681f0091a4",
+      "title": "Lens open in Lens — agg-based Table should not allow converting of unsupported aggregations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 31,
+        "column": 5
+      }
+    },
+    {
+      "id": "7a34df7d089045a-9834980a3535cb5",
+      "title": "Lens open in Lens — agg-based Table should convert aggregation with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 39,
+        "column": 99
+      }
+    },
+    {
+      "id": "7a34df7d089045a-43e51d2a8b9fd7e",
+      "title": "Lens open in Lens — agg-based Table should convert total function to summary row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 45,
+        "column": 11
+      }
+    },
+    {
+      "id": "7a34df7d089045a-41072edeb7136f7",
+      "title": "Lens open in Lens — agg-based Table should convert sibling pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 56,
+        "column": 83
+      }
+    },
+    {
+      "id": "7a34df7d089045a-ed2ea0860dad523",
+      "title": "Lens open in Lens — agg-based Table should convert parent pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 65,
+        "column": 18
+      }
+    },
+    {
+      "id": "7a34df7d089045a-785a081df361bc5",
+      "title": "Lens open in Lens — agg-based Table should convert split rows and split table to split table rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 76,
+        "column": 47
+      }
+    },
+    {
+      "id": "7a34df7d089045a-d027deb444ad879",
+      "title": "Lens open in Lens — agg-based Table should convert percentage column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/table.spec.ts",
+        "line": 89,
+        "column": 44
+      }
+    },
+    {
+      "id": "eafc93ff100c738-dce60f7b6eb64ac",
+      "title": "Lens open in Lens — agg-based Visualize navigation should navigate between Visualize and Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/visualize_navigation.spec.ts",
+        "line": 34,
+        "column": 15
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-8a2a36e89561d55",
+      "title": "Lens open in Lens — agg-based XY should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-a55e3996e3f61f6",
+      "title": "Lens open in Lens — agg-based XY should convert in different layers if metrics have different chart types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-eb4f0ca011f8140",
+      "title": "Lens open in Lens — agg-based XY should convert in one layer if metrics have the same chart type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 68,
+        "column": 13
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-18dbda2f5c3d823",
+      "title": "Lens open in Lens — agg-based XY should convert parent pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 80,
+        "column": 4
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-07518115039f8b8",
+      "title": "Lens open in Lens — agg-based XY should convert sibling pipeline aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 87,
+        "column": 70
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-4576208b3e581bd",
+      "title": "Lens open in Lens — agg-based XY should draw a reference line",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 98,
+        "column": 24
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-ce0234abe3172d5",
+      "title": "Lens open in Lens — agg-based XY should convert line stacked to area stacked chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 110,
+        "column": 75
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-e7385f86bcc5f4b",
+      "title": "Lens open in Lens — agg-based XY should convert percentage charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 114,
+        "column": 16
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-2d22d05e3db9af2",
+      "title": "Lens open in Lens — agg-based XY should convert horizontal bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 126,
+        "column": 72
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-5f387d98b20775d",
+      "title": "Lens open in Lens — agg-based XY should convert y-axis positions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 133,
+        "column": 16
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-5eaade963afc846",
+      "title": "Lens open in Lens — agg-based XY should convert split series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 146,
+        "column": 16
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-44999020f8fdbab",
+      "title": "Lens open in Lens — agg-based XY should convert x-axis",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 163,
+        "column": 22
+      }
+    },
+    {
+      "id": "ca1b1ef2991ad69-03b85f52581f1f3",
+      "title": "Lens open in Lens — agg-based XY should convert correctly percentiles with decimals",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/agg_based/xy.spec.ts",
+        "line": 176,
+        "column": 11
+      }
+    },
+    {
+      "id": "1f8f9acaaf0ad2c-2a595d7dd548065",
+      "title": "TSVB Dashboard - Open in Lens should convert a by value TSVB vis to a Lens vis",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/convert_from_dashboard.spec.ts",
+        "line": 32,
+        "column": 3
+      }
+    },
+    {
+      "id": "1f8f9acaaf0ad2c-2e20d5f59faf9cf",
+      "title": "TSVB Dashboard - Open in Lens should convert a by reference TSVB vis to a Lens vis",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/convert_from_dashboard.spec.ts",
+        "line": 64,
+        "column": 7
+      }
+    },
+    {
+      "id": "adf315658819a2e-313f5487b34d0c5",
+      "title": "TSVB Gauge - Open in Lens should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/gauge.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "adf315658819a2e-604cff470b64ab7",
+      "title": "TSVB Gauge - Open in Lens should convert basic gauge to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/gauge.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "adf315658819a2e-07535ba95f7d784",
+      "title": "TSVB Gauge - Open in Lens should convert gauge with metric params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/gauge.spec.ts",
+        "line": 44,
+        "column": 5
+      }
+    },
+    {
+      "id": "adf315658819a2e-14c0f549a9abc08",
+      "title": "TSVB Gauge - Open in Lens should convert color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/gauge.spec.ts",
+        "line": 48,
+        "column": 21
+      }
+    },
+    {
+      "id": "adf315658819a2e-27a54f7156fbb56",
+      "title": "TSVB Gauge - Open in Lens should bring ignore global filters at series level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/gauge.spec.ts",
+        "line": 81,
+        "column": 29
+      }
+    },
+    {
+      "id": "adf315658819a2e-a8083534275c678",
+      "title": "TSVB Gauge - Open in Lens should bring ignore global filters at panel level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/gauge.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-d27a4393c232018",
+      "title": "TSVB Metric - Open in Lens should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-839875fb0a7aaf5",
+      "title": "TSVB Metric - Open in Lens should convert basic metric to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-a9c3a8227495e6c",
+      "title": "TSVB Metric - Open in Lens should convert static value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-783ecf3d49e8839",
+      "title": "TSVB Metric - Open in Lens should convert metric agg with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 47,
+        "column": 24
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-c6bc2c157adb4e5",
+      "title": "TSVB Metric - Open in Lens should convert color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 56,
+        "column": 59
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-e52600e9656d8ba",
+      "title": "TSVB Metric - Open in Lens should bring ignore global filters at series level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 77,
+        "column": 18
+      }
+    },
+    {
+      "id": "1c613faa7a3dac8-329171c8bf7b23b",
+      "title": "TSVB Metric - Open in Lens should bring ignore global filters at panel level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/metric.spec.ts",
+        "line": 81,
+        "column": 11
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-2e31105428d3ebe",
+      "title": "TSVB Table - Open in Lens should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-bdf37d57a9b3b46",
+      "title": "TSVB Table - Open in Lens should convert basic count aggregation table to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 68,
+        "column": 25
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-94dcfa75e727fdf",
+      "title": "TSVB Table - Open in Lens should convert last value mode to reduced time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 89,
+        "column": 18
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-335f75c67390960",
+      "title": "TSVB Table - Open in Lens should convert static value to the metric dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 97,
+        "column": 31
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-3a0e76950ff17fb",
+      "title": "TSVB Table - Open in Lens should convert aggregate by to split row dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 107,
+        "column": 24
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-8c7c91b1d376e09",
+      "title": "TSVB Table - Open in Lens should convert group by field with custom label",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 123,
+        "column": 20
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-0666ff67ace155a",
+      "title": "TSVB Table - Open in Lens should convert color ranges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 134,
+        "column": 20
+      }
+    },
+    {
+      "id": "d41ceda407f9ee4-f755135be951dc4",
+      "title": "TSVB Table - Open in Lens should bring the ignore global filters configured at panel level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/table.spec.ts",
+        "line": 166,
+        "column": 28
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-3b1388795e77b60",
+      "title": "TSVB Timeseries - Open in Lens should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-7775eaaa85f13d2",
+      "title": "TSVB Timeseries - Open in Lens should convert basic timeseries to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-177123a9faadb29",
+      "title": "TSVB Timeseries - Open in Lens should preserve app filters in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 46,
+        "column": 71
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-2798ba7e54ee8c7",
+      "title": "TSVB Timeseries - Open in Lens should preserve query in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 55,
+        "column": 18
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-d3bdce36468b18d",
+      "title": "TSVB Timeseries - Open in Lens should draw a reference line",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 59,
+        "column": 22
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-6ce61b46a6dde5d",
+      "title": "TSVB Timeseries - Open in Lens should convert metric agg with params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 81,
+        "column": 44
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-ee31a3f6241ec45",
+      "title": "TSVB Timeseries - Open in Lens should convert parent pipeline aggregation with terms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 93,
+        "column": 11
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-575246a13d698bd",
+      "title": "TSVB Timeseries - Open in Lens should convert sibling pipeline aggregation with terms",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 103,
+        "column": 26
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-a78ed705960529e",
+      "title": "TSVB Timeseries - Open in Lens should bring ignore global filters at series level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 109,
+        "column": 44
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-59ebed0b96bd5ba",
+      "title": "TSVB Timeseries - Open in Lens should bring ignore global filters at panel level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 121,
+        "column": 5
+      }
+    },
+    {
+      "id": "9b2afaabf22d454-7809b9690e17dbc",
+      "title": "TSVB Timeseries - Open in Lens should navigate back to TSVB when the Back button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/timeseries.spec.ts",
+        "line": 128,
+        "column": 18
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-a6a77e74a6a5e5b",
+      "title": "TSVB Top N - Open in Lens should check Convert to Lens action availability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-f0cb0225876b03f",
+      "title": "TSVB Top N - Open in Lens should convert to horizontal bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 48,
+        "column": 27
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-cd69015633a5e20",
+      "title": "TSVB Top N - Open in Lens should convert group by to vertical axis",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 68,
+        "column": 62
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-3fb52f2a5b05ad5",
+      "title": "TSVB Top N - Open in Lens should convert last value mode to reduced time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 76,
+        "column": 27
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-86f64f31979007c",
+      "title": "TSVB Top N - Open in Lens should convert static value to separate layer with y dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 86,
+        "column": 24
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-648a4ec965a0b9b",
+      "title": "TSVB Top N - Open in Lens should visualize field to Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 119,
+        "column": 29
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-88659f95f2ab737",
+      "title": "TSVB Top N - Open in Lens should preserve app filters in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 130,
+        "column": 38
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-8ab9c27214b068b",
+      "title": "TSVB Top N - Open in Lens should preserve query in Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 139,
+        "column": 30
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-1e72b7160a22c0b",
+      "title": "TSVB Top N - Open in Lens should bring ignore global filters at series level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 142,
+        "column": 20
+      }
+    },
+    {
+      "id": "cfe92ec1f047bbe-68538c647928e2a",
+      "title": "TSVB Top N - Open in Lens should bring ignore global filters at panel level over",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel_tests/tsvb/top_n.spec.ts",
+        "line": 121,
+        "column": 29
+      }
+    }
+  ]
+}
