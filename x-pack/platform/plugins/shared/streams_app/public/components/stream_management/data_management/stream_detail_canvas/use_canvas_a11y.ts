@@ -14,6 +14,7 @@ interface CanvasKeyboardShortcutsOptions {
   onUndo: () => void;
   onRedo: () => void;
   onEscape: () => void;
+  onEnter: () => void;
   /** Only fire when focus is within this region, so we never hijack global keys. */
   containerSelector?: string;
 }
@@ -27,6 +28,7 @@ export function useCanvasKeyboardShortcuts({
   onUndo,
   onRedo,
   onEscape,
+  onEnter,
   containerSelector = CANVAS_CONTAINER_SELECTOR,
 }: CanvasKeyboardShortcutsOptions): void {
   useEffect(() => {
@@ -38,6 +40,11 @@ export function useCanvasKeyboardShortcuts({
 
       if (event.key === 'Escape') {
         onEscape();
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        onEnter();
         return;
       }
 
@@ -61,5 +68,5 @@ export function useCanvasKeyboardShortcuts({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onUndo, onRedo, onEscape, containerSelector]);
+  }, [onUndo, onRedo, onEscape, onEnter, containerSelector]);
 }

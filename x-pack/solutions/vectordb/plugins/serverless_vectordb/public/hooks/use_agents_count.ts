@@ -24,6 +24,7 @@ export const useAgentsCount = () => {
       return response?.results?.length ?? null;
     },
     refetchOnWindowFocus: false,
+    staleTime: 60_000,
   });
 
   return { agentsCount: data ?? initialAgentsCount, isLoading };

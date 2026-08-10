@@ -16,7 +16,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ChatResponse } from '../../../../common/http_api/chat';
-import type { ListConversationsResponse } from '../../../../common/http_api/conversations';
+import type {
+  GetConversationResponse,
+  ListConversationsResponse,
+} from '../../../../common/http_api/conversations';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { internalApiPath, publicApiPath } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
@@ -530,6 +533,44 @@ apiTest.describe(
           });
         });
 
+        await apiTest.step(
+          'permissions reflect what rename and delete allow, on both GET routes',
+          async () => {
+            const getAs = async (user: { username: string; password: string }) => {
+              const response = await apiClient.get(
+                `${accessControlApiBase}/conversations/${encodeURIComponent(
+                  publicConversation.conversation_id
+                )}`,
+                { headers: headersFor(user), responseType: 'json' }
+              );
+              expect(response).toHaveStatusCode(200);
+              return response.body as GetConversationResponse;
+            };
+
+            expect((await getAs(alice)).permissions).toStrictEqual({
+              rename: true,
+              delete: true,
+            });
+            expect((await getAs(bob)).permissions).toStrictEqual({
+              rename: false,
+              delete: false,
+            });
+
+            const listedForBob = await apiClient.get(`${accessControlApiBase}/conversations`, {
+              headers: headersFor(bob),
+              responseType: 'json',
+            });
+            expect(listedForBob).toHaveStatusCode(200);
+            const listedPublicConversation = (
+              listedForBob.body as ListConversationsResponse
+            ).results.find(({ id }) => id === publicConversation.conversation_id);
+            expect(listedPublicConversation?.permissions).toStrictEqual({
+              rename: false,
+              delete: false,
+            });
+          }
+        );
+
         await apiTest.step('Bob cannot rename or delete Alice public conversation', async () => {
           const renameResponse = await renameConversationAs(
             apiClient,
@@ -735,6 +776,56 @@ apiTest.describe(
             expect(getOrphanedResponse).toHaveStatusCode(404);
           }
         );
+      }
+    );
+
+    // ── auto-create IDOR ──────────────────────────────────────────────────────
+
+    apiTest(
+      'auto-create cannot overwrite or take over another user conversation',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-autocreate-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const aliceConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'alice data',
+          title: 'Alice private conversation',
+        });
+        const conversationId = aliceConversation.conversation_id;
+
+        // converse auto-creates a conversation with the caller-supplied id, so Bob replaying
+        // Alice's id previously overwrote and took over her conversation. It must now be
+        // rejected before any create, with no LLM round (so no interceptor is set up).
+        const attempt = await apiClient.post(`${accessControlApiBase}/converse`, {
+          headers: headersFor(bob),
+          body: {
+            agent_id: agentId,
+            input: 'bob data',
+            connector_id: connectorId,
+            _execution_mode: 'local',
+            conversation_id: conversationId,
+          },
+          responseType: 'json',
+        });
+        expect(attempt).toHaveStatusCode(404);
+
+        const aliceView = await apiClient.get(
+          `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: headersFor(alice), responseType: 'json' }
+        );
+        expect(aliceView).toHaveStatusCode(200);
+        const conversation = aliceView.body as Conversation;
+        expect(conversation.user.username).toBe(alice.username);
+        expect(conversation.rounds).toHaveLength(1);
+
+        const bobView = await apiClient.get(
+          `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: headersFor(bob), responseType: 'json' }
+        );
+        expect(bobView).toHaveStatusCode(404);
       }
     );
 

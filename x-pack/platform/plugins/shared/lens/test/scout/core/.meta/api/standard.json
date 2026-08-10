@@ -1,0 +1,269 @@
+{
+  "sha1": "2ffbbe1cffb654be0a2201a26be9d899334c74d8",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "9a20063fc72c8c5-e466439a83cf853",
+      "title": "lens visualizations - create should create a lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
+        "line": 18,
+        "column": 25
+      }
+    },
+    {
+      "id": "9a20063fc72c8c5-b0986660b08c016",
+      "title": "lens visualizations - create validation - returns 400 when body is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/create.spec.ts",
+        "line": 30,
+        "column": 16
+      }
+    },
+    {
+      "id": "92c8d8a526e6912-9fc3938ad30c7e7",
+      "title": "lens visualizations - delete should delete an existing lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/delete.spec.ts",
+        "line": 20,
+        "column": 25
+      }
+    },
+    {
+      "id": "92c8d8a526e6912-79203200d6ccdc2",
+      "title": "lens visualizations - delete should return 404 when deleting a non-existent visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/delete.spec.ts",
+        "line": 28,
+        "column": 84
+      }
+    },
+    {
+      "id": "0b749b8b94ee42c-9f3b7350a14f660",
+      "title": "lens visualizations - get should get a lens visualization by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/get.spec.ts",
+        "line": 20,
+        "column": 25
+      }
+    },
+    {
+      "id": "0b749b8b94ee42c-293fcf0165795a9",
+      "title": "lens visualizations - get should return 404 for a non-existent lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/get.spec.ts",
+        "line": 29,
+        "column": 22
+      }
+    },
+    {
+      "id": "c0e60106c7a0cca-06babd174c255d6",
+      "title": "lens visualizations - search should return the list of lens visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/search.spec.ts",
+        "line": 18,
+        "column": 25
+      }
+    },
+    {
+      "id": "c0e60106c7a0cca-c116711b522fb04",
+      "title": "lens visualizations - search should filter visualizations by title and description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/search.spec.ts",
+        "line": 27,
+        "column": 22
+      }
+    },
+    {
+      "id": "c0e60106c7a0cca-8e4434eefd0f350",
+      "title": "lens visualizations - search validation - returns 400 for unknown query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/search.spec.ts",
+        "line": 39,
+        "column": 77
+      }
+    },
+    {
+      "id": "93b93d439d2c363-32e2e96ec866d6f",
+      "title": "lens visualizations - update should update an existing lens visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "93b93d439d2c363-a79cfe11de0f753",
+      "title": "lens visualizations - update should upsert when no visualization exists for the id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 39,
+        "column": 16
+      }
+    },
+    {
+      "id": "93b93d439d2c363-75d3dc22a6747df",
+      "title": "lens visualizations - update validation - returns 400 for an invalid id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 55,
+        "column": 22
+      }
+    },
+    {
+      "id": "93b93d439d2c363-2fa89c8a94db732",
+      "title": "lens visualizations - update validation - returns 400 when body is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/visualizations/update.spec.ts",
+        "line": 69,
+        "column": 11
+      }
+    }
+  ]
+}

@@ -34,7 +34,6 @@ export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute =>
       }),
     },
   ],
-  enableDatePicker: true,
   'data-test-subj': 'mlPageModelManagement',
 });
 

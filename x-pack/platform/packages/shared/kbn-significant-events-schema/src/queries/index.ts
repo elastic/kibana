@@ -11,14 +11,6 @@ import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
-/**
- * A knowledge indicator (feature or query link) is durable when it has no
- * `expires_at` — it is never subject to expiry-based cleanup.
- */
-export function isDurable(ki: Feature | QueryLink): boolean {
-  return !ki.expires_at;
-}
-
 export function isExpirable(
   ki: Feature | QueryLink
 ): ki is (Feature | QueryLink) & { expires_at: string } {
@@ -80,26 +72,6 @@ export interface StreamQuery extends StreamQueryBase {
   features?: QueryFeature[];
   expires_at?: string;
 }
-
-const streamQueryBaseSchema = z.object({
-  id: NonEmptyString,
-  title: NonEmptyString,
-  description: z.string().max(MAX_TEXT_LENGTH),
-}) satisfies z.Schema<StreamQueryBase>;
-
-/**
- * The `type` default exists for backward compatibility with pre-migration
- * stored documents that lack a type field. For all new writes the type MUST
- * be derived server-side via {@link deriveQueryType} — never trust the default.
- */
-export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
-  type: queryTypeSchema.default(QUERY_TYPE_MATCH),
-  severity_score: z.number().optional(),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  features: z.array(queryFeatureSchema).optional(),
-  esql: esqlQuerySchema,
-  expires_at: z.iso.datetime().optional(),
-});
 
 /**
  * Wire schema for creating/updating a query. The `type` field is intentionally

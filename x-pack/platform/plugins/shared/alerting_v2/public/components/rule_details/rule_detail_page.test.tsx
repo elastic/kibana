@@ -60,6 +60,11 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
 }));
 
+const mockRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+}));
+
 const mockOpenEditFlyout = jest.fn();
 const mockOpenCloneFlyout = jest.fn();
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
@@ -118,6 +123,7 @@ const baseRule: RuleApiResponse = {
   enabled: true,
   metadata: {
     name: 'Test Signal Rule',
+    version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },
@@ -255,7 +261,10 @@ describe('RuleDetailPage', () => {
     const toggle = await screen.findByTestId('ruleDetailsEnabledSwitch');
     expect(toggle).toBeChecked();
     fireEvent.click(toggle);
-    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: false,
+    });
   });
 
   it('renders an unchecked enabled switch for disabled rules and enables the rule when toggled on', async () => {
@@ -263,7 +272,10 @@ describe('RuleDetailPage', () => {
     const toggle = await screen.findByTestId('ruleDetailsEnabledSwitch');
     expect(toggle).not.toBeChecked();
     fireEvent.click(toggle);
-    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: true });
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: true,
+    });
   });
 
   it('disables the switch while the toggle mutation is in flight', async () => {

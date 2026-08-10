@@ -81,17 +81,35 @@ describe('ApplicationConnections', () => {
       return `/mock/app/${appId}${options?.path ?? ''}`;
     });
 
-    const { findByText, findByTestId, getByTestId, getByPlaceholderText } = renderPage(coreStart);
+    const { findAllByTestId, getAllByTestId, getByTestId, getByPlaceholderText } =
+      renderPage(coreStart);
 
-    expect(await findByText(/No application connections/)).toBeInTheDocument();
-    expect(await findByText(/Get started by creating MCP clients/)).toBeInTheDocument();
-    const addButton = await findByTestId('applicationConnectionsEmptyPromptAddButton');
+    // `EuiBasicTable` renders its `noItemsMessage` twice: once in the visible table body and
+    // once inside a screen-reader-only `<caption>` that EUI mounts behind a 500ms `EuiDelayRender`.
+    // Both copies carry the `applicationConnectionsEmptyPrompt` test subject, so scope every
+    // assertion to the visible body copy — otherwise a slow first render races the delayed caption
+    // duplicate and the singular queries throw "Found multiple elements". A genuine double-render
+    // in the body would still fail the `toHaveLength(1)` guard below.
+    await findAllByTestId('applicationConnectionsEmptyPrompt');
+    const visiblePrompts = getAllByTestId('applicationConnectionsEmptyPrompt').filter(
+      (element) => !element.closest('caption')
+    );
+    expect(visiblePrompts).toHaveLength(1);
+    const [emptyPrompt] = visiblePrompts;
+
+    expect(within(emptyPrompt).getByText(/No application connections/)).toBeInTheDocument();
+    expect(
+      within(emptyPrompt).getByText(/Get started by creating MCP clients/)
+    ).toBeInTheDocument();
+    const addButton = within(emptyPrompt).getByTestId('applicationConnectionsEmptyPromptAddButton');
     expect(addButton).toBeInTheDocument();
     expect(addButton).toHaveAttribute(
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
     );
-    const learnMoreLink = await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink');
+    const learnMoreLink = within(emptyPrompt).getByTestId(
+      'applicationConnectionsEmptyPromptLearnMoreLink'
+    );
     expect(learnMoreLink).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute(
       'href',
@@ -342,6 +360,121 @@ describe('ApplicationConnections', () => {
     fireEvent.click(getByTestId('expandRow-client-a'));
     expect(await findByText('Desktop session')).toBeInTheDocument();
     expect(queryByText('Laptop session')).not.toBeInTheDocument();
+  }, 15_000);
+
+  it('renders an "Expired" status for a connection that is expired but not revoked, and keeps it selectable', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-expired',
+            client_id: 'client-a',
+            name: 'Stale session',
+            resource: 'cluster:elastic',
+            expired: true,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    await within(listView).findByText('Stale session');
+    expect(within(listView).getByText('Expired')).toBeInTheDocument();
+
+    expect(queryByTestId('applicationConnectionsBulkRevokeButton')).not.toBeInTheDocument();
+    const rowCheckbox = within(listView).getByLabelText(/Select connection 'Stale session'/);
+    fireEvent.click(rowCheckbox);
+    expect(await findByTestId('applicationConnectionsBulkRevokeButton')).toHaveTextContent(
+      'Revoke 1 connection'
+    );
+
+    expect(within(listView).getByTestId('revokeConnection-conn-expired')).toBeInTheDocument();
+  });
+
+  it('renders "Revoked" (not "Expired") when a connection is both expired and revoked', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'My MCP app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-both',
+            client_id: 'client-a',
+            name: 'Old session',
+            resource: 'cluster:elastic',
+            expired: true,
+            revoked: true,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('My MCP app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    await within(listView).findByText('Old session');
+    expect(within(listView).getAllByText('Revoked').length).toBeGreaterThan(0);
+    expect(within(listView).queryByText('Expired')).not.toBeInTheDocument();
+  });
+
+  it('filters by "Expired" inside a mixed-status grouped row', async () => {
+    setupHttpResponses(coreStart, {
+      clients: {
+        clients: [{ id: 'client-a', client_name: 'Mixed app', resource: 'cluster:elastic' }],
+      },
+      connections: {
+        connections: [
+          {
+            id: 'conn-active',
+            client_id: 'client-a',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+          {
+            id: 'conn-expired',
+            client_id: 'client-a',
+            name: 'Stale session',
+            resource: 'cluster:elastic',
+            expired: true,
+          },
+          {
+            id: 'conn-revoked',
+            client_id: 'client-a',
+            name: 'Desktop session',
+            resource: 'cluster:elastic',
+            revoked: true,
+          },
+        ],
+      },
+    });
+
+    const { findByRole, findByTestId, findByText, getByRole, getByTestId, queryByText } =
+      renderPage(coreStart);
+
+    expect(await findByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('3');
+
+    fireEvent.click(getByRole('button', { name: /Status Selection/ }));
+    fireEvent.click(await findByRole('option', { name: /Expired/ }));
+
+    await waitFor(() => {
+      expect(getByTestId('applicationConnectionsCount-client-a')).toHaveTextContent('1');
+    });
+    fireEvent.click(getByTestId('expandRow-client-a'));
+    expect(await findByText('Stale session')).toBeInTheDocument();
+    expect(queryByText('Laptop session')).not.toBeInTheDocument();
+    expect(queryByText('Desktop session')).not.toBeInTheDocument();
   }, 15_000);
 
   it('renders the expanded connection table with the Figma-aligned columns (no Scopes, no Select-all)', async () => {

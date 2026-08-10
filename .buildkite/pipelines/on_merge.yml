@@ -38,7 +38,7 @@ steps:
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
       diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
@@ -141,7 +141,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4-standard-8-lssd
+      machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
@@ -237,6 +237,7 @@ steps:
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
+      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'

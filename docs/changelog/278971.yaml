@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278971
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Improve ancestry-related alert correlations with a time range"
+description: "The Correlations \"alerts related by ancestry\" view includes a time range control and bounds the Resolver tree query, reducing timeouts on large indices."

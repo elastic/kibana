@@ -1,0 +1,405 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-22
+entries:
+- file:
+    name: 279327.yaml
+    checksum: d5bed3c654c1a3bbaf744e221180f44bed7afc41
+  type: enhancement
+  title: Add duplicate file warning in Cases file upload
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Shows a callout in the Cases upload modal when the selected filename matches an existing attachment; upload is still allowed.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279327
+- file:
+    name: 279346.yaml
+    checksum: 3cd94c5df5891a7b21191abda94bcfca398f1fc8
+  type: feature
+  title: Add autocomplete and validation to the Cases template YAML editor
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Adds field-type snippets, `$ref` autocomplete, and inline validation for misspelled metadata keys, invalid `show_when` and `required_when` references, and control-specific validation rules.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279346
+- file:
+    name: 279385.yaml
+    checksum: 945ace9f8fac37808855f2e7200f3bc934271b2c
+  type: bug-fix
+  title: Fix Model Management pages appearing on Observability Logs Essentials projects
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Fixes Model Management pages being reachable by URL or global search on Observability Logs Essentials projects where AI features aren't supported.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/279385
+- file:
+    name: 278097.yaml
+    checksum: 9d3e5a2a58f8f7c6ee1763eb433c99e702c15c42
+  type: bug-fix
+  title: Fix exposed Synthetics monitor secrets in the "Inspect configuration" flyout
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: The Synthetics monitor "Inspect configuration" flyout could show decrypted secrets such as passwords in plain text. Secret values are now redacted in the inspect output.
+  prs:
+  - https://github.com/elastic/kibana/pull/278097
+  issues:
+  - https://github.com/elastic/kibana/issues/259257
+- file:
+    name: 279347.yaml
+    checksum: 3bbd75ae33be63c2d81fdfb0ab6391aaa80ae9ab
+  type: enhancement
+  title: Reduce duplicate anomaly detection alerts by preferring `event.ingested`
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: When `event.ingested` is present, rule queries use the previous run window on that field instead of overlapping timestamp lookbacks, while results without `event.ingested` keep the existing behavior.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/279347
+- file:
+    name: 274987.yaml
+    checksum: 801d471366e664ec76f67a84a973b0fbc5704991
+  type: breaking-change
+  title: Update endpoint response action APIs to enforce field length limits
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Endpoint response action APIs now validate the length of request fields, including comments, IDs, commands, file paths, and script content.
+  impact: Requests that exceed the new field-length limits are rejected.
+  action: Update endpoint response action API clients to keep request fields within the documented limits.
+  subtype: api
+  prs:
+  - https://github.com/elastic/kibana/pull/274987
+- file:
+    name: 277041.yaml
+    checksum: 07b1d38dd21bc56c30cdec09c56dc4e0a6f27c94
+  type: bug-fix
+  title: Fix One Workflows export of comments and enable status
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Exported workflow YAML could drop user comments or commented steps and encode the wrong enable status. Export now preserves the original YAML comments and enable flag.
+  prs:
+  - https://github.com/elastic/kibana/pull/277041
+- file:
+    name: 278874.yaml
+    checksum: 56541bec08de5527544fb0e8032d86a82b9bc54f
+  type: feature
+  title: Add tag name filtering to dashboard and link list APIs
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Dashboard and link list APIs now accept `tag_names` and `excluded_tag_names` query parameters to filter results by tag name, in addition to filtering by tag ID.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/278874
+  issues:
+  - https://github.com/elastic/kibana/issues/276883
+- file:
+    name: 279875.yaml
+    checksum: cfbcb6db9e0b2c5e4ad634f01cc53b30eb423627
+  type: bug-fix
+  title: Fix "Apply annotation to this series" checkbox when editing annotations
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Fixes the checkbox staying selected when you edit an existing annotation that applies to a single series.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/279875
+- file:
+    name: 276523.yaml
+    checksum: 56621ef36300f90663b4815d851b878d8121e601
+  type: enhancement
+  title: Add "Creating action" status message to Response Console
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: The Response Console now shows a "Creating action" message while a response action request is being created, instead of jumping straight to the pending state. The long-running command hint also starts only after the action enters pending.
+  prs:
+  - https://github.com/elastic/kibana/pull/276523
+- file:
+    name: 275289.yaml
+    checksum: 96fd67e6e6182c41eec448288919afedcf1a3d71
+  type: bug-fix
+  title: Fix duplicate APM anomaly detection alerts
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: APM anomaly detection rules could fire duplicate alerts because each run re-queried overlapping time windows. Rules now filter ML results on `event.ingested` (result write time) instead of anomaly bucket time, so each anomaly is matched once.
+  prs:
+  - https://github.com/elastic/kibana/pull/275289
+  issues:
+  - https://github.com/elastic/kibana/issues/259298
+- file:
+    name: 279300.yaml
+    checksum: b90aeff521b996cee9f84031015455b83b34724a
+  type: feature
+  title: Enable the new flyout system in Elastic Security by default
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Turns on the `securitySolution:enableNewFlyout` advanced setting so Elastic Security uses the unified flyout system unless you disable it in Advanced Settings.
+  prs:
+  - https://github.com/elastic/kibana/pull/279300
+- file:
+    name: 276936.yaml
+    checksum: 0ce8903793ac9bbf33035512ed426ff7817dc5ee
+  type: bug-fix
+  title: Fix ML saved objects API access when ML features are disabled
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Machine Learning saved object APIs incorrectly required privileges for anomaly detection, data frame analytics, and trained models all at once. Users could be blocked when a feature was disabled. APIs now accept any one of the relevant capabilities.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/276936
+- file:
+    name: 273427.yaml
+    checksum: f42aba935e87d8f6aa88dd40d6d5bded07427644
+  type: enhancement
+  title: Add `Export JSON` panel action
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/273427
+  issues:
+  - https://github.com/elastic/kibana/issues/219954
+- file:
+    name: 279883.yaml
+    checksum: e2c8f0bb03812524877273baacc513461604f02f
+  type: bug-fix
+  title: Fix missing time range in dashboard user activity logs
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: User activity logs now record the dashboard time range when `timeRestore` is disabled, instead of logging null values.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/279883
+  issues:
+  - https://github.com/elastic/kibana/issues/279845
+- file:
+    name: 275711.yaml
+    checksum: b37b22630ffd222020396899de00bc6d1a0ffbb4
+  type: breaking-change
+  title: Update endpoint metadata APIs to enforce field length limits
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Endpoint metadata, policy response, protection note, and script listing APIs now validate request field lengths.
+  impact: Requests that exceed the new field-length limits are rejected.
+  action: Update endpoint metadata, policy response, protection note, and script listing API clients to keep request fields within the documented limits.
+  subtype: api
+  prs:
+  - https://github.com/elastic/kibana/pull/275711
+- file:
+    name: 278949.yaml
+    checksum: 8ae822b6dce61ea15deed8343066397f8779c472
+  type: bug-fix
+  title: Fix risk score Inspect in Agent Builder entity preview
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Fixes the Inspect modal showing "Couldn't render this attachment" and Inspect staying disabled after you close the Entity Analytics flyout from the preview.
+  prs:
+  - https://github.com/elastic/kibana/pull/278949
+  issues:
+  - https://github.com/elastic/kibana/issues/278006
+- file:
+    name: 279533.yaml
+    checksum: 6fbd2cf6047781f4a02d44da9d418e02f54b8898
+  type: enhancement
+  title: Improve Fleet Elastic Package Registry connection error details
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Fleet connection errors to the Elastic Package Registry now include a categorized type (timeout, DNS, connection, HTTP, or unknown) and a reason (Node error code or HTTP status) in server logs and API responses.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/279533
+  issues:
+  - https://github.com/elastic/kibana/issues/274126
+- file:
+    name: 275710.yaml
+    checksum: 52d46eeb7c59429325c9eb2c908931b4db4e9461
+  type: breaking-change
+  title: Update script library APIs to enforce field length limits
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Script library APIs now validate the length of script names, descriptions, instructions, examples, executable paths, versions, and script IDs.
+  impact: Requests that exceed the new field-length limits are rejected.
+  action: Update script library API clients to keep request fields within the documented limits.
+  subtype: api
+  prs:
+  - https://github.com/elastic/kibana/pull/275710
+- file:
+    name: 279660.yaml
+    checksum: 89af9f817fcf924a8c3450faf742dd1c4adf35e1
+  type: bug-fix
+  title: Fix Context Engine AI index destination prefix validation
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: AI index `dest.value` entries must use the `ai-index-ds-*` or `ai-index-idx-*` prefix instead of `.ai-index-*`.
+  prs:
+  - https://github.com/elastic/kibana/pull/279660
+- file:
+    name: 277042.yaml
+    checksum: ab8c044db90328d131e2121c1a3ed1f0dcd0edf7
+  type: bug-fix
+  title: Fix workflow import failures with cross-space soft-deleted workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Workflow import could fail or behave incorrectly when a workflow ID was soft deleted in another space. Import now checks cross-space soft-deleted IDs before creating workflows.
+  prs:
+  - https://github.com/elastic/kibana/pull/277042
+- file:
+    name: 279314.yaml
+    checksum: 5d5fd6a2b892a553b896c4f495b65639a2b204d2
+  type: enhancement
+  title: Hide "Manage regions" for read-only users on Elastic Inference Service
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Hides the Manage regions control for users without manage access so the page no longer shows an action they cannot use.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/279314
+- file:
+    name: 278944.yaml
+    checksum: d7209aa762a0732a0d9771c01fa8362318293f88
+  type: bug-fix
+  title: Fix Dashboard Fast mode not preserved in shared links
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Sharing a dashboard link did not include the Fast mode (`esql_approximation`) setting. Shared dashboard links now preserve Fast mode when it is enabled.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/278944
+  issues:
+  - https://github.com/elastic/kibana/issues/276375
+- file:
+    name: 279466.yaml
+    checksum: f79195c614d351fa4e07c1989a8ccffd1c6d4e55
+  type: enhancement
+  title: Sync Cases custom fields with templates v2 extended fields
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: When case templates v2 is enabled, custom field values mirror into `extended_fields` on create and update, and newly configured custom fields get matching global field definitions for the templates UI.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279466
+- file:
+    name: 279391.yaml
+    checksum: 225070bba126d204b15b61b9c73f6b37f2a8a813
+  type: bug-fix
+  title: Fix Fleet integration policy YAML errors when values contain double quotes
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Fixes policy YAML corruption when an `escape_string` field value includes a `"` character, which could produce invalid agent configuration.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/279391
+  issues:
+  - https://github.com/elastic/kibana/issues/279388
+- file:
+    name: 278778.yaml
+    checksum: 4655fd0ee1268ed314238c9e4b3c49a524a0f067
+  type: feature
+  title: Add a channel selector to the Slack action in the Rule form
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: When configuring a Slack action in the rule form, you can select a channel from a dropdown list. If a channel is not listed, you can still enter it manually in the YAML editor.
+  prs:
+  - https://github.com/elastic/kibana/pull/278778
+- file:
+    name: 279373.yaml
+    checksum: 150a1685827e712ac1102f1492c770a75c360b07
+  type: enhancement
+  title: Add case templates documentation links in Cases
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Adds Documentation links in the templates list and editor headers and updates the landing page Learn more link to the manage case templates guide.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/279373
+- file:
+    name: 278923.yaml
+    checksum: ff0a3d18baa29d11b460960a7666e451f551cddf
+  type: feature
+  title: Add API and UI to rotate Fleet agent uninstall tokens
+  products:
+  - product: cloud-serverless
+    target: 2026-07-22
+  - product: kibana
+  description: Adds a "Rotate uninstall token" button to agent policy tamper protection settings and a `POST /api/fleet/uninstall_tokens/{agentPolicyId}/rotate` endpoint. Operators can invalidate a leaked uninstall token without recreating the policy and migrating agents.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/278923
+  issues:
+  - https://github.com/elastic/kibana/issues/270626

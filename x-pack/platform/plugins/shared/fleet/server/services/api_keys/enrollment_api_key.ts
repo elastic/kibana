@@ -16,6 +16,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
+import { isValidEnrollmentKeyExpiration } from '../../../common/services';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { FleetError, EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
@@ -358,6 +359,11 @@ export async function generateEnrollmentAPIKey(
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
+  if (data.expiration !== undefined && !isValidEnrollmentKeyExpiration(data.expiration)) {
+    throw new FleetError(
+      `Invalid expiration value "${data.expiration}". Must be a positive duration (for example, 30d, 24h, 90m, 60s) not exceeding 106751d.`
+    );
+  }
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate, agentPolicyId } = data;
   const logger = appContextService.getLogger();
@@ -413,6 +419,7 @@ export async function generateEnrollmentAPIKey(
   const key = await esClient.security
     .createApiKey({
       name,
+      ...(data.expiration ? { expiration: data.expiration } : {}),
       metadata: {
         managed_by: 'fleet',
         managed: true,
@@ -448,6 +455,9 @@ export async function generateEnrollmentAPIKey(
 
   const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
 
+  // key.expiration is epoch-ms returned by the Security API; convert to ISO for the date-typed field
+  const expireAt = key.expiration ? new Date(key.expiration).toISOString() : undefined;
+
   const body = {
     active: true,
     api_key_id: key.id,
@@ -457,6 +467,7 @@ export async function generateEnrollmentAPIKey(
     namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
     hidden: agentPolicy?.supports_agentless || agentPolicy?.is_managed,
+    ...(expireAt ? { expire_at: expireAt } : {}),
   };
 
   const res = await esClient.create({
@@ -474,6 +485,7 @@ export async function generateEnrollmentAPIKey(
     active: body.active,
     policy_id: body.policy_id,
     created_at: body.created_at,
+    ...(expireAt ? { expire_at: expireAt } : {}),
   };
 
   return enrollmentAPIKey;
@@ -575,5 +587,6 @@ function esDocToEnrollmentApiKey(doc: {
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
     hidden: doc._source.hidden || false,
+    ...(doc._source.expire_at ? { expire_at: doc._source.expire_at } : {}),
   };
 }

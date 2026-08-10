@@ -12,16 +12,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   GENERATE_VECTORS_INGEST_SNIPPETS,
+  GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS,
   GENERATE_VECTORS_SEARCH_SNIPPETS,
   HAVE_VECTORS_INGEST_SNIPPETS,
+  HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS,
   HAVE_VECTORS_SEARCH_SNIPPETS,
 } from './language_snippets';
 import {
   GENERATE_VECTORS_INGEST,
   GENERATE_VECTORS_SEARCH,
+  GENERATE_VECTORS_SEARCH_HYBRID,
   HAVE_VECTORS_INGEST,
   HAVE_VECTORS_SEARCH,
-} from './snippets';
+  HAVE_VECTORS_SEARCH_HYBRID,
+} from './console_snippets';
 
 const docsLabel = i18n.translate('vectordbOnboarding.docsLabel', {
   defaultMessage: 'View documentation',
@@ -44,8 +48,16 @@ export const getStepContent = (docLinks: DocLinksStart) => {
           consoleComment: i18n.translate('vectordbOnboarding.generate.ingest.consoleComment', {
             defaultMessage: 'Vector DB Onboarding: Generate Vectors',
           }),
-          snippets: GENERATE_VECTORS_INGEST_SNIPPETS,
-          request: GENERATE_VECTORS_INGEST,
+          tabs: [
+            {
+              id: 'ingest',
+              label: i18n.translate('vectordbOnboarding.generate.ingest.tabs.ingest', {
+                defaultMessage: 'Ingest',
+              }),
+              snippets: GENERATE_VECTORS_INGEST_SNIPPETS,
+              consoleRequest: GENERATE_VECTORS_INGEST,
+            },
+          ],
         },
         pills: [
           {
@@ -144,8 +156,24 @@ export const getStepContent = (docLinks: DocLinksStart) => {
           consoleComment: i18n.translate('vectordbOnboarding.generate.search.consoleComment', {
             defaultMessage: 'Vector DB Onboarding: Search Data',
           }),
-          snippets: GENERATE_VECTORS_SEARCH_SNIPPETS,
-          request: GENERATE_VECTORS_SEARCH,
+          tabs: [
+            {
+              id: 'semantic',
+              label: i18n.translate('vectordbOnboarding.generate.search.tabs.semantic', {
+                defaultMessage: 'Semantic',
+              }),
+              snippets: GENERATE_VECTORS_SEARCH_SNIPPETS,
+              consoleRequest: GENERATE_VECTORS_SEARCH,
+            },
+            {
+              id: 'hybrid',
+              label: i18n.translate('vectordbOnboarding.generate.search.tabs.hybrid', {
+                defaultMessage: 'Hybrid',
+              }),
+              snippets: GENERATE_VECTORS_SEARCH_HYBRID_SNIPPETS,
+              consoleRequest: GENERATE_VECTORS_SEARCH_HYBRID,
+            },
+          ],
         },
         pills: [
           {
@@ -216,8 +244,16 @@ export const getStepContent = (docLinks: DocLinksStart) => {
           consoleComment: i18n.translate('vectordbOnboarding.haveVectors.ingest.consoleComment', {
             defaultMessage: 'Vector DB Onboarding: Ingest Data',
           }),
-          snippets: HAVE_VECTORS_INGEST_SNIPPETS,
-          request: HAVE_VECTORS_INGEST,
+          tabs: [
+            {
+              id: 'ingest',
+              label: i18n.translate('vectordbOnboarding.haveVectors.ingest.tabs.ingest', {
+                defaultMessage: 'Ingest',
+              }),
+              snippets: HAVE_VECTORS_INGEST_SNIPPETS,
+              consoleRequest: HAVE_VECTORS_INGEST,
+            },
+          ],
         },
         pills: [
           {
@@ -276,8 +312,24 @@ export const getStepContent = (docLinks: DocLinksStart) => {
           consoleComment: i18n.translate('vectordbOnboarding.haveVectors.search.consoleComment', {
             defaultMessage: 'Vector DB Onboarding: Search Data',
           }),
-          snippets: HAVE_VECTORS_SEARCH_SNIPPETS,
-          request: HAVE_VECTORS_SEARCH,
+          tabs: [
+            {
+              id: 'knn',
+              label: i18n.translate('vectordbOnboarding.haveVectors.search.tabs.knn', {
+                defaultMessage: 'kNN',
+              }),
+              snippets: HAVE_VECTORS_SEARCH_SNIPPETS,
+              consoleRequest: HAVE_VECTORS_SEARCH,
+            },
+            {
+              id: 'hybrid',
+              label: i18n.translate('vectordbOnboarding.haveVectors.search.tabs.hybrid', {
+                defaultMessage: 'Hybrid',
+              }),
+              snippets: HAVE_VECTORS_SEARCH_HYBRID_SNIPPETS,
+              consoleRequest: HAVE_VECTORS_SEARCH_HYBRID,
+            },
+          ],
         },
         pills: [
           {

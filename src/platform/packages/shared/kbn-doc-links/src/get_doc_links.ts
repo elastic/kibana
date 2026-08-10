@@ -208,6 +208,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       vectorSearchDenseVector: `${ELASTIC_DOCS}solutions/search/vector/dense-vector`,
       jinaEmbeddingModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-jina`,
       vectorSearchBringOwnVectors: `${ELASTIC_DOCS}solutions/search/vector/bring-own-vectors`,
+      vectorDatabaseGetStarted: `${ELASTIC_DOCS}solutions/vector-database/get-started`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-model-ref`,
       syncRules: `${ELASTIC_DOCS}reference/search-connectors/es-sync-rules`,
@@ -464,9 +465,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
-      // TODO(MITRE-v19 docs): swap to the published page covering how to update outdated
-      // MITRE ATT&CK mappings on detection rules once it ships.
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
+      remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,

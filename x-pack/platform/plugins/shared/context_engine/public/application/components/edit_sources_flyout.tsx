@@ -60,7 +60,7 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
             <FormattedMessage
               id="xpack.contextEngine.editSources.title"
               defaultMessage='Edit sources for "{name}"'
-              values={{ name: aiIndex.name }}
+              values={{ name: aiIndex.id }}
             />
           </h2>
         </EuiTitle>
@@ -101,7 +101,7 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
             >
               <FormattedMessage
                 id="xpack.contextEngine.editSources.doneButton"
-                defaultMessage="Done"
+                defaultMessage="Save"
               />
             </EuiButton>
           </EuiFlexItem>

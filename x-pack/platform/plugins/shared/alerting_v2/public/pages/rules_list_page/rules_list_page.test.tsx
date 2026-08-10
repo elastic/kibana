@@ -1010,7 +1010,10 @@ describe('RulesListPage', () => {
     // Click the switch for the enabled rule (rule-1) — should disable it
     fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
-    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({
+      id: 'rule-1',
+      enabled: false,
+    });
   });
 
   it('shows "Clone" action in the context menu', async () => {

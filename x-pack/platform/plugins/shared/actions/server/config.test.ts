@@ -605,6 +605,29 @@ describe('config validation', () => {
     });
   });
 
+  describe('relay.url', () => {
+    test('accepts an https URL in production mode', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { dev: false }
+      );
+
+      expect(result.relay?.url).toEqual('https://relay.test');
+    });
+
+    test('rejects an http URL in production mode', () => {
+      expect(() =>
+        configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: false })
+      ).toThrow(/expected URI with scheme \[https\]/);
+    });
+
+    test('accepts an http URL in development mode', () => {
+      const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
+
+      expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
   describe('relay.ssl', () => {
     test('accepts the Relay URL and complete SSL configuration', () => {
       const result = configSchema.validate({

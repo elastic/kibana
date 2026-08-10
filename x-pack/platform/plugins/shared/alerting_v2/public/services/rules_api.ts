@@ -16,8 +16,8 @@ import type {
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
+  FindRulesRequest,
   FindRulesResponse,
-  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -33,15 +33,6 @@ const buildRulePath = (id: string): string =>
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
-export interface ListRulesParams {
-  page?: number;
-  perPage?: number;
-  filter?: string;
-  search?: string;
-  sortField?: FindRulesSortField;
-  sortOrder?: 'asc' | 'desc';
-}
-
 export type { BulkByIdsParams, BulkByQueryParams, BulkByQueryResult, BulkResponse, DryRunResponse };
 
 @injectable()
@@ -54,16 +45,9 @@ export class RulesApi {
     });
   }
 
-  public async listRules(params: ListRulesParams) {
+  public async listRules(params: FindRulesRequest = {}) {
     return this.http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-      query: {
-        page: params.page,
-        perPage: params.perPage,
-        filter: params.filter,
-        search: params.search,
-        sortField: params.sortField,
-        sortOrder: params.sortOrder,
-      },
+      query: params,
     });
   }
 
@@ -91,6 +75,18 @@ export class RulesApi {
 
   public async deleteRule(id: string) {
     return this.http.delete<RuleResponse>(buildRulePath(id));
+  }
+
+  public async enableRule(id: string) {
+    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_enable`);
+  }
+
+  public async disableRule(id: string) {
+    return this.http.post<RuleResponse>(`${buildRulePath(id)}/_disable`);
+  }
+
+  public async runRule(id: string) {
+    return this.http.post<void>(`${buildRulePath(id)}/_run`);
   }
 
   public async bulkDeleteRules(params: BulkByIdsParams) {
