@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-export const formatSnoozeDate = (dateStr: string): string =>
-  new Date(dateStr).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+const SHORT_DATE = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+
+const FULL_DATE = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+
+export const formatSnoozeDate = (dateStr: string): string => SHORT_DATE.format(new Date(dateStr));
 
 export const formatSnoozeFullDate = (dateStr: string): string =>
-  new Date(dateStr).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  FULL_DATE.format(new Date(dateStr));

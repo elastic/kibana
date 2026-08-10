@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
-import { PANEL_TITLE } from '@kbn/response-ops-alert-snooze';
 import React, { useState } from 'react';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
 import { formatSnoozeDate, formatSnoozeFullDate } from './format_snooze_date';
@@ -48,10 +47,9 @@ export const ActionPolicySnoozeButton = ({
           values: { date: formatSnoozeFullDate(snoozedUntil) },
         })}
       >
-        <EuiButton
+        <EuiButtonEmpty
           iconType="bellSlash"
           color="accent"
-          // @ts-expect-error - size "xs" is not a valid prop for EuiButton
           size="xs"
           onClick={() => onCancelSnooze(policy.id)}
           isLoading={isLoading}
@@ -59,7 +57,7 @@ export const ActionPolicySnoozeButton = ({
           data-test-subj="actionPolicyUnsnoozeButton"
         >
           {formatSnoozeDate(snoozedUntil)}
-        </EuiButton>
+        </EuiButtonEmpty>
       </EuiToolTip>
     );
   }
@@ -79,7 +77,6 @@ export const ActionPolicySnoozeButton = ({
       </EuiToolTip>
       {isModalOpen && (
         <ActionPolicySnoozeModal
-          title={PANEL_TITLE}
           onApplySnooze={(nextSnoozedUntil) => {
             onSnooze(policy.id, nextSnoozedUntil);
             setIsModalOpen(false);

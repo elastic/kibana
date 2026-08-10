@@ -261,6 +261,7 @@ export const ActionPoliciesTableContent = ({
                   (isSnoozing && snoozeVariables?.id === policy.id) ||
                   (isUnsnoozing && unsnoozeVariables === policy.id)
                 }
+                isDisabled={isBulkActionInProgress}
               />
             );
           }}
@@ -316,6 +317,10 @@ export const ActionPoliciesTableContent = ({
           isStateLoading={
             (isEnabling && enableVariables === policyToView.id) ||
             (isDisabling && disableVariables === policyToView.id)
+          }
+          isSnoozeLoading={
+            (isSnoozing && snoozeVariables?.id === policyToView.id) ||
+            (isUnsnoozing && unsnoozeVariables === policyToView.id)
           }
         />
       )}

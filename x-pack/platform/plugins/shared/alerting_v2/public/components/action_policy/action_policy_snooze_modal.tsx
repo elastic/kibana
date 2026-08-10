@@ -21,16 +21,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { QuickSnoozePanelMessages } from '@kbn/response-ops-alert-snooze';
 import {
+  PANEL_TITLE,
   QUICK_SNOOZE_POPOVER_APPLY,
-  QUICK_SNOOZE_POPOVER_SUBTITLE,
   QuickSnoozePanel,
+  type QuickSnoozePanelMessages,
 } from '@kbn/response-ops-alert-snooze';
 import React, { useState } from 'react';
 
 // The shared panel is worded for alerts; action policies snooze notifications.
-const SNOOZE_PANEL_MESSAGES: Partial<QuickSnoozePanelMessages> = {
+const SNOOZE_PANEL_MESSAGES = {
   durationQuestion: i18n.translate('xpack.alertingV2.actionPolicy.snoozeModal.durationQuestion', {
     defaultMessage: 'How long should notifications be snoozed?',
   }),
@@ -39,24 +39,30 @@ const SNOOZE_PANEL_MESSAGES: Partial<QuickSnoozePanelMessages> = {
       defaultMessage: 'Notifications will resume on {date}',
       values: { date },
     }),
-};
+} satisfies Partial<QuickSnoozePanelMessages>;
+
+// The shared subtitle advertises conditions and indefinite snoozing, neither of
+// which this modal offers.
+const SUBTITLE = i18n.translate('xpack.alertingV2.actionPolicy.snoozeModal.subtitle', {
+  defaultMessage: 'Silence notifications until the chosen time.',
+});
 
 interface ActionPolicySnoozeModalProps {
-  title: string;
+  title?: string;
   onApplySnooze: (snoozedUntil: string) => void;
   onCancel: () => void;
 }
 
 /** Snooze duration picker shown when snoozing one or several action policies. */
 export const ActionPolicySnoozeModal = ({
-  title,
+  title = PANEL_TITLE,
   onApplySnooze,
   onCancel,
 }: ActionPolicySnoozeModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
   // The action policy snooze API requires an end date, so the panel is rendered
-  // without the "Indefinitely" option and only a string is applicable.
-  const [snoozedUntil, setSnoozedUntil] = useState<string | null | undefined>(undefined);
+  // without the "Indefinitely" option and never reports a null schedule.
+  const [snoozedUntil, setSnoozedUntil] = useState<string | undefined>();
 
   return (
     <EuiModal
@@ -76,13 +82,13 @@ export const ActionPolicySnoozeModal = ({
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText size="xs" color="subdued">
-          <p>{QUICK_SNOOZE_POPOVER_SUBTITLE}</p>
+          <p>{SUBTITLE}</p>
         </EuiText>
         <EuiHorizontalRule margin="m" />
         <QuickSnoozePanel
           hideIndefinite
           messages={SNOOZE_PANEL_MESSAGES}
-          onScheduleChange={setSnoozedUntil}
+          onScheduleChange={(endDate) => setSnoozedUntil(endDate ?? undefined)}
         />
       </EuiModalBody>
       <EuiModalFooter>
@@ -94,9 +100,9 @@ export const ActionPolicySnoozeModal = ({
         <EuiButton
           fill
           data-test-subj="actionPolicySnoozeModalApply"
-          isDisabled={typeof snoozedUntil !== 'string'}
+          isDisabled={!snoozedUntil}
           onClick={() => {
-            if (typeof snoozedUntil === 'string') onApplySnooze(snoozedUntil);
+            if (snoozedUntil) onApplySnooze(snoozedUntil);
           }}
         >
           {QUICK_SNOOZE_POPOVER_APPLY}

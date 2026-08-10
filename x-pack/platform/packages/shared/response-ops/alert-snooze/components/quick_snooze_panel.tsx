@@ -24,8 +24,6 @@ export type { SnoozeUnit, QuickDurationId, CustomSnoozeMode, CustomDurationState
 export interface QuickSnoozePanelMessages {
   /** Question shown above the duration options. */
   durationQuestion: string;
-  /** Preview shown while "Indefinitely" is selected. */
-  indefinitelyMessage: string;
   /** Preview shown once the snooze has an end date. */
   getUnsnoozeOnDateMessage: (date: string) => string;
 }
@@ -45,7 +43,6 @@ export interface QuickSnoozePanelProps {
 
 const DEFAULT_MESSAGES: QuickSnoozePanelMessages = {
   durationQuestion: i18n.DURATION_QUESTION,
-  indefinitelyMessage: i18n.INDEFINITELY_MESSAGE,
   getUnsnoozeOnDateMessage: i18n.getUnsnoozeOnDateMessage,
 };
 
@@ -64,23 +61,22 @@ const SNOOZE_PRESET_OPTIONS: Array<{ id: QuickDurationId; label: string }> = [
 
 const OPTIONS_WITHOUT_INDEFINITE = SNOOZE_PRESET_OPTIONS.filter(({ id }) => id !== 'indefinitely');
 
-// The wider labels ("Indefinitely", "Custom") need more room than the compact
-// preset labels, so their buttons get a larger flex-grow.
+// The wider labels need more room than the compact "1h"/"8h" presets, so their
+// buttons get a larger flex-grow. "Custom" is always last in both variants.
 const WIDE_OPTION_STYLES = css`
-  .euiButtonGroup__buttons > *:nth-of-type(1) {
-    flex-grow: 2.4;
-  }
-  .euiButtonGroup__buttons > *:nth-of-type(4) {
-    flex-grow: 1.2;
-  }
-  .euiButtonGroup__buttons > *:nth-of-type(5) {
+  .euiButtonGroup__buttons > *:last-of-type {
     flex-grow: 2;
   }
 `;
 
-const WIDE_OPTION_STYLES_WITHOUT_INDEFINITE = css`
+// Only applies when "Indefinitely" leads the group, which also shifts "24h" into
+// fourth position.
+const WIDE_INDEFINITE_OPTION_STYLES = css`
+  .euiButtonGroup__buttons > *:first-of-type {
+    flex-grow: 2.4;
+  }
   .euiButtonGroup__buttons > *:nth-of-type(4) {
-    flex-grow: 2;
+    flex-grow: 1.2;
   }
 `;
 
@@ -89,10 +85,7 @@ export const QuickSnoozePanel = ({
   hideIndefinite,
   messages,
 }: QuickSnoozePanelProps) => {
-  const { durationQuestion, indefinitelyMessage, getUnsnoozeOnDateMessage } = {
-    ...DEFAULT_MESSAGES,
-    ...messages,
-  };
+  const { durationQuestion, getUnsnoozeOnDateMessage } = { ...DEFAULT_MESSAGES, ...messages };
   const [selectedDuration, setSelectedDuration] = useState<QuickDurationId>(
     hideIndefinite ? '1h' : 'indefinitely'
   );
@@ -135,7 +128,7 @@ export const QuickSnoozePanel = ({
     ? null
     : snoozeEndDate === null
     ? selectedDuration === 'indefinitely'
-      ? indefinitelyMessage
+      ? i18n.INDEFINITELY_MESSAGE
       : null
     : getUnsnoozeOnDateMessage(moment(snoozeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT));
 
@@ -153,7 +146,9 @@ export const QuickSnoozePanel = ({
         data-test-subj="quickSnoozeDurationOptions"
         buttonSize="compressed"
         isFullWidth
-        css={hideIndefinite ? WIDE_OPTION_STYLES_WITHOUT_INDEFINITE : WIDE_OPTION_STYLES}
+        css={
+          hideIndefinite ? WIDE_OPTION_STYLES : [WIDE_OPTION_STYLES, WIDE_INDEFINITE_OPTION_STYLES]
+        }
       />
 
       {selectedDuration === 'custom' && (

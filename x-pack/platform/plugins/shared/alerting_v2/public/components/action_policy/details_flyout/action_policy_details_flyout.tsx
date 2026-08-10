@@ -89,7 +89,10 @@ export const ActionPolicyDetailsFlyout = ({
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
-  const snoozedActive = isSnoozed(policy.snoozedUntil);
+  const { snoozedUntil } = policy;
+  const snoozedActive = isSnoozed(snoozedUntil);
+  // Writers get the interactive snooze bell instead, which already shows the state.
+  const canSnooze = canWrite && policy.enabled;
 
   const handleEdit = () => {
     onClose();
@@ -161,7 +164,7 @@ export const ActionPolicyDetailsFlyout = ({
           responsive={false}
           alignItems="center"
         >
-          {canWrite && policy.enabled && (
+          {canSnooze && (
             <EuiFlexItem grow={false}>
               <ActionPolicySnoozeButton
                 policy={policy}
@@ -225,13 +228,13 @@ export const ActionPolicyDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <ActionPolicyStateBadge policy={policy} isLoading={false} />
             </EuiFlexItem>
-            {snoozedActive && policy.snoozedUntil && (
+            {snoozedActive && !canSnooze && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="accent" iconType="bellSlash">
                   <FormattedMessage
                     id="xpack.alertingV2.actionPolicy.detailsFlyout.snoozedUntil"
                     defaultMessage="Snoozed until {date}"
-                    values={{ date: formatDate(policy.snoozedUntil) }}
+                    values={{ date: formatDate(snoozedUntil) }}
                   />
                 </EuiBadge>
               </EuiFlexItem>
