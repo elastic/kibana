@@ -267,6 +267,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should override axis title', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('bar');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.dest',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'unique_count',
+        field: 'bytes',
+        keepOpen: true,
+      });
+
+      await PageObjects.lens.changeAxisSide('right');
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await PageObjects.lens.closeDimensionEditor();
+
       const axisTitle = 'overridden axis';
       await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
