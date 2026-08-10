@@ -224,7 +224,7 @@ describe('runRelatedUserAliasResolution', () => {
         }),
       })
     );
-    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
     expect(result.lastRun).toMatchObject({ linksCreated: 1 });
   });
 
