@@ -702,14 +702,12 @@ describe('deleteOne', () => {
 describe('test handler', () => {
   const { test: testHandler } = MongoDBConnector;
 
-  it('returns ok:true on successful ping', async () => {
+  it('resolves on successful ping', async () => {
     mockCommand.mockResolvedValue({ ok: 1 });
 
     expect(testHandler).toBeDefined();
     if (!testHandler) return;
-    const result = await testHandler.handler(mockContext);
-    expect(result.ok).toBe(true);
-    expect(result.message).toContain('Connected');
+    await expect(testHandler.handler(mockContext)).resolves.toEqual({});
   });
 
   it('pings the admin database regardless of the configured URI path', async () => {
@@ -719,14 +717,12 @@ describe('test handler', () => {
     expect(mockDb).toHaveBeenCalledWith('admin');
   });
 
-  it('returns ok:false with message on connection failure', async () => {
+  it('throws with a message on connection failure', async () => {
     mockConnect.mockRejectedValue(new Error('Authentication failed'));
 
     expect(testHandler).toBeDefined();
     if (!testHandler) return;
-    const result = await testHandler.handler(mockContext);
-    expect(result.ok).toBe(false);
-    expect(result.message).toContain('Authentication failed');
+    await expect(testHandler.handler(mockContext)).rejects.toThrow('Authentication failed');
   });
 
   it('closes the client even when ping fails after connect', async () => {
@@ -735,7 +731,7 @@ describe('test handler', () => {
 
     expect(testHandler).toBeDefined();
     if (!testHandler) return;
-    await testHandler.handler(mockContext);
+    await expect(testHandler.handler(mockContext)).rejects.toThrow('ping error');
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
 });

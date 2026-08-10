@@ -51,7 +51,7 @@ const DataQualityComponent: React.FC = () => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const { dataView, status } = useDataView();
-  const selectedPatterns = useSelectedPatterns();
+  const selectedPatterns = useSelectedPatterns(dataView);
 
   const indicesExist = !!dataView?.matchedIndices?.length;
 

@@ -53,7 +53,7 @@ export const TagsFilterPopover = ({
       repositionOnScroll
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsOpen((prev) => !prev)}
           isSelected={isOpen}
           hasActiveFilters={activeCount > 0}

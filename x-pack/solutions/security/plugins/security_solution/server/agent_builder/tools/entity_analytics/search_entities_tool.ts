@@ -24,11 +24,11 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
+import { buildRenderAttachmentTag } from './attachment_utils';
+import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
 import {
   buildListEntityAttachmentId,
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
   describeAttachmentForRow,
   ensureEntityAttachment,
@@ -692,43 +692,8 @@ export const searchEntitiesTool = (
     schema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status === 'available') {
-            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-            if (!isEntityStoreV2Enabled) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 is not enabled.',
-              };
-            }
-
-            const [coreStart] = await core.getStartServices();
-            const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-            const indexExists = await esClient.indices.exists({
-              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
-            });
-
-            if (!indexExists) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 index does not exist for this space',
-              };
-            }
-          }
-
-          return availability;
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check entity store v2 index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
+        getEntityStoreV2ToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
     },
     handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(

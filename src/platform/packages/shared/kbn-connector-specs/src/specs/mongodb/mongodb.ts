@@ -393,22 +393,19 @@ export const MongoDBConnector: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.mongodb.test.description', {
       defaultMessage:
         'Verifies the connection URI and credentials are valid by pinging the MongoDB deployment.',
     }),
     handler: async (ctx) => {
-      try {
-        // Ping against admin — it always exists and doesn't require the
-        // configured URI to include a database path.
-        await withClient(ctx, 'admin', async (db) => {
-          await db.command({ ping: 1 });
-        });
-        return { ok: true, message: 'Connected to MongoDB successfully.' };
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        return { ok: false, message: `Connection failed: ${message}` };
-      }
+      // Ping against admin — it always exists and doesn't require the
+      // configured URI to include a database path. A resolved value means
+      // success; the executor treats a thrown error as failure.
+      await withClient(ctx, 'admin', async (db) => {
+        await db.command({ ping: 1 });
+      });
+      return {};
     },
   },
 

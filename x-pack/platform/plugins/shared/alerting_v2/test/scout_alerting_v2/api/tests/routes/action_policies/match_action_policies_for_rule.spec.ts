@@ -34,6 +34,7 @@ apiTest.describe('Match action policies for rule API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 });

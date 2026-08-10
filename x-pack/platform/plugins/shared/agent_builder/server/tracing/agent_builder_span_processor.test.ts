@@ -11,7 +11,7 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing as elasticTracing } from '@elastic/opentelemetry-node/sdk';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
-import { GenAISemanticConventions } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference-tracing';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BUILTIN_AGENTS,
@@ -831,6 +831,44 @@ describe('AgentBuilderSpanProcessor', () => {
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
       expect(GenAISemanticConventions.GenAIToolDefinitions in exported.attributes).toBe(false);
       expect(GenAISemanticConventions.GenAIToolDescription in exported.attributes).toBe(false);
+    });
+
+    it('strips conversation titles when includeRealNames is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: false }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [ElasticGenAIAttributes.ConversationTitle]: 'Kibana role configuration',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[ElasticGenAIAttributes.ConversationTitle]).toBeUndefined();
+    });
+
+    it('preserves conversation titles when includeRealNames is true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: true }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [ElasticGenAIAttributes.ConversationTitle]: 'Kibana role configuration',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[ElasticGenAIAttributes.ConversationTitle]).toBe(
+        'Kibana role configuration'
+      );
     });
 
     it('preserves tool definitions and description when includeRealNames is true', () => {

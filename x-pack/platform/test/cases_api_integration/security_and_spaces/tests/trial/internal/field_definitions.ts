@@ -23,7 +23,7 @@ const TEMPLATES_URL = '/internal/cases/templates';
 const buildCreateBody = (overrides: Record<string, unknown> = {}) => ({
   name: 'priority',
   owner: 'securitySolutionFixture',
-  definition: 'name: priority\ncontrol: SELECT_BASIC\ntype: keyword\n',
+  definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
   ...overrides,
 });
 
@@ -78,6 +78,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send(buildCreateBody({ definition: ': {not valid yaml' }))
           .expect(400);
+      });
+
+      it('returns 400 when a field-library definition is a reference', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(buildCreateBody({ definition: '$ref: existing_field\n' }))
+          .expect(400);
+
+        expect(body.message).to.contain('Invalid field definition');
       });
 
       it('returns 409 when a field definition with the same name already exists', async () => {
@@ -252,7 +263,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send(
             buildCreateBody({
-              definition: 'name: priority\ncontrol: SELECT_BASIC\ntype: keyword\nlabel: Priority\n',
+              definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\nlabel: Priority\n',
             })
           )
           .expect(200);
