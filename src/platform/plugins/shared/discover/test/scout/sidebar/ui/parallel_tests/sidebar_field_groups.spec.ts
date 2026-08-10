@@ -63,8 +63,8 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await discover.waitUntilTabIsLoaded();
 
       await unifiedFieldList.clickFieldListItemAdd('extension');
-      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('@message');
+      // Popularity is persisted async via indexPatterns.save; wait before asserting it.
       await discover.waitUntilSearchingHasFinished();
 
       expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
@@ -75,9 +75,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
       await unifiedFieldList.clickFieldListItemRemove('@message');
-      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('bytes');
-      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('@message');
       await discover.waitUntilSearchingHasFinished();
 
@@ -104,6 +102,40 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       expect(await unifiedFieldList.getSidebarSectionFieldNames('popular')).toStrictEqual(
         popularBeforeRefresh
       );
+
+      await unifiedFieldList.clickFieldListItemRemove('@message');
+      await unifiedFieldList.clickFieldListItemRemove('extension');
+      // createRuntimeField already waits for the tab/search to settle.
+      await discover.createRuntimeField('test', `emit('test')`);
+
+      try {
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+          'bytes',
+        ]);
+
+        const popularAfterRuntimeField = await unifiedFieldList.getSidebarSectionFieldNames(
+          'popular'
+        );
+        expect(popularAfterRuntimeField[0]).toBe('test');
+        expect(popularAfterRuntimeField).toContain('@message');
+        expect(popularAfterRuntimeField).toContain('extension');
+        expect(popularAfterRuntimeField).toContain('bytes');
+        await unifiedFieldList.expectSidebarSectionFieldCount('popular', 4);
+        await unifiedFieldList.expectAvailableFieldCount(
+          testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
+        );
+
+        await unifiedFieldList.clickFieldListItemAdd('clientip');
+        await discover.waitUntilSearchingHasFinished();
+
+        const popularAfterClientip = await unifiedFieldList.getSidebarSectionFieldNames('popular');
+        expect(popularAfterClientip[0]).toBe('test');
+        expect(popularAfterClientip).toContain('clientip');
+        await unifiedFieldList.expectSidebarSectionFieldCount('popular', 5);
+      } finally {
+        await discover.deleteRuntimeField('test');
+        await unifiedFieldList.clearFieldSearch();
+      }
     }
   );
 
