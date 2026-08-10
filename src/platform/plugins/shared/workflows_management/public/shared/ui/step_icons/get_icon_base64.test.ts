@@ -251,7 +251,7 @@ describe('getIconBase64', () => {
     it('prefers hardcoded icon for email over EUI name string', async () => {
       const result = await getIconBase64({
         actionTypeId: '.email',
-        icon: 'email',
+        icon: 'mail',
         kind: 'step',
       });
 
