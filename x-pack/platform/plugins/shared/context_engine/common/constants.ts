@@ -6,15 +6,22 @@
  */
 
 export const publicApiPath = '/api/context_engine';
+export const internalApiPath = '/internal/context_engine';
 
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
+export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
 
 /**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.
  */
 export const AI_INDEX_API_VERSION = '2023-10-31';
+
+/**
+ * Version of internal Context Engine AI index routes.
+ */
+export const AI_INDEX_INTERNAL_API_VERSION = '1';
 
 /**
  * Backing data streams and indices follow type-specific naming conventions,
