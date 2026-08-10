@@ -127,12 +127,14 @@ describe('renderIacTemplateHandler', () => {
           name: 'cloud_security_posture',
           version: '3.5.0',
           // cis_gcp filtered out — not an aws input
-          enabledInputs: ['cloudbeat/cis_aws'],
+          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
         },
         {
           name: 'cloud_asset_inventory',
           version: '1.7.0',
-          enabledInputs: ['cloudbeat/asset_inventory_aws'],
+          policyTemplates: [
+            { name: 'asset_inventory', enabledInputs: ['cloudbeat/asset_inventory_aws'] },
+          ],
         },
       ],
     });
@@ -185,7 +187,14 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
       integrations: [
-        { name: 'aws', version: '7.1.0', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
+        {
+          name: 'aws',
+          version: '7.1.0',
+          policyTemplates: [
+            { name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
+            { name: 's3', enabledInputs: ['aws-s3'] },
+          ],
+        },
       ],
     });
   });
@@ -252,10 +261,249 @@ describe('renderIacTemplateHandler', () => {
         {
           name: 'aws',
           version: '7.1.0',
-          // guardduty + s3 inputs, deduplicated; cloudtrail (not requested) excluded
-          enabledInputs: ['aws-s3', 'aws-cloudwatch'],
+          // Per-template inputs; cloudtrail (not requested) excluded
+          policyTemplates: [
+            { name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
+            { name: 's3', enabledInputs: ['aws-s3'] },
+          ],
         },
       ],
+    });
+  });
+
+  describe('multi-integration and multi-policy-template outbound shape', () => {
+    const AWS_PACKAGE_INFO = {
+      name: 'aws',
+      version: '7.1.0',
+      policy_templates: [
+        { name: 'guardduty', inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }] },
+        { name: 's3', inputs: [{ type: 'aws-s3' }] },
+        { name: 'cloudtrail', inputs: [{ type: 'aws-cloudtrail' }] },
+      ],
+    };
+
+    const GUARDDUTY_PACKAGE_INFO = {
+      name: 'aws_guardduty',
+      version: '2.0.0',
+      policy_templates: [{ name: 'guardduty', inputs: [{ type: 'aws-s3' }] }],
+    };
+
+    it('sends multiple integrations each with their own nested policyTemplates', async () => {
+      mockedGetPackageInfo.mockImplementation(async ({ pkgName }) => {
+        if (pkgName === 'aws') {
+          return AWS_PACKAGE_INFO as any;
+        }
+        if (pkgName === 'aws_guardduty') {
+          return GUARDDUTY_PACKAGE_INFO as any;
+        }
+        return CSPM_PACKAGE_INFO as any;
+      });
+      mockedRenderTemplate.mockResolvedValue({
+        artifactUrl: 'https://s3.example/rendered',
+        expiresAt: '2026-07-28T12:00:00Z',
+      });
+
+      await renderIacTemplateHandler(
+        buildContext(),
+        buildRequest({
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: [
+            { name: 'aws', policyTemplates: ['guardduty'] },
+            { name: 'aws_guardduty', policyTemplates: ['guardduty'] },
+            { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+          ],
+        }),
+        response
+      );
+
+      expect(mockedGetPackageInfo).toHaveBeenCalledTimes(3);
+      expect(mockedRenderTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        integrations: [
+          {
+            name: 'aws',
+            version: '7.1.0',
+            policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] }],
+          },
+          {
+            name: 'aws_guardduty',
+            version: '2.0.0',
+            policyTemplates: [{ name: 'guardduty', enabledInputs: ['aws-s3'] }],
+          },
+          {
+            name: 'cloud_security_posture',
+            version: '3.5.0',
+            policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+          },
+        ],
+      });
+      expect(reportIacProvisionerRenderRequested).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationCount: 3 })
+      );
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('keeps enabledInputs scoped per policy template (not flattened across templates)', async () => {
+      mockedGetPackageInfo.mockResolvedValue(AWS_PACKAGE_INFO as any);
+      mockedRenderTemplate.mockResolvedValue({
+        artifactUrl: 'https://s3.example/rendered',
+        expiresAt: '2026-07-28T12:00:00Z',
+      });
+
+      await renderIacTemplateHandler(
+        buildContext(),
+        buildRequest({
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: [{ name: 'aws', policyTemplates: ['guardduty', 's3', 'cloudtrail'] }],
+        }),
+        response
+      );
+
+      expect(mockedRenderTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        integrations: [
+          {
+            name: 'aws',
+            version: '7.1.0',
+            policyTemplates: [
+              { name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
+              { name: 's3', enabledInputs: ['aws-s3'] },
+              { name: 'cloudtrail', enabledInputs: ['aws-cloudtrail'] },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('combines multi-integration with multi-policy-template packages', async () => {
+      mockedGetPackageInfo.mockImplementation(async ({ pkgName }) =>
+        pkgName === 'aws' ? (AWS_PACKAGE_INFO as any) : (CSPM_PACKAGE_INFO as any)
+      );
+      mockedRenderTemplate.mockResolvedValue({
+        artifactUrl: 'https://s3.example/rendered',
+        expiresAt: '2026-07-28T12:00:00Z',
+      });
+
+      await renderIacTemplateHandler(
+        buildContext(),
+        buildRequest({
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: [
+            { name: 'aws', policyTemplates: ['guardduty', 's3'] },
+            { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+          ],
+        }),
+        response
+      );
+
+      expect(mockedRenderTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        integrations: [
+          {
+            name: 'aws',
+            version: '7.1.0',
+            policyTemplates: [
+              { name: 'guardduty', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
+              { name: 's3', enabledInputs: ['aws-s3'] },
+            ],
+          },
+          {
+            name: 'cloud_security_posture',
+            version: '3.5.0',
+            policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+          },
+        ],
+      });
+      expect(reportIacProvisionerRenderRequested).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationCount: 2 })
+      );
+    });
+
+    it('drops policy templates with no provider-relevant inputs but keeps the rest', async () => {
+      mockedGetPackageInfo.mockResolvedValue({
+        name: 'mixed_package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'aws_tpl',
+            inputs: [{ type: 'aws-s3', title: '', description: '' }],
+          },
+          {
+            // Only GCP inputs — filtered out of the outbound request
+            name: 'gcp_tpl',
+            inputs: [{ type: 'cloudbeat/cis_gcp', title: '', description: '' }],
+          },
+        ],
+      } as any);
+      mockedRenderTemplate.mockResolvedValue({
+        artifactUrl: 'https://s3.example/rendered',
+        expiresAt: '2026-07-28T12:00:00Z',
+      });
+
+      await renderIacTemplateHandler(
+        buildContext(),
+        buildRequest({
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: [{ name: 'mixed_package', policyTemplates: ['aws_tpl', 'gcp_tpl'] }],
+        }),
+        response
+      );
+
+      expect(mockedRenderTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        integrations: [
+          {
+            name: 'mixed_package',
+            version: '1.0.0',
+            policyTemplates: [{ name: 'aws_tpl', enabledInputs: ['aws-s3'] }],
+          },
+        ],
+      });
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('returns 400 when one of several integrations has no provider-relevant inputs', async () => {
+      mockedGetPackageInfo.mockImplementation(async ({ pkgName }) => {
+        if (pkgName === 'gcp_only') {
+          return {
+            name: 'gcp_only',
+            version: '1.0.0',
+            policy_templates: [
+              {
+                name: 'cspm',
+                inputs: [{ type: 'cloudbeat/cis_gcp', title: '', description: '' }],
+              },
+            ],
+          } as any;
+        }
+        return CSPM_PACKAGE_INFO as any;
+      });
+
+      await renderIacTemplateHandler(
+        buildContext(),
+        buildRequest({
+          provider: 'aws',
+          flow: 'cloud_connector',
+          integrations: [
+            { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+            { name: 'gcp_only', policyTemplates: ['cspm'] },
+          ],
+        }),
+        response
+      );
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('gcp_only'),
+          }),
+        })
+      );
+      expect(mockedRenderTemplate).not.toHaveBeenCalled();
     });
   });
 

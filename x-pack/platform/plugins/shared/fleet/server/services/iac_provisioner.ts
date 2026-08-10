@@ -26,10 +26,16 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
 
+export interface IacProvisionerRenderPolicyTemplate {
+  name: string;
+  enabledInputs: string[];
+}
+
 export interface IacProvisionerRenderIntegration {
   name: string;
   version: string;
-  enabledInputs: string[];
+  /** Policy templates the caller enabled, each with its provider-relevant inputs. */
+  policyTemplates: IacProvisionerRenderPolicyTemplate[];
 }
 
 export interface IacProvisionerRenderRequest {

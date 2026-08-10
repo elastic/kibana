@@ -67,30 +67,38 @@ export const renderIacTemplateHandler: FleetRequestHandler<
           skipArchive: true,
         });
 
-        const inputs = (packageInfo.policy_templates ?? [])
-          .filter(({ name }) => policyTemplates.has(name))
-          .flatMap((template) => ('inputs' in template ? template.inputs ?? [] : []));
         // MVP heuristic pending confirmation with the provisioner team
         // (OQ-A in security-team#18632): only provider-relevant input types
         // are sent, since mixed-provider policy templates (e.g. CSPM) would
         // otherwise pull blueprints targeting other canonical templates.
-        const enabledInputs = Array.from(
-          new Set(
-            inputs.map(({ type }) => type).filter((type) => type.toLowerCase().includes(provider))
-          )
-        );
+        const resolvedPolicyTemplates = (packageInfo.policy_templates ?? [])
+          .filter(({ name }) => policyTemplates.has(name))
+          .map((template) => {
+            const inputs = 'inputs' in template ? template.inputs ?? [] : [];
+            const enabledInputs = Array.from(
+              new Set(
+                inputs
+                  .map(({ type }) => type)
+                  .filter((type) => type.toLowerCase().includes(provider))
+              )
+            );
+            return { name: template.name, enabledInputs };
+          })
+          // Drop templates that contribute nothing for this provider so the
+          // outbound request only carries renderable policy templates.
+          .filter(({ enabledInputs }) => enabledInputs.length > 0);
 
         return {
           name: pkgName,
           version: packageInfo.version,
-          enabledInputs,
+          policyTemplates: resolvedPolicyTemplates,
         };
       })
     );
 
     // An integration with no provider-relevant inputs cannot contribute to
     // the template; sending it would only produce confusing provider errors.
-    const emptyIntegration = integrations.find(({ enabledInputs }) => !enabledInputs.length);
+    const emptyIntegration = integrations.find(({ policyTemplates }) => !policyTemplates.length);
     if (emptyIntegration) {
       return response.badRequest({
         body: {

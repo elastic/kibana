@@ -41,7 +41,11 @@ const mockedAgent = jest.mocked(Agent);
 const RENDER_REQUEST = {
   provider: 'aws' as const,
   integrations: [
-    { name: 'cloud_security_posture', version: '3.5.0', enabledInputs: ['cloudbeat/cis_aws'] },
+    {
+      name: 'cloud_security_posture',
+      version: '3.5.0',
+      policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
+    },
   ],
 };
 
