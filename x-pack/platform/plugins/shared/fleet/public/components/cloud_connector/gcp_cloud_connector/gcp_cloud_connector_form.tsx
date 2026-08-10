@@ -131,7 +131,7 @@ export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         data-test-subj={GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ}
         target="_blank"
         iconSide="left"
-        iconType="launch"
+        iconType="rocket"
         href={cloudConnectorRemoteRoleTemplate}
       >
         <FormattedMessage
