@@ -51,9 +51,9 @@ export const clickSavedObjectTagsFilter = () => {
 };
 
 export const clickSavedObjectTagOption = (optionId: string) => {
-  // After opening the Tags filter, the option in the open dropdown is :visible while any
-  // tag-searchbar-option-* element outside a closed popover is not. Scoping to :visible
-  // avoids ambiguity when multiple frameworks (legacy saved objects tagging and
-  // content-list) render identical test-subjects on the same page.
-  cy.get(GET_SAVED_OBJECTS_TAGS_OPTION(optionId)).filter(':visible').click();
+  // EUI field_value_selection renders option elements in both the pre-mounted (hidden) popover
+  // panel and the open popover panel — both may pass :visible during the animation. The open
+  // panel's elements appear later in DOM order (EUI portals to document.body), so .last()
+  // reliably targets the active popover option.
+  cy.get(GET_SAVED_OBJECTS_TAGS_OPTION(optionId)).filter(':visible').last().click();
 };
