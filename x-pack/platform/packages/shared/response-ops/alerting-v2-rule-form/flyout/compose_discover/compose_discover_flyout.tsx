@@ -882,13 +882,6 @@ export function ComposeDiscoverFlyout({
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
-    if (isAlert && queryToCommit.format === 'composed') {
-      const currentNoData = methods.getValues('noDataStrategy');
-      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData);
-      if (resolvedNoData !== currentNoData) {
-        methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
-      }
-    }
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       cancelYamlParse();

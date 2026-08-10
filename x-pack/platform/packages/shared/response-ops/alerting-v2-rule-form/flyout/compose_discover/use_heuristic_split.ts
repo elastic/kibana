@@ -151,8 +151,10 @@ export function discoverQueryToComposed(inlinedQuery: string): {
  */
 export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
 
+export type ComposedRuleQuery = Extract<RuleQuery, { format: 'composed' }>;
+
 export interface SplitRuleQueryResult {
-  query: RuleQuery;
+  query: ComposedRuleQuery;
   outcome: SplitOutcome;
 }
 
@@ -183,24 +185,21 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
     };
   }
 
-  const query: RuleQuery = { format: 'composed', base, breach: { segment: alertBlock } };
-  return { query, outcome: hasAlert ? 'split_failed' : 'empty' };
+  return {
+    query: { format: 'composed', base, breach: { segment: alertBlock } },
+    outcome: hasAlert ? 'split_failed' : 'empty',
+  };
 }
 
 /**
- * Merges `splitResult` (heuristic split output, always `composed`) with
- * `sandboxQuery.recovery` when `sandboxQuery` is also `composed`; otherwise
- * returns `splitResult` unchanged.
+ * Merges `splitResult` with `sandboxQuery.recovery` when the sandbox query is
+ * composed and already has a recovery block; otherwise returns `splitResult`.
  */
 export function resolveUnifiedAlertApplyQuery(
   sandboxQuery: RuleQuery,
-  splitResult: RuleQuery
-): RuleQuery {
-  if (
-    splitResult.format === 'composed' &&
-    sandboxQuery.format === 'composed' &&
-    sandboxQuery.recovery
-  ) {
+  splitResult: ComposedRuleQuery
+): ComposedRuleQuery {
+  if (sandboxQuery.format === 'composed' && sandboxQuery.recovery) {
     return { ...splitResult, recovery: sandboxQuery.recovery };
   }
   return splitResult;
