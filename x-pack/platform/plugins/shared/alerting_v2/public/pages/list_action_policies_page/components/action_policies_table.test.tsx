@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ListPageTestProviders } from '../../../test_utils/test_providers';
@@ -490,15 +490,60 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
+  describe('bulk actions', () => {
+    const selectAllAndOpenMenu = async () => {
+      await waitFor(() => expect(screen.getByTestId('checkboxSelectAll')).toBeInTheDocument());
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
+      fireEvent.click(await screen.findByText('1 Selected'));
+    };
+
+    it('refetches the list after a bulk snooze so the new state is reflected', async () => {
+      renderTable();
+
+      await selectAllAndOpenMenu();
+      fireEvent.click(await screen.findByText('Snooze'));
+      fireEvent.click(await screen.findByTestId('actionPolicySnoozeModalApply'));
+
+      expect(mockBulkAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'snooze', ids: ['policy-1'] }),
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+
+      const findItemsCallsBeforeSuccess = mockFindItems.mock.calls.length;
+      const [, { onSuccess }] = mockBulkAction.mock.calls[0];
+      act(() => onSuccess());
+
+      await waitFor(() =>
+        expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
+      );
+    });
+
+    it('refetches the list after a bulk action that has no confirmation step', async () => {
+      renderTable();
+
+      await selectAllAndOpenMenu();
+      fireEvent.click(await screen.findByText('Unsnooze'));
+
+      const findItemsCallsBeforeSuccess = mockFindItems.mock.calls.length;
+      const [, { onSuccess }] = mockBulkAction.mock.calls[0];
+      act(() => onSuccess());
+
+      await waitFor(() =>
+        expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
+      );
+    });
+  });
+
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCapabilities = READ_ONLY_CAPABILITIES;
     });
 
-    it('hides the snooze popover in the notify column', async () => {
+    it('hides the snooze button in the notify column', async () => {
       renderTable();
 
-      await waitFor(() => expect(screen.queryByText('Snooze popover')).toBeNull());
+      await waitFor(() => expect(screen.getByText('Policy One')).toBeInTheDocument());
+      expect(screen.queryByText('Snooze button')).toBeNull();
     });
 
     it('does not render row selection checkboxes', async () => {

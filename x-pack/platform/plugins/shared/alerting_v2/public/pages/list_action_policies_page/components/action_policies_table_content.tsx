@@ -349,6 +349,7 @@ const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void 
 
 const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
   const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
+  const { refetch } = useContentListState();
 
   if (selectedCount === 0) return null;
 
@@ -359,11 +360,17 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((p) => p.id);
+    // The list is fetched through the content list data source, so invalidating
+    // the policy query keys is not enough to reflect the new state.
+    const onSuccess = () => {
+      clearSelection();
+      refetch();
+    };
 
     if (action === 'snooze' && snoozedUntil) {
-      bulkAction({ action, ids, snoozedUntil }, { onSuccess: clearSelection });
+      bulkAction({ action, ids, snoozedUntil }, { onSuccess });
     } else if (action !== 'snooze') {
-      bulkAction({ action, ids }, { onSuccess: clearSelection });
+      bulkAction({ action, ids }, { onSuccess });
     }
   };
 
