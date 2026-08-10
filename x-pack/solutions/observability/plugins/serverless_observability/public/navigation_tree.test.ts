@@ -9,6 +9,7 @@ import { createNavigationTree, filterForFeatureAvailability } from './navigation
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 const getAdminSettingsNode = (
   options: Parameters<typeof createNavigationTree>[0]
@@ -40,6 +41,30 @@ describe('Navigation Tree', () => {
       title: 'Observability',
       link: 'observability-overview',
     });
+  });
+
+  it('shows Nightshift first when significant events are available', () => {
+    const navigation = createNavigationTree({
+      core,
+      significantEventsAvailable: true,
+    });
+
+    expect(navigation.body[0]).toMatchObject({
+      link: 'nightshift',
+      icon: NightshiftNavigationIcon,
+    });
+    expect(navigation.body[1]).toMatchObject({
+      link: 'observability-overview',
+    });
+  });
+
+  it('hides Nightshift when significant events are unavailable', () => {
+    const navigation = createNavigationTree({
+      core,
+      significantEventsAvailable: false,
+    });
+
+    expect(navigation.body.find((item) => item.link === 'nightshift')).toBeUndefined();
   });
 
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {

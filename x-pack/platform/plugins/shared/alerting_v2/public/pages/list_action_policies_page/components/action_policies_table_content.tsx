@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -356,11 +356,12 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((p) => p.id);
-    const actions: ActionPolicyBulkAction[] =
-      action === 'snooze' && snoozedUntil
-        ? ids.map((id) => ({ id, action: 'snooze', snoozedUntil }))
-        : ids.map((id) => ({ id, action } as ActionPolicyBulkAction));
-    bulkAction({ actions }, { onSuccess: clearSelection });
+
+    if (action === 'snooze' && snoozedUntil) {
+      bulkAction({ action, ids, snoozedUntil }, { onSuccess: clearSelection });
+    } else if (action !== 'snooze') {
+      bulkAction({ action, ids }, { onSuccess: clearSelection });
+    }
   };
 
   return (

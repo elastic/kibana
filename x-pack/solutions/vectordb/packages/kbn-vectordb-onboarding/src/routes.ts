@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const TUTORIALS_PATH = '/tutorials';
-export const ONBOARDING_PATH = '/onboarding';
+export const GETTING_STARTED_PATH = '/getting_started';

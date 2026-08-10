@@ -27,12 +27,17 @@ import { createSearchSource } from '../../../state_management/utils/create_searc
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { TabState } from '../../../state_management/redux';
+import {
+  selectCurrentProfileLocatorState,
+  type RuntimeStateManager,
+  type TabState,
+} from '../../../state_management/redux';
 
 interface BuildShareOptionsParams {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   currentTab: TabState;
+  runtimeStateManager: RuntimeStateManager;
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   hasUnsavedChanges: boolean;
@@ -50,6 +55,7 @@ export const buildShareOptions = async ({
   discoverParams,
   services,
   currentTab,
+  runtimeStateManager,
   persistedDiscoverSession,
   totalHitsState,
   hasUnsavedChanges,
@@ -84,6 +90,12 @@ export const buildShareOptions = async ({
     absoluteTimeRange
   );
   const filters = services.filterManager.getFilters();
+  const profileState = selectCurrentProfileLocatorState({
+    runtimeStateManager,
+    tabId: currentTab.id,
+    profileStateMap: currentTab.profileState,
+    profileStateRegistry: services.profileStateRegistry,
+  });
 
   // Share -> Get links -> Snapshot
   const params: DiscoverSharingData['locatorParams'][number]['params'] = {
@@ -95,6 +107,7 @@ export const buildShareOptions = async ({
     filters,
     timeRange,
     refreshInterval,
+    profileState,
   };
 
   if (currentTab) {
@@ -268,6 +281,7 @@ export const getShareAppMenuItem = ({
   hasIntegrations,
   hasUnsavedChanges,
   currentTab,
+  runtimeStateManager,
   persistedDiscoverSession,
   totalHitsState,
   intl,
@@ -277,6 +291,7 @@ export const getShareAppMenuItem = ({
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
   currentTab: TabState;
+  runtimeStateManager: RuntimeStateManager;
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   intl: IntlShape;
@@ -290,6 +305,7 @@ export const getShareAppMenuItem = ({
       discoverParams,
       services,
       currentTab,
+      runtimeStateManager,
       persistedDiscoverSession,
       totalHitsState,
       hasUnsavedChanges,
@@ -321,6 +337,7 @@ export const getShareAppMenuItem = ({
         discoverParams,
         services,
         currentTab,
+        runtimeStateManager,
         persistedDiscoverSession,
         totalHitsState,
         hasUnsavedChanges,

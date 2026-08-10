@@ -131,6 +131,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -146,6 +147,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -160,6 +162,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing snoozedUntil', async ({ apiClient, apiServices }) => {
@@ -173,6 +176,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
@@ -182,6 +186,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -197,6 +202,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 

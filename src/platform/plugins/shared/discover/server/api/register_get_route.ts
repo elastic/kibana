@@ -9,7 +9,7 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
-import { schema, ValidationError } from '@kbn/config-schema';
+import { prettifyError, z, ZodError } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -37,13 +37,13 @@ export const registerGetRoute = (
         version: routeVersion,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string({
-                meta: {
+            params: z
+              .object({
+                id: z.string().meta({
                   description: 'The Discover session ID.',
-                },
-              }),
-            }),
+                }),
+              })
+              .strict(),
           },
           response: {
             200: {
@@ -58,7 +58,7 @@ export const registerGetRoute = (
         },
       },
       async (context, request, response) =>
-        telemetryHandler(request, usageCounter, async () => {
+        telemetryHandler(request, { usageCounter }, async () => {
           try {
             const body = await getDiscoverSession(context, request.params.id);
 
@@ -71,8 +71,8 @@ export const registerGetRoute = (
               return response.notFound({ body: { message } });
             }
 
-            if (error instanceof ValidationError) {
-              logRequest(logger, request, 'error', error.stack ?? error.message);
+            if (error instanceof ZodError) {
+              logRequest(logger, request, 'error', error.stack ?? prettifyError(error));
               throw error;
             }
 

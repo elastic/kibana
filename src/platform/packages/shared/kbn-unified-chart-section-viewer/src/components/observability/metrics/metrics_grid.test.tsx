@@ -25,10 +25,17 @@ import { MetricsExperienceStateProvider } from './context/metrics_experience_sta
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
-jest.mock('@kbn/discover-utils', () => ({
-  DiscoverFlyouts: { metricInsights: 'metricInsights' },
-  dismissAllFlyoutsExceptFor: jest.fn(),
-}));
+jest.mock('@kbn/discover-utils', () => {
+  const { METRICS_GRID_SETTINGS_DEFAULTS } = jest.requireActual(
+    '@kbn/discover-utils/src/data_types/metrics'
+  );
+
+  return {
+    DiscoverFlyouts: { metricInsights: 'metricInsights' },
+    METRICS_GRID_SETTINGS_DEFAULTS,
+    dismissAllFlyoutsExceptFor: jest.fn(),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');

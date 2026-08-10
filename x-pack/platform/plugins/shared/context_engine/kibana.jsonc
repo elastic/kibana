@@ -8,8 +8,8 @@
     "id": "contextEngine",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["features", "share", "esql"],
-    "optionalPlugins": ["console"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredPlugins": ["actions", "features", "share", "esql", "triggersActionsUi"],
+    "optionalPlugins": ["console", "workflowsManagement"],
+    "requiredBundles": ["kibanaReact", "actions"]
   }
 }

@@ -64,7 +64,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     const loadSmokescreenTestFiles = () => {
-      loadTestFile(require.resolve('./chart_creation'));
       loadTestFile(require.resolve('./chart_switching'));
       loadTestFile(require.resolve('./layers'));
       loadTestFile(require.resolve('./dimension_editor'));
