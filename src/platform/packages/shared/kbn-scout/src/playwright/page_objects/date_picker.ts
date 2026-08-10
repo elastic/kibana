@@ -130,10 +130,77 @@ export class DatePicker {
   }
 
   async setCommonlyUsedTime(option: string) {
-    await this.quickMenuButton.click();
-    const commonlyUsedOption = this.page.testSubj.locator(`superDatePickerCommonlyUsed_${option}`);
-    await expect(commonlyUsedOption).toBeVisible();
-    await commonlyUsedOption.click();
+    if (await this.isNewDateRangePicker()) {
+      await this.page.testSubj.locator('dateRangePickerControlButton').click();
+      await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
+      // The new picker's `toTestSubj` replaces every whitespace run with an
+      // underscore, whereas EUI's legacy quick-menu only replaces the first
+      // space. Callers pass the legacy form (e.g. "Last_15 minutes"), so
+      // normalise the remaining whitespace here for the new picker.
+      const presetItem = this.page.testSubj.locator(
+        `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`
+      );
+      await expect(presetItem).toBeVisible();
+      await presetItem.click();
+    } else {
+      await this.quickMenuButton.click();
+      const commonlyUsedOption = this.page.testSubj.locator(
+        `superDatePickerCommonlyUsed_${option}`
+      );
+      await expect(commonlyUsedOption).toBeVisible();
+      await commonlyUsedOption.click();
+    }
+  }
+
+  async setTextRange(value: string) {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('setTextRange is only supported by the new DateRangePicker');
+    }
+
+    await this.ensurePickerVisible();
+    await this.page.testSubj.locator('dateRangePickerControlButton').click();
+    const input = this.page.testSubj.locator('dateRangePickerInput');
+    await input.clear();
+    await input.fill(value);
+    // Enter applies the range and submits the query on its own — the picker's
+    // `onInputKeyDown` calls `applyRange`, which the query bar's `onChange`
+    // forwards to `onSubmit`. No separate querySubmitButton click is needed.
+    await input.press('Enter');
+    // The input unmounts immediately, but the popover panel closes with an
+    // animation and stays visible a bit longer — wait for it too, so a
+    // following `openDateRangePickerPresetsPanel()` doesn't skip re-opening it.
+    await input.waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
+  }
+
+  async saveCurrentRangeAsPreset() {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('saveCurrentRangeAsPreset is only supported by the new DateRangePicker');
+    }
+
+    await this.openDateRangePickerPresetsPanel();
+    await this.page.testSubj.locator('dateRangePickerSavePresetButton').click();
+    // Saving applies the range (`applyRange`), which closes the popover. Wait
+    // for the panel to be gone so a following open isn't racing the close — the
+    // idempotent opener would otherwise read the still-closing panel as "open"
+    // and skip re-opening it.
+    await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor({ state: 'hidden' });
+  }
+
+  getDateRangePreset(label: string) {
+    return this.page.testSubj.locator(this.getDateRangePresetTestSubject(label));
+  }
+
+  async deleteDateRangePreset(label: string) {
+    if (!(await this.isNewDateRangePicker())) {
+      throw new Error('deleteDateRangePreset is only supported by the new DateRangePicker');
+    }
+
+    await this.openDateRangePickerPresetsPanel();
+    const preset = this.getDateRangePreset(label);
+    await preset.waitFor();
+    await preset.hover();
+    await preset.getByTestId('dateRangePickerDeletePresetButton').click();
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
