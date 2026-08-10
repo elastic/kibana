@@ -26,13 +26,11 @@ jest.mock('../../lib/get_user_info', () => ({
   getUserInfo: jest.fn(),
 }));
 
-// uuid@11 ships ESM-only; under jest the CJS interop leaves `v4` uncallable
-// ("(0, _uuid.v4) is not a function"). Mock it with a deterministic counter so
-// route handlers that stamp `schedule_id: uuidv4()` run.
+// uuid@11 is ESM-only, so `v4` is uncallable under jest ("_uuid.v4 is not a
+// function"). Mock it UUID-v4-shaped (callers assert the format) and unique.
 jest.mock('uuid', () => {
   let counter = 0;
 
-  // UUID-v4-shaped so callers asserting the v4 format pass; counter keeps them unique.
   return {
     v4: () => {
       const n = (++counter).toString(16).padStart(12, '0');

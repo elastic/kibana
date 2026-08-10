@@ -307,9 +307,8 @@ export const stripPriorModePerQueryFields = (
       return rest;
     }
 
-    // On a legacy→interval transition, drop bare interval values that were
-    // never explicitly set by the user — they are stale copies from prebuilt
-    // packs. Only an explicit schedule_type: 'interval' marker survives.
+    // Legacy→interval transition: drop bare intervals (stale prebuilt-pack copies);
+    // only an explicit schedule_type: 'interval' marker survives.
     if (scheduleType === undefined && priorPackMode == null) {
       const { interval: _interval, ...stripped } = rest;
 
@@ -331,16 +330,11 @@ export const stripPriorModePerQueryFields = (
 };
 
 /**
- * Converge marker-less per-query intervals on write.
- *
- * In interval-mode packs, a per-query `interval` is only meaningful when the
- * query carries an explicit `schedule_type: 'interval'` marker — without the
- * marker it is a stale copied value that the agent never honours (the wire gate
- * in `convertSOQueriesToPackConfig` already drops it). Applying this at write
- * time keeps the stored SO consistent with what the agent actually runs.
- *
- * Queries in rrule mode and queries carrying an explicit `schedule_type:
- * 'interval'` are left untouched.
+ * Drop marker-less per-query intervals on write so the stored SO matches what
+ * the agent runs: in an interval-mode pack a bare `interval` without an explicit
+ * `schedule_type: 'interval'` marker is a stale prebuilt-pack copy the wire gate
+ * (`convertSOQueriesToPackConfig`) already ignores. Explicit overrides and rrule
+ * queries are left untouched.
  */
 export const convergePerQueryIntervals = (
   queries: Record<string, PackQueryInput>,
@@ -428,9 +422,8 @@ export const convertSOQueriesToPackConfig = (
           scheduleFields = { rrule_schedule: queryRrule };
         }
       } else if (packMode === 'interval') {
-        // Only emit a per-query interval when the user explicitly overrode via
-        // the flyout (schedule_type: 'interval'). A stored interval value alone
-        // (e.g. copied from a prebuilt pack) must not override default_native_schedule.
+        // Emit a per-query interval only for an explicit flyout override; a bare
+        // stored value must not shadow default_native_schedule.
         if (querySchedType === 'interval' && interval !== undefined) {
           scheduleFields = { interval };
         }

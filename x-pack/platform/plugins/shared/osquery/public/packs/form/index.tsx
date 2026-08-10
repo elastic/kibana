@@ -295,11 +295,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           : [];
         const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
-        // Only emit pack-level schedule fields when the user actually touched
-        // the schedule section (dirtyFields.schedule) or when the pack already
-        // has an explicit persisted schedule (packHasExplicitSchedule). Suppressing
-        // this for an untouched legacy pack prevents a spurious legacy→interval
-        // transition on the server that would strip every bare per-query interval.
+        // Emit schedule fields only when the user touched the schedule or the pack
+        // already has one — otherwise an untouched legacy pack triggers a spurious
+        // legacy→interval transition that strips every bare per-query interval.
         const scheduleIsDirtyOrExplicit = Boolean(dirtyFields.schedule) || packHasExplicitSchedule;
         const scheduleFields =
           isRruleSchedulingEnabled && scheduleFormState && scheduleIsDirtyOrExplicit

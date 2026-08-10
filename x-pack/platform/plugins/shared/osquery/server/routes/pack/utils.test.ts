@@ -194,11 +194,9 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('interval');
     });
 
-    // Regression guard for #279946: a stale per-query interval copied from a
-    // prebuilt pack must NOT override default_native_schedule on the wire.
-    // Only an explicit schedule_type: 'interval' marker (set via the flyout)
-    // should produce a per-query interval override.
-    // Uses distinct non-default values (80/100 under 120) so divergence is visible.
+    // Regression guard for #279946: a stale bare per-query interval (no
+    // schedule_type marker) must not shadow default_native_schedule; only an
+    // explicit flyout override does. Values 80/100 under 120 keep divergence visible.
     test('stale marker-less per-query interval — NOT emitted, query inherits pack default', () => {
       const out = convertSOQueriesToPackConfig(
         [
