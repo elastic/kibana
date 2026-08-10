@@ -301,7 +301,7 @@ export class StreamsAppPage {
 
 :::::
 
-When a Component Object doesn't do what you need, don't work around it locally — neither by subclassing it, nor by writing your own helper that drives the component directly. Both leave the gap in place for every other suite, and put you back on the selectors these helpers exist to replace. [Contribute the missing capability upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) instead, so every suite gets it.
+If a Component Object lacks what you need, don't subclass it or drive the component yourself — that puts you back on the selectors these helpers replace. [Contribute the capability upstream](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
