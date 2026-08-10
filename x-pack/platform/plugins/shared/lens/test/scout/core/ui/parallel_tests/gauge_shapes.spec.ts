@@ -28,7 +28,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       const { lens } = pageObjects;
 
       const getGaugeBullet = async () => {
-        const debugState = await lens.getCurrentChartDebugState('gaugeChart');
+        const debugState = await lens.workspace.getCurrentChartDebugState('gaugeChart');
         return debugState.bullet?.rows[0][0];
       };
 
@@ -71,9 +71,9 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
           include: ['[data-test-subj="lnsApp"]'],
         });
         expect(styleViolations).toHaveLength(0);
-        await lens.setInputValue('lnsToolbarGaugeLabelMajor', 'custom title');
+        await lens.workspace.setInputValue('lnsToolbarGaugeLabelMajor', 'custom title');
         await lens.style.setGaugeMinorLabelMode('custom');
-        await lens.setInputValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+        await lens.workspace.setInputValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
         // Wait for debounced title/subtitle to reach the chart before closing the flyout.
         await expect.poll(async () => (await getGaugeBullet())?.title).toBe('custom title');
         await expect.poll(async () => (await getGaugeBullet())?.subtitle).toBe('custom subtitle');
@@ -90,14 +90,14 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
         await lens.dimensions.openDimensionEditor(
           'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
         );
-        await lens.setInputValue('lns-indexPattern-static_value-input', '1000');
+        await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '1000');
         await expect.poll(async () => (await getGaugeBullet())?.domain?.[0]).toBe(1000);
         await lens.closeDimensionEditor();
 
         await lens.dimensions.openDimensionEditor(
           'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
         );
-        await lens.setInputValue('lns-indexPattern-static_value-input', '25000');
+        await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '25000');
         await expect.poll(async () => (await getGaugeBullet())?.domain?.[1]).toBe(25000);
         await lens.closeDimensionEditor();
 
@@ -149,8 +149,8 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
 
       await spaceTest.step('switch to table and drop unsupported static values', async () => {
         await lens.switchToVisualization('lnsDatatable');
-        await expect.poll(async () => lens.getCountOfDatatableColumns()).toBe(1);
-        expect(await lens.getDatatableHeaderText(0)).toBe('Count of records');
+        await expect.poll(async () => lens.datatable.getCountOfDatatableColumns()).toBe(1);
+        expect(await lens.datatable.getDatatableHeaderText(0)).toBe('Count of records');
       });
     }
   );

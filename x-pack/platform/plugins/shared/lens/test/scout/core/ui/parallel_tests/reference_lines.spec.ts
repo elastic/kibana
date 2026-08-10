@@ -98,7 +98,9 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           // Snapshot before close: closing the editor (and applying the fill) must produce a
           // newer chart render. Settling on the pre-edit count lets the drag land on stale
           // state and drop the dimension without adding it to the target group.
-          const renderCountBeforeClose = await lens.getVisualizationRenderCount('xyVisChart');
+          const renderCountBeforeClose = await lens.workspace.getVisualizationRenderCount(
+            'xyVisChart'
+          );
           await lens.closeDimensionEditor();
           await lens.waitForVisualization('xyVisChart', {
             afterCount: renderCountBeforeClose ?? undefined,

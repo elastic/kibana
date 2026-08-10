@@ -218,7 +218,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
       .poll(
         async () =>
           (
-            await lens.getCurrentChartDebugState('xyVisChart')
+            await lens.workspace.getCurrentChartDebugState('xyVisChart')
           ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
@@ -241,7 +241,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
       .poll(
         async () =>
           (
-            await lens.getCurrentChartDebugState('xyVisChart')
+            await lens.workspace.getCurrentChartDebugState('xyVisChart')
           ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )

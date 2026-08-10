@@ -34,7 +34,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
 
     await lens.dimensions.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -62,7 +62,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await expect(dimensions[0]).toHaveText('Average machine.ram');
 
     await lens.dimensions.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -91,7 +91,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await expect(dimensions[1]).toHaveText('@timestamp');
 
     await lens.dimensions.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -131,7 +131,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
 
     await lens.dimensions.hoverOverDimensionButton();
     await expect
-      .poll(async () => lens.getMetricVisualizationData(), { timeout: 20_000 })
+      .poll(async () => lens.metric.getMetricVisualizationData(), { timeout: 20_000 })
       .toStrictEqual([
         {
           title: 'osx',

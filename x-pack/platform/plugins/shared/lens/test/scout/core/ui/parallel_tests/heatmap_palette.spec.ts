@@ -43,7 +43,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       });
       await lens.waitForVisualization('xyVisChart');
 
-      const getHeatmapDebug = () => lens.getCurrentChartDebugState('heatmapChart');
+      const getHeatmapDebug = () => lens.workspace.getCurrentChartDebugState('heatmapChart');
 
       let previousFirstLegendKey = '';
       let previousFirstLegendColor = '';
@@ -69,7 +69,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
           include: ['[data-test-subj="lns-palettePanelFlyout"]'],
         });
         expect(violations).toHaveLength(0);
-        await lens.setInputValue('lnsPalettePanel_dynamicColoring_range_value_0', '10');
+        await lens.workspace.setInputValue('lnsPalettePanel_dynamicColoring_range_value_0', '10');
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
@@ -95,7 +95,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       });
 
       await spaceTest.step('reflect stop changes in number mode', async () => {
-        await lens.setInputValue('lnsPalettePanel_dynamicColoring_range_value_0', '0');
+        await lens.workspace.setInputValue('lnsPalettePanel_dynamicColoring_range_value_0', '0');
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
@@ -109,7 +109,10 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
 
       await spaceTest.step('apply stop value without clearing cell fills', async () => {
         // Target a stop near the lower data bound; assert cells keep a fill color.
-        await lens.setInputValue('lnsPalettePanel_dynamicColoring_range_value_0', '5722.7747');
+        await lens.workspace.setInputValue(
+          'lnsPalettePanel_dynamicColoring_range_value_0',
+          '5722.7747'
+        );
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();

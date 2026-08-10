@@ -33,7 +33,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await lens.waitForVisualization('mtrVis');
 
     await lens.dimensions.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -62,7 +62,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await expect(dimensions[1]).toHaveText('Static value: 1');
 
     await lens.dimensions.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -92,7 +92,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await expect(dimensions[2]).toHaveText('@timestamp');
 
     await lens.dimensions.hoverOverDimensionButton();
-    const data = await lens.getMetricVisualizationData();
+    const data = await lens.metric.getMetricVisualizationData();
     expect(data).toHaveLength(1);
     expect(data).toStrictEqual([
       {
@@ -123,7 +123,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
 
     await lens.dimensions.hoverOverDimensionButton();
     await expect
-      .poll(async () => lens.getMetricVisualizationData(), { timeout: 20_000 })
+      .poll(async () => lens.metric.getMetricVisualizationData(), { timeout: 20_000 })
       .toStrictEqual([
         {
           title: 'osx',
