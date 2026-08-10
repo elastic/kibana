@@ -16,8 +16,13 @@ if (!Object.hasOwn(global.URL, 'createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!Object.hasOwn(global, 'TextEncoder')) {
-  const { TextEncoder, TextDecoder } = require('node:util');
-  global.TextEncoder = TextEncoder;
+  const { TextEncoder: NodeTextEncoder, TextDecoder } = require('node:util');
+
+  global.TextEncoder = class TextEncoder extends NodeTextEncoder {
+    encode(input = '') {
+      return global.Uint8Array.from(super.encode(input));
+    }
+  };
   global.TextDecoder = TextDecoder;
 }
 
