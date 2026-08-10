@@ -6,7 +6,7 @@
  */
 
 import type { ListRuleChangeHistoryResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject, OasExampleEntry } from '../oas_types';
 
@@ -45,7 +45,7 @@ export const RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE: OasExampleEntry = {
   name: 'ruleChangeHistoryUnavailable',
   summary: 'Change history data stream is not initialized',
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE,
+    code: ALERTING_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE,
     error: 'Service Unavailable',
     message: 'Rule change history is unavailable',
   },
