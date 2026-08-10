@@ -125,7 +125,7 @@ export const ActionPoliciesBulkActions = ({
             button={
               <EuiButtonEmpty
                 size="xs"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                 isLoading={isLoading}
