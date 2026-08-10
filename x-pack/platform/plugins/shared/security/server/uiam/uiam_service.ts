@@ -58,7 +58,20 @@ export interface GrantUiamApiKeyRequestBody {
   };
 }
 
+/**
+ * Options that control how the grant request itself is authenticated to UIAM.
+ */
 export interface GrantUiamApiKeyOptions {
+  /**
+   * Whether to present Kibana's own client authentication (the shared secret header and, when
+   * configured, the mTLS client certificate) alongside the granting credential. UIAM authenticates
+   * the credential and Kibana independently, and requires the two to agree: an internal API key or
+   * a session token must arrive with client authentication, while an external (organization) API
+   * key must arrive without it, so that internal credentials that leak cannot be replayed through
+   * customer-facing code paths. Presenting the wrong combination fails the grant.
+   *
+   * Defaults to `true`, which is correct for everything except an external API key.
+   */
   includeClientAuthentication?: boolean;
 }
 
@@ -205,6 +218,7 @@ export interface UiamServicePublic {
    * Grants an API key using the UIAM service.
    * @param authorization The HTTP authorization header containing scheme and credentials.
    * @param params The parameters for creating the API key (name and optional expiration).
+   * @param options The options that control how the grant request itself is authenticated to UIAM.
    * @returns A promise that resolves to an object containing the API key details.
    */
   grantApiKey(
@@ -363,8 +377,7 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
-  #unauthenticatedDispatcher: Agent | undefined;
-  #unauthenticatedDispatcherInitialized = false;
+  #dispatcherWithoutClientCertificate: Agent | undefined;
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
@@ -576,7 +589,7 @@ export class UiamService implements UiamServicePublic {
         body: JSON.stringify(body),
         dispatcher: includeClientAuthentication
           ? this.#dispatcher
-          : this.#getUnauthenticatedDispatcher(),
+          : this.#getDispatcherWithoutClientCertificate(),
       };
 
       const response = await UiamService.#parseUiamResponse(
@@ -1077,6 +1090,9 @@ export class UiamService implements UiamServicePublic {
 
   /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
+   *
+   * @param includeClientCertificate Whether to present Kibana's own mTLS client certificate. Server
+   * verification is unaffected either way.
    */
   #createFetchDispatcher(includeClientCertificate = true) {
     const { certificateAuthorities, verificationMode } = this.#config.ssl;
@@ -1122,13 +1138,18 @@ export class UiamService implements UiamServicePublic {
     });
   }
 
-  #getUnauthenticatedDispatcher() {
-    if (!this.#unauthenticatedDispatcherInitialized) {
-      this.#unauthenticatedDispatcher = this.#createFetchDispatcher(false);
-      this.#unauthenticatedDispatcherInitialized = true;
+  /**
+   * Returns the dispatcher for the rare request that must not present Kibana's own mTLS client
+   * certificate, created on first use since virtually every request presents it. Without a
+   * certificate configured there is nothing to withhold, so the main dispatcher (and its connection
+   * pool) is reused.
+   */
+  #getDispatcherWithoutClientCertificate() {
+    if (!this.#config.ssl.certificate) {
+      return this.#dispatcher;
     }
 
-    return this.#unauthenticatedDispatcher;
+    return (this.#dispatcherWithoutClientCertificate ??= this.#createFetchDispatcher(false));
   }
 
   /**
