@@ -25,7 +25,7 @@ export interface ConversationService {
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor>;
+  }): Promise<ConversationRoundAuthor | undefined>;
 }
 
 interface ConversationServiceDeps {
@@ -62,8 +62,10 @@ export class ConversationServiceImpl implements ConversationService {
 
   /**
    * Returns the author of a conversation round: the origin's own author if it provides one,
-   * otherwise the authenticated Kibana user. Every round is attributed, whatever the conversation's
-   * access mode, since authorship cannot be reconstructed once a conversation is shared.
+   * otherwise the authenticated Kibana user's profile id. Every round is attributed, whatever the
+   * conversation's access mode, since authorship cannot be reconstructed once a conversation is
+   * shared. No author is assigned when the user has no profile id (e.g. some API key callers) —
+   * the username is not a stable identifier and must not be stored as one.
    */
   async getConversationRoundAuthor({
     request,
@@ -71,14 +73,18 @@ export class ConversationServiceImpl implements ConversationService {
   }: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor> {
+  }): Promise<ConversationRoundAuthor | undefined> {
     if (origin?.author) {
       return origin.author;
     }
 
     const user = await this.getCurrentUser({ request });
 
-    return { id: user.id ?? user.username, username: user.username };
+    if (user.id === undefined) {
+      return undefined;
+    }
+
+    return { id: user.id, username: user.username };
   }
 
   private async getCurrentUser({ request }: { request: KibanaRequest }) {

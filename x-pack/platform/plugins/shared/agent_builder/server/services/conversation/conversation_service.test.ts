@@ -76,13 +76,13 @@ describe('ConversationServiceImpl', () => {
       expect(author).toEqual({ id: 'profile-1', username: 'jane' });
     });
 
-    it('falls back to the username as id when the user has no profile id', async () => {
+    it('does not assign an author when the user has no profile id', async () => {
       const service = createService();
       getUserFromRequestMock.mockResolvedValue({ username: 'jane' });
 
       const author = await service.getConversationRoundAuthor({ request });
 
-      expect(author).toEqual({ id: 'jane', username: 'jane' });
+      expect(author).toBeUndefined();
     });
   });
 });
