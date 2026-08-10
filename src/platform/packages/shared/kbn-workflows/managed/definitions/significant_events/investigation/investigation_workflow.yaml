@@ -120,6 +120,42 @@ steps:
                 reason:
                   type: string
                   maxLength: 10000
+                evidence:
+                  type: array
+                  description: >
+                    What this hypothesis' verdict rests on — at most 3 entries. Every hypothesis
+                    that ends "confirmed" or "dismissed" must carry at least one. Only cite ES|QL
+                    you actually executed, verbatim, with the absolute window it ran over; never
+                    invent a query.
+                  maxItems: 3
+                  items:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                        maxLength: 10000
+                        description: What was observed and why it decided this hypothesis.
+                      esql_query:
+                        type: string
+                        maxLength: 10000
+                        description: The exact ES|QL query executed to gather this evidence, when one was run.
+                      time_range:
+                        type: object
+                        description: >
+                          Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                          esql_query is set — without it the query cannot be opened in Discover.
+                        properties:
+                          from:
+                            type: string
+                            maxLength: 64
+                          to:
+                            type: string
+                            maxLength: 64
+                        required:
+                          - from
+                          - to
+                    required:
+                      - description
               required:
                 - candidate
                 - confidence
@@ -187,6 +223,21 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
                         required:
                           - description
                   required:
@@ -229,6 +280,21 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
                         required:
                           - description
                   required:
@@ -274,6 +340,21 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
                         required:
                           - description
                   required:
