@@ -11,8 +11,9 @@ import { z } from '@kbn/zod';
 import {
   asCodeIdSchema,
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSearchRequestSchema,
+  getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
@@ -35,6 +36,7 @@ export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_DISCOVER_SESSION_TAGS = 1000;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
 
 const visContextSchema = z
@@ -187,6 +189,10 @@ export const discoverSessionApiDataSchema = z
       .max(MAX_SESSION_DESCRIPTION_LENGTH)
       .default('')
       .meta({ description: 'Discover session description.' }),
+    tags: getAsCodeTagsSchema(
+      'Tag IDs to associate with this Discover session.',
+      MAX_DISCOVER_SESSION_TAGS
+    ).optional(),
     tabs: z
       .array(discoverSessionApiTabSchema)
       .min(1)
@@ -215,7 +221,7 @@ export const discoverSessionApiResponseSchema = z
   })
   .strict();
 
-export const discoverSessionSearchParamsSchema = asCodePaginationParamsSchema.extend({
+export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
@@ -233,6 +239,10 @@ const discoverSessionSearchItemSchema = z
       .object({
         title: z.string().meta({ description: 'Discover session title.' }),
         description: z.string().optional().meta({ description: 'Discover session description.' }),
+        tags: getAsCodeTagsSchema(
+          'Tag IDs associated with this Discover session.',
+          MAX_DISCOVER_SESSION_TAGS
+        ).optional(),
       })
       .strict(),
     meta: asCodeMetaSchema,
