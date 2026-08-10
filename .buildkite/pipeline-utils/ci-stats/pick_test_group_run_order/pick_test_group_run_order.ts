@@ -17,7 +17,12 @@ import { getTrackedBranch } from '../../utils';
 import { CiStatsClient } from '../client';
 
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS, WORKFLOW_SCHEMA_CONFIG_PATH } from './const';
+import {
+  AGENT_DISK_GIB,
+  DURATION_PERCENTILE,
+  STEP_KEYS,
+  WORKFLOW_SCHEMA_CONFIG_PATH,
+} from './const';
 import { loadRunOrderConfig } from './env_config';
 import { ftrManifest } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
