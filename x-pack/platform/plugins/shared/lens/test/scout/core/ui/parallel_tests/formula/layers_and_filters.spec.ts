@@ -36,7 +36,7 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
           formula: `moving_average(sum(bytes), window=5`,
           keepOpen: true,
         });
-        await lens.setTableDynamicColoring('text');
+        await lens.style.setTableDynamicColoring('text');
         await lens.waitForVisualization();
 
         // FTR also asserted `styleObj.color` was defined after text coloring. Restoring that

@@ -103,7 +103,7 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
             'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
             1
           );
-          await lens.setAnnotationTextVisibility('name');
+          await lens.style.setAnnotationTextVisibility('name');
           await lens.closeDimensionEditor();
 
           // "Apply and close" auto-saves the linked annotation group to the library and

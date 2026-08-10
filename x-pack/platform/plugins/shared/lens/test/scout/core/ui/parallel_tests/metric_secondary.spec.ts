@@ -50,7 +50,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
       await spaceTest.step('configures a static badge color', async () => {
         await page.testSubj.click('lnsMetric_color_mode_static');
 
-        await lens.setColorPickerValue(CUSTOM_STATIC_COLOR_HEX);
+        await lens.style.setColorPickerValue(CUSTOM_STATIC_COLOR_HEX);
 
         await expect(lens.secondaryMetricBadge).toHaveCSS(
           'background-color',

@@ -174,7 +174,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
       await spaceTest.step('applies a static color to every tile', async () => {
         await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
 
-        await lens.setColorPickerValue('#000000');
+        await lens.style.setColorPickerValue('#000000');
         await lens.waitForVisualization('mtrVis');
 
         // Tile fill color is applied on its own debounce independent of `data-rendering-count`,
@@ -199,7 +199,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
 
         // The 3-color palette renders 4 range inputs: the "No min"/"No max" boundaries, which
         // hold no value, plus the 2 editable thresholds asserted below.
-        const stops = await lens.getPaletteColorStops(4);
+        const stops = await lens.style.getPaletteColorStops(4);
         const thresholds = stops.map(({ stop }) => stop).filter((stop) => Boolean(stop));
         expect(thresholds).toStrictEqual(['10400.18', '15077.59']);
 

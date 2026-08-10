@@ -179,7 +179,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     expect(await lens.layers.getLayerCount()).toBe(1);
 
     expect(await lens.getChartSwitchType()).toBe('Bar');
-    expect(await lens.getSelectedBarOrientationSetting()).toBe('Horizontal');
+    expect(await lens.style.getSelectedBarOrientationSetting()).toBe('Horizontal');
   });
 
   spaceTest('should convert y-axis positions', async ({ pageObjects }) => {

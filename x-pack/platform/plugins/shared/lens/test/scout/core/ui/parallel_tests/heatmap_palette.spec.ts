@@ -82,7 +82,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       });
 
       await spaceTest.step('keep legend when switching percentage to number', async () => {
-        await lens.setPaletteRangeType('number');
+        await lens.style.setPaletteRangeType('number');
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
@@ -125,7 +125,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       });
 
       await spaceTest.step('reset stop numbers when changing palette', async () => {
-        await lens.changePaletteTo('status');
+        await lens.style.changePaletteTo('status');
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();
@@ -145,7 +145,7 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
           key,
           color,
         }));
-        await lens.setPaletteRangeType('percent');
+        await lens.style.setPaletteRangeType('percent');
 
         const legendAfter = (await getHeatmapDebug()).legend?.items?.map(({ key, color }) => ({
           key,
@@ -157,8 +157,8 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       await spaceTest.step('change x-axis label rotation', async () => {
         await lens.closePalettePanelFlyout();
         await lens.closeDimensionEditor();
-        await lens.openStyleSettingsFlyout();
-        await lens.setAxisLabelOrientation('vertical');
+        await lens.style.openStyleSettingsFlyout();
+        await lens.style.setAxisLabelOrientation('vertical');
         await expect
           .poll(async () => {
             const debugState = await getHeatmapDebug();

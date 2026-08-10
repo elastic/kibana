@@ -66,18 +66,18 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
         await lens.setEuiSwitch('lnsDynamicColoringGaugeSwitch', true);
         await lens.closeDimensionEditor();
 
-        await lens.openStyleSettingsFlyout();
+        await lens.style.openStyleSettingsFlyout();
         const { violations: styleViolations } = await page.checkA11y({
           include: ['[data-test-subj="lnsApp"]'],
         });
         expect(styleViolations).toHaveLength(0);
         await lens.setInputValue('lnsToolbarGaugeLabelMajor', 'custom title');
-        await lens.setGaugeMinorLabelMode('custom');
+        await lens.style.setGaugeMinorLabelMode('custom');
         await lens.setInputValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
         // Wait for debounced title/subtitle to reach the chart before closing the flyout.
         await expect.poll(async () => (await getGaugeBullet())?.title).toBe('custom title');
         await expect.poll(async () => (await getGaugeBullet())?.subtitle).toBe('custom subtitle');
-        await lens.closeFlyoutWithBackButton();
+        await lens.style.closeFlyoutWithBackButton();
 
         await lens.waitForVisualization('gaugeChart');
         await lens.dimensions.openDimensionEditor(
@@ -112,7 +112,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to vertical bullet without losing configuration', async () => {
-        await lens.setGaugeOrientation('vertical');
+        await lens.style.setGaugeOrientation('vertical');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.vertical);
         expect(debugData?.title).toBe('custom title');
@@ -121,7 +121,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to minor arc without losing configuration', async () => {
-        await lens.setGaugeShape('Minor arc');
+        await lens.style.setGaugeShape('Minor arc');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.halfCircle);
         expect(debugData?.title).toBe('custom title');
@@ -130,7 +130,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to major arc without losing configuration', async () => {
-        await lens.setGaugeShape('Major arc');
+        await lens.style.setGaugeShape('Major arc');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
         expect(debugData?.title).toBe('custom title');
@@ -139,7 +139,7 @@ spaceTest.describe('Lens gauge shapes', { tag: '@local-stateful-classic' }, () =
       });
 
       await spaceTest.step('switch to circle without losing configuration', async () => {
-        await lens.setGaugeShape('Circle');
+        await lens.style.setGaugeShape('Circle');
         const debugData = await getGaugeBullet();
         expect(debugData?.subtype).toBe(BulletSubtype.circle);
         expect(debugData?.title).toBe('custom title');

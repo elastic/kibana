@@ -67,19 +67,19 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
 
       await spaceTest.step('recolors the metric when tweaking the palette range', async () => {
         await lens.openPalettePanelFlyout();
-        await lens.setPaletteRangeValue(1, '21000');
+        await lens.style.setPaletteRangeValue(1, '21000');
 
         await expect(lens.legacyMetricValue).toHaveCSS('color', RANGE_TWEAKED_COLOR);
       });
 
       await spaceTest.step('recolors the metric when reversing the palette', async () => {
-        await lens.reversePaletteColors();
+        await lens.style.reversePaletteColors();
 
         await expect(lens.legacyMetricValue).toHaveCSS('color', REVERSED_COLOR);
       });
 
       await spaceTest.step('resets the color stops when picking a predefined palette', async () => {
-        await lens.changePaletteTo('temperature');
+        await lens.style.changePaletteTo('temperature');
 
         await expect(lens.legacyMetricValue).toHaveCSS('color', TEMPERATURE_COLOR);
       });
