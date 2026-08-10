@@ -97,7 +97,7 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
       { stop: '', color: undefined },
     ]);
     await lens.closePalettePanelFlyout();
-    await lens.closeDimensionEditorPanel();
+    await lens.dimensions.closeDimensionEditorPanel();
   });
 
   spaceTest(
