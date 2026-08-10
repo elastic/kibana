@@ -313,8 +313,8 @@ const configSchema = schema.object(
         return 'cannot use [rewriteBasePath] when [basePath] is not specified';
       }
 
-      if (rawConfig.publicBaseUrl) {
-        const parsedUrl = url.parse(rawConfig.publicBaseUrl);
+      const parsedUrl = rawConfig.publicBaseUrl && url.parse(rawConfig.publicBaseUrl);
+      if (parsedUrl) {
         if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
           return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
         }
@@ -325,9 +325,7 @@ const configSchema = schema.object(
 
       if (
         rawConfig.selfHttp.ssl.certificateAuthorities !== undefined &&
-        (rawConfig.selfHttp.target !== 'auto' ||
-          !rawConfig.publicBaseUrl ||
-          new URL(rawConfig.publicBaseUrl).protocol !== 'https:')
+        (rawConfig.selfHttp.target !== 'auto' || !parsedUrl || parsedUrl.protocol !== 'https:')
       ) {
         return '[selfHttp.ssl.certificateAuthorities] can only be used when [selfHttp.target] is [auto] and [publicBaseUrl] uses HTTPS';
       }
