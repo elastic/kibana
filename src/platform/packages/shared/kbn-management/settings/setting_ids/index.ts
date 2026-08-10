@@ -78,6 +78,7 @@ export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
   'agentBuilder:tracing:includeSystemPrompt';
 export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
+export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
@@ -189,6 +190,12 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOV
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES =
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD =
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE =
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

@@ -50,7 +50,9 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
 
         await lens.layers.activateLayerTab(1);
         // The default static value is backend-computed; assert the structure, not the number.
-        expect(await lens.getDimensionTriggerText(REFERENCE_LINE_LEFT)).toMatch(/^Static value: /);
+        expect(await lens.dimensions.getDimensionTriggerText(REFERENCE_LINE_LEFT)).toMatch(
+          /^Static value: /
+        );
       });
 
       await spaceTest.step(
@@ -61,7 +63,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
             `${REFERENCE_LINE_LEFT} > lns-empty-dimension`
           );
 
-          const triggers = await lens.getDimensionTriggersTexts(REFERENCE_LINE_LEFT);
+          const triggers = await lens.dimensions.getDimensionTriggersTexts(REFERENCE_LINE_LEFT);
           expect(triggers).toHaveLength(2);
           expect(triggers[0]).toMatch(/^Static value: /);
           expect(triggers[1]).toBe('Median of bytes');
@@ -76,7 +78,7 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           field: 'bytes',
           keepOpen: true,
         });
-        await lens.changeAxisSide('right');
+        await lens.dimensions.changeAxisSide('right');
         await lens.closeDimensionEditor();
 
         await lens.layers.activateLayerTab(1);
@@ -88,12 +90,17 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
       await spaceTest.step(
         'carries the style when moving a reference line to another group',
         async () => {
-          await lens.openDimensionEditor(`${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`, 1);
-          await lens.setReferenceLineFillBelow();
+          await lens.dimensions.openDimensionEditor(
+            `${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`,
+            1
+          );
+          await lens.style.setReferenceLineFillBelow();
           // Snapshot before close: closing the editor (and applying the fill) must produce a
           // newer chart render. Settling on the pre-edit count lets the drag land on stale
           // state and drop the dimension without adding it to the target group.
-          const renderCountBeforeClose = await lens.getVisualizationRenderCount('xyVisChart');
+          const renderCountBeforeClose = await lens.workspace.getVisualizationRenderCount(
+            'xyVisChart'
+          );
           await lens.closeDimensionEditor();
           await lens.waitForVisualization('xyVisChart', {
             afterCount: renderCountBeforeClose ?? undefined,
@@ -114,8 +121,14 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           ).toHaveCount(1);
           await lens.waitForVisualization('xyVisChart');
 
-          await lens.openDimensionEditor(`${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`, 1);
-          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
+          await lens.dimensions.openDimensionEditor(
+            `${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`,
+            1
+          );
+          await expect(lens.style.referenceLineFillBelowButton).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
           await lens.closeDimensionEditor();
         }
       );
@@ -132,8 +145,15 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           ).toHaveCount(2);
           await lens.waitForVisualization('xyVisChart');
 
-          await lens.openDimensionEditor(`${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`, 1, 1);
-          await expect(lens.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
+          await lens.dimensions.openDimensionEditor(
+            `${REFERENCE_LINE_RIGHT} > lns-dimensionTrigger`,
+            1,
+            1
+          );
+          await expect(lens.style.referenceLineFillBelowButton).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
           await lens.closeDimensionEditor();
         }
       );
