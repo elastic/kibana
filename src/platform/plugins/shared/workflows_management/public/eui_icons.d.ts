@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiIcon } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../../types';
+declare module '@elastic/eui/es/components/icon/assets/*' {
+  import type * as React from 'react';
 
-// The official full-color butler, which reads on both themes. The monochrome
-// glyph this replaced is a thin outline that collapses into a smudge at 16px.
-import icon from './jenkins.svg';
-
-export default (props: ConnectorIconProps) => {
-  return <EuiIcon type={icon} {...props} />;
-};
+  interface SVGRProps {
+    title?: string;
+    titleId?: string;
+  }
+  export const icon: ({
+    title,
+    titleId,
+    ...props
+  }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
+  export {};
+}
