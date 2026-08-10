@@ -350,4 +350,9 @@ export const ConnectorIconsMap: Map<
     '.gcp_iam',
     lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
   ],
+
+  [
+    '.urlscan_io',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
+  ],
 ]);
