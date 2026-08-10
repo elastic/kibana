@@ -10,8 +10,11 @@
 import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
-import * as T from '@babel/types';
+import type * as T from '@babel/types';
 import type { ImportType } from '@kbn/import-resolver';
+
+import type { Importer, SomeNode } from './ast';
+import { isIdentifier, isImportCallee, isStringLiteral, isTemplateLiteral } from './ast';
 
 const JEST_MODULE_METHODS = [
   'jest.createMockFromModule',
@@ -24,37 +27,12 @@ const JEST_MODULE_METHODS = [
   'jest.requireMock',
 ];
 
-export type Importer =
-  | TSESTree.ImportDeclaration
-  | T.ImportDeclaration
-  | TSESTree.ExportNamedDeclaration
-  | T.ExportNamedDeclaration
-  | TSESTree.ExportAllDeclaration
-  | T.ExportAllDeclaration
-  | TSESTree.CallExpression
-  | T.CallExpression
-  | TSESTree.ImportExpression
-  | TSESTree.CallExpression
-  | T.CallExpression;
-
-export type SomeNode = TSESTree.Node | T.Node;
-
 interface VisitorContext {
   node: SomeNode;
   type: ImportType;
   importer: Importer;
 }
 type Visitor = (req: string | null, context: VisitorContext) => void;
-
-const isIdent = (node: SomeNode): node is TSESTree.Identifier | T.Identifier =>
-  T.isIdentifier(node) || node.type === AST_NODE_TYPES.Identifier;
-
-const isStringLiteral = (node: SomeNode): node is TSESTree.StringLiteral | T.StringLiteral =>
-  T.isStringLiteral(node) ||
-  (node.type === AST_NODE_TYPES.Literal && typeof node.value === 'string');
-
-const isTemplateLiteral = (node: SomeNode): node is TSESTree.TemplateLiteral | T.TemplateLiteral =>
-  T.isTemplateLiteral(node) || node.type === AST_NODE_TYPES.TemplateLiteral;
 
 function passSourceAsString(
   fn: Visitor,
@@ -111,14 +89,14 @@ export function visitAllImportStatements(fn: Visitor) {
     },
     CallExpression(node: TSESTree.CallExpression | T.CallExpression) {
       const { callee, arguments: args } = node;
-      // babel parser used for .js files treats import() calls as CallExpressions with callees of type "Import"
-      if (T.isImport(callee)) {
+      // babel's AST treats import() calls as CallExpressions with callees of type "Import"
+      if (isImportCallee(callee)) {
         passSourceAsString(fn, args[0], node, 'esm');
         return;
       }
 
       // is this a `require()` call?
-      if (isIdent(callee) && callee.name === 'require') {
+      if (isIdentifier(callee) && callee.name === 'require') {
         passSourceAsString(fn, args[0], node, 'require');
         return;
       }
@@ -126,8 +104,8 @@ export function visitAllImportStatements(fn: Visitor) {
       // is this an `obj.method()` call?
       if (
         callee.type === AST_NODE_TYPES.MemberExpression &&
-        isIdent(callee.object) &&
-        isIdent(callee.property)
+        isIdentifier(callee.object) &&
+        isIdentifier(callee.property)
       ) {
         const { object: left, property: right } = callee;
         const name = `${left.name}.${right.name}`;
