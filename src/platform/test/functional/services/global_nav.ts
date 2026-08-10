@@ -53,16 +53,35 @@ export class GlobalNavService extends FtrService {
    */
   public async isNextProjectChrome(): Promise<boolean> {
     // The chrome shell renders exactly one of these headers once loaded, but none while navigating,
-    // so wait for whichever appears before deciding rather than probing a single header once.
-    const anyHeaderSelector = ['chromeNextGlobalHeader', 'headerGlobalNav', 'kibanaProjectHeader']
-      .map((subj) => `[data-test-subj="${subj}"]`)
-      .join(',');
+    // and a stale header from the previous page can briefly overlap the incoming one.
+    const headerSubjects = ['chromeNextGlobalHeader', 'headerGlobalNav', 'kibanaProjectHeader'];
+    const anyHeaderSelector = headerSubjects.map((subj) => `[data-test-subj="${subj}"]`).join(',');
 
+    // Pages without a recognized header retain classic behavior.
     if (!(await this.find.existsByCssSelector(anyHeaderSelector, this.findTimeout))) {
       return false;
     }
 
-    return await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
+    // Wait until a single recognized header remains before reading the mode. A zero-timeout snapshot
+    // taken right after navigation can miss `chromeNextGlobalHeader` while it is still mounting (and
+    // catch a lingering previous header), which made repeated calls disagree and throw.
+    let isNextProjectChrome = false;
+    await this.retry.waitForWithTimeout(
+      'chrome header to settle on a single recognized state',
+      this.findTimeout,
+      async () => {
+        const present = await Promise.all(
+          headerSubjects.map((subj) => this.testSubjects.exists(subj, { timeout: 0 }))
+        );
+        if (present.filter(Boolean).length !== 1) {
+          return false;
+        }
+        [isNextProjectChrome] = present;
+        return true;
+      }
+    );
+
+    return isNextProjectChrome;
   }
 
   public async moveMouseToLogo(): Promise<void> {
