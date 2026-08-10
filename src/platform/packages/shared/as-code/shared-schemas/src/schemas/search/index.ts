@@ -8,4 +8,3 @@
  */
 
 export { asCodeSearchRequestSchema } from './schema';
-export { getTagsSearchRequest } from './get_tags_search_request';

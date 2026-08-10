@@ -11,7 +11,7 @@
       "@kbn/core-user-settings-types"
     ]
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "../../../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_cps_local/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -79,7 +79,8 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-workplace-ai",
-    "@kbn/core-user-profile-server"
+    "@kbn/core-user-profile-server",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

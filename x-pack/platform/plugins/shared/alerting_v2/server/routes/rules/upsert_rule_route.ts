@@ -21,6 +21,12 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_UPSERT_CONFLICT_DESCRIPTION,
+} from './rule_response_descriptions';
+import { upsertRuleOasExamples } from './upsert_rule_oas_example';
 
 @injectable()
 export class UpsertRuleRoute extends BaseAlertingRoute {
@@ -35,6 +41,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     summary: 'Create or replace a rule',
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -52,16 +59,15 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates the rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description:
-          'Indicates the rule was created or updated concurrently, or the request changes immutable fields.',
+        description: RULE_UPSERT_CONFLICT_DESCRIPTION,
       },
     },
   };

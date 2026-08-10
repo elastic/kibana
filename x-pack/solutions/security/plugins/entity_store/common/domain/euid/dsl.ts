@@ -83,6 +83,11 @@ export function getEuidDslDocumentsContainsIdFilter(
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
+ * @param options.excludeHigherRankedFields - When `true` (default), higher-ranked identity fields
+ *   absent from the document must also be missing-or-empty in matched documents (partition
+ *   semantics, used by extraction). Pass `false` when looking up a stored entity by partial
+ *   identity (e.g. only `host.name`) — the stored entity carries the higher-ranked fields
+ *   (e.g. `host.id`), so demanding their absence would always produce zero results.
  * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain enough
  *   identifying information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter`
  *   (same gate as `getEuidDslDocumentsContainsIdFilter` / logs extraction) after field evaluations
@@ -90,7 +95,8 @@ export function getEuidDslDocumentsContainsIdFilter(
  */
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
-  doc: any
+  doc: any,
+  { excludeHigherRankedFields = true }: { excludeHigherRankedFields?: boolean } = {}
 ): QueryDslQueryContainer | undefined {
   if (!doc) {
     return undefined;
@@ -161,7 +167,7 @@ export function getEuidDslFilterBasedOnDocument(
   // mapping) skip the guards because the condition itself is the discriminator.
   const isConditionBased = evaluationSpecs.some(({ spec }) => spec.type === 'condition');
 
-  if (!isConditionBased) {
+  if (!isConditionBased && excludeHigherRankedFields) {
     const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
       (field) => !evaluatedDestinations.has(field)
     );

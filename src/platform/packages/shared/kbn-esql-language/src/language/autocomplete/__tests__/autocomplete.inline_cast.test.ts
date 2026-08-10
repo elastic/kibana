@@ -54,6 +54,7 @@ describe('Inline Cast Autocomplete Suggestions', () => {
     await assertSuggestions('FROM index_a | WHERE "false"::boolean ^', [
       '\n',
       '| ',
+      ': $0',
       ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'any',

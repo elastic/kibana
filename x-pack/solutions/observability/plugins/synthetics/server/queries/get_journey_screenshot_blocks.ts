@@ -6,7 +6,7 @@
  */
 
 import type { SyntheticsEsClient } from '../lib';
-import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import { getSyntheticsScopedIndex } from '../../common/get_synthetics_indices';
 import type { ScreenshotBlockDoc } from '../../common/runtime_types';
 
 interface ScreenshotBlockResultType {
@@ -30,7 +30,7 @@ export const getJourneyScreenshotBlocks = async ({
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotBlockDoc[]> => {
   const body = {
-    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+    index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     query: {
       bool: {
         filter: [

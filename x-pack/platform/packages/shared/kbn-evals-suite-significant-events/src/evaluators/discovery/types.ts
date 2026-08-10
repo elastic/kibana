@@ -6,7 +6,7 @@
  */
 
 import type { ConverseStep, EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { Detection, Discovery, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 
 /** Fields every discovery agent output carries: the converse trail and trace id. */
 export interface AgentOutputBase {
@@ -25,7 +25,7 @@ export interface ExampleOutputBase {
 }
 
 export interface DiscoveryAgentOutput extends AgentOutputBase {
-  discoveries: Discovery[];
+  significantEvents: SignificantEvent[];
   inputDetections?: Detection[];
 }
 
@@ -35,32 +35,16 @@ export interface DiscoveryEvaluationExample {
   };
   output: ExampleOutputBase & {
     /**
-     * Canonical expected discoveries (signals + causal_features + blast_radius) — the grouping check
-     * derives its expected groups from these discoveries' `signals[].metadata.rule_uuid`s.
+     * Canonical expected significant events (signals + causal_features + blast_radius + status) —
+     * the grouping check derives its expected groups from these events' `signals[].metadata.rule_uuid`s.
      */
-    expected_discoveries?: Array<Partial<Discovery>>;
+    expected_significant_events?: Array<Partial<SignificantEvent>>;
+    /** Human-readable summary of expected status outcomes for status-correctness grading. */
+    expected_ground_truth?: string;
+    /** Expected confirmed rule UUIDs keyed by event ID for confirmation-alignment grading. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
 
 export type DiscoveryEvaluator = Evaluator<DiscoveryEvaluationExample, DiscoveryAgentOutput>;
-
-export interface DiscoveryJudgeAgentOutput extends AgentOutputBase {
-  significantEvents: SignificantEvent[];
-  inputDiscoveries: Discovery[];
-}
-
-export interface DiscoveryJudgeEvaluationExample {
-  input: {
-    discoveries: Array<Partial<Discovery>>;
-  };
-  output: ExampleOutputBase & {
-    expected_ground_truth?: string;
-  } & Record<string, unknown>;
-  metadata: Record<string, unknown> | null;
-}
-
-export type DiscoveryJudgeEvaluator = Evaluator<
-  DiscoveryJudgeEvaluationExample,
-  DiscoveryJudgeAgentOutput
->;

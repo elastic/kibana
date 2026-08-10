@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export function throwIfAborted(abortController: AbortController) {
-  if (abortController.signal.aborted) {
+export function throwIfAborted(signal: AbortSignal) {
+  if (signal.aborted) {
     throw new Error('Task was aborted');
   }
 }

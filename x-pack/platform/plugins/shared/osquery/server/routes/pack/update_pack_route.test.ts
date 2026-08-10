@@ -2497,4 +2497,611 @@ describe('updatePackRoute', () => {
       expect(Object.keys(writtenPacks)).toEqual(['default--renamed-pack']);
     });
   });
+
+  describe('disable branch — removes from every wire-attached package policy', () => {
+    // Regression for #279224: post-upgrade (9.4.3 → 9.5.0) the wire attachments
+    // and the pack SO references can diverge. Disable must scan the wire
+    // (policyHasPack), not the references, or the pack keeps running on agents
+    // while the SO reads `enabled: false`.
+    const buildDisableClient = (currentSO: typeof basePackSO) => {
+      const updatedSO = {
+        ...currentSO,
+        attributes: { ...currentSO.attributes, enabled: false },
+      };
+      let getCallCount = 0;
+
+      return {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+    };
+
+    const buildWirePolicy = (id: string, policyIds: string[], packKey = 'default--my-pack') => ({
+      id,
+      policy_ids: policyIds,
+      package: { name: 'osquery_manager', version: '1.0.0' },
+      inputs: [
+        {
+          type: 'osquery',
+          streams: [],
+          config: {
+            osquery: {
+              value: {
+                packs: {
+                  [packKey]: {
+                    shard: 100,
+                    pack_id: 'pack-id',
+                    default_native_schedule: { interval: 60 },
+                    queries: {},
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const runDisable = async (currentSO: typeof basePackSO, wirePolicies: unknown[]) => {
+      const mockClient = buildDisableClient(currentSO);
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({ items: wirePolicies });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { enabled: false },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      return { packagePolicyUpdate, mockResponse };
+    };
+
+    it('removes the pack from a wire policy NOT covered by SO references (post-upgrade drift)', async () => {
+      const currentSO = {
+        ...basePackSO,
+        // Diverged: wire carries the pack but the SO no longer references the
+        // agent policy that owns the package policy.
+        references: [],
+        attributes: { ...basePackSO.attributes, name: 'my-pack', enabled: true },
+      };
+
+      const { packagePolicyUpdate, mockResponse } = await runDisable(currentSO, [
+        buildWirePolicy('package-policy-1', ['policy-1']),
+      ]);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+
+      const [, , packagePolicyId, updatedPackagePolicy] = packagePolicyUpdate.mock.calls[0];
+      expect(packagePolicyId).toBe('package-policy-1');
+      const writtenPacks = updatedPackagePolicy.inputs[0].config.osquery.value.packs;
+      expect(writtenPacks).not.toHaveProperty('default--my-pack');
+    });
+
+    it('removes the pack from EVERY wire-attached policy (global/shard pack, empty references)', async () => {
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          shards: [{ key: '*', value: 100 }],
+        },
+      };
+
+      const { packagePolicyUpdate } = await runDisable(currentSO, [
+        buildWirePolicy('package-policy-1', ['policy-1']),
+        buildWirePolicy('package-policy-2', ['policy-2']),
+      ]);
+
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+      const updatedIds = packagePolicyUpdate.mock.calls.map((call) => call[2]).sort();
+      expect(updatedIds).toEqual(['package-policy-1', 'package-policy-2']);
+      packagePolicyUpdate.mock.calls.forEach((call) => {
+        const writtenPacks = call[3].inputs[0].config.osquery.value.packs;
+        expect(writtenPacks).not.toHaveProperty('default--my-pack');
+      });
+    });
+
+    it('still removes the pack when references are aligned with the wire (no regression)', async () => {
+      const currentSO = {
+        ...basePackSO,
+        references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+        attributes: { ...basePackSO.attributes, name: 'my-pack', enabled: true },
+      };
+
+      const { packagePolicyUpdate } = await runDisable(currentSO, [
+        buildWirePolicy('package-policy-1', ['policy-1']),
+      ]);
+
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      const writtenPacks =
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+      expect(writtenPacks).not.toHaveProperty('default--my-pack');
+    });
+
+    it('updates a package policy shared by multiple agent policies exactly once', async () => {
+      const currentSO = {
+        ...basePackSO,
+        // Both owning agent policies are referenced, so the pre-fix
+        // reference-driven loop resolved the same shared package policy twice
+        // and wrote it twice. Keep them populated or this asserts the wire scan
+        // rather than the dedup.
+        references: [
+          { id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' },
+          { id: 'policy-2', name: 'policy-2', type: 'ingest-agent-policies' },
+        ],
+        attributes: { ...basePackSO.attributes, name: 'my-pack', enabled: true },
+      };
+
+      // One package policy owned by two agent policies. The wire scan iterates
+      // package policies (not agent-policy references), so it must be updated a
+      // single time rather than once per owning agent policy.
+      const { packagePolicyUpdate } = await runDisable(currentSO, [
+        buildWirePolicy('shared-package-policy', ['policy-1', 'policy-2']),
+      ]);
+
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      expect(packagePolicyUpdate.mock.calls[0][2]).toBe('shared-package-policy');
+      const writtenPacks =
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+      expect(writtenPacks).not.toHaveProperty('default--my-pack');
+    });
+
+    it('removes a pack stored on the wire under a legacy (unprefixed) key', async () => {
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: { ...basePackSO.attributes, name: 'my-pack', enabled: true },
+      };
+
+      // Pre-namespacing wire configs keyed packs by bare name (`my-pack`)
+      // rather than `default--my-pack`. Disable must clean these up too.
+      const { packagePolicyUpdate } = await runDisable(currentSO, [
+        buildWirePolicy('package-policy-1', ['policy-1'], 'my-pack'),
+      ]);
+
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      const writtenPacks =
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+      expect(writtenPacks).not.toHaveProperty('my-pack');
+      expect(writtenPacks).not.toHaveProperty('default--my-pack');
+    });
+  });
+
+  describe('policy-diff branch — wire-based detach (drifted references)', () => {
+    const buildWirePolicyWithPack = (id: string, policyIds: string[]) => ({
+      id,
+      policy_ids: policyIds,
+      package: { name: 'osquery_manager', version: '1.0.0' },
+      inputs: [
+        {
+          type: 'osquery',
+          streams: [],
+          config: {
+            osquery: {
+              value: {
+                packs: {
+                  'default--my-pack': {
+                    shard: 100,
+                    pack_id: 'pack-id',
+                    default_native_schedule: { interval: 60 },
+                    queries: {},
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    it('detaches the pack from a wire policy no longer targeted even when SO references are stale', async () => {
+      const currentSO = {
+        ...basePackSO,
+        // Stale references: the wire carries the pack on two package policies,
+        // but the SO only references one agent policy (post-upgrade drift).
+        references: [{ id: 'policy-1', name: 'policy-1', type: 'ingest-agent-policies' }],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          // Drifted attachment: pack is on the wire but this agent policy is no
+          // longer targeted and is absent from the SO references.
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([{ id: 'policy-1', name: 'policy-1' }]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        // `enabled` omitted (unchanged) so this hits the add/update/remove
+        // diff branch rather than the enable-flip branch.
+        body: { policy_ids: ['policy-1'] },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const callsById = new Map(
+        packagePolicyUpdate.mock.calls.map((call) => [call[2] as string, call[3]])
+      );
+      expect(callsById.has('package-policy-1')).toBe(true);
+      expect(callsById.has('package-policy-2')).toBe(true);
+
+      // Still-targeted policy keeps the pack on the wire.
+      expect(callsById.get('package-policy-1').inputs[0].config.osquery.value.packs).toHaveProperty(
+        'default--my-pack'
+      );
+
+      // Drifted, no-longer-targeted policy has the pack removed even though it
+      // was not reachable through the SO references.
+      expect(
+        callsById.get('package-policy-2').inputs[0].config.osquery.value.packs
+      ).not.toHaveProperty('default--my-pack');
+    });
+
+    it('keeps an enabled pack on the wire when an edit-only PUT hits the empty-reference drift state', async () => {
+      // Drift state: SO references are empty but the wire still carries the
+      // pack. An edit that never mentions policy_ids or shards is not a
+      // retarget request, so it must leave the wire alone — detaching here
+      // would unschedule an enabled pack on every agent.
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only-drifted-pack-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(packagePolicyUpdate).not.toHaveBeenCalled();
+    });
+
+    it('still detaches drifted policies when the request does ask to retarget', async () => {
+      // Counterpart to the guard above: an explicit `policy_ids: []` IS a
+      // retarget request, so the wire must be cleaned even though the resolved
+      // write-target set is empty.
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+          shards: [],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [buildWirePolicyWithPack('package-policy-1', ['policy-1'])],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { policy_ids: [] },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+      expect(packagePolicyUpdate.mock.calls[0][2]).toBe('package-policy-1');
+      expect(
+        packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs
+      ).not.toHaveProperty('default--my-pack');
+    });
+
+    it('keeps a global pack on the wire when the request omits policy_ids and shards', async () => {
+      // A global pack targets policies through its stored `*` shard, not
+      // through policy_ids. An edit-only PUT must not resolve to zero write
+      // targets and detach the pack from every agent.
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          name: 'my-pack',
+          enabled: true,
+          queries: [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 }],
+          shards: [{ key: '*', value: 100 }],
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+        },
+      };
+      const updatedSO = { ...currentSO };
+
+      let getCallCount = 0;
+      const mockClient = {
+        get: jest.fn().mockImplementation(() => {
+          getCallCount += 1;
+
+          return Promise.resolve(getCallCount === 1 ? currentSO : updatedSO);
+        }),
+        find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        update: jest.fn().mockResolvedValue({
+          id: 'pack-id',
+          attributes: updatedSO.attributes,
+          references: currentSO.references,
+        }),
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      };
+
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          buildWirePolicyWithPack('package-policy-1', ['policy-1']),
+          buildWirePolicyWithPack('package-policy-2', ['policy-2']),
+        ],
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-1', name: 'policy-1' },
+              { id: 'policy-2', name: 'policy-2' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+            fetchAllItems: fetchAllItemsFromListMock(packagePolicyList),
+            update: packagePolicyUpdate,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'edit-only-global-pack-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const callsById = new Map(
+        packagePolicyUpdate.mock.calls.map((call) => [call[2] as string, call[3]])
+      );
+      expect([...callsById.keys()].sort()).toEqual(['package-policy-1', 'package-policy-2']);
+      callsById.forEach((updatedPackagePolicy) => {
+        expect(updatedPackagePolicy.inputs[0].config.osquery.value.packs).toHaveProperty(
+          'default--my-pack'
+        );
+      });
+
+      // The stored `*` shard must survive an edit that never mentions shards.
+      expect(mockClient.update.mock.calls[0][2].shards).toEqual([{ key: '*', value: 100 }]);
+    });
+  });
 });

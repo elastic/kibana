@@ -10,6 +10,7 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
+  DEFAULT_TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsSchema } from './common';
@@ -19,7 +20,9 @@ import {
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
+  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
+  MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
   ID_MAX_LENGTH,
@@ -372,7 +375,7 @@ export const createRuleDataBaseSchema = z
       .string()
       .min(1)
       .max(128)
-      .default('@timestamp')
+      .default(DEFAULT_TIME_FIELD)
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     query: querySchema,
@@ -500,6 +503,7 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
@@ -537,7 +541,6 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strict()
   .check((ctx) => {
@@ -571,6 +574,15 @@ export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   id: z.string().describe('Unique rule identifier.'),
+  metadata: metadataSchema.extend({
+    version: z
+      .number()
+      .int()
+      .min(1)
+      .describe(
+        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
+      ),
+  }),
   enabled: z.boolean().describe('Whether the rule is enabled.'),
   createdBy: z.string().nullable().describe('User who created the rule.'),
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
@@ -579,7 +591,9 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   version: z
     .string()
     .optional()
-    .describe('The version of the rule, used for optimistic concurrency control'),
+    .describe(
+      'The saved object version token of the rule, used for optimistic concurrency control.'
+    ),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
@@ -589,26 +603,27 @@ export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesParamsSchema = z.object({
+export const findRulesRequestSchema = z.object({
   page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  perPage: z.coerce
+  per_page: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
     .describe('The number of rules to return per page. Defaults to 20.'),
-  filter: z.string().optional().describe('The filter to apply to the rules.'),
-  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+  filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
+  sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
   search: z
     .string()
     .trim()
     .min(1)
+    .max(MAX_SEARCH_LENGTH)
     .optional()
     .describe('A text string to search across rule fields.'),
 });
 
-export type FindRulesParams = z.infer<typeof findRulesParamsSchema>;
+export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
@@ -640,35 +655,7 @@ export const ruleTagsResponseSchema = z
   })
   .describe('All unique tags across rules.');
 
-/** Bulk operation response schema. */
-export const bulkOperationResponseSchema = z
-  .object({
-    rules: z.array(ruleResponseSchema).describe('The rules that the operation was applied to.'),
-    errors: z
-      .array(
-        z.object({
-          id: z.string().describe('The identifier of the rule that failed.'),
-          error: z.object({
-            message: z.string().describe('The error message.'),
-            statusCode: z.number().describe('The HTTP status code.'),
-          }),
-        })
-      )
-      .describe('Errors encountered during the bulk operation.'),
-    truncated: z
-      .boolean()
-      .optional()
-      .describe(
-        'True when the request used a filter that matched more rules than were included in this operation.'
-      ),
-    totalMatched: z
-      .number()
-      .optional()
-      .describe('Total number of rules matching the filter when truncated is true.'),
-  })
-  .describe('Result of a bulk rule operation.');
-
-export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;
+export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
 export const ruleIdSchema = z
   .string()

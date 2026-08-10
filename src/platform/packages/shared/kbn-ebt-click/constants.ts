@@ -48,6 +48,12 @@ export const EBT_CLICK_ACTIONS = {
   VIEW_ALERTS: 'viewAlerts',
   /** User intends to view SLOs for a service or resource. */
   VIEW_SLOS: 'viewSlos',
+  /** User intends to view anomaly details for an entity. */
+  VIEW_ANOMALIES: 'viewAnomalies',
+  /** User intends to open an actions menu to explore available actions. */
+  OPEN_ACTIONS: 'openActions',
+  /** User intends to add data to their (empty) cluster. Commonly used from empty data prompts and similar components */
+  ADD_DATA: 'addData',
 } as const;
 
 /**

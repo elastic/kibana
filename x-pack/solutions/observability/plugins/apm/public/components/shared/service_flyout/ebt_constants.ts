@@ -9,8 +9,11 @@ export const SERVICE_FLYOUT_EBT_ELEMENTS = {
   TITLE: 'serviceFlyoutTitle',
   ALERTS_BADGE: 'serviceFlyoutAlertsBadge',
   SLO_BADGE: 'serviceFlyoutSloBadge',
+  ANOMALIES_BADGE: 'serviceFlyoutAnomaliesBadge',
   ACTIONS_MENU: 'serviceFlyoutActionsMenu',
   TABS: 'serviceFlyoutTabs',
+  QUERY_CONTROLS: 'serviceFlyoutQueryControls',
+  CHART_CONTROLS: 'serviceFlyoutChartControls',
 } as const;
 
 export const SERVICE_FLYOUT_EBT_ACTIONS = {

@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   HostIsolationFlyout,
   HOST_ISOLATION_FLYOUT_TEST_ID,
+  HOST_ISOLATION_INTEGRATION_TEST_ID,
   HOST_ISOLATION_PANEL_TEST_ID,
   HOST_ISOLATION_TITLE_TEST_ID,
 } from './host_isolation_flyout';
@@ -24,6 +25,10 @@ jest.mock('../../../../hooks/use_app_toasts', () => ({
 
 jest.mock('../..', () => ({
   useWithCaseDetailsRefresh: () => undefined,
+}));
+
+jest.mock('../../../../hooks/endpoint/use_alert_response_actions_support', () => ({
+  useAlertResponseActionsSupport: () => ({ details: { agentType: 'endpoint' } }),
 }));
 
 jest.mock('./host_isolation_panel', () => ({
@@ -97,6 +102,22 @@ describe('<HostIsolationFlyout />', () => {
 
     expect(screen.getByTestId(HOST_ISOLATION_PANEL_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(HOST_ISOLATION_FLYOUT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders the integration line in the header', () => {
+    render(
+      <HostIsolationFlyout
+        hit={hit}
+        detailsData={detailsData}
+        isolateAction="isolateHost"
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId(HOST_ISOLATION_INTEGRATION_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(`${HOST_ISOLATION_INTEGRATION_TEST_ID}-label`)).toHaveTextContent(
+      'Integration'
+    );
   });
 
   it('fires the isolation success toast and calls onClose when form reports success', () => {

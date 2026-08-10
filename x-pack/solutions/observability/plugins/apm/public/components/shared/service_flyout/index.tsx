@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlyoutBody, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../common/service_map';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ResponsiveFlyout } from '../responsive_flyout';
 import { ServiceFlyoutFooter } from './footer';
 import { ServiceFlyoutHeader } from './header';
 import { ServiceFlyoutOverview } from './overview';
+import {
+  ServiceFlyoutContextProvider,
+  type ServiceFlyoutContextValue,
+} from './service_flyout_context';
+import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
+import { useApmIndices } from './hooks/use_apm_indices';
+export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -35,104 +43,129 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
+export interface ServiceFlyoutTelemetry {
+  client: { reportServiceFlyoutViewed: (params: { tabId: string; source: string }) => void };
+  source: string;
+}
+
 interface ServiceFlyoutProps {
-  service: ServiceNodeData;
-  environment: Environment;
-  kuery: string;
-  initialRangeFrom: string;
-  initialRangeTo: string;
-  initialTransactionType?: string;
-  onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
+  deps: ServiceFlyoutContextValue['deps'];
+  service: ServiceFlyoutContextValue['service'];
+  filters: {
+    environment: Environment;
+    rangeFrom: string;
+    rangeTo: string;
+    transactionType?: string;
+  };
+  telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
+  historyKey?: symbol;
+  contextActions?: ServiceFlyoutContextValue['contextActions'];
 }
 
 export function ServiceFlyout({
+  deps,
   service,
-  environment,
-  kuery,
-  initialRangeFrom,
-  initialRangeTo,
-  initialTransactionType,
-  onView,
+  filters,
+  telemetry,
   onClose,
+  historyKey,
+  contextActions,
 }: ServiceFlyoutProps) {
-  const title = service.label ?? service.id;
+  const { environment, rangeFrom, rangeTo, transactionType } = filters;
+  const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
-
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
-  const [flyoutRange, setFlyoutRange] = useState({
-    rangeFrom: initialRangeFrom,
-    rangeTo: initialRangeTo,
+  const [flyoutRange, setFlyoutRange] = useState({ rangeFrom, rangeTo });
+  const { start, end } = useTimeRange({
+    rangeFrom: flyoutRange.rangeFrom,
+    rangeTo: flyoutRange.rangeTo,
   });
-  const [transactionType, setTransactionType] = useState(initialTransactionType ?? '');
+  const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
+
+  const capabilities = useServiceFlyoutCapabilities({
+    serviceName: service.name,
+    environment: flyoutEnvironment,
+    start,
+    end,
+  });
+
+  const { indices: indicesValue, loading: indicesLoading } = useApmIndices({
+    http: deps.core.http,
+  });
+  const indices = indicesLoading ? undefined : indicesValue ?? null;
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
 
+  const { client: telemetryClient, source: telemetrySource } = telemetry;
   useEffect(() => {
-    onView?.({ tabId: selectedTabId });
-  }, [onView, selectedTabId]);
+    telemetryClient.reportServiceFlyoutViewed({ tabId: selectedTabId, source: telemetrySource });
+  }, [telemetryClient, telemetrySource, selectedTabId]);
 
   const renderTabContent = () => {
     switch (selectedTabId) {
       case SERVICE_FLYOUT_TAB_IDS.overview:
-        return (
-          <ServiceFlyoutOverview
-            service={service}
-            environment={flyoutEnvironment}
-            kuery={kuery}
-            rangeFrom={flyoutRange.rangeFrom}
-            rangeTo={flyoutRange.rangeTo}
-            transactionType={transactionType}
-            refreshToken={refreshToken}
-            onTransactionTypeChange={setTransactionType}
-            onEnvironmentChange={setFlyoutEnvironment}
-            onRangeChange={setFlyoutRange}
-            onRefresh={() => setRefreshToken(Date.now())}
-          />
-        );
+        return <ServiceFlyoutOverview />;
       default:
         return null;
     }
   };
 
   return (
-    <EuiPortal>
-      <ResponsiveFlyout
-        data-test-subj="serviceFlyout"
-        flyoutMenuDisplayMode="always"
-        onClose={onClose}
-        ownFocus={false}
-        size="m"
-        paddingSize="m"
-        resizable
-        minWidth={660}
-        session="start"
-        flyoutMenuProps={{ title }}
-        aria-labelledby={titleId}
+    <ServiceFlyoutContextProvider
+      value={{
+        deps,
+        contextActions,
+        service,
+        capabilities,
+        indices,
+        filters: {
+          environment: flyoutEnvironment,
+          setEnvironment: setFlyoutEnvironment,
+          rangeFrom: flyoutRange.rangeFrom,
+          rangeTo: flyoutRange.rangeTo,
+          setRange: setFlyoutRange,
+          refreshToken,
+          onRefresh: () => setRefreshToken(Date.now()),
+          transactionType: flyoutTransactionType,
+          setTransactionType: setFlyoutTransactionType,
+        },
+      }}
+    >
+      <TimeRangeMetadataContextProvider
+        uiSettings={deps.core.uiSettings}
+        start={start}
+        end={end}
+        kuery=""
+        useSpanName={false}
       >
-        <ServiceFlyoutHeader
-          service={service}
-          title={title}
-          titleId={titleId}
-          environment={flyoutEnvironment}
-          kuery={kuery}
-          rangeFrom={flyoutRange.rangeFrom}
-          rangeTo={flyoutRange.rangeTo}
-          selectedTabId={selectedTabId}
-          onSelectedTabIdChange={setSelectedTabId}
-        />
-        <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-        <ServiceFlyoutFooter
-          serviceName={service.id}
-          environment={flyoutEnvironment}
-          rangeFrom={flyoutRange.rangeFrom}
-          rangeTo={flyoutRange.rangeTo}
-          transactionType={transactionType}
-        />
-      </ResponsiveFlyout>
-    </EuiPortal>
+        <ResponsiveFlyout
+          data-test-subj="serviceFlyout"
+          flyoutMenuDisplayMode="always"
+          onClose={onClose}
+          ownFocus={false}
+          size="m"
+          paddingSize="m"
+          resizable
+          minWidth={660}
+          session="start"
+          historyKey={historyKey}
+          flyoutMenuProps={{ title }}
+          aria-labelledby={titleId}
+        >
+          <ServiceFlyoutHeader
+            title={title}
+            titleId={titleId}
+            selectedTabId={selectedTabId}
+            onSelectedTabIdChange={setSelectedTabId}
+          />
+          <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
+          <ServiceFlyoutFooter />
+        </ResponsiveFlyout>
+      </TimeRangeMetadataContextProvider>
+    </ServiceFlyoutContextProvider>
   );
 }

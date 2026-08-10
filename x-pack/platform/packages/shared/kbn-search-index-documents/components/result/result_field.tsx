@@ -7,21 +7,23 @@
 
 import React, { useState } from 'react';
 
+import type { IconType } from '@elastic/eui';
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
+  EuiToken,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { ResultFieldProps } from './result_types';
 import { PERMANENTLY_TRUNCATED_FIELDS } from './constants';
-import { ResultFieldValue } from './result_field_value';
+import { ResultFieldValue, VectorFieldValue } from './result_field_value';
 import * as Styles from './styles';
 
 const iconMap: Record<string, string> = {
@@ -63,55 +65,115 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'question';
 
+const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel?: string }> = ({
+  iconType,
+  label,
+  fieldTypeLabel,
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const iconButton = (
+    <EuiButtonEmpty
+      size="s"
+      aria-label={
+        fieldTypeLabel ??
+        i18n.translate('xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel', {
+          defaultMessage: "Show this field's type",
+        })
+      }
+      onClick={fieldTypeLabel ? () => setIsPopoverOpen(!isPopoverOpen) : undefined}
+    >
+      <EuiToken iconType={iconType} size="s" />
+    </EuiButtonEmpty>
+  );
+  return (
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
+      <EuiFlexItem grow={false}>
+        {fieldTypeLabel ? (
+          <EuiPopover
+            aria-label={fieldTypeLabel}
+            closePopover={() => setIsPopoverOpen(false)}
+            button={iconButton}
+            isOpen={isPopoverOpen}
+          >
+            {fieldTypeLabel}
+          </EuiPopover>
+        ) : (
+          iconButton
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s" color="default">
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
   fieldName,
   fieldValue,
   fieldType = 'object',
+  embeddings,
   isExpanded,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isSemanticVector = fieldType === 'semantic_text' && embeddings && embeddings.length > 0;
   const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const resolvedIconType = iconType || (fieldType ? iconMap[fieldType] : defaultToken);
+
   const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
     defaultMessage: 'This field is of the type {fieldType}',
     values: { fieldType },
   });
 
+  if (isSemanticVector && isExpanded) {
+    return (
+      <EuiTableRow css={Styles.resultFieldSemanticVector(euiTheme)}>
+        <EuiTableRowCell colSpan={2} className="resultFieldRowCell" truncateText={false}>
+          <Styles.SemanticVectorGrid $padding={euiTheme.size.s}>
+            <TypeLine
+              iconType="tokenSemanticText"
+              label={fieldName}
+              fieldTypeLabel={fieldTypeLabel}
+            />
+            <EuiText size="s" color="default">
+              {fieldValue}
+            </EuiText>
+            <TypeLine
+              iconType="tokenVectorDense"
+              label={i18n.translate(
+                'xpack.searchIndexDocuments.result.value.semanticText.embeddingsLabel',
+                { defaultMessage: 'embeddings' }
+              )}
+              fieldTypeLabel={i18n.translate(
+                'xpack.searchIndexDocuments.result.embeddingsFieldTypeAriaLabel',
+                {
+                  defaultMessage:
+                    'This semantic text field contains embeddings as well as the original text',
+                }
+              )}
+            />
+            <VectorFieldValue embeddings={embeddings} />
+          </Styles.SemanticVectorGrid>
+        </EuiTableRowCell>
+      </EuiTableRow>
+    );
+  }
+
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
       <EuiTableRowCell className="resultFieldRowCell" valign="middle" truncateText={!isExpanded}>
-        <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              aria-label={fieldTypeLabel}
-              closePopover={() => setIsPopoverOpen(false)}
-              button={
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel',
-                    {
-                      defaultMessage: "Show this field's type",
-                    }
-                  )}
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                  iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)}
-                />
-              }
-              isOpen={isPopoverOpen}
-            >
-              {fieldTypeLabel}
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s" color="default">
-              {fieldName}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
       <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
-        <ResultFieldValue fieldValue={fieldValue} fieldType={fieldType} isExpanded={isExpanded} />
+        <ResultFieldValue
+          fieldValue={fieldValue}
+          fieldType={fieldType}
+          embeddings={isExpanded ? embeddings : undefined}
+          isExpanded={isExpanded}
+        />
       </EuiTableRowCell>
     </EuiTableRow>
   );

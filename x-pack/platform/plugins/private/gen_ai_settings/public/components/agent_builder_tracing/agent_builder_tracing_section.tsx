@@ -124,7 +124,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                         )}
                       </EuiSplitButton.ActionPrimary>
                       <EuiSplitButton.ActionSecondary
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         aria-label={i18n.translate(
                           'xpack.genAiSettings.agentBuilderTracing.dashboardMenuAriaLabel',
                           { defaultMessage: 'More dashboard options' }
@@ -234,16 +234,11 @@ export const AgentBuilderTracingSection: React.FC = () => {
                       <br />
                       <FormattedMessage
                         id="xpack.genAiSettings.agentBuilderTracing.indices"
-                        defaultMessage="Traces are stored in {index1} and {index2}"
+                        defaultMessage="Traces are stored in {index1}"
                         values={{
                           index1: (
                             <code css={{ color: euiTheme.colors.subduedText }}>
                               traces-agent_builder.otel-*
-                            </code>
-                          ),
-                          index2: (
-                            <code css={{ color: euiTheme.colors.subduedText }}>
-                              logs-agent_builder.otel-*
                             </code>
                           ),
                         }}

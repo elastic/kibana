@@ -104,6 +104,11 @@ export const useLeadingControlColumns = ({
     if (canUseTimeline) {
       columns.push({
         id: 'entity-analytics-timeline-action',
+        // Widen the actions column so its "Actions" header renders as text rather than
+        // collapsing to an info icon. UnifiedDataTable's ActionsHeader only shows the label
+        // when the column is wider than the rendered word, and the default single-icon width
+        // (24px) is too narrow.
+        width: 48,
         render: (Control, { record }) => (
           <InvestigateInTimelineRowControl Control={Control} record={record} tableId={tableId} />
         ),

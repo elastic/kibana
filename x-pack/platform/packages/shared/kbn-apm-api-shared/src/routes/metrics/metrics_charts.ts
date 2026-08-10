@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Coordinate, YUnit, ChartType } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -32,13 +32,15 @@ export interface MetricsChartsResponse {
 
 export const metricsChartsRoute = defineRoute<MetricsChartsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
-  params: z.object({
-    path: z.object({ serviceName: z.string() }),
-    query: z
-      .object({ agentName: z.string() })
-      .merge(z.object({ serviceNodeName: z.string() }).partial())
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: z
+        .object({ agentName: z.string() })
+        .merge(z.object({ serviceNodeName: z.string() }).partial())
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

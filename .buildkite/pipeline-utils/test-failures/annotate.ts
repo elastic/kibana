@@ -65,8 +65,9 @@ export const getAnnotation = (
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+        const issueLink = failure.githubIssue ? ` [[issue]](${failure.githubIssue})` : '';
 
-        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+        return `[[job]](${jobUrl})${logsLink}${issueLink} ${failure.jobName} / ${failure.name}`;
       })
       .join('<br />\n')
   );

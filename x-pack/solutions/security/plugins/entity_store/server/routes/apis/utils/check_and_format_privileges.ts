@@ -19,19 +19,23 @@ import {
   ENTITY_LATEST,
 } from '../../../../common';
 
+const PrivilegesDetail = z.object({
+  elasticsearch: z.object({
+    cluster: z.object({}).catchall(z.boolean()).optional(),
+    index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+  }),
+  kibana: z.object({}).catchall(z.boolean()).optional(),
+});
+
 export type Privileges = z.infer<typeof Privileges>;
 export const Privileges = z.object({
   has_all_required: z.boolean(),
   has_read_permissions: z.boolean().optional(),
   has_write_permissions: z.boolean().optional(),
+  has_install_permissions: z.boolean().optional(),
   has_kibana_feature_access: z.boolean().optional(),
-  privileges: z.object({
-    elasticsearch: z.object({
-      cluster: z.object({}).catchall(z.boolean()).optional(),
-      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
-    }),
-    kibana: z.object({}).catchall(z.boolean()).optional(),
-  }),
+  privileges: PrivilegesDetail,
+  install_privileges: PrivilegesDetail.optional(),
 });
 
 const groupPrivilegesByName = <PrivilegeName extends string>(
