@@ -44498,7 +44498,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.lookbackHelpText": "Fügt dem Rückblickzeitraum Zeit hinzu, um verpasste Alerts zu verhindern.",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.lookbackLabel": "Zusätzliche Zeit für Rückblicke",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.setSchedule.warningCalloutMessage": "Sie sind dabei, Änderungen an {rulesCount, plural, one {# selected rule} other {# selected rules}} anzuwenden. Die Änderungen, die Sie vornehmen, werden die bestehenden Regelpläne und die zusätzliche Rückblickzeit (falls vorhanden) überschreiben.",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription": "Falls Sie nicht ausgewählt haben, Änderungen an Regeln mithilfe von Kibana-Datenansichten anzuwenden, wurden diese Regeln nicht aktualisiert und werden weiterhin Datenansichten verwenden.",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successToastTitle": "Regeln aktualisiert",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesEditDescription": "{rulesCount, plural, =1 {# prebuilt Elastic rule} other {# vordefinierte Elastic-Regeln}} (Das Bearbeiten von vordefinierten Regeln wird nicht unterstützt)",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enable.errorToastDescription": "{rulesCount, plural, =1 {# rule is} other {# Regeln sind}} konnten nicht aktiviert werden.",
