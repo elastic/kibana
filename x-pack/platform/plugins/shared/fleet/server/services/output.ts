@@ -1155,7 +1155,6 @@ class OutputService {
         esClient,
         id,
         updateData,
-        originalOutput,
         defaultDataOutputId,
         fromPreconfiguration
       );
