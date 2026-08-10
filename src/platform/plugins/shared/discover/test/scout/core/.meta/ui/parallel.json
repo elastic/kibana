@@ -1,5 +1,5 @@
 {
-  "sha1": "2d204e2a1fcc95b345b60b2de9e842c06212b184",
+  "sha1": "7f7c88c543f781067ada4683cb40dd8777ce5017",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -88,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 50,
-        "column": 28
+        "line": 66,
+        "column": 11
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 99,
-        "column": 43
+        "line": 107,
+        "column": 19
       }
     },
     {
@@ -236,6 +236,58 @@
       }
     },
     {
+      "id": "478c3baf483d35a-f5bf8287919c203",
+      "title": "Discover default columns should render default columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 28,
+        "column": 23
+      }
+    },
+    {
+      "id": "478c3baf483d35a-ec1d070ad629b2a",
+      "title": "Discover default columns should render only available default columns after switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 34,
+        "column": 5
+      }
+    },
+    {
+      "id": "478c3baf483d35a-bca73198e1adbdc",
+      "title": "Discover default columns should combine selected columns and default columns after switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 92,
+        "column": 20
+      }
+    },
+    {
+      "id": "478c3baf483d35a-4d84b3cd62b02cb",
+      "title": "Discover default columns should not change columns if discover:modifyColumnsOnSwitch is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 147,
+        "column": 3
+      }
+    },
+    {
       "id": "b36e5d4fe77e2d1-958b3be687e6b1b",
       "title": "Discover default route can use a saved search as default route",
       "expectedStatus": "passed",
@@ -259,6 +311,59 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_route.spec.ts",
         "line": 44,
         "column": 31
+      }
+    },
+    {
+      "id": "11e9f59685b0708-72dffb3fb6f5ef9",
+      "title": "Discover drag and drop should support dragging and dropping a field onto the grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
+        "line": 23,
+        "column": 23
+      }
+    },
+    {
+      "id": "11e9f59685b0708-4f3f7ae3f30246d",
+      "title": "Discover drag and drop should support dragging and dropping a field onto the grid (with keyboard)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
+        "line": 45,
+        "column": 84
+      }
+    },
+    {
+      "id": "2a14d7cd35c2249-224a066230d1aa6",
+      "title": "Discover session embedded in dashboard - request cancellation cancels async search when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/embedded_search_cancellation.spec.ts",
+        "line": 27,
+        "column": 35
       }
     },
     {
@@ -730,6 +835,344 @@
       }
     },
     {
+      "id": "af07fa66e78a026-9414796ab2a6675",
+      "title": "Discover request counts - data view mode should send 2 search requests (documents + chart) on page load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 41,
+        "column": 20
+      }
+    },
+    {
+      "id": "af07fa66e78a026-d6ab6809825ab1c",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when refreshing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 54,
+        "column": 22
+      }
+    },
+    {
+      "id": "af07fa66e78a026-70550fec82c9a04",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when changing the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 60,
+        "column": 17
+      }
+    },
+    {
+      "id": "af07fa66e78a026-9205e1a0df03410",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when changing the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "af07fa66e78a026-70d8dd242626fca",
+      "title": "Discover request counts - data view mode should send no requests when toggling the chart visibility",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "af07fa66e78a026-b9876cbfd8a0714",
+      "title": "Discover request counts - data view mode should send a request for chart data when showing the chart after a time range change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 88,
+        "column": 29
+      }
+    },
+    {
+      "id": "af07fa66e78a026-b1e44dd5127f037",
+      "title": "Discover request counts - data view mode should send expected requests for saved search changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 102,
+        "column": 29
+      }
+    },
+    {
+      "id": "af07fa66e78a026-e9489ce54e89912",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when adding a filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 139,
+        "column": 27
+      }
+    },
+    {
+      "id": "af07fa66e78a026-48d60bb76674be3",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when sorting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 149,
+        "column": 29
+      }
+    },
+    {
+      "id": "af07fa66e78a026-b9fd78bcec0d769",
+      "title": "Discover request counts - data view mode should send 1 request (chart) when changing to a breakdown field without an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 161,
+        "column": 16
+      }
+    },
+    {
+      "id": "af07fa66e78a026-d250fc5c7acc8d7",
+      "title": "Discover request counts - data view mode should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 173,
+        "column": 29
+      }
+    },
+    {
+      "id": "af07fa66e78a026-016ffc090791b11",
+      "title": "Discover request counts - data view mode should send 1 request (chart) when changing the chart interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 182,
+        "column": 29
+      }
+    },
+    {
+      "id": "af07fa66e78a026-1b2cc86dacd9241",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when changing the data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 188,
+        "column": 13
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-21dc485ed0caea5",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) on submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 47,
+        "column": 27
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-ee762da870acf85",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) when refreshing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 56,
+        "column": 51
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-407a637f3791346",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) when changing the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 63,
+        "column": 33
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-30d5ce62b5af1d6",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) when changing the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 75,
+        "column": 33
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-7cbe84a735e821e",
+      "title": "Discover request counts - ES|QL mode should send no requests when toggling the chart visibility",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 88,
+        "column": 9
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-af9567d179501fe",
+      "title": "Discover request counts - ES|QL mode should send a request for chart data when showing the chart after a time range change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 97,
+        "column": 17
+      }
+    },
+    {
       "id": "adcd001115fd3a8-48b9e02303701a3",
       "title": "Discover runtime field editor CRUD creates a runtime field",
       "expectedStatus": "passed",
@@ -1000,6 +1443,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/source_filters.spec.ts",
         "line": 31,
         "column": 62
+      }
+    },
+    {
+      "id": "97b11d54520b89e-dac22b5f8fd6bca",
+      "title": "Discover time field column should handle the time field column changes correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/time_field_column.spec.ts",
+        "line": 20,
+        "column": 23
       }
     },
     {
