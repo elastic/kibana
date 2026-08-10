@@ -15,7 +15,7 @@ import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
 import { useCanUpdateAgent } from '../../hooks/agents/use_can_update_agent';
 import { useAgentAiIndices } from '../../hooks/ai_indices/use_agent_ai_indices';
 import { useListAiIndices } from '../../hooks/ai_indices/use_list_ai_indices';
-import { getContextStatus } from '../../hooks/ai_indices/context_status';
+import { getContextStatus, hasDefaultAiIndex } from '../../hooks/ai_indices/context_status';
 import { labels } from '../../utils/i18n';
 import { AiIndexSelector } from './ai_index_selector';
 import { ContextStatusBadge } from './context_status_badge';
@@ -49,6 +49,7 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({ agent, aiIndices,
       agentName={agent.name}
       aiIndices={aiIndices}
       selectedIds={agent.configuration.ai_indices ?? []}
+      includesDefaultAiIndex={hasDefaultAiIndex(agent)}
       isDisabled={!canEditAgent}
       onChange={handleChange}
     />

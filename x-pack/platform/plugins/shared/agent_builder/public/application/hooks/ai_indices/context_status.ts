@@ -10,6 +10,15 @@ import { chatAgentTypeId } from '@kbn/agent-builder-common';
 
 export type ContextStatus = 'on' | 'auto' | 'off';
 
+type AgentShape = Pick<AgentDefinition, 'type' | 'configuration'>;
+
+/**
+ * Whether the agent's type merges the default `elastic` AI index in at runtime, meaning the agent
+ * always retrieves from it regardless of what is stored on the agent itself.
+ */
+export const hasDefaultAiIndex = (agent: Pick<AgentDefinition, 'type'>): boolean =>
+  agent.type === chatAgentTypeId;
+
 /**
  * Derives how an agent uses the Context Engine.
  *
@@ -27,11 +36,9 @@ export type ContextStatus = 'on' | 'auto' | 'off';
  * `agent-builder-server/allow_lists.test.ts` pins that list so a new type fails a test and gets
  * reviewed against this derivation.
  */
-export const getContextStatus = (
-  agent: Pick<AgentDefinition, 'type' | 'configuration'>
-): ContextStatus => {
+export const getContextStatus = (agent: AgentShape): ContextStatus => {
   if ((agent.configuration.ai_indices?.length ?? 0) > 0) {
     return 'on';
   }
-  return agent.type === chatAgentTypeId ? 'auto' : 'off';
+  return hasDefaultAiIndex(agent) ? 'auto' : 'off';
 };

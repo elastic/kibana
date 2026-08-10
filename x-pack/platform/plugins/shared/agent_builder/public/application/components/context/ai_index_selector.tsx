@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
@@ -18,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { CONTEXT_ENGINE_PATHS } from '@kbn/context-engine-plugin/common/paths';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -27,6 +29,11 @@ interface AiIndexSelectorProps {
   agentName: string;
   aiIndices: AiIndexHttpItem[];
   selectedIds: string[];
+  /**
+   * Whether the agent's type merges the default `elastic` AI index in at runtime. When it does,
+   * that index is shown ticked and disabled: it always applies and cannot be removed.
+   */
+  includesDefaultAiIndex: boolean;
   isDisabled: boolean;
   onChange: (selectedIds: string[]) => void;
 }
@@ -35,6 +42,7 @@ export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
   agentName,
   aiIndices,
   selectedIds,
+  includesDefaultAiIndex,
   isDisabled,
   onChange,
 }) => {
@@ -43,36 +51,64 @@ export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
 
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  const options = useMemo<EuiSelectableOption[]>(
-    () =>
-      aiIndices.map((aiIndex) => ({
+  // The default index is only *added* for display when it is not already stored on the agent.
+  // Storing it explicitly is redundant but legal, and an unrelated edit must not silently drop it.
+  const isDefaultForced =
+    includesDefaultAiIndex && !selectedIdSet.has(agentBuilderDefaultAiIndexId);
+
+  const options = useMemo<EuiSelectableOption[]>(() => {
+    const knownIds = new Set(aiIndices.map((aiIndex) => aiIndex.id));
+    const items = [...aiIndices];
+
+    // The default is registered in the Context Engine, so it is normally already in the list.
+    // Fall back to a synthetic entry if it has not been registered yet (first boot, for example).
+    if (includesDefaultAiIndex && !knownIds.has(agentBuilderDefaultAiIndexId)) {
+      items.unshift({ id: agentBuilderDefaultAiIndexId } as AiIndexHttpItem);
+    }
+
+    return items.map((aiIndex) => {
+      const isDefault = includesDefaultAiIndex && aiIndex.id === agentBuilderDefaultAiIndexId;
+      return {
         key: aiIndex.id,
         label: aiIndex.id,
-        checked: selectedIdSet.has(aiIndex.id) ? 'on' : undefined,
-      })),
-    [aiIndices, selectedIdSet]
-  );
+        checked: isDefault || selectedIdSet.has(aiIndex.id) ? 'on' : undefined,
+        disabled: isDefault,
+        append: isDefault ? (
+          <EuiBadge color="hollow">{labels.context.defaultAiIndexBadge}</EuiBadge>
+        ) : undefined,
+      };
+    });
+  }, [aiIndices, includesDefaultAiIndex, selectedIdSet]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
+      const checkedIds = newOptions
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.key as string);
+
       onChange(
-        newOptions.filter((option) => option.checked === 'on').map((option) => option.key as string)
+        isDefaultForced
+          ? checkedIds.filter((id) => id !== agentBuilderDefaultAiIndexId)
+          : checkedIds
       );
     },
-    [onChange]
+    [onChange, isDefaultForced]
   );
 
-  // The button reports what the agent retrieves from: the single index by name when there is
-  // exactly one, a count when there are several, and the always-injected default when empty.
+  // The button reports everything the agent actually retrieves from, including the forced default.
   const buttonLabel = useMemo(() => {
-    if (selectedIds.length === 0) {
+    const effectiveIds = isDefaultForced
+      ? [agentBuilderDefaultAiIndexId, ...selectedIds]
+      : selectedIds;
+
+    if (effectiveIds.length === 0) {
       return labels.context.selectorPlaceholder;
     }
-    if (selectedIds.length === 1) {
-      return selectedIds[0];
+    if (effectiveIds.length === 1) {
+      return effectiveIds[0];
     }
-    return labels.context.selectorSelectedCount(selectedIds.length);
-  }, [selectedIds]);
+    return labels.context.selectorSelectedCount(effectiveIds.length);
+  }, [selectedIds, isDefaultForced]);
 
   return (
     <EuiPopover

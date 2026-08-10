@@ -135,6 +135,91 @@ describe('ContextTable', () => {
     });
   });
 
+  describe('the default `elastic` AI index', () => {
+    beforeEach(() => {
+      useListAiIndices.mockReturnValue({
+        aiIndices: [{ id: 'elastic' }, { id: 'sales' }],
+        isLoading: false,
+        error: undefined,
+      });
+    });
+
+    it('is ticked and cannot be unticked for a chat agent', async () => {
+      useAgentBuilderAgents.mockReturnValue({ agents: [agent({ id: 'a' })], isLoading: false });
+
+      renderTable();
+
+      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
+      const elasticOption = within(await screen.findByTestId('agentBuilderAiIndexSelectable'))
+        .getByText('elastic')
+        .closest('li');
+
+      expect(elasticOption).toHaveAttribute('aria-checked', 'true');
+      expect(elasticOption).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('is never persisted when another index is selected', async () => {
+      useAgentBuilderAgents.mockReturnValue({ agents: [agent({ id: 'a' })], isLoading: false });
+
+      renderTable();
+
+      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
+      const selectable = await screen.findByTestId('agentBuilderAiIndexSelectable');
+      await userEvent.click(within(selectable).getByText('sales'));
+
+      expect(setAiIndices).toHaveBeenCalledWith({
+        agentId: 'a',
+        agentName: 'Agent a',
+        aiIndices: ['sales'],
+      });
+    });
+
+    // Storing it is redundant, but an unrelated edit must not silently drop it.
+    it('is preserved when the agent already stores it explicitly', async () => {
+      useAgentBuilderAgents.mockReturnValue({
+        agents: [
+          agent({ id: 'a', configuration: { tools: [], ai_indices: ['elastic'] } as never }),
+        ],
+        isLoading: false,
+      });
+
+      renderTable();
+
+      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
+      const selectable = await screen.findByTestId('agentBuilderAiIndexSelectable');
+      await userEvent.click(within(selectable).getByText('sales'));
+
+      expect(setAiIndices).toHaveBeenCalledWith({
+        agentId: 'a',
+        agentName: 'Agent a',
+        aiIndices: ['elastic', 'sales'],
+      });
+    });
+
+    it('is selectable like any other index for a non-chat agent that does not get it by default', async () => {
+      useAgentBuilderAgents.mockReturnValue({
+        agents: [
+          agent({
+            id: 'a',
+            type: 'custom_type',
+            configuration: { tools: [], ai_indices: ['sales'] } as never,
+          }),
+        ],
+        isLoading: false,
+      });
+
+      renderTable();
+
+      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
+      const elasticOption = within(await screen.findByTestId('agentBuilderAiIndexSelectable'))
+        .getByText('elastic')
+        .closest('li');
+
+      expect(elasticOption).toHaveAttribute('aria-checked', 'false');
+      expect(elasticOption).not.toHaveAttribute('aria-disabled', 'true');
+    });
+  });
+
   it('surfaces an error when the AI index list cannot be loaded', () => {
     useListAiIndices.mockReturnValue({
       aiIndices: [],

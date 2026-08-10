@@ -7,7 +7,7 @@
 
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { getContextStatus } from './context_status';
+import { getContextStatus, hasDefaultAiIndex } from './context_status';
 
 type AgentShape = Pick<AgentDefinition, 'type' | 'configuration'>;
 
@@ -16,6 +16,16 @@ const agent = (type: string, aiIndices?: string[]): AgentShape =>
     type,
     configuration: { tools: [], ...(aiIndices === undefined ? {} : { ai_indices: aiIndices }) },
   } as AgentShape);
+
+describe('hasDefaultAiIndex', () => {
+  it('is true for chat agents, which get the `elastic` index merged in at runtime', () => {
+    expect(hasDefaultAiIndex({ type: chatAgentTypeId })).toBe(true);
+  });
+
+  it('is false for any other agent type', () => {
+    expect(hasDefaultAiIndex({ type: 'custom_type' })).toBe(false);
+  });
+});
 
 describe('getContextStatus', () => {
   describe('with configured AI indices', () => {

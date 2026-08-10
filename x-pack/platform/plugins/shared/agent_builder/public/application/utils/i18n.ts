@@ -2916,7 +2916,7 @@ export const labels = {
     }),
     badgeAutoTooltip: i18n.translate('xpack.agentBuilder.context.badgeAutoTooltip', {
       defaultMessage:
-        'No AI indexes selected, so this agent retrieves from the built-in Elastic AI index only. Select one or more indexes to change what it retrieves from.',
+        'This agent retrieves from the built-in Elastic AI index only. That index is always included; select others to add to it.',
     }),
     badgeOff: i18n.translate('xpack.agentBuilder.context.badgeOff', {
       defaultMessage: 'Off',
@@ -2926,7 +2926,10 @@ export const labels = {
         'This agent type does not use the Context Engine, so it does not retrieve from any AI index.',
     }),
     selectorPlaceholder: i18n.translate('xpack.agentBuilder.context.selectorPlaceholder', {
-      defaultMessage: 'Elastic AI Index (default)',
+      defaultMessage: 'Select AI indexes',
+    }),
+    defaultAiIndexBadge: i18n.translate('xpack.agentBuilder.context.defaultAiIndexBadge', {
+      defaultMessage: 'Always included',
     }),
     selectorSelectedCount: (count: number) =>
       i18n.translate('xpack.agentBuilder.context.selectorSelectedCount', {
