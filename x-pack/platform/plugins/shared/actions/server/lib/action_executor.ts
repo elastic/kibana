@@ -21,7 +21,12 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { isConnectorAuthorizationError } from '@kbn/connector-specs';
+import {
+  isConnectorAuthorizationError,
+  getConnectorSpec,
+  TEST_CONNECTOR_SUB_ACTION,
+} from '@kbn/connector-specs';
+import { SENSITIVE_OUTPUT_ACCESS_TOKEN } from './sensitive_output_access_token';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import {
@@ -98,6 +103,14 @@ export interface ExecuteOptions<Source = unknown> {
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
   signal?: AbortSignal;
+  /**
+   * Capability token proving the caller is authorized to receive an unredacted
+   * `sensitiveOutput` action result. Must be the actions plugin's own
+   * `SENSITIVE_OUTPUT_ACCESS_TOKEN` singleton (obtained via
+   * `PluginStartContract.getSensitiveOutputAccessToken()`) — any other value,
+   * including `undefined`, results in redaction. See `sensitive_output_access_token.ts`.
+   */
+  allowSensitiveOutput?: symbol;
 }
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
@@ -149,6 +162,7 @@ export class ActionExecutor {
   public async execute({
     actionExecutionId,
     actionId,
+    allowSensitiveOutput,
     connectorTokenClient,
     consumer,
     executionId,
@@ -177,6 +191,7 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
+      allowSensitiveOutput,
       connectorTokenClient,
       consumer,
       currentUser,
@@ -386,6 +401,7 @@ export class ActionExecutor {
   private async executeHelper({
     actionExecutionId,
     actionId,
+    allowSensitiveOutput,
     connectorTokenClient,
     consumer,
     currentUser,
@@ -628,6 +644,13 @@ export class ActionExecutor {
           status: 'ok',
         };
 
+        redactSensitiveOutputIfNeeded({
+          result,
+          actionTypeId,
+          validatedParams,
+          allowSensitiveOutput,
+        });
+
         event.event = event.event || {};
 
         const { error, ...resultWithoutError } = result;
@@ -752,6 +775,61 @@ function getErrorSource(error: Error): TaskErrorSource | undefined {
   }
 
   return getTaskManagerErrorSource(error);
+}
+
+/**
+ * Redacts a successful action result's `data` when the connector spec's action
+ * definition marks it `sensitiveOutput: true`, unless the caller supplied the
+ * actions plugin's own capability token. Mutates `result` in place.
+ *
+ * This is the single centralized enforcement point for the `sensitiveOutput`
+ * mechanism: every execution surface (HTTP `_execute`, Workflows, Agent Builder,
+ * and any other `ActionsClient.execute()`/`ActionExecutor.execute()` caller) goes
+ * through here, since none of them can construct `SENSITIVE_OUTPUT_ACCESS_TOKEN`
+ * themselves. See `sensitive_output_access_token.ts` for what this token is and
+ * isn't (repository policy, not a runtime authorization boundary).
+ */
+function redactSensitiveOutputIfNeeded({
+  result,
+  actionTypeId,
+  validatedParams,
+  allowSensitiveOutput,
+}: {
+  result: ActionTypeExecutorRawResult<unknown>;
+  actionTypeId: string;
+  validatedParams: Record<string, unknown>;
+  allowSensitiveOutput?: symbol;
+}): void {
+  if (result.status !== 'ok') {
+    return;
+  }
+
+  const spec = getConnectorSpec(actionTypeId);
+  const subAction =
+    typeof validatedParams?.subAction === 'string' ? validatedParams.subAction : undefined;
+
+  let isSensitive = false;
+  if (spec && subAction !== TEST_CONNECTOR_SUB_ACTION) {
+    // The Test-tab `_test` sub-action is framework-injected (see
+    // `create_connector_from_spec.ts`) and never appears in `spec.actions`, so it's
+    // exempted above rather than falling into the fail-safe branch below. Its
+    // `ConnectorTestHandlerResult` contract documents that handlers must not return
+    // sensitive data, so treating it as sensitive-by-default would incorrectly redact
+    // every spec-based connector's Test tab result.
+    const actionDef = subAction ? spec.actions[subAction] : undefined;
+    // Fail-safe: a spec was found for this connector type, so `sensitiveOutput` is a
+    // concept that applies here. If the specific action definition can't be resolved
+    // (should be unreachable -- an unrecognized subAction throws before a successful
+    // result is produced, see generate_executor_function.ts -- but this is the
+    // fail-safe branch for if that assumption is ever wrong), default to redacting
+    // rather than not: `actionDef` missing must NOT be treated the same as
+    // `actionDef.sensitiveOutput === false`.
+    isSensitive = actionDef ? actionDef.sensitiveOutput === true : true;
+  }
+
+  if (isSensitive && allowSensitiveOutput !== SENSITIVE_OUTPUT_ACCESS_TOKEN) {
+    result.data = { redacted: true };
+  }
 }
 
 function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {

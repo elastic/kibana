@@ -19,7 +19,8 @@ export async function execute(
   connectorExecuteParams: ConnectorExecuteParams
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const log = context.logger;
-  const { actionId, params, source, relatedSavedObjects, signal } = connectorExecuteParams;
+  const { actionId, params, source, relatedSavedObjects, signal, allowSensitiveOutput } =
+    connectorExecuteParams;
   let actionTypeId: string | undefined;
 
   try {
@@ -63,5 +64,6 @@ export async function execute(
     actionExecutionId: uuidv4(),
     connectorTokenClient: context.connectorTokenClient,
     signal,
+    allowSensitiveOutput,
   });
 }

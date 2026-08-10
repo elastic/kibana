@@ -12,6 +12,7 @@ import { BearerWithTlsAuth } from './src/auth_types/bearer_with_tls_server';
 import { KubernetesAksAuth } from './src/auth_types/kubernetes_aks_server';
 import { KubernetesEksAuth } from './src/auth_types/kubernetes_eks_server';
 import { KubernetesGkeAuth } from './src/auth_types/kubernetes_gke_server';
+import { VaultAppRoleAuth } from './src/auth_types/vault_approle_server';
 
 export const authTypeSpecs = {
   ...authTypeDefinitions,
@@ -19,4 +20,5 @@ export const authTypeSpecs = {
   KubernetesAksAuth,
   KubernetesEksAuth,
   KubernetesGkeAuth,
+  VaultAppRoleAuth,
 };

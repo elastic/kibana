@@ -60,6 +60,10 @@
 
 - [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
 
+**Secrets management**
+
+- [HashiCorp Vault](/reference/connectors-kibana/hashicorp-vault-action-type.md): Read secrets from a Vault KV version 2 secrets engine to provision other connectors from a Workflow. Not usable as an Agent Builder or Assistant data source.
+
 **Email security**
 
 - [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.

@@ -4818,6 +4818,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/connector-provisioning-plugin@link:x-pack/platform/plugins/shared/connector_provisioning":
+  version "0.0.0"
+  uid ""
+
 "@kbn/connector-schemas@link:src/platform/packages/shared/kbn-connector-schemas":
   version "0.0.0"
   uid ""

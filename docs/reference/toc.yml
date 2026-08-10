@@ -106,6 +106,7 @@ toc:
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
+          - file: connectors-kibana/hashicorp-vault-action-type.md
           - file: connectors-kibana/hubspot-action-type.md
           - file: connectors-kibana/jenkins-action-type.md
           - file: connectors-kibana/jina-action-type.md

@@ -121,6 +121,7 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import { SENSITIVE_OUTPUT_ACCESS_TOKEN } from './lib/sensitive_output_access_token';
 
 export interface PluginSetupContract {
   registerType<
@@ -218,6 +219,17 @@ export interface PluginStartContract {
    */
   unregisterDynamicConnector: (connectorId: string) => boolean;
   getRelayClient: () => RelayClientContract | undefined;
+
+  /**
+   * Returns the capability token required to receive an unredacted `sensitiveOutput`
+   * action result from `actionsClient.execute()` (see `sensitiveOutput` on
+   * `ActionDefinition` in `@kbn/connector-specs`, and `action_executor.ts`'s
+   * `redactSensitiveOutputIfNeeded`). Reachable by any plugin that declares `actions`
+   * as a required dependency and calls this from its own `start()` lifecycle — this is
+   * a repository-enforced convention with static verification (a repo-wide test), not
+   * a runtime authorization boundary. See `sensitive_output_access_token.ts`.
+   */
+  getSensitiveOutputAccessToken: () => symbol;
 }
 
 export interface ActionsPluginsSetup {
@@ -828,6 +840,7 @@ export class ActionsPlugin
       unregisterDynamicConnector: (connectorId: string) =>
         this.unregisterDynamicConnector(connectorId),
       getRelayClient: () => this.relayClient,
+      getSensitiveOutputAccessToken: () => SENSITIVE_OUTPUT_ACCESS_TOKEN,
     };
   }
 
