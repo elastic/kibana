@@ -175,6 +175,7 @@ describe('Transform: <Wizard />', () => {
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
       cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -239,6 +240,7 @@ describe('Transform: <Wizard />', () => {
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
       cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -275,6 +277,57 @@ describe('Transform: <Wizard />', () => {
     await waitFor(() => {
       expect(mockStepDefineFormProps.overrides.projectRouting).toBe('_id:linked-id');
       expect(mockProjectScopePickerProps.projectRouting).toBe('_id:linked-id');
+    });
+  });
+
+  test('adopts the resolved default project routing from CPS manager readiness', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    let resolveWhenReady: () => void = () => {};
+    let defaultProjectRouting = PROJECT_ROUTING.ALL;
+    appDeps.cps = {
+      cpsManager: {
+        whenReady: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveWhenReady = resolve;
+            })
+        ),
+        fetchProjects: jest.fn().mockResolvedValue({
+          origin: {
+            _id: 'origin-id',
+            _alias: 'local_project',
+            _organisation: 'org',
+            _type: 'security',
+          },
+          linkedProjects: [
+            {
+              _id: 'linked-id',
+              _alias: 'linked_local_project',
+              _organisation: 'org',
+              _type: 'security',
+            },
+          ],
+        }),
+        getDefaultProjectRouting: jest.fn(() => defaultProjectRouting),
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformProjectScopePicker')).toHaveTextContent('All projects');
+    });
+
+    defaultProjectRouting = '_id:linked-id';
+    resolveWhenReady();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformProjectScopePicker')).toHaveTextContent('1/2 projects');
+      expect(mockStepDefineFormProps.overrides.projectRouting).toBe('_id:linked-id');
     });
   });
 });

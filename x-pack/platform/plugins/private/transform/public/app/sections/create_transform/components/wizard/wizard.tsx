@@ -136,18 +136,38 @@ export const Wizard: FC<WizardProps> = React.memo(
     const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
     const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
     const [pendingDataViewId, setPendingDataViewId] = useState<string>();
-    const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(() =>
-      cpsManager?.getDefaultProjectRouting()
-    );
+    const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>();
     const projectRoutingRef = useRef(projectRouting);
+    const hasUserSelectedProjectRouting = useRef(false);
     const changeDataViewModalTitleId = useGeneratedHtmlId();
 
     useEffect(() => {
       projectRoutingRef.current = projectRouting;
-      if (projectRouting === undefined) {
-        setProjectRouting(cpsManager?.getDefaultProjectRouting());
+    }, [projectRouting]);
+
+    useEffect(() => {
+      if (!cpsManager || cloneConfig) {
+        return;
       }
-    }, [cpsManager, projectRouting]);
+
+      let canceled = false;
+
+      cpsManager.whenReady().then(() => {
+        if (canceled || hasUserSelectedProjectRouting.current) {
+          return;
+        }
+
+        const defaultProjectRouting = cpsManager.getDefaultProjectRouting();
+        setProjectRouting(defaultProjectRouting);
+        setStepDefineState((prevState) =>
+          prevState ? { ...prevState, projectRouting: defaultProjectRouting } : prevState
+        );
+      });
+
+      return () => {
+        canceled = true;
+      };
+    }, [cloneConfig, cpsManager]);
 
     const resetWizardState = useCallback(
       (nextSearchItems: SearchItems, transformFunction: TransformFunction) => {
@@ -220,6 +240,7 @@ export const Wizard: FC<WizardProps> = React.memo(
 
     const cancelDataViewChange = useCallback(() => setPendingDataViewId(undefined), []);
     const handleProjectRoutingChange = useCallback((nextProjectRouting: ProjectRouting) => {
+      hasUserSelectedProjectRouting.current = true;
       setProjectRouting(nextProjectRouting);
       setStepDefineState((prevState) =>
         prevState ? { ...prevState, projectRouting: nextProjectRouting } : prevState
