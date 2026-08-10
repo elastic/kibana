@@ -68,8 +68,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       if ('template' in update) template$.next(update.template);
     };
 
-    let agentOverride: { template: string; esqlQuery: string | undefined } | undefined;
-
     const stateApi = initializeStateApi<CustomContentEmbeddableState>({
       uuid,
       parentApi,
@@ -98,8 +96,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         prompt$.next(lastSaved?.prompt ?? '');
-        esqlQuery$.next(agentOverride ? agentOverride.esqlQuery : lastSaved?.esqlQuery);
-        template$.next(agentOverride ? agentOverride.template : lastSaved?.template);
+        esqlQuery$.next(lastSaved?.esqlQuery);
+        template$.next(lastSaved?.template);
       },
     });
 
@@ -153,7 +151,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
         const handleFlyoutSave = useCallback(
           (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
-            agentOverride = undefined;
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
             setGenerationVersion((v) => v + 1);
           },
@@ -192,7 +189,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 | undefined;
               if (!data || data.embeddable_id !== uuid) return;
 
-              agentOverride = { template: data.panel_template, esqlQuery: data.esql_query };
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
               setGenerationVersion((v) => v + 1);
