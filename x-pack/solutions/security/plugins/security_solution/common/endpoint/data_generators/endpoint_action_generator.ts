@@ -566,6 +566,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             path: `/home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip`,
             file_size: 23895729,
             disk_free_space: 1234567000,
+            ...(details.parameters?.type === 'raw'
+              ? {
+                  total_memory_size: 53000000,
+                  total_bytes_captured: 52000000,
+                  success_ratio: 52000000 / 53000000,
+                  dump_executed_from_driver: this.randomChoice([true, false]),
+                }
+              : {}),
           },
         };
       }
