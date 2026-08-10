@@ -94,6 +94,26 @@ describe('useBulkActionItems', () => {
     ).toBeUndefined();
   });
 
+  it('exposes custom actions for composed bulk action menus', () => {
+    const onClick = jest.fn();
+    const { result } = renderUseBulkActionItems({
+      customBulkActions: [
+        {
+          key: 'attach-new-case',
+          label: 'Add to new case',
+          icon: 'briefcase',
+          onClick,
+        },
+      ],
+    });
+
+    const customAction = result.current.items.find(({ key }) => key === 'attach-new-case');
+    customAction?.onActionClick?.();
+
+    expect(onClick).toHaveBeenCalledWith(['mockEventId']);
+    expect(customAction?.icon).toBe('briefcase');
+  });
+
   describe('workflow actions', () => {
     it('should include workflow menu items when useRunDocumentWorkflowPanel returns items', () => {
       const mockMenuItem = {
