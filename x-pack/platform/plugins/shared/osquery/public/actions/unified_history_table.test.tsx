@@ -374,6 +374,36 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('Monitoring Pack')).toBeInTheDocument();
     });
 
+    it('query column falls back to scheduleId and packId when names are absent (cross-project row)', () => {
+      const row = createMockScheduledRow({
+        queryName: undefined,
+        packName: undefined,
+        scheduleId: 'sched-xp-1',
+        packId: 'pack-xp-1',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('sched-xp-1')).toBeInTheDocument();
+      expect(screen.getByText('pack-xp-1')).toBeInTheDocument();
+    });
+
+    it('query column falls back to ids when names are empty strings (cross-project row)', () => {
+      const row = createMockScheduledRow({
+        queryName: '',
+        packName: '',
+        scheduleId: 'sched-xp-2',
+        packId: 'pack-xp-2',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('sched-xp-2')).toBeInTheDocument();
+      expect(screen.getByText('pack-xp-2')).toBeInTheDocument();
+    });
+
     it('results column shows totalRows for scheduled row', () => {
       const row = createMockScheduledRow({ totalRows: 20 });
       mockHistory({ data: [row] });
@@ -415,6 +445,15 @@ describe('UnifiedHistoryTable', () => {
         'href',
         '/history/scheduled/sched-1/3'
       );
+    });
+
+    it('live row query column is unaffected by the scheduled-row fallback logic', () => {
+      const row = createMockLiveRow({ queryText: 'SELECT * FROM uptime' });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
     });
 
     it('renders mixed live and scheduled rows together', () => {
