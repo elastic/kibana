@@ -16,11 +16,9 @@ export class MlNavigation {
   }
 
   async navigateToDataVisualizer() {
-    await this.navigateToMl();
-    await this.page.testSubj.click('~mlMainTab & ~dataVisualizer');
-    await this.page.testSubj
-      .locator('~mlMainTab & ~dataVisualizer & ~selected')
-      .waitFor({ state: 'visible' });
+    // Path-based deep link: /app/ml/datavisualizer
+    await this.page.gotoApp('ml/datavisualizer');
+    await this.page.testSubj.locator('mlApp').waitFor({ state: 'visible' });
     await this.page.testSubj.locator('mlPageDataVisualizerSelector').waitFor({ state: 'visible' });
   }
 

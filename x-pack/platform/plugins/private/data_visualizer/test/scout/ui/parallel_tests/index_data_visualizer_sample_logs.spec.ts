@@ -24,7 +24,6 @@ spaceTest.describe('index based with module sample logs', { tag: tags.stateful.c
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.mlNavigation.navigateToMl();
     await pageObjects.mlNavigation.navigateToDataVisualizer();
   });
 

@@ -56,6 +56,10 @@ import { SearchPanelContent } from '../index_data_visualizer/components/search_p
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
 import { useDataDriftColors } from './use_data_drift_colors';
+import {
+  filtersNotAlreadyPresent,
+  toFilterArray,
+} from '../index_data_visualizer/utils/saved_search_utils';
 
 const maxInlineSizeStyles = css`
   max-inline-size: 100%;
@@ -247,22 +251,27 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   // Hydrate saved-search filters into FilterManager after render so doc counts and the
   // primary search bar include them. Do not call addFilters from getEsQueryFromSavedSearch
   // (that helper can run during render); mirror index data visualizer hydration instead.
+  // Track which saved search we hydrated: forceDocCountRefresh is an unstable inline
+  // callback, and FilterManager rewrites phrase query DSL on addFilters, so a naive
+  // dedupFilters(query) check + refresh would re-add forever (max update depth).
+  const hydratedSavedSearchKeyRef = useRef<string | null>(null);
   useEffect(() => {
-    const savedFilters = savedSearch?.searchSource?.getField('filter') as Filter[] | undefined;
-    if (!savedFilters?.length) {
+    const savedSearchKey = savedSearch?.id ?? savedSearch?.title ?? null;
+    if (!savedSearch || savedSearchKey == null) {
+      return;
+    }
+    if (hydratedSavedSearchKeyRef.current === savedSearchKey) {
+      return;
+    }
+
+    const savedFilters = toFilterArray(savedSearch.searchSource?.getField('filter'));
+    hydratedSavedSearchKeyRef.current = savedSearchKey;
+    if (!savedFilters.length) {
       return;
     }
 
     const filterManager = dataService.query.filterManager;
-    const existing = filterManager.getFilters();
-    const missing = savedFilters.filter(
-      (savedFilter) =>
-        !existing.some(
-          (existingFilter) =>
-            existingFilter.meta?.key === savedFilter.meta?.key &&
-            JSON.stringify(existingFilter.meta?.params) === JSON.stringify(savedFilter.meta?.params)
-        )
-    );
+    const missing = filtersNotAlreadyPresent(filterManager.getFilters(), savedFilters);
 
     if (missing.length > 0) {
       filterManager.addFilters(missing);

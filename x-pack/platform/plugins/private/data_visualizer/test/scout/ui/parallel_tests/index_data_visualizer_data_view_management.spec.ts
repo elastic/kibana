@@ -117,7 +117,6 @@ const navigateToIndexDataVisualizer = async (
   pageObjects: ExtParallelRunTestFixtures['pageObjects'],
   data: DataViewManagementTestData
 ) => {
-  await pageObjects.mlNavigation.navigateToMl();
   await pageObjects.mlNavigation.navigateToDataVisualizer();
   await pageObjects.dataVisualizerSelector.navigateToDataViewSelection();
   await pageObjects.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(

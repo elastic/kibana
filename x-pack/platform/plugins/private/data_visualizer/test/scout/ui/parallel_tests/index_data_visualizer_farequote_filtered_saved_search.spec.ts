@@ -27,7 +27,6 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.mlNavigation.navigateToMl();
       await pageObjects.mlNavigation.navigateToDataVisualizer();
     });
 

@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, compareFilters } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -31,6 +31,39 @@ function getSavedSearchSource(savedSearch?: SavedSearch | null) {
 
 function isNonAggregateQuery(query?: Query | AggregateQuery): query is Query {
   return isPopulatedObject(query, ['query', 'language']);
+}
+
+export function toFilterArray(
+  filters: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined
+): Filter[] {
+  const resolved = typeof filters === 'function' ? filters() : filters;
+  if (!resolved) {
+    return [];
+  }
+  return Array.isArray(resolved) ? resolved : [resolved];
+}
+
+/**
+ * Filters from `candidates` that are not already represented in `existing`.
+ *
+ * Prefer meta.key/params when either side has a field key: FilterManager's
+ * mapAndFlattenFilters rewrites phrase query DSL (match+type → match_phrase), so
+ * raw query comparison via dedupFilters never matches after hydration and can
+ * re-add forever. Keyless "Edit as Query DSL" filters have no meta.key — fall
+ * back to structural query comparison for those.
+ */
+export function filtersNotAlreadyPresent(existing: Filter[], candidates: Filter[]): Filter[] {
+  return candidates.filter((candidate) => {
+    return !existing.some((existingFilter) => {
+      if (existingFilter.meta?.key != null || candidate.meta?.key != null) {
+        return (
+          existingFilter.meta?.key === candidate.meta?.key &&
+          JSON.stringify(existingFilter.meta?.params) === JSON.stringify(candidate.meta?.params)
+        );
+      }
+      return compareFilters(existingFilter, candidate);
+    });
+  });
 }
 
 /**
@@ -117,22 +150,16 @@ export function getEsQueryFromSavedSearch({
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
-    const savedFilters = (savedSearchSource.getField('filter') as Filter[] | undefined) ?? [];
+    const savedFilters = toFilterArray(savedSearchSource.getField('filter'));
     // Do not call filterManager.addFilters here: this helper runs inside useMemo during
     // render, and mutating FilterManager notifies UnifiedSearch which setStates mid-render.
     // That race can clear/rebuild the search with an empty query while the UI still shows
     // the saved search query/filters, leaving document count at 0.
-    // Include saved-search filters (and any pinned global filters) directly in the DSL.
     // Include saved-search filters plus any interactive app-state filters currently in the
     // filter manager. Deduplicate against savedFilters to avoid doubling filters that are
     // stored in the saved search but were also hydrated into the filter manager after render.
     const filterManagerFilters = filterManager?.getFilters?.() ?? [];
-    const savedFilterKeys = new Set(
-      savedFilters.map((sf) => `${sf.meta?.key}::${JSON.stringify(sf.meta?.params)}`)
-    );
-    const extraFilters = filterManagerFilters.filter(
-      (f) => !savedFilterKeys.has(`${f.meta?.key}::${JSON.stringify(f.meta?.params)}`)
-    );
+    const extraFilters = filtersNotAlreadyPresent(savedFilters, filterManagerFilters);
     const filtersForQuery = [...savedFilters, ...extraFilters, ...(userFilters ?? [])];
     try {
       // buildEsQuery throws an exception for a fallible operation (anti-pattern).
