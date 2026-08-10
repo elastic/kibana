@@ -8,3 +8,24 @@
  */
 
 export { offeringBasedSchema } from './offering_based_schema';
+export type { SchemaHelper, SchemaViolationReporter } from './schema_helpers';
+export {
+  registerSchemaViolationReporter,
+  savedObjectId,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  unboundedString,
+} from './schema_helpers';
+export {
+  savedObjectIdSchema,
+  spaceIdSchema,
+  displayNameSchema,
+  descriptionSchema,
+  searchFilterSchema,
+  aggregationSchema,
+  unboundedString as zodUnboundedString,
+  deduplicatedArrayOf,
+} from './zod_helpers';

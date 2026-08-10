@@ -16,6 +16,14 @@ export type ArrayOptions<T> = TypeOptions<T[]> &
   UnknownOptions & {
     minSize?: number;
     maxSize?: number;
+    /**
+     * When true, duplicate items are silently removed before the value reaches
+     * the route handler. Deduplication runs before maxSize is checked, so
+     * maxSize reflects the deduplicated length. Uses SameValueZero equality
+     * (same as Set) — suitable for primitives; for object items equality is
+     * by reference.
+     */
+    deduplicate?: boolean;
   };
 
 export class ArrayType<T> extends Type<T[]> {
@@ -27,6 +35,10 @@ export class ArrayType<T> extends Type<T[]> {
 
     if (options.minSize !== undefined) {
       schema = schema.min(options.minSize);
+    }
+
+    if (options.deduplicate) {
+      schema = schema.custom((value: T[]) => [...new Set(value)]);
     }
 
     if (options.maxSize !== undefined) {
