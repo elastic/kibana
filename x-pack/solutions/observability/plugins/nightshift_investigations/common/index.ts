@@ -18,6 +18,13 @@ export interface InvestigationContext {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
+  /**
+   * Caller-supplied key for concurrency control. Passed to the workflow engine as
+   * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
+   * Two starts with the same key cancel-and-replace the in-flight run (cancel-in-progress
+   * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
+   */
+  concurrency_key?: string;
   context?: InvestigationContext;
 }
 

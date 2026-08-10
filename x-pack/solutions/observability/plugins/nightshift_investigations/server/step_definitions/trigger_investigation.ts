@@ -20,6 +20,10 @@ export const triggerInvestigationStepDefinition = (getClient: GetClient) =>
         .enum(['significant_event', 'alert'])
         .describe('The type of entity being investigated'),
       subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
+      concurrency_key: z
+        .string()
+        .optional()
+        .describe('Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'),
       context: z
         .record(z.unknown())
         .optional()
@@ -36,6 +40,7 @@ export const triggerInvestigationStepDefinition = (getClient: GetClient) =>
           type: context.input.subject_type,
           id: context.input.subject_id,
         },
+        concurrency_key: context.input.concurrency_key,
         context: context.input.context,
       });
       return { output: result };

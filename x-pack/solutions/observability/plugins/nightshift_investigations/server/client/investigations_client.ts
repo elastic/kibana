@@ -70,6 +70,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
@@ -90,6 +91,7 @@ export class NightshiftInvestigationsClient {
 
     const inputs = {
       message: `Investigation requested for ${subject.type} ${subject.id}`,
+      ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
