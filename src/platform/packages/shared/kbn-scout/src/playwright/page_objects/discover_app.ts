@@ -160,10 +160,21 @@ export class DiscoverApp {
     // wait for async title validation to settle before continuing.
     await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
 
-    // wait for timestamp options; default @timestamp applies.
-    await timestampField
-      .and(this.page.locator('[data-is-loading="0"]'))
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    // Wait for an actual selection: it can only exist once the options
+    // have loaded, which is the state callers really depend on.
+    const timestampCombo = this.page.components.comboBox('timestampField');
+    await expect
+      .poll(
+        async () => {
+          const isLoading = await timestampField.getAttribute('data-is-loading');
+          if (isLoading !== '0') {
+            return false;
+          }
+          return (await timestampCombo.getSelectedOptions()).length > 0;
+        },
+        { timeout: 30_000, intervals: [200] }
+      )
+      .toBe(true);
 
     const submitBtn = this.page.testSubj.locator(
       adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
