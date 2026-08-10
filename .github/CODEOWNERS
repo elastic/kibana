@@ -875,7 +875,7 @@ src/platform/plugins/shared/charts @elastic/kibana-dashboards
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/controls @elastic/kibana-dashboards
-src/platform/plugins/shared/cps @elastic/kibana-core @elastic/kibana-dashboards
+src/platform/plugins/shared/cps @elastic/kibana-core @elastic/appex-sharedux
 src/platform/plugins/shared/custom_integrations @elastic/streams-ui
 src/platform/plugins/shared/dashboard @elastic/kibana-dashboards
 src/platform/plugins/shared/dashboard_markdown @elastic/kibana-dashboards
