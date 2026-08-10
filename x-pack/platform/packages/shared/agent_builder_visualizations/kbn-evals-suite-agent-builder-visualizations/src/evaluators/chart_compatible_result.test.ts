@@ -144,4 +144,19 @@ describe('createChartCompatibleResultEvaluator', () => {
 
     expect(result.score).toBe(0);
   });
+
+  it('scores Vega results by executable columns without requiring chart_type', async () => {
+    const result = await evaluate({
+      visualizations: [{ esql: 'FROM logs | STATS c = COUNT(*) BY host', renderer: 'vega' }],
+      esResponse: {
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'c', type: 'long' },
+        ],
+        values: [['a', 1]],
+      },
+    });
+
+    expect(result.score).toBe(1);
+  });
 });

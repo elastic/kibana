@@ -29,6 +29,7 @@ import { createChartCompatibleResultEvaluator } from './evaluators/chart_compati
 import { createChartTypeVsIntentEvaluator } from './evaluators/chart_type_vs_intent';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
+import { createRendererVsIntentEvaluator } from './evaluators/renderer_vs_intent';
 import { createVisualizationConfigValidityEvaluator } from './evaluators/visualization_config_validity';
 
 export type VisualizationDatasetExample = Example<
@@ -144,6 +145,14 @@ export function createEvaluateDataset({
     expectedChartTypeExtractor: (expected) => expected?.chartType,
   });
 
+  const rendererVsIntentEvaluator = createRendererVsIntentEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    visualizationExtractor,
+    expectedRendererExtractor: (expected) => expected?.renderer,
+  });
+
   const visualizationConfigValidityEvaluator = createVisualizationConfigValidityEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
@@ -197,6 +206,7 @@ export function createEvaluateDataset({
       esqlExecutionEvaluator,
       esqlEquivalenceEvaluator,
       chartTypeVsIntentEvaluator,
+      rendererVsIntentEvaluator,
       visualizationConfigValidityEvaluator,
       chartCompatibleResultEvaluator,
       trajectoryEvaluator,

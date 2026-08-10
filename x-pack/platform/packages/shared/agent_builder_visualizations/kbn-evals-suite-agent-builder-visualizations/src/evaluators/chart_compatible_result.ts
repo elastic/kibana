@@ -169,18 +169,6 @@ export function createChartCompatibleResultEvaluator<
 
       const details = await Promise.all(
         visualizations.map(async (visualization, index) => {
-          const chartType = resolveChartType(visualization, expectedChartType);
-          if (!chartType) {
-            return {
-              index,
-              chartType: null,
-              compatible: false,
-              reason: 'No chart type available (actual or expected)',
-              columnCount: 0,
-              rowCount: 0,
-            };
-          }
-
           // Vega is not bound to Lens chart-type shape rules; treat as compatible
           // when the query executes with at least one column.
           if (visualization.renderer === 'vega') {
@@ -193,8 +181,8 @@ export function createChartCompatibleResultEvaluator<
               const compatible = columns.length > 0;
               return {
                 index,
-                chartType,
-                renderer: 'vega',
+                chartType: visualization.chartType ?? null,
+                renderer: 'vega' as const,
                 compatible,
                 reason: compatible ? undefined : 'Vega query returned no columns',
                 columnCount: columns.length,
@@ -203,14 +191,26 @@ export function createChartCompatibleResultEvaluator<
             } catch (err) {
               return {
                 index,
-                chartType,
-                renderer: 'vega',
+                chartType: visualization.chartType ?? null,
+                renderer: 'vega' as const,
                 compatible: false,
                 reason: `ES|QL execution failed: ${(err as Error).message}`,
                 columnCount: 0,
                 rowCount: 0,
               };
             }
+          }
+
+          const chartType = resolveChartType(visualization, expectedChartType);
+          if (!chartType) {
+            return {
+              index,
+              chartType: null,
+              compatible: false,
+              reason: 'No chart type available (actual or expected)',
+              columnCount: 0,
+              rowCount: 0,
+            };
           }
 
           try {

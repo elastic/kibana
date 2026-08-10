@@ -11,6 +11,7 @@ Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" 
 - **ES|QL Execution Validity** (`CODE`) — AST parse + execute against real sample data and return rows. This is the tier that surfaces the fast-model regressions that motivated the suite.
 - **ES|QL Functional Equivalence** (`LLM` calibrated judge) — three-point rubric (`equivalent` / `equivalent_with_caveats` / `not_equivalent`) for *logical* equivalence. Column alias wording is never scored (including `1-minute` vs `1-Minute Load`).
 - **Chart Type vs Intent** (`CODE`) — `create_visualization`'s `chart_type` matches the example's expected type (bar/line → `xy`, KPI → `metric`, …).
+- **Renderer vs Intent** (`CODE`) — `renderer` matches when the example declares `lens` or `vega` (skipped otherwise).
 - **Visualization Config Validity** (`CODE`) — Lens configs parse against the chart-type ESQL schema; Vega-Lite specs parse as JSON with a visual root.
 - **Chart Compatible Result** (`CODE`) — executed ES|QL column shape fits the chart type (e.g. `xy` needs a dimension + numeric measure).
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
@@ -30,7 +31,13 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). One example targets host load metrics from the GCS snapshot replay (`metrics-system.load-default`, `system.load.{1,5,15}`). Each example carries ground-truth ES|QL plus an expected `chartType`. Grow this to 20–30 real prompts.
+Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts` (~17 prompts):
+
+- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/multi-series), metric, gauge, pie, tag_cloud, data_table, heatmap, treemap, plus one Vega-Lite scatter
+- **ecommerce** (`kibana_sample_data_ecommerce`): metric / pie / xy over `order_date` + numeric revenue/quantity fields
+- **host metrics** (GCS otel-demo replay): multi-series load averages on `metrics-system.load-default`
+
+Each positive example carries ground-truth ES|QL and (for Lens) an expected `chartType`. Negatives / recovery / multi-turn edits are still follow-ups.
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
