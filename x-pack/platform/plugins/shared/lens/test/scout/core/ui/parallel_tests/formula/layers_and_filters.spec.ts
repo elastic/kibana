@@ -36,14 +36,14 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
           formula: `moving_average(sum(bytes), window=5`,
           keepOpen: true,
         });
-        await lens.setTableDynamicColoring('text');
+        await lens.style.setTableDynamicColoring('text');
         await lens.waitForVisualization();
 
         // FTR also asserted `styleObj.color` was defined after text coloring. Restoring that
         // check fails today: named palettes may not implement getColorForValue, so cells get
         // no inline color. `lns_dynamicColoring_edit` is already awaited in the page object.
         // Descope: keep the background-color negative check only (product limitation).
-        const styleObj = await lens.getDatatableCellStyle(1, 1);
+        const styleObj = await lens.datatable.getDatatableCellStyle(1, 1);
         expect(styleObj['background-color']).toBeUndefined();
       });
 
@@ -55,9 +55,9 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
         });
         await lens.waitForVisualization();
         // UI behavior: duplicated metric cells match. Exact Logstash values → #280444.
-        await expect(lens.getDatatableCellLocator(1, 1)).toHaveText(/\d/);
-        const left = await lens.getDatatableCellText(1, 1);
-        await expect(lens.getDatatableCellLocator(1, 2)).toContainText(left);
+        await expect(lens.datatable.getDatatableCellLocator(1, 1)).toHaveText(/\d/);
+        const left = await lens.datatable.getDatatableCellText(1, 1);
+        await expect(lens.datatable.getDatatableCellLocator(1, 2)).toContainText(left);
       });
     }
   );
@@ -128,8 +128,8 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
       from: 'lnsDatatable_metrics > lns-dimensionTrigger',
       to: 'lnsDatatable_metrics > lns-empty-dimension',
     });
-    await expect(lens.getDatatableCellLocator(0, 0)).toContainText('0');
-    await expect(lens.getDatatableCellLocator(0, 1)).toContainText('0');
+    await expect(lens.datatable.getDatatableCellLocator(0, 0)).toContainText('0');
+    await expect(lens.datatable.getDatatableCellLocator(0, 1)).toContainText('0');
   });
 
   spaceTest('applies a global filter to the current formula', async ({ pageObjects }) => {
@@ -148,18 +148,20 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
       });
       await lens.waitForVisualization();
       // Exact archive counts → #280444. UI asserts a positive baseline.
-      await expect(lens.getDatatableCellLocator(0, 0)).toHaveText(/\d/);
-      baselineDisplay = await lens.getDatatableCellText(0, 0);
+      await expect(lens.datatable.getDatatableCellLocator(0, 0)).toHaveText(/\d/);
+      baselineDisplay = await lens.datatable.getDatatableCellText(0, 0);
       baselineCount = Number(baselineDisplay.replace(/,/g, ''));
       expect(baselineCount).toBeGreaterThan(0);
     });
 
     await spaceTest.step('dimension filter reduces count', async () => {
-      await lens.enableFilter();
-      await lens.setFilterBy('bytes > 4000');
+      await lens.workspace.enableFilter();
+      await lens.workspace.setFilterBy('bytes > 4000');
       await lens.waitForVisualization();
-      await expect(lens.getDatatableCellLocator(0, 0)).not.toContainText(baselineDisplay);
-      const filteredCount = Number((await lens.getDatatableCellText(0, 0)).replace(/,/g, ''));
+      await expect(lens.datatable.getDatatableCellLocator(0, 0)).not.toContainText(baselineDisplay);
+      const filteredCount = Number(
+        (await lens.datatable.getDatatableCellText(0, 0)).replace(/,/g, '')
+      );
       expect(filteredCount).toBeGreaterThan(0);
       expect(filteredCount).toBeLessThan(baselineCount);
     });
@@ -168,7 +170,7 @@ spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-cl
       await lens.typeInFormula(`count(kql=`, { replace: true });
       await lens.typeInFormula(`bytes > 600000`, { focus: false });
       await lens.waitForVisualization();
-      await expect(lens.getDatatableCellLocator(0, 0)).toContainText('0');
+      await expect(lens.datatable.getDatatableCellLocator(0, 0)).toContainText('0');
     });
   });
 });

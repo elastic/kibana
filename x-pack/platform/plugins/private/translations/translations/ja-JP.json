@@ -1105,8 +1105,6 @@
     "controls.timesliderControl.displayName": "時間スライダー",
     "core.application.appContainer.loadingAriaLabel": "アプリケーションを読み込んでいます",
     "core.application.appContainer.plainSpinner.loadingAriaLabel": "アプリケーションを読み込んでいます",
-    "core.application.appNotFound.pageDescription": "このURLにアプリケーションが見つかりませんでした。前の画面に戻るか、メニューからアプリを選択してみてください。",
-    "core.application.appNotFound.title": "アプリケーションが見つかりません",
     "core.application.appRenderError.defaultTitle": "アプリケーションエラー",
     "core.chrome.appHeader.addIntegrationsMenuItemLabel": "統合の追加",
     "core.chrome.appHeader.documentationMenuItemLabel": "ドキュメント",
