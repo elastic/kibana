@@ -23,7 +23,7 @@ export const RouteBreadcrumb = ({
 
   useRouteBreadcrumb({
     title,
-    href: core.http.basePath.prepend('/app/profiling/' + href),
+    href: core.http.basePath.prepend('/app/profiling' + href),
   });
 
   return children;
