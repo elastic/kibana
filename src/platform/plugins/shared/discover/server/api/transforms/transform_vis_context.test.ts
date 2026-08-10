@@ -12,12 +12,9 @@ import type { DiscoverSessionApiTab } from '../schema';
 import { transformVisContextIn, transformVisContextOut } from './transform_vis_context';
 
 describe('vis context transforms', () => {
-  const transformOut = (visContext: Parameters<typeof transformVisContextOut>[0]) =>
-    transformVisContextOut(visContext, 'tab-1');
-
   describe('transformVisContextOut', () => {
     it('maps stored visContext to API vis_context and omits requestData', () => {
-      const result = transformOut({
+      const result = transformVisContextOut({
         suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
         requestData: {
           dataViewId: 'logs-dv',
@@ -30,50 +27,17 @@ describe('vis context transforms', () => {
       });
 
       expect(result).toEqual({
-        visContext: {
-          suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
-          attributes: {
-            visualizationType: 'lnsXY',
-            state: { foo: 'bar' },
-          },
+        suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+        attributes: {
+          visualizationType: 'lnsXY',
+          state: { foo: 'bar' },
         },
-        warnings: [],
       });
     });
 
-    it('returns no warnings for cleared stored vis context', () => {
-      expect(transformOut({})).toEqual({
-        visContext: undefined,
-        warnings: [],
-      });
-      expect(transformOut(undefined)).toEqual({
-        visContext: undefined,
-        warnings: [],
-      });
-    });
-
-    it('drops invalid stored vis context and reports a warning', () => {
-      const invalidValues = [
-        {
-          suggestionType: 'unsupported',
-          requestData: {},
-          attributes: {},
-        },
-        'invalid',
-      ] as unknown as Array<Parameters<typeof transformVisContextOut>[0]>;
-
-      for (const value of invalidValues) {
-        const result = transformOut(value);
-
-        expect(result.visContext).toBeUndefined();
-        expect(result.warnings).toEqual([
-          expect.objectContaining({
-            type: 'dropped_property',
-            tab_id: 'tab-1',
-            key: 'vis_context',
-          }),
-        ]);
-      }
+    it('returns undefined for cleared stored vis context', () => {
+      expect(transformVisContextOut({})).toBeUndefined();
+      expect(transformVisContextOut(undefined)).toBeUndefined();
     });
   });
 
@@ -95,10 +59,7 @@ describe('vis context transforms', () => {
     it('round-trips API vis_context when requestData is supplied on transform in', () => {
       const stored = transformVisContextIn(apiVisContext, requestData);
 
-      expect(transformOut(stored)).toEqual({
-        visContext: apiVisContext,
-        warnings: [],
-      });
+      expect(transformVisContextOut(stored)).toEqual(apiVisContext);
       expect(stored).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
         requestData,

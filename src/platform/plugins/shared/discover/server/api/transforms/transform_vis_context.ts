@@ -9,7 +9,7 @@
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import type { DiscoverSessionApiTab, DiscoverSessionWarning } from '../schema';
+import type { DiscoverSessionApiTab } from '../schema';
 
 type StoredVisContext = DiscoverSessionTabAttributes['visContext'];
 type ApiVisContext = DiscoverSessionApiTab['vis_context'];
@@ -27,54 +27,24 @@ const isApiSuggestionType = (value: unknown): value is ApiSuggestionType =>
   value === UnifiedHistogramSuggestionType.histogramForESQL ||
   value === UnifiedHistogramSuggestionType.histogramForDataView;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const createDroppedVisContextWarning = (tabId: string): DiscoverSessionWarning => ({
-  type: 'dropped_property',
-  tab_id: tabId,
-  key: 'vis_context',
-  message: 'Unable to transform vis context because the stored value is invalid.',
-});
-
-export const transformVisContextOut = (
-  visContext: StoredVisContext,
-  tabId: string
-): { visContext: ApiVisContext | undefined; warnings: DiscoverSessionWarning[] } => {
-  if (!visContext) {
-    return { visContext: undefined, warnings: [] };
-  }
-
-  if (!isRecord(visContext)) {
-    return {
-      visContext: undefined,
-      warnings: [createDroppedVisContextWarning(tabId)],
-    };
-  }
-
-  if (Object.keys(visContext).length === 0) {
-    return { visContext: undefined, warnings: [] };
-  }
-
+export const transformVisContextOut = (visContext: StoredVisContext): ApiVisContext | undefined => {
   if (
+    !visContext ||
     !('suggestionType' in visContext) ||
     !('attributes' in visContext) ||
     !visContext.suggestionType ||
-    !visContext.attributes ||
-    !isApiSuggestionType(visContext.suggestionType)
+    !visContext.attributes
   ) {
-    return {
-      visContext: undefined,
-      warnings: [createDroppedVisContextWarning(tabId)],
-    };
+    return undefined;
+  }
+
+  if (!isApiSuggestionType(visContext.suggestionType)) {
+    return undefined;
   }
 
   return {
-    visContext: {
-      suggestion_type: visContext.suggestionType,
-      attributes: visContext.attributes,
-    },
-    warnings: [],
+    suggestion_type: visContext.suggestionType,
+    attributes: visContext.attributes,
   };
 };
 

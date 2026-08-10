@@ -27,15 +27,12 @@ export const transformDiscoverSessionOut = (
     tags,
     tabs: attributes.tabs.map((tab) => {
       const apiTab = fromStoredTab(tab.attributes, references);
-      const { visContext, warnings: visContextWarnings } = transformVisContextOut(
-        tab.attributes.visContext,
-        tab.id
-      );
+      const visContext = transformVisContextOut(tab.attributes.visContext);
       const { panels: controlPanels, warnings: controlPanelWarnings } = transformControlPanelsOut(
         tab.attributes.controlGroupJson,
         tab.id
       );
-      warnings.push(...visContextWarnings, ...controlPanelWarnings);
+      warnings.push(...controlPanelWarnings);
 
       return {
         id: tab.id,

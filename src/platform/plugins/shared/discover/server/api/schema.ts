@@ -241,7 +241,7 @@ const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchem
 const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_property'),
-    key: z.union([z.literal('control_panels'), z.literal('vis_context')]),
+    key: z.literal('control_panels'),
   })
   .strict();
 
