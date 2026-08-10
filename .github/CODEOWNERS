@@ -535,7 +535,7 @@ src/platform/packages/shared/kbn-apm-utils @elastic/obs-signals-traces-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
 src/platform/packages/shared/kbn-background-search @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-bench @elastic/observability-ui
+src/platform/packages/shared/kbn-bench @elastic/kibana-core
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/actionable-obs-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
@@ -748,7 +748,7 @@ src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-library @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
-src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
+src/platform/packages/shared/kbn-workspaces @elastic/kibana-core
 src/platform/packages/shared/kbn-xstate-utils @elastic/streams-ui
 src/platform/packages/shared/kbn-yaml-loader @elastic/fleet
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
