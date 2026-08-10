@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { i18n } from '@kbn/i18n';
+import { AddToCaseActionPanel, ADD_TO_CASE, CASE_TYPE } from '@kbn/response-ops-alerts-table';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useRiskInputActions } from './use_risk_input_actions';
@@ -21,6 +22,29 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+
+export const RISK_INPUT_ACTION_IDS = {
+  addToNewTimeline: 'add-to-new-timeline',
+  addToCase: 'add-to-case',
+  addToNewCase: 'add-to-new-case',
+  addToExistingCase: 'add-to-existing-case',
+} as const;
+
+const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+const ADD_TO_CASE_PANEL_ID = 1;
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
   const { cases: casesService, telemetry } = useKibana().services;
@@ -45,6 +69,9 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
 
     return [
       {
+        key: RISK_INPUT_ACTION_IDS.addToNewTimeline,
+        icon: 'timeline',
+        'data-test-subj': RISK_INPUT_ACTION_IDS.addToNewTimeline,
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
@@ -116,33 +143,54 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         id: 0,
         items: [
           ...timelineActions,
+          ...(timelineActions.length > 0 && hasCasesPermissions
+            ? [
+                {
+                  key: 'separator-before-cases',
+                  isSeparator: true as const,
+                  'data-test-subj': 'securityActionMenuGroupSeparator',
+                },
+              ]
+            : []),
           ...(hasCasesPermissions
             ? [
                 {
-                  name: (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
-                      defaultMessage="Add to new case"
-                    />
-                  ),
-
-                  onClick: addToNewCaseClick,
-                },
-
-                {
-                  name: (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
-                      defaultMessage="Add to existing case"
-                    />
-                  ),
-
-                  onClick: addToExistingCase,
+                  key: RISK_INPUT_ACTION_IDS.addToCase,
+                  icon: 'briefcase' as const,
+                  'data-test-subj': RISK_INPUT_ACTION_IDS.addToCase,
+                  name: ADD_TO_CASE,
+                  panel: ADD_TO_CASE_PANEL_ID,
                 },
               ]
             : []),
         ],
       },
+      ...(hasCasesPermissions
+        ? [
+            {
+              id: ADD_TO_CASE_PANEL_ID,
+              title: CASE_TYPE,
+              content: (
+                <AddToCaseActionPanel
+                  actions={[
+                    {
+                      id: RISK_INPUT_ACTION_IDS.addToNewCase,
+                      label: ADD_TO_NEW_CASE,
+                      dataTestSubj: RISK_INPUT_ACTION_IDS.addToNewCase,
+                      onClick: addToNewCaseClick,
+                    },
+                    {
+                      id: RISK_INPUT_ACTION_IDS.addToExistingCase,
+                      label: ADD_TO_EXISTING_CASE,
+                      dataTestSubj: RISK_INPUT_ACTION_IDS.addToExistingCase,
+                      onClick: addToExistingCase,
+                    },
+                  ]}
+                />
+              ),
+            },
+          ]
+        : []),
     ];
   }, [addToExistingCase, addToNewCaseClick, inputs, hasCasesPermissions, timelineActions]);
 };
