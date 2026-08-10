@@ -38,12 +38,16 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/share-plugin'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/tooling-log'
   - '@kbn/connector-specs'
   - '@kbn/console-plugin'
   - '@kbn/core-security-server'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-management'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/index-management-shared-types'
   - '@kbn/code-editor'
   - '@kbn/ui-callout'
   - '@kbn/agent-builder-browser'
@@ -62,6 +66,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:

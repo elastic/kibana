@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { AsyncDomainEventBus } from './event_bus';
@@ -155,6 +156,12 @@ describe('AsyncDomainEventBus', () => {
 
         expect(handler).not.toHaveBeenCalled();
         expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+          labels: {
+            event_type: reservedType,
+            code: ALERTING_LOG_CODES.EVENTS_BUS_PUBLISH_SKIPPED,
+          },
+        });
       }
     );
   });
@@ -174,6 +181,10 @@ describe('AsyncDomainEventBus', () => {
 
       expect(failing).toHaveBeenCalledTimes(1);
       expect(succeeding).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('boom', {
+        labels: { event_type: 'foo', code: ALERTING_LOG_CODES.EVENTS_BUS_HANDLER_FAILED },
+        error: expect.objectContaining({ message: 'boom' }),
+      });
     });
 
     it('continues invoking siblings when a handler returns a rejected promise', async () => {

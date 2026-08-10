@@ -60,12 +60,14 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.build_redirect_url`,
   `${internalNamespaces.security}.add_entities_to_watchlist`,
   `${internalNamespaces.security}.create_watchlist`,
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.get_entity_graph`,
   `${internalNamespaces.security}.list_watchlists`,
+  `${internalNamespaces.security}.get_watchlist_id`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
   `${internalNamespaces.security}.update_watchlist`,
@@ -297,6 +299,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Alerting v2
   'platform.alerting.rule',
   'platform.alerting.action_policy',
+  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
