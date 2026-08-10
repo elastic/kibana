@@ -840,15 +840,22 @@ class OutputService {
         }
       } else if (isOtlpOutput(output)) {
         const otlpData = data as OutputSoOtlpAttributes;
-        const otlpExporterSecrets = output.secrets?.otlp_exporter;
-        if (!output.otlp_exporter.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
-          otlpData.otlp_exporter = {
-            ...otlpData.otlp_exporter,
-            tls: {
-              ...otlpData.otlp_exporter.tls,
-              key_pem: otlpExporterSecrets.tls.key_pem as string,
-            },
-          };
+        const tlsSecrets = output.secrets?.otlp_exporter?.tls;
+        const keyPemFallback = !output.otlp_exporter.tls?.key_pem && tlsSecrets?.key_pem;
+        const ownerAuthFallback =
+          !output.otlp_exporter.tls?.tpm?.owner_auth && tlsSecrets?.tpm?.owner_auth;
+        const authFallback = !output.otlp_exporter.tls?.tpm?.auth && tlsSecrets?.tpm?.auth;
+        if (keyPemFallback || ownerAuthFallback || authFallback) {
+          const tls = { ...otlpData.otlp_exporter.tls };
+          if (keyPemFallback) tls.key_pem = tlsSecrets!.key_pem as string;
+          if (ownerAuthFallback || authFallback) {
+            tls.tpm = {
+              ...tls.tpm,
+              ...(ownerAuthFallback && { owner_auth: tlsSecrets!.tpm!.owner_auth as string }),
+              ...(authFallback && { auth: tlsSecrets!.tpm!.auth as string }),
+            };
+          }
+          otlpData.otlp_exporter = { ...otlpData.otlp_exporter, tls };
         }
       }
     }
@@ -1484,16 +1491,22 @@ class OutputService {
         }
       } else if (isOtlpOutput(updateSoData)) {
         const otlpUpdateData = updateSoData as OutputSoOtlpAttributes;
-        const domainData = data as Partial<NewOtlpOutput>;
-        const otlpExporterSecrets = domainData.secrets?.otlp_exporter;
-        if (!otlpUpdateData.otlp_exporter?.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
-          otlpUpdateData.otlp_exporter = {
-            ...otlpUpdateData.otlp_exporter,
-            tls: {
-              ...otlpUpdateData.otlp_exporter?.tls,
-              key_pem: otlpExporterSecrets.tls.key_pem as string,
-            },
-          };
+        const tlsSecrets = (data as Partial<NewOtlpOutput>).secrets?.otlp_exporter?.tls;
+        const keyPemFallback = !otlpUpdateData.otlp_exporter?.tls?.key_pem && tlsSecrets?.key_pem;
+        const ownerAuthFallback =
+          !otlpUpdateData.otlp_exporter?.tls?.tpm?.owner_auth && tlsSecrets?.tpm?.owner_auth;
+        const authFallback = !otlpUpdateData.otlp_exporter?.tls?.tpm?.auth && tlsSecrets?.tpm?.auth;
+        if (keyPemFallback || ownerAuthFallback || authFallback) {
+          const tls = { ...otlpUpdateData.otlp_exporter?.tls };
+          if (keyPemFallback) tls.key_pem = tlsSecrets!.key_pem as string;
+          if (ownerAuthFallback || authFallback) {
+            tls.tpm = {
+              ...tls.tpm,
+              ...(ownerAuthFallback && { owner_auth: tlsSecrets!.tpm!.owner_auth as string }),
+              ...(authFallback && { auth: tlsSecrets!.tpm!.auth as string }),
+            };
+          }
+          otlpUpdateData.otlp_exporter = { ...otlpUpdateData.otlp_exporter, tls };
         }
       }
     }

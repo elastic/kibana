@@ -1462,7 +1462,7 @@ describe('Output Service', () => {
         );
       });
 
-      it('should write tls key_pem as plaintext when secret storage is disabled', async () => {
+      it('should write tls secrets as plaintext when secret storage is disabled', async () => {
         const soClient = getMockedSoClient();
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
@@ -1480,7 +1480,12 @@ describe('Output Service', () => {
               protocol: 'grpc',
             },
             secrets: {
-              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'my-key-pem',
+                  tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
+                },
+              },
             },
           },
           { id: 'output-test' }
@@ -1491,14 +1496,17 @@ describe('Output Service', () => {
           expect.objectContaining({
             type: 'otlp',
             otlp_exporter: expect.objectContaining({
-              tls: expect.objectContaining({ key_pem: 'my-key-pem' }),
+              tls: expect.objectContaining({
+                key_pem: 'my-key-pem',
+                tpm: expect.objectContaining({ owner_auth: 'my-owner-auth', auth: 'my-auth' }),
+              }),
             }),
           }),
           expect.anything()
         );
       });
 
-      it('should extract tls key_pem as an ESO secret ref when secret storage is enabled', async () => {
+      it('should extract tls secrets as ESO secret refs when secret storage is enabled', async () => {
         const soClient = getMockedSoClient();
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
@@ -1511,7 +1519,15 @@ describe('Output Service', () => {
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
             secrets: {
-              otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'owner-auth-secret-id' },
+                    auth: { id: 'auth-secret-id' },
+                  },
+                },
+              },
             },
           },
         } as any);
@@ -1529,7 +1545,12 @@ describe('Output Service', () => {
               protocol: 'grpc',
             },
             secrets: {
-              otlp_exporter: { tls: { key_pem: 'my-key-pem' } },
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'my-key-pem',
+                  tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
+                },
+              },
             },
           },
           { id: 'output-test' }
@@ -1540,7 +1561,15 @@ describe('Output Service', () => {
           expect.objectContaining({
             type: 'otlp',
             secrets: {
-              otlp_exporter: { tls: { key_pem: { id: 'key-pem-secret-id' } } },
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'owner-auth-secret-id' },
+                    auth: { id: 'auth-secret-id' },
+                  },
+                },
+              },
             },
           }),
           expect.anything()
@@ -3228,7 +3257,7 @@ describe('Output Service', () => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     });
 
-    it('Should write tls key_pem as plaintext on OTLP update when secret storage is disabled', async () => {
+    it('Should write tls secrets as plaintext on OTLP update when secret storage is disabled', async () => {
       const soClient = getMockedSoClient({});
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         managedOtlpOutput: true,
@@ -3242,7 +3271,12 @@ describe('Output Service', () => {
           protocol: 'grpc',
         },
         secrets: {
-          otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
+          otlp_exporter: {
+            tls: {
+              key_pem: 'updated-key-pem',
+              tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
+            },
+          },
         },
       });
 
@@ -3252,7 +3286,13 @@ describe('Output Service', () => {
         expect.objectContaining({
           type: 'otlp',
           otlp_exporter: expect.objectContaining({
-            tls: expect.objectContaining({ key_pem: 'updated-key-pem' }),
+            tls: expect.objectContaining({
+              key_pem: 'updated-key-pem',
+              tpm: expect.objectContaining({
+                owner_auth: 'updated-owner-auth',
+                auth: 'updated-auth',
+              }),
+            }),
           }),
         })
       );
@@ -3260,7 +3300,7 @@ describe('Output Service', () => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     });
 
-    it('Should extract tls key_pem as an ESO secret ref on OTLP update when secret storage is enabled', async () => {
+    it('Should extract tls secrets as ESO secret refs on OTLP update when secret storage is enabled', async () => {
       const soClient = getMockedSoClient({});
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         managedOtlpOutput: true,
@@ -3274,7 +3314,15 @@ describe('Output Service', () => {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
           secrets: {
-            otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
+            otlp_exporter: {
+              tls: {
+                key_pem: { id: 'updated-key-pem-secret-id' },
+                tpm: {
+                  owner_auth: { id: 'updated-owner-auth-secret-id' },
+                  auth: { id: 'updated-auth-secret-id' },
+                },
+              },
+            },
           },
         },
       } as any);
@@ -3285,7 +3333,12 @@ describe('Output Service', () => {
           protocol: 'grpc',
         },
         secrets: {
-          otlp_exporter: { tls: { key_pem: 'updated-key-pem' } },
+          otlp_exporter: {
+            tls: {
+              key_pem: 'updated-key-pem',
+              tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
+            },
+          },
         },
       });
 
@@ -3295,7 +3348,15 @@ describe('Output Service', () => {
         expect.objectContaining({
           type: 'otlp',
           secrets: {
-            otlp_exporter: { tls: { key_pem: { id: 'updated-key-pem-secret-id' } } },
+            otlp_exporter: {
+              tls: {
+                key_pem: { id: 'updated-key-pem-secret-id' },
+                tpm: {
+                  owner_auth: { id: 'updated-owner-auth-secret-id' },
+                  auth: { id: 'updated-auth-secret-id' },
+                },
+              },
+            },
           },
         })
       );

@@ -15,9 +15,9 @@
  *
  * Coverage:
  *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
- *     secret round-trip (otlp_exporter.tls.key_pem via .fleet-secrets).
+ *     secret round-trip (tls.key_pem and tls.tpm.owner_auth/auth via .fleet-secrets).
  *   - Update: otlp_exporter update, ES→OTLP type change, OTLP→ES type change.
- *   - Delete: ESO secret is removed when the output is deleted.
+ *   - Delete: ESO secrets are removed when the output is deleted (key_pem and tpm credentials).
  *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
  */
 
@@ -211,7 +211,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).to.contain('[request body.otlp_exporter.compression]');
       });
 
-      it('stores tls.key_pem as an ESO secret and returns a secret ref', async () => {
+      it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
         const { body } = await supertest
           .post('/api/fleet/outputs')
           .set('kbn-xsrf', 'xxxx')
@@ -224,7 +224,13 @@ export default function (providerContext: FtrProviderContext) {
             },
             secrets: {
               otlp_exporter: {
-                tls: { key_pem: 'test-tls-key-pem-value' },
+                tls: {
+                  key_pem: 'test-tls-key-pem-value',
+                  tpm: {
+                    owner_auth: 'test-tpm-owner-auth-value',
+                    auth: 'test-tpm-auth-value',
+                  },
+                },
               },
             },
           })
@@ -232,13 +238,25 @@ export default function (providerContext: FtrProviderContext) {
 
         const { item } = body;
         const tlsKeyPemSecretId: string = item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        const ownerAuthSecretId: string = item.secrets?.otlp_exporter?.tls?.tpm?.owner_auth?.id;
+        const authSecretId: string = item.secrets?.otlp_exporter?.tls?.tpm?.auth?.id;
 
         expect(tlsKeyPemSecretId).to.be.a('string');
+        expect(ownerAuthSecretId).to.be.a('string');
+        expect(authSecretId).to.be.a('string');
 
         const tlsKeyPemSecret = await getSecretById(tlsKeyPemSecretId);
         expect((tlsKeyPemSecret._source as Record<string, string>).value).to.be(
           'test-tls-key-pem-value'
         );
+
+        const ownerAuthSecret = await getSecretById(ownerAuthSecretId);
+        expect((ownerAuthSecret._source as Record<string, string>).value).to.be(
+          'test-tpm-owner-auth-value'
+        );
+
+        const authSecret = await getSecretById(authSecretId);
+        expect((authSecret._source as Record<string, string>).value).to.be('test-tpm-auth-value');
       });
     });
 
@@ -325,7 +343,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('DELETE /api/fleet/outputs/{id}', () => {
-      it('removes the associated ESO secret when an OTLP output is deleted', async () => {
+      it('removes all associated ESO secrets when an OTLP output is deleted', async () => {
         const { body: createBody } = await supertest
           .post('/api/fleet/outputs')
           .set('kbn-xsrf', 'xxxx')
@@ -333,25 +351,41 @@ export default function (providerContext: FtrProviderContext) {
             name: `otlp-delete-secrets-${uuidv4()}`,
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
-            secrets: { otlp_exporter: { tls: { key_pem: 'to-be-deleted-key' } } },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'to-be-deleted-key',
+                  tpm: { owner_auth: 'to-be-deleted-owner-auth', auth: 'to-be-deleted-auth' },
+                },
+              },
+            },
           })
           .expect(200);
 
         const { id } = createBody.item;
-        const secretId: string = createBody.item.secrets?.otlp_exporter?.tls?.key_pem?.id;
-        expect(secretId).to.be.a('string');
+        const keyPemSecretId: string = createBody.item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        const ownerAuthSecretId: string =
+          createBody.item.secrets?.otlp_exporter?.tls?.tpm?.owner_auth?.id;
+        const authSecretId: string = createBody.item.secrets?.otlp_exporter?.tls?.tpm?.auth?.id;
+        expect(keyPemSecretId).to.be.a('string');
+        expect(ownerAuthSecretId).to.be.a('string');
+        expect(authSecretId).to.be.a('string');
 
-        // Secret exists before delete
-        await getSecretById(secretId);
+        // All secrets exist before delete
+        await getSecretById(keyPemSecretId);
+        await getSecretById(ownerAuthSecretId);
+        await getSecretById(authSecretId);
 
         await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx').expect(200);
 
-        // Secret must be cleaned up
-        try {
-          await getSecretById(secretId);
-          throw new Error('Expected ESO secret to be deleted alongside the output');
-        } catch (err) {
-          expect(err.meta?.statusCode).to.be(404);
+        // All secrets must be cleaned up
+        for (const secretId of [keyPemSecretId, ownerAuthSecretId, authSecretId]) {
+          try {
+            await getSecretById(secretId);
+            throw new Error(`Expected ESO secret ${secretId} to be deleted alongside the output`);
+          } catch (err) {
+            expect(err.meta?.statusCode).to.be(404);
+          }
         }
       });
     });
