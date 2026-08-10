@@ -93,6 +93,7 @@ plugins:
     - usage_collection
     - ux
     - vis_types/timeseries
+    - vis_types/vega
     - watcher
     - workflows_extensions
     - workflows_management
