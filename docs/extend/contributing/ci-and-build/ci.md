@@ -80,6 +80,9 @@ Collect APM metrics, available for viewing on the Kibana CI APM cluster.
 ### `ci:entity-store-performance`
 Run entity store performance tests on Elastic Cloud. A fresh deployment is created for each test run (previous deployments are automatically cleaned up). Results are posted as PR comments.
 
+### `ci:ftr-auto-retry`
+Automatically retry each failed FTR config once, instead of bailing on the first failure. Useful for confirming whether an FTR failure is flaky.
+
 ### `ci:no-auto-commit`
 Skip auto-committing changed files.
 
@@ -106,6 +109,9 @@ Prevents an existing deployment from being shutdown due to inactivity.
 
 ### `ci:security-genai-run-evals`
 Run evaluations for the GenAI security evaluation suite.
+
+### `ci:use-chrome-beta`
+Run FTR tests against Chrome Beta instead of the stable Chrome, to catch upcoming-browser regressions early.
 
 ### `scout:run-all-tests`
 Disable Scout selective testing and run every Scout test, regardless of which modules the PR affects.
