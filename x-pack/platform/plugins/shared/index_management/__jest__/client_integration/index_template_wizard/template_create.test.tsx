@@ -392,49 +392,6 @@ describe('<TemplateCreate />', () => {
     }, 10000);
   });
 
-  describe('logistics (step 1)', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
-    });
-
-    it('setting index pattern to logs-*-* should set the index mode to logsdb', async () => {
-      // Logistics
-      await completeStepOne({ name: 'my_logs_template', indexPatterns: ['logs-*-*'] });
-      // Component templates
-      await completeStepTwo();
-      // Index settings
-      await completeStepThree('{}');
-      // Mappings
-      await completeStepFour();
-      // Aliases
-      await completeStepFive();
-
-      fireEvent.click(screen.getByTestId('nextButton'));
-
-      await waitFor(() => {
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/index_templates`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: 'my_logs_template',
-              indexPatterns: ['logs-*-*'],
-              allowAutoCreate: 'NO_OVERWRITE',
-              indexMode: 'logsdb',
-              _kbnMeta: {
-                type: 'default',
-                hasDatastream: false,
-                isLegacy: false,
-              },
-              template: {},
-            }),
-          })
-        );
-      });
-    }, 10000);
-  });
-
   describe('review (step 6)', () => {
     describe('default flow', () => {
       beforeEach(async () => {

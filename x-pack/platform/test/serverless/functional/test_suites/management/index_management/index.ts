@@ -7,13 +7,10 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+// The remaining tabs live in the Scout suite at
+// `x-pack/platform/plugins/shared/index_management/test/scout/ui`.
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management', function () {
-    loadTestFile(require.resolve('./component_templates'));
-    loadTestFile(require.resolve('./create_enrich_policy'));
-    loadTestFile(require.resolve('./data_streams'));
-    loadTestFile(require.resolve('./enrich_policies'));
-    loadTestFile(require.resolve('./index_templates'));
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./index_detail'));
   });
