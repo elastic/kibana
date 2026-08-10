@@ -86,6 +86,24 @@ const makeUntranslatableRule = (id: string, title: string): RuleMigrationRule =>
   translation_result: 'untranslatable',
 });
 
+const makeFailedRule = (id: string, title: string): RuleMigrationRule => ({
+  id,
+  migration_id: 'migration-1',
+  original_rule: {
+    id: `orig-${id}`,
+    vendor: 'qradar',
+    title,
+    description: `${title} description`,
+    query: 'complex unsupported query',
+    query_language: 'aql',
+  },
+  '@timestamp': '2025-05-06T07:53:48.805Z',
+  status: SiemMigrationStatus.FAILED,
+  created_by: 'test-user',
+  updated_by: 'test-user',
+  updated_at: '2025-05-06T07:57:24.929Z',
+});
+
 const threeRules: RuleMigrationRule[] = [
   makeTranslatedRule('rule-1', 'First Rule'),
   makeUntranslatableRule('rule-2', 'Second Rule'),
@@ -224,5 +242,65 @@ describe('MigrationRulesTable navigation (integration)', () => {
 
     fireEvent.click(screen.getByTestId('detailsFlyoutCloseButton'));
     expect(screen.queryByTestId('ruleMigrationDetailsFlyout')).not.toBeInTheDocument();
+  });
+
+  describe('failed rules', () => {
+    const mockRulesWithFailed = (rules: RuleMigrationRule[], failedCount: number) => {
+      (useGetMigrationRules as jest.Mock).mockReturnValue({
+        data: { migrationRules: rules, total: rules.length },
+        isLoading: false,
+      });
+      (useGetMigrationTranslationStats as jest.Mock).mockReturnValue({
+        data: getRuleMigrationTranslationStatsMock({
+          rules: {
+            total: rules.length,
+            success: {
+              total: rules.length - failedCount,
+              result: { full: rules.length - failedCount, partial: 0, untranslatable: 0 },
+              installable: rules.length - failedCount,
+              prebuilt: 0,
+              missing_index: 0,
+            },
+            failed: failedCount,
+          },
+        }),
+        isLoading: false,
+      });
+    };
+
+    it('should skip a failed rule when navigating forward and backward', () => {
+      mockRulesWithFailed(
+        [
+          makeTranslatedRule('rule-1', 'First Rule'),
+          makeFailedRule('rule-2', 'Failed Rule'),
+          makeTranslatedRule('rule-3', 'Third Rule'),
+        ],
+        1
+      );
+      renderTable();
+      openFlyoutForRule('First Rule');
+
+      fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
+
+      fireEvent.click(screen.getByTestId('migrationFlyoutPreviousButton'));
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
+    });
+
+    it('should disable both arrows when only failed rules surround the opened rule', () => {
+      mockRulesWithFailed(
+        [
+          makeFailedRule('rule-1', 'Failed Rule One'),
+          makeTranslatedRule('rule-2', 'Middle Rule'),
+          makeFailedRule('rule-3', 'Failed Rule Two'),
+        ],
+        2
+      );
+      renderTable();
+      openFlyoutForRule('Middle Rule');
+
+      expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+    });
   });
 });

@@ -9,10 +9,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationFlyoutNavigation } from '../../common/components/flyout_nav';
 import { useMigrationFlyoutNav } from '../../common/components/flyout_nav';
+import { isMigrationItemNavigableWithFlyout } from '../../common/utils';
 import { DashboardMigrationDetailsFlyout } from '../components/dashboard_details_flyout';
 
 interface UseMigrationDashboardDetailsFlyoutParams {
   isLoading?: boolean;
+  /**
+   * Ordered dashboards of the currently loaded table page, used for prev/next
+   * navigation. Failed dashboards have no details flyout and are skipped during
+   * navigation.
+   */
   migrationDashboards: DashboardMigrationDashboard[];
   getMigrationDashboardData: (dashboardId: string) =>
     | {
@@ -52,31 +58,11 @@ export function useMigrationDashboardDetailsFlyout({
   }, []);
   const closeMigrationDashboardDetails = useCallback(() => setMigrationDashboardId(undefined), []);
 
-  const openedDashboardIndex = useMemo(
-    () =>
-      migrationDashboardId
-        ? migrationDashboards.findIndex((d) => d.id === migrationDashboardId)
-        : -1,
-    [migrationDashboards, migrationDashboardId]
-  );
-
-  const goToDashboardAtIndex = useCallback(
-    (index: number) => {
-      const dashboard = migrationDashboards[index];
-      if (dashboard) {
-        setMigrationDashboardId(dashboard.id);
-      }
-    },
-    [migrationDashboards]
-  );
-
   const navigation = useMigrationFlyoutNav({
-    // openedDashboardIndex is -1 when the opened dashboard is not in the loaded page.
-    // Normalizing totalItems to 0 in that case keeps both arrows disabled.
-    currentIdx: openedDashboardIndex === -1 ? 0 : openedDashboardIndex,
-    totalItems: openedDashboardIndex === -1 ? 0 : migrationDashboards.length,
-    onNextCallback: goToDashboardAtIndex,
-    onPrevCallback: goToDashboardAtIndex,
+    items: migrationDashboards,
+    openedItemId: migrationDashboardId,
+    isNavigable: isMigrationItemNavigableWithFlyout,
+    onNavigate: openMigrationDashboardDetails,
   });
 
   const dashboardActions = useMemo(

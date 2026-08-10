@@ -13,13 +13,15 @@ import type { RuleMigrationRule } from '../../../../common/siem_migrations/model
 import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
 import type { MigrationFlyoutNavigation } from '../../common/components/flyout_nav';
 import { useMigrationFlyoutNav } from '../../common/components/flyout_nav';
+import { isMigrationItemNavigableWithFlyout } from '../../common/utils';
 
 interface UseMigrationRuleDetailsFlyoutParams {
   isLoading?: boolean;
   /**
    * Ordered rules of the currently loaded table page, used for prev/next navigation.
    * Must be the same array that backs `getMigrationRuleData`, so that navigation
-   * targets always resolve.
+   * targets always resolve. Failed rules have no details flyout and are skipped
+   * during navigation.
    */
   migrationRules: RuleMigrationRule[];
   getMigrationRuleData: (ruleId: string) =>
@@ -65,28 +67,11 @@ export function useMigrationRuleDetailsFlyout({
   }, []);
   const closeMigrationRuleDetails = useCallback(() => setMigrationRuleId(undefined), []);
 
-  const openedRuleIndex = useMemo(
-    () => (migrationRuleId ? migrationRules.findIndex((rule) => rule.id === migrationRuleId) : -1),
-    [migrationRules, migrationRuleId]
-  );
-
-  const goToRuleAtIndex = useCallback(
-    (index: number) => {
-      const rule = migrationRules[index];
-      if (rule) {
-        setMigrationRuleId(rule.id);
-      }
-    },
-    [migrationRules]
-  );
-
   const navigation = useMigrationFlyoutNav({
-    // openedRuleIndex is -1 when the opened rule is not in the loaded page. Normalizing
-    // totalItems to 0 in that case keeps both arrows disabled (hasPrevious/hasNext false).
-    currentIdx: openedRuleIndex === -1 ? 0 : openedRuleIndex,
-    totalItems: openedRuleIndex === -1 ? 0 : migrationRules.length,
-    onNextCallback: goToRuleAtIndex,
-    onPrevCallback: goToRuleAtIndex,
+    items: migrationRules,
+    openedItemId: migrationRuleId,
+    isNavigable: isMigrationItemNavigableWithFlyout,
+    onNavigate: openMigrationRuleDetails,
   });
 
   const ruleActions = useMemo(

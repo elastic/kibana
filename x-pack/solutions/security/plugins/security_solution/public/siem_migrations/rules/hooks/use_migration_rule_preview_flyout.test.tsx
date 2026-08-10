@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
+import { SiemMigrationStatus } from '../../../../common/siem_migrations/constants';
+import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { migrationRules } from '../__mocks__/migration_rules';
 import { useMigrationRuleDetailsFlyout } from './use_migration_rule_preview_flyout';
 
@@ -100,23 +102,31 @@ describe('useMigrationRuleDetailsFlyout', () => {
   });
 
   describe('rule navigation', () => {
-    // The shared mock has only 2 rules; a local 3-rule fixture is needed to exercise a
-    // genuine middle-of-page position (nested refs shared with rule '2' — nav reads id only).
+    // The shared mock has 2 rules: '1' (completed) and '2' (failed). Navigation reads
+    // id and status only, so extra fixtures are shallow spreads with overridden id/status.
+    const completedRule = (id: string): RuleMigrationRule => ({
+      ...migrationRules[1],
+      id,
+      status: SiemMigrationStatus.COMPLETED,
+    });
+    const failedRule = migrationRules[1]; // id '2', status failed
+
     const threeRules = [
       migrationRules[0], // id '1'
-      migrationRules[1], // id '2'
-      { ...migrationRules[1], id: '3' },
+      completedRule('2'),
+      completedRule('3'),
     ];
-    const getRuleData = (ruleId: string) => ({
-      migrationRule: threeRules.find((rule) => rule.id === ruleId),
+
+    const getRuleDataFor = (rules: RuleMigrationRule[]) => (ruleId: string) => ({
+      migrationRule: rules.find((rule) => rule.id === ruleId),
       matchedPrebuiltRule: undefined,
     });
 
-    const renderNavigationHook = (rules = threeRules) =>
+    const renderNavigationHook = (rules = threeRules, dataSource = threeRules) =>
       renderHook(() =>
         useMigrationRuleDetailsFlyout({
           migrationRules: rules,
-          getMigrationRuleData: getRuleData,
+          getMigrationRuleData: getRuleDataFor(dataSource),
           ruleActionsFactory: mockRuleActionsFactory,
         })
       );
@@ -236,6 +246,66 @@ describe('useMigrationRuleDetailsFlyout', () => {
       });
 
       expect(result.current.openedMigrationRuleId).toBe('1');
+    });
+
+    describe('failed rules', () => {
+      it('should disable the previous arrow when only failed rules are before the opened rule', () => {
+        const rules = [failedRule, migrationRules[0], completedRule('3')];
+        const { result } = renderNavigationHook(rules, rules);
+
+        act(() => {
+          result.current.openMigrationRuleDetails(migrationRules[0]);
+        });
+
+        expect(result.current.navigation).toEqual(
+          expect.objectContaining({ hasPrevious: false, hasNext: true })
+        );
+
+        act(() => {
+          result.current.navigation.goToPrevious();
+        });
+
+        expect(result.current.openedMigrationRuleId).toBe('1');
+      });
+
+      it('should disable the next arrow when only failed rules are after the opened rule', () => {
+        const rules = [migrationRules[0], completedRule('3'), failedRule];
+        const { result } = renderNavigationHook(rules, rules);
+
+        act(() => {
+          result.current.openMigrationRuleDetails(completedRule('3'));
+        });
+
+        expect(result.current.navigation).toEqual(
+          expect.objectContaining({ hasPrevious: true, hasNext: false })
+        );
+
+        act(() => {
+          result.current.navigation.goToNext();
+        });
+
+        expect(result.current.openedMigrationRuleId).toBe('3');
+      });
+
+      it('should skip a failed rule in the middle of the page', () => {
+        const rules = [migrationRules[0], failedRule, completedRule('3')];
+        const { result } = renderNavigationHook(rules, rules);
+
+        act(() => {
+          result.current.openMigrationRuleDetails(migrationRules[0]);
+        });
+        act(() => {
+          result.current.navigation.goToNext();
+        });
+
+        expect(result.current.openedMigrationRuleId).toBe('3');
+
+        act(() => {
+          result.current.navigation.goToPrevious();
+        });
+
+        expect(result.current.openedMigrationRuleId).toBe('1');
+      });
     });
   });
 });

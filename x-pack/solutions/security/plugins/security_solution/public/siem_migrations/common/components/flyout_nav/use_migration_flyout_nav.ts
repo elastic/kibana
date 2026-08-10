@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
-export interface UseMigrationFlyoutNavArgs {
-  currentIdx: number;
-  totalItems: number;
-  onNextCallback: (nextIdx: number) => void;
-  onPrevCallback: (prevIdx: number) => void;
+export interface UseMigrationFlyoutNavArgs<T extends { id: string }> {
+  /** Ordered items of the currently loaded table page, including non-navigable ones. */
+  items: T[];
+  /** Id of the item currently opened in the flyout, if any. */
+  openedItemId?: string;
+  /** Whether an item can be shown in the flyout. Non-navigable items are skipped. */
+  isNavigable: (item: T) => boolean;
+  /** Opens the given item in the flyout. */
+  onNavigate: (item: T) => void;
 }
 
 export interface UseMigrationFlyoutNavResult {
@@ -21,28 +25,42 @@ export interface UseMigrationFlyoutNavResult {
   goToPrevious: () => void;
 }
 
-export const useMigrationFlyoutNav = ({
-  currentIdx,
-  totalItems,
-  onNextCallback,
-  onPrevCallback,
-}: UseMigrationFlyoutNavArgs): UseMigrationFlyoutNavResult => {
+export const useMigrationFlyoutNav = <T extends { id: string }>({
+  items,
+  openedItemId,
+  isNavigable,
+  onNavigate,
+}: UseMigrationFlyoutNavArgs<T>): UseMigrationFlyoutNavResult => {
+  const navigableItems = useMemo(() => items.filter(isNavigable), [items, isNavigable]);
+
+  // -1 when nothing is open or the opened item is not navigable / not in the loaded page.
+  const openedIndex = useMemo(
+    () => (openedItemId ? navigableItems.findIndex((item) => item.id === openedItemId) : -1),
+    [navigableItems, openedItemId]
+  );
+
   const goToNext = useCallback(() => {
-    if (currentIdx < totalItems - 1) {
-      onNextCallback(currentIdx + 1);
+    const nextItem = navigableItems[openedIndex + 1];
+    // Without the -1 guard, `navigableItems[-1 + 1]` would jump to the first item.
+    if (openedIndex !== -1 && nextItem) {
+      onNavigate(nextItem);
     }
-  }, [currentIdx, totalItems, onNextCallback]);
+  }, [navigableItems, openedIndex, onNavigate]);
 
   const goToPrevious = useCallback(() => {
-    if (currentIdx > 0) {
-      onPrevCallback(currentIdx - 1);
+    const previousItem = navigableItems[openedIndex - 1];
+    if (openedIndex !== -1 && previousItem) {
+      onNavigate(previousItem);
     }
-  }, [currentIdx, onPrevCallback]);
+  }, [navigableItems, openedIndex, onNavigate]);
 
-  return {
-    hasNext: currentIdx < totalItems - 1,
-    hasPrevious: currentIdx > 0,
-    goToNext,
-    goToPrevious,
-  };
+  return useMemo(
+    () => ({
+      hasNext: openedIndex !== -1 && openedIndex < navigableItems.length - 1,
+      hasPrevious: openedIndex > 0,
+      goToNext,
+      goToPrevious,
+    }),
+    [openedIndex, navigableItems.length, goToNext, goToPrevious]
+  );
 };
