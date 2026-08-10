@@ -50,6 +50,8 @@ import { UpdateActionPolicyApiKeyRoute } from '../routes/action_policies/update_
 import { DeleteActionPolicyRoute } from '../routes/action_policies/delete_action_policy_route';
 import { ListActionPolicyExecutionsRoute } from '../routes/execution_history/list_action_policy_executions_route';
 import { ListRuleExecutionsRoute } from '../routes/execution_history/list_rule_executions_route';
+import { ListRuleChangeHistoryRoute } from '../routes/rule_change_history/list_rule_change_history_route';
+import { GetRuleChangeHistoryEventRoute } from '../routes/rule_change_history/get_rule_change_history_event_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
 import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_route';
@@ -111,6 +113,8 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkUpdateApiKeyActionPoliciesRoute);
   bind(Route).toConstantValue(ListActionPolicyExecutionsRoute);
   bind(Route).toConstantValue(ListRuleExecutionsRoute);
+  bind(Route).toConstantValue(ListRuleChangeHistoryRoute);
+  bind(Route).toConstantValue(GetRuleChangeHistoryEventRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 

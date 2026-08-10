@@ -63,6 +63,8 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - remote_clusters
+    - reindex_service
     - saved_objects_management
     - saved_objects_tagging
     - search_getting_started
@@ -75,6 +77,7 @@ plugins:
     - serverless_observability
     - share
     - significant_events
+    - significant_events_app
     - slo
     - snapshot_restore
     - spaces
@@ -88,8 +91,10 @@ plugins:
     - unified_search
     - upgrade_assistant
     - uptime
+    - usage_collection
     - ux
     - vis_types/timeseries
+    - vis_types/vega
     - watcher
     - workflows_extensions
     - workflows_management

@@ -103,6 +103,34 @@ describe('toClientLogoPayload', () => {
 
     expect(toClientLogoPayload(logo)).toBeUndefined();
   });
+
+  it('falls back to the provided data URL when the logo type is "none"', () => {
+    const logo: ClientLogo = { type: 'none' };
+
+    expect(toClientLogoPayload(logo, `data:image/png;base64,${PNG_DATA}`)).toEqual({
+      media_type: 'image/png',
+      data: PNG_DATA,
+    });
+  });
+
+  it('prefers an explicit selection over the fallback data URL', () => {
+    const logo: ClientLogo = {
+      type: 'select',
+      id: 'logo-1',
+      dataUrl: `data:image/gif;base64,${GIF_DATA}`,
+    };
+
+    expect(toClientLogoPayload(logo, `data:image/png;base64,${PNG_DATA}`)).toEqual({
+      media_type: 'image/gif',
+      data: GIF_DATA,
+    });
+  });
+
+  it('returns undefined when the logo type is "none" and the fallback fails validation', () => {
+    const logo: ClientLogo = { type: 'none' };
+
+    expect(toClientLogoPayload(logo, 'not-a-data-url')).toBeUndefined();
+  });
 });
 
 describe('toCreateOAuthClientPayload', () => {
@@ -161,6 +189,34 @@ describe('toCreateOAuthClientPayload', () => {
     });
 
     expect(payload.client_logo).toBeUndefined();
+  });
+
+  it('persists the fallback logo when the form carries no selection', () => {
+    const payload = toCreateOAuthClientPayload(baseFormData, `data:image/png;base64,${PNG_DATA}`);
+
+    expect(payload.client_logo).toEqual({
+      media_type: 'image/png',
+      data: PNG_DATA,
+    });
+  });
+
+  it('ignores the fallback logo when the form carries a selection', () => {
+    const payload = toCreateOAuthClientPayload(
+      {
+        ...baseFormData,
+        clientLogo: {
+          type: 'select',
+          id: 'logo-1',
+          dataUrl: `data:image/gif;base64,${GIF_DATA}`,
+        },
+      },
+      `data:image/png;base64,${PNG_DATA}`
+    );
+
+    expect(payload.client_logo).toEqual({
+      media_type: 'image/gif',
+      data: GIF_DATA,
+    });
   });
 
   it('maps remote redirect URIs to the redirect_uris array', () => {

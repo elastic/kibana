@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { RulesAdapterV2 } from './v2_rules_adapter';
 import {
   STREAMS_RULE_STREAM_TAG_PREFIX,
@@ -276,7 +276,7 @@ describe('RulesAdapterV2', () => {
         errors: [
           {
             id: 'missing',
-            error: { code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND, message: 'gone' },
+            error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'gone' },
           },
         ],
       });
