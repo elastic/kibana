@@ -63,8 +63,8 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await discover.waitUntilTabIsLoaded();
 
       await unifiedFieldList.clickFieldListItemAdd('extension');
+      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('@message');
-      // Popularity is persisted async via indexPatterns.save; wait before asserting it.
       await discover.waitUntilSearchingHasFinished();
 
       expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
@@ -75,7 +75,9 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT);
 
       await unifiedFieldList.clickFieldListItemRemove('@message');
+      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('@message');
       await discover.waitUntilSearchingHasFinished();
 
@@ -104,7 +106,9 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       );
 
       await unifiedFieldList.clickFieldListItemRemove('@message');
+      await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemRemove('extension');
+      await discover.waitUntilSearchingHasFinished();
       // createRuntimeField already waits for the tab/search to settle.
       await discover.createRuntimeField('test', `emit('test')`);
 
