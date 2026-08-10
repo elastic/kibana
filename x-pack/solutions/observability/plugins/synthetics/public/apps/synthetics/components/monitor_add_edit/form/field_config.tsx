@@ -1461,6 +1461,35 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       disabled: readOnly,
     }),
   },
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: {
+    fieldKey: ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+    component: TextArea,
+    label: i18n.translate('xpack.synthetics.monitorConfig.certificateErrorSpkiAllowlist.label', {
+      defaultMessage: 'Certificate error SPKI allowlist',
+    }),
+    helpText: i18n.translate(
+      'xpack.synthetics.monitorConfig.certificateErrorSpkiAllowlist.helpText',
+      {
+        defaultMessage:
+          'PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium’s trust store. Enter one PEM certificate per entry; multiple certificates can be provided as separate PEM blocks.',
+      }
+    ),
+    controlled: true,
+    props: ({ setValue, field }): EuiTextAreaProps => ({
+      id: 'syntheticsMonitorConfigCertificateErrorSpkiAllowlist',
+      readOnly,
+      value: Array.isArray(field?.value) ? field.value.join('\n\n') : field?.value || '',
+      onChange: (event) => {
+        const raw = event.target.value;
+        const entries = raw
+          .split(/(?=-----BEGIN CERTIFICATE-----)/)
+          .map((entry) => entry.trim())
+          .filter(Boolean);
+        setValue(ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST, entries);
+      },
+      placeholder: '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
+    }),
+  },
   [ConfigKey.SYNTHETICS_ARGS]: {
     fieldKey: ConfigKey.SYNTHETICS_ARGS,
     component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,

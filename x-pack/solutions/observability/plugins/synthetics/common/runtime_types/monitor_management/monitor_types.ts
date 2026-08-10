@@ -282,6 +282,7 @@ export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: t.boolean,
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: t.array(t.string),
   [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfigCodec,
 });
 
