@@ -102755,8 +102755,6 @@ components:
       type: object
       properties:
         fill:
-          availability:
-            since: 9.6.0
           default: solid
           description: 'Area fill type: solid or gradient. Defaults to solid.'
           enum:
