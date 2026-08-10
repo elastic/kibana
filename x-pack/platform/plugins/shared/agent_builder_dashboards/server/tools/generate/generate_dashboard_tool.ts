@@ -10,6 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -153,17 +154,26 @@ Use operations[] to:
         });
 
         const description = `Dashboard: ${finalDashboardData.title}`;
+        // Tag as agent so dashboard live updates can distinguish tool writes from
+        // ambient user self-sync refs that must not reset the open dashboard.
         const attachment = isNewDashboard
-          ? await attachments.add({
-              id: dashboardAttachmentId,
-              type: DASHBOARD_ATTACHMENT_TYPE,
-              description,
-              data: finalDashboardData,
-            })
-          : await attachments.update(dashboardAttachmentId, {
-              data: finalDashboardData,
-              description,
-            });
+          ? await attachments.add(
+              {
+                id: dashboardAttachmentId,
+                type: DASHBOARD_ATTACHMENT_TYPE,
+                description,
+                data: finalDashboardData,
+              },
+              ATTACHMENT_REF_ACTOR.agent
+            )
+          : await attachments.update(
+              dashboardAttachmentId,
+              {
+                data: finalDashboardData,
+                description,
+              },
+              ATTACHMENT_REF_ACTOR.agent
+            );
 
         if (!attachment) {
           throw new Error(`Failed to persist dashboard attachment "${dashboardAttachmentId}".`);

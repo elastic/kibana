@@ -7,7 +7,12 @@
 
 import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  getLatestVersion,
+  type AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import {
@@ -21,6 +26,23 @@ export interface AgentLiveUpdatesSubscriptionParams {
   api: DashboardApi;
   setAttachments: (attachments: DashboardAttachment[]) => void;
 }
+
+const isDashboardMutationOperation = (operation: AttachmentVersionRef['operation']): boolean =>
+  operation === ATTACHMENT_REF_OPERATION.updated || operation === ATTACHMENT_REF_OPERATION.created;
+
+/**
+ * User-actor updated/created refs are ambient client self-sync echoes (the open
+ * dashboard pushing its current snapshot into the conversation). Reapplying those
+ * via setState resets child panels to a stale snapshot and races panel-owned
+ * agent updates (e.g. custom content refine-with-chat).
+ *
+ * Tool-driven writes are recorded as agent (explicit) or system (default when a
+ * tool omits actor). Those are the only refs that should drive live setState.
+ */
+const isToolDrivenDashboardRef = (ref: AttachmentVersionRef, attachmentId: string): boolean =>
+  ref.attachment_id === attachmentId &&
+  isDashboardMutationOperation(ref.operation) &&
+  ref.actor !== ATTACHMENT_REF_ACTOR.user;
 
 /**
  * Creates a subscription that applies LLM-driven dashboard attachment updates
@@ -42,11 +64,8 @@ export const createAgentLiveUpdatesSubscription = ({
       const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
       const incomingAttachments = dashboardAttachments.filter((attachment) => {
         return (
-          event.data.round.input.attachment_refs?.some(
-            (ref) =>
-              ref.attachment_id === attachment.id &&
-              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
-                ref.operation === ATTACHMENT_REF_OPERATION.created)
+          event.data.round.input.attachment_refs?.some((ref) =>
+            isToolDrivenDashboardRef(ref, attachment.id)
           ) === true
         );
       });

@@ -22,15 +22,20 @@ const buildAttachment = (data: Record<string, unknown>) => ({
   versions: [{ version: 1, data }],
 });
 
-const buildRoundCompleteEvent = () => ({
+const buildRoundCompleteEvent = (
+  refs: Array<{
+    attachment_id: string;
+    version: number;
+    operation: string;
+    actor: 'agent' | 'user' | 'system';
+  }>
+) => ({
   type: ChatEventType.roundComplete,
   data: {
     attachments: [buildAttachment({ panels: [] })],
     round: {
       input: {
-        attachment_refs: [
-          { attachment_id: 'attachment-1', version: 1, operation: 'updated', actor: 'user' },
-        ],
+        attachment_refs: refs,
       },
     },
   },
@@ -65,12 +70,81 @@ describe('createAgentLiveUpdatesSubscription', () => {
     return { chatEvents$, setState, subscription };
   };
 
-  it('applies the dashboard state when an attachment is updated', () => {
+  it('applies the dashboard state when an agent updated the attachment', () => {
     const { chatEvents$, setState, subscription } = createHarness();
 
-    chatEvents$.next(buildRoundCompleteEvent());
+    chatEvents$.next(
+      buildRoundCompleteEvent([
+        {
+          attachment_id: 'attachment-1',
+          version: 1,
+          operation: 'updated',
+          actor: 'agent',
+        },
+      ])
+    );
 
     expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('applies the dashboard state when a system-actor tool update is recorded', () => {
+    const { chatEvents$, setState, subscription } = createHarness();
+
+    chatEvents$.next(
+      buildRoundCompleteEvent([
+        {
+          attachment_id: 'attachment-1',
+          version: 1,
+          operation: 'updated',
+          actor: 'system',
+        },
+      ])
+    );
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('applies when a tool-driven ref is present alongside an ambient user ref', () => {
+    const { chatEvents$, setState, subscription } = createHarness();
+
+    chatEvents$.next(
+      buildRoundCompleteEvent([
+        {
+          attachment_id: 'attachment-1',
+          version: 1,
+          operation: 'updated',
+          actor: 'user',
+        },
+        {
+          attachment_id: 'attachment-1',
+          version: 2,
+          operation: 'updated',
+          actor: 'agent',
+        },
+      ])
+    );
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('does not apply the dashboard state for the ambient self-sync (user-actor) ref', () => {
+    const { chatEvents$, setState, subscription } = createHarness();
+
+    chatEvents$.next(
+      buildRoundCompleteEvent([
+        {
+          attachment_id: 'attachment-1',
+          version: 1,
+          operation: 'updated',
+          actor: 'user',
+        },
+      ])
+    );
+
+    expect(setState).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });
 });
