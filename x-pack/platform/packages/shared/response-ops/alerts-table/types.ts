@@ -34,6 +34,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiDataGridToolBarVisibilityOptions,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import type {
   MappingRuntimeFields,
@@ -718,6 +719,8 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
 export interface BulkActionsConfig {
   label: string;
   key: string;
+  icon?: EuiContextMenuPanelItemDescriptor['icon'];
+  groupId?: string;
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;

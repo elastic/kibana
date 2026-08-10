@@ -6,15 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import type { CasesOwner, CasesService } from '../types';
 import { useCaseActions } from './use_case_actions';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { AddToCaseContextMenuItem } from '../components/add_to_case_context_menu_item';
 
 /**
- * Returns "Add to existing case" and "Add to new case" context menu items
- * for the alerts table actions popover.
+ * Returns an "Add to case" context menu item with new and existing case options.
  *
  * Returns an empty array if the cases service is unavailable or the user lacks permissions.
  */
@@ -47,26 +46,29 @@ export const useCaseAlertActionItems = ({
     }
 
     return [
-      <EuiContextMenuItem
-        data-test-subj="add-to-existing-case-action"
-        key="addToExistingCase"
-        onClick={() => {
-          handleAddToExistingCaseClick();
-          onActionExecuted?.();
-        }}
-      >
-        {ADD_TO_EXISTING_CASE}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        data-test-subj="add-to-new-case-action"
-        key="addToNewCase"
-        onClick={() => {
-          handleAddToNewCaseClick();
-          onActionExecuted?.();
-        }}
-      >
-        {ADD_TO_NEW_CASE}
-      </EuiContextMenuItem>,
+      <AddToCaseContextMenuItem
+        key="addToCase"
+        actions={[
+          {
+            id: 'addToNewCase',
+            label: ADD_TO_NEW_CASE,
+            dataTestSubj: 'add-to-new-case-action',
+            onClick: () => {
+              handleAddToNewCaseClick();
+              onActionExecuted?.();
+            },
+          },
+          {
+            id: 'addToExistingCase',
+            label: ADD_TO_EXISTING_CASE,
+            dataTestSubj: 'add-to-existing-case-action',
+            onClick: () => {
+              handleAddToExistingCaseClick();
+              onActionExecuted?.();
+            },
+          },
+        ]}
+      />,
     ];
   }, [
     userCasesPermissions?.createComment,
