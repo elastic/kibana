@@ -6,7 +6,9 @@
  */
 
 import {
+  ensureLegacyCompatibilityAliases,
   hasLegacySecurityAssets,
+  isConcreteIndexOrDataStream,
   migrateLegacySecurityAssets,
 } from './migrate_legacy_security_assets';
 import {
@@ -57,12 +59,34 @@ describe('migrateLegacySecurityAssets', () => {
   const esClient = {
     indices: {
       exists: jest.fn(),
+      get: jest.fn(),
+      getDataStream: jest.fn(),
+      getAlias: jest.fn(),
       updateAliases: jest.fn(),
     },
     ingest: {
       deletePipeline: jest.fn(),
     },
   } as any;
+
+  const mockConcrete = (concreteNames: string[]) => {
+    const concrete = new Set(concreteNames);
+    esClient.indices.getDataStream.mockImplementation(async ({ name }: { name: string }) => {
+      if (concrete.has(name) && name.includes('metadata')) {
+        return { data_streams: [{ name }] };
+      }
+      if (concrete.has(name) && name.includes('updates')) {
+        return { data_streams: [{ name }] };
+      }
+      throw { meta: { statusCode: 404 } };
+    });
+    esClient.indices.get.mockImplementation(async ({ index }: { index: string }) => {
+      if (concrete.has(index)) {
+        return { [index]: {} };
+      }
+      throw { meta: { statusCode: 404 } };
+    });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,27 +98,43 @@ describe('migrateLegacySecurityAssets', () => {
     mockDeleteComponentTemplate.mockResolvedValue(undefined as any);
     mockDeleteIndexTemplate.mockResolvedValue(undefined as any);
     esClient.indices.updateAliases.mockResolvedValue({});
+    esClient.indices.getAlias.mockRejectedValue({ meta: { statusCode: 404 } });
     esClient.ingest.deletePipeline.mockResolvedValue({});
   });
 
   it('returns false from hasLegacySecurityAssets when no legacy assets exist', async () => {
-    esClient.indices.exists.mockResolvedValue(false);
+    mockConcrete([]);
     await expect(hasLegacySecurityAssets(esClient, namespace)).resolves.toBe(false);
+  });
+
+  it('returns false from hasLegacySecurityAssets when only compatibility aliases exist', async () => {
+    // Alias-only: getDataStream/get do not key by the legacy name.
+    esClient.indices.getDataStream.mockRejectedValue({ meta: { statusCode: 404 } });
+    esClient.indices.get.mockImplementation(async ({ index }: { index: string }) => {
+      if (index === `.entities.v2.metadata.security_${namespace}`) {
+        return { [`.entities.v2.metadata.${namespace}`]: { aliases: { [index]: {} } } };
+      }
+      throw { meta: { statusCode: 404 } };
+    });
+
+    await expect(hasLegacySecurityAssets(esClient, namespace)).resolves.toBe(false);
+  });
+
+  it('isConcreteIndexOrDataStream is true only for concrete names', async () => {
+    mockConcrete([`.entities.v2.latest.security_${namespace}-00001`]);
+    await expect(
+      isConcreteIndexOrDataStream(esClient, `.entities.v2.latest.security_${namespace}-00001`)
+    ).resolves.toBe(true);
+    await expect(
+      isConcreteIndexOrDataStream(esClient, `.entities.v2.latest.security_${namespace}`)
+    ).resolves.toBe(false);
   });
 
   it('migrates legacy latest index into the neutral name and deletes legacy', async () => {
     const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
     const newIndex = getLatestEntitiesIndexName(namespace);
 
-    esClient.indices.exists.mockImplementation(async ({ index }: { index: string }) => {
-      if (index === legacyIndex) return true;
-      if (index === `.entities.v2.updates.security_${namespace}`) return false;
-      if (index === `.entities.v2.metadata.security_${namespace}`) return false;
-      if (index === newIndex) return false;
-      if (index === `.entities.v2.updates.${namespace}`) return false;
-      if (index === `.entities.v2.metadata.${namespace}`) return false;
-      return false;
-    });
+    mockConcrete([legacyIndex]);
 
     await migrateLegacySecurityAssets({ esClient, logger, namespace });
 
@@ -108,21 +148,28 @@ describe('migrateLegacySecurityAssets', () => {
       expect.objectContaining({
         source: { index: legacyIndex },
         dest: { index: newIndex },
+        waitForTask: expect.objectContaining({ forever: true }),
       })
     );
     expect(esClient.indices.updateAliases).toHaveBeenCalled();
     expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
+    expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            index: newIndex,
+            alias: `.entities.v2.latest.security_${namespace}`,
+          },
+        },
+      ],
+    });
   });
 
   it('reindexes latest again when neutral index already exists but legacy remains', async () => {
     const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
     const newIndex = getLatestEntitiesIndexName(namespace);
 
-    esClient.indices.exists.mockImplementation(async ({ index }: { index: string }) => {
-      if (index === legacyIndex) return true;
-      if (index === newIndex) return true;
-      return false;
-    });
+    mockConcrete([legacyIndex, newIndex]);
 
     await migrateLegacySecurityAssets({ esClient, logger, namespace });
 
@@ -136,6 +183,7 @@ describe('migrateLegacySecurityAssets', () => {
       expect.objectContaining({
         source: { index: legacyIndex },
         dest: { index: newIndex },
+        waitForTask: expect.objectContaining({ forever: true }),
       })
     );
     expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
@@ -145,10 +193,7 @@ describe('migrateLegacySecurityAssets', () => {
     const legacyMetadata = `.entities.v2.metadata.security_${namespace}`;
     const newMetadata = `.entities.v2.metadata.${namespace}`;
 
-    esClient.indices.exists.mockImplementation(async ({ index }: { index: string }) => {
-      if (index === legacyMetadata) return true;
-      return false;
-    });
+    mockConcrete([legacyMetadata]);
 
     await migrateLegacySecurityAssets({ esClient, logger, namespace });
 
@@ -162,18 +207,84 @@ describe('migrateLegacySecurityAssets', () => {
       expect.objectContaining({
         source: { index: legacyMetadata },
         dest: { index: newMetadata, op_type: 'create' },
+        waitForTask: expect.objectContaining({ forever: true }),
       })
     );
     expect(mockDeleteDataStream).toHaveBeenCalledWith(esClient, legacyMetadata);
+    expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [{ add: { index: newMetadata, alias: legacyMetadata } }],
+    });
+  });
+
+  it('deletes index templates before component templates', async () => {
+    const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
+    mockConcrete([legacyIndex]);
+
+    const callOrder: string[] = [];
+    mockDeleteIndexTemplate.mockImplementation(async () => {
+      callOrder.push('indexTemplate');
+      return undefined as any;
+    });
+    mockDeleteComponentTemplate.mockImplementation(async () => {
+      callOrder.push('componentTemplate');
+      return undefined as any;
+    });
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    const firstIndexTemplate = callOrder.indexOf('indexTemplate');
+    const firstComponentTemplate = callOrder.indexOf('componentTemplate');
+    expect(firstIndexTemplate).toBeGreaterThanOrEqual(0);
+    expect(firstComponentTemplate).toBeGreaterThanOrEqual(0);
+    expect(firstIndexTemplate).toBeLessThan(firstComponentTemplate);
   });
 
   it('is a no-op when only neutral assets exist', async () => {
-    esClient.indices.exists.mockResolvedValue(false);
+    mockConcrete([]);
 
     await migrateLegacySecurityAssets({ esClient, logger, namespace });
 
     expect(mockCreateIndex).not.toHaveBeenCalled();
     expect(mockReindex).not.toHaveBeenCalled();
     expect(mockDeleteIndex).not.toHaveBeenCalled();
+  });
+
+  it('ensureLegacyCompatibilityAliases adds aliases when neutral assets exist and legacy is gone', async () => {
+    const newIndex = getLatestEntitiesIndexName(namespace);
+    const newMetadata = `.entities.v2.metadata.${namespace}`;
+    mockConcrete([newIndex, newMetadata]);
+
+    await ensureLegacyCompatibilityAliases({ esClient, logger, namespace });
+
+    expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            index: newIndex,
+            alias: `.entities.v2.latest.security_${namespace}`,
+          },
+        },
+      ],
+    });
+    expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            index: newMetadata,
+            alias: `.entities.v2.metadata.security_${namespace}`,
+          },
+        },
+      ],
+    });
+  });
+
+  it('ensureLegacyCompatibilityAliases skips when legacy concrete latest still exists', async () => {
+    const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
+    const newIndex = getLatestEntitiesIndexName(namespace);
+    mockConcrete([legacyIndex, newIndex]);
+
+    await ensureLegacyCompatibilityAliases({ esClient, logger, namespace });
+
+    expect(esClient.indices.updateAliases).not.toHaveBeenCalled();
   });
 });

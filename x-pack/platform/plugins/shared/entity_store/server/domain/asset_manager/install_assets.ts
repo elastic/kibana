@@ -36,6 +36,7 @@ import { getMetadataEntityIndexTemplateConfig } from './metadata_index_template'
 import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
 import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 import {
+  ensureLegacyCompatibilityAliases,
   hasLegacySecurityAssets,
   migrateLegacySecurityAssets,
 } from './migrate_legacy_security_assets';
@@ -72,6 +73,10 @@ export async function installSharedElasticsearchAssets({
 
     // Greenfield (or post-migration): ensure neutral indices/data streams exist.
     await installIndicesAndDataStreams(esClient, namespace, logger);
+
+    // Bridge custom / predefined roles still granting `.entities.v2.*.security_*`
+    // until elasticsearch-controller and ES reserved roles ship neutral patterns.
+    await ensureLegacyCompatibilityAliases({ esClient, logger, namespace });
   } catch (error) {
     logger.error(`error installing shared assets in ${namespace}: ${error}`);
     throw error;

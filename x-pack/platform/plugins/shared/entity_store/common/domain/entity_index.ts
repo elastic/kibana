@@ -37,7 +37,11 @@ export const getEntityIndexPattern = <TDataset extends Dataset>({
 }: IndexPatternOptions<TDataset>) =>
   `.${ENTITY_BASE_PREFIX}.${schemaVersion}.${dataset}.${namespace}` as const;
 
-/** @deprecated Legacy Security-scoped index pattern; used only for upgrade migration. */
+/**
+ * @deprecated Legacy Security-scoped index pattern; used only for upgrade migration
+ * and post-migration compatibility aliases so roles granting `.entities.v2.*.security_*`
+ * keep matching after the concrete Security-scoped assets are removed.
+ */
 export const getLegacySecurityEntityIndexPattern = <TDataset extends Dataset>({
   schemaVersion,
   dataset,

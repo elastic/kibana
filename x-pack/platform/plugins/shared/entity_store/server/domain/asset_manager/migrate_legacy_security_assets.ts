@@ -46,6 +46,10 @@ interface MigrateLegacySecurityAssetsOptions {
   namespace: string;
 }
 
+/** Poll intervals for async reindex — large latest indices can exceed HTTP request timeouts. */
+const REINDEX_POLL_MIN_INTERVAL_MS = 5 * 1000;
+const REINDEX_POLL_MAX_INTERVAL_MS = 30 * 1000;
+
 const getLegacyUpdatesDataStreamName = (namespace: string) =>
   getLegacySecurityEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
@@ -60,20 +64,42 @@ const getLegacyMetadataDataStreamName = (namespace: string) =>
     namespace,
   });
 
-const indexOrDataStreamExists = async (
+const getLegacyLatestCompatibilityAlias = (namespace: string) =>
+  getLegacySecurityEntityIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_LATEST,
+    namespace,
+  });
+
+/**
+ * True when `name` is a concrete index or data stream. Returns false when the name
+ * is missing or exists only as an alias (e.g. a post-migration compatibility alias).
+ */
+export async function isConcreteIndexOrDataStream(
   esClient: ElasticsearchClient,
   name: string
-): Promise<boolean> => {
+): Promise<boolean> {
   try {
-    return await esClient.indices.exists({ index: name });
+    const { data_streams: dataStreams } = await esClient.indices.getDataStream({ name });
+    if (dataStreams.some((dataStream) => dataStream.name === name)) {
+      return true;
+    }
+  } catch {
+    // Not a data stream (or not found).
+  }
+
+  try {
+    const indices = await esClient.indices.get({ index: name });
+    // When `name` is only an alias, the response is keyed by concrete index names.
+    return Object.hasOwn(indices, name);
   } catch {
     return false;
   }
-};
+}
 
 /**
  * Returns true when any Security-scoped v2 entity-store assets still exist for the
- * namespace (pre platform / shared-index rename).
+ * namespace (pre platform / shared-index rename). Compatibility aliases alone do not count.
  */
 export async function hasLegacySecurityAssets(
   esClient: ElasticsearchClient,
@@ -85,7 +111,7 @@ export async function hasLegacySecurityAssets(
     getLegacyMetadataDataStreamName(namespace),
   ];
   for (const name of candidates) {
-    if (await indexOrDataStreamExists(esClient, name)) {
+    if (await isConcreteIndexOrDataStream(esClient, name)) {
       return true;
     }
   }
@@ -96,6 +122,20 @@ export async function hasLegacySecurityAssets(
  * Migrates Security-scoped `.entities.v2.*.security_{namespace}` assets to the
  * solution-neutral `.entities.v2.*.{namespace}` names. Safe to call when no legacy
  * assets exist (no-op). New templates/pipelines must already be installed.
+ *
+ * Failure / retry model (no automatic rollback — re-run on next install):
+ * - Legacy sources are deleted only after a successful reindex (or intentional drop
+ *   for the short-retention updates buffer).
+ * - If install fails between reindex and delete, the next install reindexes again
+ *   (`conflicts: 'proceed'`) then deletes.
+ * - If install fails after delete but before compatibility aliases are added,
+ *   {@link ensureLegacyCompatibilityAliases} on the next install restores them.
+ *
+ * Role compatibility: after migration, legacy names are re-attached as aliases on
+ * the neutral assets so custom roles granting `.entities.v2.*.security_*` keep
+ * matching. Predefined roles in elasticsearch-controller (serverless) and
+ * Elasticsearch reserved roles (stateful/ECH) must still be updated in a compatible
+ * release order with this Kibana change.
  */
 export async function migrateLegacySecurityAssets({
   esClient,
@@ -119,6 +159,65 @@ export async function migrateLegacySecurityAssets({
   log.info(`Finished migrating legacy security-scoped entity store assets in ${namespace}`);
 }
 
+/**
+ * Ensures `.entities.v2.latest.security_{ns}` and `.entities.v2.metadata.security_{ns}`
+ * exist as aliases on the neutral assets once the concrete legacy sources are gone.
+ * Idempotent; safe on greenfield (bridges predefined roles still granting `security_*`
+ * until elasticsearch-controller / ES reserved roles ship the neutral patterns).
+ *
+ * Ordering: an alias cannot share a name with a live index or data stream, so this
+ * must run only after legacy concrete assets have been deleted (or never existed).
+ */
+export async function ensureLegacyCompatibilityAliases({
+  esClient,
+  logger,
+  namespace,
+}: MigrateLegacySecurityAssetsOptions): Promise<void> {
+  const log = logger.get('migrate_legacy_security_assets');
+  const newIndex = getLatestEntitiesIndexName(namespace);
+  const legacyLatestAlias = getLegacyLatestCompatibilityAlias(namespace);
+  const legacyLatestConcrete = getLegacySecurityLatestEntitiesIndexName(namespace);
+  const newMetadata = getMetadataEntitiesDataStreamName(namespace);
+  const legacyMetadataAlias = getLegacyMetadataDataStreamName(namespace);
+
+  if (
+    (await isConcreteIndexOrDataStream(esClient, newIndex)) &&
+    !(await isConcreteIndexOrDataStream(esClient, legacyLatestConcrete)) &&
+    !(await isConcreteIndexOrDataStream(esClient, legacyLatestAlias))
+  ) {
+    await addAliasIfMissing(esClient, newIndex, legacyLatestAlias, log);
+  }
+
+  if (
+    (await isConcreteIndexOrDataStream(esClient, newMetadata)) &&
+    !(await isConcreteIndexOrDataStream(esClient, legacyMetadataAlias))
+  ) {
+    await addAliasIfMissing(esClient, newMetadata, legacyMetadataAlias, log);
+  }
+}
+
+async function addAliasIfMissing(
+  esClient: ElasticsearchClient,
+  index: string,
+  alias: string,
+  logger: Logger
+): Promise<void> {
+  try {
+    const existing = await esClient.indices.getAlias({ name: alias });
+    if (Object.hasOwn(existing, index)) {
+      logger.debug(`Legacy compatibility alias ${alias} already points at ${index}`);
+      return;
+    }
+  } catch {
+    // Alias does not exist yet (404).
+  }
+
+  await esClient.indices.updateAliases({
+    actions: [{ add: { index, alias } }],
+  });
+  logger.info(`Added legacy compatibility alias ${alias} → ${index}`);
+}
+
 async function migrateLatestIndex({
   esClient,
   logger,
@@ -128,8 +227,7 @@ async function migrateLatestIndex({
   const newIndex = getLatestEntitiesIndexName(namespace);
   const alias = getEntitiesAlias(ENTITY_LATEST, namespace);
 
-  const legacyExists = await indexOrDataStreamExists(esClient, legacyIndex);
-  if (!legacyExists) {
+  if (!(await isConcreteIndexOrDataStream(esClient, legacyIndex))) {
     return;
   }
 
@@ -142,6 +240,12 @@ async function migrateLatestIndex({
   await reindex(esClient, {
     source: { index: legacyIndex },
     dest: { index: newIndex },
+    waitForTask: {
+      logger,
+      minTimeout: REINDEX_POLL_MIN_INTERVAL_MS,
+      maxTimeout: REINDEX_POLL_MAX_INTERVAL_MS,
+      forever: true,
+    },
   });
   logger.info(`Reindexed ${legacyIndex} → ${newIndex}`);
 
@@ -159,6 +263,9 @@ async function migrateLatestIndex({
 
   await deleteIndex(esClient, legacyIndex);
   logger.debug(`Deleted legacy latest index ${legacyIndex}`);
+
+  // Must run after delete: alias name must not collide with a live index.
+  await addAliasIfMissing(esClient, newIndex, getLegacyLatestCompatibilityAlias(namespace), logger);
 }
 
 async function migrateUpdatesDataStream({
@@ -169,12 +276,12 @@ async function migrateUpdatesDataStream({
   const legacyStream = getLegacyUpdatesDataStreamName(namespace);
   const newStream = getUpdatesEntitiesDataStreamName(namespace);
 
-  if (!(await indexOrDataStreamExists(esClient, legacyStream))) {
+  if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {
     return;
   }
 
   // Updates is a short-retention extraction buffer — recreate under the new name.
-  if (!(await indexOrDataStreamExists(esClient, newStream))) {
+  if (!(await isConcreteIndexOrDataStream(esClient, newStream))) {
     await createDataStream(esClient, newStream, { throwIfExists: false });
   }
   await deleteDataStream(esClient, legacyStream);
@@ -189,7 +296,7 @@ async function migrateMetadataDataStream({
   const legacyStream = getLegacyMetadataDataStreamName(namespace);
   const newStream = getMetadataEntitiesDataStreamName(namespace);
 
-  if (!(await indexOrDataStreamExists(esClient, legacyStream))) {
+  if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {
     return;
   }
 
@@ -199,11 +306,20 @@ async function migrateMetadataDataStream({
   await reindex(esClient, {
     source: { index: legacyStream },
     dest: { index: newStream, op_type: 'create' },
+    waitForTask: {
+      logger,
+      minTimeout: REINDEX_POLL_MIN_INTERVAL_MS,
+      maxTimeout: REINDEX_POLL_MAX_INTERVAL_MS,
+      forever: true,
+    },
   });
   logger.info(`Reindexed metadata ${legacyStream} → ${newStream}`);
 
   await deleteDataStream(esClient, legacyStream);
   logger.debug(`Deleted legacy metadata data stream ${legacyStream}`);
+
+  // Alias name equals the former data-stream name — only safe after delete.
+  await addAliasIfMissing(esClient, newStream, legacyStream, logger);
 }
 
 async function cleanupLegacyTemplatesAndPipelines({
@@ -219,13 +335,9 @@ async function cleanupLegacyTemplatesAndPipelines({
     getLegacySecurityMetadataComponentTemplateName(namespace),
   ];
 
-  await Promise.all(
-    componentTemplates.map(async (name) => {
-      await deleteComponentTemplate(esClient, name);
-      logger.debug(`Deleted legacy component template ${name}`);
-    })
-  );
-
+  // Delete index templates before component templates: ES rejects deleting a component
+  // template still referenced by an index template's composed_of unless it is listed in
+  // that template's ignore_missing_component_templates (the metadata template is not).
   await Promise.all([
     deleteIndexTemplate(esClient, getLegacySecurityLatestIndexTemplateId(namespace)),
     deleteIndexTemplate(esClient, getLegacySecurityUpdatesIndexTemplateId(namespace)),
@@ -240,4 +352,11 @@ async function cleanupLegacyTemplatesAndPipelines({
       { ignore: [404] }
     ),
   ]);
+
+  await Promise.all(
+    componentTemplates.map(async (name) => {
+      await deleteComponentTemplate(esClient, name);
+      logger.debug(`Deleted legacy component template ${name}`);
+    })
+  );
 }
