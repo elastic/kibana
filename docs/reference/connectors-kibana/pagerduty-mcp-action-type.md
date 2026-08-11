@@ -34,25 +34,25 @@ The PagerDuty connector exposes the following actions:
 `getUserData`
 :   Return the current PagerDuty user — the account that owns the API key. Returns id, name, email, summary, role, and teams. Use this to confirm which user the connector is authenticated as and to obtain your user ID and email for write actions that require the `from` parameter.
 
-`triggerIncident`
+`triggerIncident` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new PagerDuty incident. Requires a service ID (use `listServices` to find one), an incident title, and the `from` email of the acting user (call `getUserData` to retrieve it). Optionally accepts urgency, a body, an escalation policy override, and direct user assignments.
 
-`acknowledgeIncident`
+`acknowledgeIncident` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Acknowledge an active PagerDuty incident by its ID. Moves the incident status from "triggered" to "acknowledged". Requires the incident ID and the `from` email of the acting user.
 
-`resolveIncident`
+`resolveIncident` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Resolve a PagerDuty incident by its ID. Moves the incident status to "resolved". Requires the incident ID and the `from` email of the acting user.
 
-`updateIncident`
+`updateIncident` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Update one or more fields on an existing PagerDuty incident (title, status, urgency, priority, or assignments). Requires the incident ID and the `from` email of the acting user.
 
-`listServices`
+`listServices` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   List PagerDuty services. Supports free-text search and filtering by team IDs. Use this to look up a service ID before triggering an incident.
 
-`addResponders`
+`addResponders` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Request additional responders for an active PagerDuty incident. Requires the incident ID, your user ID (call `getUserData` to retrieve it), a message, and at least one user ID or escalation policy ID to notify.
 
-`runResponsePlay`
+`runResponsePlay` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Execute a predefined PagerDuty response play against an incident. Requires the incident ID, the response play ID, the `from` email, and your user ID (call `getUserData` to retrieve it).
 
 `listIncidents`
