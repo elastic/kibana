@@ -1228,7 +1228,13 @@ export const LensTopNavMenu = ({
         spacing="compact"
       />
       <MountPointPortal setMountPoint={setHeaderActionMenu}>
-        <span className="kbnTopNavMenu__wrapper hide-for-sharing">
+        <span
+          className="kbnTopNavMenu__wrapper hide-for-sharing"
+          css={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
           <TopNavMenuBadges badges={legacyBadges} />
           <TopNavMenuItems config={topNavConfig} popoverBreakpoints={['xs', 's', 'm']} />
         </span>
