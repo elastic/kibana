@@ -128,6 +128,23 @@ describe('workflowExecutionLoop', () => {
     expect(params.workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
+  it('marks abort-with-error-reason (e.g. timeout) as FAILED and captures the error', async () => {
+    const params = createParams();
+    const abortController = new AbortController();
+    const timeoutError = new Error('Pre-LLM anonymization timed out after 5000ms');
+    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    abortController.abort(timeoutError);
+    await loopPromise;
+
+    expect(params.workflowExecutionCursor.captureError).toHaveBeenCalledWith(timeoutError);
+    expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: ExecutionStatus.FAILED,
+      })
+    );
+    expect(params.workflowExecutionCursor.stop).toHaveBeenCalled();
+  });
+
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
     const abortController = new AbortController();

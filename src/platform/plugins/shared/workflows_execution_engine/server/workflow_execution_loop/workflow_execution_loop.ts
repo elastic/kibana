@@ -56,12 +56,25 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       return;
     }
 
-    params.workflowExecutionState.updateWorkflowExecution({
-      cancelRequested: true,
-      cancelledAt: new Date().toISOString(),
-      cancellationReason: 'Task aborted',
-      status: ExecutionStatus.CANCELLED,
-    });
+    const reason = params.signal.reason;
+    // When the abort carries an explicit error (e.g. a pre-LLM or sync-execution
+    // timeout), treat it as FAILED so the error detail is surfaced to callers.
+    // A plain abort (no reason, or an AbortError from a no-arg abort()) keeps
+    // CANCELLED semantics — that represents an intentional stop (user disconnect).
+    const isFailureAbort = reason instanceof Error && reason.name !== 'AbortError';
+    if (isFailureAbort) {
+      workflowExecutionCursor.captureError(reason);
+      params.workflowExecutionState.updateWorkflowExecution({
+        status: ExecutionStatus.FAILED,
+      });
+    } else {
+      params.workflowExecutionState.updateWorkflowExecution({
+        cancelRequested: true,
+        cancelledAt: new Date().toISOString(),
+        cancellationReason: 'Task aborted',
+        status: ExecutionStatus.CANCELLED,
+      });
+    }
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
     workflowExecutionCursor.stop();
