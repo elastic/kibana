@@ -25,7 +25,7 @@ export const CannotReadFileCallout: FC = () => {
         text={
           <FormattedMessage
             id="xpack.ml.importExport.importFlyout.cannotReadFileCallout.body"
-            defaultMessage="Please select a file contained Machine Learning jobs which have been exported from Kibana using the Export Jobs option"
+            defaultMessage="Please select a file containing Machine Learning jobs which have been exported from Kibana using the Export Jobs option"
           />
         }
       />
