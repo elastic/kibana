@@ -85,18 +85,14 @@ spaceTest.describe(
           refresh: true,
         });
 
-        await expect
-          .poll(
-            async () => {
-              await discover.submitQuery();
-              await discover.waitUntilSearchingHasFinished();
-              await unifiedFieldList.waitUntilSidebarHasLoaded();
-              return (await discover.getHitCountInt()) === 2;
-            },
-            { timeout: 30_000, intervals: [1_000] }
-          )
-          .toBe(true);
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
 
+        // Waiting for the second document keeps the field assertion below meaningful: the
+        // sidebar has already refreshed for this fetch, so `b` is absent because it has no
+        // values, not because the list has yet to catch up.
+        expect(await discover.getHitCountInt()).toBe(2);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
           '@timestamp',
           'a',

@@ -389,12 +389,19 @@ export class DataGrid {
     return selectedMode.trim() as DataGridComparisonDiffMode;
   }
 
+  /**
+   * The rendered field-name cells of the comparison table. Exposed as a `Locator` so callers
+   * can assert on it with auto-retry (e.g. `expect(cells).toHaveText([...])`) while the table
+   * is still catching up with newly selected columns.
+   */
+  getComparisonFieldNameCells(): Locator {
+    return this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .locator('[data-test-subj="unifiedDataTableComparisonFieldName"]');
+  }
+
   async getComparisonFieldNames(): Promise<string[]> {
-    const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
-    const fieldNames = comparisonGrid.locator(
-      '[data-test-subj="unifiedDataTableComparisonFieldName"]'
-    );
-    return fieldNames.allInnerTexts();
+    return this.getComparisonFieldNameCells().allInnerTexts();
   }
 
   async getComparisonFieldCount(): Promise<number> {

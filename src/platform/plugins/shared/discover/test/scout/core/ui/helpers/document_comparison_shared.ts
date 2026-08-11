@@ -90,9 +90,9 @@ export const runDocumentComparisonSuite = ({
             await unifiedFieldList.clickFieldListItemAdd('@message');
             await unifiedFieldList.clickFieldListItemAdd('agent');
 
-            await expect
-              .poll(() => dataGrid.getComparisonFieldNames())
-              .toStrictEqual(SELECTED_FIELD_NAMES);
+            // The comparison table re-renders as each column is added, so assert on the cells
+            // themselves and let the assertion retry until the table has caught up.
+            await expect(dataGrid.getComparisonFieldNameCells()).toHaveText(SELECTED_FIELD_NAMES);
           });
 
           await spaceTest.step('allows changing diff modes', async () => {

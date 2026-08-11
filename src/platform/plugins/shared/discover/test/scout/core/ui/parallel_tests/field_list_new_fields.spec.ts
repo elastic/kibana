@@ -80,20 +80,15 @@ spaceTest.describe(
           refresh: true,
         });
 
-        await expect
-          .poll(
-            async () => {
-              await discover.submitQuery();
-              await discover.waitUntilSearchingHasFinished();
-              await unifiedFieldList.waitUntilSidebarHasLoaded();
-              return (
-                (await discover.getHitCountInt()) === 2 &&
-                (await unifiedFieldList.getAvailableFieldCount()) === 3
-              );
-            },
-            { timeout: 30_000, intervals: [1_000] }
-          )
-          .toBe(true);
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        expect(await discover.getHitCountInt()).toBe(2);
+        // The document is already visible on this fetch, but the sidebar lists its new field a
+        // moment later. Waiting on the field itself is enough; re-running the query is not what
+        // makes it appear.
+        await expect(unifiedFieldList.getAvailableField('b')).toBeVisible();
 
         expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).toStrictEqual([
           '@timestamp',

@@ -94,8 +94,9 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
             newTimeField: 'timestamp',
           });
           await unifiedFieldList.waitUntilSidebarHasLoaded();
+          await discover.waitUntilSearchingHasFinished();
 
-          await expect.poll(() => discover.getHitCountInt()).toBe(3);
+          expect(await discover.getHitCountInt()).toBe(3);
           expect(await unifiedFieldList.getAvailableFieldCount()).toBe(3);
           await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
           expect(await datePicker.timePickerExists()).toBe(true);
@@ -107,8 +108,9 @@ spaceTest.describe('Discover — data view flyout', { tag: '@local-stateful-clas
           newTimeField: "--- I don't want to use the time filter ---",
         });
         await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await discover.waitUntilSearchingHasFinished();
 
-        await expect.poll(() => discover.getHitCountInt()).toBe(4);
+        expect(await discover.getHitCountInt()).toBe(4);
         expect(await unifiedFieldList.getAvailableFieldCount()).toBe(3);
         await expect(page.testSubj.locator('unifiedHistogramChart')).toBeHidden();
         expect(await datePicker.timePickerExists()).toBe(false);

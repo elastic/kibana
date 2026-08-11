@@ -99,8 +99,9 @@ spaceTest.describe('Discover — data view creation', { tag: '@local-stateful-cl
 
     await discover.createDataViewFromSearchBar({ name: INDEX_000001, adHoc: false });
     await unifiedFieldList.waitUntilSidebarHasLoaded();
+    await discover.waitUntilSearchingHasFinished();
 
-    await expect.poll(() => discover.getHitCountInt()).toBe(1);
+    expect(await discover.getHitCountInt()).toBe(1);
     expect(await unifiedFieldList.getAvailableFieldCount()).toBe(2);
   });
 });
