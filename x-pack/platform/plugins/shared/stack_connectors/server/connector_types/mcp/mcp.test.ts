@@ -64,7 +64,9 @@ jest.mock('./auth_helpers', () => ({
 
 // Mock the build_custom_fetch module
 jest.mock('./build_custom_fetch', () => ({
-  buildCustomFetch: jest.fn().mockReturnValue(jest.fn()),
+  buildCustomFetch: jest
+    .fn()
+    .mockReturnValue({ fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) }),
 }));
 
 import { buildCustomFetch } from './build_custom_fetch';
@@ -116,14 +118,21 @@ describe('McpConnector', () => {
     const { McpClient } = require('@kbn/mcp-client');
     McpClient.mockImplementation(() => mockMcpClient);
 
-    connector = new McpConnector({
-      configurationUtilities: actionsConfigMock.create(),
-      connector: { id: 'test-connector-1', type: CONNECTOR_ID },
-      config: defaultConfig,
-      secrets: defaultSecrets,
-      logger,
-      services,
-    });
+    const mockFetchResource = { fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
+    const mockConfiguredFetchFactory = jest.fn().mockReturnValue(mockFetchResource);
+    (buildCustomFetch as jest.Mock).mockReturnValue(mockFetchResource);
+
+    connector = new McpConnector(
+      {
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: 'test-connector-1', type: CONNECTOR_ID },
+        config: defaultConfig,
+        secrets: defaultSecrets,
+        logger,
+        services,
+      },
+      mockConfiguredFetchFactory
+    );
   });
 
   describe('constructor', () => {
@@ -138,15 +147,15 @@ describe('McpConnector', () => {
       expect(typeof connector.callTool).toBe('function');
     });
 
-    it('should build a custom fetch from configurationUtilities and pass it to McpClient', () => {
+    it('should build a custom fetch from the configuredFetchFactory and pass it to McpClient', () => {
       const mockBuildCustomFetch = buildCustomFetch as jest.Mock;
+      // The new signature: buildCustomFetch(factory, targetUrl)
       expect(mockBuildCustomFetch).toHaveBeenCalledWith(
-        expect.anything(),
-        logger,
+        expect.any(Function),
         defaultConfig.serverUrl
       );
 
-      const returnedFetch = mockBuildCustomFetch.mock.results[0].value;
+      const returnedResource = mockBuildCustomFetch.mock.results[0].value;
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { McpClient } = require('@kbn/mcp-client');
@@ -156,7 +165,7 @@ describe('McpConnector', () => {
           url: defaultConfig.serverUrl,
         }),
         expect.objectContaining({
-          fetch: returnedFetch,
+          fetch: returnedResource.fetch,
         })
       );
     });
@@ -763,14 +772,19 @@ describe('McpConnector', () => {
       };
       McpClient.mockImplementationOnce(() => mockMcpClient2);
 
-      const connector2 = new McpConnector({
-        configurationUtilities: actionsConfigMock.create(),
-        connector: { id: 'test-connector-2', type: CONNECTOR_ID },
-        config: defaultConfig,
-        secrets: defaultSecrets,
-        logger,
-        services,
-      });
+      const connector2 = new McpConnector(
+        {
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: 'test-connector-2', type: CONNECTOR_ID },
+          config: defaultConfig,
+          secrets: defaultSecrets,
+          logger,
+          services,
+        },
+        jest
+          .fn()
+          .mockReturnValue({ fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) })
+      );
 
       mockMcpClient.isConnected.mockReturnValueOnce(false).mockReturnValueOnce(true);
       mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
@@ -807,14 +821,19 @@ describe('McpConnector', () => {
       };
       McpClient.mockImplementationOnce(() => mockMcpClient2);
 
-      const connectorInstance2 = new McpConnector({
-        configurationUtilities: actionsConfigMock.create(),
-        connector: { id: 'test-connector-1', type: CONNECTOR_ID }, // Same id as first connector
-        config: defaultConfig,
-        secrets: defaultSecrets,
-        logger,
-        services,
-      });
+      const connectorInstance2 = new McpConnector(
+        {
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: 'test-connector-1', type: CONNECTOR_ID }, // Same id as first connector
+          config: defaultConfig,
+          secrets: defaultSecrets,
+          logger,
+          services,
+        },
+        jest
+          .fn()
+          .mockReturnValue({ fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) })
+      );
 
       mockMcpClient.isConnected.mockReturnValueOnce(false).mockReturnValueOnce(true);
       mockMcpClient.connect.mockResolvedValue({ connected: true, capabilities: {} });
