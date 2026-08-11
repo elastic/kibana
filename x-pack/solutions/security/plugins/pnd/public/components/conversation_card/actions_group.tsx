@@ -18,6 +18,7 @@ import {
 import type { RecommendedAction } from '@kbn/pnd-common';
 import { type Investigation } from '@kbn/pnd-common';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
+import { BaseActions } from './base_actions';
 
 const ACTION_ICONS_MAP: Record<RecommendedAction, 'gear' | 'lock' | 'flag' | 'external'> = {
   contain: 'lock',
@@ -108,6 +109,9 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
               }}
             />
           </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BaseActions investigation={investigation} onOpen={onOpen} onOpenChat={onOpenChat} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
