@@ -148,6 +148,7 @@ export const ConversationsPage: React.FC = () => {
               briefingId={group.id}
               briefingType={group.id as RecommendedAction}
               briefingList={group.items}
+              isFiltered={filteredQueueItems.length !== sortedConversations.length}
             />
           ))
         : null}

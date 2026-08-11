@@ -31,6 +31,7 @@ interface ConversationQueueProps {
   briefingId: string;
   briefingType: RecommendedAction;
   briefingList: Investigation[];
+  isFiltered?: boolean;
 }
 
 const CONVERSATION_QUEUE_HEADER_DOT_SIZE = 6;
@@ -50,7 +51,7 @@ const StyledAccordion = styled(EuiAccordion)`
 `;
 
 export const ConversationQueue = memo<ConversationQueueProps>(
-  ({ briefingId, briefingType, briefingList }) => {
+  ({ briefingId, briefingType, briefingList, isFiltered = false }) => {
     const { euiTheme } = useEuiTheme();
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -118,8 +119,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             </EuiFlexGroup>
           ) : (
             <EuiPanel>
-              <EuiText size="s" color="subdued">
-                {EMPTY_CONVERSATION_QUEUE}
+              <EuiText size="xs" color="subdued">
+                {isFiltered
+                  ? EMPTY_CONVERSATION_QUEUE.emptyQueueWithFilter
+                  : EMPTY_CONVERSATION_QUEUE.emptyQueue}
               </EuiText>
             </EuiPanel>
           )}
