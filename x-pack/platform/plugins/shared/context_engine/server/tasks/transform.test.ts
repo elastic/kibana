@@ -109,7 +109,7 @@ const toolRow = (overrides: Partial<ExecuteToolSpan> = {}): ExecuteToolSpan => (
   '@timestamp': '2026-07-08T12:10:30.000Z',
   trace_id: 'trace-1',
   span_id: 'span-1',
-  'attributes.gen_ai.tool.name': 'execute_esql',
+  'attributes.gen_ai.tool.name': 'platform.core.execute_esql',
   'attributes.gen_ai.tool.call.id': 'call-1',
   'attributes.gen_ai.tool.call.arguments': JSON.stringify({
     query: 'FROM ai-index-idx-foo | LIMIT 10',
@@ -144,7 +144,7 @@ describe('build', () => {
     expect(signal['@timestamp']).toBe('2026-07-08T12:10:30.000Z');
     expect(signal.data.producer).toBe(SIGNAL_PRODUCER);
     expect(signal.data.span_id).toBe('span-1');
-    expect(signal.data.tool).toBe('execute_esql');
+    expect(signal.data.tool).toBe('platform.core.execute_esql');
     expect(signal.data.agent).toEqual({ name: 'support-agent', id: 'agent-1', class: 'user' });
     expect(signal.data.conversation_id).toBe('conversation-1');
     expect(signal.data.query).toBe('FROM ai-index-idx-foo | LIMIT 10');

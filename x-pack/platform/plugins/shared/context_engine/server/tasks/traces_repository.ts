@@ -17,6 +17,13 @@ export const MAX_ROWS_PER_QUERY = 1000;
 
 const TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
 const TRACES_INDEX_PATTERN = `${TRACES_INDEX_PREFIX}*`;
+
+/**
+ * The only tool whose spans become signals: it runs an ES|QL query and returns rows.
+ * Filtering at read-time keeps non-ES|QL tool calls out of the per-run row budget so
+ * they are never fetched only to be discarded by `build()` (query_kind === 'other').
+ */
+const EXECUTE_ESQL_TOOL_NAME = 'platform.core.execute_esql';
 const BACKING_INDEX_PREFIX = '.ds-';
 const GENERATIONAL_SUFFIX = /-\d{4}\.\d{2}\.\d{2}-\d{6}$/;
 
@@ -108,7 +115,7 @@ export const queryExecuteToolSpans = async (
 ): Promise<ToolSpanReadRow[]> => {
   const query = `
 FROM ${TRACES_INDEX_PATTERN} METADATA _index
-| WHERE attributes.gen_ai.operation.name == "execute_tool"${
+| WHERE attributes.gen_ai.operation.name == "execute_tool" AND attributes.gen_ai.tool.name == "${EXECUTE_ESQL_TOOL_NAME}"${
     watermark ? '\n| WHERE @timestamp >= ?watermark' : ''
   }
 | SORT @timestamp ASC

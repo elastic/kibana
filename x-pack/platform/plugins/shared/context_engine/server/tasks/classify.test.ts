@@ -15,7 +15,7 @@ const buildSignal = (data: Partial<EsqlToolCallSignal['data']> = {}): EsqlToolCa
   signal_type: 'tool_call',
   tags: [],
   data: {
-    tool: 'execute_esql',
+    tool: 'platform.core.execute_esql',
     query_kind: 'raw_access',
     target_index: 'logs-*',
     status: 'Ok',

@@ -123,7 +123,7 @@ const toolRow = (overrides: Partial<EsqlRow> = {}): EsqlRow => ({
   '@timestamp': '2026-07-08T12:10:30.000Z',
   trace_id: 'trace-1',
   span_id: 'span-1',
-  'attributes.gen_ai.tool.name': 'execute_esql',
+  'attributes.gen_ai.tool.name': 'platform.core.execute_esql',
   'attributes.gen_ai.tool.call.id': 'call-1',
   'attributes.gen_ai.tool.call.arguments': JSON.stringify({ query: 'FROM logs-* | LIMIT 10' }),
   'attributes.gen_ai.tool.call.result': JSON.stringify({ columns: ['message'], values: [] }),
@@ -382,6 +382,17 @@ describe('signal generator task run()', () => {
       arg.query.includes('invoke_agent')
     );
     expect(invokeCall?.[0].params).toEqual(['trace-mgmt']);
+  });
+
+  it('reads only execute_esql tool spans (filters non-ES|QL tools at read-time)', async () => {
+    const { esClient } = await run({ toolRows: [toolRow()], agentRows: [] });
+
+    const toolCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
+      arg.query.includes('execute_tool')
+    );
+    expect(toolCall?.[0].query).toContain(
+      'attributes.gen_ai.tool.name == "platform.core.execute_esql"'
+    );
   });
 
   it('keeps the watermark unchanged when the batch is aborted mid-loop', async () => {
