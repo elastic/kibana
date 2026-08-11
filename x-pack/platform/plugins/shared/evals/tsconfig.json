@@ -48,6 +48,7 @@
     "@kbn/core-spaces-common",
     "@kbn/crypto",
     "@kbn/std",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/ui-callout"
   ]
 }

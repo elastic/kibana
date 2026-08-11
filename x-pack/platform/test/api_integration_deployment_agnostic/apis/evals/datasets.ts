@@ -24,13 +24,16 @@ import {
   type UpdateEvaluationDatasetResponse,
   type UpsertEvaluationDatasetResponse,
 } from '@kbn/evals-common';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../services';
-import { getEvalsApiClientForRole } from './helpers/api_client';
+import { getEvalsApiClientForCustomRole, getEvalsApiClientForRole } from './helpers/api_client';
 import { uniqueSuffix } from './helpers/fixtures';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const customRoleScopedSupertest = getService('customRoleScopedSupertest');
+  const samlAuth = getService('samlAuth');
   const spaces = getService('spaces');
 
   let adminClient: SupertestWithRoleScopeType;
@@ -428,6 +431,126 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             space_ids: [`missing-space-${suffix}`],
           })
           .expect(400);
+      });
+
+      it('reassigns spaces through an update', async () => {
+        const name = `FTR Reassign ${suffix}`;
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'starts in the default space' })
+          .expect(200);
+
+        const { dataset_id: datasetId } = body as CreateEvaluationDatasetResponse;
+        createdDatasetIds.push({ id: datasetId, path: datasetPath });
+
+        const { body: updated } = await adminClient
+          .put(datasetPath(datasetId))
+          .send({ space_ids: ['default', spaceId] })
+          .expect(200);
+
+        expect((updated as UpdateEvaluationDatasetResponse).space_ids?.sort()).to.eql(
+          ['default', spaceId].sort()
+        );
+        await adminClient.get(inSpace(datasetPath(datasetId))).expect(200);
+      });
+
+      it('refuses to drop the space the update is made from', async () => {
+        const name = `FTR Self Removal ${suffix}`;
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'shared', space_ids: ['default', spaceId] })
+          .expect(200);
+
+        const { dataset_id: datasetId } = body as CreateEvaluationDatasetResponse;
+        createdDatasetIds.push({ id: datasetId, path: datasetPath });
+
+        await adminClient
+          .put(datasetPath(datasetId))
+          .send({ space_ids: [spaceId] })
+          .expect(400);
+      });
+
+      describe('privileges', () => {
+        // Manages evaluations in `spaceId`, only reads them in `readOnlySpaceId`,
+        // and cannot see the default space at all.
+        const readOnlySpaceId = `evals-readonly-${suffix}`;
+        let scopedClient: SupertestWithRoleScopeType;
+
+        before(async () => {
+          await spaces.create({
+            id: readOnlySpaceId,
+            name: 'Evals Read Only',
+            disabledFeatures: [],
+          });
+          await samlAuth.setCustomRole({
+            elasticsearch: {},
+            kibana: [
+              { feature: { evals: ['all'] }, spaces: [spaceId] },
+              { feature: { evals: ['read'] }, spaces: [readOnlySpaceId] },
+            ],
+          });
+          scopedClient = await getEvalsApiClientForCustomRole(customRoleScopedSupertest);
+        });
+
+        after(async () => {
+          await scopedClient.destroy();
+          await samlAuth.deleteCustomRole();
+          await spaces.delete(readOnlySpaceId);
+        });
+
+        it('refuses to share into a space the caller can see but cannot manage', async () => {
+          await scopedClient
+            .post(inSpace(EVALS_DATASETS_URL))
+            .send({
+              name: `FTR Unmanageable ${suffix}`,
+              description: 'should be rejected',
+              space_ids: [spaceId, readOnlySpaceId],
+            })
+            .expect(403);
+        });
+
+        it('rejects a space the caller cannot see at all', async () => {
+          await scopedClient
+            .post(inSpace(EVALS_DATASETS_URL))
+            .send({
+              name: `FTR Invisible Space ${suffix}`,
+              description: 'should be rejected',
+              space_ids: [spaceId, 'default'],
+            })
+            .expect(400);
+        });
+
+        it('refuses to assign to all spaces without the privilege everywhere', async () => {
+          await scopedClient
+            .post(inSpace(EVALS_DATASETS_URL))
+            .send({
+              name: `FTR All Spaces ${suffix}`,
+              description: 'should be rejected',
+              space_ids: [ALL_SPACES_ID],
+            })
+            .expect(403);
+        });
+
+        it('hides the ids of spaces the caller cannot see', async () => {
+          const name = `FTR Redacted ${suffix}`;
+          const { body } = await adminClient
+            .post(EVALS_DATASETS_URL)
+            .send({
+              name,
+              description: 'shared with a hidden space',
+              space_ids: ['default', spaceId],
+            })
+            .expect(200);
+
+          const { dataset_id: datasetId } = body as CreateEvaluationDatasetResponse;
+          createdDatasetIds.push({ id: datasetId, path: datasetPath });
+
+          const { body: read } = await scopedClient
+            .get(inSpace(datasetPath(datasetId)))
+            .expect(200);
+
+          expect((read as GetEvaluationDatasetResponse).space_ids).to.eql([spaceId, UNKNOWN_SPACE]);
+        });
       });
     });
   });

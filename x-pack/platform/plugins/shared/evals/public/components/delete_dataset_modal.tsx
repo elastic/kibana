@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiCallOut,
   EuiConfirmModal,
   EuiFieldText,
   EuiFormRow,
@@ -17,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useDeleteDataset, useEvaluationExperiments } from '../hooks/use_evals_api';
 import { useDatasetSharing } from './dataset_spaces';
 
@@ -125,6 +125,86 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
     return CALLOUT_TITLE;
   };
 
+  const calloutText = (
+    <>
+      {isUnshare ? (
+        <>
+          <p>
+            <FormattedMessage
+              id="xpack.evals.deleteDatasetModal.unshareWarning"
+              defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example} other {# examples}} stay available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
+              values={{ examplesCount, remainingCount: spaceCount - 1 }}
+            />
+          </p>
+          {otherSpaceNames.length > 0 ? (
+            <p>
+              <FormattedMessage
+                id="xpack.evals.deleteDatasetModal.remainingSpaces"
+                defaultMessage="It stays in {spaceNames}."
+                values={{ spaceNames: otherSpaceNames.join(', ') }}
+              />
+            </p>
+          ) : null}
+          {hiddenSpaceCount > 0 ? (
+            <p>
+              <FormattedMessage
+                id="xpack.evals.deleteDatasetModal.remainingHiddenSpaces"
+                defaultMessage="It stays in {hiddenSpaceCount, plural, one {# space} other {# spaces}} you do not have access to."
+                values={{ hiddenSpaceCount }}
+              />
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <p>
+            <FormattedMessage
+              id="xpack.evals.deleteDatasetModal.permanentWarning"
+              defaultMessage="Permanently deletes this dataset and its {examplesCount, plural, one {# example} other {# examples}}."
+              values={{ examplesCount }}
+            />
+          </p>
+          {isGlobal ? (
+            <p>
+              <FormattedMessage
+                id="xpack.evals.deleteDatasetModal.allSpacesWarning"
+                defaultMessage="It is available in every space, so it disappears for everyone, not just here."
+              />
+            </p>
+          ) : null}
+        </>
+      )}
+      {isUsageLoading ? (
+        <EuiText size="s">
+          <EuiLoadingSpinner size="s" /> {CHECKING_USAGE}
+        </EuiText>
+      ) : usageCount === 0 ? (
+        <p>
+          <FormattedMessage
+            id="xpack.evals.deleteDatasetModal.noUsage"
+            defaultMessage="No experiment runs have used this dataset yet."
+          />
+        </p>
+      ) : isUnshare ? (
+        <p>
+          <FormattedMessage
+            id="xpack.evals.deleteDatasetModal.unshareUsageWarning"
+            defaultMessage="{usageCount, plural, one {# experiment run has} other {# experiment runs have}} used this dataset. Those results stay under Experiments, but here they will link to a dataset this space can no longer reach."
+            values={{ usageCount }}
+          />
+        </p>
+      ) : (
+        <p>
+          <FormattedMessage
+            id="xpack.evals.deleteDatasetModal.usageWarning"
+            defaultMessage="{usageCount, plural, one {# experiment run has} other {# experiment runs have}} used this dataset. Deleting it keeps those results under Experiments, but they will reference a dataset that no longer exists."
+            values={{ usageCount }}
+          />
+        </p>
+      )}
+    </>
+  );
+
   return (
     <EuiConfirmModal
       aria-label={title}
@@ -137,87 +217,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
       confirmButtonDisabled={!isConfirmed || deleteDataset.isLoading}
       isLoading={deleteDataset.isLoading}
     >
-      <EuiCallOut
-        color="warning"
-        iconType={isUnshare ? 'spaces' : 'warning'}
-        title={getCalloutTitle()}
-      >
-        {isUnshare ? (
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.evals.deleteDatasetModal.unshareWarning"
-                defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example} other {# examples}} stay available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
-                values={{ examplesCount, remainingCount: spaceCount - 1 }}
-              />
-            </p>
-            {otherSpaceNames.length > 0 ? (
-              <p>
-                <FormattedMessage
-                  id="xpack.evals.deleteDatasetModal.remainingSpaces"
-                  defaultMessage="It stays in {spaceNames}."
-                  values={{ spaceNames: otherSpaceNames.join(', ') }}
-                />
-              </p>
-            ) : null}
-            {hiddenSpaceCount > 0 ? (
-              <p>
-                <FormattedMessage
-                  id="xpack.evals.deleteDatasetModal.remainingHiddenSpaces"
-                  defaultMessage="It stays in {hiddenSpaceCount, plural, one {# space} other {# spaces}} you do not have access to."
-                  values={{ hiddenSpaceCount }}
-                />
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.evals.deleteDatasetModal.permanentWarning"
-                defaultMessage="Permanently deletes this dataset and its {examplesCount, plural, one {# example} other {# examples}}."
-                values={{ examplesCount }}
-              />
-            </p>
-            {isGlobal ? (
-              <p>
-                <FormattedMessage
-                  id="xpack.evals.deleteDatasetModal.allSpacesWarning"
-                  defaultMessage="It is available in every space, so it disappears for everyone, not just here."
-                />
-              </p>
-            ) : null}
-          </>
-        )}
-        {isUsageLoading ? (
-          <EuiText size="s">
-            <EuiLoadingSpinner size="s" /> {CHECKING_USAGE}
-          </EuiText>
-        ) : usageCount === 0 ? (
-          <p>
-            <FormattedMessage
-              id="xpack.evals.deleteDatasetModal.noUsage"
-              defaultMessage="No experiment runs have used this dataset yet."
-            />
-          </p>
-        ) : isUnshare ? (
-          <p>
-            <FormattedMessage
-              id="xpack.evals.deleteDatasetModal.unshareUsageWarning"
-              defaultMessage="{usageCount, plural, one {# experiment run has} other {# experiment runs have}} used this dataset. Those results stay under Experiments, but here they will link to a dataset this space can no longer reach."
-              values={{ usageCount }}
-            />
-          </p>
-        ) : (
-          <p>
-            <FormattedMessage
-              id="xpack.evals.deleteDatasetModal.usageWarning"
-              defaultMessage="{usageCount, plural, one {# experiment run has} other {# experiment runs have}} used this dataset. Deleting it keeps those results under Experiments, but they will reference a dataset that no longer exists."
-              values={{ usageCount }}
-            />
-          </p>
-        )}
-      </EuiCallOut>
+      <KbnWarningCallout title={getCalloutTitle()} text={calloutText} />
 
       <EuiSpacer size="m" />
 

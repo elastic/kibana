@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -29,7 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { CodeEditor } from '@kbn/code-editor';
 import {
   API_VERSIONS,
@@ -439,21 +438,17 @@ export function AddToDatasetFlyout({
 
         const toast = coreStart.notifications.toasts.addSuccess({
           title,
-          text: toMountPoint(
-            <EuiButton
-              size="s"
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                ev.preventDefault();
+          actionProps: {
+            primary: {
+              children: VIEW_DATASET_BUTTON,
+              onClick: () => {
                 coreStart.application.navigateToApp('management', {
                   path: `ai/evals/datasets/${datasetId}`,
                 });
                 coreStart.notifications.toasts.remove(toast);
-              }}
-            >
-              {VIEW_DATASET_BUTTON}
-            </EuiButton>,
-            coreStart
-          ),
+              },
+            },
+          },
         });
       };
 
@@ -540,15 +535,12 @@ export function AddToDatasetFlyout({
       >
         {formError ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={ERROR_CALLOUT_TITLE}
-              color="danger"
-              iconType="error"
               size="s"
-            >
-              <p>{formError}</p>
-            </EuiCallOut>
+              text={<p>{formError}</p>}
+            />
             <EuiSpacer size="m" />
           </>
         ) : null}
@@ -624,16 +616,13 @@ export function AddToDatasetFlyout({
               {isSelectedDatasetShared ? (
                 <>
                   <EuiSpacer size="s" />
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     size="s"
-                    color="warning"
-                    iconType="spaces"
                     title={SHARED_DATASET_TITLE}
                     data-test-subj="addToDatasetSharedNotice"
-                  >
-                    <p>{SHARED_DATASET_BODY}</p>
-                  </EuiCallOut>
+                    text={<p>{SHARED_DATASET_BODY}</p>}
+                  />
                   <EuiSpacer size="s" />
                 </>
               ) : null}

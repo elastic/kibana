@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { DatasetSharedNotice, type SharedDatasetAction } from './dataset_shared_notice';
 import { useDatasetSharing } from './use_dataset_sharing';
 import * as i18n from './translations';
@@ -58,16 +59,13 @@ export const SharedChangeConfirmModal: React.FC<SharedChangeConfirmModalProps> =
     >
       {isRemoving ? (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             size="s"
-            color="danger"
-            iconType="spaces"
             title={i18n.REMOVED_SPACES_TITLE}
+            text={<p>{i18n.getRemovedSpacesMessage(removedSpaceNames)}</p>}
             data-test-subj="datasetRemovedSpacesNotice"
-          >
-            <p>{i18n.getRemovedSpacesMessage(removedSpaceNames)}</p>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
         </>
       ) : null}

@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFieldText,
@@ -41,6 +40,7 @@ import {
   type DatasetSummary,
 } from '@kbn/evals-common';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
@@ -435,15 +435,12 @@ export const DatasetsListPage: React.FC = () => {
           <EuiFlyoutBody>
             {createError ? (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
                   size="s"
-                  color="danger"
-                  iconType="error"
                   title={i18n.CREATE_DATASET_FAILED_TITLE}
-                >
-                  <p>{createError}</p>
-                </EuiCallOut>
+                  text={<p>{createError}</p>}
+                />
                 <EuiSpacer size="m" />
               </>
             ) : null}

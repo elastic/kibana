@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useDatasetSharing, type DatasetSharing } from './use_dataset_sharing';
 import * as i18n from './translations';
 
@@ -50,20 +50,21 @@ export const DatasetSharedNotice: React.FC<DatasetSharedNoticeProps> = ({ spaceI
   }
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       size="s"
-      color="warning"
-      iconType="spaces"
       title={isGlobal ? i18n.ALL_SPACES_NOTICE_TITLE : i18n.SHARED_NOTICE_TITLE}
       data-test-subj="datasetSharedNotice"
-    >
-      <p>{getMessage(action, getScope(sharing))}</p>
-      {!isGlobal && otherSpaceNames.length > 0 ? (
-        <p>{i18n.getOtherSpacesSentence(otherSpaceNames)}</p>
-      ) : null}
-      {!isGlobal && hiddenSpaceCount > 0 ? (
-        <p>{i18n.getHiddenSpacesSentence(hiddenSpaceCount)}</p>
-      ) : null}
-    </EuiCallOut>
+      text={
+        <>
+          <p>{getMessage(action, getScope(sharing))}</p>
+          {!isGlobal && otherSpaceNames.length > 0 ? (
+            <p>{i18n.getOtherSpacesSentence(otherSpaceNames)}</p>
+          ) : null}
+          {!isGlobal && hiddenSpaceCount > 0 ? (
+            <p>{i18n.getHiddenSpacesSentence(hiddenSpaceCount)}</p>
+          ) : null}
+        </>
+      }
+    />
   );
 };
