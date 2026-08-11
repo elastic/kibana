@@ -107,7 +107,7 @@ export const Sections: StoryObj<SectionArgs> = {
     numberOfSubsections,
   }) => (
     <FlyoutWrapper title="FlyoutSection">
-      {Array.from({ length: numberOfSections }, (_, i) => (
+      {Array.from({ length: numberOfSections }, (_sectionNumber, i) => (
         <FlyoutSection
           key={i}
           title={SECTION_TITLES[i] ?? `Section ${i + 1}`}
@@ -121,7 +121,7 @@ export const Sections: StoryObj<SectionArgs> = {
           {numberOfSubsections === 0 ? (
             <SampleText />
           ) : (
-            Array.from({ length: numberOfSubsections }, (_, j) => (
+            Array.from({ length: numberOfSubsections }, (_subsectionNumber, j) => (
               <FlyoutSubsection
                 key={j}
                 title={SUBSECTION_TITLES[j] ?? `Subsection ${j + 1}`}
@@ -186,7 +186,7 @@ export const Accordions: StoryObj<AccordionArgs> = {
     initialIsOpen,
   }) => (
     <FlyoutWrapper title="FlyoutAccordion">
-      {Array.from({ length: numberOfSections }, (_, i) => (
+      {Array.from({ length: numberOfSections }, (_sectionNumber, i) => (
         <FlyoutAccordion
           key={i}
           title={SECTION_TITLES[i] ?? `Accordion ${i + 1}`}
@@ -200,7 +200,7 @@ export const Accordions: StoryObj<AccordionArgs> = {
           {numberOfSubsections === 0 ? (
             <SampleText />
           ) : (
-            Array.from({ length: numberOfSubsections }, (_, j) => (
+            Array.from({ length: numberOfSubsections }, (_subsectionNumber, j) => (
               <FlyoutSubsection key={j} title={SUBSECTION_TITLES[j] ?? `Subsection ${j + 1}`}>
                 <SampleText />
               </FlyoutSubsection>
