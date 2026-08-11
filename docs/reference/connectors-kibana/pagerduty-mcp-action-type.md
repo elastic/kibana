@@ -29,6 +29,8 @@ API Key
 
 You can test connectors when you create or edit the connector in {{kib}}.
 
+## Pagerduty connector actions [pagerduty-connector-actions]
+
 The PagerDuty connector exposes the following actions:
 
 `getUserData`
