@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import {
   DATA_STREAM_TYPE_VAR_NAME,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { appContextService } from '../app_context';
+import { _compilePackagePolicyInputs } from '../package_policy';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
@@ -18,6 +23,15 @@ import {
   storedPackagePoliciesToAgentInputs,
   storedPackagePolicyToAgentInputs,
 } from './package_policies_to_agent_inputs';
+
+jest.mock('../app_context');
+jest.mock('../epm/packages/get', () => ({
+  getAgentTemplateAssetsMap: jest.fn().mockResolvedValue(new Map()),
+}));
+jest.mock('../package_policy', () => ({
+  ...jest.requireActual('../package_policy'),
+  _compilePackagePolicyInputs: jest.fn(),
+}));
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -1407,6 +1421,107 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         inputVar: 'input-value',
       },
     ]);
+  });
+});
+
+describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs backfill', () => {
+  const versionedPackagePolicy: PackagePolicy = {
+    id: 'versioned-uuid',
+    name: 'auditd-policy',
+    description: '',
+    created_at: '',
+    created_by: '',
+    updated_at: '',
+    updated_by: '',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    namespace: 'default',
+    package: {
+      name: 'mock_package',
+      title: 'Mock package',
+      version: '0.0.0',
+    },
+    inputs: [{ type: 'test-logs', enabled: true, streams: [] }],
+    revision: 1,
+  };
+
+  const recompiledInputs: PackagePolicyInput[] = [
+    { type: 'test-logs', enabled: true, streams: [] },
+  ];
+
+  const makeSoClient = (existingInputsForVersions: Record<string, unknown>) => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.get.mockResolvedValue({
+      id: versionedPackagePolicy.id,
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: { inputs_for_versions: existingInputsForVersions },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+    return soClient;
+  };
+
+  beforeEach(() => {
+    jest
+      .mocked(appContextService.getExperimentalFeatures)
+      .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
+    jest.mocked(_compilePackagePolicyInputs).mockReturnValue(recompiledInputs);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('recompiles and persists inputs for an agent version missing from inputs_for_versions instead of throwing', async () => {
+    const soClient = makeSoClient({
+      '9.5': [{ type: 'test-logs', enabled: false, streams: [] }],
+    });
+
+    const result = await storedPackagePoliciesToAgentInputs(
+      [versionedPackagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ type: 'test-logs' });
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      {
+        inputs_for_versions: {
+          '9.5': [{ type: 'test-logs', enabled: false, streams: [] }],
+          '9.6': recompiledInputs,
+        },
+      }
+    );
+  });
+
+  it('uses the already compiled inputs for a version present in inputs_for_versions without recompiling', async () => {
+    const soClient = makeSoClient({
+      '9.6': [{ type: 'test-logs', enabled: true, streams: [] }],
+    });
+
+    const result = await storedPackagePoliciesToAgentInputs(
+      [versionedPackagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true
+    );
+
+    expect(result).toHaveLength(1);
+    expect(_compilePackagePolicyInputs).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
   });
 });
 

@@ -33,7 +33,7 @@ import {
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
-import { FleetError, PackagePolicyValidationError } from '../../errors';
+import { PackagePolicyValidationError } from '../../errors';
 import {
   packagePolicyInputAllowsUndefinedDataStreamType,
   getInputEffectiveName,
@@ -338,13 +338,32 @@ export const storedPackagePoliciesToAgentInputs = async (
 
       if (hasVersionSpecificInputs) {
         // Package has version conditions - we should have compiled inputs for this version
-        const versionInputs = inputsForVersions[agentVersion];
+        let versionInputs = inputsForVersions[agentVersion];
         if (!versionInputs) {
-          span?.end();
-          throw new FleetError(
-            `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}. ` +
-              `Available versions: ${Object.keys(inputsForVersions).join(', ')}`
+          // Not backfilled yet, e.g. right after a Kibana upgrade widens the default version
+          // set (see getAgentVersionsForVersionSpecificPolicies) before this package policy has
+          // been recompiled for it. Recompile on the fly and persist the result so subsequent
+          // reads don't have to pay this cost again.
+          versionInputs = await recompileInputsWithAgentVersion(
+            packageInfo!,
+            packagePolicy,
+            agentVersion,
+            soClient!
           );
+          await soClient!
+            .update<PackagePolicySOAttributes>(
+              await getPackagePolicySavedObjectType(),
+              packagePolicy.id,
+              {
+                inputs_for_versions: {
+                  ...inputsForVersions,
+                  [agentVersion]: versionInputs,
+                },
+              }
+            )
+            .catch(() => {
+              // Best-effort cache — the recompiled inputs above are still used for this request.
+            });
         }
         packagePolicyWithUpdatedInputs = {
           ...packagePolicy,
