@@ -78,11 +78,11 @@ describe('ContextLandingPage', () => {
     renderWithProviders(core);
 
     expect(screen.getByTestId('contextLandingPage')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
 
     const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
     expect(createButtons).toHaveLength(1);
     expect(createButtons[0]).toHaveTextContent('Create AI Index');
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
 
     await waitFor(() => expect(core.http.get).toHaveBeenCalled());
   });
@@ -157,7 +157,9 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+    await waitFor(() =>
+      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1)
+    );
   });
 
   it('renders an error prompt when the list API fails', async () => {

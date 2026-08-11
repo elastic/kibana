@@ -17,6 +17,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
 import { toAiIndexHttpItem } from '../../utils/ai_index_content_list_utils';
 import { AiIndexCard } from './ai_index_card';
+import { AiIndexListSkeleton } from './ai_index_list_states';
 
 const GRID_COLUMNS = 3;
 
@@ -25,6 +26,10 @@ export const AiIndexCardGrid = () => {
   const phase = useContentListPhase();
   const { items, totalItems, hasNoResults } = useContentListItems();
   const { setQueryFromText } = useContentListSearch();
+
+  if (phase === 'initialLoad') {
+    return <AiIndexListSkeleton />;
+  }
 
   if (hasNoResults) {
     return (
@@ -62,7 +67,7 @@ export const AiIndexCardGrid = () => {
     );
   }
 
-  if (phase === 'initialLoad' || items.length === 0) {
+  if (items.length === 0) {
     return null;
   }
 

@@ -11,6 +11,7 @@ import React from 'react';
 import { aiIndexOwnerFilter, aiIndexTypeFilter } from '../../utils/ai_index_content_list_utils';
 import { AiIndexCardGrid } from './ai_index_card_grid';
 import { AiIndexListPagination } from './ai_index_list_pagination';
+import { AiIndexListEmpty } from './ai_index_list_states';
 
 const AiIndexTypeFilter = createFilterControl(aiIndexTypeFilter, {
   'data-test-subj': 'contextAiIndexListTypeFilter',
@@ -21,7 +22,7 @@ const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
 });
 
 export const AiIndexListing = () => (
-  <ContentList emptyState={null}>
+  <ContentList emptyState={<AiIndexListEmpty />}>
     <ContentListToolbar data-test-subj="contextAiIndexList">
       <ContentListToolbar.Filters>
         <AiIndexTypeFilter />

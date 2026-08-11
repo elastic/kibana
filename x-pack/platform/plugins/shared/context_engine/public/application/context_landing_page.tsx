@@ -7,6 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useContentListItems } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
@@ -14,36 +15,13 @@ import { CreateAiIndexButton } from './components/create_ai_index_button';
 import {
   AiIndexListing,
   AiIndexListingProvider,
-  AiIndexListEmpty,
   AiIndexListError,
-  AiIndexListSkeleton,
 } from './components/ai_index_list';
-import { useListAiIndices } from './hooks/use_list_ai_indices';
 
-export const ContextLandingPage = () => {
+const ContextLandingPageContent = () => {
   const { euiTheme } = useEuiTheme();
-  const { aiIndices, isLoading, error } = useListAiIndices();
-  const showHeaderCreateButton = isLoading || error !== undefined || aiIndices.length > 0;
-
-  const renderBody = () => {
-    if (isLoading) {
-      return <AiIndexListSkeleton />;
-    }
-
-    if (error) {
-      return <AiIndexListError error={error} />;
-    }
-
-    if (aiIndices.length === 0) {
-      return <AiIndexListEmpty />;
-    }
-
-    return (
-      <AiIndexListingProvider aiIndices={aiIndices}>
-        <AiIndexListing />
-      </AiIndexListingProvider>
-    );
-  };
+  const { isLoading, error, hasNoItems } = useContentListItems();
+  const showHeaderCreateButton = !isLoading && !error && !hasNoItems;
 
   return (
     <KibanaPageTemplate data-test-subj="contextLandingPage">
@@ -63,7 +41,15 @@ export const ContextLandingPage = () => {
           showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
         }
       />
-      <KibanaPageTemplate.Section>{renderBody()}</KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section>
+        {error ? <AiIndexListError error={error} /> : <AiIndexListing />}
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
+
+export const ContextLandingPage = () => (
+  <AiIndexListingProvider>
+    <ContextLandingPageContent />
+  </AiIndexListingProvider>
+);

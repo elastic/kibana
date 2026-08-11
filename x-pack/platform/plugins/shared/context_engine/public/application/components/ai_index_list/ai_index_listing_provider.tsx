@@ -6,30 +6,28 @@
  */
 
 import { ContentListClientProvider } from '@kbn/content-list-provider-client';
-import React, { useMemo, type ReactNode } from 'react';
-import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
+import React, { type ReactNode } from 'react';
+import { useAiIndexFindItems } from '../../hooks/use_list_ai_indices';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   AI_INDICES_PER_PAGE,
   AI_INDEX_LIST_LABELS,
   aiIndexOwnerFilter,
   aiIndexTypeFilter,
-  createFindAiIndices,
 } from '../../utils/ai_index_content_list_utils';
 
 interface AiIndexListingProviderProps {
-  aiIndices: AiIndexHttpItem[];
   children: ReactNode;
 }
 
-export const AiIndexListingProvider = ({ aiIndices, children }: AiIndexListingProviderProps) => {
-  const { services: core } = useKibana();
-  const findItems = useMemo(() => createFindAiIndices(aiIndices), [aiIndices]);
+export const AiIndexListingProvider = ({ children }: AiIndexListingProviderProps) => {
+  const { services } = useKibana();
+  const findItems = useAiIndexFindItems();
 
   return (
     <ContentListClientProvider
       id="context-engine-ai-indices"
-      core={core}
+      core={services}
       labels={AI_INDEX_LIST_LABELS}
       findItems={findItems}
       features={{
