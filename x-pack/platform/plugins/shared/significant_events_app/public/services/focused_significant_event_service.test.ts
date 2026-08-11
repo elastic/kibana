@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { FocusedSignificantEventService } from './focused_significant_event_service';
+
+const getFocusedEvent = (service: FocusedSignificantEventService) =>
+  firstValueFrom(service.focusedEvent$);
 
 const createEvent = (eventId: string): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -22,20 +26,20 @@ const createEvent = (eventId: string): SignificantEvent => ({
 });
 
 describe('FocusedSignificantEventService', () => {
-  it('stores and clears the focused event', () => {
+  it('stores and clears the focused event', async () => {
     const service = new FocusedSignificantEventService();
     const event = createEvent('payment-outage');
 
     service.setFocusedEvent(event);
 
-    expect(service.getFocusedEvent()).toBe(event);
+    expect(await getFocusedEvent(service)).toBe(event);
 
     service.clearFocusedEvent('payment-outage');
 
-    expect(service.getFocusedEvent()).toBeUndefined();
+    expect(await getFocusedEvent(service)).toBeUndefined();
   });
 
-  it('does not clear a newer focused event with an older event id', () => {
+  it('does not clear a newer focused event with an older event id', async () => {
     const service = new FocusedSignificantEventService();
     const firstEvent = createEvent('first-event');
     const secondEvent = createEvent('second-event');
@@ -44,6 +48,6 @@ describe('FocusedSignificantEventService', () => {
     service.setFocusedEvent(secondEvent);
     service.clearFocusedEvent('first-event');
 
-    expect(service.getFocusedEvent()).toBe(secondEvent);
+    expect(await getFocusedEvent(service)).toBe(secondEvent);
   });
 });

@@ -134,10 +134,24 @@ export function AlertDetails() {
     refetchRelatedDashboards,
   } = useRelatedDashboards(alertId, { enabled: canReadAlertRule });
 
-  const { rule, refetch } = useFetchRule({
+  const {
+    rule,
+    isLoading: isLoadingRule,
+    isRuleNotFound,
+    refetch,
+  } = useFetchRule({
     ruleId: ruleId || '',
     enabled: canReadAlertRule,
   });
+
+  const ruleStatus =
+    !canReadAlertRule || isLoadingRule
+      ? 'unknown'
+      : isRuleNotFound
+      ? 'deleted'
+      : rule?.enabled === false
+      ? 'disabled'
+      : 'ok';
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 
@@ -367,7 +381,11 @@ export function AlertDetails() {
           />
         )}
         <EuiSpacer size="l" />
-        <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
+        <AlertOverview
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          ruleStatus={ruleStatus}
+        />
       </EuiPanel>
     )
   ) : (
@@ -502,7 +520,7 @@ export function AlertDetails() {
                 </span>
               </EuiToolTip>
               <EuiSpacer size="xs" />
-              <AlertSubtitle alert={alertDetail.formatted} />
+              <AlertSubtitle alert={alertDetail.formatted} ruleStatus={ruleStatus} />
             </>
           ) : (
             <EuiLoadingSpinner />

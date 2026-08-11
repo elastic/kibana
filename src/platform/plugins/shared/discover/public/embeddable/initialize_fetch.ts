@@ -300,7 +300,11 @@ export function initializeFetch({
       }
     });
 
-  return () => {
-    fetchSubscription.unsubscribe();
+  return {
+    cleanup: () => fetchSubscription.unsubscribe(),
+    cancelRequests: () => {
+      abortController?.abort();
+      abortController = undefined;
+    },
   };
 }

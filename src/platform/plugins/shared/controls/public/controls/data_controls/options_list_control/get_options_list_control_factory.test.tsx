@@ -356,4 +356,40 @@ describe('Options List Control Api', () => {
       embeddableApi.setTitle('cute puppies');
     });
   });
+
+  describe('cancelRequests', () => {
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
+    test('should expose cancelRequests function on api', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+        } as OptionsListDSLControlState,
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+      expect(typeof api.cancelRequests).toBe('function');
+    });
+
+    test('calling cancelRequests should not throw', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+        } as OptionsListDSLControlState,
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+      expect(() => api.cancelRequests()).not.toThrow();
+    });
+  });
 });
