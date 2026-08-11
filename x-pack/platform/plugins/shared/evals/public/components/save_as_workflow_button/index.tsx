@@ -50,7 +50,7 @@ export const SaveAsWorkflowButton: React.FC<SaveAsWorkflowButtonProps> = ({
     return (
       <EuiButton
         size={size}
-        iconType="popout"
+        iconType="external"
         href={href}
         target="_blank"
         data-test-subj="evalsSaveAsWorkflowSaved"
