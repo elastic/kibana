@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-builder-add-doc-example-plugin",
+  "owner": "@elastic/workchat-eng",
+  "description": "Example plugin: agent-driven file upload — an add-doc-to-index skill that processes an uploaded_file attachment via readContent",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "agentBuilderAddDocExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["agentBuilder"]
+  }
+}

@@ -15,3 +15,9 @@ export {
 export { PassthroughFs } from './passthrough_fs';
 export { CapacityLimitedFs } from './capacity_limited_fs';
 export { DirtyTrackingFs } from './dirty_tracking_fs';
+export {
+  createAttachmentsStorage,
+  type AttachmentsStorage,
+  type AttachmentMeta,
+  ATTACHMENTS_PATH_PREFIX,
+} from './attachments_storage';

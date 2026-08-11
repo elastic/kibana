@@ -17,6 +17,8 @@ export const MOUNT_POINTS = {
   toolCalls: '/tool_calls',
   /** Read-only view of skill files. */
   skills: '/skills',
+  /** Read-only view of uploaded-file attachments (raw bytes; content access guarded). */
+  attachments: '/attachments',
 } as const;
 
 export type MountPoint = (typeof MOUNT_POINTS)[keyof typeof MOUNT_POINTS];

@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiCheckableCard,
   EuiFieldText,
+  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormErrorText,
@@ -92,112 +93,153 @@ export const AskUserQuestionPrompt = (props: AskUserQuestionPromptProps) => {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {/* Options */}
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="xs"
-        responsive={false}
-        css={css`
-          margin-top: ${euiTheme.size.s};
-        `}
-      >
-        {currentQuestion.options.map((option, optionIndex) => {
-          const inputId = `${baseId}-q${currentIndex}-opt${optionIndex}`;
-          const checked = (currentDraft.choice ?? []).includes(optionIndex);
-          return (
-            <EuiFlexItem
-              key={`${currentIndex}-${optionIndex}`}
-              grow={false}
-              ref={refs.setOptionRef(optionIndex)}
-            >
-              <EuiCheckableCard
-                id={inputId}
-                label={option.label}
-                checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
-                name={questionGroupName}
-                checked={checked}
-                disabled={ui.isInteractionDisabled}
-                css={optionCardStyles}
-                onChange={(e) =>
-                  handlers.handleOptionPick(
-                    optionIndex,
-                    currentQuestion.multi_select ? e.target.checked : true
-                  )
-                }
-                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
-                  handlers.handleOptionKeyDown(e, optionIndex)
-                }
+      {/* File uploader (response_type === 'file') OR options */}
+      {currentQuestion.response_type === 'file' ? (
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          responsive={false}
+          css={css`
+            margin-top: ${euiTheme.size.s};
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFilePicker
+              id={`${baseId}-q${currentIndex}-file`}
+              multiple={false}
+              display="large"
+              disabled={ui.isInteractionDisabled}
+              onChange={(files) => {
+                // EUI passes a FileList (or null), not an array. With
+                // multiple={false}, take the first file.
+                const file = files && files.length > 0 ? files[0] : undefined;
+                handlers.handleFileSelect(file);
+              }}
+              aria-label={labels.filePickerLabel}
+            />
+            <EuiText size="xs" color="subdued" css={{ marginTop: euiTheme.size.xs }}>
+              {labels.filePickerHint}
+            </EuiText>
+            {ui.uploadError && (
+              <EuiFormErrorText>
+                {labels.fileUploadError}: {ui.uploadError}
+              </EuiFormErrorText>
+            )}
+            {currentDraft.attachmentId && (
+              <EuiText size="xs" color="success">
+                <EuiIcon type="check" size="s" aria-hidden={true} />{' '}
+                {currentDraft.file?.name ?? labels.fileSelected}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="xs"
+          responsive={false}
+          css={css`
+            margin-top: ${euiTheme.size.s};
+          `}
+        >
+          {currentQuestion.options.map((option, optionIndex) => {
+            const inputId = `${baseId}-q${currentIndex}-opt${optionIndex}`;
+            const checked = (currentDraft.choice ?? []).includes(optionIndex);
+            return (
+              <EuiFlexItem
+                key={`${currentIndex}-${optionIndex}`}
+                grow={false}
+                ref={refs.setOptionRef(optionIndex)}
               >
-                {option.description && (
-                  <EuiText size="xs" color="subdued">
-                    {option.description}
-                  </EuiText>
-                )}
-              </EuiCheckableCard>
-            </EuiFlexItem>
-          );
-        })}
-
-        {/* Custom / "Be more specific" row */}
-        <EuiFlexItem grow={false} ref={refs.customRowRef}>
-          <EuiCheckableCard
-            id={`${baseId}-q${currentIndex}-custom`}
-            label=""
-            css={customRowStyles}
-            checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
-            name={questionGroupName}
-            checked={isCustomActive}
-            disabled={ui.isInteractionDisabled}
-            onChange={(e) =>
-              handlers.handleCustomToggle(currentQuestion.multi_select ? e.target.checked : true)
-            }
-            onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
-              handlers.handleOptionKeyDown(e, customRowIndex)
-            }
-            data-test-subj="agentBuilderAskUserQuestionPromptCustomRow"
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="pencil" size="m" color="subdued" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {/* Intentional: this field is only ever reached by selecting the custom
-                    option above (or restored on Back) — it must not be a stray Tab stop. */}
-                {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
-                <EuiFieldText
-                  inputRef={refs.customInputRef}
-                  tabIndex={-1}
-                  value={currentDraft.custom ?? ''}
-                  placeholder={labels.customPlaceholder}
-                  onChange={(e) => handlers.handleCustomChange(e.target.value)}
-                  onKeyDown={handlers.handleCustomFieldKeyDown}
+                <EuiCheckableCard
+                  id={inputId}
+                  label={option.label}
+                  checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
+                  name={questionGroupName}
+                  checked={checked}
                   disabled={ui.isInteractionDisabled}
-                  isInvalid={ui.showCustomError}
-                  compressed
-                  css={css`
-                    box-shadow: none;
-                    outline: none !important;
-                    outline-style: none !important;
-                    ':hover' {
+                  css={optionCardStyles}
+                  onChange={(e) =>
+                    handlers.handleOptionPick(
+                      optionIndex,
+                      currentQuestion.multi_select ? e.target.checked : true
+                    )
+                  }
+                  onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
+                    handlers.handleOptionKeyDown(e, optionIndex)
+                  }
+                >
+                  {option.description && (
+                    <EuiText size="xs" color="subdued">
+                      {option.description}
+                    </EuiText>
+                  )}
+                </EuiCheckableCard>
+              </EuiFlexItem>
+            );
+          })}
+
+          {/* Custom / "Be more specific" row */}
+          <EuiFlexItem grow={false} ref={refs.customRowRef}>
+            <EuiCheckableCard
+              id={`${baseId}-q${currentIndex}-custom`}
+              label=""
+              css={customRowStyles}
+              checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
+              name={questionGroupName}
+              checked={isCustomActive}
+              disabled={ui.isInteractionDisabled}
+              onChange={(e) =>
+                handlers.handleCustomToggle(currentQuestion.multi_select ? e.target.checked : true)
+              }
+              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
+                handlers.handleOptionKeyDown(e, customRowIndex)
+              }
+              data-test-subj="agentBuilderAskUserQuestionPromptCustomRow"
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="pencil" size="m" color="subdued" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {/* Intentional: this field is only ever reached by selecting the custom
+                    option above (or restored on Back) — it must not be a stray Tab stop. */}
+                  {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
+                  <EuiFieldText
+                    inputRef={refs.customInputRef}
+                    tabIndex={-1}
+                    value={currentDraft.custom ?? ''}
+                    placeholder={labels.customPlaceholder}
+                    onChange={(e) => handlers.handleCustomChange(e.target.value)}
+                    onKeyDown={handlers.handleCustomFieldKeyDown}
+                    disabled={ui.isInteractionDisabled}
+                    isInvalid={ui.showCustomError}
+                    compressed
+                    css={css`
                       box-shadow: none;
                       outline: none !important;
                       outline-style: none !important;
-                    }
-                  `}
-                  fullWidth
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiCheckableCard>
-        </EuiFlexItem>
-
-        {/* Validation error */}
-        {ui.showCustomError && (
-          <EuiFlexItem grow={false}>
-            <EuiFormErrorText>{labels.customError}</EuiFormErrorText>
+                      ':hover' {
+                        box-shadow: none;
+                        outline: none !important;
+                        outline-style: none !important;
+                      }
+                    `}
+                    fullWidth
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCheckableCard>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+
+          {/* Validation error */}
+          {ui.showCustomError && (
+            <EuiFlexItem grow={false}>
+              <EuiFormErrorText>{labels.customError}</EuiFormErrorText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
 
       {/* Action bar */}
       <EuiFlexGroup

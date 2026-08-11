@@ -42,3 +42,7 @@ export type {
   ConversationExecutionParams,
   ConversationAgentExecution,
 } from '@kbn/agent-builder-server/execution';
+export type {
+  AttachmentsStorage,
+  AttachmentMeta,
+} from './services/execution/filesystem/attachments_storage';

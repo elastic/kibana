@@ -7,6 +7,7 @@
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Readable } from 'node:stream';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -238,6 +239,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     getTotalTokenEstimate: jest.fn(),
     hasChanges: jest.fn(),
     markClean: jest.fn(),
+    readContent: jest.fn().mockReturnValue(new Readable({ read() {} })),
+    setAttachmentsVolume: jest.fn(),
   };
 };
 

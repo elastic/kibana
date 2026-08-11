@@ -174,6 +174,24 @@ describe('pendingAskUserQuestionStepsToActions', () => {
       const args = setup({ answers: [{ choice: [0, 1] }] });
       expect(() => pendingAskUserQuestionStepsToActions(args)).toThrow(/multi/i);
     });
+
+    it('accepts a { attachment_id } file answer', () => {
+      const args = setup({ answers: [{ attachment_id: 'att-1' }] });
+      const result = pendingAskUserQuestionStepsToActions(args);
+      expect((result.actions[1] as any).tool_results[0].artifact).toEqual({
+        answers: [{ attachment_id: 'att-1' }],
+      });
+    });
+
+    it('throws when attachment_id is combined with choice', () => {
+      const args = setup({ answers: [{ attachment_id: 'att-1', choice: [0] }] });
+      expect(() => pendingAskUserQuestionStepsToActions(args)).toThrow(/attachment_id/i);
+    });
+
+    it('throws when skipped is combined with attachment_id', () => {
+      const args = setup({ answers: [{ skipped: true, attachment_id: 'att-1' }] });
+      expect(() => pendingAskUserQuestionStepsToActions(args)).toThrow(/skipped/i);
+    });
   });
 
   it('does NOT mutate promptState.responses', () => {

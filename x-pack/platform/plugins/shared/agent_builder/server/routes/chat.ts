@@ -62,6 +62,7 @@ export const promptResponseEntrySchema = schema.oneOf([
           choice: schema.maybe(schema.arrayOf(schema.number(), { maxSize: 100 })),
           custom: schema.maybe(schema.string({ minLength: 1, maxLength: 20_000 })),
           skipped: schema.maybe(schema.boolean()),
+          attachment_id: schema.maybe(schema.string({ maxLength: 100 })),
         }),
         { maxSize: 100 }
       ),

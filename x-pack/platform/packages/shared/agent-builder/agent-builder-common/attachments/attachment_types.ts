@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   connector = 'connector',
+  uploadedFile = 'uploaded_file',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.uploadedFile]: UploadedFileAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -124,3 +126,64 @@ export interface ConnectorAttachmentData {
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+
+/**
+ * MIME types accepted for `uploaded_file` attachments. The platform upload
+ * route and the `uploaded_file` attachment type both validate against this
+ * list. Raw bytes of any other type are rejected before they reach storage.
+ */
+export const ACCEPTED_UPLOAD_MIME_TYPES = ['application/json', 'application/x-ndjson'] as const;
+
+/**
+ * File extensions accepted for `uploaded_file` attachments (lower-cased,
+ * without the leading dot). Used as a fallback when the MIME type is not
+ * supplied or generic.
+ */
+export const ACCEPTED_UPLOAD_EXTENSIONS = ['json', 'ndjson'] as const;
+
+export const isAcceptedUploadMime = (mime: string): boolean =>
+  (ACCEPTED_UPLOAD_MIME_TYPES as readonly string[]).includes(mime.toLowerCase());
+
+export const isAcceptedUploadExtension = (filename: string): boolean => {
+  const dot = filename.lastIndexOf('.');
+  if (dot < 0) return false;
+  const ext = filename.slice(dot + 1).toLowerCase();
+  return (ACCEPTED_UPLOAD_EXTENSIONS as readonly string[]).includes(ext);
+};
+
+export const uploadedFileAttachmentDataSchema = z.object({
+  /** Original file name as provided by the user. */
+  name: z.string().max(256),
+  /** MIME type, validated against an accept-list by the platform attachment type. */
+  mime: z.string().max(128),
+  /** File size in bytes. */
+  size: z.number().nonnegative(),
+  /**
+   * Path of the raw bytes within the per-run filestore attachments volume
+   * (e.g. `/attachments/<attachment_id>`). The platform owns the bytes; only
+   * metadata is exposed to the LLM.
+   */
+  fsPath: z.string().max(512),
+});
+
+/**
+ * Data for an `uploaded_file` attachment.
+ *
+ * The raw file content is never stored in the attachment `data` and never
+ * reaches the LLM. `fsPath` is the address of the bytes inside the filestore
+ * attachments volume; tools that need the content read it server-side via
+ * `AttachmentStateManager.readContent`.
+ */
+export interface UploadedFileAttachmentData {
+  /** Original file name as provided by the user. */
+  name: string;
+  /** MIME type, validated against an accept-list by the platform attachment type. */
+  mime: string;
+  /** File size in bytes. */
+  size: number;
+  /**
+   * Path of the raw bytes within the per-run filestore attachments volume
+   * (e.g. `/attachments/<attachment_id>`).
+   */
+  fsPath: string;
+}

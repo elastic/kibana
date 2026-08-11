@@ -24,6 +24,12 @@ const questionSchema = z.object({
     .boolean()
     .default(false)
     .describe('When true the user can pick more than one option'),
+  response_type: z
+    .enum(['text', 'single_select', 'multi_select', 'file'])
+    .optional()
+    .describe(
+      'How the UI should collect the answer. Use "file" to ask the user to upload a file; the answer comes back as an attachment_id referencing an uploaded_file attachment.'
+    ),
 });
 
 const schema = z.object({

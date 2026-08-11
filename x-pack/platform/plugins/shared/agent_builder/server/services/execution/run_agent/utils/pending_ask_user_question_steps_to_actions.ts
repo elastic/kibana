@@ -106,9 +106,20 @@ const validateAnswer = ({
   const hasCustom = answer.custom != null && answer.custom !== '';
 
   if (answer.skipped === true) {
+    if (hasChoice || hasCustom || answer.attachment_id != null) {
+      throw new Error(
+        `prompt_id ${promptId} answer[${idx}]: skipped must be exclusive with choice/custom/attachment_id`
+      );
+    }
+    return;
+  }
+
+  // `response_type: 'file'` questions come back as an `attachment_id` referencing
+  // an `uploaded_file` attachment created via the platform upload route.
+  if (answer.attachment_id != null) {
     if (hasChoice || hasCustom) {
       throw new Error(
-        `prompt_id ${promptId} answer[${idx}]: skipped must be exclusive with choice/custom`
+        `prompt_id ${promptId} answer[${idx}]: attachment_id must be exclusive with choice/custom`
       );
     }
     return;
@@ -116,7 +127,7 @@ const validateAnswer = ({
 
   if (!hasChoice && !hasCustom) {
     throw new Error(
-      `prompt_id ${promptId} answer[${idx}]: empty answer (no choice, custom, or skipped)`
+      `prompt_id ${promptId} answer[${idx}]: empty answer (no choice, custom, attachment_id, or skipped)`
     );
   }
 

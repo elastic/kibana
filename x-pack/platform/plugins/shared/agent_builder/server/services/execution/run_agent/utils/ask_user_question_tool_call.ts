@@ -26,6 +26,8 @@ export interface DenormalizedAnswer {
   selected_options: string[];
   custom?: string;
   skipped?: boolean;
+  /** Present for `response_type: 'file'` questions; references an `uploaded_file` attachment. */
+  attachment_id?: string;
 }
 
 export const materializeAskUserQuestionToolCall = ({
@@ -64,6 +66,9 @@ const denormalizeAnswers = (
     }
     if (answer.skipped === true) {
       out.skipped = true;
+    }
+    if (answer.attachment_id != null) {
+      out.attachment_id = answer.attachment_id;
     }
     return out;
   });

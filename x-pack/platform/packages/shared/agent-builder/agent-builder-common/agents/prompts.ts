@@ -77,6 +77,8 @@ export interface AuthorizationPromptDefinition {
 
 // Ask user question
 
+export type AskUserQuestionResponseType = 'text' | 'single_select' | 'multi_select' | 'file';
+
 export interface AskUserQuestionPromptDefinition {
   id: string;
   questions: AskUserQuestionItem[];
@@ -86,6 +88,15 @@ export interface AskUserQuestionItem {
   question: string;
   options: AskUserQuestionOption[];
   multi_select: boolean;
+  /**
+   * Controls how the UI renders and collects the answer for this question.
+   * - `text` (default when omitted): free-text input, optionally combined with the option list.
+   * - `single_select`: pick exactly one option (radio).
+   * - `multi_select`: pick zero or more options (checkboxes); mirrors `multi_select: true`.
+   * - `file`: render a file uploader; the answer is returned as an `attachment_id`
+   *   referencing an `uploaded_file` attachment created via the platform upload route.
+   */
+  response_type?: AskUserQuestionResponseType;
 }
 
 export interface AskUserQuestionOption {
@@ -100,6 +111,12 @@ export interface AskUserQuestionAnswer {
   custom?: string;
   /** True when the user explicitly skipped this question. Mutually exclusive with `choice` / `custom`. */
   skipped?: boolean;
+  /**
+   * Attachment id of the `uploaded_file` created for a `response_type: 'file'` question.
+   * The platform upload route returns the id; the client sends it back here so the
+   * agent can reference the attachment in subsequent tool calls.
+   */
+  attachment_id?: string;
 }
 
 export interface ConfirmationPromptResponse {

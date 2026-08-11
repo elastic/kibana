@@ -15,6 +15,10 @@ import {
   useAskUserQuestionTelemetry,
 } from './ask_user_question_prompt_utils';
 import type { AnswerDraft, AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
+import { useKibana } from '../../../../hooks/use_kibana';
+
+const UPLOAD_PATH = (conversationId: string) =>
+  `/internal/agent_builder/conversations/${conversationId}/attachments/upload`;
 
 export const useAskUserQuestionPrompt = ({
   promptId,
@@ -22,11 +26,17 @@ export const useAskUserQuestionPrompt = ({
   onSubmit,
   isLoading = false,
   isDisabled = false,
+  conversationId,
 }: AskUserQuestionPromptProps) => {
+  const {
+    services: { http },
+  } = useKibana();
   const totalQuestions = questions.length;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [drafts, setDrafts] = useState<AnswerDraft[]>(() => questions.map(() => ({})));
   const [showCustomError, setShowCustomError] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const baseId = useGeneratedHtmlId({ prefix: 'askUserQuestionPrompt' });
   const customInputRef = useRef<HTMLInputElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
@@ -51,7 +61,7 @@ export const useAskUserQuestionPrompt = ({
   const totalOptionStops = customRowIndex + 1; // predefined options + the custom row
   const questionGroupName = `${baseId}-q${currentIndex}`;
   const isCustomActive = !!currentDraft.customSelected;
-  const isInteractionDisabled = isDisabled || isLoading;
+  const isInteractionDisabled = isDisabled || isLoading || isUploading;
 
   // Reports the prompt-shown telemetry event once, when this prompt first appears
   useEffect(() => {
@@ -119,10 +129,81 @@ export const useAskUserQuestionPrompt = ({
     [drafts, currentIndex, onSubmit]
   );
 
-  const handleConfirm = useCallback(() => {
+  const handleFileSelect = useCallback(
+    (file: File | undefined) => {
+      setUploadError(undefined);
+      updateDraft({ ...currentDraft, skipped: false, file, attachmentId: undefined });
+    },
+    [currentDraft, updateDraft]
+  );
+
+  const uploadFile = useCallback(
+    async (file: File): Promise<string> => {
+      if (!conversationId) {
+        throw new Error('Cannot upload file: conversation id is not available');
+      }
+      // Send the raw file text as the body. A string body is passed through
+      // verbatim by the fetch layer (Blob/Uint8Array bodies can get
+      // JSON-stringified to "{}" / {"0":..}). All accepted upload types are
+      // text (JSON/NDJSON/CSV/text/plain), so reading as UTF-8 text is safe.
+      // The file name travels via the `name` query param so the route can
+      // infer the mime from the extension.
+      const text = await file.text();
+      const resp = await http.fetch<{ attachment_id: string }>(UPLOAD_PATH(conversationId), {
+        method: 'POST',
+        body: text,
+        query: { name: file.name },
+        headers: { 'Content-Type': 'application/octet-stream' },
+      });
+      if (!resp || !resp.attachment_id) {
+        throw new Error('Upload succeeded but no attachment_id was returned');
+      }
+      return resp.attachment_id;
+    },
+    [conversationId, http]
+  );
+
+  const handleConfirm = useCallback(async () => {
     if (!canConfirm) return;
     if (isCustomTextMissing(currentDraft)) {
       setShowCustomError(true);
+      return;
+    }
+    // For file questions, upload the selected file before submitting.
+    if (
+      currentQuestion.response_type === 'file' &&
+      currentDraft.file &&
+      !currentDraft.attachmentId
+    ) {
+      setIsUploading(true);
+      setUploadError(undefined);
+      let attachmentId: string;
+      try {
+        attachmentId = await uploadFile(currentDraft.file);
+      } catch (e) {
+        setUploadError(e instanceof Error ? e.message : String(e));
+        setIsUploading(false);
+        return;
+      }
+      const uploadedDraft: AnswerDraft = {
+        ...currentDraft,
+        attachmentId,
+        file: undefined,
+      };
+      setIsUploading(false);
+      reportQuestionAnswered(currentIndex, uploadedDraft, 'answered');
+      if (isFinalQuestion) {
+        const finalDrafts = drafts.map((draft, i) => (i === currentIndex ? uploadedDraft : draft));
+        onSubmit({ answers: finalDrafts.map(draftToAnswer) });
+        return;
+      }
+      setDrafts((prev) => {
+        const copy = prev.slice();
+        copy[currentIndex] = uploadedDraft;
+        return copy;
+      });
+      setShowCustomError(false);
+      setCurrentIndex((idx) => idx + 1);
       return;
     }
     reportQuestionAnswered(currentIndex, currentDraft, 'answered');
@@ -136,9 +217,13 @@ export const useAskUserQuestionPrompt = ({
     canConfirm,
     currentDraft,
     currentIndex,
+    currentQuestion.response_type,
     handleSubmit,
     isFinalQuestion,
     reportQuestionAnswered,
+    uploadFile,
+    drafts,
+    onSubmit,
   ]);
 
   const handleSkip = useCallback(() => {
@@ -280,7 +365,7 @@ export const useAskUserQuestionPrompt = ({
       questionGroupName,
       isCustomActive,
     },
-    ui: { showCustomError, isInteractionDisabled, isLoading },
+    ui: { showCustomError, isInteractionDisabled, isLoading, isUploading, uploadError },
     handlers: {
       handleOptionPick,
       handleOptionKeyDown,
@@ -290,6 +375,7 @@ export const useAskUserQuestionPrompt = ({
       handleBack,
       handleSkip,
       handleConfirm,
+      handleFileSelect,
     },
   };
 };

@@ -36,6 +36,40 @@ import type {
 } from './execution';
 
 /**
+ * Sidecar metadata persisted alongside each uploaded blob.
+ */
+export interface UploadedFileAttachmentMeta {
+  /** Original file name as provided by the user. */
+  name: string;
+  /** MIME type, validated against an accept-list by the platform attachment type. */
+  mime: string;
+  /** File size in bytes. */
+  size: number;
+}
+
+/**
+ * Request-scoped helper that persists raw uploaded-file bytes and their
+ * sidecar metadata into workspace storage (the ES workspace doc, keyed by
+ * workspaceId). Reuses the agent_builder workspace client so no new
+ * persistence layer is introduced.
+ *
+ * Bytes are stored base64-encoded under `/attachments/<id>`; metadata under
+ * `/attachments/<id>.meta.json`. The workspace doc is a single 25 MiB base64
+ * document, which is sufficient for the example use case.
+ */
+export interface AttachmentsStorageContract {
+  store(
+    workspaceId: string,
+    id: string,
+    bytes: Buffer,
+    meta: UploadedFileAttachmentMeta
+  ): Promise<void>;
+  read(workspaceId: string, id: string): Promise<Buffer | undefined>;
+  readMeta(workspaceId: string, id: string): Promise<UploadedFileAttachmentMeta | undefined>;
+  delete(workspaceId: string, id: string): Promise<boolean>;
+}
+
+/**
  * AgentBuilder tool service's setup contract.
  */
 export interface ToolsSetup {
@@ -259,6 +293,20 @@ export interface AgentBuilderPluginSetup {
    * Plugins setup contract, which can be used to register built-in plugins.
    */
   plugins: PluginsSetup;
+  /**
+   * Creates a request-scoped {@link AttachmentsStorageContract} backed by the
+   * agent_builder workspace storage. Used by platform-owned upload routes and
+   * the runner to persist raw uploaded-file bytes (base64) under
+   * `/attachments/<id>` in the workspace doc. The returned helper is scoped to
+   * the supplied request's ES client and space.
+   *
+   * Async because it lazily awaits the plugin's start services (the ES client
+   * is only available after `start()`).
+   */
+  createAttachmentsStorage: (opts: {
+    request: KibanaRequest;
+    spaceId: string;
+  }) => Promise<AttachmentsStorageContract>;
   /**
    * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
    * Exposed so that dependent plugins can pass these values to search utilities.

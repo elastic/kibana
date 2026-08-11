@@ -12,6 +12,7 @@ import type { FileEntryAccessor } from '@kbn/agent-builder-server/runner';
 import { CapacityLimitedFs } from './capacity_limited_fs';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
+import type { AttachmentsStoreImpl } from '../runner/store/volumes/attachments/attachments_store';
 import { MOUNT_POINTS } from './mount_points';
 
 export const EPHEMERAL_FS_CAPACITY_BYTES = 20 * 1024 * 1024;
@@ -20,6 +21,12 @@ export interface FilesystemServiceDeps {
   workspaceVolume: WorkspaceVolume;
   toolResultsSource: FileEntryAccessor;
   skillsSource: FileEntryAccessor;
+  /**
+   * Optional attachments volume backing the `/attachments` mount. When
+   * provided, `init()` will await its `load()` so raw uploaded-file bytes are
+   * materialized before the agent runs.
+   */
+  attachmentsSource?: AttachmentsStoreImpl;
 }
 
 /**
@@ -53,16 +60,24 @@ export class FilesystemService implements IFilesystemService {
     const toolCallsFs = new VolumeBackedReadOnlyFs(this.deps.toolResultsSource);
     const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsSource);
 
+    const mounts: Array<{ mountPoint: string; filesystem: IFileSystem }> = [
+      {
+        mountPoint: MOUNT_POINTS.workspace,
+        filesystem: this.deps.workspaceVolume.getFilesystem(),
+      },
+      { mountPoint: MOUNT_POINTS.toolCalls, filesystem: toolCallsFs },
+      { mountPoint: MOUNT_POINTS.skills, filesystem: skillsFs },
+    ];
+
+    if (this.deps.attachmentsSource) {
+      await this.deps.attachmentsSource.load();
+      const attachmentsFs = new VolumeBackedReadOnlyFs(this.deps.attachmentsSource);
+      mounts.push({ mountPoint: MOUNT_POINTS.attachments, filesystem: attachmentsFs });
+    }
+
     this.fs = new MountableFs({
       base,
-      mounts: [
-        {
-          mountPoint: MOUNT_POINTS.workspace,
-          filesystem: this.deps.workspaceVolume.getFilesystem(),
-        },
-        { mountPoint: MOUNT_POINTS.toolCalls, filesystem: toolCallsFs },
-        { mountPoint: MOUNT_POINTS.skills, filesystem: skillsFs },
-      ],
+      mounts,
     });
 
     this.initialised = true;

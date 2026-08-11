@@ -12,6 +12,7 @@ export type {
   ScreenContextAttachment,
   EsqlAttachment,
   ConnectorAttachment,
+  UploadedFileAttachment,
 } from './attachments';
 
 export type {
@@ -27,6 +28,11 @@ export {
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
   connectorAttachmentDataSchema,
+  uploadedFileAttachmentDataSchema,
+  ACCEPTED_UPLOAD_MIME_TYPES,
+  ACCEPTED_UPLOAD_EXTENSIONS,
+  isAcceptedUploadMime,
+  isAcceptedUploadExtension,
   CONNECTOR_TAG_PREFIX,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
@@ -34,6 +40,7 @@ export {
   screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type ConnectorAttachmentData,
+  type UploadedFileAttachmentData,
 } from './attachment_types';
 
 export type {

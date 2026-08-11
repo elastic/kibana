@@ -272,6 +272,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
                       onSubmit={(r) => handlePromptResponse(prompt.id, r)}
                       isLoading={isResuming}
                       isDisabled={isHitlDisabled}
+                      conversationId={conversationId}
                     />
                   </EuiFlexItem>
                 </React.Fragment>

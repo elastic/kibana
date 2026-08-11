@@ -1,0 +1,7 @@
+{
+  "timestamp": { "type": "date" },
+  "service": { "type": "keyword" },
+  "level": { "type": "keyword" },
+  "message": { "type": "text" },
+  "duration_ms": { "type": "integer" }
+}

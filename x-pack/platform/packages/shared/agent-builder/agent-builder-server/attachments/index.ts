@@ -26,5 +26,7 @@ export type {
   AttachmentStateManager,
   AttachmentUpdateInput,
   ResolvedAttachmentRef,
+  AttachmentsVolumeReader,
 } from './attachment_state_manager';
 export { createAttachmentStateManager } from './attachment_state_manager';
+export type { AttachmentsStorageContract, UploadedFileAttachmentMeta } from '../plugin_contract';

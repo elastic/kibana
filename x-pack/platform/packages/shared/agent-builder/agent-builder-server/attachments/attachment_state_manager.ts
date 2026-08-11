@@ -6,18 +6,20 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { Readable } from 'node:stream';
 import type {
   VersionedAttachment,
   AttachmentVersion,
   AttachmentVersionRef,
   AttachmentDiff,
   AttachmentInput,
-  AttachmentType,
   AttachmentRefActor,
   AttachmentRefOperation,
   AttachmentStaleCheckResult,
+  UploadedFileAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import {
+  AttachmentType,
   ATTACHMENT_REF_OPERATION,
   ATTACHMENT_REF_ACTOR,
 } from '@kbn/agent-builder-common/attachments';
@@ -30,6 +32,27 @@ import {
   isVersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
+
+/**
+ * Path prefix of the attachments mount in the agent VFS. Kept as a local
+ * constant (rather than imported from the runner) so the agent-builder-server
+ * package stays free of a runtime dependency on the runner store. The value
+ * mirrors `MOUNT_POINTS.attachments` in
+ * `server/services/execution/filesystem/mount_points.ts`.
+ */
+const MOUNT_POINTS_ATTACHMENTS_PREFIX = '/attachments';
+
+/**
+ * Minimal read-only view of the per-run attachments volume that
+ * {@link AttachmentStateManager.readContent} uses to fetch raw uploaded-file
+ * bytes. The concrete implementation is `AttachmentsStoreImpl` in the runner
+ * store; this interface keeps the agent-builder-server package free of a
+ * direct dependency on the runner store implementation.
+ */
+export interface AttachmentsVolumeReader {
+  /** Returns the raw file entry stored at `/<id>` (relative to the mount), or undefined. */
+  getEntry(path: string): Promise<{ content: { raw: { body: string } } } | undefined>;
+}
 
 /**
  * Best-effort message when `Promise.allSettled` reports `rejected` (rejection payloads vary by caller).
@@ -148,6 +171,23 @@ export interface AttachmentStateManager {
   hasChanges(): boolean;
   /** Reset the dirty flag (call after saving) */
   markClean(): void;
+
+  /**
+   * Read the raw bytes of an `uploaded_file` attachment from the per-run
+   * attachments volume. Intended for server-side tools that need to process
+   * the file content (e.g. bulk-index it) without inlining the bytes into the
+   * LLM context. Throws if no attachments volume is configured, the
+   * attachment is missing, or the attachment type is not `uploaded_file`.
+   */
+  readContent(attachmentId: string): Readable;
+  /**
+   * Wire the per-run attachments volume after the manager has been created.
+   * The volume is built from the manager's active attachments (in
+   * `createFilesystemServices`), which runs after the manager is constructed,
+   * so the volume cannot be supplied via the constructor options. This setter
+   * is called once per run, before the agent starts executing tools.
+   */
+  setAttachmentsVolume(volume: AttachmentsVolumeReader): void;
 }
 
 export interface CreateAttachmentStateManagerOptions {
@@ -156,6 +196,12 @@ export interface CreateAttachmentStateManagerOptions {
    * Used to validate attachment data before storing it into conversation state.
    */
   getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
+  /**
+   * Optional per-run attachments volume. When provided, enables
+   * {@link AttachmentStateManager.readContent} for `uploaded_file` attachments.
+   * Omit to keep existing usages (e.g. tests) unaffected.
+   */
+  attachmentsVolume?: AttachmentsVolumeReader;
 }
 
 /**
@@ -166,6 +212,12 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   private dirty: boolean = false;
   private readonly options: CreateAttachmentStateManagerOptions;
   private accessedRefs: Map<string, AttachmentVersionRef> = new Map();
+  /**
+   * Per-run attachments volume, wired via {@link setAttachmentsVolume} after
+   * the manager is constructed. Falls back to `options.attachmentsVolume`
+   * when set upfront (e.g. in tests).
+   */
+  private attachmentsVolume: AttachmentsVolumeReader | undefined;
 
   constructor(
     initialAttachments: VersionedAttachment[] = [],
@@ -174,6 +226,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     // Deep clone to avoid external mutation
     this.attachments = new Map();
     this.options = options;
+    this.attachmentsVolume = options.attachmentsVolume;
     for (const attachment of initialAttachments) {
       const next = structuredClone(attachment);
       if (next.readonly === undefined) {
@@ -555,6 +608,58 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   markClean(): void {
     this.dirty = false;
+  }
+
+  readContent(attachmentId: string): Readable {
+    const volume = this.attachmentsVolume;
+    if (!volume) {
+      throw new Error(
+        `Cannot read content for attachment "${attachmentId}": no attachments volume is configured`
+      );
+    }
+    const record = this.attachments.get(attachmentId);
+    if (!record) {
+      throw new Error(`Attachment "${attachmentId}" not found`);
+    }
+    if (record.type !== AttachmentType.uploadedFile) {
+      throw new Error(
+        `Attachment "${attachmentId}" is of type "${record.type}", expected "${AttachmentType.uploadedFile}"`
+      );
+    }
+    const currentVersion = getLatestVersion(record);
+    if (!currentVersion) {
+      throw new Error(`Attachment "${attachmentId}" has no current version`);
+    }
+    const data = currentVersion.data as UploadedFileAttachmentData;
+    const fsPath = data.fsPath;
+    const entryPath = fsPath.startsWith(MOUNT_POINTS_ATTACHMENTS_PREFIX)
+      ? fsPath.slice(MOUNT_POINTS_ATTACHMENTS_PREFIX.length)
+      : fsPath;
+    // readContent is async at the volume boundary, but the stream API is sync.
+    // Materialize the entry, then push the bytes into a Readable.
+    const stream = new Readable({ read() {} });
+    void volume
+      .getEntry(entryPath)
+      .then((entry) => {
+        if (!entry) {
+          stream.destroy(
+            new Error(
+              `Uploaded file bytes for attachment "${attachmentId}" not found at ${entryPath}`
+            )
+          );
+          return;
+        }
+        stream.push(Buffer.from(entry.content.raw.body, 'utf8'));
+        stream.push(null);
+      })
+      .catch((err) => {
+        stream.destroy(err instanceof Error ? err : new Error(String(err)));
+      });
+    return stream;
+  }
+
+  setAttachmentsVolume(volume: AttachmentsVolumeReader): void {
+    this.attachmentsVolume = volume;
   }
 
   async evaluateStalenessForActiveAttachments(

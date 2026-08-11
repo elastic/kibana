@@ -37,6 +37,9 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { createAttachmentsStorage } from './services/execution/filesystem/attachments_storage';
+import { createWorkspaceStorage } from './services/workspaces';
+import { WorkspaceClient } from './services/workspaces';
 
 export class AgentBuilderPlugin
   implements
@@ -207,6 +210,17 @@ export class AgentBuilderPlugin
       },
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
+      },
+      createAttachmentsStorage: async ({ request, spaceId }) => {
+        // Lazy: the upload route calls this at request time, by which point the
+        // start services (incl. elasticsearch) are available.
+        const [coreStart] = await coreSetup.getStartServices();
+        const workspaceStorage = createWorkspaceStorage({
+          logger: this.logger.get('attachments-storage'),
+          esClient: coreStart.elasticsearch.client.asScoped(request).asInternalUser,
+        });
+        const workspaceClient = new WorkspaceClient({ storage: workspaceStorage, space: spaceId });
+        return createAttachmentsStorage({ workspaceClient });
       },
       topSnippets: this.config.topSnippets,
     };

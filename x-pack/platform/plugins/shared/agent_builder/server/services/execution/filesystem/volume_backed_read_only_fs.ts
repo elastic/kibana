@@ -8,6 +8,7 @@
 import type { ByteString, IFileSystem, FsStat } from 'just-bash';
 import { unsafeBytesFromLatin1 } from 'just-bash';
 import type { FileEntry, FileEntryAccessor } from '@kbn/agent-builder-server/runner';
+import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 
 interface DirentEntry {
   name: string;
@@ -34,6 +35,21 @@ const entryToString = (entry: FileEntry): string =>
 const entryBytes = (entry: FileEntry): Uint8Array => encoder.encode(entryToString(entry));
 
 /**
+ * Raw uploaded-file bytes are never inlined into the LLM context. When an
+ * entry carries `FileEntryType.attachment`, refuse content reads (readFile /
+ * readFileBuffer) so tools like `read_file`, bash `cat`, `grep`, and `glob`
+ * cannot exfiltrate the bytes through the VFS. Directory listings (readdir /
+ * stat) remain available so the agent can still discover attachment names.
+ * Server-side tools that legitimately need the bytes read them via
+ * `AttachmentStateManager.readContent`, which bypasses this FS.
+ */
+const isRawAttachmentEntry = (entry: FileEntry): boolean =>
+  entry.metadata.type === FileEntryType.attachment;
+
+const attachmentAccessError = (path: string): Error =>
+  new Error(`EACCES: permission denied, read '${path}' (uploaded-file attachment)`);
+
+/**
  * Read-only `IFileSystem` adapter over a {@link FileEntryAccessor}.
  *
  * Delegates each read method to the underlying source on every call — no
@@ -55,6 +71,9 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
       }
       throw new Error(`ENOENT: no such file or directory, open '${path}'`);
     }
+    if (isRawAttachmentEntry(entry)) {
+      throw attachmentAccessError(path);
+    }
     return entryToString(entry);
   }
 
@@ -65,6 +84,9 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
         throw new Error(`EISDIR: illegal operation on a directory, read '${path}'`);
       }
       throw new Error(`ENOENT: no such file or directory, open '${path}'`);
+    }
+    if (isRawAttachmentEntry(entry)) {
+      throw attachmentAccessError(path);
     }
     return entryBytes(entry);
   }

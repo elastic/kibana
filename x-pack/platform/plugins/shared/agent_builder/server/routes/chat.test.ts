@@ -51,6 +51,12 @@ describe('promptResponseEntrySchema', () => {
     ).not.toThrow();
   });
 
+  it('accepts ask_user_question answers — attachment_id (file upload)', () => {
+    expect(() =>
+      promptResponseEntrySchema.validate({ answers: [{ attachment_id: 'att-1' }] })
+    ).not.toThrow();
+  });
+
   it('accepts a mixed answers array spanning all variants', () => {
     expect(() =>
       promptResponseEntrySchema.validate({

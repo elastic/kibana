@@ -40,6 +40,12 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
+    createAttachmentsStorage: jest.fn().mockResolvedValue({
+      store: jest.fn().mockResolvedValue(undefined),
+      read: jest.fn().mockResolvedValue(undefined),
+      readMeta: jest.fn().mockResolvedValue(undefined),
+      delete: jest.fn().mockResolvedValue(false),
+    }),
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };

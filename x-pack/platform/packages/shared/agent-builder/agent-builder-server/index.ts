@@ -151,5 +151,7 @@ export type {
   RuntimeStart,
   ReadOnlyConversationClient,
   ConversationsStart,
+  AttachmentsStorageContract,
+  UploadedFileAttachmentMeta,
 } from './plugin_contract';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

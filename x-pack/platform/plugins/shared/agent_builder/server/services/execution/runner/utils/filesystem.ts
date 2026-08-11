@@ -12,6 +12,8 @@ import { FilesystemService, WorkspaceVolume } from '../../filesystem';
 import { BashService } from '../../run_agent/bash';
 import type { BashToolAccess } from '../../run_agent/bash';
 import { WorkspaceClient, createWorkspaceStorage } from '../../../workspaces';
+import { createAttachmentsStorage } from '../../filesystem/attachments_storage';
+import { createAttachmentsStore } from '../store/volumes/attachments/attachments_store';
 import type { RunnerManager } from '../runner';
 
 /**
@@ -32,6 +34,7 @@ export const createFilesystemServices = async ({
 }): Promise<{
   filesystemService: FilesystemService;
   bashService?: BashService;
+  attachmentsVolume?: ReturnType<typeof createAttachmentsStore>;
 }> => {
   const { elasticsearch, request, logger, resultStore, skillsStore, toolManager } = manager.deps;
 
@@ -45,15 +48,25 @@ export const createFilesystemServices = async ({
     initialWorkspaceId: workspaceId,
   });
 
+  // Build the attachments volume from any uploaded_file attachments present
+  // in the conversation, reading raw bytes from workspace storage.
+  const attachmentsStorage = createAttachmentsStorage({ workspaceClient });
+  const attachmentsStore = createAttachmentsStore({
+    attachments: manager.deps.attachmentStateManager.getActive(),
+    attachmentsStorage,
+    initialWorkspaceId: workspaceId,
+  });
+
   const filesystemService = new FilesystemService({
     workspaceVolume,
     toolResultsSource: resultStore,
     skillsSource: skillsStore,
+    attachmentsSource: attachmentsStore,
   });
   await filesystemService.init();
 
   if (!experimentalFeatures.bash) {
-    return { filesystemService };
+    return { filesystemService, attachmentsVolume: attachmentsStore };
   }
 
   const bashService = new BashService({
@@ -63,7 +76,7 @@ export const createFilesystemServices = async ({
     abortSignal: manager.deps.abortSignal,
   });
 
-  return { filesystemService, bashService };
+  return { filesystemService, bashService, attachmentsVolume: attachmentsStore };
 };
 
 const createBashToolAccess = (toolManager: ToolManager): BashToolAccess => ({

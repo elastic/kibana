@@ -124,5 +124,16 @@ describe('materializeAskUserQuestionToolCall', () => {
         answers: [{ question: 'Pick a color', selected_options: ['red'] }],
       });
     });
+
+    it('includes attachment_id for file answers', () => {
+      const { content, artifact } = materializeAskUserQuestionToolCall({
+        questions: [colorQuestion],
+        answers: [{ attachment_id: 'att-123' }],
+      });
+      expect(JSON.parse(content)).toEqual({
+        answers: [{ question: 'Pick a color', selected_options: [], attachment_id: 'att-123' }],
+      });
+      expect(artifact).toEqual({ answers: [{ attachment_id: 'att-123' }] });
+    });
   });
 });

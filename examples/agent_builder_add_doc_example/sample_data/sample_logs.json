@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": "2026-08-11T10:00:00Z",
+    "service": "checkout-api",
+    "level": "info",
+    "message": "Order 1001 placed by user alice",
+    "duration_ms": 42
+  },
+  {
+    "timestamp": "2026-08-11T10:01:00Z",
+    "service": "checkout-api",
+    "level": "error",
+    "message": "Payment failed for order 1002 by user bob",
+    "duration_ms": 318
+  },
+  {
+    "timestamp": "2026-08-11T10:02:00Z",
+    "service": "inventory-api",
+    "level": "warn",
+    "message": "Stock low for SKU-42",
+    "duration_ms": 12
+  },
+  {
+    "timestamp": "2026-08-11T10:03:00Z",
+    "service": "checkout-api",
+    "level": "info",
+    "message": "Order 1003 placed by user carol",
+    "duration_ms": 51
+  },
+  {
+    "timestamp": "2026-08-11T10:04:00Z",
+    "service": "search-api",
+    "level": "info",
+    "message": "Query executed in 7ms",
+    "duration_ms": 7
+  }
+]

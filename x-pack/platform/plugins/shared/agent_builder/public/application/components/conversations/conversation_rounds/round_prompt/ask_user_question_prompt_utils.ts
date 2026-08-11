@@ -31,6 +31,10 @@ export interface AnswerDraft {
   /** True when the user has explicitly selected the custom ("Be more specific") option. */
   customSelected?: boolean;
   skipped?: boolean;
+  /** Selected File (for `response_type: 'file'` questions). */
+  file?: File;
+  /** attachment_id returned by the platform upload route, once the file has been uploaded. */
+  attachmentId?: string;
 }
 
 export interface AskUserQuestionPromptProps {
@@ -39,6 +43,8 @@ export interface AskUserQuestionPromptProps {
   onSubmit: (response: AskUserQuestionPromptResponse) => void;
   isLoading?: boolean;
   isDisabled?: boolean;
+  /** Conversation id, required for `response_type: 'file'` questions (used to POST to the upload route). */
+  conversationId?: string;
 }
 
 export const labels = {
@@ -59,6 +65,19 @@ export const labels = {
   }),
   customError: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.customError', {
     defaultMessage: 'Enter a response or choose a different option.',
+  }),
+  filePickerLabel: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.filePickerLabel', {
+    defaultMessage: 'Upload a file',
+  }),
+  filePickerHint: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.filePickerHint', {
+    defaultMessage: 'Accepted: JSON, NDJSON, CSV, text/plain',
+  }),
+  fileUploadError: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.fileUploadError', {
+    defaultMessage: 'Upload failed',
+  }),
+  fileSelected: i18n.translate('xpack.agentBuilder.askUserQuestionPrompt.fileSelected', {
+    defaultMessage: 'Selected: {name}',
+    values: { name: '' },
   }),
 };
 
@@ -94,6 +113,9 @@ export const draftToAnswer = (draft: AnswerDraft): AskUserQuestionAnswer => {
   if (draft.skipped) {
     return { skipped: true };
   }
+  if (draft.attachmentId) {
+    return { attachment_id: draft.attachmentId };
+  }
   const hasChoice = (draft.choice?.length ?? 0) > 0;
   const customTrim = draft.custom?.trim() ?? '';
   const hasCustom = !!draft.customSelected && customTrim.length > 0;
@@ -108,6 +130,12 @@ export const draftToAnswer = (draft: AnswerDraft): AskUserQuestionAnswer => {
 
 export const isDraftAnswerable = (draft: AnswerDraft): boolean => {
   if (draft.skipped) {
+    return true;
+  }
+  if (draft.attachmentId) {
+    return true;
+  }
+  if (draft.file) {
     return true;
   }
   const hasChoice = (draft.choice?.length ?? 0) > 0;

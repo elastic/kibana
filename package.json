@@ -192,6 +192,7 @@
     "@kbn/actions-types": "link:src/platform/packages/shared/kbn-actions-types",
     "@kbn/actions-utils": "link:src/platform/packages/shared/kbn-actions-utils",
     "@kbn/advanced-settings-plugin": "link:src/platform/plugins/private/advanced_settings",
+    "@kbn/agent-builder-add-doc-example-plugin": "link:examples/agent_builder_add_doc_example",
     "@kbn/agent-builder-browser": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-browser",
     "@kbn/agent-builder-common": "link:x-pack/platform/packages/shared/agent-builder/agent-builder-common",
     "@kbn/agent-builder-dashboards-common": "link:x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common",

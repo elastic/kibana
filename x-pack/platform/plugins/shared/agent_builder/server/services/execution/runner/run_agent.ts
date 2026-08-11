@@ -60,12 +60,18 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
-  const { filesystemService, bashService } = await createFilesystemServices({
+  const { filesystemService, bashService, attachmentsVolume } = await createFilesystemServices({
     manager,
     experimentalFeatures,
     workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
     spaceId,
   });
+
+  // Wire the per-run attachments volume onto the attachment state manager so
+  // server-side tools can read raw uploaded-file bytes via `readContent`.
+  if (attachmentsVolume) {
+    attachmentStateManager.setAttachmentsVolume(attachmentsVolume);
+  }
 
   return {
     request,

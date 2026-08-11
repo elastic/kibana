@@ -184,6 +184,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Workflows
   'workflow-authoring',
 
+  // Platform – Example (agent_builder_add_doc_example)
+  'add-doc-to-index',
+
   // Evals
   'eval-experiment-authoring',
 
@@ -312,6 +315,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
+
+  // Platform – Example (agent_builder_add_doc_example)
+  'uploaded_file',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

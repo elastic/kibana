@@ -14,6 +14,7 @@ import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
+import { createUploadedFileAttachmentType } from './uploaded_file';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -37,6 +38,9 @@ export const registerAttachmentTypes = ({
     createConnectorAttachmentType(),
     createConnectorSetupAttachmentType(),
     createSkillAttachmentType(),
+    createUploadedFileAttachmentType({
+      createAttachmentsStorage: agentBuilder.createAttachmentsStorage,
+    }),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

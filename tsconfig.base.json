@@ -31,6 +31,8 @@
       "@kbn/actions-utils/*": ["./src/platform/packages/shared/kbn-actions-utils/*"],
       "@kbn/advanced-settings-plugin": ["./src/platform/plugins/private/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["./src/platform/plugins/private/advanced_settings/*"],
+      "@kbn/agent-builder-add-doc-example-plugin": ["./examples/agent_builder_add_doc_example"],
+      "@kbn/agent-builder-add-doc-example-plugin/*": ["./examples/agent_builder_add_doc_example/*"],
       "@kbn/agent-builder-browser": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-browser"],
       "@kbn/agent-builder-browser/*": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-browser/*"],
       "@kbn/agent-builder-common": ["./x-pack/platform/packages/shared/agent-builder/agent-builder-common"],
