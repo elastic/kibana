@@ -43,7 +43,6 @@ const LoadedResults = ({
       searchTerm={searchTerm}
       items={items}
       isLoading={isLoading}
-      // The error state wins over partial quickstart-only results.
       isError={Boolean(error)}
       onRetry={onRetry}
       renderCard={renderResultCard}

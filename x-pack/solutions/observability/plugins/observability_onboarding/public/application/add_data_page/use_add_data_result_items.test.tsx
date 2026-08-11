@@ -74,16 +74,19 @@ describe('useAddDataResultItems', () => {
     expect(result.current.items[0].url).toContain('returnAppId=');
   });
 
-  it('includes matching quickstart cards from the curated tiles', () => {
-    const useAvailablePackages = mockPackages([]);
+  // The curated tiles are always visible below the results, so mirroring them
+  // into the result list only produced duplicates of the EPR cards.
+  it('does not mirror curated tiles into the results', () => {
+    const useAvailablePackages = mockPackages([
+      makeCard({ id: 'epr:docker', name: 'docker', title: 'Docker', description: 'Containers.' }),
+    ]);
 
     const { result } = renderHook(
-      () =>
-        useAddDataResultItems({ searchTerm: 'kubernetes', useAvailablePackages, useLocalSearch }),
+      () => useAddDataResultItems({ searchTerm: 'docker', useAvailablePackages, useLocalSearch }),
       { wrapper }
     );
 
-    expect(result.current.items.some(({ id }) => id === 'quickstart-kubernetes')).toBe(true);
+    expect(result.current.items.map(({ id }) => id)).toEqual(['epr:docker']);
   });
 
   it('surfaces the Fleet package loading error', () => {
