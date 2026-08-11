@@ -46984,7 +46984,6 @@
     "xpack.securitySolution.flyout.entityDetails.highlights.persistError": "KI-Zusammenfassung konnte nicht gespeichert werden – sie bleibt nach dem Aktualisieren nicht erhalten.",
     "xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions": "Empfohlene Maßnahmen",
     "xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel": "Zusammenfassung regenerieren",
-    "xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues": "Anonymisierte Werte anzeigen",
     "xpack.securitySolution.flyout.entityDetails.highlights.stalenessReason.riskScore": "Risikobewertung geändert von {previousScore} auf {currentScore}",
     "xpack.securitySolution.flyout.entityDetails.highlights.stalenessSignal.riskScore": "Entitätsrisiko",
     "xpack.securitySolution.flyout.entityDetails.highlights.title": "Entitätszusammenfassung",

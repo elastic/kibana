@@ -47149,7 +47149,6 @@
     "xpack.securitySolution.flyout.entityDetails.highlights.persistError": "无法保存 AI 摘要——刷新后将不会保留。",
     "xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions": "建议操作",
     "xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel": "重新生成摘要",
-    "xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues": "显示已匿名处理的值",
     "xpack.securitySolution.flyout.entityDetails.highlights.stalenessReason.riskScore": "风险分数从 {previousScore} 变更为 {currentScore}",
     "xpack.securitySolution.flyout.entityDetails.highlights.stalenessSignal.riskScore": "实体风险",
     "xpack.securitySolution.flyout.entityDetails.highlights.title": "实体摘要",

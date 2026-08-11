@@ -47143,7 +47143,6 @@
     "xpack.securitySolution.flyout.entityDetails.highlights.persistError": "AIサマリーを保存できませんでした — 更新後保持されません。",
     "xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions": "推奨されるアクション",
     "xpack.securitySolution.flyout.entityDetails.highlights.refreshAriaLabel": "概要を再生成",
-    "xpack.securitySolution.flyout.entityDetails.highlights.showAnonymizedValues": "匿名化された値を表示",
     "xpack.securitySolution.flyout.entityDetails.highlights.stalenessReason.riskScore": "リスクスコアが{previousScore}から{currentScore}に変更されました",
     "xpack.securitySolution.flyout.entityDetails.highlights.stalenessSignal.riskScore": "エンティティリスク",
     "xpack.securitySolution.flyout.entityDetails.highlights.title": "エンティティ概要",
