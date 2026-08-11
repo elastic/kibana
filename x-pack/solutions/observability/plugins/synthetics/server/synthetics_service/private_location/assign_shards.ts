@@ -17,7 +17,7 @@ const EPSILON = 1e-9;
  * Uses rendezvous (highest-random-weight) hashing so that when an agent is
  * added or removed only the monitors that map to the changed agent move; every
  * other assignment is stable. This keeps rebalancing churn minimal when agents
- * join or leave a location. The "ids" here are agent host names (see
+ * join or leave a location. The "ids" here are Fleet agent ids (see
  * {@link ./assign_by_condition}); the math is agnostic to what they represent.
  */
 
@@ -28,8 +28,8 @@ const weight = (monitorId: string, nodeId: string): number =>
   parseInt(createHash('sha256').update(`${monitorId}:${nodeId}`).digest('hex').slice(0, 13), 16);
 
 /**
- * Returns the node (agent host) that owns the given monitor, or undefined when
- * there are no nodes to assign to.
+ * Returns the node (enrolled agent) that owns the given monitor, or undefined
+ * when there are no nodes to assign to.
  */
 export const assignShard = (monitorId: string, nodeIds: string[]): string | undefined => {
   if (nodeIds.length === 0) {
@@ -76,7 +76,7 @@ export const assignShard = (monitorId: string, nodeIds: string[]): string | unde
  * so it is meant for a full-location (re)placement pass, not per-monitor.
  *
  * @param monitors monitor id + memory cost (see {@link getMonitorCostMib})
- * @param nodeIds candidate nodes (agent host names)
+ * @param nodeIds candidate nodes (Fleet agent ids)
  * @param capacities optional node weight; missing/non-positive entries fall
  *   back to 1 (uniform)
  * @returns map of monitor id → assigned node id
@@ -158,24 +158,24 @@ export interface MonitorPlacement {
   id: string;
   /** Memory cost weight (MiB); see {@link getMonitorCostMib}. */
   cost: number;
-  /** Host the monitor is currently pinned to; undefined/stale ⇒ needs placing. */
-  currentHost?: string;
+  /** Agent the monitor is currently pinned to; undefined/stale ⇒ needs placing. */
+  currentAgentId?: string;
 }
 
 /**
  * Minimal-churn, capacity-aware rebalance of a location's monitors across its
- * currently-healthy agent hosts. This is the single placement authority for the
+ * currently-healthy agents. This is the single placement authority for the
  * background rebalance task — it replaces the previous split of "rendezvous
  * failover" vs "full cost-balanced recovery", which reshuffled healthy monitors
  * whenever the two strategies disagreed.
  *
  * It preserves locality and only ever moves:
- *   1. **failover** — monitors whose current host is stale/unknown are placed on
- *      a healthy host (LPT greedy by cost, rendezvous tie-break). Mandatory for
+ *   1. **failover** — monitors whose current agent is stale/unknown are placed on
+ *      a healthy agent (LPT greedy by cost, rendezvous tie-break). Mandatory for
  *      correctness (a monitor must never stay pinned to a dead agent).
  *   2. **load-balance / recovery** — the *minimum* set of monitors needed to fill
- *      an under-utilised `recoveryHosts` target, pulled from the most over-loaded
- *      hosts. Never a full redistribution.
+ *      an under-utilised `recoveryAgentIds` target, pulled from the most
+ *      over-loaded agents. Never a full redistribution.
  *
  * Every load-balance move must strictly reduce the imbalance objective
  * `Σ (load − fairShare)²`. Moving a monitor of cost `c` from a donor to a
@@ -186,73 +186,73 @@ export interface MonitorPlacement {
  * a natural anti-churn threshold (a monitor won't move unless the imbalance
  * exceeds its own cost).
  *
- * @param monitors the location's monitors, with their current host (if any) and
+ * @param monitors the location's monitors, with their current agent (if any) and
  *   memory cost (see {@link getMonitorCostMib}).
- * @param healthyHosts candidate hosts eligible to run monitors (agent host names).
- * @param opts.capacities optional per-host weight; missing/non-positive entries
+ * @param healthyAgentIds agents eligible to run monitors (Fleet agent ids).
+ * @param opts.capacities optional per-agent weight; missing/non-positive entries
  *   fall back to the mean of the known capacities (see {@link makeCapacityOf}).
- * @param opts.recoveryHosts subset of `healthyHosts` eligible to *receive* load-
- *   balancing moves (anti-flap hysteresis — a freshly-recovered host is excluded
- *   until stable). Defaults to all healthy hosts. Failover ignores this: a stale
- *   monitor can be placed on any healthy host.
- * @returns monitor id → assigned host (only moved monitors differ from input)
+ * @param opts.recoveryAgentIds subset of `healthyAgentIds` eligible to *receive*
+ *   load-balancing moves (anti-flap hysteresis — a freshly-recovered agent is
+ *   excluded until stable). Defaults to all healthy agents. Failover ignores
+ *   this: a stale monitor can be placed on any healthy agent.
+ * @returns monitor id → assigned agent id (only moved monitors differ from input)
  */
 export const rebalanceByCost = (
   monitors: ReadonlyArray<MonitorPlacement>,
-  healthyHosts: string[],
+  healthyAgentIds: string[],
   opts: {
     capacities?: ReadonlyMap<string, number>;
-    recoveryHosts?: string[];
+    recoveryAgentIds?: string[];
   } = {}
 ): Map<string, string> => {
   const assignment = new Map<string, string>();
-  if (healthyHosts.length === 0 || monitors.length === 0) {
+  if (healthyAgentIds.length === 0 || monitors.length === 0) {
     return assignment;
   }
 
-  const { capacities, recoveryHosts } = opts;
-  const healthySet = new Set(healthyHosts);
-  const capacityOf = makeCapacityOf(healthyHosts, capacities);
-  const load = new Map<string, number>(healthyHosts.map((id) => [id, 0]));
+  const { capacities, recoveryAgentIds } = opts;
+  const healthySet = new Set(healthyAgentIds);
+  const capacityOf = makeCapacityOf(healthyAgentIds, capacities);
+  const load = new Map<string, number>(healthyAgentIds.map((id) => [id, 0]));
 
-  // Phase 1 — retain: a monitor already on a healthy host stays there (locality).
+  // Phase 1 — retain: a monitor already on a healthy agent stays there (locality).
   const unplaced: MonitorPlacement[] = [];
   for (const monitor of monitors) {
-    if (monitor.currentHost && healthySet.has(monitor.currentHost)) {
-      assignment.set(monitor.id, monitor.currentHost);
-      load.set(monitor.currentHost, load.get(monitor.currentHost)! + monitor.cost);
+    if (monitor.currentAgentId && healthySet.has(monitor.currentAgentId)) {
+      assignment.set(monitor.id, monitor.currentAgentId);
+      load.set(monitor.currentAgentId, load.get(monitor.currentAgentId)! + monitor.cost);
     } else {
       unplaced.push(monitor);
     }
   }
 
   // Phase 2 — failover: place stale/unassigned monitors heaviest-first onto the
-  // host with the lowest projected relative load (LPT), rendezvous tie-break.
-  // NOTE: this is not fenced — if a monitor's old host was a false-positive stale
-  // (or hasn't polled the revised policy yet) while the new host has started, both
-  // run it briefly. That short overlap is accepted (steady state is exactly-once,
-  // Heartbeat indexing is idempotent); see the tradeoffs in the POC design
-  // (https://github.com/elastic/kibana/pull/278434).
+  // agent with the lowest projected relative load (LPT), rendezvous tie-break.
+  // NOTE: this is not fenced — if a monitor's old agent was a false-positive stale
+  // (or hasn't polled the revised policy yet) while the new agent has started,
+  // both run it briefly. That short overlap is accepted (steady state is
+  // exactly-once, Heartbeat indexing is idempotent); see the tradeoffs in the
+  // POC design (https://github.com/elastic/kibana/pull/278434).
   const ordered = [...unplaced].sort((a, b) => b.cost - a.cost || (a.id < b.id ? -1 : 1));
-  placeByLpt(ordered, healthyHosts, load, capacityOf, assignment);
+  placeByLpt(ordered, healthyAgentIds, load, capacityOf, assignment);
 
-  // Phase 3 — load-balance onto under-utilised recovery hosts, moving the fewest
+  // Phase 3 — load-balance onto under-utilised recovery agents, moving the fewest
   // monitors that each strictly reduce Σ (load − fairShare)².
-  const recovery = (recoveryHosts ?? healthyHosts).filter((id) => healthySet.has(id));
+  const recovery = (recoveryAgentIds ?? healthyAgentIds).filter((id) => healthySet.has(id));
   if (recovery.length > 0) {
     const totalCost = monitors.reduce((sum, m) => sum + m.cost, 0);
-    const totalCapacity = healthyHosts.reduce((sum, id) => sum + capacityOf(id), 0);
+    const totalCapacity = healthyAgentIds.reduce((sum, id) => sum + capacityOf(id), 0);
     const fairShare = (id: string) => (totalCost * capacityOf(id)) / totalCapacity;
 
-    const monitorsByHost = new Map<string, MonitorPlacement[]>();
+    const monitorsByAgentId = new Map<string, MonitorPlacement[]>();
     for (const monitor of monitors) {
-      const host = assignment.get(monitor.id);
-      if (!host) {
+      const agentId = assignment.get(monitor.id);
+      if (!agentId) {
         continue;
       }
-      const list = monitorsByHost.get(host) ?? [];
+      const list = monitorsByAgentId.get(agentId) ?? [];
       list.push(monitor);
-      monitorsByHost.set(host, list);
+      monitorsByAgentId.set(agentId, list);
     }
 
     const surplusOf = (id: string) => load.get(id)! - fairShare(id);
@@ -270,7 +270,9 @@ export const rebalanceByCost = (
         (a, b) => surplusOf(a) < surplusOf(b) - EPSILON || (surplusOf(a) <= surplusOf(b) && a < b)
       );
       const donor = pick(
-        healthyHosts.filter((id) => id !== recipient && (monitorsByHost.get(id)?.length ?? 0) > 0),
+        healthyAgentIds.filter(
+          (id) => id !== recipient && (monitorsByAgentId.get(id)?.length ?? 0) > 0
+        ),
         (a, b) => surplusOf(a) > surplusOf(b) + EPSILON || (surplusOf(a) >= surplusOf(b) && a < b)
       );
       if (recipient === undefined || donor === undefined) {
@@ -285,7 +287,7 @@ export const rebalanceByCost = (
       // monitor with the most negative Δ (id tie-break). c ≥ gap never helps.
       let mover: MonitorPlacement | undefined;
       let bestDelta = -EPSILON;
-      for (const monitor of monitorsByHost.get(donor)!) {
+      for (const monitor of monitorsByAgentId.get(donor)!) {
         const delta = 2 * monitor.cost * (monitor.cost - gap);
         if (
           delta < bestDelta ||
@@ -302,11 +304,11 @@ export const rebalanceByCost = (
       assignment.set(mover.id, recipient);
       load.set(donor, load.get(donor)! - mover.cost);
       load.set(recipient, load.get(recipient)! + mover.cost);
-      monitorsByHost.set(
+      monitorsByAgentId.set(
         donor,
-        monitorsByHost.get(donor)!.filter((m) => m.id !== mover!.id)
+        monitorsByAgentId.get(donor)!.filter((m) => m.id !== mover!.id)
       );
-      monitorsByHost.set(recipient, [...(monitorsByHost.get(recipient) ?? []), mover]);
+      monitorsByAgentId.set(recipient, [...(monitorsByAgentId.get(recipient) ?? []), mover]);
     }
   }
 

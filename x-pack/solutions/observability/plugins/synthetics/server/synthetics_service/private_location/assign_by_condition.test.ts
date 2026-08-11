@@ -6,10 +6,10 @@
  */
 
 import {
-  assignAgentByHost,
+  agentIdCondition,
+  agentIdFromCondition,
+  assignAgentById,
   balanceAgentsByCost,
-  hostFromCondition,
-  hostNameCondition,
   isConditionShardedLocation,
   isEqlSafeLiteral,
   UNASSIGNED_CONDITION,
@@ -25,8 +25,8 @@ describe('isConditionShardedLocation', () => {
 });
 
 describe('isEqlSafeLiteral', () => {
-  it('accepts ordinary host names', () => {
-    for (const value of ['synth-agent-03', 'a.b.c', 'host_1', 'HOST']) {
+  it('accepts ordinary agent ids', () => {
+    for (const value of ['02f5bda4-1844-4d71-ae49-32b82df0390c', 'agent-id', 'agent_1']) {
       expect(isEqlSafeLiteral(value)).toBe(true);
     }
   });
@@ -38,123 +38,104 @@ describe('isEqlSafeLiteral', () => {
   });
 });
 
-describe('hostNameCondition', () => {
-  it('builds an EQL equality against host.name', () => {
-    expect(hostNameCondition('synth-agent-03')).toBe("${host.name} == 'synth-agent-03'");
+describe('agentIdCondition', () => {
+  it('builds an EQL equality against agent.id', () => {
+    expect(agentIdCondition('agent-123')).toBe("${agent.id} == 'agent-123'");
   });
 
-  it('pins on host.id too when provided (disambiguates same-named agents)', () => {
-    expect(hostNameCondition('synth-agent-03', 'abc-123')).toBe(
-      "${host.name} == 'synth-agent-03' and ${host.id} == 'abc-123'"
-    );
-  });
-
-  it('drops an unsafe host.id rather than emit a corrupt condition', () => {
-    expect(hostNameCondition('synth-agent-03', "bad'id")).toBe("${host.name} == 'synth-agent-03'");
-  });
-
-  it('throws on a host name that is not representable as an EQL literal', () => {
-    expect(() => hostNameCondition("o'brien-host")).toThrow();
-    expect(() => hostNameCondition('')).toThrow();
+  it('throws on an agent id that is not representable as an EQL literal', () => {
+    expect(() => agentIdCondition("bad'id")).toThrow();
+    expect(() => agentIdCondition('')).toThrow();
   });
 });
 
-describe('hostFromCondition', () => {
-  it('reads back the host stamped by hostNameCondition (with or without host.id)', () => {
-    for (const host of ['synth-agent-03', 'a.b.c']) {
-      expect(hostFromCondition(hostNameCondition(host))).toBe(host);
-      expect(hostFromCondition(hostNameCondition(host, 'some-id'))).toBe(host);
+describe('agentIdFromCondition', () => {
+  it('reads back the agent id stamped by agentIdCondition', () => {
+    for (const agentId of ['agent-1', '02f5bda4-1844-4d71-ae49-32b82df0390c']) {
+      expect(agentIdFromCondition(agentIdCondition(agentId))).toBe(agentId);
     }
   });
 
   it('returns undefined for empty, sentinel or unrecognised conditions', () => {
-    expect(hostFromCondition(undefined)).toBeUndefined();
-    expect(hostFromCondition(null)).toBeUndefined();
-    expect(hostFromCondition('')).toBeUndefined();
-    expect(hostFromCondition(UNASSIGNED_CONDITION)).toBeUndefined();
-    expect(hostFromCondition("${host.ip} == '1.2.3.4'")).toBeUndefined();
+    expect(agentIdFromCondition(undefined)).toBeUndefined();
+    expect(agentIdFromCondition(null)).toBeUndefined();
+    expect(agentIdFromCondition('')).toBeUndefined();
+    expect(agentIdFromCondition(UNASSIGNED_CONDITION)).toBeUndefined();
+    expect(agentIdFromCondition("${host.id} == 'host-1'")).toBeUndefined();
+    expect(agentIdFromCondition("not (${agent.id} == 'agent-1')")).toBeUndefined();
   });
 });
 
-describe('assignAgentByHost', () => {
-  const hosts = ['host-a', 'host-b', 'host-c'];
+describe('assignAgentById', () => {
+  const agentIds = ['agent-a', 'agent-b', 'agent-c'];
 
   it('returns undefined when no agents are enrolled', () => {
-    expect(assignAgentByHost('monitor-1', [])).toBeUndefined();
+    expect(assignAgentById('monitor-1', [])).toBeUndefined();
   });
 
-  it('assigns to one enrolled host and returns its matching condition', () => {
-    const result = assignAgentByHost('monitor-1', hosts)!;
-    expect(hosts).toContain(result.host);
-    expect(result.condition).toBe(hostNameCondition(result.host));
+  it('assigns to one enrolled agent and returns its matching condition', () => {
+    const result = assignAgentById('monitor-1', agentIds)!;
+    expect(agentIds).toContain(result.agentId);
+    expect(result.condition).toBe(agentIdCondition(result.agentId));
   });
 
-  it('pins on host.id when idByHost has an entry for the chosen host', () => {
-    const idByHost = new Map(hosts.map((h) => [h, `${h}-id`]));
-    const result = assignAgentByHost('monitor-1', hosts, idByHost)!;
-    expect(result.condition).toBe(hostNameCondition(result.host, `${result.host}-id`));
-    expect(result.condition).toContain('${host.id}');
-  });
-
-  it('reuses rendezvous placement (same result as assignShard over the hosts)', () => {
+  it('reuses rendezvous placement over the agent ids', () => {
     for (let i = 0; i < 100; i++) {
       const id = `monitor-${i}`;
-      expect(assignAgentByHost(id, hosts)!.host).toBe(assignShard(id, hosts));
+      expect(assignAgentById(id, agentIds)!.agentId).toBe(assignShard(id, agentIds));
     }
   });
 
   it('is deterministic and order-independent', () => {
-    const reversed = [...hosts].reverse();
+    const reversed = [...agentIds].reverse();
     for (let i = 0; i < 100; i++) {
       const id = `monitor-${i}`;
-      expect(assignAgentByHost(id, hosts)!.host).toBe(assignAgentByHost(id, reversed)!.host);
+      expect(assignAgentById(id, agentIds)!.agentId).toBe(assignAgentById(id, reversed)!.agentId);
     }
   });
 
-  it('moves only the dead host’s monitors when a host leaves (rendezvous property)', () => {
+  it('moves only the departed agent’s monitors when an agent leaves', () => {
     const ids = Array.from({ length: 500 }, (_, i) => `monitor-${i}`);
-    const before = new Map(ids.map((id) => [id, assignAgentByHost(id, hosts)!.host]));
+    const before = new Map(ids.map((id) => [id, assignAgentById(id, agentIds)!.agentId]));
+    const survivors = ['agent-a', 'agent-b'];
 
-    const survivors = ['host-a', 'host-b'];
-    let movedOffSurvivor = 0;
     for (const id of ids) {
-      const now = assignAgentByHost(id, survivors)!.host;
-      if (before.get(id) !== 'host-c' && before.get(id) !== now) {
-        movedOffSurvivor++;
+      const now = assignAgentById(id, survivors)!.agentId;
+      if (before.get(id) !== 'agent-c') {
+        expect(now).toBe(before.get(id));
       }
     }
-    expect(movedOffSurvivor).toBe(0);
   });
 });
 
 describe('balanceAgentsByCost', () => {
-  const hosts = ['host-a', 'host-b', 'host-c'];
+  const agentIds = ['agent-a', 'agent-b', 'agent-c'];
 
-  it('assigns every monitor to an enrolled host with a matching condition', () => {
+  it('assigns every monitor to an enrolled agent with a matching condition', () => {
     const monitors = Array.from({ length: 30 }, (_, i) => ({
       id: `monitor-${i}`,
       cost: i % 5 === 0 ? BROWSER_COST_MIB : LIGHTWEIGHT_COST_MIB,
     }));
-    const result = balanceAgentsByCost(monitors, hosts);
+    const result = balanceAgentsByCost(monitors, agentIds);
 
     expect(result.size).toBe(monitors.length);
-    for (const { host, condition } of result.values()) {
-      expect(hosts).toContain(host);
-      expect(condition).toBe(hostNameCondition(host));
+    for (const { agentId, condition } of result.values()) {
+      expect(agentIds).toContain(agentId);
+      expect(condition).toBe(agentIdCondition(agentId));
     }
   });
 
-  it('spreads browser monitors across hosts rather than piling them on one', () => {
+  it('spreads browser monitors across agents rather than piling them on one', () => {
     const monitors = Array.from({ length: 9 }, (_, i) => ({
       id: `browser-${i}`,
       cost: BROWSER_COST_MIB,
     }));
-    const byHost: Record<string, number> = {};
-    for (const { host } of balanceAgentsByCost(monitors, hosts).values()) {
-      byHost[host] = (byHost[host] ?? 0) + 1;
+    const byAgentId: Record<string, number> = {};
+    for (const { agentId } of balanceAgentsByCost(monitors, agentIds).values()) {
+      byAgentId[agentId] = (byAgentId[agentId] ?? 0) + 1;
     }
-    for (const host of hosts) {
-      expect(byHost[host]).toBe(3);
+    for (const agentId of agentIds) {
+      expect(byAgentId[agentId]).toBe(3);
     }
   });
 });

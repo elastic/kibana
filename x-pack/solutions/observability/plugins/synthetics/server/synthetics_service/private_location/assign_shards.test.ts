@@ -206,15 +206,15 @@ describe('balanceShardsByCost', () => {
 
 describe('rebalanceByCost', () => {
   const hosts = ['h1', 'h2', 'h3'];
-  const lw = (id: string, currentHost?: string): MonitorPlacement => ({
+  const lw = (id: string, currentAgentId?: string): MonitorPlacement => ({
     id,
     cost: LIGHTWEIGHT_COST_MIB,
-    currentHost,
+    currentAgentId,
   });
-  const br = (id: string, currentHost?: string): MonitorPlacement => ({
+  const br = (id: string, currentAgentId?: string): MonitorPlacement => ({
     id,
     cost: BROWSER_COST_MIB,
-    currentHost,
+    currentAgentId,
   });
 
   const loadByHost = (assignment: Map<string, string>, monitors: MonitorPlacement[]) => {
@@ -227,9 +227,9 @@ describe('rebalanceByCost', () => {
   };
   // Feed an assignment back as the new current state, to test idempotency / churn.
   const applied = (monitors: MonitorPlacement[], assignment: Map<string, string>) =>
-    monitors.map((m) => ({ ...m, currentHost: assignment.get(m.id) }));
+    monitors.map((m) => ({ ...m, currentAgentId: assignment.get(m.id) }));
   const movedCount = (monitors: MonitorPlacement[], assignment: Map<string, string>) =>
-    monitors.filter((m) => m.currentHost !== assignment.get(m.id)).length;
+    monitors.filter((m) => m.currentAgentId !== assignment.get(m.id)).length;
   // Round-robin seed = exactly cost-balanced when every monitor has equal cost.
   const balancedLw = (n: number, over: string[]) =>
     Array.from({ length: n }, (_, i) => lw(`m${i}`, over[i % over.length]));
@@ -259,23 +259,25 @@ describe('rebalanceByCost', () => {
 
   it('performs zero moves in a balanced steady state and is idempotent', () => {
     const monitors = balancedLw(30, hosts); // 10 per host, exactly fair
-    const assignment = rebalanceByCost(monitors, hosts, { recoveryHosts: hosts });
+    const assignment = rebalanceByCost(monitors, hosts, { recoveryAgentIds: hosts });
     expect(movedCount(monitors, assignment)).toBe(0);
     // Re-running on its own output moves nothing further.
-    const again = rebalanceByCost(applied(monitors, assignment), hosts, { recoveryHosts: hosts });
+    const again = rebalanceByCost(applied(monitors, assignment), hosts, {
+      recoveryAgentIds: hosts,
+    });
     expect(movedCount(applied(monitors, assignment), again)).toBe(0);
   });
 
   it('fails over only the offline host’s monitors, leaving healthy ones in place', () => {
     const monitors = balancedLw(30, hosts); // 10 on each of h1/h2/h3
     const healthy = ['h1', 'h2']; // h3 offline
-    const assignment = rebalanceByCost(monitors, healthy, { recoveryHosts: healthy });
+    const assignment = rebalanceByCost(monitors, healthy, { recoveryAgentIds: healthy });
 
     for (const m of monitors) {
-      if (m.currentHost === 'h3') {
+      if (m.currentAgentId === 'h3') {
         expect(healthy).toContain(assignment.get(m.id)); // evacuated to a healthy host
       } else {
-        expect(assignment.get(m.id)).toBe(m.currentHost); // locality: untouched
+        expect(assignment.get(m.id)).toBe(m.currentAgentId); // locality: untouched
       }
     }
     // Exactly h3's 10 monitors moved.
@@ -284,14 +286,16 @@ describe('rebalanceByCost', () => {
 
   it('does not move work onto a healthy host excluded from recovery (hysteresis)', () => {
     const monitors = balancedLw(20, ['h1', 'h2']); // all on h1/h2; h3 freshly recovered
-    const assignment = rebalanceByCost(monitors, hosts, { recoveryHosts: ['h1', 'h2'] });
+    const assignment = rebalanceByCost(monitors, hosts, {
+      recoveryAgentIds: ['h1', 'h2'],
+    });
     expect([...assignment.values()]).not.toContain('h3');
     expect(movedCount(monitors, assignment)).toBe(0);
   });
 
   it('redistributes minimally onto a recovery-eligible empty host', () => {
     const monitors = balancedLw(20, ['h1', 'h2']); // 10 on h1, 10 on h2, h3 empty
-    const assignment = rebalanceByCost(monitors, hosts, { recoveryHosts: hosts });
+    const assignment = rebalanceByCost(monitors, hosts, { recoveryAgentIds: hosts });
 
     const h3Count = [...assignment.values()].filter((h) => h === 'h3').length;
     expect(h3Count).toBeGreaterThanOrEqual(5); // got roughly its fair third (~6.67)
@@ -305,7 +309,9 @@ describe('rebalanceByCost', () => {
     // h1 has one more lightweight than h2 → gap equals one monitor's cost, so no
     // move strictly improves balance.
     const monitors = [lw('a', 'h1'), lw('b', 'h1'), lw('c', 'h2')];
-    const assignment = rebalanceByCost(monitors, ['h1', 'h2'], { recoveryHosts: ['h1', 'h2'] });
+    const assignment = rebalanceByCost(monitors, ['h1', 'h2'], {
+      recoveryAgentIds: ['h1', 'h2'],
+    });
     expect(movedCount(monitors, assignment)).toBe(0);
   });
 
@@ -315,7 +321,7 @@ describe('rebalanceByCost', () => {
       ...Array.from({ length: 30 }, (_, i) => lw(`m${i}`, hosts[i % 3])),
     ];
     const healthy = ['h1', 'h2']; // h3 offline
-    const assignment = rebalanceByCost(monitors, healthy, { recoveryHosts: healthy });
+    const assignment = rebalanceByCost(monitors, healthy, { recoveryAgentIds: healthy });
     const loads = healthy.map((h) => loadByHost(assignment, monitors)[h] ?? 0);
     expect(Math.max(...loads) - Math.min(...loads)).toBeLessThanOrEqual(BROWSER_COST_MIB);
   });
@@ -327,7 +333,7 @@ describe('rebalanceByCost', () => {
       ['h2', 2000],
     ]);
     const assignment = rebalanceByCost(monitors, ['h1', 'h2'], {
-      recoveryHosts: ['h1', 'h2'],
+      recoveryAgentIds: ['h1', 'h2'],
       capacities,
     });
     const loads = loadByHost(assignment, monitors);
@@ -342,9 +348,9 @@ describe('rebalanceByCost', () => {
       ...Array.from({ length: 20 }, (_, i) => lw(`m${i}`, hosts[i % 3])),
     ];
     const healthy = ['h1', 'h2'];
-    const a = rebalanceByCost(monitors, healthy, { recoveryHosts: healthy });
+    const a = rebalanceByCost(monitors, healthy, { recoveryAgentIds: healthy });
     const b = rebalanceByCost([...monitors].reverse(), [...healthy].reverse(), {
-      recoveryHosts: [...healthy].reverse(),
+      recoveryAgentIds: [...healthy].reverse(),
     });
     expect([...a.entries()].sort()).toEqual([...b.entries()].sort());
   });

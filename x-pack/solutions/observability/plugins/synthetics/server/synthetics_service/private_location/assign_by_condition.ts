@@ -29,24 +29,22 @@ import { assignShard, balanceShardsByCost } from './assign_shards';
  *    `fleet/server/services/agent_policies/package_policies_to_agent_inputs.ts`
  *    (`combineConditions`). Setting `newPolicy.condition` is all Kibana needs.
  *
- * Shard key — we pin on BOTH `host.name` and `host.id`:
- *  - `host.name` (lowercased) and `host.id` (machine `UniqueID`) are both
- *    published by the agent `host` context provider AND readable by Kibana from
- *    each agent's `local_metadata` in `.fleet-agents` (verified in
- *    elastic-agent `internal/pkg/composable/providers/host/host.go` and
- *    `internal/pkg/agent/application/info/inject_config.go`).
- *  - `host.name` alone is NOT unique (cloned VMs / containers can share a
- *    hostname), so two same-named agents would both match `${host.name} == 'x'`
- *    and double-run the monitor. Adding `and ${host.id} == '<uniqueId>'` narrows
- *    the match to one machine. `host.id` is also a safe (quote-free) identifier.
- *  - `agent.id` is Kibana-visible but regenerated on re-enroll, so an agent
- *    bounce would reshuffle its slice. Rejected. Agent *tags* / `env.*` aren't
- *    both provider-visible and Kibana-readable. Rejected.
+ * Shard key — we pin on `agent.id`:
+ *  - Fleet assigns every enrolled agent a unique top-level id, and Elastic Agent
+ *    publishes the same value through the `agent` context provider for condition
+ *    evaluation (see elastic-agent
+ *    `internal/pkg/composable/providers/agent/agent.go`).
+ *  - Unlike `host.name` or `host.id`, it identifies one enrolled agent rather
+ *    than a hostname or physical machine. Multiple agents on the same host are
+ *    therefore independently assignable and cannot match one another's monitor
+ *    conditions.
+ *  - A re-enrollment that receives a new `agent.id` is correctly treated as one
+ *    agent leaving and another joining; rendezvous placement limits the churn
+ *    to monitors owned by the replaced agent.
  *
- * The placement math is plain rendezvous / cost balancing over host *names*
- * (stable ids), delegating to {@link assignShard} / {@link balanceShardsByCost};
- * only the *binding* differs — a `condition` string instead of a moved
- * `policy_id`, with the assigned host's `host.id` looked up from `idByHost`.
+ * The placement math is plain rendezvous / cost balancing over Fleet agent ids,
+ * delegating to {@link assignShard} / {@link balanceShardsByCost}; only the
+ * *binding* differs — a `condition` string instead of a moved `policy_id`.
  */
 
 /** A private location is scalable when it opts into condition-based sharding. */
@@ -66,85 +64,60 @@ export const isEqlSafeLiteral = (value: string): boolean =>
   value.length > 0 && !EQL_UNSAFE_RE.test(value);
 
 /**
- * Condition that no real agent can satisfy (no agent reports this sentinel as
- * its `host.id`). Stamped on a monitor that has no assignable agent yet so it
- * runs on ZERO agents — preserving at-most-once — instead of running on every
- * agent (which an absent/`null` condition would cause). The next create/edit
- * pass or rebalance replaces it with a real host condition.
+ * Condition that no real agent can satisfy. Stamped on a monitor that has no
+ * assignable agent yet so it runs on ZERO agents — preserving at-most-once —
+ * instead of running on every agent (which an absent/`null` condition would
+ * cause). The next create/edit pass or rebalance replaces it with a real agent
+ * condition.
  */
-export const UNASSIGNED_CONDITION = "${host.id} == '__synthetics_unassigned__'";
+export const UNASSIGNED_CONDITION = "${agent.id} == '__synthetics_unassigned__'";
 
-/**
- * Builds the Elastic Agent condition that targets exactly one agent. Pins on
- * `${host.name}` and, when known, additionally on `${host.id}` so two agents
- * sharing a hostname can't both match. The `host` provider lowercases
- * `host.name`, so callers pass the already-lowercased value. Throws when the
- * host name isn't representable as an EQL literal — callers must have filtered
- * such agents out of the shard set ({@link isEqlSafeLiteral}).
- */
-export const hostNameCondition = (hostName: string, hostId?: string): string => {
-  if (!isEqlSafeLiteral(hostName)) {
-    throw new Error(`Host name is not representable in an Elastic Agent condition: "${hostName}"`);
+/** Builds the Elastic Agent condition that targets exactly one enrolled agent. */
+export const agentIdCondition = (agentId: string): string => {
+  if (!isEqlSafeLiteral(agentId)) {
+    throw new Error(`Agent id is not representable in an Elastic Agent condition: "${agentId}"`);
   }
-  const nameClause = `\${host.name} == '${hostName}'`;
-  // host.id is a machine UniqueID (quote-free in practice); guard anyway and
-  // drop the clause rather than emit a corrupt condition.
-  return hostId && isEqlSafeLiteral(hostId)
-    ? `${nameClause} and \${host.id} == '${hostId}'`
-    : nameClause;
+  return `\${agent.id} == '${agentId}'`;
 };
 
-// Matches the `${host.name} == '<name>'` clause produced by hostNameCondition.
-// Names are guaranteed quote-free (isEqlSafeLiteral), so a simple `'[^']*'`
-// literal is sufficient. The optional trailing `and ${host.id} == '…'` is not
-// captured — placement keys on host name, so that's all we read back.
-const HOST_NAME_CONDITION_RE = /\$\{host\.name\}\s*==\s*'([^']*)'/;
+const AGENT_ID_CONDITION_RE = /^\$\{agent\.id\}\s*==\s*'([^']*)'$/;
 
 /**
- * Reads the assigned host name out of a condition previously stamped by
- * {@link hostNameCondition}. Returns undefined for an empty/unrecognised
- * condition (e.g. the {@link UNASSIGNED_CONDITION} sentinel, or a monitor that
- * was never assigned an agent yet) — such monitors are treated as unassigned
- * and picked up by the next rebalance.
+ * Reads the assigned agent id out of a condition previously stamped by
+ * {@link agentIdCondition}. Empty, sentinel, or unrecognised conditions are
+ * treated as unassigned and picked up by the next rebalance.
  */
-export const hostFromCondition = (condition?: string | null): string | undefined => {
-  if (!condition) {
+export const agentIdFromCondition = (condition?: string | null): string | undefined => {
+  if (!condition || condition === UNASSIGNED_CONDITION) {
     return undefined;
   }
-  const match = HOST_NAME_CONDITION_RE.exec(condition);
+  const match = AGENT_ID_CONDITION_RE.exec(condition);
   return match ? match[1] : undefined;
 };
 
 /**
- * Rendezvous placement of a monitor onto one of the location's enrolled agent
- * hosts. Returns the assigned host and its ready-to-stamp condition (pinned on
- * host name + `host.id` when `idByHost` has it), or undefined when the location
- * has no enrolled agents yet (caller then stamps {@link UNASSIGNED_CONDITION}).
+ * Rendezvous placement of a monitor onto one of the location's enrolled agents.
+ * Returns the assigned agent id and its ready-to-stamp condition, or undefined
+ * when the location has no enrolled agents yet.
  */
-export const assignAgentByHost = (
+export const assignAgentById = (
   monitorId: string,
-  hostNames: string[],
-  idByHost?: ReadonlyMap<string, string>
-): { host: string; condition: string } | undefined => {
-  const host = assignShard(monitorId, hostNames);
-  return host ? { host, condition: hostNameCondition(host, idByHost?.get(host)) } : undefined;
+  agentIds: string[]
+): { agentId: string; condition: string } | undefined => {
+  const agentId = assignShard(monitorId, agentIds);
+  return agentId ? { agentId, condition: agentIdCondition(agentId) } : undefined;
 };
 
-/**
- * Cost-balanced placement across enrolled agent hosts for a full-location
- * (re)assignment pass — the analogue of {@link balanceShardsByCost}
- * (browser ≈ 50× a lightweight check). Returns monitor id → { host, condition }.
- */
+/** Cost-balanced placement across enrolled agents for a full-location pass. */
 export const balanceAgentsByCost = (
   monitors: ReadonlyArray<{ id: string; cost: number }>,
-  hostNames: string[],
-  capacities?: ReadonlyMap<string, number>,
-  idByHost?: ReadonlyMap<string, string>
-): Map<string, { host: string; condition: string }> => {
-  const byHost = balanceShardsByCost(monitors, hostNames, capacities);
-  const result = new Map<string, { host: string; condition: string }>();
-  for (const [monitorId, host] of byHost) {
-    result.set(monitorId, { host, condition: hostNameCondition(host, idByHost?.get(host)) });
+  agentIds: string[],
+  capacities?: ReadonlyMap<string, number>
+): Map<string, { agentId: string; condition: string }> => {
+  const byAgentId = balanceShardsByCost(monitors, agentIds, capacities);
+  const result = new Map<string, { agentId: string; condition: string }>();
+  for (const [monitorId, agentId] of byAgentId) {
+    result.set(monitorId, { agentId, condition: agentIdCondition(agentId) });
   }
   return result;
 };
