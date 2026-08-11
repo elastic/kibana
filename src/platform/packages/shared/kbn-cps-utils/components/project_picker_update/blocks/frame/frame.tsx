@@ -11,6 +11,7 @@ import React, { type PropsWithChildren, type RefObject, type ComponentProps } fr
 import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import {
   ProjectPickerFrameHeader,
+  type HeaderContextMenuItemProps,
   ProjectPickerFrameBody,
   ProjectPickerFrameFooter,
 } from './partials';
@@ -18,12 +19,14 @@ import { projectPickerFrameStyles } from './frame.styles';
 
 interface ProjectPickerFrameProps {
   scrollContainerRef?: RefObject<HTMLDivElement>;
+  customHeaderContextMenuItems?: HeaderContextMenuItemProps[];
   maxBodyHeight?: ComponentProps<typeof ProjectPickerFrameBody>['maxHeight'];
 }
 
 export function ProjectPickerFrame({
   children,
   maxBodyHeight,
+  customHeaderContextMenuItems,
   scrollContainerRef,
 }: PropsWithChildren<ProjectPickerFrameProps>) {
   const { euiTheme } = useEuiTheme();
@@ -32,7 +35,7 @@ export function ProjectPickerFrame({
   return (
     <EuiSplitPanel.Outer>
       <EuiSplitPanel.Inner css={styles.headerWrapper}>
-        <ProjectPickerFrameHeader />
+        <ProjectPickerFrameHeader customContextMenuItems={customHeaderContextMenuItems} />
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="none">
         <ProjectPickerFrameBody maxHeight={maxBodyHeight} scrollContainerRef={scrollContainerRef}>

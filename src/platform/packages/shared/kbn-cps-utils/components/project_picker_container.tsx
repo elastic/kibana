@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, type ComponentProps } from 'react';
+import React, { useCallback, useMemo, type ComponentProps } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
 import { from } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { ProjectPicker } from './project_picker';
-import { ProjectPickerSettings } from './project_picker_settings';
 
 interface ProjectPickerContainerProps {
   cpsManager: ICPSManager;
@@ -69,9 +69,24 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
     [cpsManager]
   );
 
-  const resetProjectPicker = useCallback(() => {
-    updateProjectRouting(defaultProjectRoutingGetter());
-  }, [defaultProjectRoutingGetter, updateProjectRouting]);
+  const customHeaderContextMenuItems = useMemo(
+    () => [
+      {
+        icon: 'controls',
+        label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
+          defaultMessage: 'Adjust space defaults',
+        }),
+      },
+      {
+        icon: 'gear',
+        label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
+          defaultMessage: 'Manage cross-project search',
+        }),
+        external: true,
+      },
+    ],
+    []
+  );
 
   return (
     <ProjectPicker
@@ -82,7 +97,7 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
       getActiveRouteProjects$={getActiveRouteProjects$}
       isReadonly={isReadonly}
       isDisabled={isDisabled}
-      settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
+      customHeaderContextMenuItems={customHeaderContextMenuItems}
     />
   );
 };
