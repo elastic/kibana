@@ -23,10 +23,7 @@ const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 const VIS_PANEL_MARKERS: Record<string, string> = {
   lnsDatatable: 'lnsDatatable_rows',
   pie: 'lnsPie_sliceByDimensionPanel',
-  donut: 'lnsPie_sliceByDimensionPanel',
   treemap: 'lnsPie_groupByDimensionPanel',
-  mosaic: 'lnsPie_groupByDimensionPanel',
-  waffle: 'lnsPie_groupByDimensionPanel',
   heatmap: 'lnsHeatmap_xDimensionPanel',
 };
 
@@ -78,20 +75,6 @@ export class LensApp {
     await this.lensApp.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
-  async waitForKibanaLoading() {
-    // Loading may start a tick after the action that triggered it; briefly wait for it
-    // to appear (ignore timeout if the work already finished), then require the hidden
-    // sentinel — same shape as FTR `waitUntilLoadingHasFinished`.
-    await this.page.testSubj
-      .locator('globalLoadingIndicator')
-      .waitFor({ state: 'attached', timeout: 2_000 })
-      .catch(() => undefined);
-    await this.page.testSubj.locator('globalLoadingIndicator-hidden').waitFor({
-      state: 'attached',
-      timeout: 60_000,
-    });
-  }
-
   /**
    * Waits until the Lens data panel has finished loading fields.
    *
@@ -102,6 +85,8 @@ export class LensApp {
    */
   async waitForFieldListReady(sampleField = '@timestamp') {
     // Unified field list shows this while fetching; it may never appear when cached.
+    // The field caps request can be slow on a cold, contended stack, hence the
+    // longer-than-default timeouts on both waits.
     await this.page
       .getByTestId('fieldListLoading')
       .waitFor({ state: 'hidden', timeout: 30_000 })
@@ -117,50 +102,77 @@ export class LensApp {
    *
    * @param visType Chart switcher test-subj suffix (e.g. `lnsMetric`, `bar`), not the display label.
    * @param options.search Optional filter text when the target chart is easier to find by label.
+   * @param options.waitForFieldList Wait for the data panel field list after switching. Only for
+   *   full-editor flows that configure a dimension next: the inline editing flyout (Discover,
+   *   dashboard panel editing) renders no data panel, so the wait would always time out there.
    */
-  async switchToVisualization(visType: string, options?: { search?: string }) {
+  async switchToVisualization(
+    visType: string,
+    options?: { search?: string; waitForFieldList?: boolean }
+  ) {
     await this.openChartSwitchPopover();
-    // Always filter like FTR — callers often leave the popover open from hasChartSwitchWarning
-    // with a different query, and long ids (e.g. lnsDatatable) are easier to find by suffix.
-    const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
-    await searchInput.waitFor({ state: 'visible' });
-    const query = options?.search ?? visType.substring(visType.length - 3);
-    await searchInput.fill(query);
+    await this.fillChartSwitchSearch(visType, options?.search);
     const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
     await option.waitFor({ state: 'visible' });
-    // Filtering reflows the selectable list; force avoids "element is not stable" on the
-    // focused option while EUI finishes the search animation (FTR slept 1s instead).
-    await option.click({ force: true });
-    // Popover should close after selection; waiting avoids racing with subsequent assertions.
+    // Filtering reflows the selectable list, so the option can still be moving here — the
+    // click's own actionability retry waits for a stable box (FTR slept 1s instead).
+    await option.click();
+    // Popover closes on selection; waiting avoids racing with subsequent assertions.
     await this.chartSwitchList.waitFor({ state: 'hidden' });
-    // FTR always awaits header loading here — without it, the next configureDimension can
-    // still see the previous chart's empty slots (or an empty Create remount).
-    await this.waitForKibanaLoading();
     const panelMarker = VIS_PANEL_MARKERS[visType];
     if (panelMarker) {
-      // Dimension groups render both a filled and an empty container with the same
-      // test-subj — wait for the first match only (strict mode).
-      await this.page.testSubj
-        .locator(panelMarker)
-        .first()
+      // A dimension group stamps its test-subj on every container it renders (one per
+      // accessor plus the empty slot), so match the layer panel holding them instead of
+      // one of the interchangeable containers. The switch triggers a Lens data fetch and
+      // config-panel remount, so allow more than the default action timeout.
+      await this.page
+        .locator(`[data-test-subj="lns-layerPanel-0"]:has([data-test-subj="${panelMarker}"])`)
         .waitFor({ state: 'visible', timeout: 20_000 });
     }
-    // Chart switches remount the data panel; wait for fields again so the next
-    // configureDimension / style open does not race an empty Create shell.
-    await this.waitForFieldListReady();
+    if (options?.waitForFieldList) {
+      // Chart switches remount the data panel; wait for fields again so the next
+      // configureDimension does not race an empty field list.
+      await this.waitForFieldListReady();
+    }
     // XY subtypes (bar/line/area) share the same dimension panels; callers assert the
     // switcher label themselves (getChartSwitchType). Do not wait on the label here —
     // the popover button text can lag or omit the subtype while the switch still applied.
   }
 
+  /**
+   * Returns whether the chart switcher shows a data-loss warning for `visType`.
+   * Leaves the switcher closed.
+   */
+  async hasChartSwitchWarning(visType: string, search?: string): Promise<boolean> {
+    await this.openChartSwitchPopover();
+    await this.fillChartSwitchSearch(visType, search);
+    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+    await option.waitFor({ state: 'visible' });
+    const alert = option.locator(`[data-test-subj="lnsChartSwitchPopoverAlert_${visType}"]`);
+    const hasWarning = (await alert.count()) > 0;
+    await this.closeChartSwitchPopover();
+    return hasWarning;
+  }
+
   private async openChartSwitchPopover() {
-    // Chart switch toggle: clicking while open closes it. Skip if the list is already visible
-    // (e.g. after hasChartSwitchWarning left the popover open).
-    if (await this.chartSwitchList.isVisible()) {
-      return;
-    }
     await this.chartSwitchPopover.click();
     await this.chartSwitchList.waitFor({ state: 'visible' });
+  }
+
+  private async closeChartSwitchPopover() {
+    await this.page.keyboard.press('Escape');
+    await this.chartSwitchList.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Filters the chart switcher list. Like FTR, the default query is the last three characters
+   * of `visType`, which matches the display label of every mapped chart id (`lnsDatatable` ->
+   * `ble` matches "Table"); pass `search` when the id and the label do not share a suffix.
+   */
+  private async fillChartSwitchSearch(visType: string, search?: string) {
+    const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
+    await searchInput.waitFor({ state: 'visible' });
+    await searchInput.fill(search ?? visType.substring(visType.length - 3));
   }
 
   /** Returns the chart type label shown in the chart switcher popover. */

@@ -228,7 +228,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
           keepOpen: true,
         });
 
-        await lens.dimensions.enableIncludeEmptyRows();
+        await lens.dimensions.setIncludeEmptyRows(true);
 
         await page.testSubj.locator('lnsMetric_max_cols').fill('1');
         await page.keyboard.press('Tab');

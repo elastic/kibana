@@ -6,7 +6,6 @@
  */
 
 import { createLazyPageObject, LensApp, type ScoutPage } from '@kbn/scout';
-import { LensChartSwitch } from './lens_chart_switch';
 import { LensDatatable } from './lens_datatable';
 import { LensDimensions } from './lens_dimensions';
 import { LensDragDrop } from './lens_drag_drop';
@@ -37,8 +36,6 @@ export class LensEditorApp extends LensApp {
    * (geo, extra drop types, reorder, keyboard DnD, data-panel switch).
    */
   public readonly dragDrop: LensDragDrop;
-  /** Chart-switch warning / popover helpers. */
-  public readonly chartSwitch: LensChartSwitch;
 
   constructor(page: ScoutPage) {
     super(page);
@@ -46,6 +43,7 @@ export class LensEditorApp extends LensApp {
     this.dimensions = createLazyPageObject(LensDimensions, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       closeDimensionEditor: () => this.closeDimensionEditor(),
+      setEuiSwitch: (testSubj: string, checked: boolean) => this.setEuiSwitch(testSubj, checked),
     });
     this.style = createLazyPageObject(LensStyle, page);
     this.metric = createLazyPageObject(LensMetric, page);
@@ -53,7 +51,6 @@ export class LensEditorApp extends LensApp {
     this.workspace = createLazyPageObject(LensWorkspace, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       waitForLensApp: () => this.waitForLensApp(),
-      waitForKibanaLoading: () => this.waitForKibanaLoading(),
       waitForFieldListReady: (sampleField?: string) => this.waitForFieldListReady(sampleField),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
       getFormulaModelIndex: () => this.getFormulaModelIndex(),
@@ -66,7 +63,6 @@ export class LensEditorApp extends LensApp {
       html5DragAndDrop: (from: string, to: string) => this.html5DragAndDrop(from, to),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
-    this.chartSwitch = createLazyPageObject(LensChartSwitch, page);
   }
 
   /**
@@ -76,7 +72,7 @@ export class LensEditorApp extends LensApp {
    */
   async switchToVisualization(
     visType: string,
-    options?: { search?: string; layerIndex?: number }
+    options?: { search?: string; layerIndex?: number; waitForFieldList?: boolean }
   ) {
     await this.layers.ensureLayerTabIsActive(options?.layerIndex ?? 0);
     await super.switchToVisualization(visType, options);

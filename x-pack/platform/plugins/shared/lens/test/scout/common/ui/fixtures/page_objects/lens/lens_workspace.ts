@@ -13,7 +13,6 @@ import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 interface LensWorkspaceDeps {
   closeDimensionEditorButton: Locator;
   waitForLensApp: () => Promise<void>;
-  waitForKibanaLoading: () => Promise<void>;
   waitForFieldListReady: (sampleField?: string) => Promise<void>;
   waitForVisualization: (chartTestSubj: string) => Promise<void>;
   getFormulaModelIndex: () => Promise<number>;
@@ -71,7 +70,6 @@ export class LensWorkspace {
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
-    await this.deps.waitForKibanaLoading();
     await this.deps.waitForLensApp();
     // Kibana applies `_g` (time/filters) after the shell `load` event. Interacting before
     // that hash settles remounts Lens to empty Create mid-configureDimension.
@@ -85,8 +83,6 @@ export class LensWorkspace {
     await this.page.testSubj
       .locator('lnsXY_yDimensionPanel > lns-empty-dimension')
       .waitFor({ state: 'visible', timeout: 20_000 });
-    // Absorb a trailing chrome remount after the field list first paints.
-    await this.deps.waitForKibanaLoading();
   }
 
   /**
@@ -101,7 +97,6 @@ export class LensWorkspace {
    */
   async openEditor(id: string, chartTestSubj: string) {
     await this.page.gotoApp('lens', { hash: `/edit/${id}` });
-    await this.deps.waitForKibanaLoading();
     await this.deps.waitForVisualization(chartTestSubj);
   }
 

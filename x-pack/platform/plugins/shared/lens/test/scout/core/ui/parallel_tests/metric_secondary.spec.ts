@@ -119,7 +119,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
           keepOpen: true,
         });
 
-        await lens.dimensions.enableIncludeEmptyRows();
+        await lens.dimensions.setIncludeEmptyRows(true);
 
         await lens.waitForVisualization('mtrVis');
         await expect(lens.metric.metricTilesLocator).toHaveCount(N_TILES);

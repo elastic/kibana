@@ -6,4 +6,3 @@
  */
 
 export { LensEditorApp } from './lens_editor_app';
-export { LensChartSwitch } from './lens_chart_switch';

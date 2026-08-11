@@ -15,6 +15,7 @@ const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
   closeDimensionEditor: () => Promise<void>;
+  setEuiSwitch: (testSubj: string, checked: boolean) => Promise<void>;
 }
 
 /**
@@ -140,13 +141,9 @@ export class LensDimensions {
     await this.page.components.comboBox('indexPattern-dimension-field').clear();
   }
 
-  /** Enables empty rows for the current date histogram dimension. */
-  async enableIncludeEmptyRows() {
-    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
-    await includeEmptyRows.click();
-    await includeEmptyRows
-      .and(this.page.locator('[aria-checked="true"]'))
-      .waitFor({ state: 'visible' });
+  /** Toggles "Include empty rows" for the date histogram dimension in the open editor. */
+  async setIncludeEmptyRows(checked: boolean) {
+    await this.deps.setEuiSwitch('indexPattern-include-empty-rows', checked);
   }
 
   /**

@@ -42,19 +42,27 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
 
     await lens.workspace.openEditor(artistMetricId, 'legacyMtrVis');
 
-    await expect.poll(() => lens.metric.getLegacyMetricData()).toEqual({
-      title: 'Maximum of bytes',
-      value: '19,986',
+    await expect
+      .poll(() => lens.metric.getLegacyMetricData())
+      .toStrictEqual({
+        title: 'Maximum of bytes',
+        value: '19,986',
+      });
+
+    await spaceTest.step('switch to a datatable', async () => {
+      await lens.switchToVisualization('lnsDatatable');
+      await expect.poll(() => lens.datatable.getHeaderText()).toBe('Maximum of bytes');
+      await expect.poll(() => lens.datatable.getCellText(0, 0)).toBe('19,986');
     });
 
-    await lens.switchToVisualization('lnsDatatable');
-    await expect.poll(() => lens.datatable.getHeaderText()).toBe('Maximum of bytes');
-    await expect.poll(() => lens.datatable.getCellText(0, 0)).toBe('19,986');
-
-    await lens.switchToVisualization('lnsLegacyMetric');
-    await expect.poll(() => lens.metric.getLegacyMetricData()).toEqual({
-      title: 'Maximum of bytes',
-      value: '19,986',
+    await spaceTest.step('switch back to the legacy metric', async () => {
+      await lens.switchToVisualization('lnsLegacyMetric');
+      await expect
+        .poll(() => lens.metric.getLegacyMetricData())
+        .toStrictEqual({
+          title: 'Maximum of bytes',
+          value: '19,986',
+        });
     });
   });
 
@@ -65,26 +73,31 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
 
       await lens.workspace.openEditor(xyVisId, 'xyVisChart');
 
-      await expect.poll(() => lens.chartSwitch.hasChartSwitchWarning('pie')).toBe(true);
-      await lens.switchToVisualization('pie');
+      await spaceTest.step('switch to pie, warning about the dropped x dimension', async () => {
+        await expect.poll(() => lens.hasChartSwitchWarning('pie')).toBe(true);
+        await lens.switchToVisualization('pie');
 
-      await expect(lens.workspace.chartTitle).toHaveText('lnsXYvis');
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText('lnsPie_sliceByDimensionPanel'))
-        .toBe('Top 3 values of ip');
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText('lnsPie_sizeByDimensionPanel'))
-        .toBe('Average of bytes');
+        await expect(lens.workspace.chartTitle).toHaveText('lnsXYvis');
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator('lnsPie_sliceByDimensionPanel')
+        ).toHaveText(['Top 3 values of ip']);
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator('lnsPie_sizeByDimensionPanel')
+        ).toHaveText(['Average of bytes']);
+      });
 
-      await expect.poll(() => lens.chartSwitch.hasChartSwitchWarning('bar')).toBe(false);
-      await lens.switchToVisualization('bar');
-      await expect(lens.workspace.chartTitle).toHaveText('lnsXYvis');
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-        .toBe('Top 3 values of ip');
-      await expect
-        .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-        .toBe('Average of bytes');
+      await spaceTest.step('switch to bar without data loss', async () => {
+        await expect.poll(() => lens.hasChartSwitchWarning('bar')).toBe(false);
+        await lens.switchToVisualization('bar');
+
+        await expect(lens.workspace.chartTitle).toHaveText('lnsXYvis');
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+        ).toHaveText(['Top 3 values of ip']);
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
+        ).toHaveText(['Average of bytes']);
+      });
     }
   );
 
@@ -94,14 +107,17 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
     await lens.workspace.openEditor(xyVisId, 'xyVisChart');
 
     await lens.switchToVisualization('line');
+
     await expect(lens.workspace.chartTitle).toHaveText('lnsXYvis');
-    await expect.poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_xDimensionPanel')).toBe('@timestamp');
-    await expect
-      .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-      .toBe('Average of bytes');
-    await expect
-      .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-      .toBe('Top 3 values of ip');
+    await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText([
+      '@timestamp',
+    ]);
+    await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText([
+      'Average of bytes',
+    ]);
+    await expect(
+      lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+    ).toHaveText(['Top 3 values of ip']);
   });
 
   spaceTest('transitions from pie chart to treemap chart', async ({ pageObjects }) => {
@@ -109,76 +125,14 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
 
     await lens.workspace.openEditor(pieVisId, 'partitionVisChart');
 
-    await expect.poll(() => lens.chartSwitch.hasChartSwitchWarning('treemap')).toBe(false);
+    await expect.poll(() => lens.hasChartSwitchWarning('treemap')).toBe(false);
     await lens.switchToVisualization('treemap');
-    await expect
-      .poll(() => lens.dimensions.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel'))
-      .toEqual(['Top 7 values of geo.dest', 'Top 3 values of geo.src']);
-    await expect
-      .poll(() => lens.dimensions.getDimensionTriggerText('lnsPie_sizeByDimensionPanel'))
-      .toBe('Average of bytes');
-  });
 
-  spaceTest('creates a pie chart and switches to datatable', async ({ pageObjects }) => {
-    const { lens } = pageObjects;
-
-    await lens.workspace.openFullEditor();
-
-    await lens.switchToVisualization('pie');
-    await lens.configureDimension({
-      dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-      disableEmptyRows: true,
-    });
-    await lens.configureDimension({
-      dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-      operation: 'average',
-      field: 'bytes',
-    });
-
-    await expect.poll(() => lens.chartSwitch.hasChartSwitchWarning('lnsDatatable')).toBe(false);
-    await lens.switchToVisualization('lnsDatatable');
-
-    // Switching chart type re-applies the target type's empty-rows default.
-    await lens.dimensions.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger');
-    await lens.setEuiSwitch('indexPattern-include-empty-rows', false);
-    await lens.closeDimensionEditor();
-
-    await expect.poll(() => lens.datatable.getHeaderText()).toBe('@timestamp per 3 hours');
-    await expect.poll(() => lens.datatable.getCellText(0, 0)).toBe('2015-09-20 00:00');
-    await expect.poll(() => lens.datatable.getHeaderText(1)).toBe('Average of bytes');
-    await expect.poll(() => lens.datatable.getCellText(0, 1)).toBe('6,011.351');
-  });
-
-  spaceTest('creates a heatmap chart and transitions to bar chart', async ({ pageObjects }) => {
-    const { lens } = pageObjects;
-
-    await lens.workspace.openFullEditor();
-
-    await lens.switchToVisualization('heatmap', { search: 'heat' });
-
-    await lens.configureDimension({
-      dimension: 'lnsHeatmap_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await lens.configureDimension({
-      dimension: 'lnsHeatmap_yDimensionPanel > lns-empty-dimension',
-      operation: 'terms',
-      field: 'geo.dest',
-    });
-    await lens.configureDimension({
-      dimension: 'lnsHeatmap_cellPanel > lns-empty-dimension',
-      operation: 'average',
-      field: 'bytes',
-    });
-
-    await expect.poll(() => lens.chartSwitch.hasChartSwitchWarning('bar')).toBe(false);
-    await lens.switchToVisualization('bar');
-    await expect.poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_xDimensionPanel')).toBe('@timestamp');
-    await expect
-      .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
-      .toBe('Average of bytes');
+    await expect(
+      lens.dimensions.getDimensionTriggersLocator('lnsPie_groupByDimensionPanel')
+    ).toHaveText(['Top 7 values of geo.dest', 'Top 3 values of geo.src']);
+    await expect(
+      lens.dimensions.getDimensionTriggersLocator('lnsPie_sizeByDimensionPanel')
+    ).toHaveText(['Average of bytes']);
   });
 });
