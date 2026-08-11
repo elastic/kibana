@@ -19,12 +19,10 @@ export {
   QUERY_TYPE_STATS,
   bulkStreamQueryInputSchema,
   esqlQuerySchema,
-  isDurable,
   isExpirable,
   isExpired,
   queryFeatureSchema,
   queryTypeSchema,
-  streamQuerySchema,
   upsertStreamQueryRequestSchema,
 } from './src/queries';
 
@@ -44,7 +42,6 @@ export {
   type Feature,
   type FeatureUpsert,
   type FeatureWithFilter,
-  type IdentifiedFeature,
   type IgnoredFeature,
   CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
@@ -62,8 +59,8 @@ export {
   ignoredFeatureSchema,
   isComputedFeature,
   isDuplicateFeature,
-  isFeature,
   isFeatureWithFilter,
+  MAX_FEATURE_ARRAY_ITEMS,
   mergeFeature,
   normalizeFeatureSlug,
   normalizeFeatureSlugForMatching,
@@ -72,19 +69,17 @@ export {
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 
-export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export type { IterationResult } from './src/api/features';
 
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
-  type ProcessedMarker,
   type ChangePointType,
-  processedMarkerSchema,
   CHANGE_POINT_TYPES,
-  type Discovery,
   type KnowledgeIndicator,
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventStatus,
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,
@@ -93,9 +88,16 @@ export {
   type SignificantEventInvestigation,
   type InvestigationHypothesis,
   type InvestigationState,
+  type SignificantEventUpdate,
+  type InvestigationEvidence,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_HYPOTHESIS_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATES,
+  significantEventUpdateSchema,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
@@ -104,7 +106,6 @@ export {
   SEVERITY_OPTIONS,
   getSeverityLabel,
   detectionSchema,
-  discoverySchema,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
@@ -118,6 +119,14 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './src/significant_events';
 
 export type {
@@ -139,7 +148,6 @@ export {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 

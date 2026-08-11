@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -24,6 +25,7 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const auditLogger = auditLoggerMock.create();
 
 const context: RulesClientContext = {
+  request: httpServerMock.createKibanaRequest(),
   logger,
   unsecuredSavedObjectsClient,
   authorization: authorization as unknown as AlertingAuthorization,

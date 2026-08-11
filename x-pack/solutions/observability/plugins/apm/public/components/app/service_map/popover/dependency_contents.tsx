@@ -31,8 +31,6 @@ const INITIAL_STATE: Partial<DependencyReturn> = {
 export function DependencyContents({ selection, environment, start, end }: ContentsProps) {
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/overview',
     '/services/{serviceName}/transactions/view',

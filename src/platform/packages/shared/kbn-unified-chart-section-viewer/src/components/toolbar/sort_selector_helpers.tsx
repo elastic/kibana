@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CHARTS_TOOLBAR_EBT_ELEMENT, EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../common/constants';
 import type { MetricsSortBy, MetricsSortDirection } from '../../types';
 
@@ -21,6 +22,9 @@ export const SORT_BY_LABELS: Record<MetricsSortBy, string> = {
       defaultMessage: 'Alphabetically',
     }
   ),
+  [METRICS_SORT_BY.recency]: i18n.translate('metricsExperience.sortSelector.recency', {
+    defaultMessage: 'Recently explored',
+  }),
 };
 
 const directionLegend = i18n.translate('metricsExperience.sortSelector.directionLegend', {
@@ -35,6 +39,11 @@ const directionOptions = [
     label: i18n.translate('metricsExperience.sortSelector.ascending', {
       defaultMessage: 'Ascending',
     }),
+    ...getEbtProps({
+      action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
+      element: CHARTS_TOOLBAR_EBT_ELEMENT,
+      detail: METRICS_SORT_DIRECTION.asc,
+    }),
   },
   {
     id: METRICS_SORT_DIRECTION.desc,
@@ -43,15 +52,25 @@ const directionOptions = [
     label: i18n.translate('metricsExperience.sortSelector.descending', {
       defaultMessage: 'Descending',
     }),
+    ...getEbtProps({
+      action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
+      element: CHARTS_TOOLBAR_EBT_ELEMENT,
+      detail: METRICS_SORT_DIRECTION.desc,
+    }),
   },
 ];
 
 interface SortDirectionToggleProps {
   direction: MetricsSortDirection;
+  isDisabled: boolean;
   onChange: (direction: MetricsSortDirection) => void;
 }
 
-export const SortDirectionToggle = ({ direction, onChange }: SortDirectionToggleProps) => (
+export const SortDirectionToggle = ({
+  direction,
+  isDisabled,
+  onChange,
+}: SortDirectionToggleProps) => (
   <EuiButtonGroup
     isIconOnly
     buttonSize="compressed"
@@ -59,5 +78,6 @@ export const SortDirectionToggle = ({ direction, onChange }: SortDirectionToggle
     options={directionOptions}
     idSelected={direction}
     onChange={(id) => onChange(id as MetricsSortDirection)}
+    isDisabled={isDisabled}
   />
 );

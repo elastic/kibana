@@ -15,10 +15,9 @@ import {
   createProfileProviderSharedServicesMock,
 } from '../__mocks__';
 import { createInMemoryContextAwarenessToolkit } from '../in_memory_toolkit';
-import { ProfileStateRegistry } from '../profile_state';
+import { EXAMPLE_PROFILE_STATE_DEF, ProfileStateRegistry } from '../../../common/context_awareness';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
-import { EXAMPLE_PROFILE_STATE_DEF } from './example/profile_state';
 import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import type { CellRenderersExtensionParams } from '../types';
 

@@ -43,6 +43,7 @@ export interface RuleSummaryFlyoutProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  onRun: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
@@ -57,6 +58,7 @@ export const RuleSummaryFlyout = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onRun,
   canWrite = true,
   session,
   ownFocus = true,
@@ -120,6 +122,7 @@ export const RuleSummaryFlyout = ({
                   onClone={onClone}
                   onDelete={onDelete}
                   onToggleEnabled={onToggleEnabled}
+                  onRun={onRun}
                 />
               </EuiFlexItem>
             )}

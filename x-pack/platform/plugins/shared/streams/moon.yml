@@ -17,6 +17,7 @@ project:
   owner: '@elastic/streams-ui @elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
+  - '@kbn/deeplinks-observability'
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
   - '@kbn/core'
@@ -34,7 +35,6 @@ dependsOn:
   - '@kbn/rule-registry-plugin'
   - '@kbn/es-types'
   - '@kbn/licensing-plugin'
-  - '@kbn/rule-data-utils'
   - '@kbn/zod'
   - '@kbn/streams-schema'
   - '@kbn/significant-events-schema'
@@ -54,7 +54,6 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/task-manager-plugin'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'

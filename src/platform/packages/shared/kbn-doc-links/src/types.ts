@@ -198,6 +198,7 @@ export interface DocLinks {
     readonly vectorSearchDenseVector: string;
     readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
+    readonly vectorDatabaseGetStarted: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -342,6 +343,7 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
@@ -619,6 +621,8 @@ export interface DocLinks {
     elasticAgentStandaloneLoggingConfig: string;
     agentPolicyLogLevel: string;
     elasticAgentLogFileRetention: string;
+    elasticAgentDownloads: string;
+    integrationsReference: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -760,6 +764,7 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+    readonly aiAssistant: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;
