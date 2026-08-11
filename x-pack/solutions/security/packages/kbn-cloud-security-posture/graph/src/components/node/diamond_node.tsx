@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { GRAPH_NODE_SHADOW_FILTER } from '../constants';
 import { Handle, Position } from '@xyflow/react';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import {
@@ -54,7 +55,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
     countryClickHandler,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('m', { property: 'filter' });
+  const shadow = GRAPH_NODE_SHADOW_FILTER;
   const fillColor = useNodeFillColor(color ?? 'primary');
   const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (

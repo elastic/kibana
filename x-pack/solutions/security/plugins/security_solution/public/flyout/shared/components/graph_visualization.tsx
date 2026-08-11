@@ -328,6 +328,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             }
             showInvestigateInTimeline={hasTimelineAccess}
             showToggleSearch={true}
+            entityActionsMode="hover"
+            entityStyleMode="colored"
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
             onOpenNetworkPreview={onOpenNetworkPreview}

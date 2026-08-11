@@ -45,10 +45,40 @@ jest.mock('../../../../shared/hooks/use_should_show_graph');
 
 const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
+const mockCloseLeftPanel = jest.fn();
+const mockClosePreviewPanel = jest.fn();
+const mockOpenSystemFlyout = jest.fn(() => ({ close: jest.fn() }));
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  ...jest.requireActual('@kbn/expandable-flyout'),
+  useExpandableFlyoutApi: () => ({
+    closeLeftPanel: mockCloseLeftPanel,
+    closePreviewPanel: mockClosePreviewPanel,
+  }),
+  useExpandableFlyoutState: () => ({
+    left: undefined,
+    right: undefined,
+    preview: undefined,
+  }),
+}));
+
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      },
+    }),
+  };
+});
+
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));
-
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({

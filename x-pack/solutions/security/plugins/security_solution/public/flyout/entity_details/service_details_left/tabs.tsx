@@ -13,7 +13,6 @@ import {
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
-import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   name: string,
@@ -32,10 +31,6 @@ export const useTabs = (
       }),
     ];
 
-    const graphTab = entityStoreEntityId
-      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
-      : [];
-
     const resolutionTab =
       entityStoreEntityId && hasEntityResolutionLicense
         ? [
@@ -47,6 +42,7 @@ export const useTabs = (
           ]
         : [];
 
-    return [...riskTab, ...graphTab, ...resolutionTab];
+    // Graph opens from the entity flyout preview (system flyout), not as a left-panel tab.
+    return [...riskTab, ...resolutionTab];
   }, [name, scopeId, entityStoreEntityId, hasEntityResolutionLicense]);
 };

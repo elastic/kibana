@@ -12,7 +12,7 @@ import type {
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
-import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality/constants';
+
 const groupPrivilegesByName = <PrivilegeName extends string>(
   privileges: Array<{
     privilege: PrivilegeName;
@@ -71,24 +71,35 @@ export async function checkAndFormatPrivileges({
   const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
   const { privileges, hasAllRequested } = await checkPrivileges(privilegesToCheck);
 
+  // Derive read/write from the indices that were actually requested. Previously this always
+  // checked asset-criticality only, which made Entity Store privilege checks report
+  // has_read_permissions: false even for admins (that index was never in the request).
+  const requestedIndexPatterns = Object.keys(privilegesToCheck.elasticsearch?.index ?? {});
+
   return {
     privileges: _formatPrivileges(privileges),
     has_all_required: hasAllRequested,
-    ...hasReadWritePermissions(privileges.elasticsearch, ASSET_CRITICALITY_INDEX_PATTERN),
+    ...hasReadWritePermissions(privileges.elasticsearch, requestedIndexPatterns),
   };
 }
 
 export const hasReadWritePermissions = (
   { index, cluster }: CheckPrivilegesResponse['privileges']['elasticsearch'],
-  indexKey = ''
+  indexKeys: string | string[] = []
 ) => {
+  const keys = (Array.isArray(indexKeys) ? indexKeys : [indexKeys]).filter(Boolean);
   const has =
     (type: string) =>
     ({ privilege, authorized }: { privilege: string; authorized: boolean }) =>
       privilege === type && authorized;
+  const hasOnIndices = (type: string) => {
+    if (keys.length > 0) {
+      return keys.every((key) => index[key]?.some(has(type)));
+    }
+    return Object.values(index).some((privs) => privs?.some(has(type)));
+  };
   return {
-    has_read_permissions: index[indexKey]?.some(has('read')) || cluster.some(has('read')),
-
-    has_write_permissions: index[indexKey]?.some(has('write')) || cluster.some(has('write')),
+    has_read_permissions: hasOnIndices('read') || cluster.some(has('read')),
+    has_write_permissions: hasOnIndices('write') || cluster.some(has('write')),
   };
 };

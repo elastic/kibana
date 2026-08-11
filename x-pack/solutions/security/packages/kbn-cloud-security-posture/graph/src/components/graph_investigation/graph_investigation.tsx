@@ -32,6 +32,7 @@ import { BottomBar } from '../controls/bottom_bar';
 import { DEFAULT_GRAPH_FILTERS } from '../controls/apply_filters_popover';
 import type { GraphFiltersState } from '../controls/apply_filters_popover';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
+import { GRAPH_PANEL_INSET } from '../constants';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
@@ -39,6 +40,7 @@ import type { EntityActionItem, NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
+import { getEntityCardWidthForLabels } from '../node/card_node';
 
 const useGraphPopovers = ({
   scopeId,
@@ -227,16 +229,23 @@ export interface GraphInvestigationProps {
   /**
    * Search controls layout for prototyping.
    * - `split` (Option A): top KQL toggle + bottom in-graph search
-   * - `unified` (Option B): top search dropdown with both actions; bottom search hidden
+   * - `unified` (Option B): top KQL toggle only; bottom in-graph search hidden
    */
   searchControlsVariant?: 'split' | 'unified';
 
   /**
-   * Entity actions popover interaction for prototyping (dev-graph Test A/B).
-   * - `button` (Test A): `⋯` in header, open on click (current)
-   * - `hover` (Test B): hide `⋯`, open popover on entity hover
+   * Entity actions popover interaction for prototyping (dev-graph).
+   * - `button`: `⋯` in header, open on click
+   * - `hover` (Test A): hide `⋯`, open popover on entity hover
    */
   entityActionsMode?: 'button' | 'hover';
+
+  /**
+   * Entity visual style for prototyping (dev-graph Entity Colors tab).
+   * - `default`: neutral header/icon
+   * - `colored`: risk-tinted icon/header + compact zoom-out card
+   */
+  entityStyleMode?: 'default' | 'colored';
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -259,6 +268,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showToggleSearch = false,
     searchControlsVariant = 'unified',
     entityActionsMode = 'button',
+    entityStyleMode = 'default',
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
@@ -460,6 +470,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [data?.edges]);
 
     const nodes = useMemo(() => {
+      const entityCardWidth = getEntityCardWidthForLabels(
+        (data?.nodes ?? [])
+          .filter(isEntityNode)
+          .map((node) => node.label ?? node.id)
+      );
+
       return (
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
@@ -476,9 +492,18 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               assetCriticalityCounts: nodeMetadata.assetCriticality
                 ? node.assetCriticalityCounts
                 : undefined,
-              riskScore: nodeMetadata.riskScore ? node.riskScore : undefined,
-              riskScoreMin: nodeMetadata.riskScore ? node.riskScoreMin : undefined,
-              riskScoreMax: nodeMetadata.riskScore ? node.riskScoreMax : undefined,
+              riskScore:
+                entityStyleMode === 'colored' || nodeMetadata.riskScore
+                  ? node.riskScore
+                  : undefined,
+              riskScoreMin:
+                entityStyleMode === 'colored' || nodeMetadata.riskScore
+                  ? node.riskScoreMin
+                  : undefined,
+              riskScoreMax:
+                entityStyleMode === 'colored' || nodeMetadata.riskScore
+                  ? node.riskScoreMax
+                  : undefined,
               expandButtonClick: nodeExpandButtonClickHandler,
               closeEntityActions: () => nodeExpandPopover.actions.closePopover(),
               getEntityActionItems: () =>
@@ -486,6 +511,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   .getActionItems({ id: node.id, data: node } as NodeProps)
                   .filter((item): item is EntityActionItem => item.type === 'item'),
               entityActionsMode,
+              entityStyleMode,
+              cardWidth: entityCardWidth,
               ipClickHandler: createIpClickHandler(nodeMetadata.ipAddress ? nodeIps : []),
               countryClickHandler: createCountryClickHandler(
                 nodeMetadata.geolocation ? nodeCountryCodes : []
@@ -544,6 +571,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       relationshipNodeSources,
       graphFilters,
       entityActionsMode,
+      entityStyleMode,
     ]);
 
     const searchFilterCounter = useMemo(() => {
@@ -572,6 +600,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         ? NEGATED_FILTER_SEARCH_WARNING_MESSAGE
         : undefined;
 
+    const graphTopBorder = useBorder();
+    const showGraphTopBorder = searchToggled || !showToggleSearch;
+
     return (
       <div
         css={css`
@@ -594,7 +625,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             overflow: hidden;
 
             .react-flow__panel.top.right {
-              margin-right: 8px;
+              margin-top: ${GRAPH_PANEL_INSET}px;
+              margin-right: ${GRAPH_PANEL_INSET}px;
             }
 
             .react-flow__panel.bottom {
@@ -607,10 +639,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
             .react-flow__panel.bottom.right {
               overflow: visible;
+              margin-right: ${GRAPH_PANEL_INSET}px;
+              margin-bottom: ${GRAPH_PANEL_INSET}px;
             }
 
             .react-flow__panel.bottom.left {
               overflow: visible;
+              margin-left: ${GRAPH_PANEL_INSET}px;
+              margin-bottom: ${GRAPH_PANEL_INSET}px;
             }
           `}
         >
@@ -651,7 +687,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           )}
           <EuiFlexItem
             css={css`
-              border-top: ${useBorder()};
+              /* Avoid a double divider under flyout tabs when the KQL bar is collapsed. */
+              border-top: ${showGraphTopBorder ? graphTopBorder : 'none'};
               position: relative;
               min-height: 0;
               overflow: hidden;
@@ -671,7 +708,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               highlightOriginsOnly={graphFilters.highlightOriginsOnly}
             >
               <GraphExpandPopoverSync onClosePopovers={closeGraphExpandPopovers} />
-              <Panel position="top-right">
+              <Panel
+                position="top-right"
+                style={{ marginTop: GRAPH_PANEL_INSET, marginRight: GRAPH_PANEL_INSET }}
+              >
                 <Actions
                   showInvestigateInTimeline={false}
                   showToggleSearch={showToggleSearch}

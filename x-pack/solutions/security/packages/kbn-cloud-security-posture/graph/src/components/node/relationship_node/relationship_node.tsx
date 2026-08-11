@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
-import { EuiTextTruncate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiTextTruncate, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { NODE_LABEL_WIDTH, getRelationshipColors } from '../styles';
 import { PillExpandButton, TEST_SUBJ_PILL_EXPAND_BTN } from '../pill_expand_button';
 import { useMultipleNodesSelected } from '../../../hooks/use_multiple_nodes_selected';
@@ -26,6 +26,7 @@ import {
   GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
   GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
 } from '../../test_ids';
+import { GRAPH_NODE_SHADOW } from '../../constants';
 
 const MAX_LABEL_LENGTH = 27;
 
@@ -86,8 +87,9 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
   const showExpandButton = interactive && !isMultipleNodesSelected;
 
   const { euiTheme } = useEuiTheme();
-  const defaultShadow = useEuiShadow('xs');
-  const hoverShadow = useEuiShadow('s');
+  // Figma Graph viz (13969:1176) — X-small Level 2 for relationship labels.
+  const defaultShadow = GRAPH_NODE_SHADOW;
+  const hoverShadow = GRAPH_NODE_SHADOW;
 
   const text = label ?? id;
 

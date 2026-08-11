@@ -22,6 +22,7 @@ import type { NodeViewModel } from '../types';
 import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
 import { NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
+import { GRAPH_PANEL_INSET } from '../constants';
 import minimapMapIcon from '../../assets/icons/minimap_map.svg';
 
 /** Folded-map glyph from Figma MiniMap Type=closed — not the EUI `map` (pin) icon. */
@@ -186,7 +187,7 @@ export const Minimap = ({
   defaultExpanded = true,
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
-  const minimapShadow = useEuiShadow('s');
+  const minimapShadow = useEuiShadow('m');
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   // Create a mapping of node ids to their data for easy lookup
@@ -281,7 +282,12 @@ export const Minimap = ({
   const maskColor = `color-mix(in srgb, ${euiTheme.colors.backgroundBasePlain} 55%, transparent)`;
 
   return (
-    <Panel position="bottom-right" data-test-subj={GRAPH_MINIMAP_ID} css={shellCss}>
+    <Panel
+      position="bottom-right"
+      data-test-subj={GRAPH_MINIMAP_ID}
+      css={shellCss}
+      style={{ marginRight: GRAPH_PANEL_INSET, marginBottom: GRAPH_PANEL_INSET }}
+    >
       <div css={headerCss}>
         <EuiButtonIcon
           iconType={isExpanded ? 'minus' : MinimapExpandIcon}

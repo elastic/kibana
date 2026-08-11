@@ -26,7 +26,8 @@ export const store = configureStore({
     ui: uiReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
-  middleware: [
+  // RTK 2 requires a builder callback (array form throws "`middleware` field must be a callback").
+  middleware: () => [
     savePushVsOverlayToLocalStorageMiddleware,
     saveUserSectionWidthsToLocalStorageMiddleware,
     saveUserFlyoutWidthsToLocalStorageMiddleware,

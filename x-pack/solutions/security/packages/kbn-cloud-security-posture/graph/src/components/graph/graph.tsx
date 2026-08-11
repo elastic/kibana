@@ -49,6 +49,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls, CONTROL_PANEL_MARGIN_LEFT } from '../controls/controls';
+import { GRAPH_PANEL_INSET } from '../constants';
 import { GraphInteractionToolContext } from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
 import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
@@ -638,7 +639,11 @@ export const Graph = memo<GraphProps>(
                   {interactive && (
                     <Panel
                       position="bottom-left"
-                      style={{ marginLeft: CONTROL_PANEL_MARGIN_LEFT, overflow: 'visible' }}
+                      style={{
+                        marginLeft: CONTROL_PANEL_MARGIN_LEFT,
+                        marginBottom: GRAPH_PANEL_INSET,
+                        overflow: 'visible',
+                      }}
                     >
                       <Controls
                         fitViewOptions={fitViewOptions}

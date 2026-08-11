@@ -36,6 +36,22 @@ export const GRAPH_BACKGROUND_DOT_COLOR = '#C5CCD6';
 export const GRAPH_BACKGROUND_DOT_GAP = 24;
 
 /**
+ * Distance from the graph canvas edge to floating panels (search, controls, minimap).
+ */
+export const GRAPH_PANEL_INSET = 4;
+
+/**
+ * Figma Graph viz Component Library — Source Panel / entity card shadow
+ * (node 13969:1176): X-small Level 2 — 0 1px 2px rgba(7, 16, 31, 0.06).
+ * Use for entity cards, relationship labels, and event labels.
+ */
+export const GRAPH_NODE_SHADOW = 'box-shadow: 0 1px 2px 0 rgba(7, 16, 31, 0.06);';
+
+/** Same elevation as {@link GRAPH_NODE_SHADOW}, for SVG shape nodes via CSS `filter`. */
+export const GRAPH_NODE_SHADOW_FILTER =
+  'filter: drop-shadow(0 1px 2px rgba(7, 16, 31, 0.06));';
+
+/**
  * Radius diameter for background dots, in pixels.
  */
 export const GRAPH_BACKGROUND_DOT_SIZE = 2;

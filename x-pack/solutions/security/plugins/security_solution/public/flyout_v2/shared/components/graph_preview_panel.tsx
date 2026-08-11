@@ -36,6 +36,8 @@ export interface GraphPreviewPanelProps {
   isError: boolean;
   /** Data used to render the graph preview nodes and edges. */
   data?: GraphPreviewData;
+  /** Entity that opened the flyout — keeps left preview pill in sync with the graph origin. */
+  originEntityId?: string;
 }
 
 /** Displays a graph preview panel or graph visualization upsell for the current document. */
@@ -47,6 +49,7 @@ export const GraphPreviewPanel = ({
   onShowGraph,
   showIcon,
   disableNavigation,
+  originEntityId,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
@@ -106,7 +109,35 @@ export const GraphPreviewPanel = ({
       content={!isLoading && !isError ? { paddingSize: 'none' } : undefined}
     >
       {shouldShowGraph ? (
-        <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+        <div
+          role={showLink ? 'button' : undefined}
+          tabIndex={showLink ? 0 : undefined}
+          onClick={showLink ? onShowGraph : undefined}
+          onKeyDown={
+            showLink
+              ? (event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onShowGraph?.();
+                  }
+                }
+              : undefined
+          }
+          css={
+            showLink
+              ? {
+                  cursor: 'pointer',
+                }
+              : undefined
+          }
+        >
+          <GraphPreview
+            isLoading={isLoading}
+            isError={isError}
+            data={data}
+            originEntityId={originEntityId}
+          />
+        </div>
       ) : (
         GraphVisualizationUpsell && <GraphVisualizationUpsell />
       )}

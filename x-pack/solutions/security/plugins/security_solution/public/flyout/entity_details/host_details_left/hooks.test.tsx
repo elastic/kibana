@@ -203,7 +203,6 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
-        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
       // When the entity is in the entity store, the risk tab receives the
       // `entityStoreEntityId` so it can look up unscored-entity context.
@@ -213,10 +212,7 @@ describe('hooks', () => {
         scopeId: params.scopeId,
         entityId: params.entityStoreEntityId,
       });
-      expect(getGraphViewTab).toHaveBeenCalledWith({
-        entityId: params.entityStoreEntityId,
-        scopeId: params.scopeId,
-      });
+      expect(getGraphViewTab).not.toHaveBeenCalled();
     });
 
     it('should return an empty array when no risk score, no entity store entity, no insights signals, and isRiskScoreExist is false', () => {
@@ -254,7 +250,6 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
-        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP }),
       ]);
       // The Resolution tab is the host variant, scoped correctly, and uses the
@@ -279,7 +274,6 @@ describe('hooks', () => {
 
       expect(result.current).toEqual([
         expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
-        expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
       ]);
       expect(getResolutionGroupTab).not.toHaveBeenCalled();
     });

@@ -64,15 +64,26 @@ export interface EntityNodeViewModel
   showEntityId?: boolean;
   /**
    * How entity actions popover is opened.
-   * - `button` (Test A): show `⋯` and open on click
-   * - `hover` (Test B): hide `⋯` and open on card hover
+   * - `button`: show `⋯` and open on click
+   * - `hover` (Test A): hide `⋯` and open on card hover
    */
   entityActionsMode?: 'button' | 'hover';
+  /**
+   * Entity visual style for prototyping (dev-graph).
+   * - `default`: neutral header/icon
+   * - `colored`: variant 2D — plain header, risk-light icon, solid risk badge
+   */
+  entityStyleMode?: 'default' | 'colored';
+  /**
+   * Shared fixed width for all entity cards in the current graph
+   * (sized from the longest entity label).
+   */
+  cardWidth?: number;
   /** Closes the entity actions popover (used by hover mode cleanup). */
   closeEntityActions?: () => void;
   /**
    * Returns the same expand-action items as the `⋯` popover.
-   * Used by Test B to render the hover toolbar above the entity.
+   * Used by hover mode to render the toolbar above the entity.
    */
   getEntityActionItems?: () => EntityActionItem[];
 }

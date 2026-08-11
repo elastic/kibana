@@ -11,15 +11,12 @@ import {
   EuiBeacon,
   EuiButton,
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiPopover,
   EuiToolTip,
   EuiTourStep,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,16 +27,18 @@ import { GraphNotificationBadge } from '../graph_notification_badge';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
-  GRAPH_ACTIONS_SEARCH_MENU_ID,
 } from '../test_ids';
 import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants';
 import { useGraphInteractionTool } from './graph_interaction_tool_context';
-import { useGraphSearchContext } from './graph_search_context';
-import { GraphSearchPanel } from './graph_search_panel';
-import { focusGraphFindInPageInput } from './graph_find_in_page';
 import type { NodeViewModel } from '../types';
 
-/** Option A keeps search split (top KQL + bottom find). Option B unifies both under top search. */
+/** Match controls / minimap floating chrome shadow. */
+const SEARCH_BUTTON_SHADOW = 'm' as const;
+
+/**
+ * - `split`: top KQL toggle + bottom in-graph search
+ * - `unified`: top KQL toggle only (in-graph search hidden for now)
+ */
 export type SearchControlsVariant = 'split' | 'unified';
 
 const toggleSearchBarTourTitle = i18n.translate(
@@ -61,27 +60,6 @@ const toggleSearchBarTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tooltip',
   {
     defaultMessage: 'Toggle search bar',
-  }
-);
-
-const searchMenuAriaLabel = i18n.translate(
-  'securitySolutionPackages.csp.graph.controls.searchMenu.ariaLabel',
-  {
-    defaultMessage: 'Search options',
-  }
-);
-
-const filterWithKqlLabel = i18n.translate(
-  'securitySolutionPackages.csp.graph.controls.searchMenu.filterWithKql',
-  {
-    defaultMessage: 'Filter your data using KQL syntax',
-  }
-);
-
-const searchInGraphLabel = i18n.translate(
-  'securitySolutionPackages.csp.graph.controls.searchMenu.searchInGraph',
-  {
-    defaultMessage: 'Search in the graph',
   }
 );
 
@@ -129,12 +107,12 @@ export interface ActionsProps extends CommonProps {
   searchWarningMessage?: { title: string; content: string };
 
   /**
-   * Search controls layout. `split` = Option A (current). `unified` = Option B (top dropdown).
+   * Search controls layout. `unified` hides bottom in-graph search; both use a direct KQL toggle.
    */
   searchControlsVariant?: SearchControlsVariant;
 
   /**
-   * Graph nodes for the in-graph search panel (Option B).
+   * Graph nodes (kept for API compatibility; in-graph search is temporarily hidden).
    */
   nodes?: NodeViewModel[];
 }
@@ -149,13 +127,12 @@ export const Actions = ({
   searchToggled,
   searchWarningMessage,
   searchControlsVariant = 'unified',
-  nodes = [],
+  nodes: _nodes = [],
   ...props
 }: ActionsProps) => {
   const { euiTheme } = useEuiTheme();
+  const searchButtonShadow = useEuiShadow(SEARCH_BUTTON_SHADOW);
   const [isSearchBarTourOpen, setIsSearchBarTourOpen] = useState(false);
-  const [isSearchMenuOpen, setIsSearchMenuOpen] = useState(false);
-  const [isInGraphSearchOpen, setIsInGraphSearchOpen] = useState(false);
   const hasSearchWarning = searchWarningMessage !== undefined && searchWarningMessage !== null;
   const [shouldShowSearchBarButtonTour, setShouldShowSearchBarButtonTour] = useLocalStorage(
     SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
@@ -165,39 +142,23 @@ export const Actions = ({
   const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
   const isUnified = searchControlsVariant === 'unified';
   const { registerSearchPanelToggle, registerFocusSearchInput } = useGraphInteractionTool();
-  const { entityFilters, setEntityFilters } = useGraphSearchContext();
 
-  const closeInGraphSearch = useCallback(() => {
-    setIsInGraphSearchOpen(false);
-  }, []);
+  const openKqlSearch = useCallback(() => {
+    onSearchToggle?.(true);
+  }, [onSearchToggle]);
 
-  const openInGraphSearch = useCallback(() => {
-    setIsSearchMenuOpen(false);
-    setIsInGraphSearchOpen(true);
-    requestAnimationFrame(() => {
-      focusGraphFindInPageInput();
-    });
-  }, []);
+  const toggleKqlSearch = useCallback(() => {
+    onSearchToggle?.(!searchToggled);
+  }, [onSearchToggle, searchToggled]);
 
-  const toggleInGraphSearch = useCallback(() => {
-    setIsInGraphSearchOpen((isOpen) => {
-      const next = !isOpen;
-      if (next) {
-        requestAnimationFrame(() => {
-          focusGraphFindInPageInput();
-        });
-      }
-      return next;
-    });
-  }, []);
-
+  // When bottom in-graph search is hidden (unified), wire shortcuts to the KQL bar.
   useEffect(() => {
     if (!isUnified) {
       return;
     }
 
-    registerSearchPanelToggle(toggleInGraphSearch);
-    registerFocusSearchInput(openInGraphSearch);
+    registerSearchPanelToggle(toggleKqlSearch);
+    registerFocusSearchInput(openKqlSearch);
 
     return () => {
       registerSearchPanelToggle(null);
@@ -205,10 +166,10 @@ export const Actions = ({
     };
   }, [
     isUnified,
-    openInGraphSearch,
+    openKqlSearch,
     registerFocusSearchInput,
     registerSearchPanelToggle,
-    toggleInGraphSearch,
+    toggleKqlSearch,
   ]);
 
   if (shouldShowSearchBarButtonTour && isTourEnabled) {
@@ -226,7 +187,7 @@ export const Actions = ({
   const tooltipContent =
     !isSearchBarTourOpen && hasSearchWarning
       ? searchWarningMessage.content
-      : !isSearchBarTourOpen && !isUnified
+      : !isSearchBarTourOpen
       ? toggleSearchBarTooltip
       : undefined;
 
@@ -234,10 +195,12 @@ export const Actions = ({
     css`
       position: relative;
       overflow: visible;
-      width: ${isUnified ? 'auto' : '40px'};
+      width: 40px;
       min-width: 40px;
+      border-radius: 4px;
+      ${searchButtonShadow};
     `,
-    !searchToggled && !isInGraphSearchOpen
+    !searchToggled
       ? css`
           border: ${euiTheme.border.thin};
           background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -245,196 +208,75 @@ export const Actions = ({
       : undefined,
   ];
 
-  const renderSplitSearchButton = () => (
-    <EuiTourStep
-      anchorPosition="leftUp"
-      title={toggleSearchBarTourTitle}
-      content={toggleSearchBarTourContent}
-      isStepOpen={isSearchBarTourOpen}
-      onFinish={() => setIsSearchBarTourOpen(false)}
-      step={1}
-      stepsTotal={1}
-      maxWidth={350}
-    >
-      <EuiToolTip title={tooltipTitle} content={tooltipContent} position="left">
-        <EuiButton
-          iconType="magnify"
-          color={searchToggled ? 'primary' : 'text'}
-          fill={searchToggled}
-          css={searchButtonCss}
-          contentProps={{
-            css: css`
-              position: initial;
-            `,
-          }}
-          minWidth={false}
-          size="m"
-          aria-label={toggleSearchBarTooltip}
-          data-test-subj={GRAPH_ACTIONS_TOGGLE_SEARCH_ID}
-          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-            onSearchToggle?.(!searchToggled);
-
-            setIsSearchBarTourOpen(false);
-
-            // After a button click we wish to remove the focus from the button so the tooltip won't appear
-            // Since it causes the position of the button to shift,
-            // the tooltip is hanging out there at the wrong position
-            // https://github.com/elastic/eui/issues/8266
-            event.currentTarget?.blur();
-          }}
-        >
-          {hasSearchWarning && (
-            <EuiBeacon
-              css={css`
-                position: absolute;
-                left: ${-4.5 + (searchToggled ? 1 : 0)}px;
-                bottom: ${14 + (searchToggled ? 1 : 0)}px;
-                transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
-                  bottom 0s linear !important;
-              `}
-              color="warning"
-            />
-          )}
-          {searchFilterCounter > 0 && (
-            <GraphNotificationBadge
-              css={css`
-                position: absolute;
-                right: ${-4.5 + (searchToggled ? 1 : 0)}px;
-                bottom: ${-4.5 + (searchToggled ? 1 : 0)}px;
-                transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
-                  bottom 0s linear !important;
-              `}
-            >
-              {searchFilterCounter > 99 ? '99+' : searchFilterCounter}
-            </GraphNotificationBadge>
-          )}
-        </EuiButton>
-      </EuiToolTip>
-    </EuiTourStep>
-  );
-
-  const renderUnifiedSearchTrigger = (onTriggerClick: () => void) => (
-    <EuiButton
-      iconType="arrowDown"
-      iconSide="right"
-      color={searchToggled || isInGraphSearchOpen ? 'primary' : 'text'}
-      fill={Boolean(searchToggled || isInGraphSearchOpen)}
-      css={[
-        css`
-          position: relative;
-          overflow: visible;
-          min-width: 40px;
-          padding-inline: ${euiTheme.size.s};
-        `,
-        !searchToggled && !isInGraphSearchOpen
-          ? css`
-              border: ${euiTheme.border.thin};
-              background-color: ${euiTheme.colors.backgroundBasePlain};
-            `
-          : undefined,
-      ]}
-      contentProps={{
-        css: css`
-          position: initial;
-        `,
-      }}
-      minWidth={false}
-      size="m"
-      aria-label={searchMenuAriaLabel}
-      aria-haspopup="menu"
-      aria-expanded={isSearchMenuOpen || isInGraphSearchOpen}
-      data-test-subj={GRAPH_ACTIONS_TOGGLE_SEARCH_ID}
-      onClick={() => {
-        onTriggerClick();
-        setIsSearchBarTourOpen(false);
-      }}
-    >
-      <EuiIcon type="magnify" size="m" />
-      {hasSearchWarning && (
-        <EuiBeacon
-          css={css`
-            position: absolute;
-            left: -4.5px;
-            bottom: 14px;
-          `}
-          color="warning"
-        />
-      )}
-      {searchFilterCounter > 0 && (
-        <GraphNotificationBadge
-          css={css`
-            position: absolute;
-            right: -4.5px;
-            bottom: -4.5px;
-          `}
-        >
-          {searchFilterCounter > 99 ? '99+' : searchFilterCounter}
-        </GraphNotificationBadge>
-      )}
-    </EuiButton>
-  );
-
-  const searchMenuItems = [
-    <EuiContextMenuItem
-      key="kql"
-      onClick={() => {
-        setIsSearchMenuOpen(false);
-        onSearchToggle?.(true);
-        setIsSearchBarTourOpen(false);
-      }}
-    >
-      {filterWithKqlLabel}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="graph"
-      onClick={() => {
-        openInGraphSearch();
-        setIsSearchBarTourOpen(false);
-      }}
-    >
-      {searchInGraphLabel}
-    </EuiContextMenuItem>,
-  ];
-
-  const renderUnifiedSearchButton = () => {
-    if (isInGraphSearchOpen) {
-      return (
-        <GraphSearchPanel
-          isOpen={true}
-          onClose={closeInGraphSearch}
-          nodes={nodes}
-          entityFilters={entityFilters}
-          onEntityFiltersChange={setEntityFilters}
-          anchorPosition="leftDown"
-        >
-          {renderUnifiedSearchTrigger(() => {
-            closeInGraphSearch();
-          })}
-        </GraphSearchPanel>
-      );
-    }
-
-    return (
-      <EuiPopover
-        id={GRAPH_ACTIONS_SEARCH_MENU_ID}
-        button={renderUnifiedSearchTrigger(() => {
-          setIsSearchMenuOpen((isOpen) => !isOpen);
-        })}
-        isOpen={isSearchMenuOpen}
-        closePopover={() => setIsSearchMenuOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="leftUp"
-      >
-        <EuiContextMenuPanel items={searchMenuItems} size="s" />
-      </EuiPopover>
-    );
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       {showToggleSearch && (
         <EuiFlexItem grow={false}>
-          {isUnified ? renderUnifiedSearchButton() : renderSplitSearchButton()}
+          <EuiTourStep
+            anchorPosition="leftUp"
+            title={toggleSearchBarTourTitle}
+            content={toggleSearchBarTourContent}
+            isStepOpen={isSearchBarTourOpen}
+            onFinish={() => setIsSearchBarTourOpen(false)}
+            step={1}
+            stepsTotal={1}
+            maxWidth={350}
+          >
+            <EuiToolTip title={tooltipTitle} content={tooltipContent} position="left">
+              <EuiButton
+                iconType="magnify"
+                color={searchToggled ? 'primary' : 'text'}
+                fill={searchToggled}
+                css={searchButtonCss}
+                contentProps={{
+                  css: css`
+                    position: initial;
+                  `,
+                }}
+                minWidth={false}
+                size="m"
+                aria-label={toggleSearchBarTooltip}
+                data-test-subj={GRAPH_ACTIONS_TOGGLE_SEARCH_ID}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                  onSearchToggle?.(!searchToggled);
+
+                  setIsSearchBarTourOpen(false);
+
+                  // After a button click we wish to remove the focus from the button so the tooltip won't appear
+                  // Since it causes the position of the button to shift,
+                  // the tooltip is hanging out there at the wrong position
+                  // https://github.com/elastic/eui/issues/8266
+                  event.currentTarget?.blur();
+                }}
+              >
+                {hasSearchWarning && (
+                  <EuiBeacon
+                    css={css`
+                      position: absolute;
+                      left: ${-4.5 + (searchToggled ? 1 : 0)}px;
+                      bottom: ${14 + (searchToggled ? 1 : 0)}px;
+                      transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
+                        bottom 0s linear !important;
+                    `}
+                    color="warning"
+                  />
+                )}
+                {searchFilterCounter > 0 && (
+                  <GraphNotificationBadge
+                    css={css`
+                      position: absolute;
+                      right: ${-4.5 + (searchToggled ? 1 : 0)}px;
+                      bottom: ${-4.5 + (searchToggled ? 1 : 0)}px;
+                      transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
+                        bottom 0s linear !important;
+                    `}
+                  >
+                    {searchFilterCounter > 99 ? '99+' : searchFilterCounter}
+                  </GraphNotificationBadge>
+                )}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiTourStep>
         </EuiFlexItem>
       )}
       {showToggleSearch && showInvestigateInTimeline && (

@@ -66,8 +66,8 @@ export const EntityHoverActionsToolbar = memo<EntityHoverActionsToolbarProps>(
           position: absolute;
           left: 50%;
           bottom: calc(100% + ${euiTheme.size.xs});
-          /* Figma Action Menu: ~158×32 */
-          height: 32px;
+          /* Figma Action Menu: 32px tall row with 16px glyphs */
+          height: ${euiTheme.size.xl};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -84,23 +84,28 @@ export const EntityHoverActionsToolbar = memo<EntityHoverActionsToolbarProps>(
           <EuiToolTip key={item.testSubject} content={item.label} position="top">
             <EuiButtonIcon
               iconType={item.iconType}
+              iconSize="m"
               aria-label={item.label}
               data-test-subj={item.testSubject}
               color="text"
               display="empty"
-              size="xs"
+              /* `s` = 32px hit target — matches Figma row; `xs` (24px) looked soft/undersized */
+              size="s"
               disabled={item.disabled}
               css={css`
-                /* Match Figma Action Menu: all glyphs same ink, even when disabled. */
+                /* Keep glyph ink consistent; don't force SVG fill (breaks multi-path icons). */
                 &,
                 &:disabled,
                 &[disabled] {
                   color: ${euiTheme.colors.textParagraph} !important;
                   opacity: 1;
                 }
-                .euiIcon {
-                  fill: currentColor;
-                  color: inherit;
+                .euiIcon,
+                .euiIcon svg {
+                  width: ${euiTheme.size.base};
+                  height: ${euiTheme.size.base};
+                  /* Prefer crisp vector edges when the node is CSS-scaled by zoom-invariant. */
+                  shape-rendering: geometricPrecision;
                 }
               `}
               onClick={() => {

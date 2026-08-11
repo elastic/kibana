@@ -48,6 +48,12 @@ import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPreviewPanelKey } from './entity_details/user_right';
+import type { EntityGraphExpandableFlyoutProps } from './entity_details/shared/components/entity_graph_panel';
+import {
+  ENTITY_GRAPH_PANEL_ARIA_LABEL,
+  EntityGraphPanel,
+  EntityGraphPanelKey,
+} from './entity_details/shared/components/entity_graph_panel';
 import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
@@ -205,6 +211,13 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     key: UserPanelKey,
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
     'aria-label': USER_PANEL_ARIA_LABEL,
+  },
+  {
+    key: EntityGraphPanelKey,
+    component: (props) => (
+      <EntityGraphPanel {...(props as EntityGraphExpandableFlyoutProps).params} />
+    ),
+    'aria-label': ENTITY_GRAPH_PANEL_ARIA_LABEL,
   },
   {
     key: UserDetailsPanelKey,

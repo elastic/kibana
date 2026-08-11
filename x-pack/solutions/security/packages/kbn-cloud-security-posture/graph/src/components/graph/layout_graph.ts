@@ -135,7 +135,9 @@ export const layoutGraph = (
   });
   nodes.forEach((node) => {
     let size = {
-      width: isEntityNode(node.data) ? CARD_NODE_WIDTH : NODE_WIDTH,
+      width: isEntityNode(node.data)
+        ? (node.data as { cardWidth?: number }).cardWidth ?? CARD_NODE_WIDTH
+        : NODE_WIDTH,
       height: node.measured?.height ?? NODE_HEIGHT,
     };
 

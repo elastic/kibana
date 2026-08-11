@@ -231,7 +231,13 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
   );
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder>
+    <EuiSplitPanel.Outer
+      grow
+      hasBorder
+      css={css`
+        overflow: visible;
+      `}
+    >
       <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize={'xs'}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {headerLeftSection}
@@ -239,8 +245,20 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       {showContent && (
-        <EuiSplitPanel.Inner paddingSize="none">
-          <EuiPanel paddingSize={contentPaddingSize} data-test-subj={`${dataTestSubj}Content`}>
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={css`
+            overflow: visible;
+          `}
+        >
+          <EuiPanel
+            hasShadow={false}
+            paddingSize={contentPaddingSize}
+            data-test-subj={`${dataTestSubj}Content`}
+            css={css`
+              overflow: visible;
+            `}
+          >
             {content}
           </EuiPanel>
         </EuiSplitPanel.Inner>

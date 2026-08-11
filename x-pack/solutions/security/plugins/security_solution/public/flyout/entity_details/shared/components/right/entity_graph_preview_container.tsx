@@ -46,6 +46,7 @@ export const EntityGraphPreviewContainer = memo(
         isLoading={isLoading}
         isError={isError}
         data={data}
+        originEntityId={entityId}
       />
     );
   }

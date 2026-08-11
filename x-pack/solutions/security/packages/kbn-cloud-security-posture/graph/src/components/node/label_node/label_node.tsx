@@ -9,13 +9,13 @@ import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { EuiTextTruncate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiTextTruncate, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { NodeButton, NODE_LABEL_WIDTH } from '../styles';
 import { PillExpandButton, TEST_SUBJ_PILL_EXPAND_BTN } from '../pill_expand_button';
 import { useMultipleNodesSelected } from '../../../hooks/use_multiple_nodes_selected';
 import type { LabelNodeViewModel, NodeProps } from '../../types';
 import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
-import { GRAPH_SIMPLIFIED_ZOOM_THRESHOLD } from '../../constants';
+import { GRAPH_NODE_SHADOW, GRAPH_SIMPLIFIED_ZOOM_THRESHOLD } from '../../constants';
 import { useViewportZoom } from '../../../hooks/use_viewport_zoom';
 import { analyzeDocuments } from './analyze_documents';
 import { LabelNodeBadges } from './label_node_badges';
@@ -113,8 +113,9 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   } = props.data as LabelNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
-  const defaultShadow = useEuiShadow('xs');
-  const hoverShadow = useEuiShadow('s');
+  // Figma Graph viz (13969:1176) — X-small Level 2 for relationship/event labels.
+  const defaultShadow = GRAPH_NODE_SHADOW;
+  const hoverShadow = GRAPH_NODE_SHADOW;
   const zoom = useViewportZoom();
   const isMultipleNodesSelected = useMultipleNodesSelected();
   const showExpandButton = interactive && !isMultipleNodesSelected;

@@ -38,7 +38,8 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
     },
     devTools: false,
     preloadedState: state,
-    middleware: [
+    // RTK 2 requires a builder callback (array form throws "`middleware` field must be a callback").
+    middleware: () => [
       savePushVsOverlayToLocalStorageMiddleware,
       saveUserSectionWidthsToLocalStorageMiddleware,
       saveUserFlyoutWidthsToLocalStorageMiddleware,
