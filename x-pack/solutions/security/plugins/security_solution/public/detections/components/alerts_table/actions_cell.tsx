@@ -21,6 +21,7 @@ import { RowAction } from '../../../common/components/control_columns/row_action
 import type { GetSecurityAlertsTableProp } from './types';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { alertsTableRef } from './alerts_table_ref';
 
 const onRowSelected = () => {};
 
@@ -40,7 +41,6 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   openDocumentFlyout: contextOpenDocumentFlyout,
 }) => {
   const license = useLicense();
-  const { alertsTableRef } = useAlertsContext();
   const defaults = useMemo(() => getAlertsDefaultModel(license), [license]);
   const selectTableById = useMemo(() => getTableByIdSelector(), []);
   const {
