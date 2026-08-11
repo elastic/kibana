@@ -38,8 +38,8 @@ export class DataFederationPage {
   readonly editDataSetFlyout;
 
   constructor(private readonly page: ScoutPage) {
-    this.pageTitle = page.testSubj.locator('appHeaderTitle');
-    this.tabs = page.testSubj.locator('appHeaderTabs');
+    this.pageTitle = page.testSubj.locator('dataSetsPageTitle');
+    this.tabs = page.testSubj.locator('dataSetsTabs');
     this.dataSourcesTable = page.testSubj.locator('dataSetsTable');
     this.dataSetsTable = page.testSubj.locator('dataSetsSetsTable');
     this.connectDataSourceButton = page.testSubj.locator('dataSetsCreateButton');
