@@ -96,10 +96,7 @@ const resolveLegacyHistorySnapshotIndices = async (
   }
 };
 
-async function entityAliasExists(
-  esClient: ElasticsearchClient,
-  alias: string
-): Promise<boolean> {
+async function entityAliasExists(esClient: ElasticsearchClient, alias: string): Promise<boolean> {
   try {
     await esClient.indices.getAlias({ name: alias });
     return true;
