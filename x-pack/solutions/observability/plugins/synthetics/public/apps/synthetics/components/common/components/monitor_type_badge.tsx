@@ -35,7 +35,7 @@ export function MonitorTypeBadge({
   return onClick ? (
     <EuiBadge
       onClick={onClick}
-      onClickAriaLabel={`${badgeTitle}, ${getFilterTitle()}`}
+      onClickAriaLabel={getFilterTitle(badgeTitle)}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -59,9 +59,12 @@ export function MonitorTypeBadge({
   );
 }
 
-const getFilterTitle = () => {
+const getFilterTitle = (type: string) => {
   return i18n.translate('xpack.synthetics.management.monitorList.monitorTypeBadge.filterByType', {
-    defaultMessage: 'Click to filter monitors for this type',
+    defaultMessage: '{type}. Click to filter monitors for this type',
+    values: {
+      type,
+    },
   });
 };
 
