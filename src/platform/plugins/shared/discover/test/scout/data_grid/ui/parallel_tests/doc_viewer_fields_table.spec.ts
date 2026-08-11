@@ -8,15 +8,15 @@
  */
 
 /**
- * Fields table behaviour inside the Discover doc-viewer flyout: field search,
- * type filters, hide-null-values switch, and show-only-selected-fields switch.
+ * Fields table behaviour inside the Discover doc-viewer flyout, in classic
+ * data-view mode: field search, type filters, and the hide-null-values switch.
+ * The ES|QL counterparts live in `doc_viewer_fields_table_esql.spec.ts`.
  *
  * Migrated from `src/platform/test/functional/apps/discover/group9/_doc_viewer.ts`
- * (`search`, `filter by field type`, `hide null values switch - data view mode`,
- * and `show only selected fields in ES|QL mode` groups).
+ * (`search`, `filter by field type`, and `hide null values switch - data view
+ * mode` groups).
  *
  * Dropped (covered at the unit layer):
- * - `hide null values switch - ES|QL mode` (table.test.tsx)
  * - both `should disable the switch when no fields are selected` tests (table.test.tsx)
  * - `should reveal and hide the filter form when the toggle is clicked`
  *   (field_type_filter.test.tsx) — a popover show/hide with no API call, so the
@@ -74,31 +74,7 @@ spaceTest.describe('Discover doc viewer - fields table', { tag: '@local-stateful
     await expect(docViewer.getFieldNames()).toHaveCount(initialCount);
   });
 
-  spaceTest('filters fields by type in ES|QL mode', async ({ pageObjects }) => {
-    const { discover, dataGrid, docViewer } = pageObjects;
-
-    await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 10000');
-    await discover.waitUntilTabIsLoaded();
-    await dataGrid.waitForDocTableRendered();
-
-    await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-
-    const initialCount = await docViewer.getFieldNameCount();
-    // ES|QL surfaces many fields; at least the 7 numeric ones must be present.
-    expect(initialCount).toBeGreaterThan(7);
-
-    // Pin one field so we can confirm pinned fields survive type filtering.
-    await docViewer.togglePinAction('agent');
-
-    await docViewer.openFieldTypeFilter();
-    await expect(docViewer.getFieldTypeFilterOptions()).toHaveCount(6);
-
-    // 7 number fields + 1 pinned field = 8.
-    await docViewer.clickFieldTypeFilterOption('number');
-    await expect(docViewer.getFieldNames()).toHaveCount(8);
-  });
-
-  spaceTest('hides fields with null values in data view mode', async ({ pageObjects }) => {
+  spaceTest('hides fields with null values', async ({ pageObjects }) => {
     const { docViewer } = pageObjects;
 
     await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
@@ -115,47 +91,5 @@ spaceTest.describe('Discover doc viewer - fields table', { tag: '@local-stateful
     // Toggling back restores the full set.
     await docViewer.toggleHideNullValues();
     await expect(docViewer.getFieldNames()).toHaveCount(8);
-  });
-
-  spaceTest('toggles show-only-selected-fields switch in ES|QL mode', async ({ pageObjects }) => {
-    const { discover, dataGrid, unifiedFieldList, docViewer } = pageObjects;
-
-    await discover.writeAndSubmitEsqlQuery('from logstash-* | sort @timestamp | limit 10');
-    await discover.waitUntilTabIsLoaded();
-    await dataGrid.waitForDocTableRendered();
-
-    // Add two columns so the switch becomes enabled.
-    await unifiedFieldList.clickFieldListItemAdd('agent.raw');
-    await unifiedFieldList.clickFieldListItemAdd('agent');
-
-    await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-
-    const fieldNames = docViewer.getFieldNames();
-    const getFieldNameTexts = () => fieldNames.allTextContents();
-
-    // All fields are listed; the selected ones appear in alphabetical order.
-    await expect
-      .poll(async () => {
-        const texts = await getFieldNameTexts();
-        return texts.slice(0, 6).join(',');
-      })
-      .toBe('@message,@message.raw,@tags,@tags.raw,@timestamp,agent');
-
-    // Show only the two selected columns plus @timestamp (always included).
-    await docViewer.clickShowOnlySelectedFieldsSwitch();
-    await expect.poll(getFieldNameTexts).toStrictEqual(['@timestamp', 'agent.raw', 'agent']);
-
-    // Pinning a field moves it to the top of the list.
-    await docViewer.togglePinAction('agent');
-    await expect.poll(getFieldNameTexts).toStrictEqual(['agent', '@timestamp', 'agent.raw']);
-
-    // Switching back shows all fields, with the pinned field first.
-    await docViewer.clickShowOnlySelectedFieldsSwitch();
-    await expect
-      .poll(async () => {
-        const texts = await getFieldNameTexts();
-        return texts[0];
-      })
-      .toBe('agent');
   });
 });

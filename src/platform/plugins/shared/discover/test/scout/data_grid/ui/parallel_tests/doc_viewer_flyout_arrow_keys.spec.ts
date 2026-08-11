@@ -8,10 +8,10 @@
  */
 
 /**
- * Keyboard interactions with the Discover doc-viewer flyout: arrow keys page
- * between documents, and Escape closes the flyout — except when focus sits on
- * an element that owns those keys itself (the field search input, the data
- * grid, the doc-viewer tabs, or the flyout resize handle).
+ * Arrow keys page between documents in the Discover doc-viewer flyout — except
+ * when focus sits on an element that owns those keys itself (the field search
+ * input, the data grid, the doc-viewer tabs, or the flyout resize handle).
+ * Escape-to-close lives in `doc_viewer_flyout_escape_key.spec.ts`.
  *
  * Migrated from `src/platform/test/functional/apps/discover/group9/_doc_viewer.ts`
  * (`flyout > keyboard navigation` group).
@@ -21,7 +21,7 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
-  'Discover doc viewer flyout - keyboard navigation',
+  'Discover doc viewer flyout - arrow keys',
   { tag: '@local-stateful-classic' },
   () => {
     // The FTR equivalent ran at 1600x1200 via `browser.setWindowSize`. The width
@@ -153,48 +153,6 @@ spaceTest.describe(
         await docViewer.getResizeHandle().click();
         await page.keyboard.press('ArrowRight');
         await expect(docViewer.getNavigationPage(1)).toBeVisible();
-      }
-    );
-
-    spaceTest('closes the flyout with the escape key', async ({ page, pageObjects }) => {
-      const { docViewer } = pageObjects;
-
-      await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-      await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
-
-      await page.keyboard.press('Escape');
-      await expect(docViewer.getFlyout()).toBeHidden();
-    });
-
-    spaceTest(
-      'closes the flyout with the escape key when the search input is focused',
-      async ({ page, pageObjects }) => {
-        const { docViewer } = pageObjects;
-
-        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-        await expect(docViewer.getFlyout()).toBeVisible();
-
-        await docViewer.getFieldSearchInput().click();
-        await page.keyboard.press('Escape');
-        await expect(docViewer.getFlyout()).toBeHidden();
-      }
-    );
-
-    spaceTest(
-      'does not close the flyout with the escape key when the data grid is focused',
-      async ({ page, pageObjects }) => {
-        const { dataGrid, docViewer } = pageObjects;
-
-        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-        await expect(docViewer.getFlyout()).toBeVisible();
-
-        await dataGrid.getColumnHeader('name').click();
-        await page.keyboard.press('Escape');
-        await expect(docViewer.getFlyout()).toBeVisible();
-
-        await page.keyboard.press('Tab');
-        await page.keyboard.press('Escape');
-        await expect(docViewer.getFlyout()).toBeHidden();
       }
     );
   }
