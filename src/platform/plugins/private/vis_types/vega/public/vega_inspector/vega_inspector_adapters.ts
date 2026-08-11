@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import type { Vis } from '@kbn/visualizations-plugin/public';
-import type { VegaExpressionFunctionDefinition, VisParams } from './vega_fn';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { VegaAdapter } from './vega_adapter';
 
-export const toExpressionAst = (vis: Vis<VisParams>) => {
-  const vega = buildExpressionFunction<VegaExpressionFunctionDefinition>('vega', {
-    spec: vis.params.spec,
-  });
+export interface VegaInspectorAdapters extends Adapters {
+  requests: RequestAdapter;
+  vega: VegaAdapter;
+}
 
-  return buildExpression([vega]).toAst();
-};
+export const createInspectorAdapters = (): VegaInspectorAdapters => ({
+  requests: new RequestAdapter(),
+  vega: new VegaAdapter(),
+});
