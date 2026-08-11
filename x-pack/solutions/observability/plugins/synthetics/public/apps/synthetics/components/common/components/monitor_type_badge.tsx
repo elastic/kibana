@@ -33,12 +33,15 @@ export function MonitorTypeBadge({
   size?: 's' | 'm';
 }) {
   const style = size === 's' ? COMPACT_BADGE_STYLE : undefined;
+  const badgeTitle = getMonitorTypeBadgeTitle(monitorType);
   return onClick ? (
     <EuiBadge
       onClick={onClick}
-      onClickAriaLabel={getFilterTitle(monitorType)}
+      // The accessible name has to start with the visible badge text, otherwise
+      // screen readers announce something entirely different from what is on
+      // screen (WCAG SC 4.1.2). The filter instructions follow it as context.
+      onClickAriaLabel={`${badgeTitle}, ${ariaLabel ?? getFilterTitle(monitorType)}`}
       title={ariaLabel}
-      aria-label={ariaLabel}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -46,12 +49,14 @@ export function MonitorTypeBadge({
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   ) : (
+    // No `aria-label` here: the badge is not interactive, so its visible text is
+    // already its accessible name and overriding it would hide that text from
+    // assistive technology.
     <EuiBadge
       title={ariaLabel}
-      aria-label={ariaLabel}
       iconType={getMonitorTypeBadgeIcon(monitorType)}
       style={style}
       onMouseDown={(e: MouseEvent) => {
@@ -59,7 +64,7 @@ export function MonitorTypeBadge({
         e.stopPropagation();
       }}
     >
-      {getMonitorTypeBadgeTitle(monitorType)}
+      {badgeTitle}
     </EuiBadge>
   );
 }
