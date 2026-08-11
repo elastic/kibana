@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
 import { useAPMHref } from '../links/apm/apm_link_hooks';
@@ -42,9 +41,10 @@ export function MLCallout({
   let properties:
     | {
         primaryAction: React.ReactNode | undefined;
+        color: 'primary' | 'success' | 'danger' | 'warning';
         title: string;
+        icon: string;
         text: string;
-        Component: typeof KbnInfoCallout | typeof KbnSuccessCallout;
       }
     | undefined;
 
@@ -66,11 +66,14 @@ export function MLCallout({
     case AnomalyDetectionSetupState.NoJobs:
       properties = {
         title: i18n.translate('xpack.apm.mlCallout.noJobsCalloutTitle', {
-          defaultMessage: 'Enable anomaly detection to surface anomaly scores across your services',
+          defaultMessage:
+            'Enable anomaly detection to add health status indicators to your services',
         }),
         text: i18n.translate('xpack.apm.mlCallout.noJobsCalloutText', {
-          defaultMessage: `Pinpoint anomalous transactions and monitor anomaly scores for upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
+          defaultMessage: `Pinpoint anomalous transactions and see the health of upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
         }),
+        icon: 'info',
+        color: 'primary',
         primaryAction: isOnSettingsPage ? (
           <EuiButton
             data-test-subj="apmMLCalloutCreateMlJobButton"
@@ -86,7 +89,6 @@ export function MLCallout({
         ) : (
           getLearnMoreLink('primary')
         ),
-        Component: KbnInfoCallout,
       };
       break;
 
@@ -99,6 +101,8 @@ export function MLCallout({
           defaultMessage:
             'We have updated the anomaly detection jobs that provide insights into degraded performance and added detectors for throughput and failed transaction rate. If you choose to upgrade, we will create the new jobs and close the existing legacy jobs. The data shown in the APM app will automatically switch to the new. Please note that the option to migrate all existing jobs will not be available if you choose to create a new job.',
         }),
+        color: 'success',
+        icon: 'wrench',
         primaryAction: isOnSettingsPage ? (
           <EuiButton
             data-test-subj="apmMLCalloutUpdateJobsButton"
@@ -118,7 +122,6 @@ export function MLCallout({
         ) : (
           getLearnMoreLink('success')
         ),
-        Component: KbnSuccessCallout,
       };
       break;
 
@@ -131,6 +134,8 @@ export function MLCallout({
           defaultMessage:
             'We have discovered legacy Machine Learning jobs from our previous integration which are no longer being used in the APM app',
         }),
+        icon: 'info',
+        color: 'primary',
         primaryAction: (
           <EuiButton data-test-subj="apmMLCalloutReviewJobsButton" href={mlManageJobsHref}>
             {i18n.translate('xpack.apm.settings.anomaly_detection.legacy_jobs.button', {
@@ -138,7 +143,6 @@ export function MLCallout({
             })}
           </EuiButton>
         ),
-        Component: KbnInfoCallout,
       };
       break;
   }
@@ -160,12 +164,14 @@ export function MLCallout({
   ) : null;
 
   return (
-    <properties.Component
+    <EuiCallOut
       title={properties.title}
-      text={properties.text}
+      iconType={properties.icon}
+      color={properties.color}
       onDismiss={dismissable ? onDismiss : undefined}
     >
+      <p>{properties.text}</p>
       {actions}
-    </properties.Component>
+    </EuiCallOut>
   );
 }
