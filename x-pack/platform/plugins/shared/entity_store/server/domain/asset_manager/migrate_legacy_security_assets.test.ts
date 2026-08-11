@@ -74,6 +74,9 @@ describe('migrateLegacySecurityAssets', () => {
     },
   } as any;
 
+  const notFoundError = () =>
+    Object.assign(new Error('index_not_found_exception'), { meta: { statusCode: 404 } });
+
   const mockConcrete = (concreteNames: string[]) => {
     const concrete = new Set(concreteNames);
     esClient.indices.getDataStream.mockImplementation(async ({ name }: { name: string }) => {
@@ -83,13 +86,13 @@ describe('migrateLegacySecurityAssets', () => {
       if (concrete.has(name) && name.includes('updates')) {
         return { data_streams: [{ name }] };
       }
-      throw { meta: { statusCode: 404 } };
+      throw notFoundError();
     });
     esClient.indices.get.mockImplementation(async ({ index }: { index: string }) => {
       if (concrete.has(index)) {
         return { [index]: {} };
       }
-      throw { meta: { statusCode: 404 } };
+      throw notFoundError();
     });
   };
 
@@ -126,7 +129,7 @@ describe('migrateLegacySecurityAssets', () => {
       if (index === `.entities.v2.metadata.security_${namespace}`) {
         return { [`.entities.v2.metadata.${namespace}`]: { aliases: { [index]: {} } } };
       }
-      throw { meta: { statusCode: 404 } };
+      throw notFoundError();
     });
 
     await expect(hasLegacySecurityAssets(esClient, namespace)).resolves.toBe(false);
@@ -236,7 +239,14 @@ describe('migrateLegacySecurityAssets', () => {
       updated: 0,
       versionConflicts: 0,
       total: 1,
-      failures: [{ index: legacyIndex, id: 'doc-1', cause: { type: 'mapper_parsing_exception' } }],
+      failures: [
+        {
+          index: legacyIndex,
+          id: 'doc-1',
+          status: 400,
+          cause: { type: 'mapper_parsing_exception' },
+        },
+      ],
     });
 
     await expect(migrateLegacySecurityAssets({ esClient, logger, namespace })).rejects.toThrow(

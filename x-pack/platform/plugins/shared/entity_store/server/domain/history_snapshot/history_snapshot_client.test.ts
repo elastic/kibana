@@ -60,7 +60,13 @@ describe('HistorySnapshotClient', () => {
   describe('runHistorySnapshot', () => {
     it('returns success with docCount and resetCount when reindex and updateByQuery succeed', async () => {
       mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({ created: 5, total: 5 });
+      mockReindex.mockResolvedValue({
+        created: 5,
+        updated: 0,
+        versionConflicts: 0,
+        total: 5,
+        failures: [],
+      });
       mockUpdateByQueryWithScript.mockResolvedValue({ updated: 5, total: 5 });
 
       const result = await client.runHistorySnapshot();
@@ -118,7 +124,13 @@ describe('HistorySnapshotClient', () => {
 
     it('returns success with docCount 0 and resetCount 0 when latest index has no docs', async () => {
       mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({ created: 0, total: 0 });
+      mockReindex.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        versionConflicts: 0,
+        total: 0,
+        failures: [],
+      });
 
       const result = await client.runHistorySnapshot();
 
@@ -196,7 +208,13 @@ describe('HistorySnapshotClient', () => {
 
     it('returns error when updateByQueryWithScript throws', async () => {
       mockCreateIndex.mockResolvedValue(undefined);
-      mockReindex.mockResolvedValue({ created: 3, total: 3 });
+      mockReindex.mockResolvedValue({
+        created: 3,
+        updated: 0,
+        versionConflicts: 0,
+        total: 3,
+        failures: [],
+      });
       mockUpdateByQueryWithScript.mockRejectedValue(new Error('update_by_query failed'));
 
       const result = await client.runHistorySnapshot();
