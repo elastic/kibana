@@ -11,7 +11,10 @@ import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
 
 /**
- * Context passed to ConnectorSpecEvents.handleEvents.
+ * Context passed to ConnectorSpecEvents.handleEvents after hub verification.
+ *
+ * Signed webhook verification is hub-orchestrated (fail closed before this
+ * handler runs).
  */
 export interface ConnectorIngressContext {
   readonly spaceId: string;
@@ -19,9 +22,7 @@ export interface ConnectorIngressContext {
   readonly connectorId: string;
   readonly connectorTypeId: string;
   readonly config: Record<string, unknown>;
-  readonly secrets: Record<string, unknown>;
   readonly rawBody: unknown;
-  readonly headers: Record<string, string | string[] | undefined>;
 }
 
 export interface EventPayload {
