@@ -26,6 +26,8 @@ import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 
+const BASE_SCORING_REQUEST_TIMEOUT = '5m';
+
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
@@ -243,7 +245,8 @@ const fetchNextEuidPage = async ({
       index: alertsIndex,
       pageSize,
       afterKey,
-    })
+    }),
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
@@ -278,10 +281,13 @@ const scorePageFromAlerts = async ({
   alertFilters: QueryDslQueryContainer[];
 }) => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
-  const esqlResponse = await esClient.esql.query({
-    query,
-    filter: { bool: { filter: alertFilters } },
-  });
+  const esqlResponse = await esClient.esql.query(
+    {
+      query,
+      filter: { bool: { filter: alertFilters } },
+    },
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+  );
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };
