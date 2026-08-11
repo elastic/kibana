@@ -348,11 +348,16 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
-
-      wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
-      expect(refresh).toHaveBeenCalled();
+      expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(1);
     });
+    wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().simulate('click');
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
+    });
+
+    wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
+    expect(refresh).toHaveBeenCalled();
   });
 
   it('should refresh when when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
@@ -381,13 +386,18 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(1);
+    });
+    wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().simulate('click');
+
+    await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length
       ).toBe(1);
-
-      wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
-      expect(refresh).toHaveBeenCalled();
     });
+
+    wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
+    expect(refresh).toHaveBeenCalled();
   });
 
   it('should refresh when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
@@ -418,10 +428,7 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
-    expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(0);
-    expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
-      0
-    );
+    expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(0);
   });
 
   it('should show a valid url when clicking  "View in app"', async () => {

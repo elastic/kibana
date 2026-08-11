@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSelectable } from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ADD_TO_CASE, CASE_TYPE } from '../translations';
+import { EuiContextMenuItem } from '@elastic/eui';
+import React from 'react';
 
 export interface AddToCaseAction {
   id: string;
@@ -18,53 +16,21 @@ export interface AddToCaseAction {
   disabled?: boolean;
 }
 
-type AddToCaseOption = EuiSelectableOption<{ action: AddToCaseAction }>;
-
 interface AddToCaseActionPanelProps {
   actions: AddToCaseAction[];
 }
 
-export const AddToCaseActionPanel = ({ actions }: AddToCaseActionPanelProps) => {
-  const [selectedActionId, setSelectedActionId] = useState<string>();
-  const selectedAction = actions.find(({ id }) => id === selectedActionId);
-  const options = useMemo<AddToCaseOption[]>(
-    () =>
-      actions.map((action) => ({
-        action,
-        'data-test-subj': action.dataTestSubj,
-        checked: action.id === selectedAction?.id ? 'on' : undefined,
-        disabled: action.disabled,
-        key: action.id,
-        label: action.label,
-      })),
-    [actions, selectedAction?.id]
-  );
-  const onChange = useCallback((newOptions: AddToCaseOption[]) => {
-    const newSelectedActionId = newOptions.find(({ checked }) => checked === 'on')?.key;
-    if (newSelectedActionId) {
-      setSelectedActionId(newSelectedActionId);
-    }
-  }, []);
-
-  return (
-    <>
-      <EuiSelectable<{ action: AddToCaseAction }>
-        aria-label={CASE_TYPE}
-        options={options}
-        onChange={onChange}
-        singleSelection="always"
+export const AddToCaseActionPanel = ({ actions }: AddToCaseActionPanelProps) => (
+  <>
+    {actions.map(({ id, label, onClick, dataTestSubj, disabled }) => (
+      <EuiContextMenuItem
+        key={id}
+        data-test-subj={dataTestSubj}
+        disabled={disabled}
+        onClick={onClick}
       >
-        {(list) => list}
-      </EuiSelectable>
-      <EuiButton
-        fullWidth
-        size="s"
-        disabled={!selectedAction || selectedAction.disabled}
-        onClick={selectedAction?.onClick}
-        data-test-subj="add-to-case-submit"
-      >
-        {ADD_TO_CASE}
-      </EuiButton>
-    </>
-  );
-};
+        {label}
+      </EuiContextMenuItem>
+    ))}
+  </>
+);

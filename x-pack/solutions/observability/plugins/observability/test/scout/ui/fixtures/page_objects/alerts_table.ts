@@ -31,6 +31,7 @@ export class AlertsTablePage {
   public readonly flyoutAlertDetailsButton: Locator;
   public readonly flyoutViewRuleDetailsLink: Locator;
   // Add-to-case row actions / dialogs
+  public readonly addToCaseAction: Locator;
   public readonly addToExistingCaseAction: Locator;
   public readonly addToNewCaseAction: Locator;
   public readonly createCaseFlyout: Locator;
@@ -70,6 +71,7 @@ export class AlertsTablePage {
     this.flyoutViewInAppButton = this.page.testSubj.locator('alertsFlyoutViewInAppButton');
     this.flyoutAlertDetailsButton = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
     this.flyoutViewRuleDetailsLink = this.page.testSubj.locator('viewRuleDetailsFlyout');
+    this.addToCaseAction = this.page.testSubj.locator('add-to-case-action');
     this.addToExistingCaseAction = this.page.testSubj.locator('add-to-existing-case-action');
     this.addToNewCaseAction = this.page.testSubj.locator('add-to-new-case-action');
     this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
@@ -207,11 +209,17 @@ export class AlertsTablePage {
   }
 
   // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
+  async openAddToCasePanel() {
+    await this.addToCaseAction.click();
+  }
+
   async clickAddToNewCase() {
+    await this.openAddToCasePanel();
     await this.addToNewCaseAction.click();
   }
 
   async clickAddToExistingCase() {
+    await this.openAddToCasePanel();
     await this.addToExistingCaseAction.click();
   }
 
