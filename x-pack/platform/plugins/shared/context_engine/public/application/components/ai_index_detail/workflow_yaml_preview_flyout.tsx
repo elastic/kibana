@@ -17,7 +17,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
-import { useWorkflow } from '../../hooks/use_workflow';
+import { useWorkflow, isWorkflowNotFoundError } from '../../hooks/use_workflow';
 
 const workflowYamlPreviewFlyoutBodyCss = css`
   .euiFlyoutBody__overflow,
@@ -49,6 +49,7 @@ export const WorkflowYamlPreviewFlyout = ({
 }: WorkflowYamlPreviewFlyoutProps) => {
   const { data: workflow, isLoading, error } = useWorkflow(workflowId);
   const workflowYaml = workflow?.yaml;
+  const isNotFound = isWorkflowNotFoundError(error);
 
   return (
     <EuiFlyout
@@ -71,7 +72,26 @@ export const WorkflowYamlPreviewFlyout = ({
         {isLoading ? (
           <EuiLoadingSpinner size="m" data-test-subj="contextWorkflowYamlPreviewLoading" />
         ) : null}
-        {error ? (
+        {isNotFound ? (
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.previewFlyoutNotFoundTitle',
+              { defaultMessage: 'Workflow not found' }
+            )}
+            data-test-subj="contextWorkflowYamlPreviewNotFound"
+          >
+            {i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.previewFlyoutNotFoundBody',
+              {
+                defaultMessage:
+                  'This automation references workflow "{workflowId}", which no longer exists. It may have been deleted. Remove the automation to clear the reference.',
+                values: { workflowId },
+              }
+            )}
+          </KbnWarningCallout>
+        ) : null}
+        {error && !isNotFound ? (
           <KbnDangerCallout
             announceOnMount
             title={i18n.translate(
