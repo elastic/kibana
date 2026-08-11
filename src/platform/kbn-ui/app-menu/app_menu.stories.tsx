@@ -28,7 +28,7 @@ const AppMenuWrapper = (props: AppMenuWrapperProps) => {
 };
 
 const meta: Meta<AppMenuWrapperProps> = {
-  title: 'Chrome/App Menu',
+  title: 'App Menu',
   component: AppMenuWrapper,
   decorators: [
     (Story) => {

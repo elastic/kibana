@@ -3,16 +3,21 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
-      "node"
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/ui-app-menu"
+    "@kbn/i18n",
+    "@kbn/ui-chrome-layout-utils"
   ]
 }

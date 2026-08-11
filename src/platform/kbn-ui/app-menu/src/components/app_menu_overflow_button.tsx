@@ -57,7 +57,7 @@ export const AppMenuOverflowButton = ({
 
   const button = (
     <EuiToolTip
-      content={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+      content={i18n.translate('kbnUI.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
       disableScreenReaderOutput
@@ -65,7 +65,7 @@ export const AppMenuOverflowButton = ({
       <EuiButtonIcon
         iconType="ellipsis"
         size="s"
-        aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+        aria-label={i18n.translate('kbnUI.appMenu.showMoreButtonLabel', {
           defaultMessage: 'More',
         })}
         color="text"
@@ -83,7 +83,7 @@ export const AppMenuOverflowButton = ({
       items={items}
       staticItems={staticItems}
       anchorElement={button}
-      tooltipContent={i18n.translate('core.chrome.appMenu.showMoreButtonTooltip', {
+      tooltipContent={i18n.translate('kbnUI.appMenu.showMoreButtonTooltip', {
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}
