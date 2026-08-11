@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { fireEvent, render, renderHook } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { alertInputDataMock } from '../mocks';
@@ -78,7 +78,9 @@ describe('useRiskInputActionsPanels', () => {
     jest.clearAllMocks();
     mockCanUseCases.mockReturnValue({
       create: true,
+      createComment: true,
       read: true,
+      update: false,
     });
     mockUseSendBulkToTimeline.mockReturnValue({
       sendBulkEventsToTimelineHandler: jest.fn(),
@@ -101,13 +103,10 @@ describe('useRiskInputActionsPanels', () => {
     expect(getByTestId('contextMenuPanelTitle')).toHaveTextContent('2 selected');
   });
 
-  it('displays cases actions when user has cases permissions', async () => {
-    const { findByTestId, getByTestId } = customRender();
+  it('displays the singular case action when user has cases permissions', () => {
+    const { getByTestId } = customRender();
 
-    fireEvent.click(getByTestId('add-to-case'));
-
-    expect(await findByTestId('add-to-new-case')).toBeInTheDocument();
-    expect(await findByTestId('add-to-existing-case')).toBeInTheDocument();
+    expect(getByTestId('add-to-case')).toHaveTextContent('Add to case');
   });
 
   it('keeps action order, icons, and the explicit group separator visible', () => {
@@ -132,13 +131,14 @@ describe('useRiskInputActionsPanels', () => {
   it('does NOT display cases actions when user has NO cases permissions', () => {
     mockCanUseCases.mockReturnValue({
       create: false,
+      createComment: false,
       read: false,
+      update: false,
     });
 
     const { container } = customRender();
 
-    expect(container).not.toHaveTextContent('Add to existing case');
-    expect(container).not.toHaveTextContent('Add to new case');
+    expect(container).not.toHaveTextContent('Add to case');
   });
 
   it('displays the timeline action when user has sufficient privileges', () => {

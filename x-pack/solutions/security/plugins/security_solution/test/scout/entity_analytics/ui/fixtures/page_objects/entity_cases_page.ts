@@ -7,14 +7,11 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import {
-  ADD_TO_NEW_CASE_TEST_ID,
-  ADD_TO_EXISTING_CASE_TEST_ID,
-} from '../../../../../../common/cases/attachments/entity/test_ids';
+import { ADD_TO_CASE_TEST_ID } from '../../../../../../common/cases/attachments/entity/test_ids';
 
 /**
  * Page object for entity attachment Cases UI interactions:
- * - Entity flyout Take Action popover (Add to new/existing case)
+ * - Entity flyout Take Action popover (Add to case)
  * - Cases new-case creation flyout
  * - Case view Attachments tab + the "Entities" attachment accordion
  *
@@ -35,8 +32,7 @@ export class EntityCasesPage {
   // Entity flyout – Take Action popover
   public readonly takeActionButton: Locator;
   public readonly addToCaseItem: Locator;
-  public readonly addToNewCaseItem: Locator;
-  public readonly addToExistingCaseItem: Locator;
+  public readonly createNewCaseFromModalButton: Locator;
 
   // Case view – Attachments tab + Entities accordion
   public readonly attachmentsTab: Locator;
@@ -54,9 +50,8 @@ export class EntityCasesPage {
 
   constructor(private readonly page: ScoutPage) {
     this.takeActionButton = page.testSubj.locator('take-action-button');
-    this.addToCaseItem = page.testSubj.locator('add-to-case-action');
-    this.addToNewCaseItem = page.testSubj.locator(ADD_TO_NEW_CASE_TEST_ID);
-    this.addToExistingCaseItem = page.testSubj.locator(ADD_TO_EXISTING_CASE_TEST_ID);
+    this.addToCaseItem = page.testSubj.locator(ADD_TO_CASE_TEST_ID);
+    this.createNewCaseFromModalButton = page.testSubj.locator('createNewCaseBtn');
 
     this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
     this.attachmentsContainer = page.testSubj.locator('case-view-attachments');
@@ -107,12 +102,11 @@ export class EntityCasesPage {
 
   async clickAddToNewCase() {
     await this.addToCaseItem.click();
-    await this.addToNewCaseItem.click();
+    await this.createNewCaseFromModalButton.click();
   }
 
   async clickAddToExistingCase() {
     await this.addToCaseItem.click();
-    await this.addToExistingCaseItem.click();
   }
 
   async fillCaseName(name: string) {
