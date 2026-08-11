@@ -14,7 +14,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { createMockStore, mockDataViewSpec, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
 import { TopN } from './top_n';
-import { detectionAlertsTables } from './helpers';
+import { detectionAlertsTables, getOptions } from './helpers';
 import { StatefulTopN } from '.';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
@@ -353,6 +353,20 @@ describe('StatefulTopN', () => {
       test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
         expect(TopNMocked.mock.calls[0][0].applyGlobalQueriesAndFilters).toEqual(true);
       });
+    });
+  });
+
+  describe('rendering with activeTimelineEventsTypeOverride', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders store={store}>
+          <StatefulTopN {...testProps} activeTimelineEventsTypeOverride="alert" />
+        </TestProviders>
+      );
+    });
+
+    test('passes options from getOptions("alert") when activeTimelineEventsTypeOverride is "alert"', () => {
+      expect(TopNMocked.mock.calls[0][0].options).toEqual(getOptions('alert'));
     });
   });
 });

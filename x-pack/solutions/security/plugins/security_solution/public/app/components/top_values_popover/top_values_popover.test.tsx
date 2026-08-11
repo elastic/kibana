@@ -7,8 +7,16 @@
 
 import { waitFor, render } from '@testing-library/react';
 import React from 'react';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { TestProviders } from '../../../common/mock';
 import { TopValuesPopover } from './top_values_popover';
+import { StatefulTopN } from '../../../common/components/top_n';
+
+jest.mock('../../../common/components/top_n', () => ({
+  StatefulTopN: jest.fn(() => <div data-test-subj="topN-container" />),
+}));
+
+const StatefulTopNMocked = StatefulTopN as jest.MockedFunction<typeof StatefulTopN>;
 
 jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('react-router-dom', () => {
@@ -46,6 +54,10 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('TopNAction', () => {
   it('renders', async () => {
     mockUseObservable.mockReturnValue(data);
@@ -80,6 +92,30 @@ describe('TopNAction', () => {
 
     await waitFor(() => {
       expect(queryByTestId('topN-container')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('activeTimelineEventsTypeOverride', () => {
+    it('passes "alert" when fieldName is ALERT_WORKFLOW_STATUS', async () => {
+      mockUseObservable.mockReturnValue({ ...data, fieldName: ALERT_WORKFLOW_STATUS });
+
+      render(<TopValuesPopover />, { wrapper: TestProviders });
+
+      await waitFor(() => {
+        expect(StatefulTopNMocked.mock.calls[0][0].activeTimelineEventsTypeOverride).toBe('alert');
+      });
+    });
+
+    it('passes undefined when fieldName is not ALERT_WORKFLOW_STATUS', async () => {
+      mockUseObservable.mockReturnValue(data);
+
+      render(<TopValuesPopover />, { wrapper: TestProviders });
+
+      await waitFor(() => {
+        expect(
+          StatefulTopNMocked.mock.calls[0][0].activeTimelineEventsTypeOverride
+        ).toBeUndefined();
+      });
     });
   });
 });

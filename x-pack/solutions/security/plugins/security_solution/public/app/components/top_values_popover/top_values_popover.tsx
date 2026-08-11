@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { StatefulTopN } from '../../../common/components/top_n';
@@ -54,7 +55,7 @@ export const TopValuesPopover = React.memo(() => {
         dataView={dataView}
         browserFields={browserFields}
         activeTimelineEventsTypeOverride={
-          data.fieldName === 'kibana.alert.workflow_status' ? 'alert' : undefined
+          data.fieldName === ALERT_WORKFLOW_STATUS ? 'alert' : undefined
         }
       />
     </EuiWrappingPopover>
