@@ -110,6 +110,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     nonEcsData: flattenedEcsData,
     onMenuItemClick,
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+    useNestedCaseActions: true,
     refetch,
   });
 

@@ -78,6 +78,7 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
     nonEcsData,
     onMenuItemClick: closePopover,
     ariaLabel: ADD_TO_CASE_ARIA_LABEL,
+    useNestedCaseActions: true,
   });
 
   const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
