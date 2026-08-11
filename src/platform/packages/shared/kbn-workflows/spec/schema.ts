@@ -61,8 +61,14 @@ export const WorkflowRetrySchema = z.object({
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
+// Upper bound on a KQL condition. The parser recurses, so nesting depth has to stay
+// well inside the stack limit, and this bounds it. A longer expression can be hoisted
+// into a `data.set` step and compared here as a short flag.
+export const IF_CONDITION_MAX_LENGTH = 2000;
+
 const IfConditionSchema = z
   .string()
+  .max(IF_CONDITION_MAX_LENGTH)
   .describe(
     'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
   );

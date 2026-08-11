@@ -15,6 +15,7 @@ import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   ElasticsearchStepSchema,
   EventTimestampSchema,
+  IF_CONDITION_MAX_LENGTH,
   IfStepSchema,
   KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
@@ -1242,5 +1243,22 @@ describe('`if` condition on step schemas', () => {
     const result = IfStepSchema.safeParse({ ...ifStep, if: '{{ inputs.enabled }}' });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].path).toEqual(['if']);
+  });
+
+  it("bounds the condition length on both `if` and the `if` step's `condition`", () => {
+    const atLimit = 'a'.repeat(IF_CONDITION_MAX_LENGTH);
+    const overLimit = 'a'.repeat(IF_CONDITION_MAX_LENGTH + 1);
+    const waitStep = { name: 's', type: 'wait', with: { duration: '5s' } };
+    const ifStep = {
+      name: 's',
+      type: 'if',
+      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+    };
+
+    expect(WaitStepSchema.safeParse({ ...waitStep, if: atLimit }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...waitStep, if: overLimit }).success).toBe(false);
+
+    expect(IfStepSchema.safeParse({ ...ifStep, condition: atLimit }).success).toBe(true);
+    expect(IfStepSchema.safeParse({ ...ifStep, condition: overLimit }).success).toBe(false);
   });
 });
