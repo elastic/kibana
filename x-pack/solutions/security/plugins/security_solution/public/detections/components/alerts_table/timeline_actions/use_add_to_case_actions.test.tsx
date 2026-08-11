@@ -48,6 +48,7 @@ const defaultProps = {
     { field: 'event.kind', value: ['signal'] },
     { field: 'host.name', value: ['test-host'] },
   ],
+  useNestedCaseActions: true,
   refetch,
 };
 
@@ -100,6 +101,21 @@ describe('useAddToCaseActions', () => {
     expect(result.current.addToCaseActionItems.length).toEqual(1);
     expect(result.current.addToCaseActionItems[0]['data-test-subj']).toEqual('add-to-case-action');
     expect(result.current.addToCaseActionPanels).toHaveLength(1);
+  });
+
+  it('should preserve sibling case actions unless nested actions are enabled', () => {
+    const { result } = renderHook(
+      () => useAddToCaseActions({ ...defaultProps, useNestedCaseActions: undefined }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    expect(result.current.addToCaseActionItems.map((item) => item['data-test-subj'])).toEqual([
+      'add-to-existing-case-action',
+      'add-to-new-case-action',
+    ]);
+    expect(result.current.addToCaseActionPanels).toHaveLength(0);
   });
 
   it('should render case options when event is not alert ', () => {
