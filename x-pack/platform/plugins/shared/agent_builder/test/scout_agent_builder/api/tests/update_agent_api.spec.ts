@@ -258,13 +258,13 @@ apiTest.describe(
         expect(putResponse.body.labels).toStrictEqual(['keep-me']);
         expect(putResponse.body.avatar_symbol).toBe('K');
         expect(putResponse.body.description).toBe('Original description');
-      }
-        expect(putResponse.body.description).toBe('Original description');
 
         // Partial config updates must merge, not replace — the other
         // configuration fields must survive an instructions-only update.
         expect(putResponse.body.configuration.tools).toStrictEqual([{ tool_ids: ['*'] }]);
         expect(putResponse.body.configuration.enable_elastic_capabilities).toBe(false);
+      }
+    );
 
     apiTest('updating only access_mode does not affect configuration', async ({ asAdmin }) => {
       const id = await createAgent(asAdmin, {
