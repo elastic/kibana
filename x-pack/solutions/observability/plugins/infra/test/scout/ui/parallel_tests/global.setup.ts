@@ -50,7 +50,8 @@ globalSetupHook(
     apmSynthtraceEsClient,
     log,
   }) => {
-    // MKI serverless ships Fleet TSDS templates that reject fixed historical dates.
+    // Shared CI clusters may already have Fleet TSDS templates on metrics-system.*
+    // from other suites; those reject fixed historical @timestamp values.
     // Clean stale synthtrace streams first so re-ingest is deterministic on shared CI.
     await ensureNonTsdsSystemTemplate(esClient, log);
     await infraSynthtraceEsClient.clean();
