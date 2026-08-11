@@ -19,10 +19,9 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import imageUrl from './landing_background.png';
+import illustrationUrl from './hero_illustration.svg';
 
-const BACKGROUND_IMAGE_MAX_WIDTH = '296px';
-const BACKGROUND_IMAGE_BOTTOM_OFFSET = '-60px';
+const ILLUSTRATION_WIDTH = 120;
 const HEADER_CONTENT_MIN_HEIGHT = '140px';
 
 export const LandingHeader = () => {
@@ -32,17 +31,28 @@ export const LandingHeader = () => {
     <EuiPageTemplate.Header
       paddingSize="none"
       restrictWidth
+      bottomBorder={false}
       css={css`
         padding: ${euiTheme.size.l} ${euiTheme.size.xl} 0;
       `}
     >
       <EuiFlexGroup
         alignItems="center"
-        justifyContent="spaceBetween"
+        gutterSize="xl"
         css={css`
           min-height: ${HEADER_CONTENT_MIN_HEIGHT};
         `}
       >
+        <EuiHideFor sizes={['xs', 's', 'm']}>
+          <EuiFlexItem grow={false}>
+            <EuiImage
+              src={illustrationUrl}
+              alt=""
+              width={ILLUSTRATION_WIDTH}
+              data-test-subj="obltOnboardingHomeIllustration"
+            />
+          </EuiFlexItem>
+        </EuiHideFor>
         <EuiFlexItem grow={false}>
           <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
             <h1>
@@ -60,21 +70,6 @@ export const LandingHeader = () => {
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiHideFor sizes={['xs', 's', 'm']}>
-          <EuiFlexItem
-            css={css`
-              margin-bottom: ${BACKGROUND_IMAGE_BOTTOM_OFFSET};
-            `}
-          >
-            <EuiImage
-              src={imageUrl}
-              alt=""
-              css={css`
-                max-width: ${BACKGROUND_IMAGE_MAX_WIDTH};
-              `}
-            />
-          </EuiFlexItem>
-        </EuiHideFor>
       </EuiFlexGroup>
     </EuiPageTemplate.Header>
   );

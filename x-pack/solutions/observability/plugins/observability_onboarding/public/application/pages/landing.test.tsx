@@ -47,6 +47,10 @@ jest.mock('../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => false,
 }));
 
+jest.mock('../add_data_page/observability_search_results', () => ({
+  ObservabilitySearchResults: () => <div data-test-subj="observabilitySearchResultsStub" />,
+}));
+
 const LocationDisplay = () => {
   const location = useLocation();
   return <div data-test-subj="locationPathname">{location.pathname}</div>;
@@ -160,9 +164,17 @@ describe('LandingPage', () => {
   });
 
   it('renders the API endpoints section in the V2 layout', () => {
+    const view = renderWithFlag(true);
     expect(
-      renderWithFlag(true).queryByTestId('observabilityOnboardingApiEndpointTab-elasticsearch')
+      view.queryByTestId('observabilityOnboardingApiEndpointTab-elasticsearch')
     ).toBeInTheDocument();
+    expect(
+      view.getByRole('heading', { level: 2, name: 'Connect directly to the endpoint' })
+    ).toBeInTheDocument();
+  });
+
+  it('renders the documentation and support section in the V2 layout', () => {
+    expect(renderWithFlag(true).queryByTestId('addDataDocsLinks')).toBeInTheDocument();
   });
 });
 
@@ -196,5 +208,30 @@ describe('LandingPage host tile routes (V2 gated)', () => {
     expect(screen.getByTestId('onboardingFlowFormStub')).toBeInTheDocument();
     expect(screen.queryByTestId('hostLinuxOtelPageStub')).toBeNull();
     expect(screen.queryByTestId('addDataPageV2')).toBeNull();
+  });
+});
+
+describe('LandingPage search (V2, Variant A)', () => {
+  it('keeps the curated grid visible while a search term is active', () => {
+    renderWithFlag(true, '/?search=docker');
+    expect(screen.getByTestId('observabilitySearchResultsStub')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes')
+    ).toBeInTheDocument();
+  });
+
+  it('does not render the results block without a search term', () => {
+    renderWithFlag(true);
+    expect(screen.queryByTestId('observabilitySearchResultsStub')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes')
+    ).toBeInTheDocument();
+  });
+
+  it('places the search bar before the All integrations section', () => {
+    renderWithFlag(true);
+    const searchBar = screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch');
+    const heading = screen.getByRole('heading', { name: 'All integrations' });
+    expect(searchBar.compareDocumentPosition(heading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 });

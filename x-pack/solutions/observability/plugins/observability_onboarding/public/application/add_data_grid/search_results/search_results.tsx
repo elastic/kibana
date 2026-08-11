@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGrid,
@@ -22,9 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Provisional pending final designs: two rows of three cards, then a Show more
-// button. Page size is a prop so a host can shrink it in a narrower slot.
-const DEFAULT_PAGE_SIZE = 6;
 const COLUMNS = 3;
 
 export interface AddDataSearchResultsProps<TItem extends { id: string }> {
@@ -34,7 +30,6 @@ export interface AddDataSearchResultsProps<TItem extends { id: string }> {
   isError?: boolean;
   onRetry?: () => void;
   renderCard: (item: TItem) => React.ReactNode;
-  pageSize?: number;
 }
 
 export function AddDataSearchResults<TItem extends { id: string }>({
@@ -44,33 +39,8 @@ export function AddDataSearchResults<TItem extends { id: string }>({
   isError = false,
   onRetry,
   renderCard,
-  pageSize = DEFAULT_PAGE_SIZE,
 }: AddDataSearchResultsProps<TItem>) {
   const countId = useGeneratedHtmlId({ prefix: 'addDataSearchResultsCount' });
-  const [visibleCount, setVisibleCount] = useState(pageSize);
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
-  const [previousSearchTerm, setPreviousSearchTerm] = useState(searchTerm);
-  const [previousPageSize, setPreviousPageSize] = useState(pageSize);
-
-  // Adjusted during render, not in an effect: an effect resets one commit too
-  // late, so extra cards flash and can log usage impressions on mount.
-  if (searchTerm !== previousSearchTerm || pageSize !== previousPageSize) {
-    setPreviousSearchTerm(searchTerm);
-    setPreviousPageSize(pageSize);
-    setVisibleCount(pageSize);
-    setFocusIndex(null);
-  }
-
-  // The last Show more click unmounts the button, which would drop focus to the
-  // document body. Move it onto the first card the click revealed instead.
-  const focusRevealedCard = useCallback((node: HTMLDivElement | null) => {
-    node?.focus();
-  }, []);
-
-  const showMore = () => {
-    setFocusIndex(visibleCount);
-    setVisibleCount((count) => count + pageSize);
-  };
 
   if (isError) {
     return (
@@ -117,20 +87,22 @@ export function AddDataSearchResults<TItem extends { id: string }>({
     'xpack.observability_onboarding.addDataGrid.searchResults.emptyTitle',
     { defaultMessage: 'No results for {searchTerm}', values: { searchTerm } }
   );
-  const countLabel = i18n.translate(
-    'xpack.observability_onboarding.addDataGrid.searchResults.countHeader',
-    {
-      defaultMessage: 'Showing {count, plural, one {# result} other {# results}}',
-      values: { count: items.length },
-    }
+  const countContent = (
+    <FormattedMessage
+      id="xpack.observability_onboarding.addDataGrid.searchResults.countHeader"
+      defaultMessage="Showing <strong>{count, plural, one {# integration} other {# integrations}}</strong>"
+      values={{
+        count: items.length,
+        strong: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+      }}
+    />
   );
-  const visibleItems = items.slice(0, visibleCount);
 
   // The live region stays mounted across the empty/results swap: a region that
   // mounts already holding its text is not reliably announced.
   return (
     <>
-      <EuiScreenReaderLive>{isEmpty ? emptyLabel : countLabel}</EuiScreenReaderLive>
+      <EuiScreenReaderLive>{isEmpty ? emptyLabel : countContent}</EuiScreenReaderLive>
       {isEmpty ? (
         <EuiEmptyPrompt
           titleSize="xs"
@@ -139,39 +111,15 @@ export function AddDataSearchResults<TItem extends { id: string }>({
         />
       ) : (
         <section aria-labelledby={countId} data-test-subj="addDataSearchResults">
-          <EuiText size="s" id={countId} data-test-subj="addDataSearchResultsCount">
-            <strong>{countLabel}</strong>
+          <EuiText size="s" color="subdued" id={countId} data-test-subj="addDataSearchResultsCount">
+            {countContent}
           </EuiText>
           <EuiSpacer size="m" />
           <EuiFlexGrid columns={COLUMNS} gutterSize="m">
-            {visibleItems.map((item, index) => {
-              const isFocusTarget = index === focusIndex;
-              return (
-                <EuiFlexItem
-                  key={item.id}
-                  ref={isFocusTarget ? focusRevealedCard : undefined}
-                  tabIndex={isFocusTarget ? -1 : undefined}
-                >
-                  {renderCard(item)}
-                </EuiFlexItem>
-              );
-            })}
+            {items.map((item) => (
+              <EuiFlexItem key={item.id}>{renderCard(item)}</EuiFlexItem>
+            ))}
           </EuiFlexGrid>
-          {visibleCount < items.length && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiButtonEmpty
-                onClick={showMore}
-                iconType="arrowDown"
-                data-test-subj="addDataSearchResultsShowMore"
-              >
-                <FormattedMessage
-                  id="xpack.observability_onboarding.addDataGrid.searchResults.showMoreButtonLabel"
-                  defaultMessage="Show more"
-                />
-              </EuiButtonEmpty>
-            </>
-          )}
         </section>
       )}
     </>

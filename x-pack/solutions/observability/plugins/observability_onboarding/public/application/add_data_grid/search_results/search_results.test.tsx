@@ -6,10 +6,9 @@
  */
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { I18nProvider } from '@kbn/i18n-react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AddDataSearchResults } from './search_results';
 
 interface TestItem {
@@ -28,7 +27,7 @@ const renderCard = (item: TestItem) => <div data-test-subj={`card-${item.id}`}>{
 const liveRegionTexts = () => screen.getAllByRole('status').map((region) => region.textContent);
 
 describe('AddDataSearchResults', () => {
-  it('shows the total match count in the header', () => {
+  it('shows the total match count in the header, count and noun emphasized', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
@@ -37,7 +36,11 @@ describe('AddDataSearchResults', () => {
         renderCard={renderCard}
       />
     );
-    expect(screen.getByTestId('addDataSearchResultsCount')).toHaveTextContent('Showing 8 results');
+    const count = screen.getByTestId('addDataSearchResultsCount');
+    expect(count).toHaveTextContent('Showing 8 integrations');
+    // Design: "Showing" stays regular weight, only the count and noun are bold.
+    expect(count.querySelector('strong')).toHaveTextContent('8 integrations');
+    expect(count.querySelector('strong')).not.toHaveTextContent('Showing');
   });
 
   it('names the results section after the count header', () => {
@@ -65,7 +68,7 @@ describe('AddDataSearchResults', () => {
         renderCard={renderCard}
       />
     );
-    expect(liveRegionTexts()).toContain('Showing 8 results');
+    expect(liveRegionTexts()).toContain('Showing 8 integrations');
   });
 
   it('announces the empty state in a live region', () => {
@@ -80,116 +83,17 @@ describe('AddDataSearchResults', () => {
     expect(liveRegionTexts()).toContain('No results for zzz-no-match');
   });
 
-  it('renders only the first page and reveals more on Show more', async () => {
-    const user = userEvent.setup();
+  it('renders every item with no pagination control', () => {
     renderWithI18n(
       <AddDataSearchResults
         searchTerm="redis"
-        items={makeItems(8)}
+        items={makeItems(30)}
         isLoading={false}
         renderCard={renderCard}
       />
     );
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(8);
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(30);
     expect(screen.queryByTestId('addDataSearchResultsShowMore')).not.toBeInTheDocument();
-  });
-
-  // The other cases run on the default page size, so this is the only place a
-  // host-supplied `pageSize` is exercised at all.
-  it('pages by the host-supplied page size', async () => {
-    const user = userEvent.setup();
-    renderWithI18n(
-      <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(8)}
-        isLoading={false}
-        renderCard={renderCard}
-        pageSize={3}
-      />
-    );
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(3);
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
-  });
-
-  it('moves focus onto the first revealed card when Show more unmounts the button', async () => {
-    const user = userEvent.setup();
-    renderWithI18n(
-      <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(8)}
-        isLoading={false}
-        renderCard={renderCard}
-      />
-    );
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getByTestId('card-item-6').closest('[tabindex="-1"]')).toHaveFocus();
-  });
-
-  it('resets pagination when the search term changes', async () => {
-    const user = userEvent.setup();
-    const { rerender } = renderWithI18n(
-      <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(14)}
-        isLoading={false}
-        renderCard={renderCard}
-      />
-    );
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(12);
-    rerender(
-      <I18nProvider>
-        <AddDataSearchResults
-          searchTerm="nginx"
-          items={makeItems(14)}
-          isLoading={false}
-          renderCard={renderCard}
-        />
-      </I18nProvider>
-    );
-    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
-  });
-
-  it('never mounts the expanded page of cards under the new search term', async () => {
-    const user = userEvent.setup();
-    const mounted: string[] = [];
-    const TrackedCard = ({ id }: { id: string }) => {
-      useEffect(() => {
-        mounted.push(id);
-      }, [id]);
-      return <div data-test-subj={`card-${id}`} />;
-    };
-    const renderTrackedCard = (item: TestItem) => <TrackedCard id={item.id} />;
-
-    const { rerender } = renderWithI18n(
-      <AddDataSearchResults
-        searchTerm="redis"
-        items={makeItems(14, 'redis')}
-        isLoading={false}
-        renderCard={renderTrackedCard}
-      />
-    );
-    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
-    expect(screen.getAllByTestId(/^card-redis-/)).toHaveLength(12);
-
-    mounted.length = 0;
-    rerender(
-      <I18nProvider>
-        <AddDataSearchResults
-          searchTerm="nginx"
-          items={makeItems(14, 'nginx')}
-          isLoading={false}
-          renderCard={renderTrackedCard}
-        />
-      </I18nProvider>
-    );
-
-    // Resetting in an effect would let all 12 mount for one commit first, which
-    // host cards can report as usage-tracking impressions.
-    expect(mounted).toEqual(['nginx-0', 'nginx-1', 'nginx-2', 'nginx-3', 'nginx-4', 'nginx-5']);
   });
 
   it('renders a loading skeleton', () => {
