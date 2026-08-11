@@ -80,30 +80,43 @@ export enum TimelineEventType {
 }
 
 /**
- * The common envelope shared by every timeline event.
+ * The fields a producer supplies for a timeline event.
  *
- * `execution_id` links an event to the agent run that produced it. `trigger_event_id` links
- * a run to the content event that started it.
+ * `id`, `created_at`, and `actor` are optional here: the server assigns them when a producer
+ * omits them (id and timestamp are generated; the actor defaults to the scoped user).
+ *
+ * `execution_id` links an event to the agent run that produced it. `trigger_event_id` links a
+ * run to the content event that started it.
  */
-export interface BaseTimelineEvent<
-  TType extends TimelineEventType = TimelineEventType,
-  TData = unknown
-> {
-  /** Unique id for this event. */
-  id: string;
+export interface BaseTimelineEventInput<TType extends TimelineEventType, TData> {
   /** The event type discriminator. */
   type: TType;
-  /** ISO timestamp of when the event was appended. */
-  created_at: string;
-  /** Who produced the event. */
-  actor: EventActor;
+  /** The type-specific payload. */
+  data: TData;
   /** The run this event belongs to, for lifecycle events. */
   execution_id?: string;
   /** The content event that triggered the run this event belongs to. */
   trigger_event_id?: string;
-  /** The type-specific payload. */
-  data: TData;
+  /** Server-assigned when omitted. */
+  id?: string;
+  /** Server-assigned when omitted. */
+  created_at?: string;
+  /** Defaults to the scoped user when omitted. */
+  actor?: EventActor;
 }
+
+/**
+ * A stored timeline event: the producer fields, plus the server-assigned `id`, `created_at`, and
+ * `actor` made required.
+ */
+export type BaseTimelineEvent<TType extends TimelineEventType, TData> = BaseTimelineEventInput<
+  TType,
+  TData
+> & {
+  id: string;
+  created_at: string;
+  actor: EventActor;
+};
 
 /** A message from a user, stored the moment it arrives, apart from any run. */
 export type UserMessageEventData = Pick<RoundInput, 'message' | 'attachment_refs'>;
@@ -189,7 +202,7 @@ export type ExecutionAbortedEvent = BaseTimelineEvent<
   ExecutionAbortedEventData
 >;
 
-/** The discriminated union of all timeline events. */
+/** The discriminated union of all stored timeline events. */
 export type TimelineEvent =
   | UserMessageEvent
   | PromptResponseEvent
@@ -198,6 +211,16 @@ export type TimelineEvent =
   | ExecutionCompletedEvent
   | ExecutionFailedEvent
   | ExecutionAbortedEvent;
+
+/** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
+export type TimelineEventInput =
+  | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
+  | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
+  | BaseTimelineEventInput<TimelineEventType.promptRequested, PromptRequestedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionCompleted, ExecutionCompletedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
 
 /**
  * The run lock held on a conversation while an execution is active.

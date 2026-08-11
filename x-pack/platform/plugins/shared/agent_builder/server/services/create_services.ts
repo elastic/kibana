@@ -18,7 +18,6 @@ import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
-import { ConversationEventsServiceImpl } from './conversation_events';
 import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
@@ -218,13 +217,6 @@ export class ServiceManager {
       agents,
     });
 
-    const conversationEvents = new ConversationEventsServiceImpl({
-      logger: logger.get('conversationEvents'),
-      security,
-      elasticsearch,
-      spaces,
-    });
-
     const workspaces = createWorkspaceService({
       logger: logger.get('workspaces'),
       elasticsearch,
@@ -281,7 +273,6 @@ export class ServiceManager {
       renderers,
       skills: skillsServiceStart,
       conversations,
-      conversationEvents,
       workspaces,
       runnerFactory,
       auditLogService,

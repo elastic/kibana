@@ -266,6 +266,7 @@ export {
   TimelineTriggerType,
   TimelineEventType,
   type EventActor,
+  type BaseTimelineEventInput,
   type BaseTimelineEvent,
   type UserMessageEventData,
   type UserMessageEvent,
@@ -282,6 +283,7 @@ export {
   type ExecutionAbortedEventData,
   type ExecutionAbortedEvent,
   type TimelineEvent,
+  type TimelineEventInput,
   type ActiveExecution,
 } from './chat';
 export {

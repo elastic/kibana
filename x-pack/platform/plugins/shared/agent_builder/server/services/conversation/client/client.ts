@@ -12,6 +12,10 @@ import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
+  type TimelineEvent,
+  type TimelineEventInput,
+  type EventActor,
+  EventActorType,
   createBadRequestError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
@@ -41,11 +45,12 @@ import type {
   ConversationUpdateRequest,
   ConversationListOptions,
   UpsertRoundRequest,
+  GetEventsOptions,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
-import { createStorage } from './storage';
+import { conversationIndexName, createStorage } from './storage';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
@@ -57,6 +62,8 @@ import {
   type Document,
   type VersionedDocument,
 } from './converters';
+
+const EVENTS_APPEND_RETRY_ON_CONFLICT = 5;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -77,6 +84,10 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
+  /** Append events to the conversation's timeline. */
+  appendEvents(conversationId: string, events: TimelineEventInput[]): Promise<TimelineEvent[]>;
+  /** Read the conversation's timeline, in order. */
+  getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
 }
 
 export const createClient = ({
@@ -93,30 +104,34 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
-  return new ConversationClientImpl({ storage, user, space, agentRegistry, logger });
+  return new ConversationClientImpl({ storage, esClient, user, space, agentRegistry, logger });
 };
 
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
+  private readonly esClient: ElasticsearchClient;
   private readonly user: UserIdAndName;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
   constructor({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
+    esClient: ElasticsearchClient;
     user: UserIdAndName;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
   }) {
     this.storage = storage;
+    this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -325,6 +340,76 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
+  }
+
+  async appendEvents(
+    conversationId: string,
+    events: TimelineEventInput[]
+  ): Promise<TimelineEvent[]> {
+    if (events.length === 0) {
+      return [];
+    }
+
+    await this.getDocumentWithAccess({ conversationId, access: 'converse' });
+
+    const now = new Date().toISOString();
+    const stamped = events.map((event) => this.stampEvent(event, now));
+
+    // Atomic scripted append
+    await this.esClient.update({
+      index: conversationIndexName,
+      id: conversationId,
+      retry_on_conflict: EVENTS_APPEND_RETRY_ON_CONFLICT,
+      script: {
+        source: `
+          if (ctx._source.events == null) { ctx._source.events = []; }
+          for (def event : params.new_events) { ctx._source.events.add(event); }
+          ctx._source.updated_at = params.now;
+        `,
+        params: { new_events: stamped, now },
+      },
+    });
+
+    return stamped;
+  }
+
+  async getEvents(
+    conversationId: string,
+    options: GetEventsOptions = {}
+  ): Promise<TimelineEvent[]> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
+
+    let events: TimelineEvent[] = document._source!.events ?? [];
+
+    if (options.afterEventId) {
+      const index = events.findIndex((event) => event.id === options.afterEventId);
+      if (index >= 0) {
+        events = events.slice(index + 1);
+      }
+    }
+
+    if (options.limit != null) {
+      events = events.slice(0, options.limit);
+    }
+
+    return events;
+  }
+
+  private stampEvent(event: TimelineEventInput, now: string): TimelineEvent {
+    return {
+      ...event,
+      id: event.id ?? uuidv4(),
+      created_at: event.created_at ?? now,
+      actor: event.actor ?? this.defaultActor(),
+    } as TimelineEvent;
+  }
+
+  private defaultActor(): EventActor {
+    return {
+      type: EventActorType.user,
+      id: this.user.id ?? this.user.username,
+      username: this.user.username,
+    };
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
