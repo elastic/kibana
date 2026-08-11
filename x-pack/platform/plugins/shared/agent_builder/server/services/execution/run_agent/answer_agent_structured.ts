@@ -80,7 +80,7 @@ export const createAnswerAgentStructured = ({
 
       let response = await structuredModel.invoke(prompt);
       // unwrap response if schema was wrapped
-      if (wrapped && response[wrappedSchemaProp]) {
+      if (wrapped && typeof response === 'object' && response !== null && wrappedSchemaProp in response) {
         response = response[wrappedSchemaProp];
       }
 
