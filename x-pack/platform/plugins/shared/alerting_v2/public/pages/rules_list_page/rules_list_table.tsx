@@ -161,11 +161,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     [euiTheme.breakpoint.m]
   );
 
-  // const handleBulkUpdateApiKey = () => {
-  //   setIsBulkActionsOpen(false);
-  //   onBulkUpdateApiKey();
-  // };
-
   const pagination = {
     pageIndex: page - 1,
     pageSize: perPage,
@@ -490,6 +485,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             onClearSelection={onClearSelection}
             onBulkEnable={onBulkEnable}
             onBulkDisable={onBulkDisable}
+            onBulkUpdateApiKey={onBulkUpdateApiKey}
             onBulkDelete={onBulkDelete}
           />
         ) : null}

@@ -1254,6 +1254,7 @@ export class RulesClient {
       const failure = e instanceof Error ? e.message : String(e);
       this.logger.warn({
         message: `Failed to read the status of ${skipped.length} skipped executor task(s); assuming they are running: ${failure}`,
+        code: ALERTING_LOG_CODES.RULE_API_KEY_ROTATION_FAILED,
       });
       return skipped.map((candidate) =>
         ruleRunningError(candidate.id, candidate.attrs.metadata.name)
