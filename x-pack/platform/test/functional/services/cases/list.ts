@@ -314,6 +314,7 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
       await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
@@ -332,6 +333,7 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
