@@ -535,9 +535,7 @@ describe('TakeAction', () => {
 
       openPopover();
       fireEvent.click(screen.getByTestId('addToCase'));
-      expect(await screen.findByTestId('add-to-case-submit')).toBeDisabled();
       fireEvent.click(await screen.findByTestId('addToNewCase'));
-      fireEvent.click(await screen.findByTestId('add-to-case-submit'));
 
       await waitFor(() => {
         expect(mockOnAddToNewCase).toHaveBeenCalledWith({
@@ -558,7 +556,6 @@ describe('TakeAction', () => {
       openPopover();
       fireEvent.click(screen.getByTestId('addToCase'));
       fireEvent.click(await screen.findByTestId('addToExistingCase'));
-      fireEvent.click(await screen.findByTestId('add-to-case-submit'));
 
       expect(mockOnAddToExistingCase).toHaveBeenCalledWith({
         alertIds: expect.any(Array),

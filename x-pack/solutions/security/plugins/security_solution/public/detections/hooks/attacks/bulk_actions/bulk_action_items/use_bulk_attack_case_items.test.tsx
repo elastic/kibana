@@ -17,7 +17,7 @@ import {
 } from '../constants';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
-const submitCaseAction = async ({
+const executeCaseAction = async ({
   panel,
   alertItems,
   actionTestSubj = 'attack-add-to-new-case',
@@ -33,9 +33,7 @@ const submitCaseAction = async ({
       closePopoverMenu: jest.fn(),
     })
   );
-  expect(screen.getByTestId('add-to-case-submit')).toBeDisabled();
   await userEvent.click(screen.getByTestId(actionTestSubj));
-  await userEvent.click(screen.getByTestId('add-to-case-submit'));
 };
 
 jest.mock('../../../../../common/lib/kibana', () => ({
@@ -146,7 +144,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await submitCaseAction({
+    await executeCaseAction({
       panel: result.current.panels[0],
       alertItems: [
         {
@@ -187,7 +185,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await submitCaseAction({
+    await executeCaseAction({
       panel: result.current.panels[0],
       alertItems: [
         {
@@ -213,7 +211,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await submitCaseAction({
+    await executeCaseAction({
       panel: result.current.panels[0],
       actionTestSubj: 'attack-add-to-existing-case',
       alertItems: [
@@ -255,7 +253,7 @@ describe('useBulkAttackCaseItems', () => {
       }
     );
 
-    await submitCaseAction({
+    await executeCaseAction({
       panel: result.current.panels[0],
       actionTestSubj: 'attack-add-to-existing-case',
       alertItems: [
