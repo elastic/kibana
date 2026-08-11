@@ -12,7 +12,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard } from '@elastic/eui';
 import { JsonTreeViewer, type FormatValue, type TreeExpansionState } from './json_tree_viewer';
-import { ROOT_ID } from './tree_model';
+import { ROOT_ID, getNodeId } from './tree_model';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -20,8 +20,8 @@ jest.mock('@elastic/eui', () => ({
 }));
 const copyToClipboardMock = jest.mocked(copyToClipboard);
 
-const rowTestId = (path: string) => `jsonTreeViewerRow-json-viewer-${path.split('.').join('__')}`;
-const copyTestId = (path: string) => `jsonTreeViewerCopy-json-viewer-${path.split('.').join('__')}`;
+const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
+const copyTestId = (path: string) => `jsonTreeViewerCopy-${getNodeId(path.split('.'))}`;
 const pagerTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerPager-${collectionId}`;
 const moreTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerMore-${collectionId}`;
 const fewerTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerFewer-${collectionId}`;
