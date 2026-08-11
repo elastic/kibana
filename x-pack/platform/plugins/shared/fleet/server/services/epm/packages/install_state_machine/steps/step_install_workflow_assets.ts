@@ -302,26 +302,3 @@ export const resolveWorkflowEnabledIntent = (
 
   return undefined;
 };
-
-export const applyWorkflowEnablement = (
-  yaml: string,
-  resolvedIntent: boolean | undefined,
-  unresolved: string[],
-  logger: Logger
-): { yaml: string } => {
-  const workflowDefinition = parse(yaml) as {
-    enabled?: boolean;
-    steps?: Array<{ enabled?: boolean }>;
-  };
-
-  if (resolvedIntent && unresolved.length > 0) {
-    logger.warn(
-      `Workflow has unresolved placeholders [${unresolved.join(', ')}] — forcing disabled`
-    );
-    workflowDefinition.enabled = false;
-  } else if (resolvedIntent !== undefined) {
-    workflowDefinition.enabled = resolvedIntent;
-  }
-
-  return { yaml: stringify(workflowDefinition) };
-};

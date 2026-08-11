@@ -21,11 +21,12 @@ import {
   stepInstallWorkflowAssets,
   getFleetPackageWorkflowId,
   resolveWorkflowEnabledIntent,
-  applyWorkflowEnablement,
   substituteWorkflowConnectorIds,
 } from './step_install_workflow_assets';
 
 jest.mock('../../install');
+
+type StepInstallWorkflowAssetsParam = Parameters<typeof stepInstallWorkflowAssets>[number];
 
 const mockLogger = {
   warn: jest.fn(),
@@ -356,49 +357,6 @@ describe('resolveWorkflowEnabledIntent', () => {
   });
 });
 
-describe('applyWorkflowEnablement', () => {
-  const applyMockLogger = loggingSystemMock.createLogger();
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
-  it('enables all workflows when default_enabled is true and placeholders are resolved', () => {
-    const yaml = `enabled: false\nname: wf\nsteps: []`;
-    const { yaml: result } = applyWorkflowEnablement(yaml, true, [], applyMockLogger);
-    expect(result).toContain('enabled: true');
-    expect(applyMockLogger.warn).not.toHaveBeenCalled();
-  });
-
-  it('disables all workflows when default_enabled is false', () => {
-    const yaml = `enabled: true\nname: wf\nsteps: []`;
-    const { yaml: result } = applyWorkflowEnablement(yaml, false, [], applyMockLogger);
-    expect(result).toContain('enabled: false');
-  });
-
-  it('leaves enabled unchanged when intent is undefined', () => {
-    const yaml = `enabled: true\nname: wf\nsteps: []`;
-    const { yaml: result } = applyWorkflowEnablement(yaml, undefined, [], applyMockLogger);
-    expect(result).toContain('enabled: true');
-  });
-
-  it('forces disabled and warns when placeholders are unresolved', () => {
-    const yaml = `enabled: true\nname: wf\nsteps: []`;
-    const unresolved = ['REPLACE_WITH_FOO'];
-    const { yaml: result } = applyWorkflowEnablement(yaml, true, unresolved, applyMockLogger);
-    expect(result).toContain('enabled: false');
-    expect(applyMockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('REPLACE_WITH_FOO'));
-  });
-
-  it('preserves step-level enabled keys while editing top-level enabled', () => {
-    const yaml = `enabled: true\nname: wf\nsteps:\n  - type: wait\n    enabled: true`;
-    const { yaml: result } = applyWorkflowEnablement(yaml, false, [], applyMockLogger);
-    expect(result).toContain('enabled: false');
-    const stepEnabledMatches = result.match(/enabled: true/g);
-    expect(stepEnabledMatches).toHaveLength(1);
-  });
-});
-
 describe('stepInstallWorkflowAssets', () => {
   const pkgName = 'test-package';
   const pkgVersion = '1.2.3';
@@ -422,7 +380,7 @@ describe('stepInstallWorkflowAssets', () => {
     appContextService.stop();
   });
 
-  const createContext = (overrides: Record<string, unknown> = {}) => ({
+  const createContext = (overrides: Record<string, unknown> = {}): StepInstallWorkflowAssetsParam => ({
     logger: loggingSystemMock.createLogger(),
     savedObjectsClient,
     spaceId,
@@ -445,7 +403,7 @@ describe('stepInstallWorkflowAssets', () => {
   });
 
   it('creates a workflow and stamps managed ownership fields', async () => {
-    await stepInstallWorkflowAssets(createContext() as any);
+    await stepInstallWorkflowAssets(createContext());
 
     expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
       { id: workflowId, yaml: expect.any(String) },
@@ -471,9 +429,9 @@ describe('stepInstallWorkflowAssets', () => {
     workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
       id: workflowId,
       managed: true,
-    } as any);
+    });
 
-    await stepInstallWorkflowAssets(createContext() as any);
+    await stepInstallWorkflowAssets(createContext());
 
     expect(workflowsManagementSetupMock.management.updateWorkflow).toHaveBeenCalledWith(
       workflowId,
@@ -486,6 +444,72 @@ describe('stepInstallWorkflowAssets', () => {
       spaceId,
       expect.anything(),
       { allowManagedWorkflowMutation: true }
+    );
+  });
+
+  it('warns and forces disabled when unresolved placeholders exist and default_enabled is true', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const unresolvedPlaceholder = 'REPLACE_WITH_JIRA_CONNECTOR_ID';
+    const workflowWithPlaceholder = `name: my-workflow\nenabled: true\nconnectorId: ${unresolvedPlaceholder}\nsteps: []`;
+    const context = createContext({
+      logger,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: { default_enabled: true },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(workflowWithPlaceholder),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Workflow ${workflowId} has unresolved placeholders [${unresolvedPlaceholder}] — forcing disabled`
+      )
+    );
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ yaml: expect.stringContaining('enabled: false') }),
+      spaceId,
+      expect.anything()
+    );
+  });
+
+  it('does not warn about forcing disabled when unresolved placeholders exist but default_enabled is undefined', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const unresolvedPlaceholder = 'REPLACE_WITH_JIRA_CONNECTOR_ID';
+    const workflowWithPlaceholder = `name: my-workflow\nenabled: true\nconnectorId: ${unresolvedPlaceholder}\nsteps: []`;
+    const context = createContext({
+      logger,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(workflowWithPlaceholder),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.stringContaining('forcing disabled')
     );
   });
 });
