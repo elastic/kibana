@@ -21970,8 +21970,6 @@
     "xpack.fleet.awsConnectSetup.continueButton": "続行",
     "xpack.fleet.awsIdentityFederationSetup.createButton": "IDを作成",
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "既存のID",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdLabel": "外部ID",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdRequired": "外部IDが必要です",
     "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "CloudFormationを起動",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "新しいID",
     "xpack.fleet.awsIdentityFederationSetup.roleArnLabel": "ロールARN",
