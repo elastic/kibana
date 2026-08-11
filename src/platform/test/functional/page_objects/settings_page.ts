@@ -748,6 +748,11 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // The flyout can be found before its header text has painted; retry rather than
+      // accepting an empty read, which would only surface later as an assertion failure.
+      if (!alertText) {
+        throw new Error('deleteDataViewFlyoutHeader text not yet rendered');
+      }
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
