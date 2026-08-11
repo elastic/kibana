@@ -30,6 +30,7 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
+import type { ConversationEventsService } from './conversation_events';
 import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { RendererServiceSetup, RendererServiceStart } from './renderers';
@@ -60,6 +61,7 @@ export interface InternalStartServices {
   renderers: RendererServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  conversationEvents: ConversationEventsService;
   workspaces: WorkspaceService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;

@@ -134,3 +134,27 @@ export {
 } from './events';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
+export {
+  CONVERSATION_SCHEMA_VERSION,
+  EventActorType,
+  TimelineTriggerType,
+  TimelineEventType,
+  type EventActor,
+  type BaseTimelineEvent,
+  type UserMessageEventData,
+  type UserMessageEvent,
+  type PromptResponseEventData,
+  type PromptResponseEvent,
+  type ExecutionStartedEventData,
+  type ExecutionStartedEvent,
+  type PromptRequestedEventData,
+  type PromptRequestedEvent,
+  type ExecutionCompletedEventData,
+  type ExecutionCompletedEvent,
+  type ExecutionFailedEventData,
+  type ExecutionFailedEvent,
+  type ExecutionAbortedEventData,
+  type ExecutionAbortedEvent,
+  type TimelineEvent,
+  type ActiveExecution,
+} from './timeline_events';
