@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import path from 'node:path';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
@@ -127,4 +128,23 @@ To learn more about the Agent Builder A2A server, refer to the [A2A server docum
         return await a2aAdapter.handleA2ARequest(request, response, agentId);
       })
     );
+
+  const discoveryReason =
+    'This endpoint must be publicly accessible for A2A agent card discovery.';
+  router.get(
+    {
+      path: '/.well-known/agent.json',
+      security: {
+        authc: { enabled: false as const, reason: discoveryReason },
+        authz: { enabled: false as const, reason: discoveryReason },
+      },
+      options: { access: 'public' },
+      validate: false,
+    },
+    (_context, _request, response) => {
+      return response.redirected({
+        headers: { location: `${A2A_SERVER_PATH}/${agentBuilderDefaultAgentId}.json` },
+      });
+    }
+  );
 }

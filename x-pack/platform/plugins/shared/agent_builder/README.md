@@ -227,7 +227,7 @@ After hooks run in reverse order:
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access agentBuilder tools. It's available on `/api/agent_builder/mcp` endpoint.
+The MCP server provides a standardized interface for external OAuth clients to access agentBuilder tools. It's available on `/api/agent_builder/mcp` endpoint.
 
 ### Running with Claude Desktop
 
@@ -301,7 +301,14 @@ Whether this is needed depends on the client: some ship their own trust store, a
 
 The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with agentBuilder agents, enabling agent-to-agent collaboration following the A2A protocol specification.
 
-Agentcards for agentBuilder agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
+Agent cards for agentBuilder agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
+
+### Authentication
+
+The A2A endpoint supports two authentication methods, both advertised in the agent card's `securitySchemes`:
+
+- **API key** — pass an Elastic API key as `Authorization: ApiKey <encoded>`
+- **OAuth 2.0 bearer token** — pass a UIAM OAuth token as `Authorization: Bearer <token>`. To discover the authorization server, fetch `/.well-known/oauth-protected-resource` from the Kibana base URL. OAuth clients are registered on the **OAuth clients** page in the Agent Builder UI.
 
 ## ES|QL Based Tools
 
