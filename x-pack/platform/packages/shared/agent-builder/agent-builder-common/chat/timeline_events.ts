@@ -38,9 +38,6 @@ export enum EventActorType {
 
 /**
  * Records who produced a timeline event.
- *
- * Replaces the round-level `author` + `origin` fields: every event now carries its own
- * attribution.
  */
 export interface EventActor {
   /** The kind of participant. */
@@ -108,8 +105,6 @@ export interface BaseTimelineEvent<
   data: TData;
 }
 
-// --- Content events ------------------------------------------------------------------------
-
 /** A message from a user, stored the moment it arrives, apart from any run. */
 export type UserMessageEventData = Pick<RoundInput, 'message' | 'attachment_refs'>;
 export type UserMessageEvent = BaseTimelineEvent<
@@ -128,8 +123,6 @@ export type PromptResponseEvent = BaseTimelineEvent<
   TimelineEventType.promptResponse,
   PromptResponseEventData
 >;
-
-// --- Execution lifecycle events ------------------------------------------------------------
 
 /** Marks the start of an agent run. */
 export interface ExecutionStartedEventData {
@@ -156,9 +149,6 @@ export type PromptRequestedEvent = BaseTimelineEvent<
 
 /**
  * The terminal event of a successful run and the source of truth for it.
- *
- * Holds the full turn (steps, output, execution meta). This is close to the current round
- * without its input; the input is the trigger event that the execution points back to.
  */
 export interface ExecutionCompletedEventData {
   /** The final assistant response. */
@@ -211,10 +201,6 @@ export type TimelineEvent =
 
 /**
  * The run lock held on a conversation while an execution is active.
- *
- * A single active execution per conversation; a second trigger waits. (The lock's CAS
- * enforcement is not part of the MVP; the field is stored so it is ready when concurrency
- * control lands.)
  */
 export interface ActiveExecution {
   execution_id: string;
