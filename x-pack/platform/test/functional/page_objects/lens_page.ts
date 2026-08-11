@@ -2118,18 +2118,40 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickShareButton() {
+      if (await testSubjects.exists('lnsApp_shareButton')) {
+        return await testSubjects.click('lnsApp_shareButton');
+      }
+      if (await testSubjects.exists('app-menu-overflow-button')) {
+        await testSubjects.click('app-menu-overflow-button');
+      }
       return await testSubjects.click('lnsApp_shareButton');
     },
 
     async clickExportButton() {
+      if (await testSubjects.exists('lnsApp_exportButton')) {
+        return await testSubjects.click('lnsApp_exportButton');
+      }
+      if (await testSubjects.exists('app-menu-overflow-button')) {
+        await testSubjects.click('app-menu-overflow-button');
+      }
       return await testSubjects.click('lnsApp_exportButton');
     },
 
     async isShareable() {
+      if (!(await testSubjects.exists('lnsApp_shareButton'))) {
+        if (await testSubjects.exists('app-menu-overflow-button')) {
+          await testSubjects.click('app-menu-overflow-button');
+        }
+      }
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    isExportActionEnabled() {
+    async isExportActionEnabled() {
+      if (!(await testSubjects.exists('lnsApp_exportButton'))) {
+        if (await testSubjects.exists('app-menu-overflow-button')) {
+          await testSubjects.click('app-menu-overflow-button');
+        }
+      }
       return testSubjects.isEnabled('lnsApp_exportButton');
     },
 

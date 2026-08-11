@@ -30,7 +30,6 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
-import { APP_MENU_SHARE_ID } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import moment from 'moment';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -246,21 +245,15 @@ function getLensTopNavConfig(options: {
       target: '_blank',
       href: actions.getUnderlyingDataUrl.getLink?.(),
       order: 2,
-      run: wrapTopNavRun(actions.getUnderlyingDataUrl.execute),
+      // AppMenu getLinkProps preventDefault on left-click; run must open the tab.
+      run: wrapTopNavRun(() => {
+        const url = actions.getUnderlyingDataUrl.getLink?.();
+        if (url) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      }),
     });
   }
-
-  items.push({
-    id: 'lnsApp_inspectButton',
-    label: i18n.translate('xpack.lens.app.inspect', {
-      defaultMessage: 'Inspect',
-    }),
-    iconType: 'inspect',
-    testId: 'lnsApp_inspectButton',
-    disableButton: false,
-    order: 3,
-    run: wrapTopNavRun(actions.inspect.execute),
-  });
 
   if (actions.export.visible) {
     const exportButtonBase = {
@@ -272,7 +265,9 @@ function getLensTopNavConfig(options: {
       testId: 'lnsApp_exportButton',
       disableButton: !actions.export.enabled,
       tooltipContent: actions.export.tooltip,
-      order: 4,
+      // Keep Export ahead of Inspect so it stays in the inline AppMenu slots
+      // (APP_MENU_ITEM_LIMIT is 3; overflow kicks in above that).
+      order: 3,
     };
 
     if (exportItems && exportItems.length > 1) {
@@ -296,9 +291,23 @@ function getLensTopNavConfig(options: {
     }
   }
 
+  items.push({
+    id: 'lnsApp_inspectButton',
+    label: i18n.translate('xpack.lens.app.inspect', {
+      defaultMessage: 'Inspect',
+    }),
+    iconType: 'inspect',
+    testId: 'lnsApp_inspectButton',
+    disableButton: false,
+    // Prefer Export / Open in Discover in the limited inline slots.
+    overflow: true,
+    order: 5,
+    run: wrapTopNavRun(actions.inspect.execute),
+  });
+
   if (actions.share.visible) {
     items.push({
-      id: APP_MENU_SHARE_ID,
+      id: 'lnsApp_shareButton',
       label: i18n.translate('xpack.lens.app.shareTitle', {
         defaultMessage: 'Share',
       }),
@@ -306,6 +315,7 @@ function getLensTopNavConfig(options: {
       testId: 'lnsApp_shareButton',
       disableButton: !actions.share.enabled,
       tooltipContent: actions.share.tooltip,
+      overflow: true,
       order: 6,
       run: wrapTopNavRun(actions.share.execute),
     });
@@ -822,6 +832,8 @@ export const LensTopNavMenu = ({
           exportMenuItems.push({
             ...getLensExportItemMeta(integration.id),
             id: integration.id,
+            // Mirror sharingData.reportingDisabled / csvEnabled for nested AppMenu items.
+            disableButton: !csvEnabled,
             run: async () => {
               const shareOptions = buildShareContextMenuOptions();
               if (!shareOptions) {
@@ -844,6 +856,7 @@ export const LensTopNavMenu = ({
           exportMenuItems.push({
             ...getLensExportItemMeta(integration.id),
             id: integration.id,
+            disableButton: !csvEnabled,
             run: async () => {
               const shareOptions = buildShareContextMenuOptions();
               if (!shareOptions) {
@@ -1008,7 +1021,7 @@ export const LensTopNavMenu = ({
       switch: {
         id: 'lnsToggleAutoApply',
         label: i18n.translate('xpack.lens.settings.autoApply', {
-          defaultMessage: 'Auto-apply visualization changes',
+          defaultMessage: 'Auto-apply',
         }),
         labelProps: {},
         checked: autoApplyEnabled,
@@ -1019,7 +1032,7 @@ export const LensTopNavMenu = ({
   }, [
     initialContext,
     initialInput?.ref_id,
-    incomingState,
+
     isComingFromDashboardView,
     activeData,
     isSaveable,

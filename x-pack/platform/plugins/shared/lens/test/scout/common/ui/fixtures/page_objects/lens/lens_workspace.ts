@@ -40,8 +40,6 @@ export class LensWorkspace {
   private readonly goBackToAppButton;
   private readonly confirmModalConfirmButton;
   private readonly messageListTrigger;
-  private readonly settingsButton;
-  private readonly settingsMenu;
   private readonly emptyWorkspacePrompt;
   private readonly applyChangesPrompt;
   private readonly suggestionPanelToggle;
@@ -60,8 +58,6 @@ export class LensWorkspace {
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     this.messageListTrigger = this.page.testSubj.locator('lens-message-list-trigger');
-    this.settingsButton = this.page.testSubj.locator('lnsApp_settingsButton');
-    this.settingsMenu = this.page.testSubj.locator('lnsApp__settingsMenu');
     this.emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
     this.applyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
@@ -281,19 +277,15 @@ export class LensWorkspace {
       .count();
   }
 
-  /** Opens the Lens settings menu (auto-apply toggle lives here). */
+  /** Ensures the AppMenu auto-apply switch is visible (no settings popover anymore). */
   async openSettingsMenu() {
-    await this.settingsButton.click();
-    await this.settingsMenu.waitFor({ state: 'visible' });
+    await this.autoApplyToggle.waitFor({ state: 'visible' });
   }
 
-  /** Closes the Lens settings menu. */
-  async closeSettingsMenu() {
-    await this.settingsButton.click();
-    await this.settingsMenu.waitFor({ state: 'hidden' });
-  }
+  /** No-op — auto-apply is an inline AppMenu switch, not a settings popover. */
+  async closeSettingsMenu() {}
 
-  /** Toggles the auto-apply setting. Requires the settings menu to be open. */
+  /** Toggles the auto-apply setting. */
   async toggleAutoApply() {
     await this.autoApplyToggle.click();
   }

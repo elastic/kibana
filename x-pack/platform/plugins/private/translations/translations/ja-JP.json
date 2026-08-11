@@ -29751,8 +29751,6 @@
     "xpack.lens.section.dataPanelLabel": "データパネル",
     "xpack.lens.section.workspaceLabel": "ビジュアライゼーションワークスペース",
     "xpack.lens.settings.autoApply": "ビジュアライゼーションの変更を自動適用",
-    "xpack.lens.settings.popoverAriaLabel": "Lens設定",
-    "xpack.lens.settings.title": "Lens設定",
     "xpack.lens.settingWithSiblingFlyout.back": "戻る",
     "xpack.lens.share.csvButton": "CSV をダウンロード",
     "xpack.lens.shared.axisNameLabel": "軸のタイトル",

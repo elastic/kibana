@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import type { LensAppProps } from './types';
@@ -50,15 +50,20 @@ jest.mock('lodash', () => ({
   debounce: (fn: unknown) => fn,
 }));
 
-// Force the `xl` breakpoint so the AppHeader app menu renders its items inline
-// instead of collapsing them into the overflow popover (jsdom defaults to `l`).
+// Force wide breakpoints so the AppHeader app menu renders its items inline
+// instead of collapsing them into the overflow popover (jsdom defaults smaller).
+jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+  useCurrentChromeApplicationBreakpoint: () => 'xl',
+}));
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
   useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
 }));
 
-// ChromeAppHeaderRegistration returns null and registers with chrome; render AppHeader
-// inline in unit tests so menu item test subjects remain assertable.
+// ChromeAppHeaderRegistration / AppMenu only register with chrome and return null.
+// Render AppHeader inline in unit tests so menu item test subjects remain assertable.
 jest.mock('@kbn/app-header', () => {
   const actual = jest.requireActual('@kbn/app-header');
   return {
@@ -68,6 +73,13 @@ jest.mock('@kbn/app-header', () => {
     ),
   };
 });
+
+jest.mock('@kbn/core-chrome-app-menu', () => ({
+  AppMenu: ({ config }: { config?: unknown }) => {
+    const { AppHeader } = jest.requireActual('@kbn/app-header');
+    return <AppHeader title="lens" menu={config} />;
+  },
+}));
 
 const defaultSavedObjectId: string = faker.string.uuid();
 
@@ -104,10 +116,6 @@ describe('Lens App', () => {
     };
 
     services = makeDefaultServices(new Subject<string>(), 'sessionId-1');
-    // Default chrome mock is classic; force project so ChromeAppHeaderRegistration (mocked as
-    // AppHeader) renders the migrated app menu for assertions.
-    (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
-    (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(new BehaviorSubject('project'));
   });
 
   afterEach(() => {
@@ -959,11 +967,17 @@ describe('Lens App', () => {
   });
 
   describe('share button', () => {
-    const getShareButton = () => screen.getByTestId(/lnsApp_shareButton/);
+    const getShareButton = async () => {
+      const overflow = screen.queryByTestId('app-menu-overflow-button');
+      if (overflow) {
+        await userEvent.click(overflow);
+      }
+      return screen.getByTestId(/lnsApp_shareButton/);
+    };
 
     it('should be disabled when no data is available', async () => {
       await renderApp({ preloadedState: { isSaveable: true } });
-      expect(getShareButton()).toBeDisabled();
+      expect(await getShareButton()).toBeDisabled();
     });
 
     it('should not disable share when not saveable', async () => {
@@ -974,7 +988,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
@@ -989,7 +1003,7 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should still be enabled even if the user is missing shortUrl permissions', async () => {
@@ -1005,7 +1019,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
@@ -1020,22 +1034,30 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeDisabled();
+      expect(await getShareButton()).toBeDisabled();
     });
   });
 
   describe('inspector', () => {
+    const getInspectButton = async () => {
+      const overflow = screen.queryByTestId('app-menu-overflow-button');
+      if (overflow) {
+        await userEvent.click(overflow);
+      }
+      return screen.getByTestId('lnsApp_inspectButton');
+    };
+
     it('inspector button should be available', async () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      expect(screen.getByTestId('lnsApp_inspectButton')).toBeEnabled();
+      expect(await getInspectButton()).toBeEnabled();
     });
     it('should open inspect panel', async () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      await userEvent.click(screen.getByTestId('lnsApp_inspectButton'));
+      await userEvent.click(await getInspectButton());
       expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
@@ -1511,7 +1533,7 @@ describe('Lens App', () => {
         ],
         type: 'lnsXY',
         savedObjectId: '',
-        vizEditorOriginatingAppUrl: '#/tsvb-link',
+        visEditorOriginatingAppUrl: '#/tsvb-link',
         isVisualizeAction: true,
       } as unknown as VisualizeEditorContext;
 

@@ -29657,8 +29657,6 @@
     "xpack.lens.section.dataPanelLabel": "Datenbereich",
     "xpack.lens.section.workspaceLabel": "Arbeitsbereich „Visualisierung“",
     "xpack.lens.settings.autoApply": "Visualisierungsänderungen automatisch übernehmen",
-    "xpack.lens.settings.popoverAriaLabel": "Lens-Einstellungen",
-    "xpack.lens.settings.title": "Lens-Einstellungen",
     "xpack.lens.settingWithSiblingFlyout.back": "Zurück",
     "xpack.lens.share.csvButton": "CSV herunterladen",
     "xpack.lens.shared.axisNameLabel": "Titel der Achse",

@@ -29758,8 +29758,6 @@
     "xpack.lens.section.dataPanelLabel": "数据面板",
     "xpack.lens.section.workspaceLabel": "可视化工作区",
     "xpack.lens.settings.autoApply": "自动应用可视化更改",
-    "xpack.lens.settings.popoverAriaLabel": "Lens 设置",
-    "xpack.lens.settings.title": "Lens 设置",
     "xpack.lens.settingWithSiblingFlyout.back": "返回",
     "xpack.lens.share.csvButton": "下载 CSV",
     "xpack.lens.shared.axisNameLabel": "轴标题",

@@ -29585,8 +29585,6 @@
     "xpack.lens.section.dataPanelLabel": "Panneau de données",
     "xpack.lens.section.workspaceLabel": "Espace de travail de visualisation",
     "xpack.lens.settings.autoApply": "Appliquer automatiquement les modifications de la visualisation",
-    "xpack.lens.settings.popoverAriaLabel": "Paramètres Lens",
-    "xpack.lens.settings.title": "Paramètres Lens",
     "xpack.lens.settingWithSiblingFlyout.back": "Retour",
     "xpack.lens.share.csvButton": "Télécharger CSV",
     "xpack.lens.shared.axisNameLabel": "Titre de l'axe",

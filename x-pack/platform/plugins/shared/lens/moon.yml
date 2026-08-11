@@ -109,7 +109,6 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-utils'
   - '@kbn/app-header'
-  - '@kbn/managed-content-badge'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser-context'
@@ -129,6 +128,7 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-capabilities-common'
+  - '@kbn/managed-content-badge'
   - '@kbn/esql-types'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/fields-metadata-plugin'
@@ -159,6 +159,7 @@ dependsOn:
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/core-http-browser'
   - '@kbn/use-observable'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
