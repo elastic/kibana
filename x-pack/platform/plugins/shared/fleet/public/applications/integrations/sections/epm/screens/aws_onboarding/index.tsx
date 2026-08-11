@@ -191,6 +191,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const [isCredentialsValid, setIsCredentialsValid] = useState(false);
   // Step 4: Next is disabled until the CloudFormation stack name is entered.
   const [stackName, setStackName] = useState('');
+  const [stackVersion, setStackVersion] = useState('');
 
   useEffect(() => {
     return () => deployTimers.current.forEach((t) => window.clearTimeout(t));
@@ -426,6 +427,8 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           receivedCount={receivedCount}
           stackName={stackName}
           onStackNameChange={setStackName}
+          stackVersion={stackVersion}
+          onStackVersionChange={setStackVersion}
         />
       )}
       {currentStep === 4 && deploymentMethod === 'agent' && (

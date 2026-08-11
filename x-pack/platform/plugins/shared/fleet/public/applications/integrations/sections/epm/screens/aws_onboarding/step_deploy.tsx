@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -50,8 +50,19 @@ const ServiceStatusBadge: React.FunctionComponent<{ receiving: boolean }> = ({ r
   </div>
 );
 
+// Example (non-CloudFormation) services surfaced under Managed Integrations
+// while their data streams spin up — demo data for the prototype.
+const MANAGED_INTEGRATION_EXAMPLES = [
+  'Amazon RDS',
+  'Amazon S3',
+  'Amazon SQS',
+  'Amazon SNS',
+  'AWS Billing',
+  'Amazon DynamoDB',
+];
+
 const ServiceDetectionCard: React.FunctionComponent<{
-  service: AwsServiceEntry;
+  service: { name: string };
   receiving: boolean;
 }> = ({ service, receiving }) => (
   <EuiPanel hasBorder paddingSize="m">
@@ -80,8 +91,33 @@ export const StepDeploy: React.FunctionComponent<{
   receivedCount: number;
   stackName: string;
   onStackNameChange: (value: string) => void;
-}> = ({ services, isLaunched, receivedCount, stackName, onStackNameChange }) => {
+  stackVersion: string;
+  onStackVersionChange: (value: string) => void;
+}> = ({
+  services,
+  isLaunched,
+  receivedCount,
+  stackName,
+  onStackNameChange,
+  stackVersion,
+  onStackVersionChange,
+}) => {
   const allReceived = services.length > 0 && receivedCount >= services.length;
+
+  // Managed Integrations examples confirm quickly: first after 800ms, then
+  // one every 700ms — local state since it's simulated demo data.
+  const [managedReceived, setManagedReceived] = useState(0);
+  const managedTimers = useRef<number[]>([]);
+  useEffect(() => {
+    if (!isLaunched) return;
+    setManagedReceived(0);
+    MANAGED_INTEGRATION_EXAMPLES.forEach((_, i) => {
+      managedTimers.current.push(
+        window.setTimeout(() => setManagedReceived((c) => c + 1), 800 + i * 700)
+      );
+    });
+    return () => managedTimers.current.forEach((t) => window.clearTimeout(t));
+  }, [isLaunched]);
 
   return (
     <>
@@ -99,6 +135,7 @@ export const StepDeploy: React.FunctionComponent<{
           <p>Return to Authentication and launch CloudFormation before continuing here.</p>
         </EuiCallOut>
       ) : (
+        <>
         <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
           <CardHeader
             iconType="rocket"
@@ -117,7 +154,7 @@ export const StepDeploy: React.FunctionComponent<{
             {`${receivedCount} of ${services.length} - data received`}
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiFlexGrid columns={3} gutterSize="m">
+          <EuiFlexGrid columns={4} gutterSize="m">
             {services.map((service, i) => (
               <EuiFlexItem key={service.id}>
                 <ServiceDetectionCard service={service} receiving={i < receivedCount} />
@@ -154,9 +191,57 @@ export const StepDeploy: React.FunctionComponent<{
                   data-test-subj="awsOnboardingStackName"
                 />
               </EuiFormRow>
+              <EuiFormRow
+                label={
+                  <span>
+                    Stack version{' '}
+                    <EuiIconTip
+                      content="The version of the CloudFormation stack deployed in your account."
+                      position="right"
+                    />
+                  </span>
+                }
+                style={{ maxWidth: '50%' }}
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  placeholder="e.g.: 1.0.0"
+                  value={stackVersion}
+                  onChange={(e) => onStackVersionChange(e.target.value)}
+                  aria-label="Stack version"
+                  data-test-subj="awsOnboardingStackVersion"
+                />
+              </EuiFormRow>
             </>
           )}
         </EuiPanel>
+
+        <EuiSpacer size="m" />
+        <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
+          <CardHeader
+            iconType="package"
+            title="Managed Integrations"
+            servicesCount={MANAGED_INTEGRATION_EXAMPLES.length}
+          />
+          <EuiSpacer size="m" />
+          <EuiText size="s">
+            <p>Managed integration data streams connecting directly — no CloudFormation stack.</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {`${managedReceived} of ${MANAGED_INTEGRATION_EXAMPLES.length} - data received`}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={4} gutterSize="m">
+            {MANAGED_INTEGRATION_EXAMPLES.map((name, i) => (
+              <EuiFlexItem key={name}>
+                <ServiceDetectionCard service={{ name }} receiving={i < managedReceived} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        </EuiPanel>
+        </>
       )}
     </>
   );

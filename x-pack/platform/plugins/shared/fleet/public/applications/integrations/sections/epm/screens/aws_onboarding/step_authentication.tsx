@@ -102,27 +102,15 @@ const REGION_OPTIONS = [
 // Elastic Cloud Forwarder widget — the ONE place CloudFormation is launched
 // (state is lifted to the parent flow so step 4 "Deploy" can pick up the
 // resulting deploy/detect state without asking the user to launch again).
+// Credentials (incl. the Federated Identity Name) live in the Setup access
+// card above; Launch itself is always active.
 const CloudFormationWidget: React.FunctionComponent<{
   servicesCount: number;
-  identityName: string;
-  onIdentityNameChange: (value: string) => void;
   region: string;
   onRegionChange: (value: string) => void;
   isLaunched: boolean;
   onLaunch: () => void;
-}> = ({
-  servicesCount,
-  identityName,
-  onIdentityNameChange,
-  region,
-  onRegionChange,
-  isLaunched,
-  onLaunch,
-}) => {
-  const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
-
-  const isIdentityNameInvalid = isIdentityNameTouched && identityName.trim().length === 0;
-
+}> = ({ servicesCount, region, onRegionChange, isLaunched, onLaunch }) => {
   return (
     <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
       <PanelHeader iconType="rocket" title="Elastic Cloud Forwarder" servicesCount={servicesCount} />
@@ -130,38 +118,12 @@ const CloudFormationWidget: React.FunctionComponent<{
       <EuiText size="s">
         <p>
           Log collection via a single AWS CloudFormation stack — no agents required. Trigger
-          source (S3 or CloudWatch) is configured per service in Service settings. Enter a
-          Federated Identity Name below, then launch CloudFormation to deploy.
+          source (S3 or CloudWatch) is configured per service in Service settings. Complete
+          Setup access above, then launch CloudFormation to deploy.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        label={
-          <span>
-            Federated Identity Name{' '}
-            <EuiIconTip
-              content="The IAM federated identity Elastic uses to deploy the forwarder stack."
-              position="right"
-            />
-          </span>
-        }
-        isInvalid={isIdentityNameInvalid}
-        error="Federated Identity Name is required"
-        style={HALF_WIDTH}
-        fullWidth
-      >
-        <EuiFieldText
-          fullWidth
-          placeholder="e.g.: elastic-forwarder-prod"
-          value={identityName}
-          onChange={(e) => onIdentityNameChange(e.target.value)}
-          onBlur={() => setIsIdentityNameTouched(true)}
-          isInvalid={isIdentityNameInvalid}
-          disabled={isLaunched}
-          data-test-subj="awsOnboardingStep3IdentityName"
-        />
-      </EuiFormRow>
       <EuiFormRow
         label={
           <span>
@@ -190,7 +152,6 @@ const CloudFormationWidget: React.FunctionComponent<{
         <EuiButton
           iconType="popout"
           iconSide="right"
-          isDisabled={identityName.trim().length === 0}
           onClick={onLaunch}
           data-test-subj="awsOnboardingStep3LaunchCloudFormation"
         >
@@ -354,18 +315,22 @@ const PolicySecretsLink: React.FunctionComponent = () => (
 );
 
 // Setup access widget for the managed-integration path — a "Preferred method"
-// dropdown (Identity Federation vs Direct Access Keys, defaults to Direct
-// Access Keys) drives which credential form renders below. Within Identity
-// Federation, New vs Existing identity is a radio choice, not tabs.
+// dropdown (defaults to Identity Federation) drives which credential form
+// renders below. Within Identity Federation, New vs Existing identity is a
+// radio choice, not tabs. The Federated Identity Name is lifted to the parent
+// flow: it's the single place the name is entered (the Cloud Forwarder widget
+// no longer has its own field) and step 5's summary reads it from there.
 const SetupAccessWidget: React.FunctionComponent<{
   servicesCount: number;
   onValidityChange: (isValid: boolean) => void;
-}> = ({ servicesCount, onValidityChange }) => {
+  identityName: string;
+  onIdentityNameChange: (value: string) => void;
+}> = ({ servicesCount, onValidityChange, identityName, onIdentityNameChange }) => {
   const [preferredMethod, setPreferredMethod] = useState<PreferredAccessMethod>(
-    'direct_access_keys'
+    'identity_federation'
   );
   const [identityMode, setIdentityMode] = useState<IdentityMode>('new_identity');
-  const [federatedIdentityName, setFederatedIdentityName] = useState('');
+  const federatedIdentityName = identityName;
   const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
   const [existingRoleArn, setExistingRoleArn] = useState('');
   const [accessKeyId, setAccessKeyId] = useState('');
@@ -416,8 +381,8 @@ const SetupAccessWidget: React.FunctionComponent<{
         <EuiSelect
           fullWidth
           options={[
-            { value: 'direct_access_keys', text: 'Direct Access Keys' },
             { value: 'identity_federation', text: 'Identity Federation' },
+            { value: 'direct_access_keys', text: 'Direct Access Keys' },
           ]}
           value={preferredMethod}
           onChange={(e) => setPreferredMethod(e.target.value as PreferredAccessMethod)}
@@ -455,7 +420,7 @@ const SetupAccessWidget: React.FunctionComponent<{
                   fullWidth
                   isInvalid={isIdentityNameInvalid}
                   value={federatedIdentityName}
-                  onChange={(e) => setFederatedIdentityName(e.target.value)}
+                  onChange={(e) => onIdentityNameChange(e.target.value)}
                   onBlur={() => setIsIdentityNameTouched(true)}
                   aria-label="Federated Identity Name"
                   data-test-subj="awsOnboardingFederatedIdentityName"
@@ -465,7 +430,33 @@ const SetupAccessWidget: React.FunctionComponent<{
               <EuiAccordion id="awsOnboardingStepsToAssumeRole" buttonContent="Steps to assume role">
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
-                  <p>[Placeholder — content for these steps not yet provided.]</p>
+                  <ol>
+                    <li>
+                      Log in as an <strong>admin</strong> in the AWS account you want to onboard
+                    </li>
+                    <li>
+                      (Optional) Change the <strong>AWS region</strong> in the upper right corner
+                      to the region you want to deploy your stack to
+                    </li>
+                    <li>
+                      Tick the checkbox under <strong>capabilities</strong> in the opened
+                      CloudFormation stack review form:{' '}
+                      <strong>
+                        I acknowledge that AWS CloudFormation might create IAM resources.
+                      </strong>
+                    </li>
+                    <li>
+                      Click <strong>Create stack</strong>.
+                    </li>
+                    <li>
+                      Once stack status is <strong>CREATE_COMPLETE</strong> then click the Outputs
+                      tab
+                    </li>
+                    <li>
+                      Copy <strong>Role ARN</strong> and <strong>External ID</strong> then paste
+                      the role credentials below
+                    </li>
+                  </ol>
                 </EuiText>
               </EuiAccordion>
               <EuiSpacer size="m" />
@@ -737,12 +728,15 @@ export const StepAuthentication: React.FunctionComponent<{
         </EuiPanel>
       ) : (
         <>
-          <SetupAccessWidget servicesCount={servicesCount} onValidityChange={setManagedCredsValid} />
+          <SetupAccessWidget
+            servicesCount={servicesCount}
+            onValidityChange={setManagedCredsValid}
+            identityName={deployIdentityName}
+            onIdentityNameChange={onDeployIdentityNameChange}
+          />
           <EuiSpacer size="m" />
           <CloudFormationWidget
             servicesCount={servicesCount}
-            identityName={deployIdentityName}
-            onIdentityNameChange={onDeployIdentityNameChange}
             region={deployRegion}
             onRegionChange={onDeployRegionChange}
             isLaunched={isDeployed}

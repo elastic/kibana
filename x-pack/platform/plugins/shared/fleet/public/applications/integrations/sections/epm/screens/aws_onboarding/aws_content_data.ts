@@ -14,9 +14,43 @@
 export interface AwsContentItem {
   id: string;
   title: string;
-  type: 'dashboard' | 'search' | 'alert_rule' | 'content_package';
+  type: 'dashboard' | 'search' | 'alert_rule' | 'content_package' | 'detection_rule';
   description?: string;
 }
+
+// Prebuilt SIEM detection rules from the `security_detection_engine` package
+// (github.com/elastic/detection-rules ships 195 AWS rules; a representative
+// sample per service, all real rule names). Rendered as their own group on
+// step 5 since they install from a separate package than `aws`.
+export const DETECTION_RULES_BY_SERVICE: Record<string, AwsContentItem[]> = {
+  cloudtrail: [
+    { id: 'dr-ct-deleted', title: 'AWS CloudTrail Log Deleted', type: 'detection_rule' },
+    { id: 'dr-ct-suspended', title: 'AWS CloudTrail Log Suspended', type: 'detection_rule' },
+  ],
+  guardduty: [
+    { id: 'dr-gd-detector', title: 'AWS GuardDuty Detector Deletion', type: 'detection_rule' },
+  ],
+  ec2: [
+    {
+      id: 'dr-ec2-nacl',
+      title: 'AWS EC2 Network Access Control List Deletion',
+      type: 'detection_rule',
+    },
+    {
+      id: 'dr-ec2-creds',
+      title: 'AWS EC2 Unauthorized Admin Credential Fetch via Assumed Role',
+      type: 'detection_rule',
+    },
+  ],
+  lambda: [
+    { id: 'dr-lambda-deleted', title: 'AWS Lambda Function Deletion', type: 'detection_rule' },
+    {
+      id: 'dr-lambda-layer',
+      title: 'AWS Lambda Layer Added to Existing Function',
+      type: 'detection_rule',
+    },
+  ],
+};
 
 // Package-wide content that isn't tied to a single service.
 export const GENERAL_CONTENT: AwsContentItem[] = [
@@ -36,7 +70,6 @@ export const CONTENT_BY_SERVICE: Record<string, AwsContentItem[]> = {
   config: [{ id: 'config-dash', title: '[Logs AWS] Config', type: 'dashboard' }],
   guardduty: [
     { id: 'gd-overview', title: '[Logs AWS] Guardduty Findings Overview', type: 'dashboard' },
-    { id: 'gd-severity', title: '[Logs AWS] Guardduty Findings Severity', type: 'dashboard' },
     { id: 'gd-threat', title: '[Logs AWS] Guardduty Findings Threat', type: 'dashboard' },
   ],
   inspector: [
