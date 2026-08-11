@@ -10840,10 +10840,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.11.0.tgz#259574b2196c211b7eb487a47b9eadfbbd87473e"
-  integrity sha512-P0u3/ht/oZCQT89fOed+laLk0kZR529a825cS02uPDglxXbE97irWYpDAeRGGVETIzKfuy+H2g8c3Ccv/tXJNQ==
+"@openfeature/core@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.12.0.tgz#c9c2be428f9ceb1e8aff4e33709efe6005ea99b3"
+  integrity sha512-7PCPzyd1OC19begz30+CRknFB0ChtyaZUhk7YWrk+Bov1fpVw0HYkTXtoxxsvPfDZB9P9WsT7uixN+Z8f9+bcA==
 
 "@openfeature/launchdarkly-client-provider@0.3.3":
   version "0.3.3"
