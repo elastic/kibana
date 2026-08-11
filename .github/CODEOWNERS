@@ -2828,8 +2828,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/accessibility/apps/group1/management.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/painless_lab.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/remote_clusters.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/rollup_jobs.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/watcher.ts @elastic/kibana-management
 
