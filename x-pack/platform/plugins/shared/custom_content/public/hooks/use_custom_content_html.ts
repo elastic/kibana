@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { getServices, hasServices } from '../services';
+import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
@@ -108,11 +108,6 @@ export function useCustomContentHtml({
       setHtml(prepareHtml(template, colorModeRef.current));
       setIsLoading(false);
       setError(undefined);
-      return;
-    }
-
-    if (!hasServices()) {
-      setIsLoading(false);
       return;
     }
 
