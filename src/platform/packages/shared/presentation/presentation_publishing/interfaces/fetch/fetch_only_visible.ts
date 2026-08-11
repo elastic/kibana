@@ -19,5 +19,7 @@ export interface PublishesFetchOnlyVisible {
 export const apiPublishesFetchOnlyVisible = (
   unknownApi?: unknown
 ): unknownApi is PublishesFetchOnlyVisible => {
-  return Boolean(unknownApi && (unknownApi as PublishesFetchOnlyVisible)?.fetchOnlyVisible$ !== undefined);
+  return Boolean(
+    unknownApi && (unknownApi as PublishesFetchOnlyVisible)?.fetchOnlyVisible$ !== undefined
+  );
 };
