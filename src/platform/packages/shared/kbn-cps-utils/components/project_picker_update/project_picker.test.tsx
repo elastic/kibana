@@ -80,4 +80,36 @@ describe('ProjectPicker', () => {
     );
     expect(onProjectRoutingChange).not.toHaveBeenCalled();
   });
+
+  it('preserves explicit-ID snapshot routing on mount', async () => {
+    const onProjectRoutingChange = jest.fn();
+
+    render(
+      <ProjectPicker
+        availableProjects={[
+          createProject('matching'),
+          createProject('matching2'),
+          createProject('non-matching'),
+        ]}
+        onProjectRoutingChange={onProjectRoutingChange}
+        projectRouting="_id:matching AND _id:matching2"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-matching')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+    expect(screen.getByTestId('projectPickerListItemSwitch-matching2')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    expect(screen.getByTestId('projectPickerListItemSwitch-non-matching')).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+    expect(onProjectRoutingChange).not.toHaveBeenCalled();
+  });
 });

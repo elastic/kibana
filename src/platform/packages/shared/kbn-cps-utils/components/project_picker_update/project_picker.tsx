@@ -51,8 +51,7 @@ const ProjectPickerRoutingObserver = ({
             excludedProjectIds: excludedOverrides,
             filterExpressions: activeFilterExpressions,
             selectedProjectIds: selectedProjects,
-            projectRoutingStrategy:
-              hasActiveFilters || hasExcludedOverrides ? 'dynamic' : 'snapshot',
+            projectRoutingStrategy: hasActiveFilters ? 'dynamic' : 'snapshot',
           });
 
     if (nextProjectRouting !== projectRouting) {
