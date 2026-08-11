@@ -64,15 +64,35 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
       // Generic approach like Dev Console - just forward the request to ES
       const result = await this.executeElasticsearchRequest(esClient, stepType, stepWith);
 
-      this.workflowLogger.logInfo(`Elasticsearch action completed: ${stepType}`, {
-        event: { action: 'elasticsearch-action', outcome: 'success' },
-        tags: ['elasticsearch', 'internal-action'],
-        labels: {
-          step_type: stepType,
-          connector_type: stepType,
-          action_type: 'elasticsearch',
-        },
-      });
+      // ES _bulk returns HTTP 200 with errors:true for per-item failures; log them but keep running
+      if (result?.errors === true && Array.isArray(result?.items)) {
+        const failedCount = result.items.filter((item: any) =>
+          Object.values(item).some((op: any) => op?.error != null)
+        ).length;
+
+        this.workflowLogger.logWarn(
+          `Elasticsearch action completed with ${failedCount} partial failures out of ${result.items.length} items`,
+          {
+            event: { action: 'elasticsearch-action', outcome: 'failure' },
+            tags: ['elasticsearch', 'internal-action', 'partial-failure'],
+            labels: {
+              step_type: stepType,
+              connector_type: stepType,
+              action_type: 'elasticsearch',
+            },
+          }
+        );
+      } else {
+        this.workflowLogger.logInfo(`Elasticsearch action completed: ${stepType}`, {
+          event: { action: 'elasticsearch-action', outcome: 'success' },
+          tags: ['elasticsearch', 'internal-action'],
+          labels: {
+            step_type: stepType,
+            connector_type: stepType,
+            action_type: 'elasticsearch',
+          },
+        });
+      }
 
       return { input: stepWith, output: result, error: undefined };
     } catch (error) {
