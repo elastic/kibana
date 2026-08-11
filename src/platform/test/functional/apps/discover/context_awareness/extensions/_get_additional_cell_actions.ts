@@ -11,7 +11,6 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
-import type { Alert } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,16 +27,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   const checkAlert = async (text: string) => {
-    let alert: Alert | undefined;
-    try {
-      await retry.waitFor('alert to be present', async () => {
-        alert = (await browser.getAlert()) ?? undefined;
-        return Boolean(alert);
-      });
-      expect(await alert?.getText()).to.be(text);
-    } finally {
-      await alert?.dismiss();
-    }
+    await retry.waitFor(`cell action result "${text}"`, async () => {
+      const message = await browser.execute(
+        () =>
+          document.querySelector('[data-test-subj="exampleDataSourceActionResult"]')?.textContent ??
+          null
+      );
+      return message === text;
+    });
+    // Clear the signal so the next action waits on a fresh result rather than a stale match.
+    await browser.execute(() => {
+      document.querySelector('[data-test-subj="exampleDataSourceActionResult"]')?.remove();
+    });
   };
 
   describe('extension getAdditionalCellActions', () => {

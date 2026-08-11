@@ -112,6 +112,22 @@ const getBoxColor = (value: string) =>
   boxColorOptions.find((option) => option.value === value)?.value ??
   EXAMPLE_PROFILE_STATE_DEFAULTS.boxColor;
 
+const EXAMPLE_CELL_ACTION_RESULT_TEST_SUBJ = 'exampleDataSourceActionResult';
+
+// Signals a cell action result via a non-blocking DOM node rather than window.alert(), which would block the event loop mid-render and destabilize the data grid.
+const signalCellActionResult = (message: string) => {
+  let resultEl = document.querySelector<HTMLElement>(
+    `[data-test-subj="${EXAMPLE_CELL_ACTION_RESULT_TEST_SUBJ}"]`
+  );
+  if (!resultEl) {
+    resultEl = document.createElement('div');
+    resultEl.dataset.testSubj = EXAMPLE_CELL_ACTION_RESULT_TEST_SUBJ;
+    resultEl.hidden = true;
+    document.body.appendChild(resultEl);
+  }
+  resultEl.textContent = message;
+};
+
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
 }> => ({
@@ -453,7 +469,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           getDisplayName: () => 'Example data source action',
           getIconType: () => 'plus',
           execute: () => {
-            alert('Example data source action executed');
+            signalCellActionResult('Example data source action executed');
           },
         },
         {
@@ -461,7 +477,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           getDisplayName: () => 'Another example data source action',
           getIconType: () => 'minus',
           execute: () => {
-            alert('Another example data source action executed');
+            signalCellActionResult('Another example data source action executed');
           },
           isCompatible: ({ field }) => field.name !== 'message',
         },
