@@ -6,9 +6,9 @@
  */
 
 import type { EsClient, RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, createDataStream, deleteDataStream, testData } from '../../fixtures';
+import { SERVERLESS_LOGS_CAPABLE } from '../../tags';
 
 const { API_BASE_PATH, COMMON_HEADERS } = testData;
 
@@ -26,7 +26,7 @@ const clearSettings = (esClient: EsClient) =>
 
 apiTest.describe(
   'Data streams logsdb cluster settings API - serverless',
-  { tag: tags.serverless.all },
+  { tag: SERVERLESS_LOGS_CAPABLE },
   () => {
     let credentials: RoleApiCredentials;
 

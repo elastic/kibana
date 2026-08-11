@@ -6,17 +6,16 @@
  */
 
 import type { EsClient, RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, deleteTemplate, getTemplatePayload, testData } from '../../fixtures';
+import { SERVERLESS_LOGS_CAPABLE } from '../../tags';
 
 const { API_BASE_PATH, COMMON_HEADERS } = testData;
 
 const TEMPLATE_NAME = 'index-management-api-logsdb-template-serverless';
 
-// `logsdb.prior_logs_usage` only exists on stateful (see index_templates_logsdb_settings.spec.ts).
-// `cluster.logsdb.enabled` defaults to true here, so unset resolves to logsdb — the opposite of
-// stateful — matching data_streams_logsdb_settings_serverless.spec.ts's documented default.
+// `cluster.logsdb.enabled` defaults to true here, so unset resolves to logsdb (opposite of stateful,
+// where `prior_logs_usage` also applies — see index_templates_logsdb_settings.spec.ts).
 const CASES: Array<{ enabled: boolean | null; indexMode?: string }> = [
   { enabled: true, indexMode: 'logsdb' },
   { enabled: false, indexMode: undefined },
@@ -29,7 +28,7 @@ const clearSettings = (esClient: EsClient) =>
 
 apiTest.describe(
   'Index templates logsdb cluster settings API - serverless',
-  { tag: tags.serverless.all },
+  { tag: SERVERLESS_LOGS_CAPABLE },
   () => {
     let credentials: RoleApiCredentials;
 
