@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { EuiSuperSelectWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper, type EuiSuperSelectObject } from '@kbn/scout';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -59,11 +59,11 @@ export class ComposeDiscoverPage {
   public readonly emptyQueryCallout: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
-  private readonly modeSuperSelect: EuiSuperSelectWrapper;
+  private readonly modeSuperSelect: EuiSuperSelectObject;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
-    this.modeSuperSelect = new EuiSuperSelectWrapper(page, 'composeDiscoverModeSelect');
+    this.modeSuperSelect = page.components.superSelect('composeDiscoverModeSelect');
 
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
     this.nextButton = this.page.testSubj.locator('composeDiscoverNext');
@@ -176,7 +176,7 @@ export class ComposeDiscoverPage {
    * is disabled while the query sandbox is open in form mode.
    */
   async selectMode(kind: 'alert' | 'signal') {
-    await this.modeSuperSelect.selectOption(kind);
+    await this.modeSuperSelect.selectOptionByValue(kind);
   }
 
   /** Waits until a time-field `<select>` option is present (field-caps resolution). */

@@ -57,9 +57,24 @@ if: >-
   )
 
 concurrency:
-  # One validation lane per PR. Never cancel an in-flight iteration: a cancelled run
-  # could drop the run-count bookkeeping mid-flight.
-  group: 'flaky-fix-verifier-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}'
+  # One lane per PR, entered only by events that can verify it. Anything else gets its own
+  # suffix so it skips without evicting the pending run (GitHub keeps just one per group).
+  group: >-
+    flaky-fix-verifier-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}-${{
+      (
+        github.event.action == 'labeled' &&
+        github.event.label.name != 'flaky-test-fixer' &&
+        format('label-{0}', github.event.label.name)
+      ) ||
+      (
+        github.event_name == 'issue_comment' &&
+        !contains(github.event.comment.body, 'Flaky Test Runner Stats') &&
+        format('comment-{0}', github.event.comment.id)
+      ) ||
+      'verify'
+    }}
+  # Never cancel an in-flight iteration: a cancelled run could drop the run-count
+  # bookkeeping mid-flight.
   cancel-in-progress: false
 
 env:
