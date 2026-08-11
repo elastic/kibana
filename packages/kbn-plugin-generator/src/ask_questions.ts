@@ -73,12 +73,14 @@ export const QUESTIONS = [
   {
     name: 'description',
     message: 'Provide a description for your plugin.',
-    default: undefined,
+    default: '',
   },
   {
     name: 'ownerName',
     message: 'Who is developing and maintaining this plugin?',
-    default: undefined,
+    // Required by the external-plugin kibana.json manifest parser; --yes must not leave this empty.
+    default: 'Plugin Author',
+    validate: (ownerName: string) => (!ownerName ? 'owner is required' : true),
     when: ({ internal }: Answers) => !internal,
   },
   {

@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import del from 'del';
 import execa from 'execa';
@@ -63,6 +64,12 @@ it('generates a plugin', async () => {
       <absolute path>/plugins/foo/tsconfig.json,
     ]
   `);
+
+  // --yes must produce a bootable external-plugin manifest (owner.name is required).
+  const manifest = JSON.parse(
+    Fs.readFileSync(Path.resolve(GENERATED_DIR, 'foo/kibana.json'), 'utf8')
+  );
+  expect(manifest.owner.name).toEqual('Plugin Author');
 });
 
 it('generates a plugin without UI', async () => {
