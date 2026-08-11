@@ -263,7 +263,7 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 2. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 4. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
-5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check`. For a Jest test, one green run says nothing about a flake — repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
@@ -285,6 +285,22 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## Verifying a Jest fix
+
+The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reaches the Flaky Fix Verifier — whatever you run here is the only repeat-execution evidence it will ever get. A single green run proves the test _can_ pass, which it already could; it says nothing about the flake. So when the patch touches a Jest test, repeat it:
+
+```bash
+for i in $(seq 1 25); do
+  node scripts/jest <path-to-test-file> || { echo "FAILED on run $i"; break; }
+done
+```
+
+- **Reproduce the flake before you fix it.** Run the loop against the unpatched test first. A loop that fails is what turns the post-fix loop into evidence. If the unpatched test survives 25 runs, the flake doesn't reproduce here — fix the root cause you diagnosed, but say so under "Not verified locally" instead of presenting the clean loop as confirmation.
+- **Scale the count to the runtime.** 25 runs is the floor; go to 50 when a run takes only a few seconds. A loop this size catches a test that fails every few runs, not one that fails once a week.
+- **Run the test's neighbours at least once** (`node scripts/jest <directory-containing-the-test>`), so sibling tests share a worker with it. A flake caused by state leaking between tests in the same worker never reproduces while the file runs on its own.
+- **One failure in the loop means the fix did not hold.** Revise the patch and start the loop again.
+- Report the command and the number of runs on the Jest line of the PR's "Verified locally" block, and note under "Not verified locally" that the loop ran without CI's parallel load, so it cannot rule out a flake driven by contention on a busy agent.
 
 ## PR format
 
@@ -312,6 +328,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command; on a `⚠️` line, add a short note after the command explaining what failed, e.g.
   `✅ Passed: node scripts/eslint <files>`
   `✅ Passed: node scripts/type_check --project <tsconfig>`
+  `✅ Passed: node scripts/jest <test> — 25 consecutive runs`
   `⚠️ node scripts/jest <test> — 1 assertion still failing (<one-line reason>)`>
 
   #### Not verified locally
