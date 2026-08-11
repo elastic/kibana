@@ -1396,4 +1396,3 @@ describe('saved_object', () => {
     });
   });
 });
-
