@@ -45,10 +45,6 @@ jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
-}));
-
 jest.mock('../../../../common/lib/kuery');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
