@@ -272,11 +272,19 @@ export class DocViewer {
     return (await this.page.testSubj.locator(testSubj).getAttribute('aria-checked')) === 'true';
   }
 
+  /**
+   * Pin control for a field, matching only while that field is pinned. The
+   * control is always rendered; pinned rows are the ones *without* the
+   * `pinAction` class, which marks the hover-only affordance on unpinned rows.
+   */
+  getPinnedFieldControl(fieldName: string): Locator {
+    return this.page.locator(
+      `[data-test-subj="unifiedDocViewer_pinControl_${fieldName}"]:not(.kbnDocViewer__fieldsGrid__pinAction)`
+    );
+  }
+
   async isFieldPinned(fieldName: string): Promise<boolean> {
-    return this.page
-      .locator(
-        `[data-test-subj="unifiedDocViewer_pinControl_${fieldName}"]:not(.kbnDocViewer__fieldsGrid__pinAction)`
-      )
+    return this.getPinnedFieldControl(fieldName)
       .waitFor({ state: 'attached', timeout: 1_000 })
       .then(() => true)
       .catch(() => false);

@@ -8,16 +8,21 @@
  */
 
 /**
- * Fields table behaviour inside the Discover doc-viewer flyout, in classic
- * data-view mode: field search, type filters, and the hide-null-values switch.
- * The ES|QL counterparts live in `doc_viewer_fields_table_esql.spec.ts`.
+ * Filtering the doc-viewer fields table in classic data-view mode: field search,
+ * type filters, and the hide-null-values switch.
+ *
+ * Sibling specs cover the rest of the fields table:
+ * - `doc_viewer_fields_table_esql.spec.ts` — the ES|QL counterparts
+ * - `doc_viewer_fields_table_selection.spec.ts` — show-only-selected and pinning
  *
  * Migrated from `src/platform/test/functional/apps/discover/group9/_doc_viewer.ts`
  * (`search`, `filter by field type`, and `hide null values switch - data view
  * mode` groups).
  *
  * Dropped (covered at the unit layer):
- * - both `should disable the switch when no fields are selected` tests (table.test.tsx)
+ * - both `should disable the switch when no fields are selected` tests
+ *   (table.test.tsx) — the switch's disabled state only; the enabled/toggling
+ *   behaviour is covered in `doc_viewer_fields_table_selection.spec.ts`
  * - `should reveal and hide the filter form when the toggle is clicked`
  *   (field_type_filter.test.tsx) — a popover show/hide with no API call, so the
  *   browser round-trip adds nothing over the unit test

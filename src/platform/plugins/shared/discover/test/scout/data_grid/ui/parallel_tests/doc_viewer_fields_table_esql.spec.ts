@@ -10,8 +10,10 @@
 /**
  * Fields table behaviour inside the Discover doc-viewer flyout, in ES|QL mode:
  * type filters over the wider ES|QL field set, and the
- * show-only-selected-fields switch. The classic data-view counterparts live in
- * `doc_viewer_fields_table.spec.ts`.
+ * show-only-selected-fields switch. These run against `KEEP`-projected results,
+ * so the data-view counterparts in `doc_viewer_fields_table.spec.ts` and
+ * `doc_viewer_fields_table_selection.spec.ts` are kept as well — only those see
+ * the full document payload and its meta-field ordering.
  *
  * Migrated from `src/platform/test/functional/apps/discover/group9/_doc_viewer.ts`
  * (`filter by field type` and `show only selected fields in ES|QL mode` groups).
