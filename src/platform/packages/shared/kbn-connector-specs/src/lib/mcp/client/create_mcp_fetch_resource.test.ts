@@ -33,8 +33,11 @@ describe('createMcpFetchResource', () => {
   let networkSettings: jest.Mocked<ConnectorNetworkSettings>;
   let globalFetchSpy: jest.SpyInstance;
 
-  const createResource = (opts: { targetUrl: string; headers?: Record<string, string>; userAgent?: string }) =>
-    createMcpFetchResource({ networkSettings, logger, ...opts });
+  const createResource = (opts: {
+    targetUrl: string;
+    headers?: Record<string, string>;
+    userAgent?: string;
+  }) => createMcpFetchResource({ networkSettings, logger, ...opts });
 
   const mockRedirectResponse = (status: number, location: string | null): Response => {
     const headers = new Headers();
@@ -74,7 +77,9 @@ describe('createMcpFetchResource', () => {
 
   describe('initial URL validation', () => {
     it('throws immediately if the target URL is not allowed', () => {
-      expect(() => createResource({ targetUrl: 'https://evil.internal.example.com/steal' })).toThrow(
+      expect(() =>
+        createResource({ targetUrl: 'https://evil.internal.example.com/steal' })
+      ).toThrow(
         'target url "https://evil.internal.example.com/steal" is not added to the Kibana config xpack.actions.allowedHosts'
       );
       expect(globalFetchSpy).not.toHaveBeenCalled();
