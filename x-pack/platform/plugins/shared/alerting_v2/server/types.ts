@@ -54,6 +54,13 @@ export interface AlertingServerStart {
     spaceId: string
   ): Promise<ActionPolicyClientApi>;
 
+  /**
+   * Returns an AlertEventsClient scoped to the request's credentials.
+   * NOTE: AlertEventsClient writes via the internal ES user, so callers are
+   * responsible for enforcing write-privilege checks before calling mutating
+   * methods. HTTP routes must check via their own authz; workflow steps must
+   * check via PrivilegeChecker before invoking the client.
+   */
   getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi>;
 }
 
