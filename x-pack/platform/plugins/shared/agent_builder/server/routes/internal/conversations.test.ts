@@ -208,7 +208,7 @@ describe('registerInternalConversationRoutes - _set_read_only', () => {
     routeHandler = registerRoutes();
   });
 
-  it('updates read_only state using conversation accessor permissions', async () => {
+  it('updates read_only state using owner-only permissions', async () => {
     const response = await routeHandler(
       createMockContext() as any,
       createRequest(),
@@ -217,7 +217,7 @@ describe('registerInternalConversationRoutes - _set_read_only', () => {
 
     expect(update).toHaveBeenCalledWith(
       { id: 'conv-1', read_only: true },
-      { access: 'converse', retryOnConflict: true }
+      { access: 'owner', retryOnConflict: true }
     );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', read_only: true });
@@ -235,7 +235,7 @@ describe('registerInternalConversationRoutes - _set_read_only', () => {
 
     expect(update).toHaveBeenCalledWith(
       { id: 'conv-1', read_only: false },
-      { access: 'converse', retryOnConflict: true }
+      { access: 'owner', retryOnConflict: true }
     );
     expect(response.payload).toMatchObject({ id: 'conv-1', read_only: false });
   });

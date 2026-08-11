@@ -160,7 +160,7 @@ export function registerInternalConversationRoutes({
       const client = await conversationsService.getScopedClient({ request });
       const updatedConversation = await client.update(
         { id: conversationId, read_only: readOnly },
-        { access: 'converse', retryOnConflict: true }
+        { access: 'owner', retryOnConflict: true }
       );
 
       return response.ok<SetReadOnlyConversationResponse>({
