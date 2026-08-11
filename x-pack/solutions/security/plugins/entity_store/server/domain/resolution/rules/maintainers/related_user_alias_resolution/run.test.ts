@@ -87,11 +87,11 @@ describe('runRelatedUserAliasResolution', () => {
       search: jest.fn(),
     } as unknown as jest.Mocked<ElasticsearchClient>;
     cascadeLinkEntities = jest.fn().mockResolvedValue({
-      linked: ['user:seed@example.com@entra_id'],
+      linked: ['user:ad'],
       retargeted: [],
       skipped: [],
       cascadesBlocked: 0,
-      target_id: 'user:ad',
+      target_id: 'user:seed@example.com@entra_id',
     });
     resolutionClient = { cascadeLinkEntities } as unknown as ResolutionClient;
   });
@@ -125,8 +125,21 @@ describe('runRelatedUserAliasResolution', () => {
         }),
       })
     );
-    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
     expect(result.lastRun).toMatchObject({ seedsScanned: 1, linksCreated: 1 });
+  });
+
+  it('uses the seed as the cascade target even when a candidate has higher namespace priority', async () => {
+    esClient.search
+      .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
+      .mockResolvedValueOnce(createSearchResponse([createSourceDoc(['T03KX1Z'])]) as never)
+      .mockResolvedValueOnce(
+        createSearchResponse([createCandidate('user:ad', 'active_directory')]) as never
+      );
+
+    await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
+
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
   });
 
   it('drops okta manager values before candidate lookup', async () => {
@@ -211,7 +224,7 @@ describe('runRelatedUserAliasResolution', () => {
         }),
       })
     );
-    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
     expect(result.lastRun).toMatchObject({ linksCreated: 1 });
   });
 
@@ -263,11 +276,11 @@ describe('runRelatedUserAliasResolution', () => {
 
   it('accumulates all unambiguous candidates for one seed into a single cascade', async () => {
     cascadeLinkEntities.mockResolvedValueOnce({
-      linked: ['user:seed@example.com@entra_id', 'user:okta'],
+      linked: ['user:ad', 'user:okta'],
       retargeted: [],
       skipped: [],
       cascadesBlocked: 0,
-      target_id: 'user:ad',
+      target_id: 'user:seed@example.com@entra_id',
     });
     esClient.search
       .mockResolvedValueOnce(createSearchResponse([createSeed()]) as never)
@@ -282,8 +295,8 @@ describe('runRelatedUserAliasResolution', () => {
     const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
-    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', [
-      'user:seed@example.com@entra_id',
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', [
+      'user:ad',
       'user:okta',
     ]);
     expect(result.lastRun).toMatchObject({ linksCreated: 2 });
@@ -306,7 +319,7 @@ describe('runRelatedUserAliasResolution', () => {
     const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
-    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
     expect(result.lastRun).toMatchObject({ skippedAmbiguous: 1, linksCreated: 1 });
   });
 
@@ -329,7 +342,7 @@ describe('runRelatedUserAliasResolution', () => {
     const result = await runRelatedUserAliasResolution(createDeps({ esClient, resolutionClient }));
 
     expect(cascadeLinkEntities).toHaveBeenCalledTimes(1);
-    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:ad', ['user:seed@example.com@entra_id']);
+    expect(cascadeLinkEntities).toHaveBeenCalledWith('user:seed@example.com@entra_id', ['user:ad']);
     expect(result.lastRun).toMatchObject({ linksCreated: 1 });
   });
 
