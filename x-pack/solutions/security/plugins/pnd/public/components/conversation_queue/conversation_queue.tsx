@@ -44,7 +44,7 @@ const StyledAccordion = styled(EuiAccordion)`
 
   .euiAccordion__triggerWrapper {
     padding: ${({ theme }) =>
-      `${theme.euiTheme.size.m} ${theme.euiTheme.size.l} ${theme.euiTheme.size.m} ${theme.euiTheme.size.m}`};
+      `${theme.euiTheme.size.base} ${theme.euiTheme.size.l} ${theme.euiTheme.size.base} ${theme.euiTheme.size.base}`};
     box-sizing: border-box;
   }
 `;
