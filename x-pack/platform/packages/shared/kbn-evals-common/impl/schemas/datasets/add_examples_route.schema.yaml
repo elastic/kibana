@@ -28,6 +28,8 @@ paths:
               properties:
                 examples:
                   type: array
+                  # Keep in sync with MAX_EXAMPLES_PER_DATASET in constants.ts
+                  maxItems: 10000
                   items:
                     $ref: '#/components/schemas/AddExamplesPayload'
               required:

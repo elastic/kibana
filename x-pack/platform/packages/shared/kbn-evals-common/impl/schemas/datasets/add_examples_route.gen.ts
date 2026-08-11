@@ -39,7 +39,7 @@ export type AddEvaluationDatasetExamplesRequestParamsInput = z.input<
 
 export const AddEvaluationDatasetExamplesRequestBody = lazySchema(() =>
   z.object({
-    examples: z.array(AddExamplesPayload),
+    examples: z.array(AddExamplesPayload).max(10000),
   })
 );
 export type AddEvaluationDatasetExamplesRequestBody = z.infer<
