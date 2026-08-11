@@ -25,6 +25,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.slack2',
   '.slack_api',
   '.tines',
   '.webhook',
@@ -103,6 +104,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             actionTypeId: '.slack',
             name: 'Slack#xyztest',
             secrets: {
+              webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+            },
+          },
+          'my-slack2': {
+            actionTypeId: '.slack2',
+            name: 'Slack#xyz',
+            secrets: {
+              authType: 'webhook',
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
           },

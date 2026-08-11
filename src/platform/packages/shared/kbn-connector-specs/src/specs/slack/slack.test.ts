@@ -53,6 +53,9 @@ describe('Slack', () => {
     expect(Slack.metadata.featureUsageName).toBe('Slack (v2)');
     expect(Slack.metadata.minimumLicense).toBe('enterprise');
     expect(Slack.metadata.isTechnicalPreview).toBeUndefined();
+    expect(Slack.metadata.supportedFeatureIds).toContain('alerting');
+    expect(Slack.metadata.supportedFeatureIds).toContain('uptime');
+    expect(Slack.metadata.supportedFeatureIds).toContain('siem');
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
     expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
   });

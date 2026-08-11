@@ -65,8 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createConnectors(testRunUuid: string) {
     return await Promise.all([
-      createConnector({ name: `server-log-${testRunUuid}-${0}` }),
-      createConnector({ name: `server-log-${testRunUuid}-${1}` }),
+      createConnector({ name: `slack-${testRunUuid}-${0}` }),
+      createConnector({ name: `slack-${testRunUuid}-${1}` }),
     ]);
   }
 
@@ -82,8 +82,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         id: connector.id,
         group: 'default',
         params: {
-          message: 'from alert 1s',
-          level: 'warn',
+          subAction: 'sendMessage',
+          subActionParams: { text: 'from alert 1s' },
         },
         frequency: {
           summary: false,
@@ -110,8 +110,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         id: connector.id,
         group: 'default',
         params: {
-          message: 'from alert 1s',
-          level: 'warn',
+          subAction: 'sendMessage',
+          subActionParams: { text: 'from alert 1s' },
         },
         frequency: {
           summary: false,
@@ -432,7 +432,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const connector = await createConnectorManualCleanup({
-          name: `server-log-${testRunUuid}-${0}`,
+          name: `slack-${testRunUuid}-${0}`,
         });
 
         await pageObjects.common.navigateToApp('management', {
@@ -444,7 +444,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             {
               group: 'default',
               id: connector.id,
-              params: { level: 'info', message: ' {{context.message}}' },
+              params: {
+                subAction: 'sendMessage',
+                subActionParams: { text: ' {{context.message}}' },
+              },
               frequency: {
                 summary: false,
                 notify_when: RuleNotifyWhen.THROTTLE,
@@ -494,14 +497,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('ruleActionsAddActionButton');
         await testSubjects.existOrFail('ruleActionsConnectorsModal');
 
-        // click the available option (my-server-log is a preconfigured connector created before this test runs)
-        await find.clickByButtonText('Serverlog#xyz');
+        // click the available option (my-slack2 is a preconfigured connector created before this test runs)
+        await find.clickByButtonText('Slack#xyz');
 
         const ruleActionItems = await testSubjects.findAll('ruleActionsItem');
         expect(ruleActionItems.length).to.eql(2);
 
-        expect(await ruleActionItems[0].getVisibleText()).to.contain('Server log');
-        expect(await ruleActionItems[1].getVisibleText()).to.contain('Server log');
+        expect(await ruleActionItems[0].getVisibleText()).to.contain('Slack');
+        expect(await ruleActionItems[1].getVisibleText()).to.contain('Slack');
       });
     });
 
@@ -528,8 +531,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             id: connector.id,
             group: 'default',
             params: {
-              message: 'from alert 1s',
-              level: 'warn',
+              subAction: 'sendMessage',
+              subActionParams: { text: 'from alert 1s' },
             },
           })),
         });

@@ -29,7 +29,7 @@ export const createLegacyRuleAction = async (
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
-          actionTypeId: '.slack',
+          actionTypeId: '.server-log',
         },
       ],
     });

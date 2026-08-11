@@ -41,7 +41,7 @@ export const transformListTypesResponse = (
       source,
       sub_feature: subFeature,
       is_deprecated: isDeprecated,
-      is_create_disabled: isCreateDisabled,
+      ...(isCreateDisabled !== undefined ? { is_create_disabled: isCreateDisabled } : {}),
       allow_multiple_system_actions: allowMultipleSystemActions,
       description,
       is_experimental: isExperimental,

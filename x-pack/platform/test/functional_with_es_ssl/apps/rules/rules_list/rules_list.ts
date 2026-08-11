@@ -624,7 +624,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
             {
               id: action.id,
               group: 'default',
-              params: { level: 'info', message: 'gfghfhg' },
+              params: {
+                subAction: 'sendMessage',
+                subActionParams: { text: 'gfghfhg' },
+              },
               frequency: {
                 summary: false,
                 notify_when: 'onActionGroupChange',
@@ -636,23 +639,23 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       });
       await refreshAlertsList();
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionType.server-logFilterOption');
+      await testSubjects.click('actionType.slack2FilterOption');
 
       await retry.try(async () => {
-        const filterWithServerLogOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterWithServerLogOnlyResults.length).to.equal(1);
-        expect(filterWithServerLogOnlyResults[0].name).to.equal(
+        const filterWithSlackOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterWithSlackOnlyResults.length).to.equal(1);
+        expect(filterWithSlackOnlyResults[0].name).to.equal(
           `${noopAlertWithAction.name}Test: Noop`
         );
-        expect(filterWithServerLogOnlyResults[0].interval).to.equal('1 min');
-        expect(filterWithServerLogOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
+        expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
+        expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
       await refreshAlertsList();
 
       // de-select action type filter
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionType.server-logFilterOption');
+      await testSubjects.click('actionType.slack2FilterOption');
 
       await testSubjects.missingOrFail('centerJustifiedSpinner');
     });
@@ -805,7 +808,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
             {
               id: action.id,
               group: 'default',
-              params: { level: 'info', message: 'gfghfhg' },
+              params: {
+                subAction: 'sendMessage',
+                subActionParams: { text: 'gfghfhg' },
+              },
               frequency: {
                 summary: false,
                 notify_when: 'onActionGroupChange',

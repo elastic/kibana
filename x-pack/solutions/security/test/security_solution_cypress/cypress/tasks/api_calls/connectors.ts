@@ -41,6 +41,13 @@ const webhookConnectorAPIPayload = {
   name: 'Webhook cypress test e2e connector',
 };
 
+const serverLogConnectorAPIPayload = {
+  connector_type_id: '.server-log',
+  config: {},
+  secrets: {},
+  name: 'Server log cypress test e2e connector',
+};
+
 export const azureConnectorAPIPayload = {
   connector_type_id: '.gen-ai',
   secrets: {
@@ -68,5 +75,6 @@ export const bedrockConnectorAPIPayload = {
 
 export const createEmailConnector = () => createConnector(emailConnectorAPIPayload);
 export const createWebhookConnector = () => createConnector(webhookConnectorAPIPayload);
+export const createServerLogConnector = () => createConnector(serverLogConnectorAPIPayload);
 export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
 export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);

@@ -23,7 +23,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
-      isConnectorTypeDeprecated: true,
+      isConnectorTypeDeprecated: false,
       authMode: 'shared',
     },
     {
@@ -78,7 +78,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isDeprecated: false,
       isSystemAction: false,
       referencedByCount: 0,
-      isConnectorTypeDeprecated: false,
+      isConnectorTypeDeprecated: true,
       authMode: 'shared',
     },
     {

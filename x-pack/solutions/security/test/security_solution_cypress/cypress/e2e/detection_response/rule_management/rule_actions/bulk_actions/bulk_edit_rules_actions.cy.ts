@@ -20,16 +20,15 @@ import {
 } from '../../../../../screens/rules_bulk_actions';
 import {
   actionFormSelector,
-  EMAIL_ACTION_BTN,
-  EMAIL_ACTION_SUBJECT_INPUT,
-  EMAIL_ACTION_TO_INPUT,
+  SERVER_LOG_ACTION_BTN,
+  SERVER_LOG_ACTION_MESSAGE_TEXTAREA,
 } from '../../../../../screens/common/rule_actions';
 
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
   addEmailConnectorAndRuleAction,
-  fillEmailRuleActionForm,
+  assertEmailRuleAction,
   assertSelectedCustomFrequencyOption,
   assertSelectedPerRuleRunFrequencyOption,
   assertSelectedSummaryOfAlertsOption,
@@ -55,7 +54,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { createEmailConnector } from '../../../../../tasks/api_calls/connectors';
+import { createServerLogConnector } from '../../../../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
@@ -73,22 +72,20 @@ import {
 
 const ruleNameToAssert = 'Custom rule name with actions';
 
-const expectedExistingEmail = 'existing@example.com';
-const expectedExistingSubject = 'Existing email action';
-const expectedEmail = 'new@example.com';
-const expectedSubject = 'New email action';
+const expectedExistingServerLogMessage = 'Existing server log action';
+const expectedServerLogMessage = 'Server log action test message';
 
-const addEmailRuleAction = (email: string, subject: string) => {
-  cy.get(EMAIL_ACTION_BTN).click();
-  fillEmailRuleActionForm(email, subject);
+const addServerLogRuleAction = (message: string) => {
+  cy.get(SERVER_LOG_ACTION_BTN).click();
+  cy.get(SERVER_LOG_ACTION_MESSAGE_TEXTAREA).clear();
+  cy.get(SERVER_LOG_ACTION_MESSAGE_TEXTAREA).type(message);
 };
 
-const assertEmailRuleActionAtPosition = (email: string, subject: string, position: number) => {
-  cy.get(actionFormSelector(position)).within(() => {
-    cy.get(EMAIL_ACTION_TO_INPUT).contains(email);
-    cy.get(EMAIL_ACTION_SUBJECT_INPUT).should('have.value', subject);
-  });
-};
+const assertServerLogRuleAction = (message: string, position: number = 0) =>
+  cy
+    .get(actionFormSelector(position))
+    .find(SERVER_LOG_ACTION_MESSAGE_TEXTAREA)
+    .should('have.value', message);
 
 describe(
   'Detection rules, bulk edit of rule actions',
@@ -103,16 +100,15 @@ describe(
       deleteAlertsAndRules();
       deleteConnectors();
 
-      createEmailConnector().then(({ body }) => {
+      createServerLogConnector().then(({ body }) => {
         const actions: RuleActionArray = [
           {
             id: body.id,
-            action_type_id: '.email',
+            action_type_id: '.server-log',
             group: 'default',
             params: {
-              to: [expectedExistingEmail],
-              subject: expectedExistingSubject,
-              message: expectedExistingSubject,
+              level: 'info',
+              message: expectedExistingServerLogMessage,
             },
             frequency: {
               summary: true,
@@ -150,7 +146,7 @@ describe(
         getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test', enabled: false })
       );
 
-      createEmailConnector();
+      createServerLogConnector();
 
       // Prevent prebuilt rules package installation and mock two prebuilt rules
       preventPrebuiltRulesPackageInstallation();
@@ -222,7 +218,7 @@ describe(
           // ensure rule actions info callout displayed on the form
           cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
-          addEmailRuleAction(expectedEmail, expectedSubject);
+          addServerLogRuleAction(expectedServerLogMessage);
           pickSummaryOfAlertsOption();
           pickCustomFrequencyOption(expectedActionFrequency);
 
@@ -234,8 +230,8 @@ describe(
 
           assertSelectedSummaryOfAlertsOption();
           assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-          assertEmailRuleActionAtPosition(expectedExistingEmail, expectedExistingSubject, 0);
-          assertEmailRuleActionAtPosition(expectedEmail, expectedSubject, 1);
+          assertServerLogRuleAction(expectedExistingServerLogMessage, 0);
+          assertServerLogRuleAction(expectedServerLogMessage, 1);
           // ensure there is no third action
           cy.get(actionFormSelector(2)).should('not.exist');
         });
@@ -247,7 +243,7 @@ describe(
           selectAllRules();
           openBulkEditRuleActionsForm();
 
-          addEmailRuleAction(expectedEmail, expectedSubject);
+          addServerLogRuleAction(expectedServerLogMessage);
           pickSummaryOfAlertsOption();
           pickPerRuleRunFrequencyOption();
 
@@ -265,7 +261,7 @@ describe(
 
           assertSelectedSummaryOfAlertsOption();
           assertSelectedPerRuleRunFrequencyOption();
-          assertEmailRuleActionAtPosition(expectedEmail, expectedSubject, 0);
+          assertServerLogRuleAction(expectedServerLogMessage);
           // ensure existing action was overwritten
           cy.get(actionFormSelector(1)).should('not.exist');
         });
@@ -303,7 +299,7 @@ describe(
 
         assertSelectedSummaryOfAlertsOption();
         assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-        assertEmailRuleActionAtPosition(expectedNewConnectorEmail, expectedNewConnectorSubject, 1);
+        assertEmailRuleAction(expectedNewConnectorEmail, expectedNewConnectorSubject);
       });
     });
   }

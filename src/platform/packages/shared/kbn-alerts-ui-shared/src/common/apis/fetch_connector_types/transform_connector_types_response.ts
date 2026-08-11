@@ -31,7 +31,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   isSystemActionType,
   subFeature,
   isDeprecated,
-  isCreateDisabled,
+  ...(isCreateDisabled !== undefined ? { isCreateDisabled } : {}),
   allowMultipleSystemActions,
   description,
   isExperimental,
