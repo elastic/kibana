@@ -8,6 +8,7 @@
 import type {
   AgentAccessControl,
   AgentAccessControlEntry,
+  AgentConfiguration,
   AgentDefinition,
 } from '@kbn/agent-builder-common';
 
@@ -37,18 +38,13 @@ export interface DeleteAgentResponse {
 }
 
 /**
- * Configuration contributed by an agent's *type*, which always applies on top of the agent's own
- * configuration and cannot be edited on the agent. Internal API only: it exists so the UI can tell
- * type-contributed values apart from the agent's own, which the merged configuration cannot express.
- *
- * Projected rather than complete — a type's base `instructions` run to tens of kilobytes, and no
- * consumer needs them in the browser.
+ * The AI indices an agent inherits from its *type*, for `GET /internal/agent_builder/agents/_base_configuration`.
+ * The public agent APIs only return an agent's own configuration, so this is the only way a client
+ * can tell inherited AI indices from assigned ones.
  */
 export interface AgentBaseConfigurationItem {
   agent_id: string;
-  configuration: {
-    ai_indices: string[];
-  };
+  configuration: Required<Pick<AgentConfiguration, 'ai_indices'>>;
 }
 
 export interface ListAgentBaseConfigurationResponse {

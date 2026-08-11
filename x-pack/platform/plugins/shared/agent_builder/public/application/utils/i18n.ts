@@ -2884,17 +2884,17 @@ export const labels = {
     }),
     pageDescription: i18n.translate('xpack.agentBuilder.context.pageDescription', {
       defaultMessage:
-        'Give your agents governed knowledge from AI indexes. Turn Context on per agent; build and manage the indexes themselves in the Context area.',
+        'Give your agents governed knowledge from AI indices. Turn Context on per agent; build and manage the indices themselves in the Context area.',
     }),
     calloutTitle: i18n.translate('xpack.agentBuilder.context.calloutTitle', {
       defaultMessage: 'What is this?',
     }),
     calloutBody: i18n.translate('xpack.agentBuilder.context.calloutBody', {
       defaultMessage:
-        'Context gives your agents governed knowledge from AI indexes, so they retrieve ranked facts instead of scanning raw data every turn. It runs background extraction, which uses tokens; that is why it is off by default on existing deployments and on by default for new ones. Turn it on per agent and pick which AI indexes each agent retrieves from.',
+        'Context gives your agents governed knowledge from AI indices, so they retrieve ranked facts instead of scanning raw data every turn. It runs background extraction, which uses tokens; that is why it is off by default on existing deployments and on by default for new ones. Turn it on per agent and pick which AI indices each agent retrieves from.',
     }),
     tableCaption: i18n.translate('xpack.agentBuilder.context.tableCaption', {
-      defaultMessage: 'Agents and the AI indexes they retrieve context from',
+      defaultMessage: 'Agents and the AI indices they retrieve context from',
     }),
     columnAgent: i18n.translate('xpack.agentBuilder.context.columnAgent', {
       defaultMessage: 'Agent',
@@ -2909,24 +2909,24 @@ export const labels = {
       defaultMessage: 'On',
     }),
     badgeOnTooltip: i18n.translate('xpack.agentBuilder.context.badgeOnTooltip', {
-      defaultMessage: 'This agent retrieves from the AI indexes selected here.',
+      defaultMessage: 'This agent retrieves from the AI indices selected here.',
     }),
     badgeAuto: i18n.translate('xpack.agentBuilder.context.badgeAuto', {
       defaultMessage: 'Auto',
     }),
     badgeAutoTooltip: i18n.translate('xpack.agentBuilder.context.badgeAutoTooltip', {
       defaultMessage:
-        'This agent retrieves only from the AI indexes its type always includes. Select others to add to them.',
+        'This agent retrieves only from the AI indices its type always includes. Select others to add to them.',
     }),
     badgeOff: i18n.translate('xpack.agentBuilder.context.badgeOff', {
       defaultMessage: 'Off',
     }),
     badgeOffTooltip: i18n.translate('xpack.agentBuilder.context.badgeOffTooltip', {
       defaultMessage:
-        'This agent has no AI indexes of its own and its type contributes none, so it does not retrieve from the Context Engine.',
+        'This agent has no AI indices of its own and its type contributes none, so it does not retrieve from the Context Engine.',
     }),
     selectorPlaceholder: i18n.translate('xpack.agentBuilder.context.selectorPlaceholder', {
-      defaultMessage: 'Select AI indexes',
+      defaultMessage: 'Select AI indices',
     }),
     inheritedAiIndexBadge: i18n.translate('xpack.agentBuilder.context.inheritedAiIndexBadge', {
       defaultMessage: 'Always included',
@@ -2939,22 +2939,22 @@ export const labels = {
     ),
     selectorSelectedCount: (count: number) =>
       i18n.translate('xpack.agentBuilder.context.selectorSelectedCount', {
-        defaultMessage: '{count, plural, one {# AI index selected} other {# AI indexes selected}}',
+        defaultMessage: '{count, plural, one {# AI index selected} other {# AI indices selected}}',
         values: { count },
       }),
     selectorAriaLabel: (agentName: string) =>
       i18n.translate('xpack.agentBuilder.context.selectorAriaLabel', {
-        defaultMessage: 'Select AI indexes for {agentName}',
+        defaultMessage: 'Select AI indices for {agentName}',
         values: { agentName },
       }),
     selectorSearchPlaceholder: i18n.translate(
       'xpack.agentBuilder.context.selectorSearchPlaceholder',
       {
-        defaultMessage: 'Search AI indexes',
+        defaultMessage: 'Search AI indices',
       }
     ),
     noAiIndicesMessage: i18n.translate('xpack.agentBuilder.context.noAiIndicesMessage', {
-      defaultMessage: 'No AI indexes yet.',
+      defaultMessage: 'No AI indices yet.',
     }),
     createNewAiIndex: i18n.translate('xpack.agentBuilder.context.createNewAiIndex', {
       defaultMessage: 'Create new AI index',
@@ -2963,15 +2963,15 @@ export const labels = {
       defaultMessage: 'Context off · agent does not use the Context Engine',
     }),
     manageInContextArea: i18n.translate('xpack.agentBuilder.context.manageInContextArea', {
-      defaultMessage: 'Manage AI indexes',
+      defaultMessage: 'Manage AI indices',
     }),
     updateSuccessToast: (agentName: string) =>
       i18n.translate('xpack.agentBuilder.context.updateSuccessToast', {
-        defaultMessage: 'Updated AI indexes for {agentName}',
+        defaultMessage: 'Updated AI indices for {agentName}',
         values: { agentName },
       }),
     updateErrorToast: i18n.translate('xpack.agentBuilder.context.updateErrorToast', {
-      defaultMessage: 'Failed to update AI indexes',
+      defaultMessage: 'Failed to update AI indices',
     }),
     noAgentsMessage: i18n.translate('xpack.agentBuilder.context.noAgentsMessage', {
       defaultMessage: 'No agents found.',
@@ -2979,7 +2979,7 @@ export const labels = {
     aiIndicesLoadErrorMessage: i18n.translate(
       'xpack.agentBuilder.context.aiIndicesLoadErrorMessage',
       {
-        defaultMessage: 'Could not load AI indexes. Check that the Context Engine is available.',
+        defaultMessage: 'Could not load AI indices. Check that the Context Engine is available.',
       }
     ),
   },

@@ -37,24 +37,17 @@ export function registerInternalAgentRoutes({
         await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID)
       );
 
-      // `ai_indices` is the only projected field, and it is meaningless while the Context Engine
-      // is off — the public API omits it entirely in that case.
+      // `ai_indices` is the only projected field, which is meaningless while the Context Engine is off
       if (!contextEngineEnabled) {
         return response.ok<ListAgentBaseConfigurationResponse>({ body: { results: [] } });
       }
 
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
-
-      // No list options, so this applies the same visibility filter as the public list endpoint
-      // and the returned ids line up with what a client renders.
       const agents = await registry.list();
 
       const results = await Promise.all(
         agents.map(async (agent) => {
-          // `undefined` means the agent's type is not registered. Its execution-time base is then
-          // whatever the fallback substitutes, which is not this agent's configuration, so nothing
-          // is reported rather than another type's values.
           const base = await agentsService.resolveAgentBaseConfiguration({ agent, request });
           return {
             agent_id: agent.id,

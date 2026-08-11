@@ -7,10 +7,6 @@
 
 /**
  * In-app routes for the Context Engine application, relative to {@link CONTEXT_ENGINE_APP_PATH}.
- *
- * These live in `common/` rather than `public/` so that other plugins linking into the Context
- * Engine (for example Agent Builder's Context page) can share a single source of truth instead of
- * duplicating the path strings.
  */
 export const CONTEXT_ENGINE_PATHS = {
   landing: '/',

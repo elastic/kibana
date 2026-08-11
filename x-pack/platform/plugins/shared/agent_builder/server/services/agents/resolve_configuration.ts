@@ -53,14 +53,6 @@ export const createConfigurationResolver = ({
     return type ? readBaseConfiguration(type, ctx) : {};
   };
 
-  /**
-   * Resolves a type's base configuration without the unknown-type fallback, returning `undefined`
-   * when the type is not registered.
-   *
-   * The fallback above keeps execution working when a type is missing, but it substitutes another
-   * type's configuration. Callers that *report* configuration must not present that substitution
-   * as the agent's own, so they get "unknown" instead and can say so.
-   */
   const resolveRegisteredBaseConfiguration = async (
     typeId: string,
     ctx: AgentConfigContext

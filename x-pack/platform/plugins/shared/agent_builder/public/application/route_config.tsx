@@ -241,7 +241,6 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     element: <AgentBuilderToolDetailsPage />,
   },
-  // Listed last so the sidebar reads Agents · Skills · Tools · Context, matching the design
   {
     path: '/manage/context',
     viewId: agentBuilderViewIds.manageContext,
