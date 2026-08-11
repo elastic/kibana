@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ loadTestFile }) {
-  describe('status', () => {
-    loadTestFile(require.resolve('./status'));
-  });
-}
+export { SecurityDiscoverFlyout } from './security_discover_flyout';
