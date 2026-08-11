@@ -4155,13 +4155,6 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@kayahr/text-encoding@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@kayahr/text-encoding/-/text-encoding-1.3.0.tgz#90ae1007dc86d35a977cd709dfa9fe21cc2bc8c6"
-  integrity sha512-JjQVFXnN/ynXN+GDgpwNM+PJ4NwDFZwRolgSu4bYG1JKuRreVFY5uss5K/lsH6qY38+WgU7M40M2SHoiWQHKgQ==
-  dependencies:
-    tslib "^2.6.2"
-
 "@kbn/aad-fixtures-plugin@link:x-pack/platform/test/alerting_api_integration/common/plugins/aad":
   version "0.0.0"
   uid ""
@@ -22737,9 +22730,9 @@ hoist-non-react-statics@3.3.2, hoist-non-react-statics@^2.5.5, hoist-non-react-s
     react-is "^16.7.0"
 
 hono@^4.11.4:
-  version "4.12.34"
-  resolved "https://registry.yarnpkg.com/hono/-/hono-4.12.34.tgz#9d6fb4ff01d6a8fa3a0290b4e120da19ea181b9b"
-  integrity sha512-GqXJqY/xJkJmuloTrnV1ZEXG3fqte+VjkUqoRNZXcrUidiUOP4fMSIHHY4tsqZBK++kVyWmt/AAfSUuy57/eSA==
+  version "4.13.1"
+  resolved "https://registry.yarnpkg.com/hono/-/hono-4.13.1.tgz#d4a606b792954d07a6215d12c01b7cf59da03cbc"
+  integrity sha512-kdJoFVv2xmayw6cY09H7AbMJMt8Jn5jdlEdXsP7AGBdF2DIptVlKlOLKXP41yPip4/a3yQPv9gVcJYI8YY04dw==
 
 hosted-git-info@^2.1.4:
   version "2.8.9"
