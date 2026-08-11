@@ -51,11 +51,7 @@ import {
   createEventIngestedPipeline,
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
-import {
-  DEFAULT_MAX_TERMS_QUERY_COUNT,
-  estimateLookbackDays,
-  riskScoreSeriesEntityBatchSize,
-} from '../utils/elasticsearch_terms_limits';
+import { riskScoreSeriesEntityBatchSize } from '../utils/elasticsearch_terms_limits';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -624,4 +620,3 @@ const toContributionFields = (risk: RiskScoreTimeSeriesRisk): Partial<RiskScoreH
   ...(risk.category_2_count !== undefined && { category_2_count: risk.category_2_count }),
   ...(risk.criticality_level !== undefined && { criticality_level: risk.criticality_level }),
 });
-
