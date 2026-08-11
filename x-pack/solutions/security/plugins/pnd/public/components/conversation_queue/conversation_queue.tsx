@@ -33,6 +33,8 @@ interface ConversationQueueProps {
   briefingList: Investigation[];
 }
 
+const CONVERSATION_QUEUE_HEADER_DOT_SIZE = 6;
+
 const StyledAccordion = styled(EuiAccordion)`
   &.euiAccordion-isOpen {
     .euiAccordion__triggerWrapper {
@@ -53,14 +55,27 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
+          <span
+            style={{
+              background: euiTheme.colors[CONVERSATION_CATEGORY_COLORS[briefingType]],
+              width: `${CONVERSATION_QUEUE_HEADER_DOT_SIZE}px`,
+              height: `${CONVERSATION_QUEUE_HEADER_DOT_SIZE}px`,
+              borderRadius: '50%',
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle
+            size="xxs"
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+          >
             <h3>{CONVERSATION_QUEUE_LABELS[briefingType]}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>
-            {briefingList.length}
-          </EuiBadge>
+          <EuiBadge color="hollow">{briefingList.length}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
