@@ -44,6 +44,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     profileId: string;
     id: string;
     isSelected: boolean;
+    onInteraction?: () => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -73,6 +74,7 @@ export const Chart = ({
   profileId,
   id,
   isSelected,
+  onInteraction,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -124,6 +126,7 @@ export const Chart = ({
             syncTooltips={syncTooltips}
             extraDisabledActions={extraDisabledActions}
             quickActionIds={quickActionIds}
+            onInteraction={onInteraction}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

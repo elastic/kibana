@@ -42,6 +42,7 @@ const PresentationPanelChrome = <
   titleHighlight,
   setDragHandle,
   componentApi,
+  onInteraction,
 }: React.PropsWithChildren<
   Omit<
     PresentationPanelProps<ApiType, ComponentPropsType>,
@@ -108,6 +109,7 @@ const PresentationPanelChrome = <
         showBorder,
       }}
       setDragHandle={setDragHandle}
+      onInteraction={onInteraction}
     >
       <EuiPanel
         role="figure"

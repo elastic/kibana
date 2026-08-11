@@ -66,6 +66,8 @@ export interface PresentationPanelProps<
    * Optional search term to highlight in the panel title
    */
   titleHighlight?: string;
+
+  onInteraction: () => void;
 }
 
 /**

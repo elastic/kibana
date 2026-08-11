@@ -53,7 +53,7 @@ export const EmbeddableRenderer = <
 
     const phaseTracker = new PhaseTracker(startTime);
 
-    const { Component, componentApi } = await buildEmbeddable<SerializedState, Api>({
+    const { Component, componentApi, onInteraction } = await buildEmbeddable<SerializedState, Api>({
       factory,
       maybeId,
       parentApi: getParentApi(),
@@ -67,6 +67,7 @@ export const EmbeddableRenderer = <
     return {
       Component,
       componentApi,
+      onInteraction,
       Panel: PresentationPanel,
       phaseTracker,
     };
@@ -100,6 +101,7 @@ export const EmbeddableRenderer = <
     <value.Panel<Api, {}>
       Component={value.Component}
       componentApi={value.componentApi}
+      onInteraction={value.onInteraction}
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
     />
