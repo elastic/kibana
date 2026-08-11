@@ -153,6 +153,16 @@ describe('lazySchema', () => {
       });
     });
 
+    it('does not crash when the factory returns an optional-wrapped schema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).optional());
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+    });
+
+    it('does not crash when the factory returns a default-wrapped schema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).default({ id: 'x' }));
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+    });
+
     // Verifies that the Object.create wrapper preserves non-enumerable _zod
     // internals (e.g. propValues) so that parse still works after toJSONSchema.
     it('still parses correctly after z.toJSONSchema is called', () => {
