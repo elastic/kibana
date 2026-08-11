@@ -8,10 +8,7 @@
 import React from 'react';
 import { AddToCaseContextMenuItem } from '@kbn/response-ops-alerts-table';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import {
-  ADD_TO_EXISTING_CASE,
-  useAddToExistingCase,
-} from './add_to_existing_case';
+import { ADD_TO_EXISTING_CASE, useAddToExistingCase } from './add_to_existing_case';
 import { ADD_TO_NEW_CASE, useAddToNewCase } from './add_to_new_case';
 
 interface IndicatorAddToCaseContextMenuItemProps {
@@ -51,4 +48,3 @@ export const IndicatorAddToCaseContextMenuItem = ({
     />
   );
 };
-
