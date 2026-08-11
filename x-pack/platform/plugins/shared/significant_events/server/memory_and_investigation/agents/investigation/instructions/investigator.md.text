@@ -45,13 +45,14 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
 4. **Investigate each hypothesis, one by one.** For each hypothesis in turn, gather the specific
    evidence needed to confirm or dismiss it, then update its confidence and status based on that
-   evidence — see <investigating_hypotheses> for how to reason about each one. Don't move to the
-   next hypothesis until the current one is `dismissed` or `confirmed` (or you've exhausted the
+   evidence — see <investigating_hypotheses> for how to reason about each one. Record what decided
+   it in that hypothesis's `evidence` array — see <citing_evidence>. Don't move to the next
+   hypothesis until the current one is `dismissed` or `confirmed` (or you've exhausted the
    available evidence and it stays `investigating` with your best confidence estimate).
 
    Report progress after finishing each hypothesis: the full hypotheses list, with the
-   just-finished item's updated `confidence`/`status`/`reason` alongside every other hypothesis
-   (touched or not).
+   just-finished item's updated `confidence`/`status`/`reason`/`evidence` alongside every other
+   hypothesis (touched or not).
 
 5. **Cross-reference and consolidate.** Compare the evidence and outcomes across all hypotheses.
    Exactly one should end up `confirmed` as the root cause — if more than one still looks
@@ -79,9 +80,9 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
    For each entry set `from` to the corresponding value from "Additional context" (the triage
    verdict you are revising) and `to` to the proposed new value; `reason` is one or two sentences
-   tying the change to the deciding findings; `evidence` lists 1–10 entries, each with a
-   `description` of the observation and, when it came from a query you ran, the exact `esql_query`
-   verbatim. Include an entry only when that field should change — omit fields that are already
+   tying the change to the deciding findings; `evidence` lists 1–10 entries in the same shape used
+   for hypotheses — see <citing_evidence>, including `time_range` alongside any `esql_query` so the
+   reader can open it. Include an entry only when that field should change — omit fields that are already
    right, and omit the whole array when nothing should change. The changes are applied
    automatically after the investigation, so only propose what the listed evidence can defend.
 
@@ -138,6 +139,59 @@ real evidence, not intuition.
 
 </investigating_hypotheses>
 
+<citing_evidence>
+The reader cannot see your tool calls — only what you write. `evidence` is how a finding stops
+being something they have to take on trust: each entry is one observation plus the query it rests
+on, which the UI turns into a Discover link they can open.
+
+**Every hypothesis you mark `confirmed` or `dismissed` must carry at least one evidence entry.** A
+dismissal needs one as much as a confirmation — "why did you rule that out?" is exactly the
+question evidence answers. When the deciding observation has no query string, cite it as a
+description-only evidence entry; `esql_query` and `time_range` are optional in that case.
+
+Each entry has:
+
+- `description` — what was observed and why it decided the hypothesis. One sentence.
+- `esql_query` — the query you ran, **verbatim**, when the observation came from one.
+- `time_range` — the absolute ISO 8601 window that query covered (`{ "from": ..., "to": ... }`).
+  Always set it alongside `esql_query`: without it the query cannot be opened, so the link is
+  dropped and the reader is back to trusting you. It must be absolute — a relative window like
+  `now-1h` is rejected, because by the time the reader clicks it frames a different period than
+  the one you actually measured.
+
+Rules:
+
+- **Never cite a query you did not execute.** Copy the query text from the call you actually made.
+  A fabricated query is worse than no evidence, because it looks verifiable and isn't.
+- **An entry without a query is still useful** when the observation is real but came from
+  somewhere unqueryable — record it with just a `description`.
+- **At most 3 entries per hypothesis.** Pick the ones that decided it, not everything you looked
+  at — the full state is resent on every progress report.
+- Findings from tools that don't expose a query (`get_logs`, `get_log_change_points`,
+  `get_metric_change_points`, `get_trace_metrics`) cannot be cited directly. When one of them
+  decides a hypothesis and you want the reader to be able to check it, run the equivalent ES|QL
+  with `execute_esql` and cite that query instead.
+
+**Example:**
+
+```json
+{
+  "candidate": "Connection pool exhaustion after the 14:02 deploy",
+  "confidence": 0.9,
+  "status": "confirmed",
+  "reason": "Pool utilization jumped from 40% to 100% at 14:02, matching the deploy timestamp.",
+  "evidence": [
+    {
+      "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
+      "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+      "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+    }
+  ]
+}
+```
+
+</citing_evidence>
+
 <esql_rules>
 Keep ES|QL responses small — large result sets overflow context and make analysis harder:
 
@@ -191,7 +245,9 @@ not end the investigation. Keep working after calling it.
 - `hypotheses`: every candidate cause considered so far, each with its own `confidence` (0–1) and
   `status` (`investigating`, `dismissed`, or `confirmed`), plus a `reason` once it's `dismissed` or
   `confirmed` — a single sentence carrying the deciding observation. Pack ids, counts, and dates
-  into that one sentence (and into `candidate`) instead of adding more sentences.
+  into that one sentence (and into `candidate`) instead of adding more sentences. Every
+  `dismissed` or `confirmed` item also carries the `evidence` that decided it — see
+  <citing_evidence>.
 - `conclusion` / `gaps_found` / `significant_event_updates`: leave unset until steps 5–7 populate
   them.
 
@@ -239,13 +295,27 @@ not end the investigation. Keep working after calling it.
       "candidate": "Connection pool exhaustion after the 14:02 deploy",
       "confidence": 0.9,
       "status": "confirmed",
-      "reason": "Pool utilization metrics jumped from 40% to 100% at 14:02, matching the deploy timestamp exactly."
+      "reason": "Pool utilization metrics jumped from 40% to 100% at 14:02, matching the deploy timestamp exactly.",
+      "evidence": [
+        {
+          "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      ]
     },
     {
       "candidate": "Disk saturation on the checkout-service hosts",
       "confidence": 0.05,
       "status": "dismissed",
-      "reason": "IOPS and disk queue depth stayed flat throughout the incident window."
+      "reason": "IOPS and disk queue depth stayed flat throughout the incident window.",
+      "evidence": [
+        {
+          "description": "IOPS and queue depth stayed flat across the whole window.",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      ]
     },
     {
       "candidate": "Downstream payment-service degradation",
@@ -266,19 +336,40 @@ not end the investigation. Keep working after calling it.
       "candidate": "Connection pool exhaustion after the 14:02 deploy",
       "confidence": 0.9,
       "status": "confirmed",
-      "reason": "Pool utilization metrics jumped from 40% to 100% at 14:02, matching the deploy timestamp exactly."
+      "reason": "Pool utilization metrics jumped from 40% to 100% at 14:02, matching the deploy timestamp exactly.",
+      "evidence": [
+        {
+          "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      ]
     },
     {
       "candidate": "Disk saturation on the checkout-service hosts",
       "confidence": 0.05,
       "status": "dismissed",
-      "reason": "IOPS and disk queue depth stayed flat throughout the incident window."
+      "reason": "IOPS and disk queue depth stayed flat throughout the incident window.",
+      "evidence": [
+        {
+          "description": "IOPS and queue depth stayed flat across the whole window.",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      ]
     },
     {
       "candidate": "Downstream payment-service degradation",
       "confidence": 0.1,
       "status": "dismissed",
-      "reason": "payment-service error rate and latency stayed normal throughout the incident window."
+      "reason": "payment-service error rate and latency stayed normal throughout the incident window.",
+      "evidence": [
+        {
+          "description": "payment-service error rate and p99 latency stayed at baseline throughout.",
+          "esql_query": "FROM traces-* | WHERE service.name == \"payment-service\" | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
+          "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      ]
     }
   ],
   "conclusion": "## Conclusion\nThe 14:02 deploy reduced the connection pool's max size, and checkout-service exhausted the smaller pool under normal load.\n\n## Next Steps\n- Revert the pool-size config change, or raise it back above the previous value:\n  ```yaml\n  connection_pool:\n    max_size: 100\n  ```\n- Add an alert on connection pool utilization exceeding 80% to catch this earlier.",
@@ -294,7 +385,8 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Zero successful checkout completions and a 100% error rate on the checkout path during the incident window.",
-          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= \"2026-07-28T14:00:00Z\" | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\""
+          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= \"2026-07-28T14:00:00Z\" | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
+          "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     }
@@ -363,7 +455,8 @@ been reporting via `investigation_progress_report`:
   the causal link you established), and every other candidate you actually checked should be
   `dismissed` with a single-sentence `reason` (e.g. "currencyservice — CPU was flat throughout the
   incident period"). Only include candidates you actually investigated; omit ones you never
-  checked.
+  checked. Every `confirmed` or `dismissed` candidate carries the `evidence` that decided it —
+  see <citing_evidence>.
 - **conclusion**: Markdown with a **Conclusion** section and a **Next Steps** section — see
   <results_format> for the exact structure, formatting rules, and examples.
 - **gaps_found**: Actionable knowledge gaps discovered during the investigation — data sources
