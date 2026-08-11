@@ -19,11 +19,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useForm, FormProvider, type FieldErrors } from 'react-hook-form';
-import { useProjectPickerActions, useProjectPickerState } from '../../../../../state';
 import {
-  previewFilterMatchingIds,
+  useFetchProjectsByRouting,
+  useProjectPickerActions,
+  useProjectPickerState,
+} from '../../../../../state';
+import {
+  buildPreviewFilterExpressions,
+  collectProjectIdsFromProjectsData,
+  getEnabledFilterExpressions,
+  intersectServerMatchIds,
   isDuplicateFilterExpressionDraft,
-} from '../../../../../state/derivatives';
+} from '../../../../../utils/state_utils';
+import { encodeFilterOnlyRouting } from '../../../../../utils';
 import { FilterSelectionInput, type FilterInput } from './filter_input';
 import { isValidFilterExpression } from '../../../../../utils/filter_input_codec';
 
@@ -50,6 +58,7 @@ export function ProjectPickerFilterForm({
 }: ProjectPickerFilterFormProps) {
   const actions = useProjectPickerActions();
   const state = useProjectPickerState();
+  const fetchProjectsByRouting = useFetchProjectsByRouting();
   const [filterInput, setFilterInput] = useState<FilterInput | null>(null);
 
   const parsedDefaultFilterExpression = useMemo(() => {
@@ -106,35 +115,58 @@ export function ProjectPickerFilterForm({
   const shouldDisableCreateFilter = !completeFilterExpression;
 
   const validateExpression = useCallback(
-    (input: FilterInput): true | string => {
+    async (input: FilterInput): Promise<true | string> => {
       if (!isValidFilterExpression(input)) {
         return true;
       }
 
-      const matchingIds = previewFilterMatchingIds(
-        state.availableProjects,
-        state.filterExpressions,
-        input,
-        filterId
-      );
-
-      // check if draft expression is a duplicate of an existing filter expression
+      // Local duplicate check — no server round-trip.
       if (isDuplicateFilterExpressionDraft(state.filterExpressions, input, filterId)) {
         return i18n.translate('cpsUtils.projectPicker.filterBox.duplicateFilterHelpText', {
           defaultMessage: 'This filter already exists. Change the filter or edit the existing one.',
         });
       }
 
-      if (matchingIds !== null && matchingIds.length === 0) {
-        return i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
-          defaultMessage:
-            'No projects match this filter. Adjust so at least one project is included in your search.',
+      const previewFilters = buildPreviewFilterExpressions(
+        state.filterExpressions,
+        input,
+        filterId
+      );
+
+      if (!previewFilters) {
+        return true;
+      }
+
+      const filterOnlyRouting = encodeFilterOnlyRouting(
+        getEnabledFilterExpressions(previewFilters)
+      );
+
+      if (!filterOnlyRouting) {
+        return true;
+      }
+
+      try {
+        const data = await fetchProjectsByRouting(filterOnlyRouting);
+        const matchingIds = intersectServerMatchIds(
+          state.availableProjects,
+          collectProjectIdsFromProjectsData(data)
+        );
+
+        if (matchingIds.length === 0) {
+          return i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
+            defaultMessage:
+              'No projects match this filter. Adjust so at least one project is included in your search.',
+          });
+        }
+      } catch {
+        return i18n.translate('cpsUtils.projectPicker.filterBox.filterSearchFailedHelpText', {
+          defaultMessage: 'Unable to validate this filter. Try again.',
         });
       }
 
       return true;
     },
-    [filterId, state.availableProjects, state.filterExpressions]
+    [filterId, fetchProjectsByRouting, state.availableProjects, state.filterExpressions]
   );
 
   const handleValidFilterInput = useCallback(

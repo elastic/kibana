@@ -29,9 +29,10 @@ import {
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '@kbn/cps-utils';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
-import { BehaviorSubject, from, switchMap } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { showProjectRoutingChangeConfirmModal } from '../../../../application/jobs/components/project_routing_change_confirm';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
@@ -100,12 +101,13 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   }, [selectedProjectRouting]);
 
   const getProjects$ = useCallback(() => {
-    return selectedProjectRouting$.current.pipe(
-      switchMap((routing) => {
-        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
-      })
-    );
+    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
   }, [cpsManager]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
+    [cpsManager]
+  );
 
   const defaultProjectRoutingGetter = useCallback(() => {
     return cpsManager?.getDefaultProjectRouting();
@@ -300,6 +302,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
                 projectRouting$={selectedProjectRouting$.current}
                 onProjectRoutingChange={onProjectRoutingChange}
                 getActiveRouteProjects$={getProjects$}
+                fetchProjectsByRouting={fetchProjectsByRouting}
                 defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                 totalProjectCount={totalProjectCount}
                 projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"

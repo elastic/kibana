@@ -41,10 +41,12 @@ const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
+const mockFetchProjectsByRouting = jest.fn();
 
 jest.mock('../../../../../state', () => ({
   useProjectPickerState: () => mockUseProjectPickerState(),
   useProjectPickerActions: () => mockUseProjectPickerActions(),
+  useFetchProjectsByRouting: () => mockFetchProjectsByRouting,
 }));
 
 const createFilterExpressions = (
@@ -63,6 +65,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   availableProjects: new Map([[securityProject._id, securityProject]]),
   excludedOverrides: [],
   filteredProjectIds: [securityProject._id],
+  isFilterSearchLoading: false,
+  filterSearchError: null,
   visibleProjectIds: [securityProject._id],
   selectedProjects: [securityProject._id],
   currentProjectRouting: '_alias:*',
@@ -122,6 +126,17 @@ const fillFilterForm = async (
 describe('ProjectPickerFilterForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchProjectsByRouting.mockImplementation(async (routing?: string) => {
+      if (!routing) {
+        return { origin: securityProject, linkedProjects: [] };
+      }
+      // Match env:prod / _type:security style equals clauses used in these tests.
+      const matches = routing.includes('_type:security') || routing.includes('env:prod');
+      if (matches && !routing.includes('staging') && !routing.includes('env:staging')) {
+        return { origin: securityProject, linkedProjects: [] };
+      }
+      return { origin: null, linkedProjects: [] };
+    });
   });
 
   it('adds a filter and closes the form when submit succeeds', async () => {
@@ -155,12 +170,14 @@ describe('ProjectPickerFilterForm', () => {
     expect(
       screen.getByText('This filter already exists. Change the filter or edit the existing one.')
     ).toBeInTheDocument();
+    expect(mockFetchProjectsByRouting).not.toHaveBeenCalled();
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).not.toHaveBeenCalled();
   });
 
   it('surfaces a zero-match validation error on submit and does not mutate state', async () => {
     const user = userEvent.setup();
+    mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
     const { onCloseFilterFormRequested } = renderForm();
 
     await fillFilterForm(user, { tagName: 'env', tagValue: 'prod' });
@@ -173,10 +190,11 @@ describe('ProjectPickerFilterForm', () => {
     await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
 
     expect(
-      screen.getByText(
+      await screen.findByText(
         'No projects match this filter. Adjust so at least one project is included in your search.'
       )
     ).toBeInTheDocument();
+    expect(mockFetchProjectsByRouting).toHaveBeenCalled();
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).not.toHaveBeenCalled();
   });

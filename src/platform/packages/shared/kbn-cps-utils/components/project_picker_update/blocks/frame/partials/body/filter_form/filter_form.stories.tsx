@@ -64,6 +64,10 @@ export const ProjectPickerFilterBoxStory: StoryObj<
       currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
       originProjectId={originProjectId}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects[0] ?? null,
+        linkedProjects: availableProjects.slice(1),
+      })}
     >
       <ProjectPickerFilterForm {...props} />
     </ProjectPickerStateProvider>

@@ -18,6 +18,7 @@ export {
 } from './filter_input_codec';
 export {
   projectRoutingCodec,
+  encodeFilterOnlyRouting,
   type ProjectRoutingExpression,
   type ProjectRoutingStrategy,
   ROUTING_WILDCARD,

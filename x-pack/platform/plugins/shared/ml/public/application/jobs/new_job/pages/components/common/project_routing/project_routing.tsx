@@ -11,7 +11,8 @@ import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, from, switchMap } from 'rxjs';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { BehaviorSubject, from } from 'rxjs';
 import { useMlKibana } from '../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../job_creator_context';
 import type {
@@ -42,12 +43,13 @@ export const ProjectRoutingSelect: FC = () => {
   }, [projectRouting]);
 
   const getProjects$ = useCallback(() => {
-    return projectRouting$.current.pipe(
-      switchMap((routing) => {
-        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
-      })
-    );
+    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
   }, [cpsManager]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
+    [cpsManager]
+  );
 
   const defaultProjectRoutingGetter = useCallback(() => {
     return cpsManager?.getDefaultProjectRouting();
@@ -73,6 +75,7 @@ export const ProjectRoutingSelect: FC = () => {
         projectRouting$={projectRouting$.current}
         onProjectRoutingChange={onProjectRoutingChange}
         getActiveRouteProjects$={getProjects$}
+        fetchProjectsByRouting={fetchProjectsByRouting}
         defaultProjectRoutingGetter={defaultProjectRoutingGetter}
         totalProjectCount={totalProjectCount}
         isReadonly={false}

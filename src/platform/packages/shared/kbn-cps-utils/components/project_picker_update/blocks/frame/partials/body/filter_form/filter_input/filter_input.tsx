@@ -39,8 +39,9 @@ interface FilterSelectionInputProps {
   /**
    * Business-rule validator invoked by RHF on submit (and on revalidation).
    * Return `true` when valid, or an error message string when invalid.
+   * May be async when validating against the server.
    */
-  validateExpression: (input: FilterInput) => true | string;
+  validateExpression: (input: FilterInput) => true | string | Promise<true | string>;
   getFilteringDimensionsOptions: () => string[];
   getFilterValuesOptions: (anchor: Omit<Partial<FilterInput>, 'tagValue'>) => string[];
 }

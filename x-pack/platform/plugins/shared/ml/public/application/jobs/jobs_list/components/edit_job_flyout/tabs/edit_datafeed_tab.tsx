@@ -9,10 +9,11 @@ import type { ChangeEvent, FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldNumber } from '@elastic/eui';
-import { BehaviorSubject, from, switchMap } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -81,12 +82,13 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
 
   const getProjects$ = useCallback(() => {
-    return datafeedProjectRouting$.current.pipe(
-      switchMap((routing) => {
-        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
-      })
-    );
+    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
   }, [cpsManager]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
+    [cpsManager]
+  );
 
   const defaultProjectRoutingGetter = useCallback(() => {
     return cpsManager?.getDefaultProjectRouting();
@@ -127,6 +129,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
               projectRouting$={datafeedProjectRouting$.current}
               onProjectRoutingChange={onProjectRoutingChange}
               getActiveRouteProjects$={getProjects$}
+              fetchProjectsByRouting={fetchProjectsByRouting}
               defaultProjectRoutingGetter={defaultProjectRoutingGetter}
               totalProjectCount={totalProjectCount}
               disabled={datafeedRunning}

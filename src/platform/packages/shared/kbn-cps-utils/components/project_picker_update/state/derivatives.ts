@@ -7,120 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CPSProject } from '../../../types';
 import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
-import {
-  type FilterExpressionDraft,
-  type FilterExpressionValue,
-  type FilterOperatorLiteral,
-  getFilterExpressionLookupKey,
-  getOperatorKind,
-  isNegatedOperator,
-  isValidFilterExpression,
-  OperatorKind,
-} from '../utils/filter_input_codec';
+import { type FilterExpressionValue } from '../utils/filter_input_codec';
 import { PROJECT_SELECTION_DIMENSION, projectRoutingCodec } from '../utils/project_routing_codec';
-
-export const PREVIEW_FILTER_EXPRESSION_ID = '__preview__';
-
-const getProjectFieldValue = (project: CPSProject, tagName: string): string | undefined => {
-  const normalizedKey = tagName.startsWith('_') ? tagName : `_${tagName}`;
-  return project[normalizedKey] ?? project[tagName];
-};
-
-const matchesFilterValue = (
-  fieldValue: string | undefined,
-  operator: FilterOperatorLiteral,
-  tagValue: string | string[] | undefined
-): boolean => {
-  if (getOperatorKind(operator) === OperatorKind.EXISTS) {
-    return fieldValue !== undefined;
-  }
-
-  if (fieldValue === undefined || tagValue === undefined) {
-    return false;
-  }
-  return Array.isArray(tagValue) ? tagValue.includes(fieldValue) : fieldValue === tagValue;
-};
-
-export const applyFilterExpressions = (
-  availableProjects: Map<CPSProject['_id'], CPSProject>,
-  filterExpressions: Map<string, FilterEntry>
-): string[] => {
-  if (filterExpressions.size === 0) {
-    return [];
-  }
-
-  let matchingIds = Array.from(availableProjects.keys());
-
-  for (const entry of filterExpressions.values()) {
-    if (!entry.enabled) {
-      continue;
-    }
-
-    const { operator, tagName, tagValue } = entry.expression;
-
-    if (!tagName || (getOperatorKind(operator) !== OperatorKind.EXISTS && !tagValue)) {
-      continue;
-    }
-
-    const isNegated = isNegatedOperator(operator);
-    matchingIds = matchingIds.filter((id) => {
-      const project = availableProjects.get(id);
-      if (!project) {
-        return false;
-      }
-
-      const fieldValue = getProjectFieldValue(project, tagName);
-      const matches = matchesFilterValue(fieldValue, operator, tagValue);
-      return isNegated ? !matches : matches;
-    });
-  }
-
-  return matchingIds;
-};
-
-/**
- * Previews matching project IDs for a draft filter combined with existing filters.
- * Returns `null` when the draft is incomplete.
- */
-export const previewFilterMatchingIds = (
-  availableProjects: Map<CPSProject['_id'], CPSProject>,
-  existingFilterExpressions: Map<string, FilterEntry>,
-  draft: FilterExpressionDraft,
-  filterId?: string
-): string[] | null => {
-  if (!isValidFilterExpression(draft)) {
-    return null;
-  }
-
-  const previewFilters = new Map(existingFilterExpressions);
-  if (filterId) {
-    const existing = previewFilters.get(filterId);
-    previewFilters.set(filterId, {
-      expression: draft,
-      enabled: existing?.enabled ?? true,
-    });
-  } else {
-    previewFilters.set(PREVIEW_FILTER_EXPRESSION_ID, { expression: draft, enabled: true });
-  }
-
-  return applyFilterExpressions(availableProjects, previewFilters);
-};
-
-export function isDuplicateFilterExpressionDraft(
-  filterExpressions: Map<string, FilterEntry>,
-  draft: FilterExpressionValue,
-  editingFilterId?: string
-): boolean {
-  const draftKey = getFilterExpressionLookupKey(draft);
-  if (!filterExpressions.has(draftKey)) {
-    return false;
-  }
-
-  return draftKey !== editingFilterId;
-}
 
 export const hasActiveFilterExpressions = (
   filterExpressions: Map<string, FilterEntry>
@@ -172,11 +62,6 @@ export const computeSelectedProjects = (
  * Order is important here, when derivations depend on other derivations, they should be computed after the dependent derivations.
  */
 export const projectPickerDerivatives = [
-  {
-    key: 'filteredProjectIds',
-    compute: (state: ProjectPickerState) =>
-      applyFilterExpressions(state.availableProjects, state.filterExpressions),
-  },
   {
     key: 'visibleProjectIds',
     compute: (state: ProjectPickerState) => computeVisibleProjectIds(state),

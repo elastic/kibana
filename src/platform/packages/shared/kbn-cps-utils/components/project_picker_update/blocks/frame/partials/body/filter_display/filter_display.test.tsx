@@ -61,6 +61,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   availableProjects: new Map(),
   excludedOverrides: [],
   filteredProjectIds: [],
+  isFilterSearchLoading: false,
+  filterSearchError: null,
   visibleProjectIds: [],
   selectedProjects: [],
   currentProjectRouting: '',

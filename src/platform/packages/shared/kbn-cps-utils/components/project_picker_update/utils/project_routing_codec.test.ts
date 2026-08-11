@@ -11,6 +11,7 @@ import { FilterOperator, type FilterExpressionValue } from './filter_input_codec
 import type { ProjectRoutingExpression } from './project_routing_codec';
 import {
   decodeTagFilterRoutingClause,
+  encodeFilterOnlyRouting,
   encodeTagFilterRoutingClause,
   projectRoutingCodec,
   ProjectRoutingExpressionSchema,
@@ -88,6 +89,29 @@ describe('encodeTagFilterRoutingClause', () => {
         tagValue: undefined,
       })
     ).toBe('NOT env:*');
+  });
+});
+
+describe('encodeFilterOnlyRouting', () => {
+  it('returns undefined when there are no filter expressions', () => {
+    expect(encodeFilterOnlyRouting([])).toBeUndefined();
+  });
+
+  it('encodes tag filters without _id selection clauses', () => {
+    expect(encodeFilterOnlyRouting([typeSecurityExpression])).toBe('_type:security');
+  });
+
+  it('joins multiple tag filters with AND', () => {
+    expect(
+      encodeFilterOnlyRouting([
+        typeSecurityExpression,
+        {
+          operator: FilterOperator.EQUALS,
+          tagName: 'env',
+          tagValue: 'prod',
+        },
+      ])
+    ).toBe('_type:security AND env:prod');
   });
 });
 

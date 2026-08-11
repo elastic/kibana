@@ -44,9 +44,18 @@ export interface ProjectPickerState extends ProjectPickerStoredState {
   currentProjectRouting: ProjectRouting;
   isUsingSpaceDefaults: boolean;
   /**
-   * This is the list of project ids that match the filter expressions the user has applied.
+   * Project ids that match the enabled filter expressions, from server search
+   * intersected with {@link ProjectPickerStoredState.availableProjects}.
    */
   filteredProjectIds: string[];
+  /**
+   * True while a filter-expression server search is in flight.
+   */
+  isFilterSearchLoading: boolean;
+  /**
+   * Last filter-search error, if any.
+   */
+  filterSearchError: Error | null;
   /**
    * This is the list of projects that qualify to be displayed considering the filter expressions the user has applied.
    */
@@ -103,10 +112,32 @@ export function createStoreReducers() {
         // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
         filteringDimensions: [],
         filteredProjectIds: [],
+        isFilterSearchLoading: false,
+        filterSearchError: null,
         selectedProjects: [],
         visibleProjectIds: [],
         currentProjectRouting: '',
         isUsingSpaceDefaults: false,
+      };
+    },
+    /**
+     * Updates filter search loading / result state from an async server fetch.
+     */
+    _setFilterSearchResult(
+      state: ProjectPickerState,
+      payload: {
+        filteredProjectIds?: string[];
+        isFilterSearchLoading: boolean;
+        filterSearchError: Error | null;
+      }
+    ) {
+      return {
+        ...state,
+        ...(payload.filteredProjectIds !== undefined
+          ? { filteredProjectIds: payload.filteredProjectIds }
+          : {}),
+        isFilterSearchLoading: payload.isFilterSearchLoading,
+        filterSearchError: payload.filterSearchError,
       };
     },
     /**

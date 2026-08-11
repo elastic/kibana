@@ -66,6 +66,10 @@ export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> 
     defaultProjectRoutingGetter: () => '_alias:origin',
     currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
+    fetchProjectsByRouting: async (routing) => {
+      action('fetchProjectsByRouting')(routing);
+      return { origin: null, linkedProjects: [] };
+    },
     get originProjectId(): string {
       return this.availableProjects![0]._id;
     },
@@ -88,6 +92,7 @@ export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectP
     defaultProjectRoutingGetter: () => '_alias:origin',
     currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
+    fetchProjectsByRouting: async () => ({ origin: null, linkedProjects: [] }),
     get originProjectId(): string {
       return this.availableProjects![0]._id;
     },

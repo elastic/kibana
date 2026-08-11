@@ -54,6 +54,8 @@ describe('ProjectPicker', () => {
     defaultProjectRoutingGetter: () => undefined,
     currentProjectRoutingGetter: () => '',
     onProjectRoutingChange: jest.fn(),
+    fetchProjectsByRouting: jest.fn().mockResolvedValue(mockProjectsData),
+    totalProjectCount: 3,
   };
 
   const renderProjectPicker = async (props: Partial<ProjectPickerProps> = {}) => {
@@ -99,6 +101,7 @@ describe('ProjectPicker', () => {
 
   it('should render nothing when there are no linked projects', async () => {
     await renderProjectPicker({
+      totalProjectCount: 1,
       getActiveRouteProjects$: () =>
         of({
           origin: originProject,
@@ -225,6 +228,7 @@ describe('ProjectPicker', () => {
 });
 
 describe('ProjectPickerContent', () => {
+  const mockFetchProjectsByRouting = jest.fn().mockResolvedValue(mockProjectsData);
   const mockProjects = {
     originProject: {
       _id: 'origin',
@@ -249,14 +253,16 @@ describe('ProjectPickerContent', () => {
       render(
         <I18nProvider>
           <EuiThemeProvider>
-            <ProjectPickerContent projects={mockProjects} controlsState="hidden" />
+            <ProjectPickerContent
+              projects={mockProjects}
+              fetchProjectsByRouting={mockFetchProjectsByRouting}
+              controlsState="hidden"
+            />
           </EuiThemeProvider>
         </I18nProvider>
       );
     });
 
-    expect(screen.queryByText('All projects')).not.toBeInTheDocument();
-    expect(screen.queryByText('This project')).not.toBeInTheDocument();
     expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();
     expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
   });
@@ -271,6 +277,7 @@ describe('ProjectPickerContent', () => {
                 ...mockProjects,
                 originProject: null,
               }}
+              fetchProjectsByRouting={mockFetchProjectsByRouting}
               controlsState="hidden"
             />
           </EuiThemeProvider>
@@ -293,6 +300,7 @@ describe('ProjectPickerContent', () => {
                 isLoading: true,
                 error: null,
               }}
+              fetchProjectsByRouting={mockFetchProjectsByRouting}
               controlsState="hidden"
             />
           </EuiThemeProvider>
@@ -300,30 +308,6 @@ describe('ProjectPickerContent', () => {
       );
     });
 
-    expect(screen.getByText('Searching across 0 projects')).toBeInTheDocument();
-  });
-
-  it('shows error state without projects', async () => {
-    await act(async () => {
-      render(
-        <I18nProvider>
-          <EuiThemeProvider>
-            <ProjectPickerContent
-              projects={{
-                originProject: null,
-                linkedProjects: [],
-                isLoading: false,
-                error: new Error('Failed to load projects'),
-              }}
-              controlsState="hidden"
-            />
-          </EuiThemeProvider>
-        </I18nProvider>
-      );
-    });
-
-    expect(
-      screen.getByText('Failed to load projects. Try refreshing the page.')
-    ).toBeInTheDocument();
+    expect(document.querySelector('.euiLoadingSpinner')).toBeTruthy();
   });
 });

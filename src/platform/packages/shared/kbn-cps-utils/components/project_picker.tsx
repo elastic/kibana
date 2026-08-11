@@ -37,7 +37,10 @@ import type { CPSProject, ProjectsData } from '../types';
 export interface ProjectPickerProps
   extends Pick<
       ComponentProps<typeof ProjectPickerStateProvider>,
-      'defaultProjectRoutingGetter' | 'onProjectRoutingChange' | 'currentProjectRoutingGetter'
+      | 'defaultProjectRoutingGetter'
+      | 'onProjectRoutingChange'
+      | 'currentProjectRoutingGetter'
+      | 'fetchProjectsByRouting'
     >,
     Pick<ComponentProps<typeof ProjectPickerFrame>, 'customHeaderContextMenuItems'> {
   getActiveRouteProjects$: () => Observable<ProjectsData | null>;
@@ -54,6 +57,7 @@ export const ProjectPicker = ({
   getActiveRouteProjects$,
   defaultProjectRoutingGetter,
   currentProjectRoutingGetter,
+  fetchProjectsByRouting,
   totalProjectCount,
   customHeaderContextMenuItems,
 }: ProjectPickerProps) => {
@@ -139,6 +143,7 @@ export const ProjectPicker = ({
       originProjectId={originProject._id}
       availableProjects={availableProjects}
       onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={fetchProjectsByRouting}
       isReadOnly={isReadonly}
     >
       <EuiPopover

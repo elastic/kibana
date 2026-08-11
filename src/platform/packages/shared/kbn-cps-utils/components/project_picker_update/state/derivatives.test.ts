@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CPSProject } from '../../../types';
+import type { CPSProject, ProjectsData } from '../../../types';
 import type { FilterEntry, ProjectPickerState } from './reducers';
 import {
-  applyFilterExpressions,
+  buildPreviewFilterExpressions,
+  collectProjectIdsFromProjectsData,
   computeSelectedProjects,
   computeVisibleProjectIds,
+  getEnabledFilterExpressions,
+  intersectServerMatchIds,
   isDuplicateFilterExpressionDraft,
-  previewFilterMatchingIds,
   projectPickerDerivatives,
 } from './derivatives';
 import { applyStoreDerivatives } from './store';
@@ -23,6 +25,7 @@ import {
   getFilterExpressionLookupKey,
   type FilterExpressionValue,
 } from '../utils/filter_input_codec';
+import { encodeFilterOnlyRouting } from '../utils/project_routing_codec';
 
 const typeSecurityExpression = {
   operator: FilterOperator.EQUALS,
@@ -62,6 +65,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     availableProjects,
     excludedOverrides: [],
     filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
     visibleProjectIds: [],
     selectedProjects: [],
     currentProjectRouting: '',
@@ -73,158 +78,72 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   };
 };
 
-describe('applyFilterExpressions', () => {
-  it('returns an empty list when no filter expressions are set', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1' })],
-      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-    ]);
-
-    expect(applyFilterExpressions(availableProjects, new Map())).toEqual([]);
+describe('collectProjectIdsFromProjectsData', () => {
+  it('returns an empty list for null data', () => {
+    expect(collectProjectIdsFromProjectsData(null)).toEqual([]);
   });
 
-  it('filters projects by tag name and value', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1', _type: 'security' })],
-      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-    ]);
+  it('collects origin and linked project ids', () => {
+    const data: ProjectsData = {
+      origin: createProject({ _id: 'origin' }),
+      linkedProjects: [createProject({ _id: 'linked1' }), createProject({ _id: 'linked2' })],
+    };
 
-    expect(
-      applyFilterExpressions(availableProjects, createFilterExpressions([[typeSecurityExpression]]))
-    ).toEqual(['p1']);
-  });
-
-  it('excludes projects when the filter operator is negated', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1', _type: 'security' })],
-      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-    ]);
-
-    expect(
-      applyFilterExpressions(
-        availableProjects,
-        createFilterExpressions([
-          [
-            {
-              operator: FilterOperator.NOT_EQUALS,
-              tagName: '_type',
-              tagValue: 'security',
-            },
-          ],
-        ])
-      )
-    ).toEqual(['p2']);
-  });
-
-  it('skips disabled filter expressions', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1', _type: 'security' })],
-      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-    ]);
-
-    expect(
-      applyFilterExpressions(
-        availableProjects,
-        createFilterExpressions([[typeSecurityExpression, false]])
-      )
-    ).toEqual(['p1', 'p2']);
-  });
-
-  it('matches projects that have the tag present when the operator is exists', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1', env: 'prod' })],
-      ['p2', createProject({ _id: 'p2' })],
-    ]);
-
-    expect(
-      applyFilterExpressions(
-        availableProjects,
-        createFilterExpressions([
-          [{ operator: FilterOperator.EXISTS, tagName: 'env', tagValue: undefined }],
-        ])
-      )
-    ).toEqual(['p1']);
-  });
-
-  it('matches projects that are missing the tag when the operator is not-exists', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1', env: 'prod' })],
-      ['p2', createProject({ _id: 'p2' })],
-    ]);
-
-    expect(
-      applyFilterExpressions(
-        availableProjects,
-        createFilterExpressions([
-          [{ operator: FilterOperator.NOT_EXISTS, tagName: 'env', tagValue: undefined }],
-        ])
-      )
-    ).toEqual(['p2']);
+    expect(collectProjectIdsFromProjectsData(data)).toEqual(['origin', 'linked1', 'linked2']);
   });
 });
 
-describe('previewFilterMatchingIds', () => {
-  const availableProjects = new Map([
-    ['p1', createProject({ _id: 'p1', _type: 'security' })],
-    ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-  ]);
+describe('intersectServerMatchIds', () => {
+  it('keeps only ids present in the available projects catalog', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
 
+    expect(intersectServerMatchIds(availableProjects, ['p1', 'unknown', 'p2'])).toEqual([
+      'p1',
+      'p2',
+    ]);
+  });
+
+  it('returns an empty list when nothing intersects', () => {
+    const availableProjects = new Map([['p1', createProject({ _id: 'p1' })]]);
+
+    expect(intersectServerMatchIds(availableProjects, ['other'])).toEqual([]);
+  });
+});
+
+describe('buildPreviewFilterExpressions', () => {
   it('returns null when the draft filter is incomplete', () => {
     expect(
-      previewFilterMatchingIds(availableProjects, new Map(), {
+      buildPreviewFilterExpressions(new Map(), {
         operator: FilterOperator.EQUALS,
         tagName: '_type',
       })
     ).toBeNull();
   });
 
-  it('previews a new filter against available projects', () => {
-    expect(
-      previewFilterMatchingIds(availableProjects, new Map(), {
-        operator: FilterOperator.EQUALS,
-        tagName: '_type',
-        tagValue: 'security',
-      })
-    ).toEqual(['p1']);
-  });
+  it('adds a preview entry for a new draft filter', () => {
+    const preview = buildPreviewFilterExpressions(new Map(), typeSecurityExpression);
 
-  it('returns an empty list when the draft filter matches no projects', () => {
-    expect(
-      previewFilterMatchingIds(availableProjects, new Map(), {
-        operator: FilterOperator.EQUALS,
-        tagName: '_type',
-        tagValue: 'missing',
-      })
-    ).toEqual([]);
-  });
-
-  it('combines the draft filter with existing enabled filters', () => {
-    expect(
-      previewFilterMatchingIds(
-        availableProjects,
-        createFilterExpressions([[typeSecurityExpression]]),
-        {
-          operator: FilterOperator.EQUALS,
-          tagName: '_organisation',
-          tagValue: 'other-org',
-        }
-      )
-    ).toEqual([]);
+    expect(preview).not.toBeNull();
+    expect(getEnabledFilterExpressions(preview!)).toEqual([typeSecurityExpression]);
   });
 
   it('replaces an existing filter when editing by filterId', () => {
-    expect(
-      previewFilterMatchingIds(
-        availableProjects,
-        createFilterExpressions([[typeSecurityExpression]]),
-        {
-          operator: FilterOperator.EQUALS,
-          tagName: '_type',
-          tagValue: 'observability',
-        },
-        typeSecurityKey
-      )
-    ).toEqual(['p2']);
+    const existing = createFilterExpressions([[typeSecurityExpression]]);
+    const draft = {
+      operator: FilterOperator.EQUALS,
+      tagName: '_type',
+      tagValue: 'observability',
+    } as const;
+
+    const preview = buildPreviewFilterExpressions(existing, draft, typeSecurityKey);
+
+    expect(getEnabledFilterExpressions(preview!)).toEqual([draft]);
+    expect(encodeFilterOnlyRouting(getEnabledFilterExpressions(preview!))).toBe(
+      '_type:observability'
+    );
   });
 });
 
@@ -440,7 +359,7 @@ describe('projectPickerDerivatives', () => {
     expect(derivedState.filteringDimensions).toContain('_type');
   });
 
-  it('computes filteredProjectIds before selectedProjects', () => {
+  it('computes selectedProjects from filteredProjectIds when filters are active', () => {
     const availableProjects = new Map([
       ['p1', createProject({ _id: 'p1', _type: 'security' })],
       ['p2', createProject({ _id: 'p2', _type: 'observability' })],
@@ -449,34 +368,13 @@ describe('projectPickerDerivatives', () => {
     const state = createState({
       availableProjects,
       filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      filteredProjectIds: ['p1'],
     });
 
-    const afterFiltered = {
-      ...state,
-      filteredProjectIds: projectPickerDerivatives[0].compute(state),
-    };
+    const derivedState = applyStoreDerivatives(state, [...projectPickerDerivatives]);
 
-    expect(afterFiltered.filteredProjectIds).toEqual(['p1']);
-    expect(projectPickerDerivatives[2].compute(afterFiltered)).toEqual(['p1']);
-  });
-
-  it('computes visibleProjectIds from active filters', () => {
-    const availableProjects = new Map([
-      ['p1', createProject({ _id: 'p1', _type: 'security' })],
-      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-    ]);
-
-    const state = createState({
-      availableProjects,
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    const afterFiltered = {
-      ...state,
-      filteredProjectIds: projectPickerDerivatives[0].compute(state),
-    };
-
-    expect(projectPickerDerivatives[1].compute(afterFiltered)).toEqual(['p1']);
+    expect(derivedState.visibleProjectIds).toEqual(['p1']);
+    expect(derivedState.selectedProjects).toEqual(['p1']);
   });
 
   it('computes currentProjectRouting from filters and dynamic exclusions', () => {
@@ -490,6 +388,7 @@ describe('projectPickerDerivatives', () => {
         availableProjects,
         defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p2'],
         excludedOverrides: ['p2'],
       }),
       [...projectPickerDerivatives]
@@ -504,6 +403,7 @@ describe('projectPickerDerivatives', () => {
       createState({
         defaultProjectRouting: '_type:security',
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1'],
         excludedOverrides: ['p2'],
       }),
       [...projectPickerDerivatives]

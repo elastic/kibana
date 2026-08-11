@@ -44,6 +44,11 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
 
   const includedVisibleProjectIds = useMemo(() => getIncludedVisibleProjectIds(state), [state]);
 
+  const selectedProjectIdsSet = useMemo(
+    () => new Set(state.selectedProjects),
+    [state.selectedProjects]
+  );
+
   const visibleProjects = useMemo(
     () =>
       state.visibleProjectIds
@@ -158,24 +163,25 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
       ) : null}
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
-          {visibleProjects.map((project) => (
-            <EuiFlexItem key={project._id} css={styles.listItemContainer}>
-              <ProjectPickerListItem
-                isSelected={state.selectedProjects.includes(project._id)}
-                isToggleDisabled={
-                  state.selectedProjects.includes(project._id) &&
-                  includedVisibleProjectIds.length === 1
-                }
-                isReadOnly={state.isReadOnly}
-                isOriginProject={state.originProjectId === project._id}
-                toggleDisabledMessage={toggleDisabledMessage}
-                project={project}
-                onContextMenu={onContextMenu}
-                onToggle={onToggle}
-                onLabelClick={onLabelClick}
-              />
-            </EuiFlexItem>
-          ))}
+          {visibleProjects.map((project) => {
+            const isSelected = selectedProjectIdsSet.has(project._id);
+
+            return (
+              <EuiFlexItem key={project._id} css={styles.listItemContainer}>
+                <ProjectPickerListItem
+                  isSelected={isSelected}
+                  isToggleDisabled={isSelected && includedVisibleProjectIds.length === 1}
+                  isReadOnly={state.isReadOnly}
+                  isOriginProject={state.originProjectId === project._id}
+                  toggleDisabledMessage={toggleDisabledMessage}
+                  project={project}
+                  onContextMenu={onContextMenu}
+                  onToggle={onToggle}
+                  onLabelClick={onLabelClick}
+                />
+              </EuiFlexItem>
+            );
+          })}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

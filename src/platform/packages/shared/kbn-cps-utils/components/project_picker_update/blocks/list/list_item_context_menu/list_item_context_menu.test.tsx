@@ -33,6 +33,8 @@ const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPi
   ]),
   excludedOverrides: [],
   filteredProjectIds: ['p1', 'p2'],
+  isFilterSearchLoading: false,
+  filterSearchError: null,
   visibleProjectIds: ['p1', 'p2'],
   selectedProjects: ['p1', 'p2'],
   currentProjectRouting: '',

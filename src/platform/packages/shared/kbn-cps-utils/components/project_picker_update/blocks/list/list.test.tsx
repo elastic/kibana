@@ -70,6 +70,10 @@ const defaultProps = {
   defaultProjectRoutingGetter: () => '',
   currentProjectRoutingGetter: () => '',
   onProjectRoutingChange: jest.fn(),
+  fetchProjectsByRouting: jest.fn(async () => ({
+    origin: null,
+    linkedProjects: [],
+  })),
 };
 
 const renderComponent = (

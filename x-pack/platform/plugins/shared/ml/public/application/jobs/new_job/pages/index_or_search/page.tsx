@@ -11,11 +11,12 @@ import { EuiFlexGroup, EuiFormRow, EuiPageBody, EuiPanel, EuiSpacer } from '@ela
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
-import { BehaviorSubject, from, switchMap } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
@@ -74,12 +75,13 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   }, [cpsManager]);
 
   const getProjects$ = useCallback(() => {
-    return projectRouting$.current.pipe(
-      switchMap((routing) => {
-        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
-      })
-    );
+    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
   }, [cpsManager]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
+    [cpsManager]
+  );
 
   const defaultProjectRoutingGetter = useCallback(() => {
     return cpsManager?.getDefaultProjectRouting();
@@ -133,6 +135,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
                 <MlProjectPickerPanel
                   onProjectRoutingChange={onProjectRoutingChange}
                   getActiveRouteProjects$={getProjects$}
+                  fetchProjectsByRouting={fetchProjectsByRouting}
                   projectRouting$={projectRouting$.current}
                   defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                   totalProjectCount={totalProjectCount}

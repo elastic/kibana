@@ -53,6 +53,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   availableProjects: new Map([[defaultProject._id, defaultProject]]),
   excludedOverrides: [],
   filteredProjectIds: [defaultProject._id],
+  isFilterSearchLoading: false,
+  filterSearchError: null,
   visibleProjectIds: [defaultProject._id],
   selectedProjects: [defaultProject._id],
   currentProjectRouting: '',

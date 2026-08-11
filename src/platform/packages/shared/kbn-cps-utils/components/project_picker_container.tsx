@@ -12,6 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
 import { from } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { ProjectPicker } from './project_picker';
@@ -51,8 +52,14 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
   const getActiveRouteProjects$ = useCallback<
     ComponentProps<typeof ProjectPicker>['getActiveRouteProjects$']
   >(() => {
-    return from(cpsManager.fetchProjects(cpsManager.getProjectRouting()));
+    // Bootstrap the full project catalog — filter search is owned by the picker.
+    return from(cpsManager.fetchProjects(PROJECT_ROUTING.ALL));
   }, [cpsManager]);
+
+  const fetchProjectsByRouting = useCallback(
+    (projectRouting?: ProjectRouting) => cpsManager.fetchProjects(projectRouting),
+    [cpsManager]
+  );
 
   const defaultProjectRoutingGetter = useCallback(() => {
     return cpsManager.getDefaultProjectRouting();
@@ -95,6 +102,7 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       onProjectRoutingChange={updateProjectRouting}
       getActiveRouteProjects$={getActiveRouteProjects$}
+      fetchProjectsByRouting={fetchProjectsByRouting}
       isReadonly={isReadonly}
       isDisabled={isDisabled}
       customHeaderContextMenuItems={customHeaderContextMenuItems}

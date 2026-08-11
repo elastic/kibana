@@ -23,6 +23,17 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
         zIndex: euiTheme.levels.header,
         borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         padding: euiTheme.size.base,
+        '&:after': {
+          content: '""',
+          position: 'absolute',
+          top: '0%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
+          height: '100%',
+          zIndex: -1,
+          backgroundColor: euiTheme.components.headerBackground,
+        },
       },
     ]);
   },

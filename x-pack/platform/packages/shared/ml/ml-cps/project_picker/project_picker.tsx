@@ -17,7 +17,10 @@ import { useObservable } from '@kbn/use-observable';
 export interface MlProjectPickerPanelProps
   extends Pick<
     ComponentProps<typeof ProjectPicker>,
-    'onProjectRoutingChange' | 'getActiveRouteProjects$' | 'defaultProjectRoutingGetter'
+    | 'onProjectRoutingChange'
+    | 'getActiveRouteProjects$'
+    | 'defaultProjectRoutingGetter'
+    | 'fetchProjectsByRouting'
   > {
   projectRouting$?: BehaviorSubject<ProjectRouting>;
   totalProjectCount: number;
@@ -37,6 +40,7 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
   projectRoutingValueTestSubj,
   getActiveRouteProjects$,
   defaultProjectRoutingGetter,
+  fetchProjectsByRouting,
 }) => {
   const isDisabled = disabled || projectRouting$ === undefined;
 
@@ -73,6 +77,7 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
           ) : (
             <ProjectPicker
               getActiveRouteProjects$={getActiveRouteProjects$}
+              fetchProjectsByRouting={fetchProjectsByRouting}
               totalProjectCount={totalProjectCount}
               currentProjectRoutingGetter={currentProjectRoutingGetter}
               defaultProjectRoutingGetter={defaultProjectRoutingGetter}

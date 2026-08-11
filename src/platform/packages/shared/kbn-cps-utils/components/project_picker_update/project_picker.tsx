@@ -21,6 +21,7 @@ export function ProjectPicker({
   onProjectRoutingChange,
   defaultProjectRoutingGetter,
   currentProjectRoutingGetter,
+  fetchProjectsByRouting,
   projectRoutingStrategy,
 }: Omit<ProjectPickerStateProviderProps, 'children'>) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -33,6 +34,7 @@ export function ProjectPicker({
       isReadOnly={isReadOnly}
       originProjectId={originProjectId}
       onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={fetchProjectsByRouting}
       projectRoutingStrategy={projectRoutingStrategy}
     >
       <ProjectPickerFrame maxBodyHeight={500} scrollContainerRef={scrollContainerRef}>

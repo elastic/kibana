@@ -51,12 +51,48 @@ const linkedProjectTwo: CPSProject = {
 
 const availableProjects = [originProject, linkedProjectOne, linkedProjectTwo];
 
+/**
+ * Test double for server filter search: returns catalog projects matching simple tag:value clauses.
+ */
+const createFetchProjectsByRouting = (projects: CPSProject[] = availableProjects) =>
+  jest.fn(async (routing?: ProjectRouting) => {
+    if (!routing) {
+      return { origin: projects[0] ?? null, linkedProjects: projects.slice(1) };
+    }
+
+    const tagClauses = routing
+      .split(' AND ')
+      .map((clause) => clause.trim())
+      .filter((clause) => clause.includes(':') && !clause.includes('_id'));
+
+    const matched = projects.filter((project) =>
+      tagClauses.every((clause) => {
+        const separatorIndex = clause.indexOf(':');
+        const tag = clause.slice(0, separatorIndex);
+        const value = clause.slice(separatorIndex + 1);
+        return project[tag] === value;
+      })
+    );
+
+    if (matched.length === 0) {
+      return { origin: null, linkedProjects: [] };
+    }
+
+    const origin =
+      projects[0] && matched.some((p) => p._id === projects[0]._id) ? projects[0] : matched[0];
+    return {
+      origin: matched.find((p) => p._id === origin._id) ?? matched[0],
+      linkedProjects: matched.filter((p) => p._id !== origin._id),
+    };
+  });
+
 const defaultProviderProps: Omit<ProjectPickerStateProviderProps, 'children'> = {
   availableProjects,
   originProjectId: originProject._id,
   defaultProjectRoutingGetter: () => '',
   currentProjectRoutingGetter: () => '',
   onProjectRoutingChange: jest.fn(),
+  fetchProjectsByRouting: createFetchProjectsByRouting(),
 };
 
 const renderProjectPicker = (
@@ -319,6 +355,49 @@ describe('ProjectPickerStateProvider', () => {
           expect.objectContaining({ isUsingSpaceDefaults: false })
         );
       });
+    });
+  });
+
+  describe('server-backed filter search', () => {
+    it('fetches on filter expression changes and not on exclusions', async () => {
+      const user = userEvent.setup();
+      const fetchProjectsByRouting = createFetchProjectsByRouting();
+      const organisationFilter = {
+        operator: FilterOperator.EQUALS,
+        tagName: '_organisation',
+        tagValue: 'test-org',
+      } as const;
+
+      render(
+        <ProjectPickerStateProvider
+          {...defaultProviderProps}
+          fetchProjectsByRouting={fetchProjectsByRouting}
+        >
+          <AddFilterExpression expression={organisationFilter} />
+          <ProjectPickerList />
+        </ProjectPickerStateProvider>
+      );
+
+      expect(fetchProjectsByRouting).not.toHaveBeenCalled();
+
+      await user.click(screen.getByTestId('addFilterExpression'));
+
+      await waitFor(() => {
+        expect(fetchProjectsByRouting).toHaveBeenCalledWith('_organisation:test-org');
+      });
+
+      const callsAfterFilter = fetchProjectsByRouting.mock.calls.length;
+
+      await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('projectPickerListItemSwitch-linked1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
+      });
+
+      expect(fetchProjectsByRouting.mock.calls.length).toBe(callsAfterFilter);
     });
   });
 });

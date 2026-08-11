@@ -81,16 +81,18 @@ describe('ProjectPickerContainer', () => {
       expect(screen.getByTestId('cps-project-picker-button')).toBeInTheDocument();
     });
 
-    it('should call fetchProjects when component mounts', async () => {
+    it('should call fetchProjects with the full catalog routing on mount', async () => {
+      const fetchProjects = jest.fn().mockResolvedValue({
+        origin: mockOriginProject,
+        linkedProjects: mockLinkedProjects,
+      });
       await renderProjectPicker({
         cpsManager: {
-          fetchProjects: jest.fn().mockResolvedValue({
-            origin: mockOriginProject,
-            linkedProjects: mockLinkedProjects,
-          }),
+          fetchProjects,
         },
       });
       expect(screen.queryByTestId('cps-project-picker-button')).toBeInTheDocument();
+      expect(fetchProjects).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
     });
 
     it('should not render when there is no origin project', async () => {

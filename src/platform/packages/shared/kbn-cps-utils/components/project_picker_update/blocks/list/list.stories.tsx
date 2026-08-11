@@ -72,6 +72,10 @@ export const ProjectPickerListItemStory: StoryObj<
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects[0] ?? null,
+        linkedProjects: availableProjects.slice(1),
+      })}
     >
       <ProjectPickerList {...props} />
     </ProjectPickerStateProvider>

@@ -458,3 +458,19 @@ export const decodeTagFilterRoutingClause = decodeTagFilterClause;
 
 /** Encode a single Lucene tag-filter routing clause (for tests and internal round-trips). */
 export const encodeTagFilterRoutingClause = encodeTagFilterClause;
+
+/**
+ * Encodes enabled tag filter expressions into a project routing string with no `_id`
+ * selection/exclusion clauses. Used for server-side filter search.
+ * Returns `undefined` when there are no filter expressions to encode.
+ */
+export const encodeFilterOnlyRouting = (
+  filterExpressions: readonly FilterExpressionValue[]
+): ProjectRouting | undefined => {
+  if (filterExpressions.length === 0) {
+    return undefined;
+  }
+
+  const encoded = filterExpressions.map(encodeTagFilterClause).filter(Boolean).join(' AND ');
+  return encoded.length > 0 ? encoded : undefined;
+};

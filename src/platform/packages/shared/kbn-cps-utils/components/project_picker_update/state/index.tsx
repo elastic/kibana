@@ -14,22 +14,34 @@ import React, {
   createContext,
   type PropsWithChildren,
   useEffect,
+  useRef,
+  useCallback,
 } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import { createStoreReducers } from './reducers';
 import { type ProjectPickerState } from './reducers';
 import { projectPickerDerivatives } from './derivatives';
-import { type CPSProject } from '../../../types';
+import {
+  collectProjectIdsFromProjectsData,
+  getEnabledFilterExpressions,
+  intersectServerMatchIds,
+} from '../utils/state_utils';
+import { type CPSProject, type ProjectsData } from '../../../types';
 import {
   createFilterExpressionsMap,
+  encodeFilterOnlyRouting,
   parseDefaultProjectRouting,
   type ProjectRoutingStrategy,
 } from '../utils';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
-  actions: Omit<ActionsFromReducers<ReturnType<typeof createStoreReducers>>, '_setStoreState'>;
+  actions: Omit<
+    ActionsFromReducers<ReturnType<typeof createStoreReducers>>,
+    '_setStoreState' | '_setFilterSearchResult'
+  >;
+  fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
 }
 
 export interface ProjectPickerStateProviderProps
@@ -38,6 +50,11 @@ export interface ProjectPickerStateProviderProps
   availableProjects: CPSProject[];
   currentProjectRoutingGetter: () => ProjectRouting | undefined;
   defaultProjectRoutingGetter: () => ProjectRouting;
+  /**
+   * Fetches projects matching a project routing expression. Used for filter-expression
+   * server search; must not be used for exclusion-only changes.
+   */
+  fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
   /**
    * Controls how project IDs are encoded into the routing string.
    *
@@ -77,6 +94,11 @@ export const useProjectPickerState = () => {
   return ctx.state;
 };
 
+export const useFetchProjectsByRouting = () => {
+  const ctx = useProjectPickerContext();
+  return ctx.fetchProjectsByRouting;
+};
+
 const createInitialPickerState = ({
   availableProjects,
   currentProjectRouting,
@@ -105,11 +127,20 @@ const createInitialPickerState = ({
     availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
     excludedOverrides: [...parsed.excludedOverrides],
     filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
     visibleProjectIds: [],
     selectedProjects: [],
     currentProjectRouting: '',
     isUsingSpaceDefaults: false,
   };
+};
+
+/**
+ * Stable serialization of enabled filter expressions for effect deps / race tokens.
+ */
+const getEnabledFiltersIdentity = (state: ProjectPickerState): string => {
+  return encodeFilterOnlyRouting(getEnabledFilterExpressions(state.filterExpressions)) ?? '';
 };
 
 export const ProjectPickerStateProvider = ({
@@ -121,9 +152,13 @@ export const ProjectPickerStateProvider = ({
   projectRoutingStrategy = 'dynamic',
   defaultProjectRoutingGetter,
   currentProjectRoutingGetter,
+  fetchProjectsByRouting,
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
+  const filterFetchAbortRef = useRef<AbortController | null>(null);
+  const fetchProjectsByRoutingRef = useRef(fetchProjectsByRouting);
+  fetchProjectsByRoutingRef.current = fetchProjectsByRouting;
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: createInitialPickerState({
@@ -161,6 +196,67 @@ export const ProjectPickerStateProvider = ({
     store.actions,
   ]);
 
+  const enabledFiltersIdentity = getEnabledFiltersIdentity(store.state);
+
+  const runFilterSearch = useCallback(
+    async (filterIdentity: string, availableProjectsMap: Map<string, CPSProject>) => {
+      filterFetchAbortRef.current?.abort();
+      const abortController = new AbortController();
+      filterFetchAbortRef.current = abortController;
+
+      if (!filterIdentity) {
+        store.actions._setFilterSearchResult({
+          filteredProjectIds: [],
+          isFilterSearchLoading: false,
+          filterSearchError: null,
+        });
+        return;
+      }
+
+      store.actions._setFilterSearchResult({
+        isFilterSearchLoading: true,
+        filterSearchError: null,
+      });
+
+      try {
+        const data = await fetchProjectsByRoutingRef.current(filterIdentity);
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        const serverIds = collectProjectIdsFromProjectsData(data);
+        const filteredProjectIds = intersectServerMatchIds(availableProjectsMap, serverIds);
+
+        store.actions._setFilterSearchResult({
+          filteredProjectIds,
+          isFilterSearchLoading: false,
+          filterSearchError: null,
+        });
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        store.actions._setFilterSearchResult({
+          isFilterSearchLoading: false,
+          filterSearchError: error instanceof Error ? error : new Error(String(error)),
+        });
+      }
+    },
+    [store.actions]
+  );
+
+  useEffect(() => {
+    const availableProjectsMap = new Map(
+      availableProjects.map((project) => [project._id, project])
+    );
+    void runFilterSearch(enabledFiltersIdentity, availableProjectsMap);
+
+    return () => {
+      filterFetchAbortRef.current?.abort();
+    };
+  }, [enabledFiltersIdentity, availableProjects, runFilterSearch]);
+
   useEffect(() => {
     const routing = store.state.currentProjectRouting;
     if (routing !== (currentProjectRoutingGetter() ?? '')) {
@@ -168,5 +264,21 @@ export const ProjectPickerStateProvider = ({
     }
   }, [store.state.currentProjectRouting, onProjectRoutingChange, currentProjectRoutingGetter]);
 
-  return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
+  const contextValue = useMemo((): ProjectPickerContext => {
+    const {
+      _setStoreState: _omitSetStoreState,
+      _setFilterSearchResult: _omitSetFilterSearchResult,
+      ...publicActions
+    } = store.actions;
+
+    return {
+      state: store.state,
+      actions: publicActions,
+      fetchProjectsByRouting,
+    };
+  }, [store.state, store.actions, fetchProjectsByRouting]);
+
+  return (
+    <ProjectPickerContext.Provider value={contextValue}>{children}</ProjectPickerContext.Provider>
+  );
 };

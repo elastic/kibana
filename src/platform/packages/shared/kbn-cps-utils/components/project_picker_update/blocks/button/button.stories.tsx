@@ -63,6 +63,10 @@ export const ProjectPickerButtonStory: StoryObj<
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects?.[0] ?? null,
+        linkedProjects: availableProjects?.slice(1) ?? [],
+      })}
     >
       <ProjectPickerButton {...props} />
     </ProjectPickerStateProvider>
@@ -113,6 +117,10 @@ export const ProjectPickerButtonDisabledStory: StoryObj<
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       currentProjectRoutingGetter={currentProjectRoutingGetter}
       onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects?.[0] ?? null,
+        linkedProjects: availableProjects?.slice(1) ?? [],
+      })}
     >
       <ProjectPickerButton {...props} />
     </ProjectPickerStateProvider>
