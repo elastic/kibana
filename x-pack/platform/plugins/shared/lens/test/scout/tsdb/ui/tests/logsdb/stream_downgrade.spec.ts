@@ -38,10 +38,6 @@ interface ScenarioResult {
   hasDataAfterDowngrade: boolean;
   /** Bar chart data using the utc_time date field instead of @timestamp. */
   altDateFieldBars: Array<{ y: number }>;
-  /** Whether the annotation layer rendered with @timestamp time field. */
-  annotationVisible: boolean;
-  /** Whether the annotation layer rendered with utc_time time field. */
-  annotationAltTimeFieldVisible: boolean;
 }
 
 const runScenario = async (
@@ -134,10 +130,7 @@ const runScenario = async (
       return chartBars;
     });
 
-  const checkAnnotationLayer = async (
-    timeField: string,
-    extraFields: string[]
-  ): Promise<boolean> => {
+  const checkAnnotationLayer = async (timeField: string, extraFields: string[]): Promise<void> => {
     await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -171,19 +164,17 @@ const runScenario = async (
     await pageObjects.lens.closeDimensionEditor();
 
     // Multiple annotation icons may render on the chart; check that at least one exists.
-    const annotationCount = await page.testSubj.locator('xyVisGroupedAnnotationIcon').count();
+    const annotationIcons = page.testSubj.locator('xyVisGroupedAnnotationIcon');
+    await expect(annotationIcons).not.toHaveCount(0);
 
     await pageObjects.lens.layers.removeLayer(1);
-    return annotationCount > 0;
   };
 
-  const annotationVisible =
-    await test.step('visualize an annotation layer from a LogsDB stream', async () =>
-      checkAnnotationLayer('@timestamp', ['host.name', 'utc_time']));
+  await test.step('visualize an annotation layer from a LogsDB stream', async () =>
+    checkAnnotationLayer('@timestamp', ['host.name', 'utc_time']));
 
-  const annotationAltTimeFieldVisible =
-    await test.step('visualize an annotation layer using another time field', async () =>
-      checkAnnotationLayer('utc_time', ['host.name', '@timestamp']));
+  await test.step('visualize an annotation layer using another time field', async () =>
+    checkAnnotationLayer('utc_time', ['host.name', '@timestamp']));
 
   await test.step('visualize ES|QL queries based on a LogsDB stream', async () => {
     await page.gotoApp('discover');
@@ -217,8 +208,6 @@ const runScenario = async (
     hasDataBeforeDowngrade,
     hasDataAfterDowngrade,
     altDateFieldBars,
-    annotationVisible,
-    annotationAltTimeFieldVisible,
   };
 };
 
@@ -243,10 +232,6 @@ const assertDowngradeResult = (
     expect.soft(result.hasDataBeforeDowngrade).toBe(true);
     expect.soft(result.hasDataAfterDowngrade).toBe(true);
   }
-
-  // Annotation layers
-  expect.soft(result.annotationVisible).toBe(true);
-  expect.soft(result.annotationAltTimeFieldVisible).toBe(true);
 };
 
 test.describe('Lens LogsDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
