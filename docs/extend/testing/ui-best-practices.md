@@ -277,7 +277,7 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 :::::
 
-## Use EUI component helpers in page objects [use-eui-test-helpers-in-page-objects]
+## Use EUI test helpers in page objects [use-eui-test-helpers-in-page-objects]
 
 Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. Scout has two sources:
 
