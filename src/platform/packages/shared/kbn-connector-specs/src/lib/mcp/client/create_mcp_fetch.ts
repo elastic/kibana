@@ -20,11 +20,11 @@ interface SseChannelGate {
 }
 
 /**
- * Wraps an Actions {@link McpFetchResource} with the SSE gate logic required by the MCP Streamable
- * HTTP transport. The gate coordinates between the GET SSE channel and subsequent POST tool-calls
- * so that POSTs do not race the channel open.
+ * Wraps an {@link McpFetchResource} with the SSE gate logic required by the MCP Streamable HTTP
+ * transport. The gate coordinates between the GET SSE channel and subsequent POST tool-calls so
+ * that POSTs do not race the channel open.
  *
- * The underlying resource already applies SSL/TLS, proxy, User-Agent, and body-size policy; this
+ * The underlying resource already applies network policy from `BuildContext.networkSettings`; this
  * wrapper adds only the MCP-specific SSE ordering guarantee.
  */
 export function createMcpFetch(resource: McpFetchResource): FetchLike {

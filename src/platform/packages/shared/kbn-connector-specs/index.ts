@@ -56,9 +56,4 @@ export type {
   ClientTypeSpecs,
 } from './src/lib/clients';
 export { createMcpClientType } from './src/lib/mcp/client';
-export type {
-  McpClientTypeDeps,
-  McpFetchResource,
-  McpFetchOptions,
-  McpFetchFactory,
-} from './src/lib/mcp/client';
+export type { McpClientTypeDeps, McpFetchResource } from './src/lib/mcp/client';

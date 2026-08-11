@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Agent, ProxyAgent } from 'undici';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { actionsConfigMock } from '../../actions_config.mock';
-import { buildMcpFetchFactory } from './mcp_fetch';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { ConnectorNetworkSettings } from '../../clients/client_type_spec';
+import { createMcpFetchResource } from './create_mcp_fetch_resource';
 
 jest.mock('undici', () => {
   const MockAgent = jest.fn().mockImplementation(() => ({
@@ -23,13 +25,16 @@ jest.mock('undici', () => {
   };
 });
 
-describe('buildMcpFetchFactory', () => {
-  const logger = loggingSystemMock.createLogger();
+describe('createMcpFetchResource', () => {
+  const logger = loggerMock.create();
   const targetUrl = 'https://mcp-server.example.com/v1/mcp';
   const allowedHosts = ['mcp-server.example.com', 'allowed.example.com'];
 
-  let configurationUtilities: ReturnType<typeof actionsConfigMock.create>;
+  let networkSettings: jest.Mocked<ConnectorNetworkSettings>;
   let globalFetchSpy: jest.SpyInstance;
+
+  const createResource = (opts: { targetUrl: string; headers?: Record<string, string>; userAgent?: string }) =>
+    createMcpFetchResource({ networkSettings, logger, ...opts });
 
   const mockRedirectResponse = (status: number, location: string | null): Response => {
     const headers = new Headers();
@@ -41,24 +46,24 @@ describe('buildMcpFetchFactory', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    configurationUtilities = actionsConfigMock.create();
-
-    configurationUtilities.getSSLSettings.mockReturnValue({});
-    configurationUtilities.getProxySettings.mockReturnValue(undefined);
-    configurationUtilities.getCustomHostSettings.mockReturnValue(undefined);
-    configurationUtilities.getResponseSettings.mockReturnValue({
-      maxContentLength: 1_000_000,
-      timeout: 60_000,
-    });
-
-    configurationUtilities.ensureUriAllowed.mockImplementation((uri: string) => {
-      const { hostname } = new URL(uri);
-      if (!allowedHosts.includes(hostname)) {
-        throw new Error(
-          `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
-        );
-      }
-    });
+    networkSettings = {
+      ensureUriAllowed: jest.fn((uri: string) => {
+        const { hostname } = new URL(uri);
+        if (!allowedHosts.includes(hostname)) {
+          throw new Error(
+            `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
+          );
+        }
+      }),
+      ensureHostnameAllowed: jest.fn(),
+      getSslSettings: jest.fn().mockReturnValue({}),
+      getProxySettings: jest.fn().mockReturnValue(undefined),
+      getCustomHostSettings: jest.fn().mockReturnValue(undefined),
+      getResponseSettings: jest.fn().mockReturnValue({
+        maxContentLength: 1_000_000,
+        timeout: 60_000,
+      }),
+    };
 
     globalFetchSpy = jest.spyOn(globalThis, 'fetch');
   });
@@ -69,20 +74,18 @@ describe('buildMcpFetchFactory', () => {
 
   describe('initial URL validation', () => {
     it('throws immediately if the target URL is not allowed', () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      expect(() => factory({ targetUrl: 'https://evil.internal.example.com/steal' })).toThrow(
+      expect(() => createResource({ targetUrl: 'https://evil.internal.example.com/steal' })).toThrow(
         'target url "https://evil.internal.example.com/steal" is not added to the Kibana config xpack.actions.allowedHosts'
       );
       expect(globalFetchSpy).not.toHaveBeenCalled();
     });
 
     it('does not throw for an allowed target URL', () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      expect(() => factory({ targetUrl })).not.toThrow();
+      expect(() => createResource({ targetUrl })).not.toThrow();
     });
 
     it('validates every directly requested URL, not only the resource target', async () => {
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       await expect(resource.fetch('https://evil.internal.example.com/steal')).rejects.toThrow(
         'target url "https://evil.internal.example.com/steal" is not added to the Kibana config xpack.actions.allowedHosts'
@@ -93,8 +96,7 @@ describe('buildMcpFetchFactory', () => {
 
   describe('redirect URL validation', () => {
     it('validates each redirect URL against the allowlist', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       const redirectUrl = 'https://allowed.example.com/v1/mcp';
       const finalResponse = new Response('final', { status: 200 });
@@ -104,12 +106,11 @@ describe('buildMcpFetchFactory', () => {
 
       await resource.fetch(targetUrl, { method: 'POST' });
 
-      expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(redirectUrl);
+      expect(networkSettings.ensureUriAllowed).toHaveBeenCalledWith(redirectUrl);
     });
 
     it('throws when a redirect URL is not on the allowlist', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy.mockResolvedValueOnce(
         mockRedirectResponse(302, 'https://evil.internal.example.com/steal')
@@ -123,8 +124,7 @@ describe('buildMcpFetchFactory', () => {
 
   describe('dispatcher caching', () => {
     it('creates one dispatcher per resource and reuses it', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       const finalResponse = new Response('ok', { status: 200 });
       globalFetchSpy.mockResolvedValue(finalResponse);
@@ -138,7 +138,7 @@ describe('buildMcpFetchFactory', () => {
 
     it('creates separate dispatchers for different destination policies', async () => {
       // Different proxy policies for different hosts
-      configurationUtilities.getProxySettings.mockReturnValue({
+      networkSettings.getProxySettings.mockReturnValue({
         proxyUrl: 'https://proxy.example.com:8080',
         proxyBypassHosts: new Set(['mcp-server.example.com']),
         proxyOnlyHosts: undefined,
@@ -146,8 +146,7 @@ describe('buildMcpFetchFactory', () => {
         proxySSLSettings: { verificationMode: 'full' as const },
       });
 
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       const redirectUrl = 'https://allowed.example.com/v1';
       const finalResponse = new Response('ok', { status: 200 });
@@ -163,7 +162,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('uses a direct connection when the host is not in proxyOnlyHosts', async () => {
-      configurationUtilities.getProxySettings.mockReturnValue({
+      networkSettings.getProxySettings.mockReturnValue({
         proxyUrl: 'https://proxy.example.com:8080',
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['other.example.com']),
@@ -172,7 +171,7 @@ describe('buildMcpFetchFactory', () => {
       });
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
 
       expect(Agent).toHaveBeenCalledTimes(1);
@@ -189,10 +188,10 @@ describe('buildMcpFetchFactory', () => {
         ca: Buffer.from('certificate authority'),
         allowPartialTrustChain: true,
       };
-      configurationUtilities.getSSLSettings.mockReturnValue(sslSettings);
+      networkSettings.getSslSettings.mockReturnValue(sslSettings);
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
 
       expect(Agent).toHaveBeenCalledWith({
@@ -212,10 +211,10 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('applies custom host CA data and verification mode overrides', async () => {
-      configurationUtilities.getSSLSettings.mockReturnValue({
+      networkSettings.getSslSettings.mockReturnValue({
         verificationMode: 'certificate',
       });
-      configurationUtilities.getCustomHostSettings.mockReturnValue({
+      networkSettings.getCustomHostSettings.mockReturnValue({
         url: 'https://mcp-server.example.com:443',
         ssl: {
           certificateAuthoritiesData: 'custom host ca',
@@ -224,7 +223,7 @@ describe('buildMcpFetchFactory', () => {
       });
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
 
       const connectOptions = (Agent as unknown as jest.Mock).mock.calls[0][0].connect;
@@ -240,11 +239,11 @@ describe('buildMcpFetchFactory', () => {
     it('applies target and proxy TLS settings independently', async () => {
       const targetCa = Buffer.from('target ca');
       const proxyCa = Buffer.from('proxy ca');
-      configurationUtilities.getSSLSettings.mockReturnValue({
+      networkSettings.getSslSettings.mockReturnValue({
         verificationMode: 'full',
         ca: targetCa,
       });
-      configurationUtilities.getProxySettings.mockReturnValue({
+      networkSettings.getProxySettings.mockReturnValue({
         proxyUrl: 'https://proxy.example.com:8080',
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
@@ -256,7 +255,7 @@ describe('buildMcpFetchFactory', () => {
       });
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
 
       expect(ProxyAgent).toHaveBeenCalledWith(
@@ -279,8 +278,7 @@ describe('buildMcpFetchFactory', () => {
 
   describe('redirect behaviour', () => {
     it('changes method to GET and strips body for 301', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(301, 'https://allowed.example.com/v1'))
@@ -294,8 +292,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('changes method to GET and strips body for 302', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1'))
@@ -309,8 +306,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('changes method to GET and strips body for 303', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(303, 'https://allowed.example.com/v1'))
@@ -324,8 +320,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('preserves method and body for 307', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
@@ -339,8 +334,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('preserves method and body for 308', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(308, 'https://allowed.example.com/v1'))
@@ -354,8 +348,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('strips authorization header on cross-origin redirect', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
@@ -376,8 +369,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('does not restore default authorization on a cross-origin redirect', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({
+      const resource = createResource({
         targetUrl,
         headers: { Authorization: 'Bearer secret' },
       });
@@ -393,8 +385,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('preserves authorization header on same-origin redirect', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://mcp-server.example.com/v2/mcp'))
@@ -414,8 +405,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('throws when max redirects are exceeded', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy.mockResolvedValue(
         mockRedirectResponse(302, 'https://allowed.example.com/loop')
@@ -426,8 +416,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('throws when a redirect is missing the Location header', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, null));
 
@@ -439,7 +428,7 @@ describe('buildMcpFetchFactory', () => {
 
   describe('response settings', () => {
     it('rejects a declared response larger than maxResponseContentLength', async () => {
-      configurationUtilities.getResponseSettings.mockReturnValue({
+      networkSettings.getResponseSettings.mockReturnValue({
         maxContentLength: 5,
         timeout: 60_000,
       });
@@ -447,7 +436,7 @@ describe('buildMcpFetchFactory', () => {
         new Response('too large', { headers: { 'content-length': '9' } })
       );
 
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       await expect(resource.fetch(targetUrl)).rejects.toThrow(
         'Response content length 9 exceeds limit of 5'
@@ -455,13 +444,13 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('applies responseTimeout to headers and body inactivity', async () => {
-      configurationUtilities.getResponseSettings.mockReturnValue({
+      networkSettings.getResponseSettings.mockReturnValue({
         maxContentLength: 1_000_000,
         timeout: 12_345,
       });
       globalFetchSpy.mockResolvedValueOnce(new Response('ok'));
 
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
 
       expect(Agent).toHaveBeenCalledWith(
@@ -475,8 +464,7 @@ describe('buildMcpFetchFactory', () => {
 
   describe('SSE passthrough', () => {
     it('passes GET response body through as a stream', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       const sseResponse = new Response('data: hello\n\n', {
         status: 200,
@@ -489,8 +477,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('passes POST response with text/event-stream content-type through as a stream', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       const sseResponse = new Response('data: hello\n\n', {
         status: 200,
@@ -503,16 +490,12 @@ describe('buildMcpFetchFactory', () => {
     });
   });
 
-  describe('Cloud User-Agent', () => {
-    it('applies a User-Agent header derived from cloud info', async () => {
-      // Provide a minimal cloud mock. The actual CloudSetup type has many fields;
-      // buildUserAgent only needs serverless.projectId or deploymentId.
-      const mockCloud = { serverless: { projectId: 'proj-abc' } } as Parameters<
-        typeof buildMcpFetchFactory
-      >[2];
-
-      const factory = buildMcpFetchFactory(configurationUtilities, logger, mockCloud);
-      const resource = factory({ targetUrl });
+  describe('User-Agent', () => {
+    it('applies a custom User-Agent when provided', async () => {
+      const resource = createResource({
+        targetUrl,
+        userAgent: 'kibana-mcp-client elastic (project:proj-abc)',
+      });
 
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
@@ -525,9 +508,8 @@ describe('buildMcpFetchFactory', () => {
       expect(ua).toContain('proj-abc');
     });
 
-    it('applies a User-Agent header even without cloud info', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+    it('applies the default User-Agent when none is provided', async () => {
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
@@ -535,15 +517,13 @@ describe('buildMcpFetchFactory', () => {
 
       const requestInit = globalFetchSpy.mock.calls[0][1];
       const headers = requestInit.headers as Headers;
-      const ua = headers.get('user-agent');
-      expect(ua).toBeTruthy();
+      expect(headers.get('user-agent')).toBe('kibana-mcp-client');
     });
   });
 
   describe('close()', () => {
     it('closes all cached dispatchers', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
       await resource.fetch(targetUrl);
@@ -555,8 +535,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('is idempotent: calling close() twice does not throw', async () => {
-      const factory = buildMcpFetchFactory(configurationUtilities, logger);
-      const resource = factory({ targetUrl });
+      const resource = createResource({ targetUrl });
 
       globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
       await resource.fetch(targetUrl);
@@ -570,7 +549,7 @@ describe('buildMcpFetchFactory', () => {
     });
 
     it('rejects requests after the resource is closed', async () => {
-      const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
+      const resource = createResource({ targetUrl });
       await resource.close();
 
       await expect(resource.fetch(targetUrl)).rejects.toThrow('MCP fetch resource is closed.');

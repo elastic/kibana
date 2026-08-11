@@ -9,8 +9,9 @@
 
 import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
-import type { McpFetchFactory, McpFetchResource } from './mcp_fetch_types';
+import type { McpFetchResource } from './mcp_fetch_types';
 import { createMcpFetch } from './create_mcp_fetch';
+import { createMcpFetchResource } from './create_mcp_fetch_resource';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 
@@ -22,24 +23,22 @@ const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 const fetchResources = new WeakMap<McpClient, McpFetchResource>();
 
 /**
- * Dependencies the MCP client type closes over. Outbound-HTTP policy is injected here rather than
- * through generic `BuildContext`, so non-HTTP client types stay unaffected.
+ * Optional closed-over defaults for the MCP client type. Outbound network policy comes from
+ * `BuildContext.networkSettings` at build time — not from these deps.
  */
 export interface McpClientTypeDeps {
-  mcpFetchFactory?: McpFetchFactory;
   defaultHeaders?: Readonly<Record<string, string>>;
+  userAgent?: string;
 }
 
 /**
  * Factory for the registered client type behind `ctx.getClient('mcp')`.
  *
- * Build creates an `McpClient` using the Actions `McpFetchFactory` closed over via `deps` (SSL/TLS,
- * proxy, User-Agent policy). If no factory is available, falls back to the built-in Fetch API so
- * the type remains usable in unit tests and contexts where the factory has not been wired yet.
+ * Build applies `ctx.networkSettings` (allowlist, TLS, proxy, timeout, body size) through an
+ * MCP fetch resource, then connects `@kbn/mcp-client` with Streamable HTTP.
  *
  * `isUserError` classifies unauthorized / forbidden failures as user errors so the executor can
- * surface them as non-retryable USER errors rather than FRAMEWORK errors. Relies on the SDK error
- * types when present, and on `McpClient.connect`'s wrapped "Unauthorized error:" messages.
+ * surface them as non-retryable USER errors rather than FRAMEWORK errors.
  */
 export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpec<McpClient> => ({
   id: 'mcp',
@@ -50,8 +49,6 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
     if (!serverUrl) {
       throw new Error('config.serverUrl is required');
     }
-
-    ctx.networkSettings.ensureUriAllowed(serverUrl);
 
     // Auth headers come from the connector's configured auth type via the framework credential.
     // Tolerate auth types without a header producer (e.g. `none`) by falling back to no headers.
@@ -67,16 +64,14 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
     const headers: Record<string, string> = { ...(deps.defaultHeaders ?? {}), ...authHeaders };
     const hasHeaders = Object.keys(headers).length > 0;
 
-    let customFetch: ((url: string | URL, init?: RequestInit) => Promise<Response>) | undefined;
-    let resource: McpFetchResource | undefined;
-
-    if (deps.mcpFetchFactory) {
-      resource = deps.mcpFetchFactory({
-        targetUrl: serverUrl,
-        ...(hasHeaders ? { headers } : {}),
-      });
-      customFetch = createMcpFetch(resource);
-    }
+    const resource = createMcpFetchResource({
+      networkSettings: ctx.networkSettings,
+      logger: ctx.logger,
+      targetUrl: serverUrl,
+      ...(hasHeaders ? { headers } : {}),
+      ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
+    });
+    const customFetch = createMcpFetch(resource);
 
     const client = new McpClient(
       ctx.logger,
@@ -87,13 +82,11 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       },
       {
         ...(hasHeaders ? { headers: { ...headers } } : {}),
-        ...(customFetch ? { fetch: customFetch } : {}),
+        fetch: customFetch,
       }
     );
 
-    if (resource) {
-      fetchResources.set(client, resource);
-    }
+    fetchResources.set(client, resource);
 
     await client.connect();
 
@@ -103,7 +96,6 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
   async terminate(client: McpClient): Promise<void> {
     await client.disconnect();
 
-    // Release the MCP fetch resource (undici dispatcher) tied to this client, if any.
     const resource = fetchResources.get(client);
     if (resource) {
       fetchResources.delete(client);
@@ -123,7 +115,6 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       return err.code === 401 || err.code === 403;
     }
     if (err instanceof Error) {
-      // McpClient.connect wraps UnauthorizedError as a plain Error with this prefix.
       if (err.message.startsWith('Unauthorized error:')) {
         return true;
       }

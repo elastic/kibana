@@ -9,20 +9,8 @@
 
 import type { FetchLike } from '@kbn/mcp-client';
 
-/**
- * Actions-owned fetch used by the pooled MCP client type.
- *
- * The Actions plugin implements {@link McpFetchFactory}; MCP client code only depends on
- * these types so `@kbn/connector-specs` does not import the Actions plugin.
- */
+/** Closable fetch bound to one MCP server URL (owns Undici dispatchers). */
 export interface McpFetchResource {
   readonly fetch: FetchLike;
   close(): Promise<void>;
 }
-
-export interface McpFetchOptions {
-  readonly targetUrl: string;
-  readonly headers?: Readonly<Record<string, string>>;
-}
-
-export type McpFetchFactory = (options: McpFetchOptions) => McpFetchResource;

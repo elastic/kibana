@@ -66,9 +66,7 @@ export const createConnectorTypeFromSpec = (
         getClientLeasePool: actions.getClientLeasePool,
         networkSettings,
         clientTypes: {
-          mcp: createMcpClientType({
-            mcpFetchFactory: actions.getMcpFetchFactory(),
-          }),
+          mcp: createMcpClientType(),
         },
       })
     : undefined;

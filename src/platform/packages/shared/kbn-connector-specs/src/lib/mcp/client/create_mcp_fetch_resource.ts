@@ -1,18 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Agent, ProxyAgent, type Dispatcher } from 'undici';
-import type { Logger } from '@kbn/core/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { Logger } from '@kbn/logging';
 import { getNodeSSLOptions, type CustomHostSettings, type SSLSettings } from '@kbn/actions-utils';
 import type { FetchLike } from '@kbn/mcp-client';
-import type { McpFetchFactory, McpFetchResource } from '@kbn/connector-specs';
-import type { ActionsConfigurationUtilities } from '../../actions_config';
-import { buildUserAgent } from '../get_axios_instance';
+import type { ConnectorNetworkSettings } from '../../clients/client_type_spec';
+import type { McpFetchResource } from './mcp_fetch_types';
+
+const DEFAULT_USER_AGENT = 'kibana-mcp-client';
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
+const MAX_REDIRECTS = 20;
+const BLOCKED_CROSS_ORIGIN_HEADERS = ['authorization'];
+const STRIPPED_METHOD_CHANGE_HEADERS = [
+  'content-encoding',
+  'content-language',
+  'content-location',
+  'content-type',
+];
+const SSE_CONTENT_TYPE = 'text/event-stream';
+
+export interface CreateMcpFetchResourceOpts {
+  networkSettings: ConnectorNetworkSettings;
+  logger: Logger;
+  targetUrl: string;
+  headers?: Readonly<Record<string, string>>;
+  userAgent?: string;
+}
 
 function buildTlsConnectOptions(
   logger: Logger,
@@ -64,14 +84,14 @@ function shouldUseProxy(
 }
 
 function buildDispatcherForUrl(
-  configurationUtilities: ActionsConfigurationUtilities,
+  networkSettings: ConnectorNetworkSettings,
   logger: Logger,
   targetUrl: string
 ): Dispatcher {
-  const sslSettings = configurationUtilities.getSSLSettings();
-  const proxySettings = configurationUtilities.getProxySettings();
-  const { timeout } = configurationUtilities.getResponseSettings();
-  const customHostSettings = configurationUtilities.getCustomHostSettings(targetUrl);
+  const sslSettings = networkSettings.getSslSettings();
+  const proxySettings = networkSettings.getProxySettings();
+  const { timeout } = networkSettings.getResponseSettings();
+  const customHostSettings = networkSettings.getCustomHostSettings(targetUrl);
   const tlsOptions = buildTlsConnectOptions(logger, sslSettings, customHostSettings);
   const timeoutOptions = timeout > 0 ? { headersTimeout: timeout, bodyTimeout: timeout } : {};
 
@@ -102,9 +122,6 @@ function buildDispatcherForUrl(
   return new Agent({ connect: tlsOptions, ...timeoutOptions });
 }
 
-/**
- * Merges multiple AbortSignals into one that aborts when any of the sources abort.
- */
 function mergeAbortSignals(signals: AbortSignal[]): AbortSignal {
   const controller = new AbortController();
   for (const signal of signals) {
@@ -116,18 +133,6 @@ function mergeAbortSignals(signals: AbortSignal[]): AbortSignal {
   }
   return controller.signal;
 }
-
-const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
-const MAX_REDIRECTS = 20;
-const BLOCKED_CROSS_ORIGIN_HEADERS = ['authorization'];
-const STRIPPED_METHOD_CHANGE_HEADERS = [
-  'content-encoding',
-  'content-language',
-  'content-location',
-  'content-type',
-];
-
-const SSE_CONTENT_TYPE = 'text/event-stream';
 
 const enforceResponseContentLength = (response: Response, maxContentLength: number): Response => {
   const contentType = response.headers.get('content-type') ?? '';
@@ -182,27 +187,19 @@ const enforceResponseContentLength = (response: Response, maxContentLength: numb
 };
 
 /**
- * Creates an {@link McpFetchResource} for a given MCP server URL.
- *
- * The resource owns a cache of Undici dispatchers (keyed by destination origin).
- * Dispatchers are built lazily on first request to a destination and reused within the same
- * resource lifetime. Call `close()` when the resource is no longer needed so all open sockets
- * are released.
+ * Builds a closable fetch resource for one MCP server URL using Actions network settings from
+ * {@link BuildContext.networkSettings} (allowlist, TLS, proxy, timeout, body-size limits).
  */
-function createMcpFetchResource(
-  configurationUtilities: ActionsConfigurationUtilities,
-  logger: Logger,
-  cloud: CloudSetup | undefined,
-  targetUrl: string,
-  defaultHeaders?: Readonly<Record<string, string>>
-): McpFetchResource {
-  // Validate the initial target URL up front so callers get an immediate error
-  // rather than a deferred failure on the first network hop.
-  configurationUtilities.ensureUriAllowed(targetUrl);
+export function createMcpFetchResource({
+  networkSettings,
+  logger,
+  targetUrl,
+  headers: defaultHeaders,
+  userAgent = DEFAULT_USER_AGENT,
+}: CreateMcpFetchResourceOpts): McpFetchResource {
+  networkSettings.ensureUriAllowed(targetUrl);
 
-  const userAgent = buildUserAgent(cloud);
-  const { timeout, maxContentLength } = configurationUtilities.getResponseSettings();
-
+  const { timeout, maxContentLength } = networkSettings.getResponseSettings();
   const dispatchers = new Map<string, Dispatcher>();
   let closed = false;
 
@@ -210,7 +207,7 @@ function createMcpFetchResource(
     const origin = new URL(url).origin;
     let dispatcher = dispatchers.get(origin);
     if (!dispatcher) {
-      dispatcher = buildDispatcherForUrl(configurationUtilities, logger, url);
+      dispatcher = buildDispatcherForUrl(networkSettings, logger, url);
       dispatchers.set(origin, dispatcher);
     }
     return dispatcher;
@@ -233,7 +230,6 @@ function createMcpFetchResource(
       requestHeaders.set('user-agent', userAgent);
     }
 
-    // Build abort signals: request signal + optional timeout
     const signals: AbortSignal[] = [];
     if (init?.signal) {
       signals.push(init.signal as AbortSignal);
@@ -288,9 +284,7 @@ function createMcpFetchResource(
     }
 
     const resolvedUrl = new URL(location, urlStr).toString();
-
-    // Validate each redirect destination against the allowlist.
-    configurationUtilities.ensureUriAllowed(resolvedUrl);
+    networkSettings.ensureUriAllowed(resolvedUrl);
     logger.debug(`mcp-fetch: following redirect (${response.status}) to ${resolvedUrl}`);
 
     try {
@@ -310,7 +304,6 @@ function createMcpFetchResource(
       delete redirectInit.body;
     }
 
-    // Per WHATWG Fetch spec: strip authorization header on cross-origin redirects.
     const requestOrigin = new URL(urlStr).origin;
     const redirectOrigin = new URL(resolvedUrl).origin;
     if (requestOrigin !== redirectOrigin) {
@@ -324,7 +317,7 @@ function createMcpFetchResource(
 
   const fetchFn: FetchLike = async (url, init) => {
     const urlString = typeof url === 'string' ? url : url.toString();
-    configurationUtilities.ensureUriAllowed(urlString);
+    networkSettings.ensureUriAllowed(urlString);
     const headers = new Headers(defaultHeaders);
     new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
     return followRedirects(urlString, { ...init, headers });
@@ -347,21 +340,4 @@ function createMcpFetchResource(
       dispatchers.clear();
     },
   };
-}
-
-/**
- * Returns an {@link McpFetchFactory} that applies Actions SSL/TLS, proxy, User-Agent, timeout,
- * and body-size settings to outbound MCP Streamable HTTP requests.
- *
- * The factory validates the `targetUrl` on creation, caches Undici dispatchers per destination
- * so redirect hops can use different transports, and returns a `close()` method that drains
- * open sockets.
- */
-export function buildMcpFetchFactory(
-  configurationUtilities: ActionsConfigurationUtilities,
-  logger: Logger,
-  cloud?: CloudSetup
-): McpFetchFactory {
-  return ({ targetUrl, headers }) =>
-    createMcpFetchResource(configurationUtilities, logger, cloud, targetUrl, headers);
 }

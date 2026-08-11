@@ -26,6 +26,13 @@ jest.mock('./create_mcp_fetch', () => ({
   createMcpFetch: jest.fn().mockReturnValue(jest.fn()),
 }));
 
+jest.mock('./create_mcp_fetch_resource', () => ({
+  createMcpFetchResource: jest.fn().mockReturnValue({
+    fetch: jest.fn(),
+    close: jest.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext => ({
   logger: {
     debug: jest.fn(),
@@ -68,7 +75,7 @@ describe('createMcpClientType', () => {
       expect(McpClient).toHaveBeenCalledWith(
         ctx.logger,
         expect.objectContaining({ url: 'https://mcp.example.com' }),
-        expect.any(Object)
+        expect.objectContaining({ fetch: expect.any(Function) })
       );
       expect(client.connect).toHaveBeenCalled();
     });
@@ -81,41 +88,39 @@ describe('createMcpClientType', () => {
       );
     });
 
-    it('validates the server URL against the network allowlist', async () => {
-      const ctx = makeBuildContext();
-
-      await createMcpClientType().build(ctx);
-
-      expect(ctx.networkSettings.ensureUriAllowed).toHaveBeenCalledWith('https://mcp.example.com');
-    });
-
-    it('uses mcpFetchFactory when available', async () => {
+    it('builds an MCP fetch resource from networkSettings', async () => {
+      const { createMcpFetchResource } = jest.requireMock('./create_mcp_fetch_resource') as {
+        createMcpFetchResource: jest.Mock;
+      };
       const { createMcpFetch } = jest.requireMock('./create_mcp_fetch') as {
         createMcpFetch: jest.Mock;
       };
       const mockResource = { fetch: jest.fn(), close: jest.fn() };
-      const mockFactory = jest.fn().mockReturnValue(mockResource);
+      createMcpFetchResource.mockReturnValue(mockResource);
 
       const ctx = makeBuildContext();
+      await createMcpClientType().build(ctx);
 
-      await createMcpClientType({ mcpFetchFactory: mockFactory }).build(ctx);
-
-      expect(mockFactory).toHaveBeenCalledWith(
-        expect.objectContaining({ targetUrl: 'https://mcp.example.com' })
+      expect(createMcpFetchResource).toHaveBeenCalledWith(
+        expect.objectContaining({
+          networkSettings: ctx.networkSettings,
+          logger: ctx.logger,
+          targetUrl: 'https://mcp.example.com',
+        })
       );
       expect(createMcpFetch).toHaveBeenCalledWith(mockResource);
     });
 
-    it('passes defaultHeaders to the factory and McpClient constructor', async () => {
+    it('passes defaultHeaders to the fetch resource and McpClient constructor', async () => {
+      const { createMcpFetchResource } = jest.requireMock('./create_mcp_fetch_resource') as {
+        createMcpFetchResource: jest.Mock;
+      };
       const defaultHeaders = { 'X-Custom': 'header' };
-      const mockResource = { fetch: jest.fn(), close: jest.fn() };
-      const mockFactory = jest.fn().mockReturnValue(mockResource);
-
       const ctx = makeBuildContext();
 
-      await createMcpClientType({ mcpFetchFactory: mockFactory, defaultHeaders }).build(ctx);
+      await createMcpClientType({ defaultHeaders }).build(ctx);
 
-      expect(mockFactory).toHaveBeenCalledWith(
+      expect(createMcpFetchResource).toHaveBeenCalledWith(
         expect.objectContaining({ headers: defaultHeaders })
       );
       expect(McpClient).toHaveBeenCalledWith(
@@ -125,17 +130,18 @@ describe('createMcpClientType', () => {
       );
     });
 
-    it('merges credential auth headers into the factory and McpClient headers', async () => {
+    it('merges credential auth headers into the fetch resource and McpClient headers', async () => {
+      const { createMcpFetchResource } = jest.requireMock('./create_mcp_fetch_resource') as {
+        createMcpFetchResource: jest.Mock;
+      };
       const authHeaders = { Authorization: 'Bearer tok' };
-      const mockResource = { fetch: jest.fn(), close: jest.fn() };
-      const mockFactory = jest.fn().mockReturnValue(mockResource);
       const ctx = makeBuildContext({
         credential: { getAuthHeaders: jest.fn().mockResolvedValue(authHeaders) },
       });
 
-      await createMcpClientType({ mcpFetchFactory: mockFactory }).build(ctx);
+      await createMcpClientType().build(ctx);
 
-      expect(mockFactory).toHaveBeenCalledWith(
+      expect(createMcpFetchResource).toHaveBeenCalledWith(
         expect.objectContaining({ headers: expect.objectContaining(authHeaders) })
       );
       expect(McpClient).toHaveBeenCalledWith(
@@ -169,9 +175,13 @@ describe('createMcpClientType', () => {
     });
 
     it('closes the MCP fetch resource on terminate', async () => {
+      const { createMcpFetchResource } = jest.requireMock('./create_mcp_fetch_resource') as {
+        createMcpFetchResource: jest.Mock;
+      };
       const mockResource = { fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
-      const mockFactory = jest.fn().mockReturnValue(mockResource);
-      const clientType = createMcpClientType({ mcpFetchFactory: mockFactory });
+      createMcpFetchResource.mockReturnValue(mockResource);
+
+      const clientType = createMcpClientType();
       const ctx = makeBuildContext();
       const client = await clientType.build(ctx);
 

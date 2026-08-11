@@ -379,14 +379,6 @@ describe('Actions Plugin', () => {
       });
     });
 
-    describe('getMcpFetchFactory()', () => {
-      it('exposes an Actions-configured fetch factory', async () => {
-        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-
-        expect(pluginSetup.getMcpFetchFactory()).toEqual(expect.any(Function));
-      });
-    });
-
     describe('isPreconfiguredConnector', () => {
       function setup(config: ActionsConfig) {
         context = coreMock.createPluginInitializerContext<ActionsConfig>(config);

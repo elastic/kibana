@@ -10,4 +10,6 @@
 export { createMcpClientType } from './mcp_client_type';
 export type { McpClientTypeDeps } from './mcp_client_type';
 export { createMcpFetch } from './create_mcp_fetch';
-export type { McpFetchFactory, McpFetchOptions, McpFetchResource } from './mcp_fetch_types';
+export { createMcpFetchResource } from './create_mcp_fetch_resource';
+export type { CreateMcpFetchResourceOpts } from './create_mcp_fetch_resource';
+export type { McpFetchResource } from './mcp_fetch_types';
