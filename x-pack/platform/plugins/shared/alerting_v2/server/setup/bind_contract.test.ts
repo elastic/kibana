@@ -6,14 +6,15 @@
  */
 
 import { Container, ContainerModule } from 'inversify';
-import { KibanaRequest } from '@kbn/core/server';
-import { Start, ServiceToken } from '@kbn/core-di';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { ServiceToken } from '@kbn/core-di';
+import { Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
-import { AlertingServerStart } from '../types';
+import type { AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 
 const AlertingStartToken = Start as ServiceToken<AlertingServerStart>;

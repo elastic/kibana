@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { getCreateAlertEventStepDefinition } from './create_alert_event_step';
 
