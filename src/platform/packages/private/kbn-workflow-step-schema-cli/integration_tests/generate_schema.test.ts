@@ -14,7 +14,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   createTestServers,
-  createRootWithCorePlugins,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
@@ -61,23 +60,49 @@ const authHeaders = {
  * Poll the composed-schema route until the workflows plugins have finished
  * registering, so the generated artifact reflects the full superset rather than
  * a partially-initialized registry.
+ *
+ * The only legitimate wait is for the licensing plugin to publish its state
+ * asynchronously after boot (typically a few seconds). A 2-minute budget keeps
+ * the descriptive "Timed out …" message winning the race against Jest's own
+ * timeout even on slow CI shards.
  */
-async function waitForSchemaRoute(baseUrl: string, timeoutMs = 5 * 60 * 1000): Promise<void> {
-  const deadline = Date.now() + timeoutMs;
+async function waitForSchemaRoute(
+  log: ToolingLog,
+  baseUrl: string,
+  timeoutMs = 2 * 60 * 1000
+): Promise<void> {
+  const start = Date.now();
+  const deadline = start + timeoutMs;
   let lastError = 'unknown error';
+  let attempts = 0;
   while (Date.now() < deadline) {
+    attempts++;
     try {
       const response = await fetch(`${baseUrl}${SCHEMA_READY_PATH}`, { headers: authHeaders });
       if (response.ok) {
+        log.debug(`Schema route ready after ${attempts} attempt(s) (${Date.now() - start}ms)`);
         return;
       }
       lastError = `HTTP ${response.status} ${response.statusText}`;
     } catch (error) {
-      lastError = error instanceof Error ? error.message : String(error);
+      if (error instanceof Error) {
+        // Include the underlying cause (e.g. ECONNREFUSED) so "TypeError: fetch
+        // failed" is self-diagnosing in CI logs.
+        const cause = (error as NodeJS.ErrnoException).cause;
+        const causeStr = cause instanceof Error ? ` (cause: ${cause.message})` : '';
+        lastError = `${error.message}${causeStr}`;
+      } else {
+        lastError = String(error);
+      }
     }
+    log.warning(`Schema route not ready yet (attempt ${attempts}): ${lastError}`);
     await new Promise((resolve) => setTimeout(resolve, 2_000));
   }
-  throw new Error(`Timed out waiting for ${SCHEMA_READY_PATH}: ${lastError}`);
+  throw new Error(
+    `Timed out waiting for ${SCHEMA_READY_PATH} after ${attempts} attempt(s) (${
+      Date.now() - start
+    }ms): ${lastError}`
+  );
 }
 
 describe('workflow step schema generation', () => {
@@ -88,30 +113,34 @@ describe('workflow step schema generation', () => {
   let baseUrl: string;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
+    const { startES, startKibana } = createTestServers({
       adjustTimeout: (timeout) => jest.setTimeout(timeout),
       settings: {
-        es: {
-          license: 'trial',
+        es: { license: 'trial' },
+        kbn: {
+          // `oss: false` discovers every repo plugin (getPackages(REPO_ROOT)), so
+          // the full union of solution steps/connectors/triggers is registered.
+          cliArgs: { oss: false },
+          // An explicit port avoids a port-0 trap: createRootWithCorePlugins
+          // defaults to server.port = 0 (OS-assigned ephemeral), but
+          // coreSetup.http.getServerInfo() returns config.port (0), not the
+          // actual bound port. fetch('http://localhost:0/...') fails immediately
+          // with ECONNREFUSED for every attempt, silently timing the test out.
+          server: { port: 55620 },
         },
       },
     });
 
     esServer = await startES();
+    kibanaServer = await startKibana();
 
-    // `oss: false` discovers every repo plugin (`getPackages(REPO_ROOT)`), so the
-    // full union of solution steps/connectors/triggers is registered.
-    const root = createRootWithCorePlugins({}, { oss: false });
-    await root.preboot();
-    const coreSetup = await root.setup();
-    const coreStart = await root.start();
-    kibanaServer = { root, coreSetup, coreStart, stop: async () => await root.shutdown() };
-
-    const { protocol, hostname, port } = coreSetup.http.getServerInfo();
-    const host = hostname === '0.0.0.0' ? 'localhost' : hostname;
+    const { protocol, hostname, port } = kibanaServer.coreSetup.http.getServerInfo();
+    // Use 127.0.0.1 (IPv4) explicitly to avoid IPv6/IPv4 ambiguity where `localhost`
+    // may resolve to `::1` on macOS while Kibana binds to `0.0.0.0` (IPv4 only).
+    const host = hostname === '0.0.0.0' ? '127.0.0.1' : hostname;
     baseUrl = `${protocol}://${host}:${port}`;
 
-    await waitForSchemaRoute(baseUrl);
+    await waitForSchemaRoute(log, baseUrl);
   });
 
   afterAll(async () => {
