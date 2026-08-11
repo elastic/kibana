@@ -51,6 +51,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - license_management
     - links
     - logstash
     - management
@@ -64,6 +65,7 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - rollup
     - remote_clusters
     - reindex_service
     - saved_objects_management
