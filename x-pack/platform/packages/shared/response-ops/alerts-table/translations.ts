@@ -244,27 +244,12 @@ export const SELECT_ROW_ARIA_LABEL = (displayedRowIndex: number) =>
     defaultMessage: 'Select row {displayedRowIndex}',
   });
 
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.responseOpsAlertsTable.actions.addToCase',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
-
 export const ADD_TO_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToCaseMenu', {
   defaultMessage: 'Add to case',
 });
 
-export const CASE_TYPE = i18n.translate('xpack.responseOpsAlertsTable.actions.caseType', {
-  defaultMessage: 'Case type',
-});
-
 export const ADD_TO_CHAT = i18n.translate('xpack.responseOpsAlertsTable.actions.addChat', {
   defaultMessage: 'Add to chat',
-});
-
-export const ADD_TO_NEW_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToNewCase', {
-  defaultMessage: 'Add to new case',
 });
 
 export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(

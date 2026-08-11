@@ -136,10 +136,6 @@ test.describe(
       ]) {
         await expect(page.testSubj.locator(action)).toBeAttached();
       }
-
-      await pageObjects.alertsTablePage.openAddToCasePanel();
-      await expect(pageObjects.alertsTablePage.addToExistingCaseAction).toBeAttached();
-      await expect(pageObjects.alertsTablePage.addToNewCaseAction).toBeAttached();
     });
 
     test('remembers hidden columns across navigations', async ({ page, pageObjects }) => {
