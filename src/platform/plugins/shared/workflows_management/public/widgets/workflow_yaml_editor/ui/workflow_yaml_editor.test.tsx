@@ -39,12 +39,11 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
   const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
   return {
     YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
-      const React = require('react');
       return React.createElement(
         'div',
         { 'data-testid': 'yaml-editor' },
         React.createElement('textarea', {
-          ref: (el: HTMLTextAreaElement | null) => {
+          ref: (el: HTMLTextAreaElement | null): void => {
             if (el) {
               // getModel returns undefined so handleEditorDidMount skips provider
               // registration (the `if (!model) return` guard). This keeps the
