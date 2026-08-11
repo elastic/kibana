@@ -7,7 +7,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 import {} from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -27,6 +27,11 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
 } from '../common/constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
+import * as connectorsModule from './connectors';
+import * as workflowsModule from './workflows';
+import * as agentBuilderModule from './agent_builder';
+import { CasesClientFactory } from './client/factory';
+import { createCasesClientMock } from './client/mocks';
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
@@ -313,6 +318,59 @@ describe('Cases Plugin', () => {
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);
+    });
+  });
+
+  describe('client source propagation', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const request = httpServerMock.createKibanaRequest();
+
+    it('passes the correct source for each client path', async () => {
+      const connectorRegistration = jest
+        .spyOn(connectorsModule, 'registerConnectorTypes')
+        .mockImplementation(() => {});
+
+      const workflowRegistration = jest
+        .spyOn(workflowsModule, 'registerCaseWorkflowSteps')
+        .mockImplementation(() => {});
+
+      const agentBuilderRegistration = jest
+        .spyOn(agentBuilderModule, 'registerCasesAgentBuilderTools')
+        .mockImplementation(() => {});
+
+      const createClient = jest
+        .spyOn(CasesClientFactory.prototype, 'create')
+        .mockResolvedValue(createCasesClientMock());
+
+      pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
+
+      coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+      plugin.setup(coreSetup, pluginsSetup);
+      const startContract = plugin.start(coreStart, pluginsStart);
+
+      const clients = [
+        ['connector', connectorRegistration.mock.calls[0][0].getCasesClient],
+        ['workflow', workflowRegistration.mock.calls[0][1]],
+        ['agent_builder', agentBuilderRegistration.mock.calls[0][1]],
+        ['plugin_contract', startContract.getCasesClientWithRequest],
+      ] as const;
+
+      for (const [expectedSource, getCasesClient] of clients) {
+        createClient.mockClear();
+
+        await getCasesClient(request);
+
+        expect(createClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            request,
+            clientSource: expectedSource,
+          })
+        );
+      }
     });
   });
 });

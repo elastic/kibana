@@ -14,6 +14,8 @@ import { newCase } from '../mocks';
 import { createCasesSubClient } from './cases/client';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import type { CasesClientSource } from './types';
+import { withUsageCounter } from './usage_counters';
+import { createAttachmentsSubClient } from './attachments/client';
 
 jest.mock('./cases/create', () => ({ create: jest.fn().mockResolvedValue({ id: 123 }) }));
 jest.mock('./cases/get', () => ({
@@ -24,6 +26,7 @@ jest.mock('./cases/get', () => ({
   getTags: jest.fn().mockResolvedValue([]),
   getCategories: jest.fn().mockResolvedValue([]),
 }));
+jest.mock('./attachments/add', () => ({ addComment: jest.fn().mockResolvedValue({}) }));
 
 describe('withUsageCounter', () => {
   beforeEach(() => {
@@ -39,6 +42,25 @@ describe('withUsageCounter', () => {
   const mockCasesClient = createCasesClientMock();
   const mockCasesClientInternal = createCasesClientInternalMock();
   const client = createCasesSubClient(clientArgs, mockCasesClient, mockCasesClientInternal);
+  const attachmentClient = createAttachmentsSubClient(
+    clientArgs,
+    mockCasesClient,
+    mockCasesClientInternal
+  );
+
+  it('wrapper function should forward arguments and return correct value', async () => {
+    const operation = jest.fn().mockResolvedValue('result');
+    const wrapped = withUsageCounter('create_case', clientArgs, operation);
+    await expect(wrapped('argument')).resolves.toBe('result');
+    expect(operation).toHaveBeenCalledWith('argument');
+  });
+
+  it('wrapper function should forward failures', async () => {
+    const operationError = jest.fn().mockRejectedValue(new Error('failure'));
+    const wrapped = withUsageCounter('create_case', clientArgs, operationError);
+    await expect(wrapped('argument')).rejects.toThrow('failure');
+    expect(operationError).toHaveBeenCalledWith('argument');
+  });
 
   it('should call incrementCounter with correct parameters', async () => {
     await client.create(newCase);
@@ -48,17 +70,22 @@ describe('withUsageCounter', () => {
     });
   });
 
+  it('should call incrementCounter for attachmets', async () => {
+    await attachmentClient.add({
+      caseId: '1',
+      comment: { attachmentId: 'test', type: 'user', owner: 'security' },
+    });
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: 'add_attachment',
+      counterType: 'cases_client.rest_api',
+    });
+  });
+
   it('resolve and get method are ignored from telemetry', async () => {
     await client.get({ id: '1' });
     await client.resolve({ id: '1' });
-    expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith({
-      counterName: 'get_case',
-      counterType: 'cases_client.rest_api',
-    });
-    expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith({
-      counterName: 'resolve_case',
-      counterType: 'cases_client.rest_api',
-    });
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   it('should not throw if usageCounter is undefined', async () => {
