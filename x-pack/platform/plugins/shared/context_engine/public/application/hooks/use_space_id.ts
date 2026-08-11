@@ -15,11 +15,15 @@ export const useSpaceId = (spaces?: SpacesPluginStart): string | undefined => {
   useEffect(() => {
     let cancelled = false;
     if (spaces) {
-      spaces.getActiveSpace().then((space) => {
-        if (!cancelled) {
-          setSpaceId(space.id);
-        }
-      });
+      spaces
+        .getActiveSpace()
+        .then((space) => {
+          if (!cancelled) {
+            setSpaceId(space.id);
+          }
+        })
+        // Degrade to no space id (and thus no trace) rather than throwing an unhandled rejection.
+        .catch(() => {});
     }
     return () => {
       cancelled = true;

@@ -15,7 +15,11 @@ import type { ChatOpener, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  // Keep signal groups / group signals fresh for 30s so they don't refetch on every remount or
+  // window refocus.
+  defaultOptions: { queries: { staleTime: 30_000 } },
+});
 
 export const mountApp = ({
   core,
@@ -37,7 +41,7 @@ export const mountApp = ({
     triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,
     spaces: plugins.spaces,
-    chatOpener: getChatOpener?.(),
+    getChatOpener,
   };
 
   ReactDOM.render(

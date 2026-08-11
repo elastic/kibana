@@ -35,7 +35,7 @@ const buildSignal = (overrides: Partial<Signal> = {}): Signal => ({
 });
 
 describe('getSignalGroups', () => {
-  it('runs a terms aggregation over the tags keyword field of the signals index pattern', async () => {
+  it("runs a terms aggregation over the tags keyword field of the current space's signals index", async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({
       aggregations: {
@@ -48,11 +48,11 @@ describe('getSignalGroups', () => {
       },
     } as any);
 
-    const result = await getSignalGroups(esClient, { maxGroups: 100 });
+    const result = await getSignalGroups(esClient, { spaceId: 'default', maxGroups: 100 });
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-*',
+        index: 'context-engine-signals-default',
         size: 0,
         ignore_unavailable: true,
         allow_no_indices: true,
@@ -71,11 +71,22 @@ describe('getSignalGroups', () => {
     });
   });
 
+  it('reads the index for the requested space', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockResolvedValue({ aggregations: { tags: { buckets: [] } } } as any);
+
+    await getSignalGroups(esClient, { spaceId: 'marketing', maxGroups: 100 });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'context-engine-signals-marketing' })
+    );
+  });
+
   it('returns an empty group list when the index has no signals', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({} as any);
 
-    const result = await getSignalGroups(esClient, { maxGroups: 100 });
+    const result = await getSignalGroups(esClient, { spaceId: 'default', maxGroups: 100 });
 
     expect(result).toEqual({ groups: [] });
   });
@@ -92,17 +103,23 @@ describe('getSignalsByTag', () => {
       },
     } as any);
 
-    const result = await getSignalsByTag(esClient, { tag: 'query_error', from: 0, size: 25 });
+    const result = await getSignalsByTag(esClient, {
+      spaceId: 'default',
+      tag: 'query_error',
+      from: 0,
+      size: 25,
+    });
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-*',
+        index: 'context-engine-signals-default',
         from: 0,
         size: 25,
         ignore_unavailable: true,
         allow_no_indices: true,
         track_total_hits: true,
-        query: { term: { tags: 'query_error' } },
+        _source: { excludes: ['data.returned.columns'] },
+        query: { bool: { filter: [{ term: { tags: 'query_error' } }] } },
         sort: [{ '@timestamp': { order: 'desc' } }],
       })
     );
@@ -118,7 +135,12 @@ describe('getSignalsByTag', () => {
       },
     } as any);
 
-    const result = await getSignalsByTag(esClient, { tag: 'query_error', from: 0, size: 25 });
+    const result = await getSignalsByTag(esClient, {
+      spaceId: 'default',
+      tag: 'query_error',
+      from: 0,
+      size: 25,
+    });
 
     expect(result).toEqual({ signals: [signal], total: 1 });
   });

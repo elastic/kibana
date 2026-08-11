@@ -19,18 +19,29 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { TraceWaterfall, createEsTraceFetcher, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import React, { useMemo } from 'react';
+import { buildAgentBuilderTracesIndexName } from '../../../../common/constants';
 import type { Signal } from '../../../../common/http_api/signals';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
-import { humanizeQueryKind, humanizeTagType, signalTitle } from './signal_format';
+import {
+  humanizeQueryKind,
+  humanizeTagType,
+  signalTitle,
+  SIGNAL_STATUS_ERROR,
+} from './signal_format';
 
-const TRACE_CONTAINER_HEIGHT = 360;
+const traceContainerStyle = css`
+  height: 360px;
+`;
 
 interface SignalDetailFlyoutProps {
   signals: Signal[];
+  /** Total number of signals in the group (from the badge), used for the "Signal X of N" label. */
+  total: number;
   index: number;
   onNavigate: (index: number) => void;
   onClose: () => void;
@@ -44,6 +55,7 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 
 export const SignalDetailFlyout = ({
   signals,
+  total,
   index,
   onNavigate,
   onClose,
@@ -55,7 +67,7 @@ export const SignalDetailFlyout = ({
 
   const signal = signals[index];
 
-  const tracesIndex = spaceId ? `traces-agent_builder.otel-${spaceId}` : undefined;
+  const tracesIndex = spaceId ? buildAgentBuilderTracesIndexName(spaceId) : undefined;
   const traceId = signal?.trace_ids?.[0];
   // Gate on the trace id, not on `data.search.search` (which is always defined).
   const canShowTrace = Boolean(tracesIndex && traceId);
@@ -75,9 +87,10 @@ export const SignalDetailFlyout = ({
   }
 
   const { data: signalData } = signal;
-  const total = signals.length;
+  // Navigation is bounded by the loaded page, while the "of N" label reflects the group total.
+  const loadedCount = signals.length;
   const hasPrevious = index > 0;
-  const hasNext = index < total - 1;
+  const hasNext = index < loadedCount - 1;
 
   const fields = [
     {
@@ -163,7 +176,7 @@ export const SignalDetailFlyout = ({
         <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiBadge
-              color={signalData.status === 'Error' ? 'danger' : 'success'}
+              color={signalData.status === SIGNAL_STATUS_ERROR ? 'danger' : 'success'}
               data-test-subj="contextSignalDetailStatus"
             >
               {signalData.status}
@@ -225,7 +238,7 @@ export const SignalDetailFlyout = ({
         </SectionTitle>
         <EuiSpacer size="s" />
         {canShowTrace ? (
-          <div style={{ height: TRACE_CONTAINER_HEIGHT }} data-test-subj="contextSignalDetailTrace">
+          <div css={traceContainerStyle} data-test-subj="contextSignalDetailTrace">
             <TraceWaterfall
               spans={traceResult.spans}
               traceId={traceId}

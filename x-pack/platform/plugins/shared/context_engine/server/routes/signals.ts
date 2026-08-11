@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, RequestHandler } from '@kbn/core/server';
+import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   DEFAULT_SIGNALS_PAGE_SIZE,
   MAX_SIGNAL_GROUPS,
@@ -20,10 +20,14 @@ import {
 import type { ListSignalGroupsResponse, ListSignalsResponse } from '../../common/http_api/signals';
 import { apiPrivileges } from '../../common/features';
 import { getSignalGroups, getSignalsByTag } from '../signals/read';
+import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
 };
+
+/** Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`. */
+const MAX_RESULT_WINDOW = 10000;
 
 const listSignalsQuerySchema = schema.object({
   tag: schema.string({
@@ -31,7 +35,11 @@ const listSignalsQuerySchema = schema.object({
     maxLength: 1024,
     meta: { description: 'The tag whose signals should be fetched.' },
   }),
-  from: schema.number({ min: 0, defaultValue: 0 }),
+  from: schema.number({
+    min: 0,
+    max: MAX_RESULT_WINDOW - MAX_SIGNALS_PAGE_SIZE,
+    defaultValue: 0,
+  }),
   size: schema.number({
     min: 1,
     max: MAX_SIGNALS_PAGE_SIZE,
@@ -40,25 +48,25 @@ const listSignalsQuerySchema = schema.object({
 });
 
 /**
- * Gates every Signals route on the Context Engine advanced setting, mirroring the AI index
- * routes. While the setting is off the routes 404 as if they did not exist.
+ * Resolves the active space id for the request, falling back to the default space when the spaces
+ * plugin is absent. Signals are read from the current space's index.
  */
-const withContextEngineFeatureFlag =
-  <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
-  async (ctx, request, response) => {
-    const { uiSettings } = await ctx.core;
-    const isEnabled = await uiSettings.client.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
-    if (!isEnabled) {
-      return response.notFound();
-    }
-    return handler(ctx, request, response);
-  };
+const DEFAULT_SPACE_ID = 'default';
+
+const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRequest): string =>
+  spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
 /**
  * Registers the read-only Signals routes. Reads run as the CURRENT USER (the signals indices are
- * per-space user indices), so both handlers use `asCurrentUser`.
+ * per-space user indices), so both handlers use `asCurrentUser` and read the current space's index.
  */
-export const registerSignalRoutes = ({ router }: { router: IRouter }) => {
+export const registerSignalRoutes = ({
+  router,
+  getSpaces,
+}: {
+  router: IRouter;
+  getSpaces: () => Promise<SpacesPluginStart | undefined>;
+}) => {
   // Preaggregated grouped-by-tag list.
   router.versioned
     .get({
@@ -67,13 +75,15 @@ export const registerSignalRoutes = ({ router }: { router: IRouter }) => {
       access: 'internal',
       summary: 'List signal groups',
       description:
-        'Returns the Context Engine signals grouped by tag: a terms aggregation over the whole signals store.',
+        "Returns the current space's Context Engine signals grouped by tag: a terms aggregation over the whole space's signals store.",
     })
     .addVersion(
       { version: SIGNALS_INTERNAL_API_VERSION, validate: false },
-      withContextEngineFeatureFlag(async (ctx, _request, response) => {
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         const body: ListSignalGroupsResponse = await getSignalGroups(esClient, {
+          spaceId,
           maxGroups: MAX_SIGNAL_GROUPS,
         });
         return response.ok({ body });
@@ -97,8 +107,14 @@ export const registerSignalRoutes = ({ router }: { router: IRouter }) => {
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
         const { tag, from, size } = request.query;
-        const body: ListSignalsResponse = await getSignalsByTag(esClient, { tag, from, size });
+        const body: ListSignalsResponse = await getSignalsByTag(esClient, {
+          spaceId,
+          tag,
+          from,
+          size,
+        });
         return response.ok({ body });
       })
     );

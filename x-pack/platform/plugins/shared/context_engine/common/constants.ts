@@ -70,3 +70,14 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
 /** Agent id whose tool calls are left untagged. */
 export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+
+/**
+ * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept
+ * in-plugin — mirrors Agent Builder's exported `buildAgentBuilderTracesIndexPattern` contract —
+ * so Context Engine does not take a dependency on `@kbn/agent-builder-plugin`.
+ */
+export const AGENT_BUILDER_TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
+
+/** The Agent Builder OTel traces index name for a given Kibana space. */
+export const buildAgentBuilderTracesIndexName = (spaceId: string): string =>
+  `${AGENT_BUILDER_TRACES_INDEX_PREFIX}${spaceId}`;

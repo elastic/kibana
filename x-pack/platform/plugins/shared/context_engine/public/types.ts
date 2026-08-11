@@ -11,17 +11,16 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
-import type { Signal } from '../common/http_api/signals';
 
 /**
- * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at
- * and the signals in scope. The actual Agent Builder opener is registered by a separate PR
- * (search-team #15593) — this plugin only defines the seam.
+ * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
+ * optionally, the tag/group they are scoped to. The opener (registered by a separate PR,
+ * search-team #15593) fetches the signals server-side; the materialized signals are intentionally
+ * NOT passed so the opener always works from the authoritative, complete set.
  */
 export interface AnalyzeAndImproveContext {
   aiIndex: AiIndexHttpItem;
-  signals: Signal[];
-  /** The tag/group the signals were drawn from, when the action is scoped to one group. */
+  /** The tag/group the action is scoped to, when drilled into a single group. */
   tag?: string;
 }
 

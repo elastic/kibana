@@ -16,7 +16,6 @@ import type {
   ListSignalGroupsResponse,
   ListSignalsResponse,
 } from '../../../common/http_api/signals';
-import type { AnalyzeAndImproveContext, ChatOpener } from '../../types';
 
 interface ListSignalGroupsArgs {
   signal?: AbortSignal;
@@ -49,15 +48,3 @@ export const listSignals = (
     query: { tag, from, size },
     ...(signal ? { signal } : {}),
   });
-
-/**
- * Invokes the registered "Analyze & improve" chat opener. No-op when no opener is registered
- * (the button that triggers this is hidden in that case). The opener itself is provided by a
- * separate PR (search-team #15593).
- */
-export const analyzeAndImprove = (
-  opener: ChatOpener | undefined,
-  context: AnalyzeAndImproveContext
-): void => {
-  opener?.(context);
-};

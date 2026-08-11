@@ -108,8 +108,14 @@ export class ContextEnginePlugin
       },
     });
 
-    // Read-only Signals routes (reads run as the current user).
-    registerSignalRoutes({ router });
+    // Read-only Signals routes (reads run as the current user, scoped to the active space).
+    registerSignalRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+    });
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),

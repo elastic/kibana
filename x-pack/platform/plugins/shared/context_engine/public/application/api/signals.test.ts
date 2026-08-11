@@ -12,8 +12,7 @@ import {
   signalGroupsPath,
   signalsPath,
 } from '../../../common/constants';
-import type { AnalyzeAndImproveContext } from '../../types';
-import { analyzeAndImprove, listSignalGroups, listSignals } from './signals';
+import { listSignalGroups, listSignals } from './signals';
 
 describe('listSignalGroups', () => {
   it('requests the versioned grouped endpoint', async () => {
@@ -66,21 +65,5 @@ describe('listSignals', () => {
       query: { tag: 'coverage_gap', from: 25, size: 50 },
       signal,
     });
-  });
-});
-
-describe('analyzeAndImprove', () => {
-  const context = { aiIndex: { id: 'idx' }, signals: [] } as unknown as AnalyzeAndImproveContext;
-
-  it('invokes the registered opener with the context', () => {
-    const opener = jest.fn();
-
-    analyzeAndImprove(opener, context);
-
-    expect(opener).toHaveBeenCalledWith(context);
-  });
-
-  it('is a no-op when no opener is registered', () => {
-    expect(() => analyzeAndImprove(undefined, context)).not.toThrow();
   });
 });

@@ -48,8 +48,9 @@ export class ContextEnginePlugin
     >
 {
   /**
-   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered.
-   * Read at mount time and threaded into the app via services.
+   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered. A
+   * getter over this field is threaded into the app so the button reacts to an opener registered
+   * after mount, rather than a value snapshotted once at mount time.
    */
   private chatOpener?: ChatOpener;
 

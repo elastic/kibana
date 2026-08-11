@@ -15,8 +15,12 @@ export interface ContextEngineServices extends CoreStart {
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
   console?: ContextEngineStartDependencies['console'];
   spaces?: ContextEngineStartDependencies['spaces'];
-  /** The registered "Analyze & improve" chat opener, if any. */
-  chatOpener?: ChatOpener;
+  /**
+   * Resolves the registered "Analyze & improve" chat opener at call time (or `undefined` if none is
+   * registered yet). A getter — not the resolved value — so the button reacts to an opener that
+   * #15593 registers after this app has mounted.
+   */
+  getChatOpener?: () => ChatOpener | undefined;
 }
 
 const useTypedKibana = () => useKibana<ContextEngineServices>();

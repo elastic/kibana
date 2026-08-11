@@ -27,7 +27,7 @@ const services = {
   spaces: undefined,
 };
 
-const renderFlyout = (signals: Signal[], index = 0) => {
+const renderFlyout = (signals: Signal[], index = 0, total = signals.length) => {
   const onNavigate = jest.fn();
   const onClose = jest.fn();
   const view = render(
@@ -36,6 +36,7 @@ const renderFlyout = (signals: Signal[], index = 0) => {
         <KibanaContextProvider services={services}>
           <SignalDetailFlyout
             signals={signals}
+            total={total}
             index={index}
             onNavigate={onNavigate}
             onClose={onClose}
@@ -61,6 +62,12 @@ describe('SignalDetailFlyout', () => {
     expect(screen.getByTestId('contextSignalDetailQuery')).toBeInTheDocument();
     expect(screen.getByTestId('contextSignalDetailError')).toHaveTextContent('boom');
     expect(screen.getByTestId('contextSignalDetailPosition')).toHaveTextContent('Signal 2 of 3');
+  });
+
+  it('bases the "Signal X of N" label on the group total, not the loaded page', () => {
+    renderFlyout(signals, 0, 100);
+
+    expect(screen.getByTestId('contextSignalDetailPosition')).toHaveTextContent('Signal 1 of 100');
   });
 
   it('shows the no-trace message when the space id is unavailable', () => {

@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import { analyzeAndImprove } from '../../api/signals';
+import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { useSignals } from '../../hooks/use_signals';
@@ -41,22 +41,53 @@ interface SignalsPanelProps {
  */
 export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const {
-    services: { chatOpener },
+    services: { getChatOpener },
   } = useKibana();
+  // Resolve at render time so the button appears as soon as an opener is registered (#15593),
+  // rather than being frozen to whatever existed at mount.
+  const chatOpener = getChatOpener?.();
 
-  const { groups, isLoading: isLoadingGroups } = useSignalGroups();
+  const { groups, isLoading: isLoadingGroups, error: groupsError } = useSignalGroups();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
   const [flyoutIndex, setFlyoutIndex] = useState<number | null>(null);
 
-  const { signals, isLoading: isLoadingSignals } = useSignals({ tag: selectedTag });
+  const {
+    signals,
+    total,
+    isLoading: isLoadingSignals,
+    error: signalsError,
+  } = useSignals({ tag: selectedTag });
 
   const loading = isLoading || isLoadingGroups;
 
   const handleAnalyze = () => {
     if (aiIndex) {
-      analyzeAndImprove(chatOpener, { aiIndex, signals, tag: selectedTag });
+      analyzeAndImprove(getChatOpener, { aiIndex, tag: selectedTag });
     }
   };
+
+  const errorPrompt = (
+    <EuiEmptyPrompt
+      color="danger"
+      iconType="error"
+      titleSize="xs"
+      data-test-subj="contextSignalsError"
+      title={
+        <h3>
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.errorTitle', {
+            defaultMessage: 'Unable to load signals',
+          })}
+        </h3>
+      }
+      body={
+        <p>
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.errorBody', {
+            defaultMessage: 'Something went wrong while loading signals. Try again later.',
+          })}
+        </p>
+      }
+    />
+  );
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSignalsPanel">
@@ -100,6 +131,8 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
       {loading ? (
         <EuiSkeletonText lines={3} data-test-subj="contextSignalsLoading" />
+      ) : groupsError ? (
+        errorPrompt
       ) : selectedTag === undefined ? (
         groups.length === 0 ? (
           <EuiEmptyPrompt
@@ -123,10 +156,11 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
             }
           />
         ) : (
-          <div data-test-subj="contextSignalsGroups">
+          <div data-test-subj="contextSignalsGroups" role="list">
             {groups.map((group, groupIndex) => (
               <React.Fragment key={group.tag}>
                 <EuiPanel
+                  role="listitem"
                   hasBorder
                   paddingSize="m"
                   data-test-subj="contextSignalGroupRow"
@@ -174,6 +208,8 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
           <EuiSpacer size="s" />
           {isLoadingSignals ? (
             <EuiSkeletonText lines={3} data-test-subj="contextSignalsGroupLoading" />
+          ) : signalsError ? (
+            errorPrompt
           ) : signals.length === 0 ? (
             <EuiText size="s" color="subdued" data-test-subj="contextSignalsGroupEmpty">
               <p>
@@ -183,12 +219,29 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
               </p>
             </EuiText>
           ) : (
-            signals.map((signal, signalIndex) => (
-              <React.Fragment key={signal.signal_id}>
-                <SignalRow signal={signal} onViewDetails={() => setFlyoutIndex(signalIndex)} />
-                {signalIndex < signals.length - 1 && <EuiSpacer size="s" />}
-              </React.Fragment>
-            ))
+            <>
+              {total > signals.length && (
+                <>
+                  <EuiText size="xs" color="subdued" data-test-subj="contextSignalsGroupTruncated">
+                    <p>
+                      {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.truncated', {
+                        defaultMessage: 'Showing first {shown} of {total}',
+                        values: { shown: signals.length, total },
+                      })}
+                    </p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              <div role="list">
+                {signals.map((signal, signalIndex) => (
+                  <div role="listitem" key={signal.signal_id}>
+                    <SignalRow signal={signal} onViewDetails={() => setFlyoutIndex(signalIndex)} />
+                    {signalIndex < signals.length - 1 && <EuiSpacer size="s" />}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -196,6 +249,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
       {flyoutIndex !== null && signals[flyoutIndex] && (
         <SignalDetailFlyout
           signals={signals}
+          total={total}
           index={flyoutIndex}
           onNavigate={setFlyoutIndex}
           onClose={() => setFlyoutIndex(null)}

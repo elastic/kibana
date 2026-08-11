@@ -63,7 +63,7 @@ const renderPanel = ({
   const services = {
     ...coreMock.createStart(),
     data: { search: { search: jest.fn() } },
-    chatOpener,
+    getChatOpener: () => chatOpener,
   };
   render(
     <I18nProvider>
@@ -136,14 +136,47 @@ describe('SignalsPanel', () => {
     expect(screen.queryByTestId('contextSignalsAnalyzeButton')).not.toBeInTheDocument();
   });
 
-  it('shows the Analyze & improve button and invokes the registered opener', () => {
+  it('shows the Analyze & improve button and invokes the registered opener without signals', () => {
     const opener = jest.fn();
     renderPanel({ chatOpener: opener });
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
 
-    expect(opener).toHaveBeenCalledWith(
-      expect.objectContaining({ aiIndex, signals: [], tag: undefined })
+    expect(opener).toHaveBeenCalledWith({ aiIndex, tag: undefined });
+    expect(opener.mock.calls[0][0]).not.toHaveProperty('signals');
+  });
+
+  it('renders a distinct error state when the groups query fails', () => {
+    mockUseSignalGroups.mockReturnValue(groupsResult({ error: new Error('boom') }));
+    renderPanel();
+
+    expect(screen.getByTestId('contextSignalsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsEmpty')).not.toBeInTheDocument();
+  });
+
+  it('renders the error state when the per-group signals query fails', () => {
+    mockUseSignalGroups.mockReturnValue(
+      groupsResult({ groups: [{ tag: 'query_error', count: 1 }] })
+    );
+    mockUseSignals.mockReturnValue(signalsResult({ error: new Error('boom') }));
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('contextSignalGroupRow'));
+
+    expect(screen.getByTestId('contextSignalsError')).toBeInTheDocument();
+  });
+
+  it('shows a truncation notice when the group total exceeds the loaded page', () => {
+    mockUseSignalGroups.mockReturnValue(
+      groupsResult({ groups: [{ tag: 'query_error', count: 100 }] })
+    );
+    mockUseSignals.mockReturnValue(signalsResult({ signals: [buildSignal()], total: 100 }));
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('contextSignalGroupRow'));
+
+    expect(screen.getByTestId('contextSignalsGroupTruncated')).toHaveTextContent(
+      'Showing first 1 of 100'
     );
   });
 });

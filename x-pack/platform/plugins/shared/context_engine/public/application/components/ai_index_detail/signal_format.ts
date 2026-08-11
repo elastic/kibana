@@ -8,6 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { Signal } from '../../../../common/http_api/signals';
 
+/** The `data.status` value marking a failed tool call. Shared by the row and the detail flyout. */
+export const SIGNAL_STATUS_ERROR = 'Error';
+
 /** Known tags get a curated label; unknown tags fall back to a Title-Cased keyword. */
 const KNOWN_TAG_LABELS: Record<string, string> = {
   query_error: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.tag.queryError', {
@@ -80,7 +83,7 @@ export const signalSummary = (signal: Signal): string => {
 
   const sentences: string[] = [];
 
-  if (signal.tags.includes('query_error') || data.status === 'Error') {
+  if (signal.tags.includes('query_error') || data.status === SIGNAL_STATUS_ERROR) {
     sentences.push(
       i18n.translate('xpack.contextEngine.aiIndexDetail.signals.summary.queryError', {
         defaultMessage: 'A {kind} tool call against {target} failed{error}.',

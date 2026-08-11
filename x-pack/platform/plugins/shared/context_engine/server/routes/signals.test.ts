@@ -66,7 +66,7 @@ describe('signals routes', () => {
       versioned: { get: jest.fn(createVersionedRoute('GET')) },
     } as unknown as IRouter;
 
-    registerSignalRoutes({ router });
+    registerSignalRoutes({ router, getSpaces: async () => undefined });
   });
 
   it('registers both routes as internal read routes', () => {
@@ -90,7 +90,7 @@ describe('signals routes', () => {
     expect(search).not.toHaveBeenCalled();
   });
 
-  it('aggregates by tag and reads as the current user', async () => {
+  it("aggregates by tag over the current space's index and reads as the current user", async () => {
     search.mockResolvedValue({
       aggregations: { tags: { buckets: [{ key: 'query_error', doc_count: 5 }] } },
     });
@@ -99,7 +99,7 @@ describe('signals routes', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-*',
+        index: 'context-engine-signals-default',
         aggs: { tags: { terms: expect.objectContaining({ field: 'tags' }) } },
       })
     );
@@ -108,7 +108,7 @@ describe('signals routes', () => {
     });
   });
 
-  it('fetches the signals for a tag', async () => {
+  it("fetches the signals for a tag from the current space's index", async () => {
     const signal = { signal_id: 'sig-1', tags: ['query_error'], data: {} };
     search.mockResolvedValue({ hits: { total: { value: 1 }, hits: [{ _source: signal }] } });
 
@@ -116,10 +116,20 @@ describe('signals routes', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-*',
-        query: { term: { tags: 'query_error' } },
+        index: 'context-engine-signals-default',
+        query: { bool: { filter: [{ term: { tags: 'query_error' } }] } },
       })
     );
     expect(response.ok).toHaveBeenCalledWith({ body: { signals: [signal], total: 1 } });
+  });
+
+  it('bounds `from` so `from + size` cannot exceed the ES max result window', () => {
+    const { validate } = getRoute(signalsPath);
+    const querySchema = (validate as { request: { query: { validate: (v: unknown) => unknown } } })
+      .request.query;
+
+    expect(() => querySchema.validate({ tag: 'query_error', from: 9900, size: 100 })).not.toThrow();
+    expect(() => querySchema.validate({ tag: 'query_error', from: 9901, size: 100 })).toThrow();
+    expect(() => querySchema.validate({ tag: 'query_error', from: 20000, size: 100 })).toThrow();
   });
 });

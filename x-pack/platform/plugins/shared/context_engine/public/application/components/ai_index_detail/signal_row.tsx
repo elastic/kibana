@@ -18,7 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Signal } from '../../../../common/http_api/signals';
-import { humanizeQueryKind, signalSummary, signalTitle } from './signal_format';
+import {
+  humanizeQueryKind,
+  signalSummary,
+  signalTitle,
+  SIGNAL_STATUS_ERROR,
+} from './signal_format';
 
 interface SignalRowProps {
   signal: Signal;
@@ -31,7 +36,7 @@ interface SignalRowProps {
  */
 export const SignalRow = ({ signal, onViewDetails }: SignalRowProps) => {
   const { data } = signal;
-  const isError = data.status === 'Error';
+  const isError = data.status === SIGNAL_STATUS_ERROR;
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="contextSignalRow">
