@@ -138,9 +138,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           },
         }}
         hideSearchBar
-      >
-        <></>
-      </ProfilingAppPageTemplate>
+      />
     );
   }
 

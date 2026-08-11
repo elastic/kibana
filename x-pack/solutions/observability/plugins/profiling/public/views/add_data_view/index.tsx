@@ -11,9 +11,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiCodeBlock,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -513,26 +511,14 @@ EOF`}
     <ProfilingAppPageTemplate
       restrictWidth
       hideSearchBar
-      pageTitle={
-        <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="m" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.profiling.noDataPage.pageTitle', {
-              defaultMessage: 'Add profiling data',
-            })}
-          </EuiFlexItem>
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      }
+      pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
+        defaultMessage: 'Add profiling data',
+      })}
     >
       {isLoading ? (
-        <></>
+        <EuiFlexItem>
+          <EuiLoadingSpinner />
+        </EuiFlexItem>
       ) : (
         <>
           <EuiCallOut
