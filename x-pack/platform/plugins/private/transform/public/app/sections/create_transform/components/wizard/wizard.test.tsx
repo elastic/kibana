@@ -175,6 +175,7 @@ describe('Transform: <Wizard />', () => {
   test('renders project scope before a data view is selected', async () => {
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
+      isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
         fetchProjects: jest.fn().mockResolvedValue({
@@ -208,9 +209,36 @@ describe('Transform: <Wizard />', () => {
     expect(screen.getByTestId('transformDataViewPicker')).toHaveTextContent('Select data view');
   });
 
+  test('does not render project scope or inject default routing when CPS tier is ineligible', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => '_id:linked-id');
+    appDeps.cps = {
+      isTierEligible: false,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        fetchProjects: jest.fn(),
+        getDefaultProjectRouting,
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockStepDefineForm')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
+    expect(getDefaultProjectRouting).not.toHaveBeenCalled();
+  });
+
   test('shows a visible project scope error when project fetch fails', async () => {
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
+      isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
         fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
@@ -261,6 +289,7 @@ describe('Transform: <Wizard />', () => {
   test('updates project routing when project scope changes', async () => {
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
+      isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
         fetchProjects: jest.fn().mockResolvedValue({
@@ -307,6 +336,7 @@ describe('Transform: <Wizard />', () => {
     let resolveWhenReady: () => void = () => {};
     let defaultProjectRouting: ProjectRouting = PROJECT_ROUTING.ALL;
     appDeps.cps = {
+      isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn(
           () =>

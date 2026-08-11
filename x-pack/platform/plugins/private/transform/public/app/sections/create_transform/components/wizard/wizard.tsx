@@ -119,6 +119,7 @@ export const Wizard: FC<WizardProps> = React.memo(
     const appDependencies = useAppDependencies();
     const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
     const cpsManager = cps?.cpsManager;
+    const shouldUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
     const dataView = searchItems?.dataView;
     const defaultTransformFunction = getInitialTransformFunction(
       cloneConfig,
@@ -146,7 +147,7 @@ export const Wizard: FC<WizardProps> = React.memo(
     }, [projectRouting]);
 
     useEffect(() => {
-      if (!cpsManager || cloneConfig) {
+      if (!shouldUseProjectScope || !cpsManager) {
         return;
       }
 
@@ -167,7 +168,7 @@ export const Wizard: FC<WizardProps> = React.memo(
       return () => {
         canceled = true;
       };
-    }, [cloneConfig, cpsManager]);
+    }, [cpsManager, shouldUseProjectScope]);
 
     const resetWizardState = useCallback(
       (nextSearchItems: SearchItems, transformFunction: TransformFunction) => {
@@ -179,7 +180,7 @@ export const Wizard: FC<WizardProps> = React.memo(
           cloneConfig,
           nextSearchItems.dataView
         );
-        if (!cloneConfig && nextStepDefineState.projectRouting === undefined) {
+        if (shouldUseProjectScope && nextStepDefineState.projectRouting === undefined) {
           nextStepDefineState.projectRouting =
             projectRoutingRef.current ?? cpsManager?.getDefaultProjectRouting();
         }
@@ -194,7 +195,7 @@ export const Wizard: FC<WizardProps> = React.memo(
         setStepCreateState(getDefaultStepCreateState());
         setCurrentStep(WIZARD_STEPS.DEFINE);
       },
-      [cloneConfig, cpsManager]
+      [cloneConfig, cpsManager, shouldUseProjectScope]
     );
 
     useEffect(() => {
@@ -251,7 +252,7 @@ export const Wizard: FC<WizardProps> = React.memo(
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
     const projectScopeSelector =
-      cpsManager && !cloneConfig ? (
+      shouldUseProjectScope && cpsManager ? (
         <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
           <ProjectScopeSelector
             cpsManager={cpsManager}
