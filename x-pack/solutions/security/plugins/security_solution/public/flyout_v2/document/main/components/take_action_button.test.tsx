@@ -9,10 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  ADD_TO_CASE_ACTION_IDS,
-  useAddToCaseActions,
-} from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
@@ -263,7 +260,6 @@ describe('<TakeActionButton />', () => {
           'data-test-subj': 'add-to-case-action',
         },
       ],
-      addToCaseActionPanels: [],
     });
     mockUseAlertsActions.mockReturnValue({
       actionItems: [
@@ -1081,17 +1077,25 @@ describe('<TakeActionButton />', () => {
       });
     });
 
-    it.each([
-      [ADD_TO_CASE_ACTION_IDS.addToNewCase, FLYOUT_ACTION.ADD_TO_CASE_NEW],
-      [ADD_TO_CASE_ACTION_IDS.addToExistingCase, FLYOUT_ACTION.ADD_TO_CASE_EXISTING],
-    ])('reports the selected case action', (actionId, expectedAction) => {
-      renderTakeActionButton();
+    it('reports action "add_to_case" when "Add to case" is clicked', () => {
+      mockUseAddToCaseActions.mockReturnValue({
+        addToCaseActionItems: [
+          {
+            key: 'add-to-case-action',
+            'data-test-subj': 'add-to-case-action',
+            name: 'Add to case',
+            onClick: jest.fn(),
+          },
+        ],
+      });
+      const { getByTestId, getByText } = renderTakeActionButton();
 
-      mockUseAddToCaseActions.mock.calls[0][0].onActionClick?.(actionId);
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Add to case'));
 
       expect(mockReportActionClicked).toHaveBeenCalledWith({
         flyoutType: FLYOUT_TYPE.DOCUMENT,
-        action: expectedAction,
+        action: FLYOUT_ACTION.ADD_TO_CASE,
       });
     });
 

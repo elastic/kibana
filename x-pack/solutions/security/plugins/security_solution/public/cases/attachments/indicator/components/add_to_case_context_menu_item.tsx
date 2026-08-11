@@ -5,46 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
-import { AddToCaseContextMenuItem } from '@kbn/response-ops-alerts-table';
+import React, { useCallback } from 'react';
+import { EuiContextMenuItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { ADD_TO_EXISTING_CASE, useAddToExistingCase } from './add_to_existing_case';
-import { ADD_TO_NEW_CASE, useAddToNewCase } from './add_to_new_case';
+import type { IndicatorAttachmentMetadata } from '..';
+import { generateIndicatorAttachmentsMetadata, generateIndicatorAttachmentsWithoutOwner } from '..';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useCaseDisabled } from '../hooks/use_case_permission';
 
 interface IndicatorAddToCaseContextMenuItemProps {
   indicator: Indicator;
   onClick: () => void;
-  addToNewCaseTestSubj: string;
-  addToExistingCaseTestSubj: string;
+  ['data-test-subj']?: string;
 }
+
+const ADD_TO_CASE = i18n.translate('xpack.securitySolution.threatIntelligence.addToCase', {
+  defaultMessage: 'Add to case',
+});
 
 export const IndicatorAddToCaseContextMenuItem = ({
   indicator,
   onClick,
-  addToNewCaseTestSubj,
-  addToExistingCaseTestSubj,
+  'data-test-subj': dataTestSubj,
 }: IndicatorAddToCaseContextMenuItemProps) => {
-  const addToNewCase = useAddToNewCase({ indicator, onClick });
-  const addToExistingCase = useAddToExistingCase({ indicator, onClick });
+  const { cases } = useKibana().services;
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
+  const id = indicator._id as string;
+  const attachmentMetadata: IndicatorAttachmentMetadata =
+    generateIndicatorAttachmentsMetadata(indicator);
+  const attachments: CaseAttachmentsWithoutOwner = generateIndicatorAttachmentsWithoutOwner(
+    id,
+    attachmentMetadata
+  );
+  const handleClick = useCallback(() => {
+    onClick();
+    selectCaseModal.open({ getAttachments: () => attachments });
+  }, [attachments, onClick, selectCaseModal]);
+  const disabled = useCaseDisabled(attachmentMetadata.indicatorName);
 
   return (
-    <AddToCaseContextMenuItem
-      actions={[
-        {
-          id: 'addToNewCase',
-          label: ADD_TO_NEW_CASE,
-          dataTestSubj: addToNewCaseTestSubj,
-          disabled: addToNewCase.disabled,
-          onClick: addToNewCase.onClick,
-        },
-        {
-          id: 'addToExistingCase',
-          label: ADD_TO_EXISTING_CASE,
-          dataTestSubj: addToExistingCaseTestSubj,
-          disabled: addToExistingCase.disabled,
-          onClick: addToExistingCase.onClick,
-        },
-      ]}
-    />
+    <EuiContextMenuItem
+      data-test-subj={dataTestSubj}
+      disabled={disabled}
+      icon="briefcase"
+      onClick={handleClick}
+    >
+      {ADD_TO_CASE}
+    </EuiContextMenuItem>
   );
 };
