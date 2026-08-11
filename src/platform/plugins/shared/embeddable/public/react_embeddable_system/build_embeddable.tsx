@@ -63,7 +63,6 @@ export async function buildEmbeddable<
       // Spread default panel capabilities first, allow apiRegistration to override them
       ...panelCapabilitiesDefaults,
       ...apiRegistration,
-      isVisible$,
       ...(apiPublishesFetchSetting(parentApi) && {
         isFetchPaused$: parentApi.fetchSetting$.pipe(
           combineLatestWith(isVisible$),

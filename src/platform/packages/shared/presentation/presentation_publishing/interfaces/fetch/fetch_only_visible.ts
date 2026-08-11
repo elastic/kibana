@@ -23,11 +23,3 @@ export const apiPublishesFetchSetting = (
 ): unknownApi is PublishesFetchSetting => {
   return Boolean(unknownApi && (unknownApi as PublishesFetchSetting)?.fetchSetting$ !== undefined);
 };
-
-export interface PublishesIsVisible {
-  isVisible$: PublishingSubject<boolean>;
-}
-
-export const apiPublishesIsVisible = (unknownApi?: unknown): unknownApi is PublishesIsVisible => {
-  return Boolean(unknownApi && (unknownApi as PublishesIsVisible)?.isVisible$ !== undefined);
-};

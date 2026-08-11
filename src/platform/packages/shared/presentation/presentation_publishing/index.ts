@@ -82,8 +82,6 @@ export {
 export {
   type FetchSetting,
   type PublishesFetchSetting,
-  type PublishesIsVisible,
-  apiPublishesIsVisible,
   apiPublishesFetchSetting,
 } from './interfaces/fetch/fetch_only_visible';
 export {
