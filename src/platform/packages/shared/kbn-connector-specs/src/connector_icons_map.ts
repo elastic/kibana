@@ -350,4 +350,14 @@ export const ConnectorIconsMap: Map<
     '.gcp_iam',
     lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
   ],
+
+  [
+    '.google_compute_engine',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleComputeEngine" */ './specs/google_compute_engine/icon'
+        )
+    ),
+  ],
 ]);
