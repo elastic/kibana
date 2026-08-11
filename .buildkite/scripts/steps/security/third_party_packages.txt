@@ -61,4 +61,3 @@ redux-v4
 reselect-v4
 @swc/plugin-emotion
 graphql
-@babel/plugin-transform-react-jsx
