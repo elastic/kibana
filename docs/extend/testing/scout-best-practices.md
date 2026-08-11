@@ -143,16 +143,6 @@ await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
 await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1');
 ```
 
-✔️ **Do:** filter a table down to the target before reading its rows. Narrowing first is what makes an exact count safe:
-
-```ts
-await searchBox.fill(connectorName);
-await searchBox.press('Enter');
-await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-
-await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
-```
-
 :::::
 
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
