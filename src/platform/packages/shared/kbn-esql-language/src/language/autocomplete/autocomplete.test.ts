@@ -1192,6 +1192,18 @@ describe('autocomplete', () => {
       'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
       ['\n', 'AND $0', 'OR $0', '| ']
     );
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN (FROM /), true, false)'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN (FROM /), false)'],
+    ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(query);
+      const suggestedTexts = suggestions.map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['index', 'otherIndex']));
+      expect(suggestedTexts.some((text) => text.trim() === 'doubleField')).toBe(false);
+    });
   });
 
   describe('ROW operator expressions', () => {

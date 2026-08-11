@@ -19,7 +19,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../../../../all_operators';
-import { normalizePreferredExpressionTypes } from '../../utils';
+import { isExpressionParenthesized, normalizePreferredExpressionTypes } from '../../utils';
 import {
   areParamsHomogeneous,
   hasBooleanSignature,
@@ -42,6 +42,10 @@ const stringPredicateOperatorNames = [
   ...inOperators.map(({ name }) => name),
   ...nullCheckOperators.map(({ name }) => name),
 ];
+
+const parenthesizedBooleanOperatorNames = [...logicalOperators, ...nullCheckOperators].map(
+  ({ name }) => name
+);
 
 export interface OperatorDecision {
   shouldSuggest: boolean;
@@ -77,12 +81,33 @@ type Rule = (context: EvaluatedOperatorRuleContext) => OperatorDecision | null;
 // Order matters: specific rules must come before general rules to avoid being shadowed.
 //
 // Rule ordering logic:
+// 0. Syntax-specific rules (parenthesized boolean expressions)
 // 1. Context-based rules (no function context, any type, boolean)
 // 2. Homogeneous function rules (first param, subsequent params)
 // 3. Type-specific rules (numeric, string/text, single string)
 // 4. Default fallback
 
 const rules: Rule[] = [
+  // Rule 0: A parenthesized boolean can be followed by logical and null-check operators
+  (ctx) => {
+    const { expressionRoot, innerText } = ctx.ctx;
+
+    if (
+      !ctx.functionParameterContext &&
+      ctx.expressionType === 'boolean' &&
+      expressionRoot &&
+      isExpressionParenthesized(innerText, expressionRoot)
+    ) {
+      return {
+        shouldSuggest: true,
+        allowedOperators: parenthesizedBooleanOperatorNames,
+        reason: 'Parenthesized boolean expression',
+      };
+    }
+
+    return null;
+  },
+
   // Rule 1: No function context - allow operators (filtered by type and expression preference)
   (ctx) => {
     if (!ctx.functionParameterContext) {

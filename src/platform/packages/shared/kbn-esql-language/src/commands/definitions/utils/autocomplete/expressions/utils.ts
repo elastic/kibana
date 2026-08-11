@@ -13,7 +13,7 @@ import {
   isLiteral,
   isUnaryExpression,
 } from '@elastic/esql';
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
@@ -31,6 +31,17 @@ import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
+
+/** Checks whether the source text wraps an AST expression in closed parentheses. */
+export const isExpressionParenthesized = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem
+): boolean => {
+  const beforeExpression = innerText.slice(0, expressionRoot.location.min).trimEnd();
+  const afterExpression = innerText.slice(expressionRoot.location.max + 1).trimStart();
+
+  return beforeExpression.endsWith('(') && afterExpression.startsWith(')');
+};
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];

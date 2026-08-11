@@ -10,6 +10,7 @@
 import { Parser, PromQLParser } from '@elastic/esql';
 import type { PromQLAstQueryExpression } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
+import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import {
   correctPromqlQuerySyntax,
   correctQuerySyntax,
@@ -25,6 +26,13 @@ interface ParsedAutocompleteQuery {
   tokens: EsqlLexerToken[];
 }
 
+const parseCorrectedQuery = (query: string): ESQLAstQueryExpression => {
+  const correctedQuery = correctQuerySyntax(query);
+  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
+  return removeAutocompleteMarkers(root);
+};
+
 /**
  * Parses the query up to the cursor for autocomplete.
  * It fixes incomplete input before parsing and returns AST data built from the corrected text.
@@ -33,13 +41,21 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
   const innerText = fullText.substring(0, offset);
   // Keep tokens tied to the real editor text; correctedQuery can add synthetic markers/brackets.
   const tokens = getEsqlLexerTokens(innerText);
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-  const cleanRoot = removeAutocompleteMarkers(root);
+  let root = parseCorrectedQuery(innerText);
+
+  // A missing operand can collapse a nested expression to `unknown`; retry with a temporary operand to preserve its AST.
+  if (findAstPosition(root, offset).node?.type === 'unknown') {
+    const recoveredRoot = parseCorrectedQuery(`${innerText} ${EDITOR_MARKER}`);
+    const recoveredNode = findAstPosition(recoveredRoot, offset).node;
+
+    if (recoveredNode && recoveredNode.type !== 'unknown') {
+      root = recoveredRoot;
+    }
+  }
 
   return {
     innerText,
-    root: cleanRoot,
+    root,
     tokens,
   };
 }
