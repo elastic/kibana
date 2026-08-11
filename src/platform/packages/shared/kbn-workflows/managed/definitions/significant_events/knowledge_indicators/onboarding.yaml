@@ -3,7 +3,7 @@
 # Orchestrates the full KI onboarding pipeline for a stream:
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
-#   3. Queries generation (optional, skippable — persistence handled by the child workflow)
+#   3. Queries generation (conditional — skipped when no new features were found)
 
 version: "1"
 name: "KI Onboarding"
