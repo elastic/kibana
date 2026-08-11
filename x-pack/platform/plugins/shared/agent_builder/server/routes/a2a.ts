@@ -133,18 +133,15 @@ To learn more about the Agent Builder A2A server, refer to the [A2A server docum
     'This endpoint must be publicly accessible for A2A agent card discovery.';
   router.get(
     {
-      path: '/.well-known/agent.json',
+      path: `${A2A_SERVER_PATH}/.well-known/agent-card.json`,
       security: {
-        authc: { enabled: false as const, reason: discoveryReason },
         authz: { enabled: false as const, reason: discoveryReason },
       },
       options: { access: 'public' },
       validate: false,
     },
-    (_context, _request, response) => {
-      return response.redirected({
-        headers: { location: `${A2A_SERVER_PATH}/${agentBuilderDefaultAgentId}.json` },
-      });
+    (_context, request, response) => {
+      return a2aAdapter.handleAgentCardRequest(request, response, agentBuilderDefaultAgentId);
     }
   );
 }
