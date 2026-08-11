@@ -413,3 +413,117 @@ For **batch analysis on historical data**, pass `start` and `end` to `ml.ad_mana
 6. **Fix memory before `query_delay`.** `hard_limit` invalidates downstream diagnostics.
 7. **Stop datafeed → close job → update config → open job → start datafeed** for any config change to memory or query delay.
 8. **Confirm RCAs with `ad_rca_source_evidence`.** Raw source documents are ground truth.
+
+---
+
+## Visualize — Dashboard Panels
+
+**License**: Platinum or higher. Decline clearly if not available.
+**Tool**: `platform.dashboard.generate_dashboard` with `source: "config"`. Never use `source: "request"` — no resolver exists for ML panels.
+**Job IDs**: always from prior `ml.ad_get_job_info` results or explicit user input. Never invent.
+
+### When to add charts
+
+| Situation | Chart |
+| --- | --- |
+| Investigation complete — entities and time ranges identified | Swimlane (`viewBy` on primary influencer field) |
+| After swimlane — comparing actual metric values across several top entities | Anomaly charts (multi-series view with model bounds + anomaly markers) |
+| After swimlane — narrowing to one entity + detector | Single metric viewer for that entity |
+| User asks to "show"/"visualise" anomalies with no investigation context | Swimlane (`overall`) first; then offer `viewBy` breakdown |
+| Explain mode — discussing model bounds or score deviation | Single metric viewer (actual vs model bounds is the visual score explanation) |
+| Forecast was run in Explain mode | Single metric viewer with `forecast_id` |
+| Manage mode — new job has produced first results | Swimlane (`overall`) for initial results overview |
+
+Charts do **not** belong as unprompted additions in Troubleshoot mode (job health, memory, datafeed issues) or when explaining score methodology alone.
+
+### Swimlane type — decision logic
+
+Derive `swimlane_type` and `view_by` from the job's `analysis_config` (available from `ml.ad_get_job_info`) and from anomaly record field values already returned by prior RCA tools.
+
+Priority order for `view_by` field selection: `partition_field_name` → `by_field_name` → `over_field_name`.
+
+1. **One influencer/partition field in the job config** → use `viewBy` with that field automatically. No need to ask.
+2. **Multiple fields** → use the field that appeared in the highest-scoring anomaly records from the current investigation (check `partition_field_value` / `by_field_value` on top records). If genuinely ambiguous, ask once: *"The job has both `host.name` and `service.name` — which should the swim lane split by, or would you prefer an overall view?"*
+3. **No influencer/partition fields** in the job config, or **multiple jobs selected** → use `overall`.
+
+### `ml_anomaly_swimlane`
+
+Heatmap — each row is one `view_by` field value, each column is a time bucket, colour intensity = anomaly score. Answers *"which entity was anomalous, and when?"*
+
+```json
+{
+  "source": "config",
+  "type": "ml_anomaly_swimlane",
+  "grid": { "x": 0, "y": 0, "w": 24, "h": 10 },
+  "config": {
+    "job_ids": ["my-job"],
+    "swimlane_type": "viewBy",
+    "view_by": "host.name"
+  }
+}
+```
+
+| Field | Notes |
+| --- | --- |
+| `job_ids` | Required. One or more existing job or group IDs. |
+| `swimlane_type` | Required. `"overall"` or `"viewBy"`. |
+| `view_by` | Required when `swimlane_type` is `"viewBy"`. Use the exact field name from the job config (e.g. `"host.name"`). |
+| `time_range` | Optional. Omit to inherit the dashboard time range. |
+
+### `ml_anomaly_charts`
+
+Multi-series time series — one chart per anomalous entity/series — showing actual metric values alongside model bounds and anomaly markers. Useful for comparing how several top entities deviate from their respective baselines in a single view. Sits between the swimlane (score overview) and the single metric viewer (one-entity drill-down).
+
+```json
+{
+  "source": "config",
+  "type": "ml_anomaly_charts",
+  "grid": { "x": 0, "y": 10, "w": 24, "h": 15 },
+  "config": {
+    "job_ids": ["my-job"],
+    "severity_threshold": 50
+  }
+}
+```
+
+| Field | Notes |
+| --- | --- |
+| `job_ids` | Required. One or more existing job or group IDs. |
+| `severity_threshold` | Optional. Minimum anomaly score (0–100) to surface. Default 25; raise to 50 or 75 to focus on high-severity series. |
+| `time_range` | Optional. Omit to inherit the dashboard time range. |
+
+### `ml_single_metric_viewer`
+
+Continuous time series for one detector in one job — actual metric values with upper/lower model confidence bounds overlaid, anomaly markers as scatter points, optional forecast band. Answers *"how does this entity's behaviour deviate from the model?"*
+
+Populate `selected_entities` directly from anomaly record fields (`partition_field_value`, `by_field_value`, `over_field_value`) already available from prior RCA results — no need to ask the user.
+
+```json
+{
+  "source": "config",
+  "type": "ml_single_metric_viewer",
+  "grid": { "x": 0, "y": 10, "w": 24, "h": 18 },
+  "config": {
+    "job_ids": ["my-job"],
+    "selected_detector_index": 0,
+    "selected_entities": { "host.name": "web-01" }
+  }
+}
+```
+
+| Field | Notes |
+| --- | --- |
+| `job_ids` | Required. Exactly **one** job ID. |
+| `selected_detector_index` | Zero-based detector index. Use the `detector_index` from the anomaly record. Defaults to 0. |
+| `selected_entities` | Key-value map of partition/by/over field → value (e.g. `{"host.name": "web-01"}`). Populate from RCA results. Omit for population-level jobs with no entity fields. |
+| `function_description` | `"min"`, `"max"`, or `"mean"` — only for metric detectors. |
+| `forecast_id` | Include when a forecast was previously generated for this job. |
+| `time_range` | Optional. Omit to inherit the dashboard time range. |
+
+### Layout
+
+Stack in order of increasing specificity: swimlane (overview) → anomaly charts (multi-series detail) → single metric viewer (one-entity drill-down).
+
+- Swimlane: `w: 24`, `h: 10`, `y: 0`.
+- Anomaly charts: `w: 24`, `h: 15`, `y: 10` (when shown alongside swimlane).
+- Single metric viewer: `w: 24`, `h: 18`, `y: 10` (or `y: 25` when anomaly charts are also present).
