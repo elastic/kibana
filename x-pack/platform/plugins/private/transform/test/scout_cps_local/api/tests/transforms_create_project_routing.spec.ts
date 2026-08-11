@@ -9,16 +9,26 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../common';
-import { generateDestIndex, generateTransformConfig } from '../helpers/transform_config';
-import { transformApiTest as apiTest } from '../fixtures';
-import { COMMON_HEADERS } from '../constants';
+import { generateDestIndex, generateTransformConfig } from '../../../scout/api/helpers/transform_config';
+import { transformApiTest as apiTest } from '../../../scout/api/fixtures';
+import { COMMON_HEADERS } from '../../../scout/api/constants';
+
+/**
+ * Requires a CPS-enabled Scout server (`--serverConfigSet cps_local`).
+ * Standard serverless Security Complete does not enable CPS, so this suite lives
+ * under `scout_cps_local` and runs via `.buildkite/scripts/steps/test/scout/cps_testing.sh`.
+ *
+ * Linked project id matches `MOCK_IDP_UIAM_PROJECT_ID2` from `@kbn/mock-idp-utils`
+ * (registered by the cps_local Scout stack).
+ */
+const LINKED_PROJECT_ROUTING = '_id:fedcba65432109876543210987654321';
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create with project routing',
   { tag: tags.serverless.security.complete },
   () => {
     const transformId = 'test_transform_id_create_with_project_routing';
-    const projectRouting = '_id:linked-id';
+    const projectRouting = LINKED_PROJECT_ROUTING;
     let transformManagerCookieHeader: CookieHeader;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
