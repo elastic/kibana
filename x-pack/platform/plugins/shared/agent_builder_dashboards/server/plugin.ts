@@ -65,7 +65,11 @@ export class AgentBuilderDashboardsPlugin
         false
       );
       registerSkills(setupDeps.agentBuilder, customContentEnabled);
-    })();
+    })().catch((err) => {
+      this.logger.error(
+        `Failed to register dashboard skills: ${err instanceof Error ? err.message : String(err)}`
+      );
+    });
 
     return {};
   }
