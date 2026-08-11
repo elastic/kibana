@@ -17,7 +17,7 @@ import {
   withActionIcons,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
-import { ATTACK_CASE_ACTION_IDS } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_case_items';
+import { ATTACK_ADD_TO_CASE_ACTION_ID } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_case_items';
 import { ATTACK_TAG_ACTION_ID } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_tags_items';
 import { ATTACK_ASSIGNEE_ACTION_IDS } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_assignees_items';
 import { RUN_ATTACK_WORKFLOW_ACTION_ID } from '../../../hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_run_workflow_items';
@@ -53,7 +53,7 @@ const ACTION_ICONS_BY_ID = {
   [ATTACK_AI_ACTION_IDS.viewInAiAssistant]: 'sparkles',
   [ATTACK_ASSIGNEE_ACTION_IDS.assign]: 'users',
   [ATTACK_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
-  [ATTACK_CASE_ACTION_IDS.addToCase]: 'briefcase',
+  [ATTACK_ADD_TO_CASE_ACTION_ID]: 'briefcase',
   [ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
   [ATTACK_TAG_ACTION_ID]: 'tag',
   [EXPLORE_IN_ATTACKS_ACTION_ID]: 'external',

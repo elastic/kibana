@@ -9,24 +9,22 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 
 interface Props {
   canUserCreateAndReadCases: () => boolean;
-  title: string;
   onClick?: () => void;
 }
 
-export const useAddToNewCase = ({
+export const useAddToCase = ({
   canUserCreateAndReadCases,
-  title,
   onClick,
 }: Props): {
   disabled: boolean;
-  onAddToNewCase: ({
+  onAddToCase: ({
     alertIds,
     markdownComments,
     replacements,
@@ -39,29 +37,29 @@ export const useAddToNewCase = ({
   const { cases } = useKibana().services;
   const { alertsIndexPattern } = useAssistantContext();
 
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
-    initialValue: {
-      description: i18n.CASE_DESCRIPTION(title),
-      title,
+  const { open: openSelectCaseModal } = cases.hooks.useCasesAddToExistingCaseModal({
+    onClose: onClick,
+    successToaster: {
+      title: i18n.ADD_TO_CASE_SUCCESS,
     },
-    toastContent: i18n.ADD_TO_CASE_SUCCESS,
   });
-  const openCreateCaseFlyout = useCallback(
+
+  const onAddToCase = useCallback(
     ({
       alertIds,
-      headerContent,
       markdownComments,
       replacements,
     }: {
       alertIds: string[];
-      headerContent?: React.ReactNode;
       markdownComments: string[];
       replacements?: Replacements;
     }) => {
-      const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
-        comment: x,
-        type: AttachmentType.user,
-      }));
+      const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>(
+        (comment) => ({
+          comment,
+          type: AttachmentType.user,
+        })
+      );
 
       const originalAlertIds = getOriginalAlertIds({ alertIds, replacements });
       const alertAttachments = originalAlertIds.map<CaseAttachmentWithoutOwner>((alertId) => ({
@@ -74,42 +72,15 @@ export const useAddToNewCase = ({
         type: AttachmentType.alert,
       }));
 
-      const attachments = [...userCommentAttachments, ...alertAttachments];
-
-      createCaseFlyout.open({
-        attachments,
-        headerContent,
+      openSelectCaseModal({
+        getAttachments: () => [...userCommentAttachments, ...alertAttachments],
       });
     },
-    [alertsIndexPattern, createCaseFlyout]
-  );
-
-  const headerContent = useMemo(
-    () => <div>{i18n.CREATE_A_CASE_FOR_ATTACK_DISCOVERY(title)}</div>,
-    [title]
-  );
-
-  const onAddToNewCase = useCallback(
-    ({
-      alertIds,
-      markdownComments,
-      replacements,
-    }: {
-      alertIds: string[];
-      markdownComments: string[];
-      replacements?: Replacements;
-    }) => {
-      if (onClick) {
-        onClick();
-      }
-
-      openCreateCaseFlyout({ alertIds, headerContent, markdownComments, replacements });
-    },
-    [headerContent, onClick, openCreateCaseFlyout]
+    [alertsIndexPattern, openSelectCaseModal]
   );
 
   return {
     disabled: !canUserCreateAndReadCases(),
-    onAddToNewCase,
+    onAddToCase,
   };
 };

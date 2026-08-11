@@ -54,11 +54,7 @@ jest.mock('../../use_attack_discovery_bulk', () => ({
 }));
 
 jest.mock('./use_add_to_case', () => ({
-  useAddToNewCase: jest.fn(() => ({ disabled: false, onAddToNewCase: jest.fn() })),
-}));
-
-jest.mock('./use_add_to_existing_case', () => ({
-  useAddToExistingCase: jest.fn(() => ({ onAddToExistingCase: jest.fn() })),
+  useAddToCase: jest.fn(() => ({ disabled: false, onAddToCase: jest.fn() })),
 }));
 
 jest.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
@@ -160,19 +156,6 @@ describe('TakeAction', () => {
     openPopover();
 
     expect(screen.getByTestId('addToCase')).toBeInTheDocument();
-  });
-
-  it('renders the Add to existing case action', async () => {
-    render(
-      <TestProviders>
-        <TakeAction {...defaultProps} />
-      </TestProviders>
-    );
-
-    openPopover();
-
-    fireEvent.click(screen.getByTestId('addToCase'));
-    expect(await screen.findByTestId('addToExistingCase')).toBeInTheDocument();
   });
 
   it('renders the View in AI Assistant action', () => {
@@ -509,24 +492,18 @@ describe('TakeAction', () => {
   });
 
   describe('case interactions', () => {
-    const mockOnAddToNewCase = jest.fn();
-    const mockOnAddToExistingCase = jest.fn();
+    const mockOnAddToCase = jest.fn();
 
     beforeEach(() => {
-      const { useAddToNewCase } = jest.requireMock('./use_add_to_case');
-      const { useAddToExistingCase } = jest.requireMock('./use_add_to_existing_case');
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
 
-      useAddToNewCase.mockReturnValue({
+      useAddToCase.mockReturnValue({
         disabled: false,
-        onAddToNewCase: mockOnAddToNewCase,
-      });
-
-      useAddToExistingCase.mockReturnValue({
-        onAddToExistingCase: mockOnAddToExistingCase,
+        onAddToCase: mockOnAddToCase,
       });
     });
 
-    it('calls onAddToNewCase when clicking add to new case', async () => {
+    it('calls onAddToCase when clicking add to case', async () => {
       render(
         <TestProviders>
           <TakeAction {...defaultProps} />
@@ -535,32 +512,13 @@ describe('TakeAction', () => {
 
       openPopover();
       fireEvent.click(screen.getByTestId('addToCase'));
-      fireEvent.click(await screen.findByTestId('addToNewCase'));
 
       await waitFor(() => {
-        expect(mockOnAddToNewCase).toHaveBeenCalledWith({
+        expect(mockOnAddToCase).toHaveBeenCalledWith({
           alertIds: expect.any(Array),
           markdownComments: expect.any(Array),
           replacements: undefined,
         });
-      });
-    });
-
-    it('calls onAddToExistingCase when clicking add to existing case', async () => {
-      render(
-        <TestProviders>
-          <TakeAction {...defaultProps} />
-        </TestProviders>
-      );
-
-      openPopover();
-      fireEvent.click(screen.getByTestId('addToCase'));
-      fireEvent.click(await screen.findByTestId('addToExistingCase'));
-
-      expect(mockOnAddToExistingCase).toHaveBeenCalledWith({
-        alertIds: expect.any(Array),
-        markdownComments: expect.any(Array),
-        replacements: undefined,
       });
     });
   });
@@ -601,15 +559,10 @@ describe('TakeAction', () => {
         },
       });
 
-      const { useAddToNewCase } = jest.requireMock('./use_add_to_case');
-      useAddToNewCase.mockReturnValue({
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      useAddToCase.mockReturnValue({
         disabled: true,
-        onAddToNewCase: jest.fn(),
-      });
-
-      const { useAddToExistingCase } = jest.requireMock('./use_add_to_existing_case');
-      useAddToExistingCase.mockReturnValue({
-        onAddToExistingCase: jest.fn(),
+        onAddToCase: jest.fn(),
       });
     });
 

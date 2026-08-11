@@ -22,13 +22,10 @@ import type {
 export interface UseAttackCaseContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
   /** Array of attacks with alert ids and markdown comments */
   attacksWithCase: AttackWithCase[];
-  /** Title used to initialize "create case" flyout */
-  title: string;
 }
 
 export const useAttackCaseContextMenuItems = ({
   attacksWithCase,
-  title,
   closePopover,
   clearSelection,
   setIsLoading,
@@ -36,7 +33,6 @@ export const useAttackCaseContextMenuItems = ({
   telemetrySource,
 }: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackCaseItems({
-    title,
     closePopover,
     telemetrySource,
   });

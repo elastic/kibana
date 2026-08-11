@@ -159,7 +159,6 @@ export function AttacksGroupTakeActionItems({
 
   const { items: casesItems, panels: casePanels } = useAttackCaseContextMenuItems({
     closePopover,
-    title: attack.title,
     attacksWithCase,
     telemetrySource,
   });
