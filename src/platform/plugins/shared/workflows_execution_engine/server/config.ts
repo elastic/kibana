@@ -83,10 +83,13 @@ const configSchema = schema.object({
     /**
      * Maximum wall-clock time allowed for a single synchronous workflow execution.
      * When the deadline is reached the internal AbortController is aborted, which
-     * propagates cancellation through the execution loop to any in-flight step.
-     * Callers may impose a shorter deadline via ExecuteWorkflowOptions.abortSignal.
+     * propagates cancellation through the execution loop and cancels any in-flight
+     * I/O (e.g. LLM streaming). Around-hook workflows that wrap LLM calls can take
+     * several minutes; the 10-minute default reflects this. The natural upper bound
+     * is the HTTP request timeout — if the client disconnects, that signal propagates
+     * first. Callers may impose a shorter deadline via ExecuteWorkflowOptions.abortSignal.
      */
-    maxDurationMs: schema.number({ defaultValue: 60_000, min: 1_000 }),
+    maxDurationMs: schema.number({ defaultValue: 600_000, min: 1_000 }),
   }),
 });
 
