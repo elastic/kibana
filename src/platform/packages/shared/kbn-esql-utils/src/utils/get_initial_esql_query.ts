@@ -34,7 +34,9 @@ const getFinalWhereClause = (
  * @param dataView
  * @param query
  * @param filters - DSL filters to convert to ES|QL WHERE clauses
- * @param options
+ * @param options - Additional options, currently only appendSortByTimestamp is supported
+ * @param options.appendSortByTimestamp - Whether to append a SORT DESC clause on the dataView timeFieldName
+ * @returns The initial ES|QL query
  */
 export function getInitialESQLQuery(
   dataView: DataView,
