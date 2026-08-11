@@ -39,6 +39,7 @@ import {
   esqlIn,
   esqlOr,
   esqlString,
+  isNonEmptyArray,
 } from '../../../../../utils/esql_expressions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
@@ -245,15 +246,13 @@ export function getIncomingSpanLinksESQL(traceId: string, docId: string): ESQLAs
 export function getOutgoingSpanLinksESQL(
   spanLinks: SpanLinkDetails[]
 ): ESQLAstExpression | undefined {
+  const traceIds = spanLinks.map(({ traceId }) => traceId);
+  const spanIds = spanLinks.map(({ spanId }) => spanId);
+
   // `IN ()` is not valid ES|QL, so there is no clause to build without links.
-  if (!spanLinks.length) {
+  if (!isNonEmptyArray(traceIds) || !isNonEmptyArray(spanIds)) {
     return undefined;
   }
 
-  const [{ traceId: firstTraceId, spanId: firstSpanId }, ...otherLinks] = spanLinks;
-
-  return esqlAnd([
-    esqlIn(TRACE_ID_FIELD, [firstTraceId, ...otherLinks.map(({ traceId }) => traceId)]),
-    esqlIn(SPAN_ID_FIELD, [firstSpanId, ...otherLinks.map(({ spanId }) => spanId)]),
-  ]);
+  return esqlAnd([esqlIn(TRACE_ID_FIELD, traceIds), esqlIn(SPAN_ID_FIELD, spanIds)]);
 }

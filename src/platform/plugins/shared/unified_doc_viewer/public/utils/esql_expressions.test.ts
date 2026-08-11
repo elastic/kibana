@@ -18,6 +18,7 @@ import {
   esqlIn,
   esqlOr,
   esqlString,
+  isNonEmptyArray,
 } from './esql_expressions';
 
 const render = (clause: ESQLAstExpression): string => {
@@ -70,6 +71,16 @@ describe('esqlIn', () => {
     expect(render(esqlIn('trace.id', ['a', 'b']))).toBe(
       'FROM logs-*\n  | WHERE trace.id IN ("a", "b")'
     );
+  });
+});
+
+describe('isNonEmptyArray', () => {
+  it('accepts an array holding at least one value', () => {
+    expect(isNonEmptyArray(['a'])).toBe(true);
+  });
+
+  it('rejects an empty array', () => {
+    expect(isNonEmptyArray([])).toBe(false);
   });
 });
 

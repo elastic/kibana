@@ -39,6 +39,9 @@ import { esqlColumn } from './esql_column';
  */
 export type NonEmptyArray<T> = [T, ...T[]];
 
+/** Narrows a mapped array so it can flow into `esqlAnd`, `esqlOr` or `esqlIn`. */
+export const isNonEmptyArray = <T>(values: T[]): values is NonEmptyArray<T> => values.length > 0;
+
 /** A string literal node, escaped only once at print time (never re-parsed). */
 export const esqlString = (value: string): ESQLStringLiteral =>
   Builder.expression.literal.string(value);
