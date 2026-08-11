@@ -566,8 +566,11 @@ import type {
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
 - [UI Metadata System](./src/connector_spec_ui.ts) - UI derivation documentation
+- [Client types](./src/lib/clients/README.md) - Authoring and review checklist for pooled `ctx.getClient` client types
 
 ## Contributing
+
+When adding a new **pooled client type** (`ctx.getClient`), follow [src/lib/clients/README.md](./src/lib/clients/README.md) — especially outbound network policy and egress metering. Registration is a deliberate production enablement.
 
 When adding a new connector:
 
