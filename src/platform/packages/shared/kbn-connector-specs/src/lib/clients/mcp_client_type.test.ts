@@ -44,9 +44,17 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
     warn: jest.fn(),
     error: jest.fn(),
   } as unknown as BuildContext['logger'],
-  axiosInstance: {} as BuildContext['axiosInstance'],
   config: { serverUrl: 'https://mcp.example.com' },
-  network: { ensureUriAllowed: jest.fn(), ensureHostnameAllowed: jest.fn() },
+  networkSettings: {
+    ensureUriAllowed: jest.fn(),
+    ensureHostnameAllowed: jest.fn(),
+    getSslSettings: jest.fn().mockReturnValue({}),
+    getProxySettings: jest.fn().mockReturnValue(undefined),
+    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
+    getResponseSettings: jest
+      .fn()
+      .mockReturnValue({ timeout: 60_000, maxContentLength: 1_000_000 }),
+  },
   credential: { getAuthHeaders: jest.fn().mockResolvedValue({}) },
   ...overrides,
 });
@@ -89,7 +97,7 @@ describe('createMcpClientType', () => {
 
       await createMcpClientType().build(ctx);
 
-      expect(ctx.network.ensureUriAllowed).toHaveBeenCalledWith('https://mcp.example.com');
+      expect(ctx.networkSettings.ensureUriAllowed).toHaveBeenCalledWith('https://mcp.example.com');
     });
 
     it('uses configuredFetchFactory when available', async () => {

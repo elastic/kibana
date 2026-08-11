@@ -54,7 +54,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       throw new McpConnectionError('config.serverUrl is required', { httpStatus: undefined });
     }
 
-    ctx.network.ensureUriAllowed(serverUrl);
+    ctx.networkSettings.ensureUriAllowed(serverUrl);
 
     // Auth headers come from the connector's configured auth type via the framework credential.
     // Tolerate auth types without a header producer (e.g. `none`) by falling back to no headers.

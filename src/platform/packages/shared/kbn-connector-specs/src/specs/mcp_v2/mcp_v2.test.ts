@@ -73,7 +73,7 @@ describe('McpV2Connector', () => {
       const result = await testDef.handler(ctx);
 
       expect(mockGetClient).toHaveBeenCalledWith('mcp');
-      expect(result).toEqual({ ok: true, message: 'Connected to MCP server. 2 tools available.' });
+      expect(result).toEqual({ message: 'Connected to MCP server. 2 tools available.' });
     });
   });
 });

@@ -95,7 +95,7 @@ export const McpV2Connector: ConnectorSpec = {
     handler: async (ctx) => {
       const mcp = await ctx.getClient('mcp');
       const { tools } = await mcp.listTools();
-      return { ok: true, message: `Connected to MCP server. ${tools.length} tools available.` };
+      return { message: `Connected to MCP server. ${tools.length} tools available.` };
     },
   },
 
