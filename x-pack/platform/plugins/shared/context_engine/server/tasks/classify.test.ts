@@ -6,9 +6,9 @@
  */
 
 import { classify } from './classify';
-import type { ToolCallSignal } from '../../common/http_api/signals';
+import type { EsqlToolCallSignal } from '../../common/http_api/signals';
 
-const buildSignal = (data: Partial<ToolCallSignal['data']> = {}): ToolCallSignal => ({
+const buildSignal = (data: Partial<EsqlToolCallSignal['data']> = {}): EsqlToolCallSignal => ({
   signal_id: 'trace-1:span-1',
   '@timestamp': '2026-07-08T12:10:30.000Z',
   trace_ids: ['trace-1'],
@@ -43,10 +43,7 @@ describe('classify', () => {
   });
 
   it('tags a failed query as query_error', () => {
-    expect(classify(buildSignal({ status: 'Error' }))).toContainEqual({
-      type: 'query_error',
-      confidence: 1,
-    });
+    expect(classify(buildSignal({ status: 'Error' }))).toContain('query_error');
   });
 
   it('tags a zero-row retrieval as empty_retrieval', () => {
@@ -54,7 +51,7 @@ describe('classify', () => {
       query_kind: 'ki_retrieval',
       returned: { columns: [], row_count: 0 },
     });
-    expect(classify(signal)).toContainEqual({ type: 'empty_retrieval', confidence: 1 });
+    expect(classify(signal)).toContain('empty_retrieval');
   });
 
   it('does not tag a non-query tool call (query_kind "other") as empty_retrieval', () => {
@@ -63,20 +60,11 @@ describe('classify', () => {
       target_index: '',
       returned: { columns: [], row_count: 0 },
     });
-    expect(classify(signal)).not.toContainEqual(
-      expect.objectContaining({ type: 'empty_retrieval' })
-    );
+    expect(classify(signal)).not.toContain('empty_retrieval');
   });
 
-  it('tags raw access as coverage_gap, with higher confidence when looped', () => {
-    expect(classify(buildSignal({ query_kind: 'raw_access', looped: true }))).toContainEqual({
-      type: 'coverage_gap',
-      confidence: 0.9,
-    });
-    expect(classify(buildSignal({ query_kind: 'raw_access', looped: false }))).toContainEqual({
-      type: 'coverage_gap',
-      confidence: 0.6,
-    });
+  it('tags raw access as coverage_gap', () => {
+    expect(classify(buildSignal({ query_kind: 'raw_access' }))).toContain('coverage_gap');
   });
 
   it('produces multiple tags for a signal that matches several rules', () => {
@@ -87,9 +75,7 @@ describe('classify', () => {
         returned: { columns: [], row_count: 0 },
       })
     );
-    expect(tags.map((tag) => tag.type).sort()).toEqual(
-      ['coverage_gap', 'empty_retrieval', 'query_error'].sort()
-    );
+    expect([...tags].sort()).toEqual(['coverage_gap', 'empty_retrieval', 'query_error'].sort());
   });
 
   it('leaves a clean signal untagged', () => {

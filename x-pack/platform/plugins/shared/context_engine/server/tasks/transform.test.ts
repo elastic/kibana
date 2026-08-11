@@ -180,14 +180,12 @@ describe('build', () => {
     expect(signal.data.agent.class).toBe('management');
   });
 
-  it('marks a tool call with no parsed query as query_kind "other"', () => {
-    const [signal] = build({
+  it('does not emit a signal for a tool call with no parsed query (query_kind "other")', () => {
+    const signals = build({
       toolRows: [toolRow({ 'attributes.gen_ai.tool.call.arguments': JSON.stringify({}) })],
       convAgent: new Map([['trace-1', userAgent]]),
     });
-    expect(signal.data.query_kind).toBe('other');
-    expect(signal.data.target_index).toBe('');
-    expect(signal.data.query).toBeUndefined();
+    expect(signals).toHaveLength(0);
   });
 
   it('marks the signal as Error and carries the error message from status.message', () => {
@@ -273,8 +271,8 @@ describe('build', () => {
     expect(signal.data.target_index).toBe('logs-*');
   });
 
-  it('emits a signal with no target_index (does not throw) for a non-string query', () => {
-    const [signal] = build({
+  it('does not throw (and emits no signal) for a non-string query', () => {
+    const signals = build({
       toolRows: [
         toolRow({
           'attributes.gen_ai.tool.call.arguments': JSON.stringify({ query: { nested: true } }),
@@ -282,9 +280,7 @@ describe('build', () => {
       ],
       convAgent: new Map([['trace-1', userAgent]]),
     });
-    expect(signal.data.target_index).toBe('');
-    expect(signal.data.query).toBeUndefined();
-    expect(signal.data.query_kind).toBe('other');
+    expect(signals).toHaveLength(0);
   });
 
   it('is idempotent: the same span always yields the same signal_id', () => {

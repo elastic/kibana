@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ToolCallSignal } from '../../common/http_api/signals';
+import type { EsqlToolCallSignal } from '../../common/http_api/signals';
 import type { SignalsServiceApi } from '../signals/service';
 import { build } from './transform';
 import type { ExecuteToolSpan } from './transform';
@@ -115,10 +115,12 @@ export const generateSignals = async ({
       fullyProcessed = false;
       break;
     }
-    const signals: ToolCallSignal[] = build({ toolRows: spaceRows, convAgent }).map((produced) => ({
-      ...produced,
-      tags: classify(produced),
-    }));
+    const signals: EsqlToolCallSignal[] = build({ toolRows: spaceRows, convAgent }).map(
+      (produced) => ({
+        ...produced,
+        tags: classify(produced),
+      })
+    );
     try {
       await signalsService.write(spaceId, signals);
       total += signals.length;

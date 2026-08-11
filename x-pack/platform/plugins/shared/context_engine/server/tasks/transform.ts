@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolCallSignal } from '../../common/http_api/signals';
+import type { EsqlToolCallSignal } from '../../common/http_api/signals';
 
 const NANOSECONDS_PER_MILLISECOND = 1_000_000;
 const LOOP_THRESHOLD = 3;
@@ -16,8 +16,8 @@ const KI_RETRIEVAL_PREFIXES = ['.ai-index', 'ki-', 'ai-index'];
 /** Identifies the builder that produced a signal, recorded on `data.producer`. */
 export const SIGNAL_PRODUCER = 'trace_tool';
 
-type QueryKind = ToolCallSignal['data']['query_kind'];
-type AgentClass = ToolCallSignal['data']['agent']['class'];
+type QueryKind = EsqlToolCallSignal['data']['query_kind'];
+type AgentClass = EsqlToolCallSignal['data']['agent']['class'];
 
 /** The `invoke_agent` span's identity, attached to every signal in its round. */
 export interface AgentInfo {
@@ -178,9 +178,14 @@ const groupByRound = (toolRows: ExecuteToolSpan[]): Map<string, ExecuteToolSpan[
   return byRound;
 };
 
-/** Builds one `ToolCallSignal` per `execute_tool` span. */
-export const build = ({ toolRows, convAgent }: BuildInput): ToolCallSignal[] => {
-  const signals: ToolCallSignal[] = [];
+/**
+ * Builds one `EsqlToolCallSignal` per esql/query `execute_tool` span. Tool calls
+ * that don't resolve to an esql query (`query_kind === 'other'`) are skipped —
+ * they carry no `target_index`/`query` and aren't actionable as signals. Round
+ * context is still computed over the whole round.
+ */
+export const build = ({ toolRows, convAgent }: BuildInput): EsqlToolCallSignal[] => {
+  const signals: EsqlToolCallSignal[] = [];
 
   for (const [traceId, rows] of groupByRound(toolRows)) {
     const agent = convAgent.get(traceId) ?? UNKNOWN_AGENT;
@@ -193,6 +198,9 @@ export const build = ({ toolRows, convAgent }: BuildInput): ToolCallSignal[] => 
     const round = computeRoundSignals(kinds);
 
     rows.forEach((row, i) => {
+      if (kinds[i] === 'other') {
+        return;
+      }
       const rawQuery = queries[i];
       const query =
         typeof rawQuery === 'string' ? rawQuery.slice(0, MAX_SIGNAL_TEXT_LENGTH) : undefined;

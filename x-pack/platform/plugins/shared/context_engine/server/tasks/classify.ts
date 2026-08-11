@@ -5,36 +5,28 @@
  * 2.0.
  */
 
-import type { SignalTag, ToolCallSignal } from '../../common/http_api/signals';
+import type { EsqlToolCallSignal } from '../../common/http_api/signals';
 
-const QUERY_ERROR_CONFIDENCE = 1;
-const EMPTY_RETRIEVAL_CONFIDENCE = 1;
-const LOOPED_COVERAGE_GAP_CONFIDENCE = 0.9;
-const DEFAULT_COVERAGE_GAP_CONFIDENCE = 0.6;
-
-/** Returns the tags for a signal. */
-export const classify = (signal: ToolCallSignal): SignalTag[] => {
+/** Returns the classification tags for a signal. */
+export const classify = (signal: EsqlToolCallSignal): string[] => {
   const { data } = signal;
 
   if (data.agent.class === 'management') {
     return [];
   }
 
-  const tags: SignalTag[] = [];
+  const tags: string[] = [];
 
   if (data.status === 'Error') {
-    tags.push({ type: 'query_error', confidence: QUERY_ERROR_CONFIDENCE });
+    tags.push('query_error');
   }
 
   if (data.query_kind !== 'other' && data.returned.row_count === 0) {
-    tags.push({ type: 'empty_retrieval', confidence: EMPTY_RETRIEVAL_CONFIDENCE });
+    tags.push('empty_retrieval');
   }
 
   if (data.query_kind === 'raw_access') {
-    tags.push({
-      type: 'coverage_gap',
-      confidence: data.looped ? LOOPED_COVERAGE_GAP_CONFIDENCE : DEFAULT_COVERAGE_GAP_CONFIDENCE,
-    });
+    tags.push('coverage_gap');
   }
 
   return tags;

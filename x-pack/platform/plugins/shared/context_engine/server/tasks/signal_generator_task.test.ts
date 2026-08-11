@@ -290,14 +290,12 @@ describe('signal generator task run()', () => {
 
     const byId = new Map(writes[0].signals.map((s) => [s.signal_id, s]));
     // Raw-access + empty retrieval → two tags on span-1.
-    expect(
-      byId
-        .get('trace-1:span-1')
-        ?.tags.map((t) => t.type)
-        .sort()
-    ).toEqual(['coverage_gap', 'empty_retrieval']);
+    expect(byId.get('trace-1:span-1')?.tags.slice().sort()).toEqual([
+      'coverage_gap',
+      'empty_retrieval',
+    ]);
     // Error span → query_error (plus coverage_gap for raw access).
-    expect(byId.get('trace-1:span-2')?.tags.map((t) => t.type)).toContain('query_error');
+    expect(byId.get('trace-1:span-2')?.tags).toContain('query_error');
 
     expect(result.state).toEqual({ watermark: '2026-07-08T12:11:00.000Z' });
   });
@@ -345,7 +343,7 @@ describe('signal generator task run()', () => {
     expect(second.writes[0].signals[0].signal_id).toBe('trace-1:span-1');
   });
 
-  it('does not throw and still emits a signal (no target_index) when a span carries a non-string query', async () => {
+  it('does not throw and emits no signal when a span carries a non-string query', async () => {
     const { result, writes } = await run({
       toolRows: [
         toolRow({
@@ -356,10 +354,8 @@ describe('signal generator task run()', () => {
       agentRows: [],
     });
 
-    expect(writes).toHaveLength(1);
-    const [signal] = writes[0].signals as Array<Signal & { data: { target_index: string } }>;
-    expect(signal.signal_id).toBe('trace-1:span-1');
-    expect(signal.data.target_index).toBe('');
+    // A non-string query resolves to query_kind "other" and is filtered out — no signal emitted.
+    expect(writes.flatMap((w) => w.signals)).toHaveLength(0);
     expect(result.state).toEqual({ watermark: '2026-07-08T12:10:30.000Z' });
   });
 
