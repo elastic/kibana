@@ -187,15 +187,15 @@ describe('ProductDocBasePlugin', () => {
       }
     );
 
-    it('schedules ensureDefaultSecurityLabs and updateSecurityLabsAll in non-serverless deployments', async () => {
+    it('skips Security Labs startup tasks in non-serverless deployments', async () => {
       const coreStart = coreMock.createStart();
       mockEisAvailable(coreStart);
       plugin.setup(coreMock.createSetup(), pluginSetupDeps);
       // Default initContext is non-serverless (buildFlavor: 'traditional')
       plugin.start(coreStart, pluginStartDeps);
       await new Promise((resolve) => setImmediate(resolve));
-      expect(DocumentationManagerMock().ensureDefaultSecurityLabs).toHaveBeenCalledTimes(1);
-      expect(DocumentationManagerMock().updateSecurityLabsAll).toHaveBeenCalledTimes(1);
+      expect(DocumentationManagerMock().ensureDefaultSecurityLabs).not.toHaveBeenCalled();
+      expect(DocumentationManagerMock().updateSecurityLabsAll).not.toHaveBeenCalled();
     });
 
     describe('serverless project gating', () => {

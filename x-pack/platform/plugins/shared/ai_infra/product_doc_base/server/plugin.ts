@@ -202,7 +202,7 @@ export class ProductDocBasePlugin
       this.logger.error(`Error scheduling product documentation updateAll task: ${err.message}`);
     });
 
-    // Security labs only for security projects; in traditional deployments all solutions are available
+    // Security Labs only for serverless security projects
     const isSecurityProject = isServerless ? cloud?.serverless?.projectType === 'security' : false;
     if (isSecurityProject) {
       documentationManager.ensureDefaultSecurityLabs().catch((err: Error) => {
