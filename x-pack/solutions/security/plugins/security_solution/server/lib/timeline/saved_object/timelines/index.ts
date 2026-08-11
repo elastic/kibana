@@ -14,7 +14,6 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObjectsFindOptions,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 
@@ -343,7 +342,7 @@ export const getAllTimelineByIds = async (
   const enrichedTimelines = await Promise.all(
     bulkResponse.saved_objects
       .filter((savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> => {
-        if (isSavedObjectErrorResult(savedObject)) return false;
+        if (savedObject.error != null) return false;
         if (
           savedObject.attributes.status === TimelineStatusEnum.draft &&
           savedObject.attributes.createdBy !== ownerDisplayName
@@ -745,7 +744,7 @@ export const deleteTimeline = async (
   const allowedIds: string[] = [];
 
   for (const savedObject of bulkGetResponse.saved_objects) {
-    if (isSavedObjectErrorResult(savedObject)) {
+    if (savedObject.error != null) {
       throw Boom.notFound();
     }
     const { status, createdBy } = savedObject.attributes;
@@ -1000,7 +999,7 @@ export const getSelectedTimelines = async (
     errors: ExportTimelineNotFoundError[];
   } = savedObjects.saved_objects.reduce(
     (acc, savedObject) => {
-      if (!isSavedObjectErrorResult(savedObject)) {
+      if (savedObject.error == null) {
         if (
           savedObject.attributes.status === TimelineStatusEnum.draft &&
           savedObject.attributes.createdBy !== currentUserDisplayName
