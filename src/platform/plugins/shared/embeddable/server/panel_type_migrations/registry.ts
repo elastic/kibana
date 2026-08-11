@@ -10,23 +10,21 @@
 import type { PanelTypeMigration } from './types';
 
 export function getPanelTypeMigrationRegistry() {
-  const migrationsBySource = new Map<string, Map<string, PanelTypeMigration>>();
+  const migrationsBySource = new Map<string, PanelTypeMigration[]>();
 
   const registerPanelTypeMigration = (migration: PanelTypeMigration) => {
     const { from, to } = migration;
-    const byTarget = migrationsBySource.get(from) ?? new Map<string, PanelTypeMigration>();
+    const existing = migrationsBySource.get(from) ?? [];
 
-    if (byTarget.has(to)) {
+    if (existing.some((registered) => registered.to === to)) {
       throw new Error(`Panel type migration ("${from}" -> "${to}") is already registered.`);
     }
 
-    byTarget.set(to, migration);
-    migrationsBySource.set(from, byTarget);
+    migrationsBySource.set(from, [...existing, migration]);
   };
 
   const getPanelTypeMigrations = (from: string): readonly PanelTypeMigration[] => {
-    const byTarget = migrationsBySource.get(from);
-    return byTarget ? Array.from(byTarget.values()) : [];
+    return migrationsBySource.get(from) ?? [];
   };
 
   return {
