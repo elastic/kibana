@@ -7,34 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppMenuComponent, type AppMenuBreakpointSource } from './src';
-export { AppMenuItem } from './src';
-export { AppMenuActionButton } from './src';
-export { AppMenuOverflowButton } from './src';
-export { AppMenuPopover } from './src';
-export { AppMenuPopoverActionButtons } from './src';
-
-export type {
-  AppMenuRunAction,
-  AppMenuRunActionParams,
-  AppMenuConfig,
-  AppMenuEbtAttrs,
-  AppMenuItemType,
-  AppMenuPrimaryActionItem,
-  AppMenuPopoverItem,
-  AppMenuSplitButtonProps,
-  AppMenuStaticItem,
-} from './src';
-
-export { APP_MENU_ITEM_LIMIT } from './src';
+/**
+ * Compatibility re-exports from `@kbn/ui-app-menu`.
+ * Prefer importing from `@kbn/ui-app-menu` directly in new code.
+ */
 
 export {
+  AppMenuComponent,
+  AppMenuItem,
+  AppMenuActionButton,
+  AppMenuOverflowButton,
+  AppMenuPopover,
+  AppMenuPopoverActionButtons,
+  APP_MENU_ITEM_LIMIT,
+  APP_MENU_EBT_ELEMENT,
   APP_MENU_TEST_SUBJECTS,
   getAppMenuItemTestSubj,
   getAppMenuActionButtonTestSubj,
-} from './src';
-
-export {
   getDisplayedItemsAllowedAmount,
   getShouldOverflow,
   isDisabled,
@@ -46,4 +35,17 @@ export {
   getPopoverActionItems,
   getIsSelectedColor,
   hasNonGlobalStaticItems,
-} from './src';
+} from '@kbn/ui-app-menu';
+
+export type {
+  AppMenuBreakpointSource,
+  AppMenuRunAction,
+  AppMenuRunActionParams,
+  AppMenuConfig,
+  AppMenuEbtAttrs,
+  AppMenuItemType,
+  AppMenuPrimaryActionItem,
+  AppMenuPopoverItem,
+  AppMenuSplitButtonProps,
+  AppMenuStaticItem,
+} from '@kbn/ui-app-menu';

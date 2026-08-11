@@ -88,7 +88,7 @@ export function getSloMenuItem({
     label: sloLabel,
     iconType: 'visGauge',
     testId: 'apmSlosHeaderLink',
-    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_ACTIONS, 'slos'),
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_SLO_MENU),
     items: sloItems,
     order,
   };

@@ -66,7 +66,7 @@ export function getAlertingMenuItem({
       id: 'createThreshold',
       label: createThresholdAlertLabel,
       testId: 'apmAlertsMenuItemCreateThreshold',
-      ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_ACTIONS, 'createThresholdRule'),
+      ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_CREATE_THRESHOLD_RULE_MENU),
       items: [
         {
           id: 'createLatencyRule',
@@ -130,7 +130,7 @@ export function getAlertingMenuItem({
     label: alertLabel,
     iconType: 'bell',
     testId: 'apmAlertAndRulesHeaderLink',
-    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_ACTIONS, 'alerts'),
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_ALERTS_MENU),
     items: alertItems,
     order,
   };
